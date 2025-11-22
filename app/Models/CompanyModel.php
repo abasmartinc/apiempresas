@@ -7,7 +7,7 @@ use CodeIgniter\Model;
 class CompanyModel extends Model
 {
     // Cambia 'api' por 'default' si corresponde
-    protected $DBGroup    = 'api';
+    protected $DBGroup    = 'default';
     protected $table      = 'companies';
     protected $primaryKey = 'id';
     protected $returnType = 'array';

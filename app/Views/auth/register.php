@@ -117,31 +117,55 @@
                 <div class="auth-card">
                     <h2>Crea tu cuenta gratis</h2>
                     <p>Sin tarjeta, sin permanencias. Solo necesitas un correo profesional.</p>
+                    <?php
+                    /** @var \CodeIgniter\Validation\Validation $validation */
+                    $validation = $validation ?? \Config\Services::validation();
+                    ?>
 
-                    <form class="auth-form" method="post" action="/signup">
+                    <?php if (session('error')): ?>
+                        <div class="auth-error">
+                            <?= esc(session('error')) ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($validation->getErrors()): ?>
+                        <div class="auth-error">
+                            <ul>
+                                <?php foreach ($validation->getErrors() as $error): ?>
+                                    <li><?= esc($error) ?></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+
+                    <form class="auth-form" method="post" action="<?= site_url('signup') ?>">
+                        <?= csrf_field() ?>
+
                         <!-- Nombre + Empresa -->
                         <div class="auth-row-inline">
                             <div style="flex:1;">
                                 <label for="name">Nombre y apellidos</label>
                                 <input
-                                    class="input"
-                                    type="text"
-                                    id="name"
-                                    name="name"
-                                    autocomplete="name"
-                                    required
-                                    placeholder="Ej. Ana García López"
+                                        class="input"
+                                        type="text"
+                                        id="name"
+                                        name="name"
+                                        autocomplete="name"
+                                        required
+                                        placeholder="Ej. Ana García López"
+                                        value="<?= esc(old('name')) ?>"
                                 />
                             </div>
                             <div style="flex:1;">
                                 <label for="company">Empresa (opcional)</label>
                                 <input
-                                    class="input"
-                                    type="text"
-                                    id="company"
-                                    name="company"
-                                    autocomplete="organization"
-                                    placeholder="Ej. Gestoría Centro SL"
+                                        class="input"
+                                        type="text"
+                                        id="company"
+                                        name="company"
+                                        autocomplete="organization"
+                                        placeholder="Ej. Gestoría Centro SL"
+                                        value="<?= esc(old('company')) ?>"
                                 />
                             </div>
                         </div>
@@ -150,13 +174,14 @@
                         <div>
                             <label for="email">Correo electrónico</label>
                             <input
-                                class="input"
-                                type="email"
-                                id="email"
-                                name="email"
-                                autocomplete="email"
-                                required
-                                placeholder="tu@empresa.com"
+                                    class="input"
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    autocomplete="email"
+                                    required
+                                    placeholder="tu@empresa.com"
+                                    value="<?= esc(old('email')) ?>"
                             />
                         </div>
 
@@ -164,20 +189,27 @@
                         <div>
                             <label for="password">Contraseña</label>
                             <input
-                                class="input"
-                                type="password"
-                                id="password"
-                                name="password"
-                                autocomplete="new-password"
-                                required
-                                minlength="8"
-                                placeholder="Mínimo 8 caracteres"
+                                    class="input"
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    autocomplete="new-password"
+                                    required
+                                    minlength="8"
+                                    placeholder="Mínimo 8 caracteres"
                             />
                         </div>
 
                         <!-- Checkbox legal -->
                         <div class="auth-checkbox">
-                            <input type="checkbox" id="terms" name="terms" required />
+                            <input
+                                    type="checkbox"
+                                    id="terms"
+                                    name="terms"
+                                    value="1"
+                                <?= old('terms') ? 'checked' : '' ?>
+                                    required
+                            />
                             <label for="terms" style="margin:0; font-weight:400;">
                                 Acepto la <a href="/privacidad" target="_blank" rel="noopener">Política de privacidad</a>
                                 y los <a href="/terminos" target="_blank" rel="noopener">Términos de servicio</a>.
@@ -199,6 +231,7 @@
                             </p>
                         </div>
                     </form>
+
                 </div>
             </div>
         </section>

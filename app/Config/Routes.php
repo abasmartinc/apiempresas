@@ -7,11 +7,10 @@ $routes->get('/', 'Home::index');
 
 $routes->get('enter', 'Login::index');
 $routes->get('documentation', 'Documentation::index');
-$routes->get('register', 'Register::index');
-$routes->get('logout', 'Login::logout');
 
+$routes->get('logout', 'Login::logout');
 $routes->post('login', 'AuthController::login');
-$routes->get('search', 'Search::index');
+
 
 // Grupo protegido: requiere JWT + DBGROUP
 $routes->group('', ['filter' => 'jwt'], static function($routes) {
@@ -21,3 +20,8 @@ $routes->group('', ['filter' => 'jwt'], static function($routes) {
 // Swagger
 $routes->cli('swagger:generate', 'App\Commands\GenerateSwaggerCommand::run');
 $routes->get('documentation', 'SwaggerController::index');
+
+$routes->get('search', 'Search::index');
+
+$routes->get('register', 'Register::index');
+$routes->post('signup', 'Register::store');

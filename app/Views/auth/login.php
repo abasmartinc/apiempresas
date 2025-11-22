@@ -77,7 +77,15 @@
                 <h1>Iniciar sesión</h1>
                 <p>Accede a tu panel para ver tu API key, consumo y documentación.</p>
 
+                <?php if (session('message')): ?>
+                    <div class="auth-alert-success">
+                        <strong><?= esc(session('message')) ?></strong>
+                    </div>
+                <?php endif; ?>
+
                 <form class="auth-form" method="post" action="/login">
+                    <?= csrf_field() ?>
+
                     <div>
                         <label for="email">Correo electrónico</label>
                         <input
