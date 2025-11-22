@@ -1,0 +1,2341 @@
+
+:root{
+    --bg1:#fbfdff; --bg2:#f6f9fd; --bg3:#f4f7fc;
+    --panel:#ffffff; --muted:#5b647a; --text:#0e1320; --border:#e8ecf5;
+    --primary:#133A82; --primary-2:#12b48a; --ring:rgba(33,82,255,.25);
+    --shadow:0 6px 22px rgba(18, 26, 60, .08); --radius:14px;
+    --code:#0f172a; --code-bg:#0f172a0d;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+    margin:0; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    color:var(--text); line-height:1.6;
+    background-color: #f9f9f9;
+}
+.bg-halo{position:fixed; inset:-20vmax; z-index:-1; pointer-events:none;
+    background: radial-gradient(70vmax 40vmax at 90% -10%, rgba(33,82,255,.055), transparent 60%),
+    radial-gradient(65vmax 38vmax at -10% 110%, rgba(18,180,138,.05), transparent 60%);
+    background-repeat:no-repeat;}
+a{color:#133A82; text-decoration:none}
+.container{max-width:1160px; margin-inline:auto; padding:0 22px}
+header{position:sticky; top:0; z-index:40; backdrop-filter:saturate(140%) blur(8px);
+     border-bottom:1px solid var(--border)}
+.nav{display:flex; align-items:center; justify-content:space-between; padding:14px 0}
+.brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.1px}
+.logo{width:30px; height:30px; display:grid; place-items:center; border-radius:8px;
+    background:conic-gradient(from 200deg, #2152ff, #12b48a, #2152ff); box-shadow:0 0 0 2px #ffffff, 0 6px 16px rgba(33,82,255,.25)}
+.nav a.minor{color:#fff}
+.btn{display:inline-flex; align-items:center; gap:10px; padding:10px 16px; border-radius:12px; font-weight:700; background:var(--primary); color:white; box-shadow:0 8px 18px rgba(33,82,255,.25); border:1px solid rgba(255,255,255,.9); transition:all .25s ease}
+.btn.secondary{background: linear-gradient(90deg, #2152ff, #12b48a); color:#fff !important; border:none; box-shadow:0 6px 18px rgba(33,82,255,.25)}
+.btn.ghost{background:transparent; color:#14204a; border:1px solid var(--border)}
+.btn:hover{transform:translateY(-2px); box-shadow:0 12px 26px rgba(33,82,255,.28)}
+.btn.secondary:hover{box-shadow:0 12px 26px rgba(18,180,138,.28)}
+.grid{display:grid; gap:28px}
+/* HERO */
+.hero{padding:64px 0 40px}
+.hero .grid{grid-template-columns:1.1fr .9fr}
+.title{font-size: clamp(22px, 4vw, 36px);
+    line-height: 1.3; margin:2px 0 12px; font-weight:900; letter-spacing:-.02em}
+.subtitle{color:#49506a; font-size: clamp(16px, 2.4vw, 18px)}
+.cta-row{display:flex; flex-wrap:wrap; gap:12px; margin-top:22px}
+/* code card */
+.code-card{background:linear-gradient(180deg, #ffffff, #fafcff); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden}
+.code-top{display:flex; align-items:center; justify-content:space-between; padding:12px 16px;  color:#5f6b88}
+pre{margin:0; padding:16px; background:var(--code-bg); color:#0f172a; overflow:auto; font-family:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:14px; border-radius:10px}
+code .key{color:#2152ff} code .str{color:#0ea47a} code .num{color:#b45309}
+/* SEARCH */
+.search-section{padding:10px 0 12px}
+.search-card{display:grid; gap:16px; background:#ffffff; border:1px solid var(--border); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow)}
+.search-row{display:flex; gap:10px}
+.input{flex:1; background:#ffffff; border:1px solid var(--border); color:var(--text); border-radius:12px; padding:12px 14px; outline:none}
+.input:focus{border-color:var(--primary); box-shadow:0 0 0 3px var(--ring)}
+.result{display:grid; gap:14px}
+
+/* CARDS de resultado */
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:0 6px 22px rgba(18,26,60,.06)}
+.card-head{display:flex;align-items:center;gap:10px}
+.pill{padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.estado--activa{background:#e9fcf6;color:#0d7c64;border:1px solid #bdf3e6}
+.estado--inactiva{background:#fff4f4;color:#8a2a2a;border:1px solid #ffd7d7}
+dl{margin:8px 0} dt{color:#5b647a;font-size:12px} dd{margin:0;font-weight:600}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.meta{display:flex;gap:10px;align-items:center;color:#5b647a;font-size:13px;margin-top:8px}
+.badge-demo{background:#fff3c4;border:1px solid #ffe08a;color:#7b5d00;padding:2px 6px;border-radius:999px;font-size:11px}
+.json{background:#f6f8ff;border:1px solid #dfe6ff;border-radius:10px;padding:12px;margin-top:12px}
+.is-hidden{display:none}
+.actions{display:flex;gap:10px;margin-top:10px}
+/* LISTADO */
+.listado{display:grid;gap:12px}
+.item{display:grid;grid-template-columns:1.6fr .8fr .6fr .6fr auto;gap:10px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.item strong{font-weight:700}
+.item .mini-pill{font-size:11px;padding:3px 6px;border-radius:999px;background:#eef2ff;border:1px solid #dfe6ff;color:#1e2a55}
+.item a.btn{padding:8px 12px;border-radius:10px}
+/* PRICING / FEATURES etc (reusadas) */
+.features{padding:36px 0}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.audiences{padding:28px 0}
+.aud-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.how{padding:28px 0}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.pricing{padding:34px 0}
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.tier{background:#ffffff; border:1px solid var(--border); border-radius:var(--radius); padding:22px; position:relative; box-shadow:var(--shadow)}
+.price{font-size:32px; font-weight:900}
+.badge{position:absolute; top:14px; right:14px; background:#e9fcf6; color:#0d7c64; border:1px solid #bdf3e6; padding:4px 8px; border-radius:999px; font-size:12px}
+.list{margin:12px 0 0; padding:0; list-style:none}
+.list li{margin:8px 0; display:flex; gap:10px; align-items:center}
+.ok{display:inline-flex; width:18px; height:18px; border-radius:6px; background:#0ea47a1a; border:1px solid #7bd9c1}
+.tier .btn.secondary{background: linear-gradient(90deg, #2152ff, #12b48a); color:#fff !important; border:none; font-weight:700; box-shadow:0 6px 18px rgba(33,82,255,.25)}
+.tier .btn.secondary:hover{box-shadow:0 10px 25px rgba(33,82,255,.35); transform:translateY(-2px)}
+.dev{padding:30px 0}
+.cta-final{padding:40px 0 70px}
+.cta-box{background:linear-gradient(180deg, #ffffff, #f7fbff); border:1px solid var(--border); border-radius:var(--radius); padding:28px; box-shadow:var(--shadow)}
+footer{padding:26px 0 50px; color:#6b7280}
+.foot-grid{display:grid; gap:18px; grid-template-columns:2fr 1fr 1fr}
+@media (max-width: 980px){
+    .hero .grid{grid-template-columns:1fr}
+    .cards,.aud-cards,.steps,.tiers,.foot-grid{grid-template-columns:1fr}
+    .nav .desktop-only{display:none}
+    .item{grid-template-columns:1.4fr .8fr .6fr .6fr auto}
+    .grid-2{grid-template-columns:1fr}
+}
+.title .grad{background:linear-gradient(90deg, #0f172a, #2152ff, #12b48a); -webkit-background-clip:text; background-clip:text; color:transparent}
+.pill.top{display:inline-flex; gap:8px; align-items:center; padding:6px 10px; border-radius:999px; background:#eef2ff; border:1px solid #dfe6ff; color:#1e2a55; font-weight:700; font-size:12px}
+
+
+
+
+ .pill {padding:.25rem .5rem;border-radius:999px;font-size:.8rem;display:inline-block}
+.pill.estado--activa{background:#e6ffed;border:1px solid #b7ebc6}
+.pill.estado--inactiva{background:#fff2f0;border:1px solid #ffccc7}
+.mini-pill{padding:.2rem .4rem;border-radius:999px;border:1px solid #ddd;font-size:.75rem}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem 1rem}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem 1rem}
+.listado .item{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:.5rem;align-items:center;padding:.6rem;border-bottom:1px solid #eee}
+.card.empresa{border:1px solid #eee;border-radius:12px;padding:1rem;background:#fff}
+.card .section{margin-top:1rem}
+.section h4{margin:.2rem 0 .6rem 0;font-size:1rem}
+.timeline{border-left:2px solid #eee;padding-left:.8rem}
+.timeline .row{margin:.45rem 0}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:.4rem .8rem}
+.kv div{display:contents}
+.kv dt{color:#666}
+.actions{display:flex;gap:.5rem;margin-top:.8rem}
+.json.is-hidden{display:none}
+.badge-demo{background:#faf5ff;border:1px solid #e9d8fd;border-radius:6px;padding:.15rem .4rem;font-size:.75rem}
+.muted{color:#333}
+.btn{padding:.5rem .8rem;border-radius:8px;border:1px solid #ddd;cursor:pointer}
+.btn.ghost{background:transparent}
+.btn.primary{background:#111827;color:#fff;border-color:#111827}
+
+
+     /* ===== FICHA DE EMPRESA · POLISH VISUAL (sin cambiar JS) ===== */
+ .card.empresa{
+     border:1px solid #e5e7eb !important;
+     border-radius:16px !important;
+     padding:22px !important;
+     background:#fff !important;
+     box-shadow:0 8px 24px rgba(17,24,39,.06) !important;
+ }
+
+.card.empresa .card-head{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:16px;
+    border-bottom:1px dashed #eef2f7; padding-bottom:12px; margin-bottom:14px;
+}
+.card.empresa .card-head h3{margin:0 0 2px; font-size:1.1rem; line-height:1.2}
+.card.empresa .card-head .muted{color:#6b7280}
+
+.card.empresa .pill{padding:.35rem .6rem; border-radius:999px; font-size:.78rem; font-weight:700}
+.card.empresa .estado--activa{background:#e7fff1; border:1px solid #b9f5cf; color:#066e2c}
+.card.empresa .estado--inactiva{background:#fff1f0; border:1px solid #ffd0cc; color:#9a1a0f}
+
+.card.empresa .section{margin-top:16px}
+.card.empresa .section h4{
+    position:relative; margin:.2rem 0 .7rem; font-size:.95rem; font-weight:600; color:#0f172a;
+    padding-left:14px;
+}
+.card.empresa .section h4::before{
+    content:""; position:absolute; left:0; top:.55rem; width:8px; height:8px; border-radius:999px; background:#3b82f6;
+    box-shadow:0 0 0 3px rgba(59,130,246,.12);
+}
+
+.card.empresa .kv{grid-template-columns:220px 1fr !important; gap:8px 16px}
+.card.empresa .kv dt{color:#6b7280; font-weight:500}
+.card.empresa .kv dd{margin:0; color:#111827}
+
+.card.empresa .timeline{padding-left:10px; position:relative}
+.card.empresa .timeline .row{
+    position:relative; padding:6px 0 6px 12px; border-left:2px solid #eef2f7;
+}
+.card.empresa .timeline .row::before{
+    content:""; position:absolute; left:-7px; top:12px; width:10px; height:10px; border-radius:999px; background:#3b82f6;
+    box-shadow:0 0 0 3px rgba(59,130,246,.12);
+}
+.card.empresa .timeline .mini-pill{border-color:#e5e7eb; background:#f8fafc; color:#1f2937}
+
+.card.empresa .actions{gap:10px; margin-top:6px}
+.card.empresa .btn{padding:.5rem .85rem; border-radius:10px; border:1px solid #e5e7eb; background:#fff}
+.card.empresa .btn:hover{background:#f8fafc}
+.card.empresa .btn.primary{background:#111827; border-color:#111827; color:#fff}
+
+.card.empresa .meta{
+    border-top:1px dashed #eef2f7; padding-top:10px; margin-top:6px; color:#6b7280; font-size:.9rem
+}
+.card.empresa .badge-demo{background:#f5f3ff; border:1px solid #e9e5ff; color:#4f46e5}
+
+.card.empresa .json{
+    background:#0f172a0d; border:1px solid #e5e7eb; border-radius:10px;
+    padding:12px; margin-top:12px; overflow:auto;
+}
+
+
+     /* ===== LAYOUT 2 COLUMNAS (aprovecha el espacio derecho) ===== */
+ .card.empresa{
+     display:grid !important;
+     grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+     gap: 18px 24px;
+     align-items:start;
+ }
+
+/* El header ocupa todo el ancho */
+.card.empresa .card-head{ grid-column: 1 / -1; }
+
+/* Orden actual de tus secciones: 1 Registro, 2 Gobierno, 3 Actos, 4 VIES, 5 Meta/acciones, luego <pre> */
+.card.empresa .section:nth-of-type(1){ grid-column:1; } /* Ficha registral */
+.card.empresa .section:nth-of-type(2){ grid-column:1; } /* Gobierno corporativo */
+.card.empresa .section:nth-of-type(3){ grid-column:1; } /* Últimos actos */
+
+/* Sidebar derecha */
+.card.empresa .section:nth-of-type(4){
+    grid-column:2;
+    position:sticky;
+    top:88px;
+}
+.card.empresa .section:last-of-type{ grid-column:2; } /* Meta + botones */
+.card.empresa pre.json{ grid-column:2; max-height:380px; }
+
+/* Botón VIES a ancho completo en la sidebar */
+.card.empresa .section:nth-of-type(4) .btn.primary{ width:100%; }
+
+/* Responsivo: 1 columna en <=980px */
+@media (max-width: 980px){
+    .card.empresa{
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    .card.empresa .card-head,
+    .card.empresa .section,
+    .card.empresa pre.json{
+        grid-column: 1 / -1;
+    }
+    .card.empresa .section:nth-of-type(4){ position:static; }
+}
+
+
+     /* --- FICHA: franja inferior (meta + acciones) --- */
+ .card.empresa .section:last-of-type{
+     display:flex !important;
+     justify-content:space-between !important;
+     align-items:center !important;
+     gap:16px !important;
+ }
+
+/* Botonera: a la derecha y sin “glow” */
+.card.empresa .actions{
+    display:flex !important;
+    gap:10px !important;
+    justify-content:flex-end !important;
+}
+
+/* Botones dentro de la ficha: fondo blanco, texto oscuro, sin sombra */
+.card.empresa .actions .btn{
+    background:#fff !important;
+    color:#0f172a !important;
+    border:1px solid #e5e7eb !important;
+    box-shadow:none !important;
+    padding:.55rem .9rem !important;
+    border-radius:10px !important;
+    font-weight:600 !important;
+}
+
+/* Hover sutil */
+.card.empresa .actions .btn:hover{ background:#f8fafc !important; }
+
+/* “Ghost” dentro de la ficha ≈ igual (sin primario ni gradientes) */
+.card.empresa .actions .btn.ghost{
+    background:#fff !important;
+    color:#0f172a !important;
+}
+
+/* Si por algún motivo se renderiza un botón vacío, escóndelo */
+.card.empresa .actions .btn:empty{ display:none !important; }
+
+
+     /* --- Mover la franja inferior al ancho completo y alinearla a la izquierda --- */
+ .card.empresa .section:last-of-type{
+     grid-column: 1 / -1 !important;   /* ocupa ambas columnas */
+     display:flex !important;
+     align-items:center !important;
+     justify-content:flex-start !important;  /* izquierda */
+     gap:16px !important;
+     flex-wrap:wrap !important;              /* si no cabe, salta de línea */
+     border-top:1px dashed #eef2f7;          /* por si se perdió con otros overrides */
+     padding-top:12px;
+     margin-top:8px;
+ }
+
+/* Botonera junto al texto, sin empujar a la derecha */
+.card.empresa .actions{
+    display:flex !important;
+    gap:10px !important;
+    margin-left:0 !important;
+    justify-content:flex-start !important;
+}
+
+/* (Opcional) que el visor JSON también salga a todo el ancho bajo la franja */
+.card.empresa pre.json{
+    grid-column: 1 / -1 !important;
+    max-height: 420px;
+}
+
+
+     /* ===== Pasos (Regístrate / Conecta / Automatiza) ===== */
+ .steps .card{
+     position: relative;
+     padding-top: 44px;               /* espacio para la insignia */
+     border-radius: 16px;
+ }
+
+.steps .card > .pill{
+    position: absolute;
+    top: 14px; left: 14px;
+    display: grid;
+    place-items: center;
+    width: 28px; height: 28px;       /* círculo */
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .2px;
+    background: #fff;                /* fondo blanco */
+    color: #111827;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 8px 18px rgba(17,24,39,.08);
+}
+
+/* por si .mini-pill global mete estilos, los neutralizamos aquí */
+.steps .card > .pill.mini-pill{
+    padding: 0;
+    background: #fff;
+    border-color: #e5e7eb;
+    color: #111827;
+}
+
+/* accesibilidad: ligera reacción al foco/hover */
+.steps .card:hover > .pill{
+    box-shadow: 0 10px 22px rgba(17,24,39,.12);
+}
+
+/* responsive: mantiene proporciones */
+@media (max-width: 980px){
+    .steps .card{ padding-top: 46px; }
+    .steps .card > .pill{ width: 30px; height: 30px; }
+}
+
+
+     /* === Pasos (1 · 2 · 3) con degradado de marca === */
+ .steps .card{
+     position: relative;
+     padding-top: 46px; /* espacio para la insignia */
+     border-radius: 16px;
+ }
+
+.steps .card > .pill{
+    position:absolute; top:14px; left:14px;
+    display:grid; place-items:center;
+    width:32px; height:32px; border-radius:999px;
+    font:700 12px/1 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    letter-spacing:.2px;
+    color:#fff; text-shadow:0 1px 0 rgba(0,0,0,.25);
+
+    /* Degradado brand */
+    background: linear-gradient(90deg, var(--primary), var(--primary-2));
+    border:none;
+
+    /* Glow suave */
+    box-shadow:
+            0 8px 22px rgba(33,82,255,.18),
+            0 2px 6px rgba(0,0,0,.06);
+}
+
+/* Neutraliza estilos globales de mini-pill dentro de .steps */
+.steps .card > .pill.mini-pill{
+    padding:0; border:0; background: linear-gradient(90deg, var(--primary), var(--primary-2));
+    color:#fff;
+}
+
+/* Hover/focus accesible */
+.steps .card:hover > .pill,
+.steps .card > .pill:focus-visible{
+    box-shadow:
+            0 10px 26px rgba(33,82,255,.24),
+            0 3px 8px rgba(0,0,0,.08);
+    outline: none;
+}
+
+/* Responsivo */
+@media (max-width: 980px){
+    .steps .card{ padding-top: 50px; }
+    .steps .card > .pill{ width:34px; height:34px; font-size:13px; }
+}
+
+
+footer{
+    padding: 40px !important;
+    background-color: #f9f9f9;
+}
+
+
+     /* === MODAL BASE === */
+ .modal-overlay {
+     position: fixed;
+     inset: 0;
+     background: rgba(10, 15, 30, 0.55);
+     backdrop-filter: blur(6px);
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     z-index: 9999;
+     opacity: 0;
+     pointer-events: none;
+     transition: opacity .3s ease;
+ }
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Caja principal */
+.modal {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.25);
+    max-width: 480px;
+    width: 90%;
+    padding: 32px 28px;
+    position: relative;
+    animation: fadeUp .35s ease;
+}
+@keyframes fadeUp {
+    from {transform: translateY(40px); opacity:0;}
+    to {transform: translateY(0); opacity:1;}
+}
+
+/* Cierre */
+.modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    color: #64748b;
+    cursor: pointer;
+    line-height: 1;
+    transition: color .2s;
+}
+.modal-close:hover { color: #0f172a; }
+
+/* Contenido */
+.modal-content h2 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    line-height: 1.2;
+}
+.modal-content p { margin-bottom: 1rem; }
+
+/* Formulario */
+.modal-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.modal-form input[type="email"] {
+    flex: 1;
+    padding: 12px 14px;
+    border: 1px solid #dbe3f1;
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+}
+.modal-form input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--ring);
+}
+.modal-form button {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .modal { padding: 26px 20px; }
+    .modal-content h2 { font-size: 1.3rem; }
+}
+
+
+ .modal { outline: none; }
+.modal-close { cursor: pointer; }
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+.ve-logo{
+    border-radius:10px;
+    box-shadow:0 0 0 2px #fff, 0 6px 18px rgba(33,82,255,.25);
+}
+.brand-text{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    line-height:1.2;
+    margin-top:1px;
+}
+.brand-name{
+    font-weight:800;
+    font-size:1.05rem;
+    letter-spacing:.1px;
+    color:#0f172a;
+}
+.brand-tag{
+    margin-top:3px;
+    font-size:0.83rem;
+    font-weight:500;
+    color:#6b7280;
+    background:none;
+    border:none;
+    padding:0;
+}
+@media (max-width:980px){
+    .brand-tag{display:none;}
+}
+
+.brand{ display:flex; align-items:center; gap:12px; }
+.ve-logo{ display:block; width:32px; height:32px; border-radius:10px;
+    box-shadow:0 0 0 2px #fff, 0 6px 18px rgba(33,82,255,.22); }
+.brand-text{ display:flex; flex-direction:column; line-height:1.2; }
+.brand-name{ font-weight:800; font-size:1.05rem; color:#fff; }
+.brand-tag{ margin-top:3px; font-size:.83rem; font-weight:500; color:#ddd; }
+@media (max-width:980px){ .brand-tag{ display:none; } }
+
+
+/* ============= WOW PACK · identidad + micro-interacciones ============= */
+:root{
+    --brand-grad: linear-gradient(90deg, #2152ff, #12b48a);
+    --brand-grad-soft: linear-gradient(120deg, #2152ff22, #12b48a22);
+    --ring-strong: rgba(33,82,255,.35);
+}
+
+/* Fondo con textura sutil (sin imágenes) */
+body::before{
+    content:"";
+    position:fixed; inset:0; z-index:-2;
+    background:
+            radial-gradient(80vmax 50vmax at 10% -10%, #2152ff10 0%, transparent 55%),
+            radial-gradient(70vmax 40vmax at 115% 110%, #12b48a10 0%, transparent 60%);
+}
+body::after{
+    /* “ruido” geométrico suave */
+    content:"";
+    position:fixed; inset:0; z-index:-3; pointer-events:none;
+    background-image:
+            linear-gradient(0deg, transparent 24%, #00000003 25%, #00000003 26%, transparent 27%, transparent 74%, #00000003 75%, #00000003 76%, transparent 77%),
+            linear-gradient(90deg, transparent 24%, #00000003 25%, #00000003 26%, transparent 27%, transparent 74%, #00000003 75%, #00000003 76%, transparent 77%);
+    background-size: 22px 22px;
+}
+
+/* Header: línea superior de marca (muy sutil) */
+header{
+    border-bottom:1px solid var(--border);
+    box-shadow: 0 8px 18px rgba(15,23,42,.04);
+    background-color: #133A82;
+}
+header::after{
+    content:"";
+    position:absolute; left:0; right:0; bottom:-1px; height:2px;
+    background: var(--brand-grad-soft);
+}
+
+/* Héroe: subrayado animado en el texto con gradiente */
+.title .grad{
+    position:relative; white-space:nowrap;
+}
+.title .grad::after{
+    content:"";
+    position:absolute; left:0; right:0; bottom:-4px; height:8px;
+    background: var(--brand-grad);
+    filter: blur(6px);
+    opacity:.28; border-radius:12px;
+    transform-origin:left center; transform: scaleX(.65);
+    transition: transform .5s cubic-bezier(.2,.8,.2,1), opacity .3s ease;
+}
+.hero:hover .title .grad::after{ transform: scaleX(1); opacity:.34 }
+
+/* Botones: “shine” + presión */
+.btn{
+    position:relative; overflow:hidden;
+    transform: translateZ(0);
+}
+
+.btn:hover::after{ transform: skewX(-20deg) translateX(160%); }
+.btn:active{ transform: translateY(0); box-shadow:0 6px 16px rgba(33,82,255,.22) }
+
+/* Tarjetas: borde conic + hover lift */
+.card{
+    position:relative; border-radius:16px;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    border:1px solid #e9eef8;
+    background:
+            conic-gradient(from 180deg at 100% 0%, #2152ff0a, #12b48a08, #2152ff05) border-box;
+}
+.card:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 16px 34px rgba(15,23,42,.08);
+    border-color:#dfe6f6;
+}
+
+/* Code card tipo terminal */
+.code-card .code-top{
+    gap:10px;
+}
+.code-card .code-top::before{
+    content:""; flex:0 0 auto; width:42px; height:10px; border-radius:20px;
+    background:
+            radial-gradient(circle at 6px 50%, #ff5f56 5px, transparent 6px),
+            radial-gradient(circle at 21px 50%, #ffbd2e 5px, transparent 6px),
+            radial-gradient(circle at 36px 50%, #27c93f 5px, transparent 6px);
+    opacity:.9;
+}
+
+/* Buscador: glassmorphism ligero */
+.search-card{
+    background: rgba(255,255,255,.9);
+    backdrop-filter: blur(6px) saturate(1.1);
+    border:1px solid #eaf0fb;
+}
+.search-row .input{
+    background:#ffffffcc;
+}
+.search-row .input:focus{ box-shadow:0 0 0 4px var(--ring-strong) }
+
+/* Features / audiencias: icon bubble */
+.cards .card h3::before,
+.aud-cards .card h3::before{
+    content:""; display:inline-block; width:10px; height:10px; margin-right:15px;
+    border-radius:50%;
+    background: var(--brand-grad);
+    box-shadow: 0 0 0 6px #2152ff12;
+    vertical-align:middle;
+}
+
+/* Pasos: conectores entre tarjetas */
+.steps{ position:relative }
+.steps .card{
+    background: #fff;
+}
+.steps .card::after{
+    content:"";
+    position:absolute; top:28px; right:-14px; width:28px; height:2px;
+    background: var(--brand-grad);
+    opacity:.35;
+}
+.steps .card:last-child::after{ display:none }
+
+/* Pricing: resalta el plan “best” (añade class="tier best" a ese div) */
+.tier.best{
+    border-color: transparent;
+    background:
+            linear-gradient(#fff,#fff) padding-box,
+            var(--brand-grad) border-box;
+    box-shadow: 0 22px 44px rgba(33,82,255,.12);
+    transform: translateY(-2px);
+}
+.tier.best .price{ background: var(--brand-grad); -webkit-background-clip:text; background-clip:text; color:transparent }
+.tier.best .badge{
+    background:#fff; color:#0d7c64; border:1px solid #bdf3e6;
+}
+.tier.best .btn{ box-shadow:0 10px 24px rgba(33,82,255,.28) }
+
+/* CTA final: borde de marca y fondo suave */
+.cta-box{
+    background:
+            linear-gradient(180deg,#ffffff, #f8fbff);
+    border:1px solid #e6edfb;
+    position:relative;
+}
+.cta-box::after{
+    content:"";
+    position:absolute; inset:auto 14px -1px 14px; height:3px;
+    background: var(--brand-grad); opacity:.35; border-radius:99px;
+}
+
+/* Footer: borde superior con degradado y menos gris */
+footer{
+    border-top:1px solid #e6ecf8;
+    background:#133A82;
+}
+
+/* Accesibilidad focus visible */
+a:focus-visible, .btn:focus-visible, .input:focus-visible{
+    outline:none; box-shadow:0 0 0 4px var(--ring-strong) !important; border-color:transparent !important;
+}
+
+/* Pequeñas mejoras responsive */
+@media (max-width: 980px){
+    .title .grad::after{ bottom:-3px; height:6px; filter: blur(5px) }
+    .steps .card::after{ display:none }
+}
+
+
+/* ===================== SPACING / BREATHING ROOM PACK ===================== */
+:root{
+    /* Escala de espacios y medidas del contenedor */
+    --space-1: 8px;
+    --space-2: 12px;
+    --space-3: 16px;
+    --space-4: 24px;
+    --space-5: 32px;
+    --space-6: 48px;
+    --space-7: 64px;
+    --space-8: 88px;
+
+    --container-max: 1240px;   /* antes 1160px */
+    --container-gutter: 32px;  /* antes 22px */
+}
+
+/* Contenedor más ancho y con más gutter lateral */
+.container{
+    max-width: var(--container-max) !important;
+    padding-inline: var(--container-gutter) !important;
+}
+
+/* Separación vertical entre secciones principales */
+section.container{
+    padding-block: var(--space-5) !important; /* 48px arriba/abajo */
+}
+
+
+/* Más espacio entre bloques internos tipo grid */
+.grid{ gap: var(--space-5) !important; }                 /* 32px */
+.cards, .aud-cards, .steps, .tiers{ gap: var(--space-5) !important; }
+
+/* Tarjetas y bloques con más padding interno */
+.card,
+.code-card,
+.search-card,
+.tier,
+.cta-box{
+    padding: 24px !important;               /* + aire por dentro */
+    border-radius: 16px !important;
+}
+
+/* Items del listado y filas: más cómodos */
+.item{ padding: 14px 16px !important; gap: var(--space-3) !important; }
+
+/* Inputs y barra de búsqueda más amplios */
+.input{ padding: 14px 16px !important; }
+.search-row{ gap: var(--space-3) !important; }
+
+/* Encabezados con margen inferior consistente */
+h1.title{ margin: 4px 0 var(--space-3) !important; }
+section h2{ margin: 0 0 var(--space-4) !important; }
+.card h3{ margin: 0 0 var(--space-2) !important; }
+
+/* Más separación entre el héroe y la code-card */
+.hero .grid{ grid-template-columns: 1.05fr .95fr; gap: var(--space-5) !important; }
+
+/* Pricing: separa tarjetas del resto */
+.pricing.container{ padding-block: var(--space-7) !important; }
+.tiers .tier{ min-height: 100%; }
+
+/* Footer también respira mejor */
+footer.container{ padding-block: var(--space-6) !important; }
+
+/* Header: un poco más de altura y respiro lateral para los CTAs */
+.nav{ padding: 16px 0 !important; }
+
+/* ------------------ Responsive tuning ------------------ */
+@media (max-width: 1180px){
+    :root{
+        --container-gutter: 28px;
+    }
+}
+@media (max-width: 980px){
+    :root{
+        --container-gutter: 22px;
+    }
+    section.container{ padding-block: var(--space-5) !important; }
+    .hero{ padding: var(--space-7) 0 var(--space-5) !important; }
+    .grid, .cards, .aud-cards, .steps, .tiers{ gap: var(--space-4) !important; }
+    .card, .code-card, .search-card, .tier, .cta-box{ padding: 20px !important; }
+}
+@media (max-width: 640px){
+    :root{
+        --container-gutter: 18px;
+    }
+    section.container{ padding-block: var(--space-4) !important; }
+    .card, .code-card, .search-card, .tier, .cta-box{ padding: 18px !important; }
+    .input{ padding: 12px 14px !important; }
+}
+/* ===== 1) Títulos de sección con personalidad (wow sutil) ===== */
+section.container h2{
+    font-weight: 800;
+    letter-spacing:-.015em;
+    font-size: clamp(20px, 2.2vw, 26px);
+    line-height:1.15;
+    margin: 0 0 18px !important;
+    position: relative;
+    color:#0f172a;
+}
+
+/* Subrayado de marca, corto y elegante */
+section.container h2::after{
+    content:"";
+    display:block;
+    width: 72px;                      /* largo del subrayado */
+    height: 4px;
+    margin-top: 10px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-2));
+    box-shadow: 0 6px 16px rgba(33,82,255,.20);
+}
+
+/* (Opcional) “kicker”/etiqueta encima del h2 si añades data-eyebrow en el H2 */
+section.container h2[data-eyebrow]{
+    padding-top: 18px;
+}
+section.container h2[data-eyebrow]::before{
+    content: attr(data-eyebrow);
+    position: absolute;
+    top: 0; left: 0;
+    font: 700 11px/1 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    letter-spacing:.12em;
+    text-transform: uppercase;
+    color:#1e2a55;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #eef2ff;
+    border:1px solid #dfe6ff;
+}
+
+/* ===== 2) Pasos 1·2·3: alinear número y título (sin cambiar HTML) ===== */
+/* Convertimos la card en una grid de 2 columnas:
+   [pill] [título] en la fila 1, el párrafo ocupa toda la fila 2 */
+.steps .card{
+    position: relative;               /* conservamos sombras, etc. */
+    padding-top: 18px !important;     /* ya no necesitamos gran offset para la pill */
+    display: grid !important;
+    grid-template-columns: auto 1fr;
+    grid-auto-rows: min-content;
+    column-gap: 12px;
+}
+
+/* La pastilla deja de ser absoluta y se alinea con el H3 */
+.steps .card > .pill{
+    position: static !important;
+    grid-column: 1;
+    grid-row: 1;
+    width: 32px; height: 32px;
+    display: grid; place-items:center;
+    margin: 0;
+}
+
+/* Título alineado verticalmente con la pill */
+.steps .card h3{
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+    line-height:1.2;
+    display:flex; align-items:center;
+}
+
+/* El párrafo debajo ocupando todo el ancho */
+.steps .card p{
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-top: 8px;
+}
+
+/* Mantén el degradado bonito de las pills que ya tenías */
+.steps .card > .pill{
+    color:#fff;
+    background: linear-gradient(90deg, var(--primary), var(--primary-2)) !important;
+    border: none !important;
+    box-shadow: 0 8px 22px rgba(33,82,255,.18), 0 2px 6px rgba(0,0,0,.06);
+}
+
+.search-card{
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 60%, #f7fbff 100%);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+}
+.btn_header{
+    background-color: #fff;
+    color: #133A82;
+}
+
+.btn{
+    border: none;
+}
+
+section{
+    background-color: #fff;
+}
+
+/* === SEARCH CARD · fondo sutil que resalta, sin líneas ni ruido === */
+:root{
+    --primary:#2152ff;   /* azul marca */
+    --brand-2:#12b48a;   /* verde marca */
+    --panel:#ffffff;
+}
+
+/* Limpia cualquier pseudo anterior que dibuje barras/líneas */
+.search-section .search-card::before,
+.search-section .search-card::after{ content:none !important; }
+
+/* Panel con tinte suave + luz diagonal (resalta sin “gritar”) */
+.search-section .search-card{
+    position:relative;
+    overflow:hidden;
+    border-radius:20px;
+    padding:24px;
+    border:1px solid rgba(33,82,255,.12);
+    background:
+        /* foco frío superior-izq (muy leve) */
+            radial-gradient(800px 400px at -10% -20%, rgba(33,82,255,.045), transparent 60%),
+                /* foco cálido inferior-der (muy leve) */
+            radial-gradient(700px 420px at 110% 120%, rgba(18,180,138,.05), transparent 62%),
+                /* gradiente base limpio */
+            linear-gradient(135deg, #ffffff 0%, #f7fbff 55%, #eef6ff 100%);
+    box-shadow:
+            0 10px 26px rgba(15,23,42,.10),
+            0 1px 0 rgba(255,255,255,.8) inset; /* highlight interior suave */
+}
+
+/* Inputs y botón “integrados” visualmente con el panel */
+.search-section .search-row{ gap:12px; margin-top:10px; }
+.search-section .search-row .input{
+    background: var(--panel);
+    border:1px solid #dbe3f5;
+    border-radius:12px;
+    padding:14px 16px;
+    color:#0f172a;
+    box-shadow: 0 1px 0 #ffffff inset;
+}
+.search-section .search-row .input:focus{
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(33,82,255,.20);
+}
+
+/* Botón con gradiente de marca y sombra corta (no exagerada) */
+.search-section .search-row .btn{
+    border:none;
+    border-radius:12px;
+    padding:12px 16px;
+    background: linear-gradient(90deg, var(--primary), var(--brand-2));
+    color:#fff;
+    font-weight:700;
+    box-shadow: 0 10px 22px rgba(33,82,255,.22);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.search-section .search-row .btn:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px rgba(33,82,255,.28);
+}
+
+/* Texto secundario ligeramente más contrastado (mejor legibilidad) */
+.search-section .search-card .muted{ color:#5f6b88; }
+
+/* Responsive fino */
+@media (max-width:640px){
+    .search-section .search-card{ padding:20px }
+    .search-section .search-row{ gap:10px }
+}
+
+
+.card-head{
+    background-color: #fff;
+    padding: 15px;
+}
+
+/* =========================
+   PRICING — BLOQUES DE COLOR
+   ========================= */
+
+/* Fondo de la sección: discreto, no blanco puro */
+.pricing.container{
+    background: linear-gradient(180deg, #f8fbff 0%, #f2f6ff 100%);
+    /*border: 1px solid #e6ecf8;
+    border-radius: 20px;
+    box-shadow: 0 12px 28px rgba(15,23,42,.08);*/
+    padding: 56px var(--container-gutter);
+}
+
+/* Grid responsivo */
+.pricing .tiers{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+}
+@media (max-width: 980px){
+    .pricing .tiers{ grid-template-columns: 1fr; }
+}
+
+/* Tarjeta BASE: sin blanco, sin bordes visibles; todo color */
+.pricing .tier{
+    position: relative;
+    border-radius: 18px;
+    padding: 26px;
+    color: #fff;
+    border: 1px solid transparent;
+    box-shadow:
+            0 18px 40px rgba(15,23,42,.18),
+            inset 0 1px 0 rgba(255,255,255,.12);
+    transition: transform .2s ease, box-shadow .25s ease, filter .2s ease;
+    overflow: hidden;
+}
+
+/* Micro brillo diagonal “wow” */
+.pricing .tier::after{
+    content:"";
+    position:absolute; inset:-40% -10% auto -10%; height: 60%;
+    background: linear-gradient(135deg, rgba(255,255,255,.20), rgba(255,255,255,0));
+    transform: rotate(3deg);
+    pointer-events:none;
+}
+
+/* Tipografía dentro del bloque de color */
+.pricing .tier h3{ margin: 0 0 6px; font-weight: 800; letter-spacing:-.01em; color:#fff }
+.pricing .tier .muted{ margin: 0 0 16px; color: rgba(255,255,255,.82) }
+.pricing .tier .price{ font-size: 34px; font-weight: 900; margin: 6px 0 14px; color:#fff }
+
+/* Lista y checks en blanco translúcido */
+.pricing .list{ list-style:none; padding:0; margin: 10px 0 0 }
+.pricing .list li{
+    display:flex; align-items:center; gap:10px; margin:10px 0;
+    color: rgba(255,255,255,.96);
+}
+.pricing .ok{
+    width:18px; height:18px; flex:0 0 18px; border-radius:6px;
+    background: rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.28);
+    position:relative;
+}
+.pricing .ok::after{
+    content:"";
+    position:absolute; left:4px; top:2px; width:8px; height:12px;
+    border-right:2px solid #fff; border-bottom:2px solid #fff;
+    opacity:.9; transform: rotate(45deg);
+}
+
+/* CTA en píldora blanca para contraste */
+.pricing .tier .btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width: 160px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background:#ffffff;
+    color:#0f172a;
+    border: none;
+    font-weight: 800;
+    box-shadow: 0 10px 22px rgba(0,0,0,.18);
+    transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+}
+.pricing .tier .btn:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 16px 28px rgba(0,0,0,.22);
+}
+
+/* Hover general del bloque */
+.pricing .tier:hover{
+    transform: translateY(-3px);
+    filter: saturate(1.05);
+    box-shadow: 0 22px 46px rgba(15,23,42,.24);
+}
+
+/* Insignia “Beta” en verde suave */
+.pricing .badge{
+    position:absolute; top:14px; right:14px;
+    padding: 6px 10px; font-size:12px; font-weight:700;
+    border-radius: 999px;
+    background: #d1fae5; color:#065f46; border:1px solid #a7f3d0;
+}
+
+/* ===== Paletas por tarjeta (sin tocar HTML) ===== */
+/* Free = Slate/Indigo suave */
+.pricing .tier:nth-child(1){
+    background:
+            radial-gradient(120% 120% at -10% -10%, #7c87a73a 0%, transparent 60%),
+            linear-gradient(180deg, #334155 0%, #1f2a44 100%);
+    border-color: rgba(148,163,184,.35);
+}
+
+/* Pro (destacada) = Azul Pro intenso */
+.pricing .tier:nth-child(2){
+    background:
+            radial-gradient(120% 120% at 110% -10%, #60a5fa40 0%, transparent 55%),
+            linear-gradient(180deg, #1e3a8a 0%, #2563eb 100%);
+    border-color: rgba(59,130,246,.45);
+    transform: translateY(-4px);
+    box-shadow:
+            0 28px 64px rgba(37,99,235,.32),
+            inset 0 1px 0 rgba(255,255,255,.16);
+}
+.pricing .tier:nth-child(2) .btn{
+    color:#0b2254;
+}
+
+/* Business = Teal/Emerald moderno */
+.pricing .tier:nth-child(3){
+    background:
+            radial-gradient(120% 120% at -5% 105%, #34d39940 0%, transparent 55%),
+            linear-gradient(180deg, #0f766e 0%, #059669 100%);
+    border-color: rgba(16,185,129,.45);
+}
+
+/* Móvil: sombras más suaves para no “manchar” */
+@media (max-width:640px){
+    .pricing .tier{ box-shadow: 0 16px 34px rgba(15,23,42,.20) }
+}
+
+/* ===== PRICING · Checks premium (redondos, con luz y acorde a cada plan) ===== */
+
+/* Espaciado y alineado */
+.pricing .list{ list-style:none; padding:0; margin:12px 0 0 }
+.pricing .list li{
+    display:flex; align-items:center; gap:12px;
+    margin:12px 0; line-height:1.45;
+    color: rgba(255,255,255,.96);
+}
+
+/* Base del check: circular, con luz interior y borde sutil */
+.pricing .ok{
+    position:relative; flex:0 0 22px;
+    width:22px; height:22px; border-radius:999px;
+    background: rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.28);
+    box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.25),
+            0 2px 6px rgba(0,0,0,.25);
+}
+
+/* brillo suave */
+.pricing .ok::before{
+    content:""; position:absolute; inset:2px; border-radius:999px;
+    background: radial-gradient(circle at 30% 28%, rgba(255,255,255,.55) 0%, rgba(255,255,255,.12) 45%, transparent 70%);
+    opacity:.9;
+}
+
+/* ✓ nítido y centrado */
+.pricing .ok::after{
+    content:"";
+    position:absolute; left: 7px;
+    top: -4px;
+    width: 7px;
+    height: 14px;
+    border-right:3px solid #fff; border-bottom:3px solid #fff;
+    transform: rotate(45deg);
+    filter: drop-shadow(0 0 2px rgba(0,0,0,.15));
+}
+
+/* micro-interacción al pasar por la fila */
+.pricing .list li:hover .ok{
+    transform: translateY(-1px);
+    box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.3),
+            0 4px 10px rgba(0,0,0,.28);
+}
+
+/* —— Acentos por plan (bordes/halo coherentes con el color del bloque) —— */
+.pricing .tier:nth-child(1) .ok{            /* Free: slate/indigo */
+    border-color: rgba(148,163,184,.55);
+    box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.25),
+            0 2px 6px rgba(30,41,59,.35);
+}
+
+.pricing .tier:nth-child(2) .ok{            /* Pro: azul */
+    border-color: rgba(59,130,246,.65);
+    background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(37,99,235,.18));
+    box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.25),
+            0 2px 8px rgba(37,99,235,.45);
+}
+
+.pricing .tier:nth-child(3) .ok{            /* Business: teal/emerald */
+    border-color: rgba(16,185,129,.6);
+    background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(5,150,105,.18));
+    box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.25),
+            0 2px 8px rgba(5,150,105,.45);
+}
+
+/* ===== Botones dentro de PRICING: píldora blanca legible ===== */
+.pricing .tier .btn,
+.pricing .tier .btn.secondary{
+    background: #ffffff !important;           /* quita el gradiente global */
+    color: #0f172a !important;                /* texto oscuro */
+    border: 1px solid rgba(255,255,255,.35);  /* borde sutil sobre el bloque de color */
+    border-radius: 12px;
+    font-weight: 800;
+    text-shadow: none;                        /* por si viene de otro lado */
+    box-shadow:
+            0 8px 20px rgba(0,0,0,.18),
+            inset 0 1px 0 rgba(255,255,255,.6);
+}
+
+/* Hover/active accesible */
+.pricing .tier .btn:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(0,0,0,.22);
+}
+.pricing .tier .btn:active{
+    transform: translateY(-1px);
+}
+
+/* Focus visible (teclado) */
+.pricing .tier .btn:focus-visible{
+    outline: none;
+    box-shadow:
+            0 0 0 3px rgba(255,255,255,.7),
+            0 0 0 6px rgba(33,82,255,.35);
+}
+
+/* Si prefieres que el botón de la tarjeta central tenga un borde “azul” */
+.pricing .tier:nth-child(2) .btn{
+    border-color: rgba(59,130,246,.55);
+}
+.hero::before {
+    content:"";
+    position:absolute; inset:-120px;
+    background: radial-gradient(circle at 60% 20%, #2152FF33, transparent 70%);
+    filter: blur(80px);
+    z-index:-1;
+}
+
+header{
+    background:linear-gradient(180deg,#133A82 0%,#0B2254 100%) !important;
+    color:#eaf1ff; border-bottom:1px solid rgba(255,255,255,.08);
+    box-shadow:0 12px 24px rgba(8,26,64,.25);
+}
+header .btn.btn_header{ background:#fff; color:#0B2254; border:1px solid rgba(255,255,255,.25) }
+footer{
+    background:linear-gradient(180deg,#0B2254 0%,#0A1E48 100%) !important;
+    color:#dfe8ff !important; border-top:1px solid rgba(255,255,255,.08) !important;
+}
+footer a.minor{ color:#eaf1ffcc } footer a.minor:hover{ color:#fff }
+
+
+
+/* ===========================
+   BUSCADOR · caja pro + depth
+   (aplica a tu HTML actual)
+   =========================== */
+
+/* Limpia cualquier pseudo previo */
+.search-section .search-card::before,
+.search-section .search-card::after{ content:none !important; }
+
+/* Caja principal */
+.search-section .search-card{
+    position: relative;
+    overflow: hidden;
+    border-radius: 22px;
+    padding: 24px;
+    border: 1px solid #dfe6f6;
+    background:
+        /* base fría (no blanco plano) */
+            linear-gradient(180deg, #ffffff 0%, #f6faff 55%, #eef7ff 100%);
+    /* profundidad agradable */
+    box-shadow: 0 16px 36px rgba(15,23,42,.12);
+}
+
+/* Halos de marca muy sutiles (teal + azul) */
+.search-section .search-card::before{
+    content:"";
+    position:absolute; inset:-18% -14% auto -14%; height: 58%;
+    background:
+            radial-gradient(50% 70% at 12% 28%, rgba(18,180,138,.12) 0%, transparent 60%),
+            radial-gradient(60% 80% at 88% 26%, rgba(33,82,255,.12) 0%, transparent 65%);
+    filter: blur(26px);
+    pointer-events:none;
+}
+
+/* Tipografía interna */
+.search-section .search-card h2{
+    margin:0 0 6px !important;
+    letter-spacing:-.01em;
+    color:#0f172a;
+}
+.search-section .search-card .muted{ color:#5f6b88 }
+
+/* Fila input + botón */
+.search-section .search-row{
+    display:flex; gap:12px; margin-top:10px;
+}
+
+/* Input integrado con el panel */
+.search-section .search-row .input{
+    flex:1;
+    background:#ffffff;
+    border:1px solid #dbe3f5;
+    border-radius:12px;
+    padding:14px 16px;
+    color:#0f172a;
+    outline:none;
+    box-shadow: 0 1px 0 #ffffff inset;
+}
+.search-section .search-row .input::placeholder{ color:#98a6c2 }
+.search-section .search-row .input:focus{
+    border-color: var(--primary, #2152ff);
+    box-shadow: 0 0 0 3px rgba(33,82,255,.22);
+}
+
+/* Botón con gradiente de marca (compacto y legible) */
+.search-section .search-row .btn{
+    border:none;
+    border-radius:12px;
+    padding:12px 16px;
+    background: linear-gradient(90deg, var(--primary, #2152ff), var(--brand-2, #12b48a));
+    color:#fff;
+    font-weight:800;
+    box-shadow: 0 12px 26px rgba(33,82,255,.26);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.search-section .search-row .btn:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 18px 34px rgba(33,82,255,.32);
+}
+
+/* Resultado y texto inferior */
+.search-section .result{ display:grid; gap:14px; margin-top:12px }
+.search-section .search-card p.muted:last-child{ margin-top:8px }
+
+/* Responsive fino */
+@media (max-width:640px){
+    .search-section .search-card{ padding:20px; border-radius:18px }
+    .search-section .search-row{ gap:10px }
+    .search-section .search-row .btn{ padding:11px 14px }
+}
+/* =========================================
+   FEATURES & AUDIENCES · cards con profundidad
+   ========================================= */
+
+/* Grid (por si quieres forzar consistencia) */
+.features .cards,
+.audiences .aud-cards{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:24px;
+}
+
+/* ---------- 1) FEATURES (tinte índigo frío) ---------- */
+.features .cards .card{
+    position:relative; overflow:hidden;
+    border-radius:16px;
+    padding:20px 22px;
+    border:1px solid #e3e9ff;
+    background:
+            radial-gradient(100% 120% at 110% -10%, #5b7dff22 0%, transparent 55%),
+            linear-gradient(180deg, #ffffff 0%, #f6f8ff 100%);
+    box-shadow: 0 10px 22px rgba(15,23,42,.10);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.features .cards .card:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 16px 34px rgba(15,23,42,.14);
+    border-color:#d7defa;
+}
+
+/* Punto de identidad (índigo) */
+.features .cards .card h3{
+    margin:0 0 8px; font-weight:800; letter-spacing:-.01em;
+}
+.features .cards .card h3::before{
+    content:""; display:inline-block; width:12px; height:12px; margin-right:10px;
+    border-radius:999px; vertical-align:middle;
+    background: radial-gradient(circle at 35% 35%, #ffffffaa 0 35%, #5843ff 36% 100%);
+    box-shadow: 0 0 0 6px #5b7dff22;
+}
+
+/* Texto */
+.features .cards .card p{ margin:0; color:#3b4460 }
+
+/* ---------- 2) AUDIENCES (tinte teal/verde) ---------- */
+.audiences .aud-cards .card{
+    position:relative; overflow:hidden;
+    border-radius:16px;
+    padding:20px 22px;
+    border:1px solid #d7efe8;
+    background:
+            radial-gradient(110% 120% at -10% 120%, #12b48a22 0%, transparent 55%),
+            linear-gradient(180deg, #ffffff 0%, #f3fbf8 100%);
+    box-shadow: 0 10px 22px rgba(15,23,42,.10);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.audiences .aud-cards .card:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 16px 34px rgba(15,23,42,.14);
+    border-color:#ccebe2;
+}
+
+/* Punto de identidad (teal) */
+.audiences .aud-cards .card h3{
+    margin:0 0 8px; font-weight:800; letter-spacing:-.01em;
+}
+.audiences .aud-cards .card h3::before{
+    content:""; display:inline-block; width:12px; height:12px; margin-right:10px;
+    border-radius:999px; vertical-align:middle;
+    background: radial-gradient(circle at 35% 35%, #ffffffaa 0 35%, #0ea47a 36% 100%);
+    box-shadow: 0 0 0 6px #12b48a22;
+}
+
+/* ---------- responsive fino ---------- */
+@media (max-width:980px){
+    .features .cards, .audiences .aud-cards{ grid-template-columns:1fr }
+}
+
+/* =======================================================
+   1) CODE CARD · terminal limpio con profundidad sutil
+   ======================================================= */
+.code-card{
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    border: 1px solid #e6e9ff;
+    background:
+            radial-gradient(120% 140% at 110% -10%, #5b7dff20 0%, transparent 55%),
+            linear-gradient(180deg,#ffffff 0%, #f6f8ff 100%);
+    box-shadow: 0 14px 28px rgba(15,23,42,.12);
+}
+
+/* barra superior tipo “terminal” */
+.code-card .code-top{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:12px 16px;
+    color:#6a7394; font-weight:600;
+    position:relative;
+}
+.code-card .code-top::before{
+    content:""; display:inline-block;
+    width:44px; height:12px; border-radius:999px;
+    background:
+            radial-gradient(circle at 6px 50%, #ff5f56 6px, transparent 7px),
+            radial-gradient(circle at 22px 50%, #ffbd2e 6px, transparent 7px),
+            radial-gradient(circle at 38px 50%, #27c93f 6px, transparent 7px);
+    opacity:.9;
+}
+
+/* bloque de código */
+.code-card pre{
+    margin:0; padding:16px; border-radius:12px;
+    background: #f2f4ff;
+    border: 1px solid #e1e6ff;
+    color:#0f172a; font-size:14px; line-height:1.5;
+    box-shadow: inset 0 1px 0 #ffffff;
+}
+
+/* =======================================================
+   2) CTA FINAL (beta) · bloque con tinte + formulario integrado
+   ======================================================= */
+.cta-final .cta-box{
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    border: 1px solid #dfe6f6;
+    background:
+            radial-gradient(120% 140% at -10% 110%, #12b48a1f 0%, transparent 55%),
+            radial-gradient(120% 140% at 110% -10%, #2152ff1f 0%, transparent 55%),
+            linear-gradient(180deg, #ffffff 0%, #f6fbff 100%);
+    box-shadow: 0 16px 36px rgba(15,23,42,.12);
+}
+
+
+
+/* texto secundario */
+.cta-final .cta-box .muted{ color:#5f6b88 }
+
+/* formulario integrado */
+.cta-final .search-row{ gap:12px; margin-top:10px }
+.cta-final .search-row .input{
+    background:#ffffff;
+    border:1px solid #dbe3f5;
+    border-radius:12px;
+    padding:14px 16px;
+    color:#0f172a;
+    box-shadow: 0 1px 0 #ffffff inset;
+}
+.cta-final .search-row .input:focus{
+    border-color: var(--primary,#2152ff);
+    box-shadow: 0 0 0 3px rgba(33,82,255,.22);
+}
+
+/* botón morado-azul “wow” para diferenciar del buscador */
+.cta-final .search-row .btn{
+    border:none;
+    border-radius:12px;
+    padding:12px 16px;
+    background: linear-gradient(135deg, #473BFF, #2563eb 70%);
+    color:#fff; font-weight:800;
+    box-shadow: 0 14px 30px rgba(71,59,255,.35);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.cta-final .search-row .btn:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 18px 38px rgba(71,59,255,.42);
+}
+
+/* responsive fino */
+@media (max-width:640px){
+    .code-card, .cta-final .cta-box{ border-radius:16px }
+    .cta-final .search-row{ gap:10px }
+    .cta-final .search-row .btn{ padding:11px 14px }
+}
+
+#beta{
+    padding-bottom: 70px !important;
+}
+
+/* =========================================================
+   MOBILE POLISH (≤ 640px) — arreglos de responsive reales
+   Pega al final. No toca HTML.
+   ========================================================= */
+@media (max-width: 640px){
+
+    /* Contenedor y tipografía base */
+    .container{ padding-inline: 18px !important; }
+    h1.title{ font-size: clamp(22px, 6vw, 28px) !important; line-height:1.18 }
+    section.container{ padding-block: 26px !important; }
+
+    /* Grids a 1 columna */
+    .hero .grid,
+    .features .cards,
+    .audiences .aud-cards,
+    .how .steps,
+    .pricing .tiers{ grid-template-columns: 1fr !important; gap: 16px !important; }
+
+    /* Sombras y bordes más suaves (para que no “manchen”) */
+    .hero.container,
+    .search-section.container,
+    .features.container,
+    .audiences.container,
+    .how.container,
+    .pricing.container{
+        border-radius: 16px !important;
+        box-shadow: 0 10px 22px rgba(15,23,42,.12) !important;
+    }
+
+    /* ——— HERO ——— */
+    .hero.container{ padding: 36px 18px 30px !important; }
+    .hero.container::before{
+        /* halo más pequeño para que no desborde */
+        inset: -20% -20% auto -20%;
+        height: 50%;
+        filter: blur(18px);
+        opacity:.9;
+    }
+    .cta-row{ gap:10px }
+    .cta-row .btn{ width:100%; justify-content:center }
+
+    /* ——— BUSCADOR ——— */
+    .search-section .search-card{
+        padding: 20px !important; border-radius: 16px !important;
+    }
+    .search-section .search-card::before{
+        /* reduce halos; evita overflow */
+        inset: auto -18% -35% -18%;
+        height: 56%;
+        filter: blur(18px);
+    }
+    .search-section .search-row{ gap:10px }
+    .search-section .search-row .input{ padding: 12px 14px; font-size: 16px; } /* 16px para evitar zoom iOS */
+    .search-section .search-row .btn{ padding: 12px 14px; width: 40%; }
+    /* Si quieres botón al 100% debajo del input, descomenta:
+       .search-section .search-row{ flex-direction:column }
+       .search-section .search-row .btn{ width:100% }
+    */
+
+    /* ——— FEATURES / AUDIENCES CARDS ——— */
+    .features .cards .card,
+    .audiences .aud-cards .card,
+    .steps .card{
+        padding: 16px !important;
+        border-radius: 14px !important;
+        box-shadow: 0 8px 18px rgba(15,23,42,.10);
+    }
+    .features .cards .card h3::before,
+    .audiences .aud-cards .card h3::before{ margin-right:8px }
+
+    /* ——— CODE CARD ——— */
+    .code-card{ border-radius: 14px !important; }
+    .code-card .code-top{ padding: 10px 12px }
+    .code-card pre{ padding: 12px; font-size: 13px; overflow:auto }
+    .code-card pre code{ white-space: pre } /* scroll horizontal, no wrap feo */
+
+    /* ——— CTA FINAL (beta) ——— */
+    .cta-final .cta-box{
+        border-radius: 16px !important;
+        padding: 18px !important;
+    }
+    .cta-final .cta-box::after{ left:12px; right:12px; bottom:8px; height:3px }
+    .cta-final .search-row{
+        flex-direction: column; gap: 10px;
+    }
+    .cta-final .search-row .input{ padding: 12px 14px; font-size: 16px }
+    .cta-final .search-row .btn{ width: 100%; padding: 12px 14px }
+
+    /* ——— PRICING ——— */
+    .pricing .tier{
+        padding: 20px !important;
+        border-radius: 16px !important;
+        box-shadow: 0 14px 30px rgba(15,23,42,.20);
+        transform: none !important; /* evita lift excesivo en móvil */
+    }
+    .pricing .tier .price{ font-size: 28px }
+    .pricing .tier .btn{ width: 100%; justify-content:center; min-width: 0 }
+
+    /* ——— Footer enlaces ——— */
+    footer .foot-grid{ grid-template-columns: 1fr !important; gap: 14px }
+}
+
+/* =========================================================
+   TWEAKS TABLET (641–980px) — equilibra columnas y halos
+   ========================================================= */
+@media (min-width:641px) and (max-width:980px){
+    .container{ padding-inline: 24px !important; }
+    .hero.container{ padding: 52px 24px 44px !important; }
+    .search-section .search-card{ padding: 22px }
+    .features .cards, .audiences .aud-cards, .how .steps{
+        grid-template-columns: repeat(2,1fr) !important;
+    }
+    .pricing .tiers{ grid-template-columns: repeat(2,1fr) !important }
+    .pricing .tier:nth-child(3){ grid-column: span 2 } /* la tercera ocupa línea completa */
+    /* halos algo más contenidos */
+    .hero.container::before,
+    .search-section .search-card::before{ filter: blur(22px); opacity:.95 }
+}
+
+/* ===== RIBBON / SLAB BASE ===== */
+.slab {
+    position: relative;
+    border-radius: 18px;
+    padding: clamp(18px, 3.5vw, 34px);
+    overflow: hidden;
+    border: 1px solid #e6ecf8;
+    box-shadow: 0 10px 28px rgba(15,23,42,.08);
+    background: linear-gradient(160deg, #fbfdff 0%, #f2f7ff 60%, #eef7ff 100%);
+}
+.slab::before{
+    content:"";
+    position:absolute; inset:-40% -20% auto -20%; height:220px;
+    background:
+            radial-gradient(80% 120% at 10% 30%, rgba(33,82,255,.16), transparent 60%),
+            radial-gradient(80% 120% at 90% 0%, rgba(18,180,138,.14), transparent 65%);
+    filter: blur(22px);
+}
+.slab h2{ margin:0 0 14px !important; }
+.slab .eyebrow{
+    display:inline-block; font:700 11px/1 Inter, system-ui, sans-serif; letter-spacing:.14em;
+    text-transform:uppercase; color:#1e2a55; background:#eef2ff; border:1px solid #dfe6ff;
+    padding:6px 10px; border-radius:999px; margin-bottom:10px;
+}
+
+/* ===== FEATURE RAIL (sustituye las 3 cards) ===== */
+.feature-rail{
+    display:grid; grid-template-columns: 0.9fr 1.1fr; gap: clamp(18px, 3vw, 32px); align-items:start;
+}
+@media (max-width:980px){ .feature-rail{ grid-template-columns:1fr; } }
+
+.feature-hero{
+    background: linear-gradient(135deg, #0f172a, #132346);
+    color:#fff; border-radius:16px; padding:24px;
+    box-shadow: 0 16px 36px rgba(15,23,42,.22);
+    position:relative; overflow:hidden;
+}
+.feature-hero::after{
+    content:""; position:absolute; inset:auto -20% -1px -20%; height:4px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-2)); opacity:.6; border-radius:999px;
+}
+
+.feature-list{ display:grid; gap:14px; }
+
+.feature-row .dot{
+    width:36px; height:36px; border-radius:10px; display:grid; place-items:center;
+    background: linear-gradient(135deg, #2152ff, #6282ff 60%, #12b48a);
+    box-shadow:0 8px 18px rgba(33,82,255,.25);
+}
+.feature-row h3{ margin:0 0 6px; font-weight:800; }
+.feature-row p{ margin:0; color:#4b5563 }
+
+/* ===== AUDIENCE SPOTLIGHT (sustituye 3 cards) ===== */
+.spotlight{
+    display:grid; gap:18px;
+}
+.spot{
+    position:relative; border-radius:18px; padding:22px 22px 22px 68px;
+    color:#0f172a; border:1px solid #e6ecf8; overflow:hidden;
+    background: linear-gradient(160deg, #ffffff 0%, #f7fbff 100%);
+    box-shadow: 0 12px 30px rgba(15,23,42,.08);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.spot:hover{ transform: translateY(-2px); box-shadow: 0 18px 42px rgba(15,23,42,.12); }
+.spot::before{
+    content:""; position:absolute; left:20px; top:22px; width:30px; height:30px; border-radius:999px;
+    background: conic-gradient(from 180deg, #2152ff, #12b48a, #2152ff);
+    box-shadow: 0 0 0 6px rgba(33,82,255,.10);
+}
+.spot h3{ margin:0 0 6px; font-weight:800 }
+.spot p{ margin:0; color:#4b5563 }
+
+/* variantes de color sutil para cada bloque */
+.spot.dev{ background: linear-gradient(180deg, #ffffff 0%, #eef5ff 100%); }
+.spot.gest{ background: linear-gradient(180deg, #ffffff 0%, #eefcf7 100%); }
+.spot.fin{ background: linear-gradient(180deg, #ffffff 0%, #eef6ff 100%); }
+
+/* detalle "connector" wow entre spots */
+.spot + .spot{ position:relative; }
+.spot + .spot::after{
+    content:""; position:absolute; left:35px; top:-12px; width:2px; height:12px;
+    background: linear-gradient(180deg, var(--primary), var(--primary-2));
+    opacity:.45;
+}
+
+/* ===== BANDAS / SECCIONES PLANAS ===== */
+.band {
+    position: relative;
+    border-radius: 18px;
+    padding: clamp(18px, 3vw, 64px);
+    background:
+            radial-gradient(80% 100% at 8% -10%, rgba(33,82,255,.08), transparent 55%),
+            radial-gradient(80% 100% at 95% 110%, rgba(18,180,138,.08), transparent 60%),
+            #ffffff;
+}
+
+/* Encabezado */
+.band .eyebrow{
+    display:inline-block;
+    font:700 11px/1 Inter, system-ui, sans-serif;
+    letter-spacing:.14em; text-transform:uppercase;
+    color:#1e2a55; background:#eef2ff; border:1px solid #dfe6ff;
+    padding:6px 10px; border-radius:999px; margin-bottom:10px;
+}
+
+/* ===== FEATURE STRIPE (sin tarjetas) ===== */
+.features-stripe{
+    display:grid; grid-template-columns: 0.95fr 1.05fr; gap: clamp(16px, 3vw, 28px);
+    align-items:start;
+}
+@media (max-width:980px){ .features-stripe{ grid-template-columns:1fr; } }
+
+.feature-hero{
+    border-radius:16px;
+    padding:22px;
+    color:#fff;
+    background: linear-gradient(135deg, #0f172a, #162a52);
+    position:relative; overflow:hidden;
+}
+.feature-hero::after{
+    content:""; position:absolute; left:18px; right:18px; bottom:-1px; height:3px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-2)); opacity:.6; border-radius:99px;
+}
+
+/* lista plana con separadores; sin cajas */
+.feature-row{
+    display:grid; grid-template-columns: 36px 1fr;
+    gap:12px; align-items:start;
+    padding:14px 0;
+}
+.feature-icon{
+    width:36px; height:36px; border-radius:10px; display:grid; place-items:center;
+    background: linear-gradient(135deg, #2152ff, #5f80ff 60%, #12b48a);
+    color:#fff; font-weight:800; font-size:12px;
+    box-shadow: 0 6px 16px rgba(33,82,255,.22);
+}
+.feature-row h3{ margin:0 0 4px; font-weight:800 }
+.feature-row p{ margin:0; color:#4b5563 }
+
+/* ===== AUDIENCE “LINES” (columnas con solo línea lateral) ===== */
+.audience-lines{
+    display:grid; grid-template-columns: repeat(3, 1fr); gap: clamp(12px, 2.4vw, 20px);
+}
+@media (max-width:980px){ .audience-lines{ grid-template-columns:1fr; } }
+
+.aud-line{
+    padding: 8px 0 8px 16px;
+    border-left: 4px solid transparent;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    border-radius: 12px;
+}
+.aud-line.dev   { border-left-color: #2152ff; }
+.aud-line.gest  { border-left-color: #12b48a; }
+.aud-line.fin   { border-left-color: #5f80ff; }
+
+.aud-line h3{ margin:0 0 6px; font-weight:800 }
+.aud-line p{ margin:0; color:#4b5563 }
+
+/* Quita sombras en estas dos secciones si heredaban .card */
+#caracteristicas .card, .audiences .card { box-shadow:none; border:none; background:transparent; padding:0; }
+
+/* ===== Meta bajo el panel oscuro (métricas + fuentes) ===== */
+.feature-left { display: grid; gap: 14px; }
+
+.feature-meta{
+    display: grid;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid #e8eef8;
+    background:
+            radial-gradient(80% 120% at 0% 0%, rgba(33,82,255,.05), transparent 60%),
+            radial-gradient(80% 120% at 100% 100%, rgba(18,180,138,.06), transparent 60%),
+            #ffffff;
+}
+
+/* KPIs en pastillas ligeras */
+.kpis{
+    display: grid;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: 10px;
+}
+.kpi{
+    display:flex; align-items:center; gap:10px;
+    padding:10px 12px; border-radius:12px;
+    border:1px solid #e8eef8; background:#ffffff;
+    box-shadow: 0 4px 14px rgba(15,23,42,.04);
+}
+.kpi strong{ font-weight:800; font-size:15px; color:#0f172a }
+.kpi span{ color:#55607a; font-size:13px }
+
+/* Tira de fuentes (logos tipográficos) */
+.sources{
+    display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+    border-top:1px dashed #e8eef8; padding-top:10px;
+}
+.src{
+    font-weight:700; font-size:12px; letter-spacing:.06em;
+    color:#22324f; padding:6px 10px; border-radius:999px;
+    background:#eef2ff; border:1px solid #dfe6ff;
+}
+.src.alt{ background:#e9fcf6; border-color:#bdf3e6; color:#0d7c64; }
+.src.gray{ background:#f3f5f9; border-color:#e5e9f3; color:#475569; }
+
+@media (max-width:980px){
+    .kpis{ grid-template-columns:1fr; }
+}
+
+/* ---- Limpieza del bloque meta bajo el panel oscuro ---- */
+.feature-left{ display:grid; gap:14px; }
+
+/* Contenedor: sin “doble card”, glass muy suave */
+.feature-meta{
+    display:grid;
+    gap:12px;
+    padding:12px 14px;
+    border-radius:14px;
+    border:1px solid #e9eef7;            /* línea fina */
+    background:
+            linear-gradient(180deg,#ffffff 60%, #f7fbff 100%); /* plano sutil */
+    box-shadow: 0 6px 20px rgba(15,23,42,.06);          /* una sola sombra */
+}
+
+/* KPIs: 3 columnas iguales, misma altura y alineación baseline */
+.kpis{
+    display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px;
+}
+.kpi{
+    display:flex; align-items:center; gap:12px; /* todo en una línea */
+    padding:12px 14px; border-radius:12px;
+    background:#fff;
+    border:1px solid #e9eef7;              /* sin doble sombra */
+    box-shadow:none;
+    min-height:56px;
+}
+
+/* Columna del número */
+.kpi .num{
+    font-weight:900; font-size:18px; line-height:1;
+    color:#0f172a; letter-spacing:-.01em;
+}
+/* Columna del texto (dos líneas pequeñas) */
+.kpi .txt{
+    display:flex; flex-direction:column; gap:2px;
+    font-size:12px; line-height:1.15; color:#55607a;
+}
+
+/* Caja “4 fuentes …” que estaba a la derecha: la convertimos a KPI normal */
+.kpi.stack{ align-items:flex-start; }
+.kpi.stack .num{ margin-top:1px; }
+.kpi.stack .txt{ color:#334155; }
+
+/* Tira de fuentes: chips más compactos y una sola línea scrollable */
+.sources{
+    display:flex; gap:8px; align-items:center;
+    border-top:1px dashed #e9eef7; padding-top:10px;
+    overflow:auto; scrollbar-width:none; -ms-overflow-style:none;
+}
+.sources::-webkit-scrollbar{ display:none; }
+.src{
+    font-weight:700; font-size:11px; letter-spacing:.06em;
+    color:#22324f; padding:6px 10px; border-radius:999px;
+    background:#eef2ff; border:1px solid #dfe6ff; white-space:nowrap;
+}
+.src.alt{ background:#e9fcf6; border-color:#bdf3e6; color:#0d7c64 }
+.src.gray{ background:#f3f5f9; border-color:#e5e9f3; color:#475569 }
+
+/* Ajustes responsivos: pila vertical limpia */
+@media (max-width:980px){
+    .kpis{ grid-template-columns:1fr; }
+    .kpi{ justify-content:flex-start; }
+}
+
+/* === Franja de métricas sin “card” === */
+.ve-stat-strip{
+    --bdr:14px;
+    display:grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    align-items:center;
+    gap:0;
+    padding:18px 22px;
+    margin-top:12px;
+
+    /* Degradado sutil que conecta con tu azul/verde de marca */
+    background:
+            linear-gradient(180deg, #f7fbff 0%, #f3f9ff 35%, #eefaf6 100%);
+    border-radius: var(--bdr);
+    border: 1px solid rgba(33,82,255,.08);
+    box-shadow:
+            0 12px 28px rgba(15,23,42,.06),
+            inset 0 1px 0 rgba(255,255,255,.6);
+    backdrop-filter: blur(6px);
+}
+
+.ve-stat{
+    min-width:0; /* evita saltos de línea raros */
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+}
+
+.ve-stat__label{
+    font-size:12px;
+    line-height:1.1;
+    color:#5b6783;
+    letter-spacing:.02em;
+}
+
+.ve-stat__value{
+    font-size:22px;
+    line-height:1;
+    font-weight:800;
+    letter-spacing:-.01em;
+    color:#0f172a;
+    /* brillo sutil en números para dar profundidad sin “card” */
+    text-shadow: 0 1px 0 rgba(255,255,255,.55);
+}
+
+.ve-stat__divider{
+    width:1px; height:36px; align-self:center;
+    background: linear-gradient(180deg, transparent, rgba(3,7,18,.12), transparent);
+    border-radius:1px;
+}
+
+/* Opcional: chips compactos de fuentes debajo (sin card) */
+.ve-sources-inline{
+    display:flex; gap:8px; flex-wrap:wrap;
+    margin:10px 0 0;
+}
+.ve-sources-inline > span{
+    font-size:11px; font-weight:700; letter-spacing:.06em;
+    padding:6px 10px; border-radius:999px;
+    background:#eef2ff; color:#22324f;
+    border:1px solid #dfe6ff;
+}
+
+/* Responsivo: pila vertical elegante */
+@media (max-width: 980px){
+    .ve-stat-strip{
+        grid-template-columns: 1fr;
+        gap:10px;
+        padding:16px 16px;
+    }
+    .ve-stat__divider{
+        width:100%; height:1px;
+        background: linear-gradient(90deg, transparent, rgba(3,7,18,.10), transparent);
+    }
+    .ve-stat__value{ font-size:20px; }
+}
+
+/* Ayuda a frases largas (fuentes oficiales) a romper bien */
+.ve-wrap{ white-space:normal; word-break:keep-all; }
+
+
+/* ========= 1) BADGES CON GRADIENTE + GLOW ========= */
+.feat-badge{
+    --g1:#2152FF; --g2:#5C7CFF; --g3:#12B48A;
+    display:inline-flex; align-items:center; justify-content:center;
+    width:40px; height:40px; border-radius:12px;
+    color:#fff; font-weight:700; font-size:14px;
+    background:
+            radial-gradient(60% 60% at 30% 20%, rgba(255,255,255,.25) 0%, rgba(255,255,255,0) 60%),
+            linear-gradient(135deg, var(--g1), var(--g2) 60%, var(--g3));
+    box-shadow:
+            0 10px 24px rgba(33,82,255,.18),
+            0 2px 8px rgba(18,180,138,.18),
+            inset 0 1px 0 rgba(255,255,255,.35);
+    border:1px solid rgba(255,255,255,.28);
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+.feat-badge:hover{ transform: translateY(-1px); box-shadow:
+        0 14px 30px rgba(33,82,255,.20), 0 3px 10px rgba(18,180,138,.20),
+        inset 0 1px 0 rgba(255,255,255,.4);
+}
+.feat-badge::after{ /* halo exterior suave */
+    content:""; position:absolute; inset:-6px; border-radius:16px;
+    background: radial-gradient(50% 50% at 50% 50%, rgba(92,124,255,.18), transparent 70%);
+    filter: blur(8px); z-index:-1;
+}
+
+/* Variantes rápidas si quieres matizarlos */
+.feat-badge--bolt{ --g1:#5C7CFF; --g2:#5F6CFF; --g3:#12B48A; }
+.feat-badge--check{ --g1:#3B82F6; --g2:#5C7CFF; --g3:#34D399; }
+.feat-badge--api{ --g1:#3B82F6; --g2:#7C8CFF; --g3:#60A5FA; }
+
+/* ========= 2) FRANJA DE MÉTRICAS COMPACTA ========= */
+.ve-stat-strip{
+    --bdr:14px;
+    display:grid; grid-template-columns:1fr auto 1fr auto 1fr;
+    align-items:center; gap:0;
+    padding:16px 18px; margin-top:12px;
+    background: linear-gradient(180deg,#f6f9ff 0%, #f2f8ff 45%, #eefaf6 100%);
+    border-radius:var(--bdr);
+    border:1px solid rgba(33,82,255,.08);
+    box-shadow: 0 10px 24px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.55);
+}
+.ve-stat{min-width:0; display:flex; flex-direction:column; gap:2px;}
+.ve-stat__label{font-size:12px; color:#5b6783; letter-spacing:.02em;}
+.ve-stat__value{font-weight:800; font-size:20px; line-height:1; color:#0f172a; text-shadow:0 1px 0 rgba(255,255,255,.55);}
+.ve-stat__divider{width:1px; height:30px; background:linear-gradient(180deg,transparent,rgba(3,7,18,.12),transparent); border-radius:1px;}
+
+/* La columna de “Fuentes oficiales” NO grita: tamaño menor y peso 600 */
+.ve-stat--sources .ve-stat__value{font-size:16px; font-weight:600; white-space:normal; word-break:keep-all; color:#1b2742;}
+
+/* Chips opcionales debajo (queda sutil) */
+.ve-sources-inline{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 0;}
+.ve-sources-inline > span{
+    font-size:11px; font-weight:700; letter-spacing:.06em;
+    padding:6px 10px; border-radius:999px;
+    background:#eef2ff; color:#22324f; border:1px solid #dfe6ff;
+}
+
+/* Responsive limpio */
+@media (max-width:980px){
+    .ve-stat-strip{ grid-template-columns:1fr; gap:10px; padding:14px; }
+    .ve-stat__divider{ width:100%; height:1px; background:linear-gradient(90deg,transparent,rgba(3,7,18,.12),transparent); }
+    .ve-stat__value{ font-size:18px; }
+    .ve-stat--sources .ve-stat__value{ font-size:15px; }
+}
+
+.ve-stat{
+    padding: 10px;
+}
+
+.ve-stat__value .ve-wrap{
+    font-size: 14px !important;
+}
+
+/* Contenedor de chips */
+.ve-sources-inline{
+    display:flex; flex-wrap:wrap; gap:8px;
+    margin-top:8px;
+}
+
+/* Chip */
+.ve-sources-inline .chip{
+    font-size:11px; font-weight:700; letter-spacing:.05em;
+    padding:6px 10px; border-radius:999px;
+    background:#eef2ff; color:#22324f;
+    border:1px solid #dfe6ff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+    white-space:nowrap;
+}
+
+/* Versión compacta si quieres que ocupen aún menos */
+.ve-sources-inline .chip.small{
+    padding:4px 8px; font-size:10.5px; letter-spacing:.04em;
+}
+
+/* Por si venías de usar .ve-stat__value para fuentes: ocúltalo cuando existan chips */
+.ve-stat--sources .ve-stat__value{ display:none; }
+
+/* Responsive */
+@media (max-width:980px){
+    .ve-sources-inline{ gap:6px; }
+}
+
+.feature-rows{
+    padding-left: 40px;
+}
+
+/* Posición absoluta respecto a la sección */
+.search-section { position: relative; }
+.hint-arrow-svg{
+    position: absolute;
+    /* Ajusta coordenadas hasta que apunte donde quieres */
+    left: 336px;
+    top: 108px;
+    width: 220px;
+    height: 110px;
+    pointer-events: none;
+    z-index: 5;
+    filter: drop-shadow(0 6px 18px rgba(33,82,255,.25));
+    transition: opacity .2s ease, transform .2s ease;
+}
+
+/* Animación de “trazo dibujado” */
+.hint-arrow-svg .path{
+    stroke-dasharray: 360;
+    stroke-dashoffset: 360;
+    animation: draw 1.1s ease-out forwards, breathe 5s ease-in-out infinite 1.2s;
+}
+.hint-arrow-svg .arrow{
+    opacity: 0;
+    animation: fadeIn .5s ease-out forwards 1s, breathe 5s ease-in-out infinite 1.2s;
+}
+
+/* Ocultar al interactuar */
+.search-section:hover .hint-arrow-svg,
+.search-section:focus-within .hint-arrow-svg{
+    opacity: 0;
+    transform: translateY(-4px);
+}
+
+@keyframes draw{ to { stroke-dashoffset: 0; } }
+@keyframes fadeIn{ to { opacity: 1; } }
+@keyframes breathe{
+    0%,100%{ transform: translateY(0); }
+    50%    { transform: translateY(-2px); }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .hint-arrow-svg .path,
+    .hint-arrow-svg .arrow{ animation: none; }
+}
+
+/* --- MOD: flecha a la derecha y apuntando a la izquierda --- */
+.hint-arrow-svg--right {
+    left: auto;                       /* anulamos left */
+    right: 380px;  /* colócala cerca del botón Buscar */
+    top: -6px;    /* ajusta fino según tu input */
+    transform: scaleX(-1);            /* flip horizontal => apunta a la izquierda */
+    transform-origin: 50% 50%;
+    rotate: -20deg;
+}
+
+/* Al interactuar: mantenemos el flip y añadimos el pequeño desplazamiento */
+.search-section:hover .hint-arrow-svg--right,
+.search-section:focus-within .hint-arrow-svg--right{
+    opacity: 0;
+    transform: scaleX(-1) translateY(-4px);
+}
+
+
+
+.company-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 20px 24px;
+    box-shadow:
+            0 24px 60px rgba(15, 23, 42, 0.12),
+            0 0 0 1px rgba(148, 163, 184, 0.12);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    width: 100%;
+    margin: 0 auto;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+}
+
+.company-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 18px;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.company-card__eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #f9f9f9;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.company-card__name {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    color: #fff;
+}
+
+.company-card__meta {
+    font-size: 13px;
+    color: #f9f9f9;
+}
+
+.company-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.company-status__dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.25);
+    margin-right: 7px;
+}
+
+/* Estado ACTIVA (verde, muy destacado) */
+.company-status--active {
+    background: radial-gradient(circle at 0 0, #bbf7d0 0, #22c55e 35%, #15803d 100%);
+    color: #f9fafb;
+}
+
+.company-status--active .company-status__dot {
+    background: #bbf7d0;
+}
+
+/* Otros estados (ej. INACTIVA, EXTINTA) */
+.company-status--inactive {
+    background: linear-gradient(135deg, #e2e8f0, #cbd5f5);
+    color: #111827;
+}
+
+.company-status--inactive .company-status__dot {
+    background: #e5e7eb;
+    box-shadow: 0 0 0 6px rgba(148, 163, 184, 0.35);
+}
+
+.company-card__body {
+    border-top: 1px solid rgba(226, 232, 240, 0.9);
+    padding-top: 14px;
+}
+
+.company-card__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 24px;
+}
+
+.company-card__grid div {
+    display: flex;
+    flex-direction: column;
+}
+
+.company-card__grid dt {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #94a3b8;
+    margin-bottom: 2px;
+}
+
+.company-card__grid dd {
+    margin: 0;
+    font-size: 14px;
+    color: #0f172a;
+    font-weight: 500;
+}
+
+.company-card__purpose {
+    grid-column: 1 / -1;
+}
+
+.company-card__purpose dd {
+    font-size: 13px;
+    color: #475569;
+    font-weight: 400;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .company-card {
+        padding: 16px 14px;
+    }
+    .company-card__header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .company-card__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.btn-json-api {
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.9);
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    background: #f8fafc;
+    color: #0f172a;
+    cursor: pointer;
+}
+
+.btn-json-api:hover {
+    background: #e5edff;
+    border-color: #4f46e5;
+}
+
+.company-card__footer {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(226, 232, 240, 0.9);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.company-card__json {
+    margin-top: 10px;
+    background: #020617;
+    color: #e5e7eb;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    max-height: 260px;
+    overflow: auto;
+}
+
+.company-card__json code {
+    white-space: pre;
+}
+
+.is-hidden { display: none; }
+
+
+
