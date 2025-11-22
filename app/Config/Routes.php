@@ -6,6 +6,7 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 
 $routes->get('enter', 'Login::index');
+$routes->get('documentation', 'Documentation::index');
 $routes->get('register', 'Register::index');
 $routes->get('logout', 'Login::logout');
 

@@ -1,85 +1,12 @@
 <!doctype html>
 <html lang="es">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>VerificaEmpresas.es — API de verificación de empresas españolas</title>
-    <meta name="description" content="API REST y buscador para verificar empresas españolas en segundos. Datos del BORME, AEAT, INE y VIES listos para tus flujos KYC/KYB, onboarding y facturación." />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="<?= base_url('public/css/styles.css') ?>" />
+    <?=view('partials/head') ?>
 </head>
 <body>
 <div class="bg-halo" aria-hidden="true"></div>
 
-<header>
-    <div class="container nav">
-        <div class="brand">
-            <!-- ICONO VERIFICAEMPRESAS (check limpio, sin triángulo) -->
-            <svg class="ve-logo" width="32" height="32" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <!-- Degradado de marca -->
-                    <linearGradient id="ve-g" x1="10" y1="54" x2="54" y2="10" gradientUnits="userSpaceOnUse">
-                        <stop stop-color="#2152FF"/>
-                        <stop offset=".65" stop-color="#5C7CFF"/>
-                        <stop offset="1" stop-color="#12B48A"/>
-                    </linearGradient>
-                    <!-- Halo del bloque -->
-                    <filter id="ve-cardShadow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity=".20"/>
-                    </filter>
-                    <!-- Sombra suave del check (no genera triángulos) -->
-                    <filter id="ve-checkShadow" x="-30%" y="-30%" width="160%" height="160%">
-                        <feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#0B1A36" flood-opacity=".22"/>
-                    </filter>
-                    <!-- Brillo muy leve arriba-izquierda -->
-                    <radialGradient id="ve-gloss" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
-                                    gradientTransform="translate(20 16) rotate(45) scale(28)">
-                        <stop stop-color="#FFFFFF" stop-opacity=".32"/>
-                        <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
-                    </radialGradient>
-                    <!-- Aro exterior para definir borde en fondos muy claros -->
-                    <linearGradient id="ve-rim" x1="12" y1="52" x2="52" y2="12">
-                        <stop stop-color="#FFFFFF" stop-opacity=".6"/>
-                        <stop offset="1" stop-color="#FFFFFF" stop-opacity=".35"/>
-                    </linearGradient>
-                </defs>
-
-                <!-- Tarjeta con halo + brillo sutil -->
-                <g filter="url(#ve-cardShadow)">
-                    <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#ve-g)"/>
-                    <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#ve-gloss)"/>
-                    <rect x="6.5" y="6.5" width="51" height="51" rx="13.5" fill="none" stroke="url(#ve-rim)"/>
-                </g>
-
-                <!-- Check principal sin trazo oscuro debajo, con sombra de filtro -->
-                <path d="M18 33 L28 43 L46 22"
-                      stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"
-                      fill="none" filter="url(#ve-checkShadow)"/>
-            </svg>
-
-
-            <div class="brand-text">
-                <span class="brand-name">API<span class="grad">Empresas</span>.es</span>
-                <span class="brand-tag">Verificación empresarial en segundos</span>
-            </div>
-        </div>
-
-        <nav class="desktop-only" aria-label="Principal">
-            <a class="minor" href="#buscar">Buscar</a>
-            <span style="margin:0 12px; color:#cdd6ea">•</span>
-            <a class="minor" href="#caracteristicas">Características</a>
-            <span style="margin:0 12px; color:#cdd6ea">•</span>
-            <a class="minor" href="#precios">Precios</a>
-            <span style="margin:0 12px; color:#cdd6ea">•</span>
-            <a class="minor" href="#docs">Docs</a>
-        </nav>
-        <div class="desktop-only">
-            <a class="btn btn_header" href="<?=site_url() ?>register">Crear cuenta gratis</a>
-        </div>
-    </div>
-</header>
+<?=view('partials/header') ?>
 
 <main>
     <section class="hero container">
@@ -97,8 +24,8 @@
                     facturación y scoring de clientes.
                 </p>
                 <div class="cta-row">
-                    <a class="btn" href="#beta">🚀 Empezar gratis (sin tarjeta)</a>
-                    <a class="btn ghost" href="#docs">Ver documentación</a>
+                    <a class="btn" href="<?=site_url() ?>register">🚀 Empezar gratis (sin tarjeta)</a>
+                    <a class="btn ghost" href="<?=site_url() ?>documentation">Ver documentación</a>
                 </div>
                 <p class="muted" style="margin-top:10px;font-size:13px;">
                     Ideal para SaaS, fintech, ERPs y productos B2B que necesitan validar CIF y razón social en tiempo real.
@@ -420,81 +347,7 @@
     </section>-->
 </main>
 
-<footer >
-    <div class="container">
-        <div class="foot-grid">
-            <div>
-                <div class="brand">
-                    <!-- ICONO VERIFICAEMPRESAS (check limpio, sin triángulo) -->
-                    <svg class="ve-logo" width="32" height="32" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <!-- Degradado de marca -->
-                            <linearGradient id="ve-g" x1="10" y1="54" x2="54" y2="10" gradientUnits="userSpaceOnUse">
-                                <stop stop-color="#2152FF"/>
-                                <stop offset=".65" stop-color="#5C7CFF"/>
-                                <stop offset="1" stop-color="#12B48A"/>
-                            </linearGradient>
-                            <!-- Halo del bloque -->
-                            <filter id="ve-cardShadow" x="-20%" y="-20%" width="140%" height="140%">
-                                <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity=".20"/>
-                            </filter>
-                            <!-- Sombra suave del check (no genera triángulos) -->
-                            <filter id="ve-checkShadow" x="-30%" y="-30%" width="160%" height="160%">
-                                <feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#0B1A36" flood-opacity=".22"/>
-                            </filter>
-                            <!-- Brillo muy leve arriba-izquierda -->
-                            <radialGradient id="ve-gloss" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
-                                            gradientTransform="translate(20 16) rotate(45) scale(28)">
-                                <stop stop-color="#FFFFFF" stop-opacity=".32"/>
-                                <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
-                            </radialGradient>
-                            <!-- Aro exterior para definir borde en fondos muy claros -->
-                            <linearGradient id="ve-rim" x1="12" y1="52" x2="52" y2="12">
-                                <stop stop-color="#FFFFFF" stop-opacity=".6"/>
-                                <stop offset="1" stop-color="#FFFFFF" stop-opacity=".35"/>
-                            </linearGradient>
-                        </defs>
-
-                        <!-- Tarjeta con halo + brillo sutil -->
-                        <g filter="url(#ve-cardShadow)">
-                            <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#ve-g)"/>
-                            <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#ve-gloss)"/>
-                            <rect x="6.5" y="6.5" width="51" height="51" rx="13.5" fill="none" stroke="url(#ve-rim)"/>
-                        </g>
-
-                        <!-- Check principal sin trazo oscuro debajo, con sombra de filtro -->
-                        <path d="M18 33 L28 43 L46 22"
-                              stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"
-                              fill="none" filter="url(#ve-checkShadow)"/>
-                    </svg>
-
-
-                    <div class="brand-text">
-                        <span class="brand-name">Verifica<span class="grad">Empresas</span>.es</span>
-                        <span class="brand-tag">API de verificación mercantil en segundos</span>
-                    </div>
-                </div>
-                <p>
-                    Datos procedentes de fuentes públicas: BOE/BORME, AEAT, INE, VIES.
-                    No somos servicio oficial del BOE. Cumplimiento RGPD (Art. 14) y
-                    reutilización de información del sector público.
-                </p>
-            </div>
-            <div>
-                <h4 style="margin:0 0 8px">Producto</h4>
-                <a class="minor" href="#buscar">Buscador</a><br />
-                <a class="minor" href="#docs">Documentación</a><br />
-                <a class="minor" href="#precios">Precios</a>
-            </div>
-            <div>
-                <h4 style="margin:0 0 8px">Legal</h4>
-                <a class="minor" href="#">Privacidad</a><br />
-                <a class="minor" href="#">Términos</a><br />
-                <a class="minor" href="#">Contacto</a>
-            </div>
-        </div>
-    </div>
-</footer>
+<?=view('partials/footer') ?>
 <?= view('scripts') ?>
 
 </body>
