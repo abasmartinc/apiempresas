@@ -63,15 +63,6 @@
                 </div>
             </div>
 
-            <nav class="desktop-only" aria-label="Principal">
-                <a class="minor" href="#buscar">Buscar</a>
-                <span style="margin:0 12px; color:#cdd6ea">•</span>
-                <a class="minor" href="#caracteristicas">Características</a>
-                <span style="margin:0 12px; color:#cdd6ea">•</span>
-                <a class="minor" href="#precios">Precios</a>
-                <span style="margin:0 12px; color:#cdd6ea">•</span>
-                <a class="minor" href="<?=site_url() ?>documentation">Docs</a>
-            </nav>
             <div class="desktop-only">
                 <a class="btn btn_header" href="<?=site_url() ?>enter">Iniciar sesión</a>
             </div>

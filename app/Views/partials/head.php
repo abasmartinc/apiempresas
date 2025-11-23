@@ -1,6 +1,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>VerificaEmpresas.es — API de verificación de empresas españolas</title>
+<title>APIEmpresas.es — API de verificación de empresas españolas</title>
 <meta name="description" content="API REST y buscador para verificar empresas españolas en segundos. Datos del BORME, AEAT, INE y VIES listos para tus flujos KYC/KYB, onboarding y facturación." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

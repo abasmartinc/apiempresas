@@ -1,0 +1,248 @@
+.billing-main{
+    padding:18px 0 70px;
+}
+.billing-header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:18px;
+    margin-bottom:24px;
+}
+.billing-header h1{
+    margin:0 0 6px;
+    font-size:24px;
+    font-weight:800;
+    letter-spacing:-.02em;
+}
+.billing-header p{
+    margin:0;
+    color:#4b5563;
+}
+.billing-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 10px;
+    border-radius:999px;
+    background:#eef2ff;
+    border:1px solid #dfe6ff;
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.09em;
+    color:#1e293b;
+}
+
+.billing-layout{
+    display:grid;
+    grid-template-columns: minmax(0,1.1fr) minmax(0,.9fr);
+    gap:22px;
+}
+@media (max-width:980px){
+    .billing-layout{
+        grid-template-columns:1fr;
+    }
+}
+
+.billing-card{
+    background:#ffffff;
+    border-radius:18px;
+    border:1px solid #e6ecf8;
+    box-shadow:0 12px 28px rgba(15,23,42,.08);
+    padding:20px 22px 22px;
+}
+.billing-card h2{
+    margin:0 0 6px;
+    font-size:17px;
+    font-weight:700;
+}
+.billing-card p{
+    margin:0 0 10px;
+    color:#4b5563;
+    font-size:14px;
+}
+
+/* Resumen de plan */
+.plan-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:14px;
+    margin-top:8px;
+    margin-bottom:14px;
+}
+.plan-main{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+}
+.plan-name{
+    font-weight:800;
+    font-size:16px;
+}
+.plan-meta{
+    font-size:13px;
+    color:#6b7280;
+}
+.badge-plan{
+    padding:4px 8px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:700;
+    background:#e9fcf6;
+    border:1px solid #bdf3e6;
+    color:#047857;
+    white-space:nowrap;
+}
+
+.usage-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    color:#64748b;
+    margin-bottom:4px;
+}
+.usage-bar{
+    position:relative;
+    width:100%;
+    height:10px;
+    border-radius:999px;
+    background:#e5e7eb;
+    overflow:hidden;
+}
+.usage-bar-fill{
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    width:46%; /* reemplaza con % real via inline style */
+    border-radius:999px;
+    background:linear-gradient(90deg,#2152ff,#12b48a);
+    box-shadow:0 0 0 1px rgba(255,255,255,.4);
+    transition:width .3s ease;
+}
+
+.plan-actions{
+    margin-top:16px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+.plan-actions .btn{
+    padding:9px 14px;
+    border-radius:10px;
+    font-size:14px;
+}
+.plan-actions .btn.ghost{
+    background:#fff;
+    border:1px solid #e5e7eb;
+    color:#0f172a;
+    box-shadow:none;
+}
+
+/* Método de pago */
+.payment-method{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin:10px 0 8px;
+    padding:10px 12px;
+    border-radius:12px;
+    border:1px solid #e5e7eb;
+    background:#f9fafb;
+}
+.card-icon{
+    width:42px;
+    height:26px;
+    border-radius:8px;
+    background:linear-gradient(135deg,#0f172a,#1f2937);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#f9fafb;
+    font-size:11px;
+    font-weight:700;
+}
+.payment-text span{
+    display:block;
+    font-size:13px;
+}
+.payment-text span:first-child{
+    font-weight:600;
+    color:#0f172a;
+}
+.payment-text span:last-child{
+    color:#6b7280;
+}
+.payment-footer{
+    font-size:12px;
+    color:#6b7280;
+    margin-top:6px;
+}
+
+/* Tabla de facturas */
+.billing-table-card{
+    margin-top:26px;
+}
+.billing-table-wrapper{
+    margin-top:10px;
+    border-radius:14px;
+    border:1px solid #e5e7eb;
+    background:#ffffff;
+    overflow:hidden;
+    box-shadow:0 10px 24px rgba(15,23,42,.08);
+}
+table.billing-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+}
+table.billing-table thead{
+    background:#f9fafb;
+}
+table.billing-table th,
+table.billing-table td{
+    padding:10px 14px;
+    text-align:left;
+    border-bottom:1px solid #edf1f9;
+}
+table.billing-table th{
+    font-weight:600;
+    color:#6b7280;
+}
+table.billing-table td{
+    color:#111827;
+}
+table.billing-table tr:last-child td{
+    border-bottom:none;
+}
+.pill-invoice{
+    display:inline-flex;
+    padding:3px 8px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:700;
+    background:#ecfdf5;
+    border:1px solid #bbf7d0;
+    color:#047857;
+}
+.pill-invoice.pending{
+    background:#fef9c3;
+    border-color:#fde68a;
+    color:#92400e;
+}
+.link-inline{
+    font-size:12px;
+    color:#2152ff;
+}
+
+@media (max-width:640px){
+    .billing-header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+    .plan-row{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+}

@@ -758,7 +758,7 @@ section h2{ margin: 0 0 var(--space-4) !important; }
 .hero .grid{ grid-template-columns: 1.05fr .95fr; gap: var(--space-5) !important; }
 
 /* Pricing: separa tarjetas del resto */
-.pricing.container{ padding-block: var(--space-7) !important; }
+
 .tiers .tier{ min-height: 100%; }
 
 /* Footer también respira mejor */
@@ -1232,7 +1232,7 @@ header{
     color:#eaf1ff; border-bottom:1px solid rgba(255,255,255,.08);
     box-shadow:0 12px 24px rgba(8,26,64,.25);
 }
-header .btn.btn_header{ background:#fff; color:#0B2254; border:1px solid rgba(255,255,255,.25) }
+/*header .btn.btn_header{ background:#fff; color:#0B2254; border:1px solid rgba(255,255,255,.25) }*/
 footer{
     background:linear-gradient(180deg,#0B2254 0%,#0A1E48 100%) !important;
     color:#dfe8ff !important; border-top:1px solid rgba(255,255,255,.08) !important;
@@ -2337,5 +2337,206 @@ footer a.minor{ color:#eaf1ffcc } footer a.minor:hover{ color:#fff }
 
 .is-hidden { display: none; }
 
+
+:root {
+    /* Colores base de la marca */
+    --ve-navy: #050816;
+    --ve-navy-soft: #0b1020;
+
+    /* Amarillos brand */
+    --ve-yellow: #facc15;
+    --ve-yellow-strong: #eab308;
+    --ve-yellow-soft: #fef3c7;
+}
+
+/* Estilo general de botones del header */
+.nav .btn_header {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 1.5rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    border: 0;
+    cursor: pointer;
+    transition:
+            background 0.16s ease,
+            color 0.16s ease,
+            box-shadow 0.16s ease,
+            transform 0.12s ease;
+}
+
+/* Primario: Crear cuenta gratis (amarillo sólido con degradado) */
+.nav .btn_header--primary {
+    background: linear-gradient(135deg, var(--ve-yellow) 0%, #f97316 100%);
+    color: var(--ve-navy-soft);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.45);
+}
+
+.nav .btn_header--primary:hover {
+    background: linear-gradient(135deg, var(--ve-yellow-strong) 0%, #ea580c 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.55);
+}
+
+.nav .btn_header--primary:active {
+    transform: translateY(0);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.55);
+}
+
+/* Secundario: Iniciar sesión (outline amarillo) */
+.nav .btn_header--ghost {
+    background: transparent;
+    color: var(--ve-yellow);
+    border: 1px solid rgba(250, 204, 21, 0.75);
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.7);
+}
+
+.nav .btn_header--ghost:hover {
+    background: rgba(250, 204, 21, 0.10);
+    transform: translateY(-1px);
+}
+
+.nav .btn_header--ghost:active {
+    transform: translateY(0);
+}
+
+/* Iconos dentro de los botones */
+.nav .btn_header .btn-header__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+}
+
+.nav .btn_header .btn-header__icon svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+:root {
+    --ve-navy: #050816;
+    --ve-navy-soft: #0b1020;
+
+    /* amarillo y amigos */
+    --ve-yellow: #facc15;
+    --ve-yellow-soft: #fef3c7;
+    --ve-yellow-strong: #eab308;
+
+    /* azul de marca aproximado (para sombra) */
+    --ve-blue: #2563eb;
+}
+
+/* Botones del header: base */
+.nav .btn_header {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 1.6rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    border: 0;
+    cursor: pointer;
+    transition:
+            background 0.18s ease,
+            color 0.18s ease,
+            box-shadow 0.18s ease,
+            transform 0.12s ease;
+}
+
+/* PRIMARIO: Crear cuenta gratis */
+.nav .btn_header.btn_header--primary {
+    background: radial-gradient(circle at 0% 0%, #fefce8 0, #facc15 35%, #f97316 100%);
+    color: var(--ve-navy-soft);
+    box-shadow:
+            0 0 0 1px rgba(248, 250, 252, 0.18),
+            0 12px 30px rgba(37, 99, 235, 0.55);
+}
+
+.nav .btn_header.btn_header--primary:hover {
+    background: radial-gradient(circle at 0% 0%, #fef9c3 0, var(--ve-yellow-strong) 40%, #ea580c 100%);
+    transform: translateY(-1px);
+    box-shadow:
+            0 0 0 1px rgba(248, 250, 252, 0.22),
+            0 16px 40px rgba(37, 99, 235, 0.65);
+}
+
+.nav .btn_header.btn_header--primary:active {
+    transform: translateY(0);
+    box-shadow:
+            0 0 0 1px rgba(248, 250, 252, 0.22),
+            0 8px 20px rgba(15, 23, 42, 0.7);
+}
+
+/* SECUNDARIO: Iniciar sesión (glass + acento amarillo) */
+.nav .btn_header.btn_header--ghost {
+    color: #e5e7eb;
+    border: 1px solid rgba(148, 163, 184, 0.7);
+    backdrop-filter: blur(14px);
+}
+
+.nav .btn_header.btn_header--ghost:hover {
+    border-color: rgba(250, 204, 21, 0.9);
+    color: var(--ve-yellow-soft);
+    transform: translateY(-1px);
+}
+
+.nav .btn_header.btn_header--ghost:active {
+    transform: translateY(0);
+}
+
+/* Iconos */
+.nav .btn_header .btn-header__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 30% 0%, #ffffff 0, #bfdbfe 35%, #22c55e 100%);
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.45);
+}
+
+.nav .btn_header.btn_header--ghost .btn-header__icon {
+    background: radial-gradient(circle at 30% 0%, #1d2542 0, #111827 40%, #22c55e 100%);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+}
+
+.nav .btn_header .btn-header__icon svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+}
+
+
+.btn_start {
+    border: none;
+    border-radius: 12px;
+    padding: 12px 16px;
+    background: linear-gradient(90deg, var(--primary, #2152ff), var(--brand-2, #12b48a));
+    color: #fff;
+    font-weight: 800;
+    box-shadow: 0 12px 26px rgba(33,82,255,.26);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.btn_start:hover {
+    border: none;
+    border-radius: 12px;
+    padding: 12px 16px;
+    background: linear-gradient(90deg, var(--primary, #2152ff), var(--brand-2, #12b48a));
+    color: #fff;
+    font-weight: 800;
+    box-shadow: 0 12px 26px rgba(33,82,255,.26);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
 
 

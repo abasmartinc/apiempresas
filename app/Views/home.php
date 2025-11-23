@@ -24,7 +24,7 @@
                     facturación y scoring de clientes.
                 </p>
                 <div class="cta-row">
-                    <a class="btn" href="<?=site_url() ?>register">🚀 Empezar gratis (sin tarjeta)</a>
+                    <a class="btn btn_start" href="<?=site_url() ?>register">Empezar gratis (sin tarjeta)</a>
                     <a class="btn ghost" href="<?=site_url() ?>documentation">Ver documentación</a>
                 </div>
                 <p class="muted" style="margin-top:10px;font-size:13px;">
@@ -96,7 +96,7 @@
 
             <p class="muted">
                 ¿Quieres integrarlo en tu producto?
-                <a href="<?=site_url() ?>register">Crear cuenta gratis">Crea tu cuenta gratuita y consigue tu API key</a>.
+                <a href="<?=site_url() ?>register">Crea tu cuenta gratuita y consigue tu API key</a>.
             </p>
 
         </div>

@@ -8,8 +8,9 @@ $routes->get('/', 'Home::index');
 $routes->get('enter', 'Login::index');
 $routes->get('documentation', 'Documentation::index');
 
-$routes->get('logout', 'Login::logout');
-$routes->post('login', 'AuthController::login');
+$routes->get('enter', 'Login::index');          // muestra login
+$routes->post('login', 'Login::authenticate');  // procesa login
+$routes->get('logout', 'Login::logout');        // cierre de sesión
 
 
 // Grupo protegido: requiere JWT + DBGROUP
@@ -25,3 +26,10 @@ $routes->get('search', 'Search::index');
 
 $routes->get('register', 'Register::index');
 $routes->post('signup', 'Register::store');
+
+$routes->get('dashboard', 'Dashboard::index');
+$routes->get('search_company', 'Search::search_company');
+$routes->get('billing', 'Billing::index');
+$routes->get('usage', 'Usage::index');
+$routes->get('prices', 'Prices::index');
+$routes->get('contact', 'Contact::index');

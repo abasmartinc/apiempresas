@@ -54,15 +54,6 @@
                     <span class="brand-tag">Verificación mercantil en segundos</span>
                 </div>
             </div>
-            <nav class="desktop-only" aria-label="Principal">
-                <a class="minor" href="#buscar">Buscar</a>
-                <span style="margin:0 12px; color:#cdd6ea">•</span>
-                <a class="minor" href="#caracteristicas">Características</a>
-                <span style="margin:0 12px; color:#cdd6ea">•</span>
-                <a class="minor" href="#precios">Precios</a>
-                <span style="margin:0 12px; color:#cdd6ea">•</span>
-                <a class="minor" href="<?=site_url() ?>documentation">Docs</a>
-            </nav>
             <div class="desktop-only">
                 <a class="btn btn_header" href="<?=site_url() ?>register">Crear cuenta gratis</a>
             </div>
@@ -76,14 +67,18 @@
             <div class="auth-card">
                 <h1>Iniciar sesión</h1>
                 <p>Accede a tu panel para ver tu API key, consumo y documentación.</p>
-
+                <?php if (session('error')): ?>
+                    <div class="auth-alert-error">
+                        <?= esc(session('error')) ?>
+                    </div>
+                <?php endif; ?>
                 <?php if (session('message')): ?>
                     <div class="auth-alert-success">
                         <strong><?= esc(session('message')) ?></strong>
                     </div>
                 <?php endif; ?>
 
-                <form class="auth-form" method="post" action="/login">
+                <form class="auth-form" method="post" action="<?=site_url() ?>login">
                     <?= csrf_field() ?>
 
                     <div>

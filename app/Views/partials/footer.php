@@ -58,17 +58,19 @@
                     reutilización de información del sector público.
                 </p>
             </div>
+            <?php if(session('logged_in')){ ?>
             <div>
                 <h4 style="margin:0 0 8px">Producto</h4>
-                <a class="minor" href="#buscar">Buscador</a><br />
-                <a class="minor" href="#docs">Documentación</a><br />
-                <a class="minor" href="#precios">Precios</a>
+                <a class="minor" href="<?=site_url() ?>search_company">Buscador</a><br />
+                <a class="minor" href="<?=site_url() ?>dcumentation">Documentación</a><br />
+                <a class="minor" href="<?=site_url() ?>prices">Precios</a>
             </div>
+            <?php } ?>
             <div>
                 <h4 style="margin:0 0 8px">Legal</h4>
                 <a class="minor" href="#">Privacidad</a><br />
                 <a class="minor" href="#">Términos</a><br />
-                <a class="minor" href="#">Contacto</a>
+                <a class="minor" href="<?=site_url() ?>contact">Contacto</a>
             </div>
         </div>
     </div>

@@ -70,5 +70,13 @@ class Search extends BaseController
             );
         }
     }
+
+    public function search_company()
+    {
+        if (!session('logged_in')) {
+            return redirect()->to(site_url());
+        }
+        return view('search');
+    }
 }
 

@@ -1,4 +1,4 @@
-.docs-main{ padding:40px 0 60px; }
+.docs-main{ padding:18px 0 60px; }
 .docs-layout{
     display:grid;
     grid-template-columns:260px minmax(0,1fr);

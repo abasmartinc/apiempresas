@@ -1,3 +1,11 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <?=view('partials/head') ?>
+</head>
+<body>
+<div class="bg-halo" aria-hidden="true"></div>
+
 <header>
     <div class="container nav">
         <div class="brand">
@@ -54,29 +62,58 @@
         </div>
 
         <nav class="desktop-only" aria-label="Principal">
-            <a class="minor" href="#buscar">Buscar</a>
+            <a class="minor" href="<?=site_url() ?>dashboard">Dashboard</a>
             <span style="margin:0 12px; color:#cdd6ea">•</span>
-            <a class="minor" href="#caracteristicas">Características</a>
+            <a class="minor" href="<?=site_url() ?>billing">Planes y facturación</a>
             <span style="margin:0 12px; color:#cdd6ea">•</span>
-            <a class="minor" href="#precios">Precios</a>
+            <a class="minor" href="<?=site_url() ?>usage">Consumo</a>
             <span style="margin:0 12px; color:#cdd6ea">•</span>
-            <a class="minor" href="<?=site_url() ?>documentation">Docs</a>
+            <a class="minor" href="<?=site_url() ?>documentation">Documentación</a>
         </nav>
         <div class="desktop-only">
-            <!-- Crear cuenta gratis -->
-            <a class="btn btn_header btn_header--primary" href="<?=site_url() ?>register">
-
-                <span>Crear cuenta gratis</span>
-            </a>
-
-            <!-- Iniciar sesión -->
-            <a class="btn btn_header btn_header--ghost" href="<?=site_url() ?>enter">
-
-                <span>Iniciar sesión</span>
-            </a>
+            <?php if(!session('logged_in')){ ?>
+                <a class="btn btn_header btn_header--ghost" href="<?=site_url() ?>enter">
+                    <span>Iniciar sesión</span>
+                </a>
+            <?php } else { ?>
+                <a class="btn btn_header btn_header--ghost" href="<?=site_url() ?>logout">
+                    <span>Salir</span>
+                </a>
+            <?php } ?>
         </div>
 
 
 
     </div>
 </header>
+
+
+<main style="padding:40px 0 70px;">
+    <section class="container search-section">
+        <div class="search-card ">
+            <div>
+                <h2>Prueba el buscador — mismo motor que la API</h2>
+                <p class="muted">
+                    Introduce un <strong>CIF</strong> o nombre comercial. Verás el resultado en tarjetas limpias
+                    y puedes consultar el JSON que devuelve la API.
+                </p>
+            </div>
+
+            <div class="search-row">
+                <input class="input" id="q" placeholder="Ej. Gestiones López o B12345678" aria-label="Buscar empresa por nombre o CIF" />
+                <button class="btn" id="btnBuscar" aria-label="Buscar">Buscar empresa</button>
+            </div>
+
+            <!-- 💡 Este div es imprescindible para que el JS pinte resultados -->
+            <div id="resultado" class="result"></div>
+
+
+        </div>
+    </section>
+</main>
+
+<?=view('partials/footer') ?>
+<?= view('scripts') ?>
+
+</body>
+</html>
