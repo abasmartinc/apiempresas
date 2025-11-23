@@ -108,7 +108,7 @@
                     </div>
 
                     <div class="auth-submit-row">
-                        <button type="submit" class="btn">Entrar</button>
+                        <button type="submit" class="btn" id="login-submit">Entrar</button>
                         <p class="auth-muted">
                             ¿No tienes cuenta?
                             <a href="<?=site_url() ?>register">Crear cuenta gratis</a>
@@ -122,6 +122,21 @@
     <!-- FOOTER -->
     <?=view('partials/footer') ?>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('.auth-form');
+        const btn  = document.getElementById('login-submit');
+
+        if (form && btn) {
+            form.addEventListener('submit', function () {
+                // Evitar dobles envíos
+                btn.disabled = true;
+                btn.textContent = 'Iniciando sesión…';
+            });
+        }
+    });
+</script>
 
 </body>
 </html>
