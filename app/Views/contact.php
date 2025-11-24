@@ -12,7 +12,7 @@
     <header>
         <div class="container nav">
             <div class="brand">
-                <!-- ICONO VERIFICAEMPRESAS -->
+                <!-- ICONO APIEMPRESAS -->
                 <a href="<?= site_url() ?>">
                     <svg class="ve-logo" width="32" height="32" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
                         <defs>
@@ -74,7 +74,7 @@
                         <span>Iniciar sesión</span>
                     </a>
                 <?php else: ?>
-                    <a class="btn btn_header btn_header--ghost" href="<?= site_url() ?>logout">
+                    <a class="btn btn_header btn_header--ghost logout" href="<?= site_url() ?>logout">
                         <span>Salir</span>
                     </a>
                 <?php endif; ?>
@@ -87,7 +87,7 @@
         <div class="container">
             <div class="dash-header">
                 <h1>Contacto y soporte</h1>
-                <p>Cuéntanos en qué podemos ayudarte con la API de VerificaEmpresas. Te responderemos en menos de 24&nbsp;h laborables.</p>
+                <p>Cuéntanos en qué podemos ayudarte con la API de APIEmpresas. Te responderemos en menos de 24&nbsp;h laborables.</p>
             </div>
 
             <div class="dash-grid">
@@ -255,13 +255,13 @@
 
                         <div class="plan-meta">
                             <div><strong>Email general:</strong><br>
-                                <a href="mailto:soporte@verificaempresas.es">soporte@verificaempresas.es</a>
+                                <a href="mailto:soporte@apiempresas.es">soporte@apiempresas.es</a>
                             </div>
                             <div><strong>Consultas técnicas:</strong><br>
-                                <a href="mailto:dev@verificaempresas.es">dev@verificaempresas.es</a>
+                                <a href="mailto:dev@apiempresas.es">dev@apiempresas.es</a>
                             </div>
                             <div><strong>Facturación y planes:</strong><br>
-                                <a href="mailto:billing@verificaempresas.es">billing@verificaempresas.es</a>
+                                <a href="mailto:billing@apiempresas.es">billing@apiempresas.es</a>
                             </div>
                         </div>
 

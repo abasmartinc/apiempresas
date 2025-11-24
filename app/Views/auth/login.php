@@ -13,7 +13,7 @@
     <header>
         <div class="container nav">
             <div class="brand">
-                <!-- ICONO VERIFICAEMPRESAS -->
+                <!-- ICONO APIEMPRESAS -->
                 <a href="<?=site_url() ?>">
                     <svg class="ve-logo" width="32" height="32" viewBox="0 0 64 64">
                         <defs>

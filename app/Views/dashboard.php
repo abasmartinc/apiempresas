@@ -12,7 +12,7 @@
     <header>
         <div class="container nav">
             <div class="brand">
-                <!-- ICONO VERIFICAEMPRESAS (check limpio, sin triángulo) -->
+                <!-- ICONO APIEMPRESAS (check limpio, sin triángulo) -->
                 <a href="<?=site_url() ?>">
                     <svg class="ve-logo" width="32" height="32" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
                         <defs>
@@ -81,7 +81,7 @@
                     <span>Iniciar sesión</span>
                 </a>
                 <?php } else { ?>
-                    <a class="btn btn_header btn_header--ghost" href="<?=site_url() ?>logout">
+                    <a class="btn btn_header btn_header--ghost logout" href="<?=site_url() ?>logout">
                         <span>Salir</span>
                     </a>
                 <?php } ?>
@@ -150,7 +150,7 @@
                     <!-- QUICKSTART / DOCS -->
                     <section class="dash-card">
                         <h2>Empieza en 5 minutos</h2>
-                        <p>Endpoints principales y recursos para integrar VerificaEmpresas en tus flujos.</p>
+                        <p>Endpoints principales y recursos para integrar APIEmpresas en tus flujos.</p>
 
                         <div class="quick-grid">
                             <div class="quick-item">
@@ -205,7 +205,7 @@
                         <h3>¿Necesitas ayuda?</h3>
                         <p>Si tienes una duda sobre la integración o uso del API, escríbenos.</p>
                         <p>
-                            <a href="mailto:soporte@verificaempresas.es">soporte@verificaempresas.es</a><br />
+                            <a href="mailto:soporte@apiempresas.es">soporte@apiempresas.es</a><br />
                             <span style="color:#6b7280;">Tiempo medio de respuesta &lt; 24h laborables.</span>
                         </p>
                     </section>
@@ -215,6 +215,7 @@
     </main>
 
     <?=view('partials/footer') ?>
+
 </div>
 
 <script>

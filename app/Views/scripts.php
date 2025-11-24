@@ -1,3 +1,4 @@
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 // Tracking mínimo hacia CodeIgniter. Ajusta la ruta si hiciera falta.
 window.track = window.track || (async function(name, props={}){
@@ -187,5 +188,47 @@ window.track = window.track || (async function(name, props={}){
     });
 })();
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const logoutLink = document.querySelector('.logout');
+        if (!logoutLink) return;
+
+        logoutLink.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            // Usamos el href del propio enlace por si lo cambias en el futuro
+            const targetUrl = this.getAttribute('href') || '<?= site_url('logout') ?>';
+
+            Swal.fire({
+                title: '¿Cerrar sesión?',
+                html: 'Se cerrará tu sesión en <strong>APIEmpresas.es</strong> y volverás a la pantalla de acceso.',
+                // Quitamos el icono por defecto
+                icon: null,
+                iconHtml: '<span class="ve-swal-icon-inner">✓</span>',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, cerrar sesión',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true,
+                focusCancel: true,
+                customClass: {
+                    popup: 've-swal',
+                    title: 've-swal-title',
+                    htmlContainer: 've-swal-text',
+                    confirmButton: 'btn ve-swal-confirm',
+                    cancelButton: 'btn btn_header--ghost ve-swal-cancel',
+                    icon: 've-swal-icon' // clase del contenedor del icono
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const targetUrl = document.querySelector('.logout').getAttribute('href') || '<?= site_url('logout') ?>';
+                    window.location.href = targetUrl;
+                }
+            });
+
+        });
+    });
+</script>
+
 
 

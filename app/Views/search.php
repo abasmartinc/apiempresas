@@ -9,7 +9,7 @@
 <header>
     <div class="container nav">
         <div class="brand">
-            <!-- ICONO VERIFICAEMPRESAS (check limpio, sin triángulo) -->
+            <!-- ICONO APIEMPRESAS (check limpio, sin triángulo) -->
             <a href="<?=site_url() ?>">
                 <svg class="ve-logo" width="32" height="32" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
                     <defs>
@@ -76,7 +76,7 @@
                     <span>Iniciar sesión</span>
                 </a>
             <?php } else { ?>
-                <a class="btn btn_header btn_header--ghost" href="<?=site_url() ?>logout">
+                <a class="btn btn_header btn_header--ghost logout" href="<?=site_url() ?>logout">
                     <span>Salir</span>
                 </a>
             <?php } ?>

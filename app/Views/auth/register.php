@@ -11,7 +11,7 @@
     <header>
         <div class="container nav">
             <div class="brand">
-                <!-- ICONO VERIFICAEMPRESAS (check limpio, sin triángulo) -->
+                <!-- ICONO APIEMPRESAS (check limpio, sin triángulo) -->
                 <a href="<?=site_url() ?>">
                     <svg class="ve-logo" width="32" height="32" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
                         <defs>

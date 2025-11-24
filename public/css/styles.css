@@ -2539,4 +2539,91 @@ footer a.minor{ color:#eaf1ffcc } footer a.minor:hover{ color:#fff }
     transition: transform .2s ease, box-shadow .2s ease;
 }
 
+/* SweetAlert – estilo APIEmpresas */
+.ve-swal {
+    border-radius: 18px;
+    padding: 24px 28px 22px;
+    background: #ffffff;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.32);
+}
 
+.ve-swal-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.ve-swal-text {
+    font-size: 14px;
+    color: #4b5563;
+}
+
+/* Botones usando tus estilos de .btn / .btn_header--ghost */
+.ve-swal-confirm,
+.ve-swal-cancel {
+    min-width: 140px;
+    font-size: 14px;
+}
+
+.swal2-actions {
+    margin-top: 18px !important;
+    gap: 10px !important;
+}
+
+/* Contenedor del popup */
+.ve-swal {
+    border-radius: 18px;
+    padding: 24px 28px 22px;
+    background: #ffffff;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.32);
+}
+
+/* Título y texto */
+.ve-swal-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.ve-swal-text {
+    font-size: 14px;
+    color: #4b5563;
+}
+
+/* Icono custom */
+.ve-swal-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #2152FF, #5C7CFF 65%, #12B48A);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.35);
+}
+
+.ve-swal-icon-inner {
+    font-size: 22px;
+    color: #ffffff;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* Botones */
+.ve-swal-confirm,
+.ve-swal-cancel {
+    min-width: 140px;
+    font-size: 14px;
+}
+
+.swal2-actions {
+    margin-top: 18px !important;
+    gap: 10px !important;
+}
+
+div:where(.swal2-icon){
+    border-color: #2e4385 !important;
+}

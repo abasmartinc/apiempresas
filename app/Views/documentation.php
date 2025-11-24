@@ -11,7 +11,7 @@
 <header>
     <div class="container nav">
         <div class="brand">
-            <!-- ICONO VERIFICAEMPRESAS (check limpio, sin triángulo) -->
+            <!-- ICONO APIEMPRESAS (check limpio, sin triángulo) -->
             <a href="<?=site_url() ?>">
                 <svg class="ve-logo" width="32" height="32" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
                     <defs>
@@ -78,7 +78,7 @@
                     <span>Iniciar sesión</span>
                 </a>
             <?php } else { ?>
-                <a class="btn btn_header btn_header--ghost" href="<?=site_url() ?>logout">
+                <a class="btn btn_header btn_header--ghost logout" href="<?=site_url() ?>logout">
                     <span>Salir</span>
                 </a>
             <?php } ?>
@@ -108,13 +108,13 @@
             <!-- CONTENIDO -->
             <div class="docs-content">
                 <h1>Documentación del API</h1>
-                <p>Integra VerificaEmpresas.es en tus sistemas para validar CIF, estado mercantil y datos básicos de empresas españolas.</p>
+                <p>Integra APIEmpresas.es en tus sistemas para validar CIF, estado mercantil y datos básicos de empresas españolas.</p>
 
                 <!-- INTRO -->
                 <section class="docs-section" id="intro">
                     <h2>1. Introducción</h2>
                     <p>
-                        El API de VerificaEmpresas.es está pensado para usarse desde tu backend
+                        El API de APIEmpresas.es está pensado para usarse desde tu backend
                         (PHP, Node, Python, etc.) y devolver información mercantil en tiempo real.
                     </p>
                     <p>
@@ -124,7 +124,7 @@
                     <p>
                         Base URL recomendada:
                     </p>
-                    <pre><code>https://api.verificaempresas.es/v1</code></pre>
+                    <pre><code>https://api.apiempresas.es/v1</code></pre>
                 </section>
 
                 <!-- AUTH -->
@@ -136,7 +136,7 @@
                         Puedes ver y rotar tu clave desde el panel.
                     </p>
                     <pre><code class="language-http">GET /v1/company?cif=B12345678 HTTP/1.1
-Host: api.verificaempresas.es
+Host: api.apiempresas.es
 Authorization: Bearer sk_live_xxxxxxxx
 Accept: application/json
 </code></pre>
@@ -194,14 +194,14 @@ Accept: application/json
                     <p>Ejemplo mínimo para validar un CIF desde PHP o Laravel.</p>
 
                     <h3>4.1 Instalación</h3>
-                    <pre><code class="language-bash">composer require verificaempresas/sdk-php</code></pre>
+                    <pre><code class="language-bash">composer require apiempresas/sdk-php</code></pre>
 
                     <h3>4.2 Ejemplo rápido (Laravel)</h3>
                     <pre><code class="language-php">&lt;?php
 
-use VerificaEmpresas\Client;
+use APIEmpresas\Client;
 
-$client = new Client(env('VERIFICAEMPRESAS_API_KEY'));
+$client = new Client(env('APIEMPRESAS_API_KEY'));
 
 $response = $client-&gt;company([
     'cif' =&gt; 'B12345678',
@@ -223,12 +223,12 @@ if ($response-&gt;ok()) {
                     <p>Uso típico en un backend Node (Express, Nest, serverless, etc.).</p>
 
                     <h3>5.1 Instalación</h3>
-                    <pre><code class="language-bash">npm install @verificaempresas/sdk</code></pre>
+                    <pre><code class="language-bash">npm install @apiempresas/sdk</code></pre>
 
                     <h3>5.2 Ejemplo rápido (Node)</h3>
-                    <pre><code class="language-js">import { VerificaEmpresas } from "@verificaempresas/sdk";
+                    <pre><code class="language-js">import { APIEmpresas } from "@apiempresas/sdk";
 
-const client = new VerificaEmpresas(process.env.VE_API_KEY);
+const client = new ApiEmpresas(process.env.VE_API_KEY);
 
 const company = await client.company({ cif: "B12345678" });
 
