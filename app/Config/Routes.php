@@ -24,6 +24,7 @@ $routes->get('blog', 'Blog::index');
 $routes->get('blog/post', 'Blog::post');
 $routes->get('blog/get_posts', 'Blog::get_posts');
 $routes->get('blog/(:segment)', 'Blog::post/$1');
+$routes->get('get-posts-grid', 'Blog::get_posts_grid');
 
 
 // ----------- API ----------- //
