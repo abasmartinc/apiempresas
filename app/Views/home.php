@@ -329,27 +329,127 @@
         </div>
     </section>
 
-    <!--<section id="beta" class="cta-final container">
-        <div class="cta-box">
-            <h2>Crea tu cuenta gratuita y recibe tu API key</h2>
-            <p class="muted">
-                Regístrate y te enviaremos al instante tu <strong>API key gratuita</strong> y acceso al buscador avanzado.
-                Sin tarjeta, sin compromiso. Perfecto para probar la integración en tu entorno.
-            </p>
-            <form onsubmit="event.preventDefault(); document.getElementById('beta-ok').style.display='block'" class="search-row">
-                <input class="input" type="email" placeholder="tu@correo.com" required />
-                <button class="btn" type="submit">🚀 Crear cuenta gratis</button>
-            </form>
-            <p id="beta-ok" class="muted" style="display:none; margin-top:8px">
-                ✅ ¡Listo! Te enviaremos tu API key y los siguientes pasos a tu correo.
-            </p>
+    <!-- BLOG HOME -->
+    <!-- BLOG HOME -->
+    <section class="home-blog container">
+        <div class="band home-blog__band">
+            <div class="home-blog__head">
+                <span class="eyebrow">Recursos &amp; guías</span>
+                <h2>Aprende a sacarle más partido a la API</h2>
+                <p class="muted">
+                    Guías técnicas y casos de uso reales para developers, producto y equipos de riesgo
+                    que trabajan con datos de empresas españolas.
+                </p>
+            </div>
+
+            <div class="home-blog__grid" id="home-blog-grid">
+                <!-- Skeletons mientras cargan los posts -->
+                <article class="home-blog__card home-blog__card--skeleton">
+                    <div class="home-blog__skeleton-eyebrow skeleton-block"></div>
+                    <div class="home-blog__skeleton-title skeleton-block"></div>
+                    <div class="home-blog__skeleton-line skeleton-block"></div>
+                    <div class="home-blog__skeleton-line skeleton-block"></div>
+                    <div class="home-blog__skeleton-meta skeleton-block"></div>
+                </article>
+
+                <article class="home-blog__card home-blog__card--skeleton">
+                    <div class="home-blog__skeleton-eyebrow skeleton-block"></div>
+                    <div class="home-blog__skeleton-title skeleton-block"></div>
+                    <div class="home-blog__skeleton-line skeleton-block"></div>
+                    <div class="home-blog__skeleton-line skeleton-block"></div>
+                    <div class="home-blog__skeleton-meta skeleton-block"></div>
+                </article>
+
+                <article class="home-blog__card home-blog__card--skeleton">
+                    <div class="home-blog__skeleton-eyebrow skeleton-block"></div>
+                    <div class="home-blog__skeleton-title skeleton-block"></div>
+                    <div class="home-blog__skeleton-line skeleton-block"></div>
+                    <div class="home-blog__skeleton-line skeleton-block"></div>
+                    <div class="home-blog__skeleton-meta skeleton-block"></div>
+                </article>
+
+                <article class="home-blog__card home-blog__card--skeleton">
+                    <div class="home-blog__skeleton-eyebrow skeleton-block"></div>
+                    <div class="home-blog__skeleton-title skeleton-block"></div>
+                    <div class="home-blog__skeleton-line skeleton-block"></div>
+                    <div class="home-blog__skeleton-line skeleton-block"></div>
+                    <div class="home-blog__skeleton-meta skeleton-block"></div>
+                </article>
+            </div>
         </div>
-    </section>-->
+    </section>
+
+    <section id="beta" class="cta-final container">
+        <div class="cta-box">
+            <div class="cta-layout">
+                <!-- Columna texto -->
+                <div class="cta-copy">
+                    <h2>Crea tu cuenta gratuita y recibe tu API key</h2>
+                    <p class="muted">
+                        Regístrate en minutos y prueba la API con el mismo motor que usamos en producción.
+                        Ideal para validar CIF, razón social y estado de empresas españolas sin fricción.
+                    </p>
+
+                    <ul class="cta-benefits">
+                        <li><strong>Sin tarjeta</strong> ni permanencias: cancela cuando quieras.</li>
+                        <li><strong>2.000 consultas/mes</strong> incluidas en el plan Sandbox.</li>
+                        <li><strong>Acceso al buscador web</strong> y a la documentación completa.</li>
+                    </ul>
+                </div>
+
+                <!-- Columna CTA -->
+                <div class="cta-actions">
+                    <span class="cta-pill">Sandbox · Entorno de pruebas</span>
+
+                    <a class="btn btn_start cta-main-btn" href="<?=site_url() ?>register">
+                        🚀 Crear cuenta gratis
+                    </a>
+
+                    <p class="muted cta-note">
+                        Sin tarjeta, sin compromiso. Solo necesitas tu email de trabajo.
+                    </p>
+
+                    <p class="muted cta-login">
+                        ¿Ya tienes cuenta?
+                        <a href="<?=site_url() ?>login">Inicia sesión aquí</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
 </main>
 
 <?=view('partials/footer') ?>
 <?= view('scripts') ?>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const grid = document.getElementById('home-blog-grid');
+        if (!grid) return;
 
+        fetch('<?=site_url() ?>blog/get_posts', {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(function (response) {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
+            .then(function (data) {
+                if (data && data.ok && data.html) {
+                    grid.innerHTML = data.html;
+                } else {
+                    // Si algo falla, dejamos el skeleton o podríamos ocultar la sección
+                    console.warn('No se pudieron cargar los posts del blog.');
+                }
+            })
+            .catch(function (err) {
+                console.error('Error al cargar posts:', err);
+            });
+    });
+</script>
 </body>
 </html>
-

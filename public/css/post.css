@@ -1,0 +1,418 @@
+/* ==================================
+   BLOG · PÁGINA SINGLE POST
+   ================================== */
+
+/* Layout general */
+.blog-post-page {
+    padding-block: 32px 56px;
+}
+
+/* Contenedor centrado (solo hace de wrapper, sin card extra) */
+.blog-post-shell {
+    max-width: 920px;
+    margin-inline: auto;
+}
+
+/* CARD PRINCIPAL DEL POST */
+.blog-post-card {
+    border-radius: 24px;
+    background: #ffffff;
+    border: 1px solid #dde5ff;
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.16);
+    padding: 22px 26px 26px;
+}
+
+/* Asegurarnos de que ningún estilo global pinte un bloque azul en la cabecera */
+.blog-post-card .blog-post__hero {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    padding: 0;
+    margin: 0 0 6px;
+}
+
+/* BREADCRUMB */
+.blog-post__breadcrumb {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 8px;
+}
+
+.blog-post__breadcrumb a {
+    color: #4b5563;
+    text-decoration: none;
+}
+
+.blog-post__breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.blog-post__breadcrumb span {
+    margin: 0 4px;
+}
+
+/* CABECERA (EYEBROW + TÍTULO + META + CTA) */
+
+.blog-post__eyebrow {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #1e2a55;
+    border: 1px solid #dde4ff;
+    background: #eef2ff;
+    margin-bottom: 10px;
+}
+
+.blog-post__title {
+    margin: 4px 0 8px;
+    font-size: 26px;
+    line-height: 1.25;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.blog-post__subtitle {
+    margin: 0 0 16px;
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 640px;
+    color: #4b5563;
+}
+
+/* META */
+.blog-post__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 12px;
+}
+
+.blog-post__meta-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: #d1d5db;
+}
+
+/* CTA DOCUMENTACIÓN */
+.blog-post__hero-cta {
+    margin-top: 4px;
+}
+
+.blog-post__btn-docs {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid #dde4ff;
+    background: #ffffff;
+    color: #1f2937;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.10);
+    transition:
+            background 0.16s ease,
+            box-shadow 0.16s ease,
+            transform 0.12s ease;
+}
+
+.blog-post__btn-docs:hover {
+    background: #f9fafb;
+    box-shadow: 0 14px 26px rgba(15, 23, 42, 0.18);
+    transform: translateY(-1px);
+}
+
+.blog-post__btn-docs:active {
+    transform: translateY(0);
+    box-shadow: 0 9px 18px rgba(15, 23, 42, 0.16);
+}
+
+/* SEPARADOR ENTRE CABECERA Y CONTENIDO */
+.blog-post__divider {
+    margin: 18px 0 20px;
+    height: 1px;
+    border: 0;
+    background: linear-gradient(90deg, #e5e7eb, #d1d5ff, #e5e7eb);
+}
+
+/* CONTENIDO DEL ARTÍCULO */
+
+.blog-post__content {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #111827;
+}
+
+.blog-post__content > *:first-child {
+    margin-top: 0;
+}
+.blog-post__content > *:last-child {
+    margin-bottom: 0;
+}
+
+/* TÍTULOS INTERNOS */
+
+.blog-post__content h2 {
+    font-size: 20px;
+    margin: 24px 0 10px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.blog-post__content h3 {
+    font-size: 17px;
+    margin: 20px 0 8px;
+    font-weight: 600;
+    color: #111827;
+}
+
+/* LISTAS */
+
+.blog-post__content ul,
+.blog-post__content ol {
+    margin: 10px 0 14px;
+    padding-left: 1.4rem;
+}
+
+.blog-post__content li {
+    margin-bottom: 4px;
+}
+
+/* ENLACES EN EL CUERPO */
+
+.blog-post__content a {
+    color: #2152ff;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+}
+
+.blog-post__content a:hover {
+    color: #1d4ed8;
+}
+
+/* BLOQUES DE CÓDIGO */
+
+.blog-post__content pre {
+    margin: 14px 0;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: #020617;
+    color: #e5e7eb;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.6;
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+    border: 1px solid #1f2937;
+}
+
+.blog-post__content code {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 13px;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+/* BLOQUES FINALES (RESUMEN + RELACIONADOS) */
+
+.blog-post__footer-blocks {
+    margin-top: 26px;
+    display: grid;
+    gap: 16px;
+}
+
+.blog-post__footer-box {
+    border-radius: 18px;
+    padding: 14px 16px 16px;
+    background: #f3f6ff;
+    border: 1px solid #dde5ff;
+}
+
+.blog-post__footer-box h3 {
+    margin: 0 0 6px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.blog-post__footer-box p {
+    margin: 0 0 6px;
+    font-size: 14px;
+    color: #4b5563;
+}
+
+.blog-post__footer-box ul {
+    margin: 4px 0 0;
+    padding-left: 1.1rem;
+    font-size: 14px;
+}
+
+.blog-post__footer-box li + li {
+    margin-top: 2px;
+}
+
+/* CTA FINAL */
+
+.blog-post__cta-final {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+.blog-post__cta-final p {
+    margin: 0 0 10px;
+    font-size: 14px;
+    color: #4b5563;
+}
+
+.blog-post__btn-main {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 22px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #2152ff, #12b48a);
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    text-decoration: none;
+    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.40);
+    transition:
+            box-shadow 0.16s ease,
+            transform 0.12s ease;
+}
+
+.blog-post__btn-main:hover {
+    box-shadow: 0 18px 34px rgba(15, 23, 42, 0.40);
+    transform: translateY(-1px);
+}
+
+.blog-post__btn-main:active {
+    transform: translateY(0);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.32);
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 960px) {
+    .blog-post-card {
+        padding: 18px 20px 22px;
+        border-radius: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .blog-post-page {
+        padding-block: 24px 40px;
+    }
+
+    .blog-post__title {
+        font-size: 22px;
+    }
+}
+
+/* =========================
+   Tablas dentro del contenido del post
+   ========================== */
+
+.blog-post__content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 14px;
+    line-height: 1.5;
+    border-radius: 10px;
+    overflow: hidden; /* para que el border-radius afecte también al contenido */
+    background: rgba(10, 15, 40, 0.85);
+}
+
+/* Wrapper responsive opcional (por si en algún momento lo envuelves en un div) */
+.blog-post__content table {
+    display: table;
+}
+
+/* Cabecera */
+.blog-post__content thead {
+    background: linear-gradient(90deg, #2152FF, #5C7CFF, #12B48A);
+}
+
+.blog-post__content thead th {
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: #f5f7ff;
+    white-space: nowrap;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 13px;
+}
+
+/* Cuerpo */
+.blog-post__content tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    background: rgba(5, 10, 30, 0.9);
+}
+
+.blog-post__content tbody tr:nth-child(2n) {
+    background: rgba(15, 20, 45, 0.95);
+}
+
+.blog-post__content tbody tr:last-child {
+    border-bottom: none;
+}
+
+.blog-post__content td {
+    padding: 9px 14px;
+    color: #e2e6f5;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+/* Primera columna un poco más marcada (nombre del método) */
+.blog-post__content tbody td:first-child {
+    font-weight: 600;
+    color: #ffffff;
+}
+
+/* Pequeña “chip” visual para valores clave (opcional, pero queda bien) */
+.blog-post__content td {
+    position: relative;
+}
+
+/* Si quisieras destacar solo la fila de API moderna */
+.blog-post__content tbody tr:last-child {
+    background: rgba(24, 46, 120, 0.95);
+}
+
+.blog-post__content tbody tr:last-child td:first-child {
+    color: #fff;
+}
+
+/* Scroll horizontal en pantallas pequeñas */
+@media (max-width: 768px) {
+    .blog-post__content table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        font-size: 13px;
+    }
+
+    .blog-post__content thead th,
+    .blog-post__content td {
+        padding: 8px 10px;
+        white-space: nowrap;
+    }
+}
+

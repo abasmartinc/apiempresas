@@ -89,7 +89,7 @@ class AuthController extends ResourceController
      *   "password": "secret123"
      * }
      */
-    public function login()
+    public function authenticate()
     {
         $allowed_ips = ALLOWED_IPS;
         $client_ip = $this->request->getIPAddress();
@@ -116,22 +116,22 @@ class AuthController extends ResourceController
         $password = $json->password ?? null;
 
 
-        $apiDB = \Config\Database::connect('api');
+        $apiDB = \Config\Database::connect('default');
 
-        $user = $apiDB->table('users')->where('username', $username)->get()->getRow();
+        $user = $apiDB->table('users')->where('email', $username)->get()->getRow();
 
         if(!$user){
             $this->saveLog($client_ip, $username, $endpoint, 'Failed', 'User not valid');
             $this->incrementLoginAttempts($client_ip);
             return $this->respond(['message' => 'Invalid credentials'], ResponseInterface::HTTP_UNAUTHORIZED);
         }
-        if($user->active != 1){
+        if($user->is_active != 1){
             $this->saveLog($client_ip, $username, $endpoint, 'Failed', 'User not active');
             return $this->respond(['message' => 'Invalid credentials'], ResponseInterface::HTTP_UNAUTHORIZED);
         }
 
 
-        if ($username == $user->username && $password == $user->password) {
+        if ($username == $user->email && $password == $user->password_hash) {
             $this->clearLoginAttempts($client_ip);
             $key = getenv('JWT_SECRET');
             $payload = [
@@ -160,7 +160,7 @@ class AuthController extends ResourceController
 
     private function isLockedOut($ip_address)
     {
-        $apiDB = \Config\Database::connect('api');
+        $apiDB = \Config\Database::connect('default');
         $max_attempts = 5;
         $lockout_time = 15 * 60; // 15 minutos
 
@@ -183,7 +183,7 @@ class AuthController extends ResourceController
 
     private function incrementLoginAttempts($ip_address)
     {
-        $apiDB = \Config\Database::connect('api');
+        $apiDB = \Config\Database::connect('default');
         $attempt = $apiDB->table('login_attempts')->where('ip_address', $ip_address)->get()->getRow();
 
         if ($attempt) {
@@ -203,14 +203,14 @@ class AuthController extends ResourceController
 
     private function clearLoginAttempts($ip_address)
     {
-        $apiDB = \Config\Database::connect('api');
+        $apiDB = \Config\Database::connect('default');
         $apiDB->table('login_attempts')->where('ip_address', $ip_address)->delete();
     }
 
 
     private function saveLog($ip_address, $username, $endpoint, $status, $error_message='')
     {
-        $apiDB = \Config\Database::connect('api');
+        $apiDB = \Config\Database::connect('default');
         $apiDB->table('logs')->insert([
             'ip_address' => $ip_address,
             'username' => $username,

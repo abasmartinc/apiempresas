@@ -2,7 +2,6 @@
 
 namespace App\Controllers;
 
-
 class Home extends BaseController
 {
     public function index()
@@ -10,7 +9,9 @@ class Home extends BaseController
         if (session('logged_in')) {
             return redirect()->to(site_url('dashboard'));
         }
+
         return view('home');
     }
-}
 
+
+}

@@ -156,17 +156,17 @@
                             <div class="quick-item">
                                 <strong>Endpoint básico</strong>
                                 <code style="font-size:12px;">GET /company?cif=B12345678</code><br />
-                                <a href="/docs#company">Ver ejemplo completo →</a>
+                                <a href="<?=site_url() ?>documentation#company">Ver ejemplo completo →</a>
                             </div>
                             <div class="quick-item">
                                 <strong>SDK PHP / Laravel</strong>
                                 <p style="margin:4px 0 0;">Instala el cliente oficial y valida CIF en tus middlewares.</p>
-                                <a href="/docs/sdk-php">Guía rápida PHP →</a>
+                                <a href="<?=site_url() ?>documentation#sdk-php">Guía rápida PHP →</a>
                             </div>
                             <div class="quick-item">
                                 <strong>SDK Node / JS</strong>
                                 <p style="margin:4px 0 0;">Ideal para backend en Node o funciones serverless.</p>
-                                <a href="/docs/sdk-node">Guía rápida Node →</a>
+                                <a href="<?=site_url() ?>documentation#sdk-node">Guía rápida Node →</a>
                             </div>
                             <div class="quick-item">
                                 <strong>Buscador web</strong>
