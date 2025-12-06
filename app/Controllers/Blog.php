@@ -333,7 +333,6 @@ class Blog extends BaseController
                                 </p>
 
                                 <div class="blog-card__footer">
-                                    <span class="blog-card__tag">Datos mercantiles</span>
                                     <span class="blog-card__cta">Leer artículo →</span>
                                 </div>
                             </div>

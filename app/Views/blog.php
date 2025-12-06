@@ -66,17 +66,6 @@
                     <p class="blog-list__eyebrow">Artículos</p>
                     <h2 class="blog-list__title">Últimas publicaciones</h2>
                 </div>
-                <div class="blog-list__actions">
-                    <div class="blog-search">
-                        <span class="blog-search__icon">🔍</span>
-                        <input
-                                type="search"
-                                class="blog-search__input"
-                                placeholder="Busca por tema, API, riesgo… (visual)"
-                                disabled
-                        >
-                    </div>
-                </div>
             </div>
 
             <div id="blog-list-error" class="blog-list__error" style="display:none;">

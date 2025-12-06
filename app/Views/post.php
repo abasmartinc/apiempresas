@@ -53,12 +53,6 @@
                             <span>⏱ <?= esc($readingTime) ?></span>
                         <?php endif; ?>
                     </div>
-
-                    <div class="blog-post__hero-cta">
-                        <a href="<?= site_url('documentation') ?>" class="blog-post__btn-docs">
-                            Ver documentación de la API
-                        </a>
-                    </div>
                 </div>
 
                 <hr class="blog-post__divider"/>
