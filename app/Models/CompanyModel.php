@@ -8,7 +8,7 @@ class CompanyModel extends Model
 {
     // Cambia 'api' por 'default' si corresponde
     protected $DBGroup    = 'default';
-    protected $table      = 'companies';
+    protected $table      = 'empresia_company_details';
     protected $primaryKey = 'id';
     protected $returnType = 'array';
 
