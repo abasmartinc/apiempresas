@@ -42,13 +42,14 @@
 {
   <span class="key">"success"</span>: <span class="str">true</span>,
   <span class="key">"data"</span>: {
-    <span class="key">"cif"</span>: <span class="str">"B85438414"</span>,
     <span class="key">"name"</span>: <span class="str">"Producciones Martinez SL"</span>,
-    <span class="key">"status"</span>: <span class="str">"ACTIVA"</span>,
-    <span class="key">"province"</span>: <span class="str">"Madrid"</span>,
-    <span class="key">"cnae"</span>: <span class="str">"Actividades varias"</span>,
+    <span class="key">"cif"</span>: <span class="str">"B85438414"</span>,
+    <span class="key">"cnae"</span>: <span class="str">1200</span>,
+    <span class="key">"cnae_label"</span>: <span class="str">"Actividades varias"</span>,
+    <span class="key">"corporate_purpose"</span>: <span class="str">"La fabricación y distribución"</span>,
     <span class="key">"founded"</span>: <span class="str">"2008-07-02"</span>,
-    <span class="key">"registry_url"</span>: <span class="str">""</span>
+    <span class="key">"province"</span>: <span class="str">"Madrid"</span>,
+    <span class="key">"status"</span>: <span class="str">"ACTIVA"</span>,
   }
 } </code>
                 </pre>
