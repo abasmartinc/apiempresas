@@ -38,6 +38,13 @@ $routes->group('', ['filter' => 'jwt'], static function($routes) {
 $routes->cli('swagger:generate', 'App\Commands\GenerateSwaggerCommand::run');
 $routes->get('documentation', 'SwaggerController::index');
 
-$routes->get('map/companies', 'CompanyMapController::index');
-$routes->get('api/map/companies', 'CompanyMapController::companies');
-$routes->get('api/map/export', 'CompanyMapController::export');
+
+$routes->get('map/companies', 'CompanyMapV2Controller::index');
+$routes->get('api/geo/provinces', 'CompanyMapV2Controller::provinces');
+$routes->get('api/geo/municipalities', 'CompanyMapV2Controller::municipalities');
+$routes->get('api/cnae/sections', 'CompanyMapV2Controller::cnaeSections');
+$routes->get('api/cnae/groups', 'CompanyMapV2Controller::cnaeGroups');
+$routes->get('api/cnae/classes', 'CompanyMapV2Controller::cnaeClasses');
+$routes->get('api/cnae/subclasses', 'CompanyMapV2Controller::cnaeSubclasses');
+$routes->get('api/map/search', 'CompanyMapV2Controller::search');
+$routes->get('api/map/export', 'CompanyMapV2Controller::export');
