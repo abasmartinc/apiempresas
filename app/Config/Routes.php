@@ -37,3 +37,7 @@ $routes->group('', ['filter' => 'jwt'], static function($routes) {
 // Swagger
 $routes->cli('swagger:generate', 'App\Commands\GenerateSwaggerCommand::run');
 $routes->get('documentation', 'SwaggerController::index');
+
+$routes->get('map/companies', 'CompanyMapController::index');
+$routes->get('api/map/companies', 'CompanyMapController::companies');
+$routes->get('api/map/export', 'CompanyMapController::export');
