@@ -274,7 +274,6 @@
                     <li>Rate limit bajo</li>
                     <li>Acceso a endpoints básicos</li>
                     <li>Sin SLA</li>
-                    <li>Sin SLA</li>
                     <li>Sin soporte (solo docs)</li>
                     <li>Uso no comercial / pruebas</li>
                 </ul>
