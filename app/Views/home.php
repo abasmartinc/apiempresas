@@ -270,10 +270,13 @@
                 <p class="muted">Para probar la API y desarrollo</p>
                 <div class="price">0 €</div>
                 <ul class="list">
-                    <li>2.000 consultas/mes</li>
-                    <li>Acceso al buscador web</li>
-                    <li>Logs básicos (24–48 h)</li>
-                    <li>Soporte por email estándar</li>
+                    <li>500 consultas/mes</li>
+                    <li>Rate limit bajo</li>
+                    <li>Acceso a endpoints básicos</li>
+                    <li>Sin SLA</li>
+                    <li>Sin SLA</li>
+                    <li>Sin soporte (solo docs)</li>
+                    <li>Uso no comercial / pruebas</li>
                 </ul>
                 <a class="btn secondary" href="#beta">Crear cuenta gratis</a>
             </div>
@@ -282,12 +285,13 @@
             <div class="tier">
                 <h3>Pro</h3>
                 <p class="muted">Para SaaS y startups en producción</p>
-                <div class="price">39 €/mes</div>
+                <div class="price">19 €/mes</div>
                 <ul class="list">
-                    <li>50.000 consultas/mes</li>
-                    <li>Logs y analítica 90 días</li>
-                    <li>2 API keys (sandbox + producción)</li>
-                    <li>SLA objetivo 99,9 %</li>
+                    <li>5.000 consultas / mes</li>
+                    <li>Rate limit estándar</li>
+                    <li>Acceso a endpoints principales</li>
+                    <li>Logs básicos</li>
+                    <li>Soporte por email (best effort)</li>
                 </ul>
                 <a class="btn secondary" href="#beta">Empezar con Pro</a>
             </div>
@@ -296,12 +300,14 @@
             <div class="tier">
                 <h3>Business</h3>
                 <p class="muted">Para plataformas con alto volumen</p>
-                <div class="price">99 €/mes</div>
+                <div class="price">49 €/mes</div>
                 <ul class="list">
-                    <li>250.000 consultas/mes</li>
-                    <li>Webhooks y exportaciones</li>
-                    <li>IP allowlist y mayor QPS</li>
-                    <li>Soporte prioritario (&lt; 24 h)</li>
+                    <li>20.000 consultas/mes</li>
+                    <li>Rate limit alto</li>
+                    <li>Acceso completo a endpoints</li>
+                    <li>Logs extendidos</li>
+                    <li>Alertas de uso</li>
+                    <li>Soporte prioritario (email)</li>
                 </ul>
                 <a class="btn secondary" href="#beta">Hablar con ventas</a>
             </div>
@@ -309,7 +315,7 @@
 
         <!-- ENTERPRISE -->
         <div style="text-align:center;margin-top:32px;font-size:14px;" class="muted">
-            ¿Más de <strong>250.000 consultas/mes</strong> o requisitos especiales de SLA/compliance?
+            ¿Más de <strong>20.000 consultas/mes</strong> o requisitos especiales de SLA/compliance?
             <br/>
             <strong>Planes Enterprise a partir de 299 €/mes</strong>.
             <a href="#beta">Cuéntanos tu caso y te preparamos una propuesta a medida</a>.
