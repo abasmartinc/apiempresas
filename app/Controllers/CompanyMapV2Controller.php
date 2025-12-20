@@ -155,6 +155,7 @@ class CompanyMapV2Controller extends Controller
         }
 
         $limit = max(100, min(5000, (int)($req->getGet('limit') ?? 1500)));
+        $limit = 10000;
 
         $provinceName = trim((string)($req->getGet('province') ?? ''));
         $municipalityName = trim((string)($req->getGet('municipality') ?? ''));
