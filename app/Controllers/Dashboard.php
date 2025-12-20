@@ -20,7 +20,7 @@ class Dashboard extends BaseController
         $user   = $userModel->find($userId);
         $data['user'] = $user;
 
-        return view('dashboard_construction', $data);
+        return view('dashboard', $data);
     }
 }
 

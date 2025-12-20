@@ -17,6 +17,8 @@ $routes->post('signup', 'Register::store');
 $routes->get('dashboard', 'Dashboard::index');
 $routes->get('search_company', 'Search::search_company');
 $routes->get('billing', 'Billing::index');
+$routes->get('billing/purchase_success', 'Billing::purchase_success');
+$routes->get('billing/manage', 'Billing::billing_manage');
 $routes->get('usage', 'Usage::index');
 $routes->get('prices', 'Prices::index');
 $routes->get('contact', 'Contact::index');
@@ -28,8 +30,7 @@ $routes->get('get-posts-grid', 'Blog::get_posts_grid');
 
 
 // ----------- API ----------- //
-$routes->post('authenticate', 'AuthController::authenticate');
-$routes->group('', ['filter' => 'jwt'], static function($routes) {
+$routes->group('', ['filter' => 'apikey'], static function($routes) {
     $routes->get('api/v1/companies', 'Api\V1\Companies::index');
 });
 // ----------- API ----------- //

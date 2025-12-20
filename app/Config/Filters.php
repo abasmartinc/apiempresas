@@ -35,8 +35,8 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
-        'jwt'           => \App\Filters\JwtFilter::class,
         'dbgroup'       => DbGroupFilter::class,
+        'apikey'        => \App\Filters\ApiKeyFilter::class,
     ];
 
     /**

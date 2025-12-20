@@ -91,7 +91,7 @@
                     <ul class="auth-bullets">
                         <li>
                             <span class="bullet-dot"></span>
-                            <span><strong>Plan Free</strong> con 2.000 consultas/mes para desarrollo y pruebas.</span>
+                            <span><strong>Plan Free</strong> incluido para pruebas y desarrollo.</span>
                         </li>
                         <li>
                             <span class="bullet-dot"></span>
@@ -213,8 +213,7 @@
                                 Crear cuenta gratis
                             </button>
                             <p class="auth-muted">
-                                Al crear tu cuenta activamos automáticamente el <strong>plan Free</strong>
-                                con 2.000 consultas/mes para que integres la API sin compromiso.
+                                Puedes pasar a Pro en cualquier momento desde el panel.
                             </p>
                             <p class="auth-muted">
                                 ¿Ya tienes cuenta?

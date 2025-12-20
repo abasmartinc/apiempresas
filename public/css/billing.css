@@ -1,248 +1,968 @@
+:root{
+    --bg: #f6f8ff;
+    --card: rgba(255,255,255,.90);
+    --stroke: rgba(15, 23, 42, .10);
+
+    --text: #0b1220;
+    --muted: rgba(11,18,32,.62);
+
+    --blue: #2152FF;
+    --green:#12B48A;
+
+    --shadowA: 0 18px 46px rgba(15, 23, 42, .12);
+    --shadowB: 0 10px 26px rgba(15, 23, 42, .08);
+
+    --r: 18px;
+    --r2: 14px;
+}
+
+body{
+    background:
+            radial-gradient(900px 520px at 10% 0%, rgba(33,82,255,.12), transparent 55%),
+            radial-gradient(900px 520px at 85% 10%, rgba(92,124,255,.10), transparent 55%),
+            radial-gradient(1000px 600px at 55% 115%, rgba(18,180,138,.08), transparent 60%),
+            linear-gradient(180deg, #f9fbff 0%, var(--bg) 40%, #f3f6ff 100%);
+    color: var(--text);
+}
+
+.bg-halo{
+    position: fixed;
+    inset: -20% -20% auto -20%;
+    height: 520px;
+    pointer-events:none;
+    background:
+            radial-gradient(closest-side at 20% 30%, rgba(33,82,255,.18), transparent 65%),
+            radial-gradient(closest-side at 70% 20%, rgba(92,124,255,.14), transparent 62%),
+            radial-gradient(closest-side at 50% 80%, rgba(18,180,138,.10), transparent 62%);
+    filter: blur(18px);
+    opacity: .9;
+}
+
 .billing-main{
-    padding:18px 0 70px;
-}
-.billing-header{
-    display:flex;
-    align-items:flex-end;
-    justify-content:space-between;
-    gap:18px;
-    margin-bottom:24px;
-}
-.billing-header h1{
-    margin:0 0 6px;
-    font-size:24px;
-    font-weight:800;
-    letter-spacing:-.02em;
-}
-.billing-header p{
-    margin:0;
-    color:#4b5563;
-}
-.billing-tag{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    padding:6px 10px;
-    border-radius:999px;
-    background:#eef2ff;
-    border:1px solid #dfe6ff;
-    font-size:11px;
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.09em;
-    color:#1e293b;
+    padding: 22px 0 56px;
 }
 
-.billing-layout{
-    display:grid;
-    grid-template-columns: minmax(0,1.1fr) minmax(0,.9fr);
-    gap:22px;
-}
-@media (max-width:980px){
-    .billing-layout{
-        grid-template-columns:1fr;
-    }
-}
-
-.billing-card{
-    background:#ffffff;
-    border-radius:18px;
-    border:1px solid #e6ecf8;
-    box-shadow:0 12px 28px rgba(15,23,42,.08);
-    padding:20px 22px 22px;
-}
-.billing-card h2{
-    margin:0 0 6px;
-    font-size:17px;
-    font-weight:700;
-}
-.billing-card p{
-    margin:0 0 10px;
-    color:#4b5563;
-    font-size:14px;
-}
-
-/* Resumen de plan */
-.plan-row{
+/* HERO */
+.billing-hero{
     display:flex;
     justify-content:space-between;
     align-items:flex-start;
-    gap:14px;
-    margin-top:8px;
-    margin-bottom:14px;
+    gap: 18px;
+    padding: 18px 18px;
+    border: 1px solid rgba(205,214,234,.70);
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
+    box-shadow: var(--shadowB);
+    backdrop-filter: blur(10px);
+    margin: 18px 0 14px;
 }
-.plan-main{
+
+.billing-hero .kicker{
+    font-size: 11px;
+    letter-spacing:.12em;
+    text-transform: uppercase;
+    color: rgba(11,18,32,.55);
+    margin-bottom: 8px;
+}
+
+.billing-hero h1{
+    margin:0;
+    font-size: 26px;
+    letter-spacing:-.02em;
+}
+
+.billing-hero .sub{
+    margin: 10px 0 0;
+    color: var(--muted);
+    line-height: 1.55;
+    max-width: 78ch;
+}
+
+.hero-meta{
     display:flex;
-    flex-direction:column;
-    gap:4px;
+    flex-wrap:wrap;
+    gap: 10px;
+    margin-top: 12px;
+    align-items:center;
 }
-.plan-name{
-    font-weight:800;
-    font-size:16px;
+
+.pill{
+    display:inline-flex;
+    gap: 6px;
+    align-items:center;
+    padding: 8px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(205,214,234,.75);
+    background: rgba(255,255,255,.82);
+    color: rgba(11,18,32,.72);
+    font-size: 12.5px;
 }
-.plan-meta{
-    font-size:13px;
-    color:#6b7280;
+
+.pill strong{ color: rgba(11,18,32,.92); font-weight: 850; }
+
+.dot-sep{ color: rgba(11,18,32,.30); }
+
+.billing-hero__right{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
 }
-.badge-plan{
-    padding:4px 8px;
-    border-radius:999px;
-    font-size:11px;
-    font-weight:700;
-    background:#e9fcf6;
-    border:1px solid #bdf3e6;
-    color:#047857;
+
+/* GRID */
+.billing-grid{
+    display:grid;
+    grid-template-columns: 1.15fr .85fr;
+    gap: 16px;
+    align-items:start;
+}
+
+@media (max-width: 980px){
+    .billing-grid{ grid-template-columns: 1fr; }
+    .billing-hero{ flex-direction:column; }
+    .billing-hero__right{ justify-content:flex-start; width:100%; }
+}
+
+/* PANEL LEFT */
+.panel{
+    background: rgba(255,255,255,.90);
+    border: 1px solid rgba(205,214,234,.70);
+    border-radius: 22px;
+    box-shadow: var(--shadowA);
+    padding: 18px;
+}
+
+.panel-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.kicker{
+    font-size: 11px;
+    letter-spacing:.12em;
+    text-transform: uppercase;
+    color: rgba(11,18,32,.55);
+}
+
+.panel h2{
+    margin: 6px 0 0;
+    font-size: 18px;
+    letter-spacing:-.01em;
+}
+
+.muted{ color: var(--muted); }
+
+/* TOGGLE */
+.period-toggle{
+    display:inline-flex;
+    gap: 8px;
+    padding: 6px;
+    border-radius: 999px;
+    border: 1px solid rgba(205,214,234,.75);
+    background: rgba(255,255,255,.82);
+}
+
+.period-btn{
+    border: 1px solid transparent;
+    background: transparent;
+    padding: 9px 12px;
+    border-radius: 999px;
+    font-weight: 750;
+    font-size: 13px;
+    color: rgba(11,18,32,.70);
+    cursor:pointer;
+}
+
+.period-btn .save{
+    margin-left: 6px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    color: rgba(255,255,255,.95);
+    background: linear-gradient(135deg, rgba(33,82,255,.95), rgba(18,180,138,.90));
+}
+
+.period-btn.active{
+    color: rgba(11,18,32,.92);
+    background: rgba(33,82,255,.10);
+    border: 1px solid rgba(33,82,255,.18);
+}
+
+/* PLANS */
+.plan-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+@media (max-width: 680px){
+    .plan-grid{ grid-template-columns: 1fr; }
+}
+
+.plan-card{
+    border: 1px solid rgba(205,214,234,.75);
+    border-radius: 18px;
+    padding: 14px;
+    background: rgba(255,255,255,.88);
+    box-shadow: 0 10px 24px rgba(15,23,42,.06);
+    cursor:pointer;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.plan-card input{ display:none; }
+
+.plan-card:hover{
+    transform: translateY(-1px);
+    border-color: rgba(33,82,255,.22);
+    box-shadow: 0 14px 30px rgba(15,23,42,.08);
+}
+
+.plan-card.is-selected{
+    border-color: rgba(33,82,255,.30);
+    background: linear-gradient(180deg, rgba(33,82,255,.08), rgba(255,255,255,.90));
+    box-shadow: 0 18px 46px rgba(33,82,255,.10);
+}
+
+.plan-top{
+    display:flex;
+    justify-content:space-between;
+    gap: 12px;
+}
+
+.plan-title{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+}
+
+.badge{
+    font-size: 11px;
+    font-weight: 850;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(205,214,234,.75);
+    background: rgba(255,255,255,.90);
+    color: rgba(11,18,32,.78);
+}
+
+.badge-ok{
+    border-color: rgba(18,180,138,.22);
+    background: rgba(18,180,138,.12);
+    right: 170px;
+}
+
+.badge-neutral{
+    border-color: rgba(33,82,255,.18);
+    background: rgba(33,82,255,.08);
+    right: 146px;
+}
+
+.name{
+    font-weight: 950;
+    letter-spacing:-.01em;
+}
+
+.desc{
+    margin-top: 6px;
+    color: rgba(11,18,32,.62);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.price{
+    text-align:right;
     white-space:nowrap;
 }
 
-.usage-label{
+.price .amount{
+    font-weight: 950;
+    font-size: 22px;
+    letter-spacing:-.02em;
+}
+
+.price .unit{
+    color: rgba(11,18,32,.60);
+    font-size: 12.5px;
+    margin-top: 2px;
+}
+
+.features{
+    list-style:none;
+    padding: 0;
+    margin: 12px 0 0;
+    display:flex;
+    flex-direction:column;
+    gap: 8px;
+    color: rgba(11,18,32,.74);
+    font-size: 13px;
+}
+
+/* DIVIDER */
+.divider{
+    height: 1px;
+    background: rgba(205,214,234,.7);
+    margin: 16px 0;
+}
+
+/* FORM */
+.billing-form{ margin-top: 10px; }
+
+.form-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 680px){
+    .form-grid{ grid-template-columns: 1fr; }
+}
+
+.field label{
+    display:block;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: rgba(11,18,32,.72);
+    margin-bottom: 6px;
+}
+
+.field input,
+.field select{
+    width:100%;
+    padding: 12px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(15,23,42,.12);
+    background: rgba(255,255,255,.94);
+    outline:none;
+    transition: box-shadow .15s ease, border-color .15s ease, background .15s ease;
+    color: rgba(11,18,32,.92);
+}
+
+.field input:focus,
+.field select:focus{
+    border-color: rgba(33,82,255,.28);
+    box-shadow: 0 0 0 6px rgba(33,82,255,.12);
+    background: #fff;
+}
+
+.field-full{ grid-column: 1 / -1; }
+
+.form-actions{
+    margin-top: 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 12px;
+    border-top: 1px solid rgba(205,214,234,.7);
+}
+
+.secure-note{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    color: rgba(11,18,32,.62);
+    font-size: 12.5px;
+}
+
+.secure-ic{
+    width: 22px;
+    height: 22px;
+    border-radius: 10px;
+    display:inline-block;
+    border: 1px solid rgba(205,214,234,.8);
+    background:
+            radial-gradient(closest-side, rgba(33,82,255,.18), transparent 70%),
+            rgba(255,255,255,.90);
+}
+
+.action-buttons{ display:flex; gap: 10px; }
+
+/* RIGHT SIDE */
+.side{
+    display:flex;
+    flex-direction:column;
+    gap: 12px;
+}
+
+/* SUMMARY */
+.summary{
+    border: 1px solid rgba(205,214,234,.72);
+    border-radius: 22px;
+    background: rgba(255,255,255,.84);
+    box-shadow: var(--shadowB);
+    backdrop-filter: blur(10px);
+    padding: 16px;
+}
+
+@media (max-width: 980px){
+    .summary{ position: static; }
+}
+
+.summary-head{
     display:flex;
     justify-content:space-between;
-    font-size:12px;
-    color:#64748b;
-    margin-bottom:4px;
-}
-.usage-bar{
-    position:relative;
-    width:100%;
-    height:10px;
-    border-radius:999px;
-    background:#e5e7eb;
-    overflow:hidden;
-}
-.usage-bar-fill{
-    position:absolute;
-    left:0;
-    top:0;
-    bottom:0;
-    width:46%; /* reemplaza con % real via inline style */
-    border-radius:999px;
-    background:linear-gradient(90deg,#2152ff,#12b48a);
-    box-shadow:0 0 0 1px rgba(255,255,255,.4);
-    transition:width .3s ease;
+    align-items:baseline;
+    gap: 10px;
 }
 
-.plan-actions{
-    margin-top:16px;
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-}
-.plan-actions .btn{
-    padding:9px 14px;
-    border-radius:10px;
-    font-size:14px;
-}
-.plan-actions .btn.ghost{
-    background:#fff;
-    border:1px solid #e5e7eb;
-    color:#0f172a;
-    box-shadow:none;
+.summary h3{
+    margin:0;
+    font-size: 14px;
+    letter-spacing:-.01em;
 }
 
-/* Método de pago */
-.payment-method{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    margin:10px 0 8px;
-    padding:10px 12px;
-    border-radius:12px;
-    border:1px solid #e5e7eb;
-    background:#f9fafb;
+.summary .mini{
+    font-size: 12px;
+    color: rgba(11,18,32,.55);
 }
-.card-icon{
-    width:42px;
-    height:26px;
-    border-radius:8px;
-    background:linear-gradient(135deg,#0f172a,#1f2937);
+
+.summary-lines{
+    margin-top: 12px;
     display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#f9fafb;
-    font-size:11px;
-    font-weight:700;
+    flex-direction:column;
+    gap: 10px;
 }
-.payment-text span{
+
+.summary-lines .line{
+    display:flex;
+    justify-content:space-between;
+    gap: 10px;
+    color: rgba(11,18,32,.78);
+    font-size: 13px;
+}
+
+.summary-lines .line.total{
+    padding-top: 10px;
+    border-top: 1px solid rgba(205,214,234,.7);
+}
+
+.summary-lines strong{
+    font-weight: 900;
+    color: rgba(11,18,32,.92);
+}
+
+.summary-box{
+    margin-top: 12px;
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+}
+
+.srow{
+    display:flex;
+    gap: 10px;
+    align-items:flex-start;
+    padding: 10px 10px;
+    border-radius: 16px;
+    border: 1px solid rgba(205,214,234,.72);
+    background: rgba(255,255,255,.92);
+}
+
+.srow strong{
     display:block;
-    font-size:13px;
-}
-.payment-text span:first-child{
-    font-weight:600;
-    color:#0f172a;
-}
-.payment-text span:last-child{
-    color:#6b7280;
-}
-.payment-footer{
-    font-size:12px;
-    color:#6b7280;
-    margin-top:6px;
+    font-size: 13px;
+    letter-spacing:-.01em;
 }
 
-/* Tabla de facturas */
-.billing-table-card{
-    margin-top:26px;
+.srow span{
+    display:block;
+    margin-top: 6px;
+    color: rgba(11,18,32,.60);
+    font-size: 12.5px;
 }
-.billing-table-wrapper{
-    margin-top:10px;
-    border-radius:14px;
-    border:1px solid #e5e7eb;
-    background:#ffffff;
-    overflow:hidden;
-    box-shadow:0 10px 24px rgba(15,23,42,.08);
+
+.dot{
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    margin-top: 4px;
+    flex: 0 0 10px;
 }
-table.billing-table{
-    width:100%;
-    border-collapse:collapse;
-    font-size:13px;
+
+.dot.ok{
+    background: linear-gradient(135deg, rgba(33,82,255,.95), rgba(18,180,138,.90));
+    box-shadow: 0 0 0 6px rgba(33,82,255,.10);
 }
-table.billing-table thead{
-    background:#f9fafb;
+
+/* HELP */
+.help{
+    border: 1px solid rgba(205,214,234,.72);
+    border-radius: 22px;
+    background: rgba(255,255,255,.84);
+    box-shadow: var(--shadowB);
+    padding: 16px;
 }
-table.billing-table th,
-table.billing-table td{
-    padding:10px 14px;
-    text-align:left;
-    border-bottom:1px solid #edf1f9;
+
+.help h4{ margin: 0; font-size: 14px; }
+.help .link{ display:inline-block; margin-top: 6px; }
+
+/* Buttons (match your style) */
+.btn_light{
+    background: rgba(255,255,255,.82);
+    color: rgba(11,18,32,.88);
+    border: 1px solid rgba(205,214,234,.78);
 }
-table.billing-table th{
-    font-weight:600;
-    color:#6b7280;
+
+.btn_primary{
+    background: linear-gradient(135deg, rgba(33,82,255,.95), rgba(18,180,138,.90));
+    border: 1px solid rgba(33,82,255,.18);
+    color: #fff;
+    box-shadow: 0 14px 34px rgba(33,82,255,.16);
 }
-table.billing-table td{
-    color:#111827;
+
+.btn_full{ width:100%; }
+
+/* =========================
+   1) BACKGROUND: menos blanco, más premium
+   ========================= */
+body{
+    background:
+            radial-gradient(900px 520px at 8% -5%, rgba(33,82,255,.14), transparent 55%),
+            radial-gradient(860px 520px at 92% 0%, rgba(92,124,255,.12), transparent 55%),
+            radial-gradient(980px 600px at 55% 110%, rgba(18,180,138,.10), transparent 60%),
+            linear-gradient(180deg, #f4f7ff 0%, #eef3ff 45%, #edf1ff 100%);
 }
-table.billing-table tr:last-child td{
-    border-bottom:none;
+
+/* grid pattern (más sutil que antes) */
+body::before{
+    content:"";
+    position: fixed;
+    inset: 0;
+    pointer-events:none;
+    background-image:
+            linear-gradient(to right, rgba(11,18,32,.045) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(11,18,32,.045) 1px, transparent 1px);
+    background-size: 52px 52px;
+    opacity: .16;
 }
-.pill-invoice{
+
+/* halo más controlado */
+.bg-halo{
+    opacity: .70;
+    filter: blur(20px);
+}
+
+/* =========================
+   2) HERO: menos alto, más elegante
+   ========================= */
+.billing-hero{
+    padding: 16px 16px;           /* menos alto */
+    border-color: rgba(205,214,234,.78);
+    background: linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,255,255,.74));
+    box-shadow: 0 16px 42px rgba(15, 23, 42, .10);
+}
+
+.billing-hero h1{
+    font-size: 25px;
+}
+
+.billing-hero .sub{
+    color: rgba(11,18,32,.64);
+}
+
+/* pills con más contraste */
+.pill{
+    background: rgba(255,255,255,.86);
+    border-color: rgba(15,23,42,.12);
+    box-shadow: 0 10px 20px rgba(15,23,42,.06);
+}
+
+/* =========================
+   3) PANEL / CARDS: más profundidad, menos “plano”
+   ========================= */
+.panel{
+    background: rgba(255,255,255,.86);
+    border-color: rgba(205,214,234,.78);
+    box-shadow: 0 22px 54px rgba(15,23,42,.12);
+}
+
+.plan-card{
+    background: rgba(255,255,255,.90);
+    border-color: rgba(15,23,42,.12);
+    box-shadow: 0 14px 30px rgba(15,23,42,.07);
+}
+
+.plan-card:hover{
+    border-color: rgba(33,82,255,.26);
+    box-shadow: 0 18px 42px rgba(15,23,42,.10);
+}
+
+/* seleccionado: más “premium” sin gritar */
+.plan-card.is-selected{
+    border-color: rgba(33,82,255,.32);
+    background:
+            radial-gradient(700px 180px at 20% 0%, rgba(33,82,255,.14), transparent 60%),
+            linear-gradient(180deg, rgba(255,255,255,.94), rgba(255,255,255,.86));
+    box-shadow:
+            0 26px 60px rgba(33,82,255,.14),
+            0 16px 38px rgba(15,23,42,.10);
+}
+
+/* precios: un poco más de aire y jerarquía */
+.price{
+    padding-left: 8px;
+}
+
+.price .amount{
+    font-size: 24px;
+}
+
+.price .unit{
+    color: rgba(11,18,32,.62);
+}
+
+/* =========================
+   4) RESUMEN: que no “corte” y tenga cierre visual
+   ========================= */
+.summary{
+    background: rgba(255,255,255,.84);
+    border-color: rgba(15,23,42,.12);
+    box-shadow: 0 18px 44px rgba(15,23,42,.10);
+}
+
+.summary-lines .line{
+    color: rgba(11,18,32,.74);
+}
+
+.summary-lines .line.total strong{
+    font-size: 18px;
+}
+
+.summary-box .srow{
+    border-color: rgba(15,23,42,.11);
+    box-shadow: 0 10px 22px rgba(15,23,42,.06);
+}
+
+/* mejora: separadores más finos */
+.divider,
+.summary-lines .line.total{
+    background: none;
+    border-top: 1px solid rgba(15,23,42,.08);
+}
+
+/* =========================
+   5) FORM: inputs menos blancos, más “producto”
+   ========================= */
+.field input,
+.field select{
+    background: rgba(255,255,255,.92);
+    border-color: rgba(15,23,42,.12);
+}
+
+.field input::placeholder{
+    color: rgba(11,18,32,.40);
+}
+
+.field input:focus,
+.field select:focus{
+    border-color: rgba(33,82,255,.28);
+    box-shadow: 0 0 0 6px rgba(33,82,255,.11);
+}
+
+/* =========================
+   6) BOTONES: hover y relieve
+   ========================= */
+.btn_light{
+    background: rgba(255,255,255,.86);
+    border-color: rgba(15,23,42,.12);
+    box-shadow: 0 10px 22px rgba(15,23,42,.06);
+}
+
+.btn_light:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 14px 30px rgba(15,23,42,.08);
+}
+
+.btn_primary{
+    box-shadow: 0 18px 40px rgba(33,82,255,.18);
+}
+
+.btn_primary:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 22px 48px rgba(33,82,255,.22);
+}
+
+/* evita “saltos” por hover */
+.btn_light, .btn_primary{
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+/* =========================
+   HERO TOP: más pro + más color
+   ========================= */
+.billing-hero{
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    border: 1px solid rgba(33,82,255,.20);
+    background:
+            radial-gradient(900px 260px at 12% 0%, rgba(33,82,255,.20), transparent 60%),
+            radial-gradient(900px 260px at 88% 0%, rgba(18,180,138,.14), transparent 55%),
+            linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
+    box-shadow:
+            0 22px 60px rgba(15,23,42,.12),
+            inset 0 1px 0 rgba(255,255,255,.55);
+}
+
+/* borde degradado “premium” */
+.billing-hero::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    padding:1px;
+    border-radius: 18px;
+    background: linear-gradient(135deg,
+    rgba(33,82,255,.55),
+    rgba(92,124,255,.35),
+    rgba(18,180,138,.40)
+    );
+    -webkit-mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events:none;
+    opacity:.9;
+}
+
+/* brillo diagonal sutil */
+.billing-hero::after{
+    content:"";
+    position:absolute;
+    inset:-40% -20%;
+    background: linear-gradient(45deg,
+    transparent 40%,
+    rgba(255,255,255,.28) 50%,
+    transparent 60%
+    );
+    transform: rotate(8deg);
+    opacity:.35;
+    pointer-events:none;
+}
+
+/* Título: más presencia */
+.billing-hero h1{
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+}
+
+/* subrayado/acento bajo el título */
+.billing-hero h1 + p{
+    position: relative;
+    padding-top: 10px;
+}
+.billing-hero h1 + p::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width: 160px;
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(33,82,255,.85), rgba(18,180,138,.65));
+    box-shadow: 0 10px 22px rgba(33,82,255,.14);
+    opacity:.85;
+}
+
+/* botón “Volver”: más integrado */
+.billing-hero .btn-back,
+.billing-hero a.btn-back,
+.billing-hero .btn_light{
+    background: rgba(255,255,255,.84);
+    border: 1px solid rgba(15,23,42,.12);
+    box-shadow: 0 12px 26px rgba(15,23,42,.08);
+}
+.billing-hero .btn-back:hover,
+.billing-hero a.btn-back:hover,
+.billing-hero .btn_light:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 16px 34px rgba(15,23,42,.10);
+}
+
+/* pills: “glass” + dot de color */
+.billing-hero .pill{
+    background: rgba(255,255,255,.86);
+    border: 1px solid rgba(15,23,42,.10);
+    box-shadow: 0 10px 22px rgba(15,23,42,.06);
+    padding: 8px 10px;
+    border-radius: 999px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* dot antes del texto (sin tocar HTML) */
+.billing-hero .pill::before{
+    content:"";
+    width: 8px;
+    height: 8px;
+    border-radius: 99px;
+    background: linear-gradient(180deg, rgba(33,82,255,1), rgba(92,124,255,1));
+    box-shadow: 0 0 0 4px rgba(33,82,255,.12);
+}
+
+/* segundo pill en verde (si tienes 2-3 pills, alternamos color) */
+.billing-hero .pill:nth-of-type(2)::before{
+    background: linear-gradient(180deg, rgba(18,180,138,1), rgba(34,197,94,1));
+    box-shadow: 0 0 0 4px rgba(18,180,138,.12);
+}
+
+/* tercer pill en violeta/azul (para “Renovación”) */
+.billing-hero .pill:nth-of-type(3)::before{
+    background: linear-gradient(180deg, rgba(92,124,255,1), rgba(33,82,255,1));
+    box-shadow: 0 0 0 4px rgba(92,124,255,.12);
+}
+
+.hero-badge{
     display:inline-flex;
-    padding:3px 8px;
-    border-radius:999px;
-    font-size:11px;
-    font-weight:700;
-    background:#ecfdf5;
-    border:1px solid #bbf7d0;
-    color:#047857;
-}
-.pill-invoice.pending{
-    background:#fef9c3;
-    border-color:#fde68a;
-    color:#92400e;
-}
-.link-inline{
+    align-items:center;
+    gap:8px;
     font-size:12px;
-    color:#2152ff;
+    font-weight:700;
+    color:#0b1a36;
+    background: rgba(255,255,255,.80);
+    border: 1px solid rgba(33,82,255,.20);
+    padding: 6px 10px;
+    border-radius: 999px;
+    box-shadow: 0 12px 24px rgba(15,23,42,.07);
+}
+.hero-badge::before{
+    content:"";
+    width:10px; height:10px;
+    border-radius:99px;
+    background: linear-gradient(135deg, #2152FF, #12B48A);
+    box-shadow: 0 0 0 4px rgba(33,82,255,.12);
 }
 
-@media (max-width:640px){
-    .billing-header{
-        flex-direction:column;
-        align-items:flex-start;
-    }
-    .plan-row{
-        flex-direction:column;
-        align-items:flex-start;
-    }
+/* =========================================================
+   HOTFIX ESTABILIDAD + HOVER PLANS + HERO LAYERS
+   Pegar AL FINAL de billing.css
+   ========================================================= */
+
+/* 0) Box sizing global: evita reflows inesperados */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* 1) HERO: asegura que los pseudo-elementos no tapen el contenido */
+.billing-hero{
+    position: relative;
+    overflow: hidden;
+}
+
+/* El contenido siempre por encima del brillo/borde */
+.billing-hero > *{
+    position: relative;
+    z-index: 2;
+}
+
+/* Los decorativos siempre por detrás */
+.billing-hero::before,
+.billing-hero::after{
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* 2) PLAN CARDS: haz el label “bloque” y estable */
+.plan-card{
+    display: block;               /* crucial: label por defecto es inline */
+    width: 100%;
+    box-sizing: border-box;
+
+    /* evita cambios de tamaño visual en hover */
+    border-width: 1px !important; /* fijo */
+    outline: none;
+    will-change: transform;
+}
+
+/* 3) PLAN TOP: impedir que flex “salte” a columnas en hover */
+.plan-top{
+    display: flex;
+    flex-wrap: nowrap;            /* clave: nunca se apilen */
+    align-items: flex-start;
+    gap: 12px;
+}
+
+/* El bloque izquierdo puede encoger sin empujar al precio */
+.plan-top > div:first-child{
+    min-width: 0;                 /* clave en flex */
+    flex: 1 1 auto;
+}
+
+/* El precio nunca baja: siempre “auto” y no se encoge */
+.price{
+    flex: 0 0 auto;               /* clave */
+    white-space: nowrap;
+}
+
+/* Evita que textos largos rompan el layout */
+.desc,
+.features li{
+    overflow-wrap: anywhere;
+}
+
+/* 4) HOVER: nada de cambios que alteren ancho/alto (solo color/sombra) */
+.plan-card:hover{
+    border-width: 1px !important; /* por si en algún sitio se cambia */
+    transform: translateY(-1px);
+}
+
+/* 5) SELECCIÓN: mismo ancho/alto que hover (no reflow) */
+.plan-card.is-selected{
+    border-width: 1px !important;
+}
+
+/* 6) Si en algún sitio hay “outline” en focus/hover, que no afecte layout */
+.plan-card:focus-within{
+    outline: none;
+}
+
+/* 7) Precio: evita que cambie el tamaño del layout por subpíxeles */
+.price .amount{
+    line-height: 1;
+}
+
+/* 8) Ajuste fino: el + IVA no debe forzar salto */
+.price .unit{
+    display: inline-block;
+}
+
+/* 9) Resumen: asegurar que el total no “rompa” columnas */
+.summary-lines .line.total strong{
+    white-space: nowrap;
+}
+
+/* 10) Botones: no deben empujar el layout al hacer hover */
+.btn_light, .btn_primary{
+    will-change: transform;
+}
+
+/* =========================================================
+   FIX: Botón "Volver al dashboard" en el hero (compacto)
+   ========================================================= */
+.billing-hero__right .btn.btn_light{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;          /* evita el salto de línea */
+    padding: 10px 14px;           /* más compacto */
+    border-radius: 12px;          /* menos “tarjeta” */
+    line-height: 1;
+    font-weight: 750;
+
+    /* sombra y borde más sutiles (como antes) */
+    box-shadow: 0 10px 22px rgba(15,23,42,.06);
+    border: 1px solid rgba(15,23,42,.10);
+    background: rgba(255,255,255,.82);
+}
+
+/* Hover suave, sin inflar */
+.billing-hero__right .btn.btn_light:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(15,23,42,.08);
 }

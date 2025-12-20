@@ -267,57 +267,66 @@
             <div class="tier">
                 <span class="badge">Sandbox</span>
                 <h3>Free</h3>
-                <p class="muted">Para probar la API y desarrollo</p>
+                <p class="muted">Prueba la API con datos reales y valida resultados en un entorno de pruebas.</p>
                 <div class="price">0 €</div>
-                <ul class="list">
-                    <li>500 consultas/mes</li>
-                    <li>Rate limit bajo</li>
-                    <li>Acceso a endpoints básicos</li>
-                    <li>Sin SLA</li>
-                    <li>Sin soporte (solo docs)</li>
-                    <li>Uso no comercial / pruebas</li>
+                <ul class="tier__list">
+                    <li>Acceso al mismo motor de producción</li>
+                    <li>Datos oficiales para validar resultados</li>
+                    <li>Perfecto para pruebas técnicas y POCs</li>
+                    <li>Sin tarjeta de crédito</li>
                 </ul>
-                <a class="btn secondary" href="#beta">Crear cuenta gratis</a>
+
+                <p class="tier__note muted">
+                    Pensado para desarrollo y validación. No recomendado para uso en producción.
+                </p>
+                <a class="btn secondary" href="<?=site_url() ?>register?plan=free">Empezar gratis</a>
             </div>
 
             <!-- PLAN PRO -->
             <div class="tier">
+                <span class="badge">Recomendado</span>
                 <h3>Pro</h3>
-                <p class="muted">Para SaaS y startups en producción</p>
+                <p class="muted">El plan estándar para SaaS, ERPs y productos en producción.</p>
                 <div class="price">19 €/mes</div>
-                <ul class="list">
-                    <li>5.000 consultas / mes</li>
-                    <li>Rate limit estándar</li>
-                    <li>Acceso a endpoints principales</li>
-                    <li>Logs básicos</li>
-                    <li>Soporte por email (best effort)</li>
+                <ul class="tier__list">
+                    <li>Verificación completa y actualizada</li>
+                    <li>Tiempo real, lista para automatización</li>
+                    <li>Ideal para facturación y scoring</li>
+                    <li>Logs y control de consumo</li>
                 </ul>
-                <a class="btn secondary" href="#beta">Empezar con Pro</a>
+
+                <p class="tier__note muted">
+                    El plan estándar para SaaS, ERPs y productos en producción.
+                </p>
+                <a class="btn secondary" href="<?=site_url() ?>register?plan=pro">Empezar con Pro</a>
             </div>
 
             <!-- PLAN BUSINESS -->
             <div class="tier">
                 <h3>Business</h3>
-                <p class="muted">Para plataformas con alto volumen</p>
+                <p class="muted">Para plataformas con alto volumen y procesos críticos.</p>
                 <div class="price">49 €/mes</div>
-                <ul class="list">
-                    <li>20.000 consultas/mes</li>
-                    <li>Rate limit alto</li>
-                    <li>Acceso completo a endpoints</li>
-                    <li>Logs extendidos</li>
-                    <li>Alertas de uso</li>
-                    <li>Soporte prioritario (email)</li>
+                <ul class="tier__list">
+                    <li>Infraestructura para cargas elevadas</li>
+                    <li>Para alto volumen y procesos críticos</li>
+                    <li>SLA y alta disponibilidad</li>
+                    <li>Soporte prioritario y alertas de uso</li>
                 </ul>
-                <a class="btn secondary" href="#beta">Hablar con ventas</a>
+
+                <p class="tier__note muted">
+                    Pensado para fintech, marketplaces y plataformas críticas.
+                </p>
+                <a class="btn secondary" href="<?=site_url() ?>contact?interest=business">Empezar con Business</a>
             </div>
         </div>
+        <div class="pricing__foot">
+            <p class="pricing__hint">Cada consulta corresponde a una verificación completa de empresa. Sin costes ocultos ni llamadas parciales.</p>
 
-        <!-- ENTERPRISE -->
-        <div style="text-align:center;margin-top:32px;font-size:14px;" class="muted">
-            ¿Más de <strong>20.000 consultas/mes</strong> o requisitos especiales de SLA/compliance?
-            <br/>
-            <strong>Planes Enterprise a partir de 299 €/mes</strong>.
-            <a href="#beta">Cuéntanos tu caso y te preparamos una propuesta a medida</a>.
+            <div class="enterprise muted">
+                <span>¿Más de <strong>20.000 consultas/mes</strong> o requisitos especiales de SLA/compliance?</span>
+                <span><strong>Planes Enterprise a partir de 299 €/mes</strong>.</span>
+                <a class="enterprise__link" href="<?=site_url() ?>contact?interest=enterprise">Hablemos de tu volumen y requisitos</a>
+            </div>
         </div>
     </section>
 
