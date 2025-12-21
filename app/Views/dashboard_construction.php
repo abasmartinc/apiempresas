@@ -86,7 +86,7 @@
         <div class="container">
             <div class="dash-header">
                 <h1>Hola, <?=htmlspecialchars($user->name ?? 'Cliente') ?></h1>
-                <p>
+                <p style="margin: 0px">
                     Gracias por registrarte. Estamos afinando los últimos detalles para publicar la API en producción con garantías.
                 </p>
             </div>
@@ -114,19 +114,11 @@
                             </p>
 
                             <div class="ch-cta">
-                                <button type="button" class="btn btn-primary" id="btnNotifyMe">
-                                    Avisarme cuando esté lista
-                                </button>
                                 <a class="btn btn-ghost" href="<?=site_url() ?>documentation">
                                     Ver documentación (preview)
                                 </a>
                             </div>
 
-                            <div class="ch-foot">
-                                <div class="mini-note">
-                                    No tienes que hacer nada más: guardamos tu email y te notificaremos cuando el endpoint de producción esté disponible.
-                                </div>
-                            </div>
                         </div>
 
                         <div class="ch-side">
@@ -230,24 +222,7 @@
                         </button>
                     </section>
 
-                    <section class="support-card">
-                        <h3>Cuéntanos tu caso de uso</h3>
-                        <p>Así priorizamos los endpoints y formatos que necesitas (onboarding, KYB/KYC, scoring, facturación).</p>
 
-                        <form class="usecase-form" method="post" action="<?=site_url() ?>support/usecase">
-                            <?= csrf_field() ?>
-                            <label class="uc-label" for="uc_text">¿Qué quieres verificar primero?</label>
-                            <textarea id="uc_text" name="message" rows="4" placeholder="Ej: validar CIF + razón social + CNAE + domicilio para onboarding."></textarea>
-
-                            <button class="btn btn-primary" type="submit">
-                                Enviar
-                            </button>
-
-                            <div class="uc-footnote">
-                                También puedes escribirnos a <a href="mailto:soporte@apiempresas.es">soporte@apiempresas.es</a>.
-                            </div>
-                        </form>
-                    </section>
                 </aside>
             </div>
         </div>
@@ -256,22 +231,6 @@
     <?=view('partials/footer') ?>
 </div>
 
-<script>
-    // UI-only: confirma que el usuario ya está en lista (sin backend obligatorio).
-    (function(){
-        const btn = document.getElementById('btnNotifyMe');
-        if(!btn) return;
-
-        btn.addEventListener('click', () => {
-            btn.disabled = true;
-            btn.textContent = 'Listo: te avisaremos por email';
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.textContent = 'Avisarme cuando esté lista';
-            }, 2500);
-        });
-    })();
-</script>
 
 </body>
 </html>
