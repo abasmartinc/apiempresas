@@ -2139,7 +2139,7 @@ footer a.minor{ color:#eaf1ffcc } footer a.minor:hover{ color:#fff }
 .hint-arrow-svg--right {
     left: auto;                       /* anulamos left */
     right: 380px;  /* colócala cerca del botón Buscar */
-    top: -6px;    /* ajusta fino según tu input */
+    top: -32px;    /* ajusta fino según tu input */
     transform: scaleX(-1);            /* flip horizontal => apunta a la izquierda */
     transform-origin: 50% 50%;
     rotate: -20deg;
@@ -2835,4 +2835,8 @@ body::after,
     text-align: center;
     font-size: 13px;
     color: rgba(15, 23, 42, 0.75);
+}
+
+.faq-item{
+    padding: 0 16px;
 }
