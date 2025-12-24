@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Controllers;
+
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\CompanyModel;
@@ -19,9 +20,12 @@ class Search extends BaseController
         $this->companyModel = new CompanyModel();
     }
 
+    /**
+     * JSON API:
+     * GET /search?cif=B12345678
+     */
     public function index()
     {
-        // 1) Leer parámetro CIF
         $cif = trim((string) $this->request->getGet('cif'));
 
         if ($cif === '') {
@@ -36,10 +40,8 @@ class Search extends BaseController
         }
 
         try {
-            // 2) Llamar al modelo
             $company = $this->companyModel->getCompanyByCif($cif);
 
-            // 3) Si no se encuentra, 404
             if (!$company) {
                 return $this->respond(
                     [
@@ -51,7 +53,6 @@ class Search extends BaseController
                 );
             }
 
-            // 4) Devolver datos en formato estándar
             return $this->respond(
                 [
                     'success' => true,
@@ -71,12 +72,63 @@ class Search extends BaseController
         }
     }
 
+    /**
+     * HTML (SEO-friendly):
+     * GET /search_company?q=B12345678
+     * GET /search_company
+     *
+     * Recomendación SEO: noindex,follow (búsqueda interna)
+     */
     public function search_company()
     {
-        if (!session('logged_in')) {
-            return redirect()->to(site_url());
+        $q = trim((string) $this->request->getGet('q'));
+
+        $data = [
+            'q'           => $q,
+            'company'     => null,
+            'errorMsg'    => null,
+
+            // Variables que tu partial/head ya soporta
+            'title'       => $q ? ("Buscar empresa: {$q} | APIEmpresas.es") : 'Buscar empresa | APIEmpresas.es',
+            'excerptText' => 'Busca empresas por CIF o nombre comercial. Resultados trazables con fuentes oficiales y salida por API.',
+            'canonical'   => site_url('search_company') . ($q ? ('?q=' . rawurlencode($q)) : ''),
+            'robots'      => 'noindex,follow',
+        ];
+
+        // SSR: si viene q, intentamos buscar y renderizar HTML ya con resultado
+        if ($q !== '') {
+            try {
+                $company = $this->companyModel->getCompanyByCif($q);
+
+                if (is_object($company)) {
+                    $company = (array) $company;
+                }
+
+                if (!$company) {
+                    $data['errorMsg'] = 'No se encontró ninguna empresa con ese CIF.';
+                } else {
+                    $data['company'] = $company;
+                }
+            } catch (\Throwable $e) {
+                $data['errorMsg'] = 'Se ha producido un error interno al consultar la empresa.';
+            }
         }
-        return view('search');
+
+
+        return view('search', $data);
+    }
+
+    /**
+     * POST /search_company (form)
+     * Redirige a GET shareable: /search_company?q=...
+     */
+    public function search_company_post()
+    {
+        $q = trim((string) $this->request->getPost('q'));
+
+        $url = site_url('search_company') . ($q ? ('?q=' . rawurlencode($q)) : '');
+
+        // 303: después de POST, pasa a GET (patrón recomendado)
+        return redirect()->to($url)->setStatusCode(303);
     }
 }
-

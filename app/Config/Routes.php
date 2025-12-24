@@ -11,11 +11,12 @@ $routes->get('documentation', 'Documentation::index');
 $routes->get('enter', 'Login::index');          // muestra login
 $routes->get('logout', 'Login::logout');        // cierre de sesión
 $routes->post('login', 'Login::authenticate');        // cierre de sesión
-$routes->get('search', 'Search::index');
 $routes->get('register', 'Register::index');
 $routes->post('signup', 'Register::store');
 $routes->get('dashboard', 'Dashboard::index');
 $routes->get('search_company', 'Search::search_company');
+$routes->post('search_company', 'Search::search_company_post');
+$routes->get('search', 'Search::index');
 $routes->get('billing', 'Billing::index');
 $routes->get('billing/purchase_success', 'Billing::purchase_success');
 $routes->get('billing/manage', 'Billing::billing_manage');
