@@ -1,40 +1,13 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    // Tracking mínimo hacia CodeIgniter. Ajusta la ruta si hiciera falta.
-    window.track = window.track || (async function(name, props={}){
-        try{
-            await fetch('/events/track', {
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                credentials: 'same-origin',
-                body: JSON.stringify({
-                    name,
-                    session_id: (localStorage.getItem('ve_session_id') || (function(){
-                        const v = Math.random().toString(36).slice(2) + Date.now().toString(36);
-                        localStorage.setItem('ve_session_id', v);
-                        return v;
-                    })()),
-                    page_path: window.location.pathname + window.location.search,
-                    referer: document.referrer || null,
-                    props
-                })
-            });
-        }catch(e){ /* silencioso */ }
-    });
-
     document.addEventListener('DOMContentLoaded', () => {
-        // --- referencias ---
         const btn = document.getElementById('btnBuscar');
         const q   = document.getElementById('q');
         const out = document.getElementById('resultado');
 
-        if (!btn || !q || !out) {
-            console.warn('Faltan elementos del buscador:', { btn: !!btn, q: !!q, out: !!out });
-            return;
-        }
+        if (!btn || !q || !out) return;
 
-        // --- Render de la tarjeta ---
         function sectionRegistro(company, apiJson) {
             const statusRaw = (company.status || '').toString();
             const isActive  = statusRaw.toUpperCase() === 'ACTIVA';
@@ -90,12 +63,10 @@
 </article>`;
         }
 
-        // --- Engancha botones JSON SOLO dentro del contenedor (después de pintar) ---
         function bindJsonButtons(container) {
             const buttons = container.querySelectorAll('.btn-json-api');
-
             buttons.forEach((b) => {
-                if (b.dataset.bound === '1') return; // evita doble binding
+                if (b.dataset.bound === '1') return;
                 b.dataset.bound = '1';
 
                 b.addEventListener('click', (e) => {
@@ -112,13 +83,10 @@
             });
         }
 
-        // (Opcional) buscar con Enter
-        q.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') btn.click();
-        });
+        // Endpoint absoluto correcto (respeta subcarpeta /apiempresas)
+        const API_URL = '<?= site_url('search') ?>';
 
-        // --- Buscar: llama a API y pinta lo que venga ---
-        btn.addEventListener('click', async () => {
+        async function doSearch() {
             const v = (q.value || '').trim();
 
             if (!v) {
@@ -127,8 +95,9 @@
             }
 
             out.innerHTML = '<div class="muted">Buscando empresa en la base de datos...</div>';
+            btn.disabled = true;
 
-            const endpoint = (window.API_SEARCH_URL || 'search') + '?cif=' + encodeURIComponent(v);
+            const endpoint = API_URL + '?cif=' + encodeURIComponent(v);
 
             try {
                 const res = await fetch(endpoint, {
@@ -140,16 +109,10 @@
                 try { json = await res.json(); } catch(_) {}
 
                 if (!res.ok) {
-                    if (res.status === 404) {
-                        out.innerHTML = `<div class="muted">${(json && json.message) ? json.message : 'No se encontró ninguna empresa con ese CIF.'}</div>`;
-                        return;
-                    }
-                    if (res.status === 400) {
-                        out.innerHTML = `<div class="muted">${(json && json.message) ? json.message : 'El CIF no es válido o falta el parámetro.'}</div>`;
-                        return;
-                    }
-
-                    out.innerHTML = `<div class="muted">${(json && json.message) ? json.message : 'Error al consultar la API. Inténtalo de nuevo.'}</div>`;
+                    const msg = (json && json.message)
+                        ? json.message
+                        : (res.status === 404 ? 'No se encontró ninguna empresa con ese CIF.' : 'Error al consultar la API.');
+                    out.innerHTML = `<div class="muted">${msg}</div>`;
                     return;
                 }
 
@@ -160,21 +123,36 @@
 
                 const company = json.data || {};
                 out.innerHTML = sectionRegistro(company, json);
-
-                // Enganchar evento después de pintar
                 bindJsonButtons(out);
 
                 if (typeof track === 'function') {
                     track('search_by_cif', { cif: v });
                 }
 
-            } catch (e) {
-                console.error(e);
-                out.innerHTML = '<div class="muted">Error de conexión con la API. Revisa que el backend esté levantado.</div>';
+            } catch (err) {
+                console.error(err);
+                out.innerHTML = '<div class="muted">Error de conexión con la API.</div>';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Click
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            doSearch();
+        });
+
+        // Enter en input (sin submit, sin doble)
+        q.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                doSearch();
             }
         });
     });
 </script>
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

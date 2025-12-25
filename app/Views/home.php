@@ -90,7 +90,7 @@
 
             <div class="search-row">
                 <input class="input" id="q" placeholder="Ej. B12345678 o “Gestiones López”" aria-label="Buscar empresa por nombre o CIF" />
-                <button class="btn" id="btnBuscar" aria-label="Buscar">Validar CIF / Buscar empresa</button>
+                <button type="button" class="btn" id="btnBuscar" aria-label="Buscar">Validar CIF / Buscar empresa</button>
             </div>
 
             <div id="resultado" class="result"></div>
@@ -540,7 +540,6 @@
 
 
 <?=view('partials/footer') ?>
-<?= view('scripts') ?>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const grid = document.getElementById('home-blog-grid');

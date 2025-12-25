@@ -1,24 +1,3 @@
-// Tracking mínimo hacia CodeIgniter. Ajusta la ruta si hiciera falta.
-window.track = window.track || (async function(name, props={}){
-    try{
-        await fetch('/events/track', {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            credentials: 'same-origin',
-            body: JSON.stringify({
-                name,
-                session_id: (localStorage.getItem('ve_session_id') || (function(){
-                    const v=Math.random().toString(36).slice(2)+Date.now().toString(36);
-                    localStorage.setItem('ve_session_id', v); return v;
-                })()),
-                page_path: window.location.pathname + window.location.search,
-                referer: document.referrer || null,
-                props
-            })
-        });
-    }catch(e){ /* silencioso */ }
-});
-
 (function(){
     // --- referencias ---
     const btn = document.getElementById('btnBuscar');
