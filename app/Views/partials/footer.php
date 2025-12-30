@@ -63,7 +63,7 @@
                 <a class="minor" href="<?=site_url() ?>blog">Guías y artículos</a><br />
                 <a class="minor" href="<?=site_url() ?>search_company">Buscador</a><br />
                 <a class="minor" href="<?=site_url() ?>dcumentation">Documentación</a><br />
-                <a class="minor" href="#prices">Precios</a>
+                <a class="minor" href="#prices">Precios</a><br />
                 <a class="minor" href="#faqs">Preguntas frecuentes</a>
             </div>
             <div>
