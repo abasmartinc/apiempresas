@@ -61,10 +61,10 @@
         <nav class="desktop-only" aria-label="Principal">
             <a class="minor" href="<?= site_url() ?>dashboard">Dashboard</a>
             <span style="margin:0 12px; color:#cdd6ea">•</span>
-            <a class="minor" href="<?= site_url() ?>billing">Planes y facturación</a>
+           <!-- <a class="minor" href="<?php /*= site_url() */?>billing">Planes y facturación</a>
             <span style="margin:0 12px; color:#cdd6ea">•</span>
-            <a class="minor" href="<?= site_url() ?>usage">Consumo</a>
-            <span style="margin:0 12px; color:#cdd6ea">•</span>
+            <a class="minor" href="<?php /*= site_url() */?>usage">Consumo</a>
+            <span style="margin:0 12px; color:#cdd6ea">•</span>-->
             <a class="minor" href="<?= site_url() ?>documentation">Documentación</a>
         </nav>
 
