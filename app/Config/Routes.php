@@ -50,3 +50,5 @@ $routes->get('api/cnae/classes', 'CompanyMapV2Controller::cnaeClasses');
 $routes->get('api/cnae/subclasses', 'CompanyMapV2Controller::cnaeSubclasses');
 $routes->get('api/map/search', 'CompanyMapV2Controller::search');
 $routes->get('api/map/export', 'CompanyMapV2Controller::export');
+
+$routes->post('contact/send', 'Contact::send');

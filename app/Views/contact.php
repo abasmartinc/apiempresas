@@ -228,16 +228,16 @@
                                 <p style="margin:4px 0 0;">Parámetros, respuestas de ejemplo y códigos de error.</p>
                                 <a href="<?= site_url() ?>documentation#reference">Ver referencia →</a>
                             </div>
-                            <div class="quick-item">
+                            <!--<div class="quick-item">
                                 <strong>Estado del servicio</strong>
                                 <p style="margin:4px 0 0;">Consulta si hay incidencias activas o tareas de mantenimiento.</p>
-                                <a href="<?= site_url() ?>status">Ir al status page →</a>
+                                <a href="<?php /*= site_url() */?>status">Ir al status page →</a>
                             </div>
                             <div class="quick-item">
                                 <strong>Facturación y planes</strong>
                                 <p style="margin:4px 0 0;">Cómo cambiar de plan, límites de consumo y facturas.</p>
-                                <a href="<?= site_url() ?>billing">Ir a facturación →</a>
-                            </div>
+                                <a href="<?php /*= site_url() */?>billing">Ir a facturación →</a>
+                            </div>-->
                         </div>
                     </section>
                 </div>
@@ -256,12 +256,6 @@
                         <div class="plan-meta">
                             <div><strong>Email general:</strong><br>
                                 <a href="mailto:soporte@apiempresas.es">soporte@apiempresas.es</a>
-                            </div>
-                            <div><strong>Consultas técnicas:</strong><br>
-                                <a href="mailto:dev@apiempresas.es">dev@apiempresas.es</a>
-                            </div>
-                            <div><strong>Facturación y planes:</strong><br>
-                                <a href="mailto:billing@apiempresas.es">billing@apiempresas.es</a>
                             </div>
                         </div>
 
