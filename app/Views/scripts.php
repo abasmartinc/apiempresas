@@ -191,3 +191,60 @@
         });
     });
 </script>
+<script>
+    (function(){
+        const body = document.body;
+
+        function openModal(id){
+            const overlay = document.getElementById(id);
+            if(!overlay) return;
+
+            overlay.classList.add('active');
+            overlay.setAttribute('aria-hidden', 'false');
+            body.style.overflow = 'hidden';
+
+            const dialog = overlay.querySelector('.modal');
+            if(dialog) dialog.focus({ preventScroll: true });
+        }
+
+        function closeModal(overlay){
+            if(!overlay) return;
+
+            overlay.classList.remove('active');
+            overlay.setAttribute('aria-hidden', 'true');
+            body.style.overflow = '';
+        }
+
+        // Abrir desde links/buttons con data-open-modal="id"
+        document.addEventListener('click', (e) => {
+            const opener = e.target.closest('[data-open-modal]');
+            if(opener){
+                e.preventDefault();
+                openModal(opener.getAttribute('data-open-modal'));
+                return;
+            }
+
+            // Cerrar desde botones con data-close-modal
+            const closer = e.target.closest('[data-close-modal]');
+            if(closer){
+                e.preventDefault();
+                const overlay = closer.closest('.modal-overlay');
+                closeModal(overlay);
+                return;
+            }
+
+            // Click fuera del modal (overlay)
+            const overlay = e.target.classList && e.target.classList.contains('modal-overlay') ? e.target : null;
+            if(overlay){
+                closeModal(overlay);
+            }
+        });
+
+        // ESC para cerrar el modal activo
+        document.addEventListener('keydown', (e) => {
+            if(e.key !== 'Escape') return;
+            const active = document.querySelector('.modal-overlay.active');
+            if(active) closeModal(active);
+        });
+    })();
+</script>

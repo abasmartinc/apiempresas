@@ -2840,3 +2840,215 @@ body::after,
 .faq-item{
     padding: 0 16px;
 }
+
+/* =========================================
+   MODAL PRO PATCH v2 (ancho + header + footer fijo)
+   PÉGALO AL FINAL DEL CSS
+   ========================================= */
+
+/* Overlay igual */
+.modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    padding:22px;
+    background: rgba(14, 19, 32, .58);
+    backdrop-filter: blur(10px) saturate(1.1);
+}
+.modal-overlay.active{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+/* MODAL: más ancho y con layout que asegura footer visible */
+.modal-overlay .modal{
+    width: min(980px, calc(100vw - 44px));   /* más ancho */
+    max-width: 980px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    box-shadow: 0 30px 90px rgba(10, 15, 30, .40);
+    overflow:hidden;
+    position:relative;
+
+    /* clave: header / body / footer */
+    display:grid;
+    grid-template-rows: auto 1fr auto;
+    max-height: min(82vh, 780px);
+}
+
+/* Halo interno */
+.modal-overlay .modal::before{
+    content:"";
+    position:absolute;
+    inset:-45% -25% auto -25%;
+    height: 60%;
+    background:
+            radial-gradient(60% 80% at 18% 35%, rgba(19,58,130,.18) 0%, transparent 60%),
+            radial-gradient(60% 80% at 84% 20%, rgba(18,180,138,.15) 0%, transparent 65%);
+    filter: blur(18px);
+    pointer-events:none;
+}
+
+/* HEADER: más bonito, más “wow” */
+.modal-header{
+    position:relative;
+    padding: 20px 22px 16px;
+    background:
+            radial-gradient(120% 120% at 0% 0%, rgba(19,58,130,.12), transparent 55%),
+            radial-gradient(120% 120% at 100% 0%, rgba(18,180,138,.10), transparent 55%),
+            linear-gradient(180deg, #ffffff 0%, var(--bg1) 100%);
+    border-bottom: 1px solid var(--border);
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+}
+
+.modal-header .modal-kicker{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(19,58,130,.08);
+    border: 1px solid rgba(19,58,130,.16);
+    color: #1d2a55;
+    font-weight: 900;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    font-size: 11px;
+    margin-bottom: 10px;
+}
+
+.modal-header .modal-title{
+    margin:0;
+    font-size: 22px;
+    line-height: 1.15;
+    font-weight: 950;
+    letter-spacing: -.02em;
+    color: var(--text);
+}
+
+.modal-header .modal-sub{
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* Close button más pro */
+.modal-close{
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,.92);
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display:grid;
+    place-items:center;
+    cursor:pointer;
+    color: var(--text);
+    box-shadow: 0 12px 24px rgba(15,23,42,.10);
+    transition: transform .15s ease, box-shadow .15s ease;
+    flex: 0 0 auto;
+}
+.modal-close:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 18px 34px rgba(15,23,42,.14);
+}
+
+/* BODY: solo aquí scroll (así el footer NO desaparece) */
+.modal-body{
+    position:relative;
+    padding: 16px 22px 18px;
+    overflow:auto;
+    min-height: 0; /* clave para grid scroll correcto */
+}
+
+/* Línea sutil separadora interna (opcional) */
+.modal-body::before{
+    content:"";
+    position:sticky;
+    top:-16px;
+    display:block;
+    height: 12px;
+    background: linear-gradient(180deg, rgba(255,255,255,1), rgba(255,255,255,0));
+}
+
+/* LEGAL typography */
+.modal-legal h3{
+    margin: 16px 0 8px;
+    font-size: 14px;
+    font-weight: 950;
+    color: var(--text);
+}
+.modal-legal p{
+    margin: 0 0 12px;
+    font-size: 13.7px;
+    line-height: 1.75;
+    color: #2a3346;
+}
+.modal-legal ul{
+    margin: 8px 0 14px;
+    padding-left: 18px;
+    color: #2a3346;
+    font-size: 13.7px;
+    line-height: 1.75;
+}
+.modal-legal li{ margin: 7px 0; }
+
+/* FOOTER: SIEMPRE visible */
+.modal-footer{
+    position:relative;
+    padding: 14px 22px 18px;
+    border-top: 1px solid var(--border);
+    background: #fff;
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:10px;
+}
+
+/* Si algo lo ocultaba, esto lo fuerza */
+.modal-footer,
+.modal-footer *{
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.modal-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding: 11px 14px;
+    border-radius: 12px;
+    font-weight: 900;
+    border: 1px solid var(--border);
+    background:#fff;
+    color: var(--text);
+    cursor:pointer;
+    min-width: 110px;
+}
+
+.modal-btn.primary{
+    border:none;
+    color:#fff;
+    background: linear-gradient(90deg, var(--primary), var(--primary-2));
+    box-shadow: 0 12px 26px rgba(19,58,130,.22);
+}
+
+/* Mobile */
+@media (max-width: 640px){
+    .modal-overlay{ padding: 14px; }
+    .modal-overlay .modal{
+        width: calc(100vw - 28px);
+        border-radius: 18px;
+        max-height: 86vh;
+    }
+    .modal-header, .modal-body, .modal-footer{
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+    .modal-header .modal-title{ font-size: 20px; }
+}

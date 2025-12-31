@@ -202,8 +202,8 @@
                                     required
                             />
                             <label for="terms" style="margin:0; font-weight:400;">
-                                Acepto la <a href="/privacidad" target="_blank" rel="noopener">Política de privacidad</a>
-                                y los <a href="/terminos" target="_blank" rel="noopener">Términos de servicio</a>.
+                                Acepto la <a href="#" data-open-modal="modalPrivacy">Política de privacidad</a>
+                                y los <a href="#" data-open-modal="modalTerms">Términos de servicio</a>.
                             </label>
                         </div>
 
