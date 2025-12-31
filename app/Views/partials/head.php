@@ -108,7 +108,8 @@ $googlebot = $googlebot ?? ($robots . ',max-snippet:-1,max-image-preview:large,m
 />
 
 <!-- Styles -->
-<link rel="stylesheet" href="<?= base_url('public/css/styles.css') ?>" />
+<link rel="stylesheet" href="<?= base_url('public/css/styles.css?v=' . time()) ?>" />
+
 
 <!-- Favicons -->
 <link rel="icon" href="/favicon.ico?v=3" type="image/x-icon" />
