@@ -257,3 +257,16 @@ table.usage-table tr:last-child td{ border-bottom:none; }
         justify-content:center;
     }
 }
+
+.ve-stat-strip .ve-stat { min-width: 0; }
+.ve-stat-strip .ve-stat__value { display:block; line-height:1.2; }
+.ve-stat-strip .ve-stat--sources .ve-stat__value { white-space: nowrap; overflow: visible; }
+
+.chart-wrapper{
+    position: relative;
+    height: 260px; /* ajusta a tu gusto */
+}
+#usageChart{
+    width: 100% !important;
+    height: 100% !important;
+}

@@ -1,117 +1,106 @@
 <!doctype html>
 <html lang="es">
 <head>
-    <head>
-        <?=view('partials/head') ?>
-        <link rel="stylesheet" href="<?= base_url('public/css/usage.css') ?>" />
-    </head>
+    <?= view('partials/head') ?>
+    <link rel="stylesheet" href="<?= base_url('public/css/usage.css') ?>" />
 </head>
 <body>
 <div class="bg-halo" aria-hidden="true"></div>
 
-<header>
-    <div class="container nav">
-        <div class="brand">
-            <!-- ICONO APIEMPRESAS (check limpio, sin triángulo) -->
-            <a href="<?=site_url() ?>">
-                <svg class="ve-logo" width="32" height="32" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <!-- Degradado de marca -->
-                        <linearGradient id="ve-g" x1="10" y1="54" x2="54" y2="10" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="#2152FF"/>
-                            <stop offset=".65" stop-color="#5C7CFF"/>
-                            <stop offset="1" stop-color="#12B48A"/>
-                        </linearGradient>
-                        <!-- Halo del bloque -->
-                        <filter id="ve-cardShadow" x="-20%" y="-20%" width="140%" height="140%">
-                            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity=".20"/>
-                        </filter>
-                        <!-- Sombra suave del check (no genera triángulos) -->
-                        <filter id="ve-checkShadow" x="-30%" y="-30%" width="160%" height="160%">
-                            <feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#0B1A36" flood-opacity=".22"/>
-                        </filter>
-                        <!-- Brillo muy leve arriba-izquierda -->
-                        <radialGradient id="ve-gloss" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
-                                        gradientTransform="translate(20 16) rotate(45) scale(28)">
-                            <stop stop-color="#FFFFFF" stop-opacity=".32"/>
-                            <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
-                        </radialGradient>
-                        <!-- Aro exterior para definir borde en fondos muy claros -->
-                        <linearGradient id="ve-rim" x1="12" y1="52" x2="52" y2="12">
-                            <stop stop-color="#FFFFFF" stop-opacity=".6"/>
-                            <stop offset="1" stop-color="#FFFFFF" stop-opacity=".35"/>
-                        </linearGradient>
-                    </defs>
+<?= view('partials/header_inner') ?>
 
-                    <!-- Tarjeta con halo + brillo sutil -->
-                    <g filter="url(#ve-cardShadow)">
-                        <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#ve-g)"/>
-                        <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#ve-gloss)"/>
-                        <rect x="6.5" y="6.5" width="51" height="51" rx="13.5" fill="none" stroke="url(#ve-rim)"/>
-                    </g>
+<?php
+// ===== Helpers defensivos (array u objeto) =====
+$get = function ($src, string $key, $default = null) {
+    if (is_array($src)) return $src[$key] ?? $default;
+    if (is_object($src)) return $src->$key ?? $default;
+    return $default;
+};
 
-                    <!-- Check principal sin trazo oscuro debajo, con sombra de filtro -->
-                    <path d="M18 33 L28 43 L46 22"
-                          stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"
-                          fill="none" filter="url(#ve-checkShadow)"/>
-                </svg>
-            </a>
-            <div class="brand-text">
-                <span class="brand-name">API<span class="grad">Empresas</span>.es</span>
-                <span class="brand-tag">Verificación empresarial en segundos</span>
-            </div>
-        </div>
-        <nav class="desktop-only" aria-label="Principal">
-            <a class="minor" href="<?=site_url() ?>dashboard">Dashboard</a>
-            <span style="margin:0 12px; color:#cdd6ea">•</span>
-            <a class="minor" href="<?=site_url() ?>billing">Planes y facturación</a>
-            <span style="margin:0 12px; color:#cdd6ea">•</span>
-            <a class="minor" href="<?=site_url() ?>documentation">Documentación</a>
-            <span style="margin:0 12px; color:#cdd6ea">•</span>
-            <a class="minor" href="<?=site_url() ?>search_company">Buscador</a>
-        </nav>
-        <div class="desktop-only">
-            <?php if(!session('logged_in')){ ?>
-                <a class="btn btn_header btn_header--ghost" href="<?=site_url() ?>enter">
-                    <span>Iniciar sesión</span>
-                </a>
-            <?php } else { ?>
-                <a class="btn btn_header btn_header--ghost logout" href="<?=site_url() ?>logout">
-                    <span>Salir</span>
-                </a>
-            <?php } ?>
-        </div>
+$fmt = function ($n) {
+    return number_format((int)$n, 0, ',', '.');
+};
 
+$formatDateTime = function ($dt) {
+    if (!$dt) return null;
+    $ts = strtotime((string)$dt);
+    if (!$ts) return null;
+    return date('d/m/Y H:i', $ts);
+};
 
+// ===== Datos principales =====
+$userName = esc($get($user, 'name', ''));
+$apiKey   = $get($api_key, 'api_key', null);
 
-    </div>
-</header>
+// En tu BD:
+// api_plans: name, monthly_quota
+// user_subscriptions: status, current_period_start, current_period_end
+$planName      = $get($plan, 'name', '—');
+$monthlyQuota  = $get($plan, 'monthly_quota', null);
+
+$subStatus     = $get($plan, 'status', null);
+$periodStart   = $get($plan, 'current_period_start', null);
+$periodEnd     = $get($plan, 'current_period_end', null);
+
+$periodStartFmt = $formatDateTime($periodStart);
+$periodEndFmt   = $formatDateTime($periodEnd);
+
+// ===== Consumos =====
+$usedThisMonth = (int)($api_request_total_month ?? 0);
+$usedToday     = isset($api_request_total_today) ? (int)$api_request_total_today : null;
+
+// ===== Normalización cuota (por seguridad) =====
+$monthlyQuotaRaw = $monthlyQuota;
+
+if (is_string($monthlyQuotaRaw)) {
+    $monthlyQuotaRaw = trim($monthlyQuotaRaw);
+    $monthlyQuotaRaw = str_replace(['.', ',', ' '], '', $monthlyQuotaRaw);
+}
+
+$monthlyQuotaInt = (is_numeric($monthlyQuotaRaw) && (int)$monthlyQuotaRaw > 0)
+    ? (int)$monthlyQuotaRaw
+    : null;
+
+// ===== Cálculos cuota =====
+$percent = null;
+$remaining = null;
+
+if ($monthlyQuotaInt !== null) {
+    $percent = (int) round(($usedThisMonth / $monthlyQuotaInt) * 100);
+    $percent = max(0, min(999, $percent));
+    $remaining = max(0, $monthlyQuotaInt - $usedThisMonth);
+}
+
+$barWidth = $percent !== null ? max(0, min(100, $percent)) : 0;
+?>
 
 <main class="usage-main">
     <div class="container">
+
         <!-- CABECERA -->
         <div class="usage-header">
             <div>
                 <h1>Uso de la API</h1>
                 <p>Revisa tus consultas y controla cuánto estás consumiendo en cada periodo.</p>
             </div>
-            <form class="usage-filters">
+
+            <form class="usage-filters" method="get" action="<?= current_url() ?>">
                 <div>
                     <label for="range">Rango</label><br>
                     <select id="range" name="range">
-                        <option value="30">Últimos 30 días</option>
-                        <option value="7">Últimos 7 días</option>
-                        <option value="today">Hoy</option>
-                        <option value="custom">Personalizado…</option>
+                        <option value="30" <?= (($_GET['range'] ?? '') === '30') ? 'selected' : '' ?>>Últimos 30 días</option>
+                        <option value="7" <?= (($_GET['range'] ?? '') === '7') ? 'selected' : '' ?>>Últimos 7 días</option>
+                        <option value="today" <?= (($_GET['range'] ?? '') === 'today') ? 'selected' : '' ?>>Hoy</option>
+                        <option value="custom" <?= (($_GET['range'] ?? '') === 'custom') ? 'selected' : '' ?>>Personalizado…</option>
                     </select>
                 </div>
                 <div>
                     <label for="from">Desde</label><br>
-                    <input type="date" id="from" name="from">
+                    <input type="date" id="from" name="from" value="<?= esc($_GET['from'] ?? '') ?>">
                 </div>
                 <div>
                     <label for="to">Hasta</label><br>
-                    <input type="date" id="to" name="to">
+                    <input type="date" id="to" name="to" value="<?= esc($_GET['to'] ?? '') ?>">
                 </div>
                 <div>
                     <label>&nbsp;</label><br>
@@ -120,124 +109,143 @@
             </form>
         </div>
 
-        <!-- FRANJA DE KPIs (usa clases ve-stat-strip ya definidas en tu CSS) -->
+        <!-- FRANJA DE KPIs -->
         <div class="ve-stat-strip">
             <div class="ve-stat">
                 <div class="ve-stat__label">Consultas en este mes</div>
-                <div class="ve-stat__value">12.430</div>
+                <div class="ve-stat__value"><?= $fmt($usedThisMonth) ?></div>
             </div>
+
             <div class="ve-stat__divider"></div>
+
             <div class="ve-stat">
                 <div class="ve-stat__label">Consultas hoy</div>
-                <div class="ve-stat__value">312</div>
+                <div class="ve-stat__value"><?= $usedToday !== null ? $fmt($usedToday) : '—' ?></div>
             </div>
+
             <div class="ve-stat__divider"></div>
+
             <div class="ve-stat ve-stat--sources">
                 <div class="ve-stat__label">Porcentaje de tu límite</div>
-                <div class="ve-stat__value">62 % del plan actual</div>
+                <div class="ve-stat__value">
+                    <?php if ($monthlyQuotaInt !== null): ?>
+                        <?= (int)$percent ?>% (<?= $fmt($usedThisMonth) ?> / <?= $fmt($monthlyQuotaInt) ?>)
+                    <?php else: ?>
+                        —
+                    <?php endif; ?>
+                </div>
             </div>
+
+
         </div>
 
         <!-- LAYOUT PRINCIPAL -->
         <div class="usage-layout">
-            <!-- IZQUIERDA: gráfico + desglose -->
+            <!-- IZQUIERDA -->
             <section class="usage-card">
                 <h2>Consultas por día</h2>
                 <p>Distribución del número de consultas realizadas en el periodo seleccionado.</p>
 
                 <div class="chart-wrapper">
-                    <!-- Aquí luego montas Chart.js o similar -->
-                    <div class="chart-placeholder">
-                        (Gráfico de líneas — consultas por día)
-                    </div>
+                    <canvas id="usageChart" height="110"></canvas>
                 </div>
+
 
                 <div class="usage-table-wrapper">
                     <table class="usage-table">
                         <thead>
                         <tr>
-                            <th>Tipo de consulta</th>
-                            <th>Últimos 30 días</th>
-                            <th>Porcentaje</th>
+                            <th>Endpoint</th>
+                            <th>Este mes</th>
+                            <th>% del plan</th>
                             <th>Hoy</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr>
-                            <td>
-                                <span class="usage-pill">Ficha mercantil básica</span>
-                            </td>
-                            <td>8.920</td>
-                            <td>71%</td>
-                            <td>210</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <span class="usage-pill">Directivos &amp; administradores</span>
-                            </td>
-                            <td>2.140</td>
-                            <td>17%</td>
-                            <td>63</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <span class="usage-pill">Riesgos / incidencias</span>
-                            </td>
-                            <td>870</td>
-                            <td>7%</td>
-                            <td>24</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <span class="usage-pill">Otras (demo, sandbox)</span>
-                            </td>
-                            <td>500</td>
-                            <td>5%</td>
-                            <td>15</td>
+                            <td><span class="usage-pill">/api/v1/companies</span></td>
+                            <td><?= $fmt($usedThisMonth) ?></td>
+                            <td><?= $percent !== null ? ($percent . '%') : '—' ?></td>
+                            <td><?= $usedToday !== null ? $fmt($usedToday) : '—' ?></td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- DERECHA: límite, alertas, call to action -->
+            <!-- DERECHA -->
             <section class="usage-card">
                 <h2>Límites de tu plan</h2>
                 <p>Monitoriza cómo vas respecto al límite de consultas incluido en tu suscripción.</p>
 
                 <div class="limit-block">
                     <h3>Uso del plan actual</h3>
-                    <p style="margin-bottom:4px;">
-                        Plan <strong>Pro 50k</strong> — 50.000 consultas/mes incluidas.
+
+                    <p style="margin-bottom:6px;">
+                        Plan <strong><?= esc($planName) ?></strong>
+                        <?php if ($subStatus): ?>
+                            — <span style="opacity:.8;"><?= esc($subStatus) ?></span>
+                        <?php endif; ?>
+                        <br>
+
+                        <?php if ($periodStartFmt && $periodEndFmt): ?>
+                            <span style="opacity:.85;">Periodo: <?= esc($periodStartFmt) ?> → <?= esc($periodEndFmt) ?></span><br>
+                        <?php endif; ?>
+
+                        <?php if ($monthlyQuotaInt !== null): ?>
+                            <span><?= $fmt($monthlyQuotaInt) ?> consultas/mes incluidas.</span>
+                        <?php else: ?>
+                            <span>límite no disponible.</span>
+                        <?php endif; ?>
                     </p>
+
                     <div class="limit-bar">
-                        <div class="limit-bar-inner"></div>
+                        <div class="limit-bar-inner" style="width: <?= (int)$barWidth ?>%;"></div>
                     </div>
+
                     <div class="limit-meta">
-                        <span>31.200 usadas este mes</span>
-                        <span>Quedan 18.800 consultas</span>
+                        <span><?= $fmt($usedThisMonth) ?> usadas este mes</span>
+                        <span>
+                            <?php if ($remaining !== null): ?>
+                                Quedan <?= $fmt($remaining) ?> consultas
+                            <?php else: ?>
+                                Quedan —
+                            <?php endif; ?>
+                        </span>
                     </div>
                 </div>
 
                 <div class="limit-block" style="margin-top:14px;">
                     <h3>Alertas</h3>
                     <ul class="alert-list">
-                        <li>
-                            <span class="badge-dot"></span>
-                            <div>
-                                <strong>Has superado el 60% de tu límite mensual.</strong><br>
-                                Te avisaremos por email al pasar el 80% para que puedas ampliar antes de llegar al tope.
-                            </div>
-                        </li>
-                        <li class="info">
-                            <span class="badge-dot"></span>
-                            <div>
-                                <strong>No tienes alertas críticas.</strong><br>
-                                Si llegas al 100% de tu cuota, las nuevas consultas se cobrarán a precio por exceso.
-                            </div>
-                        </li>
+                        <?php if ($percent !== null && $percent >= 80): ?>
+                            <li>
+                                <span class="badge-dot"></span>
+                                <div>
+                                    <strong>Vas por el <?= $percent ?>% de tu cuota mensual.</strong><br>
+                                    Si sigues a este ritmo, podrías llegar al límite antes de fin de mes.
+                                </div>
+                            </li>
+                        <?php elseif ($percent !== null && $percent >= 60): ?>
+                            <li>
+                                <span class="badge-dot"></span>
+                                <div>
+                                    <strong>Has superado el 60% de tu límite mensual.</strong><br>
+                                    Te avisaremos al pasar el 80% para que puedas ampliar antes de llegar al tope.
+                                </div>
+                            </li>
+                        <?php else: ?>
+                            <li class="info">
+                                <span class="badge-dot"></span>
+                                <div>
+                                    <strong>No tienes alertas críticas.</strong><br>
+                                    Si llegas al 100% de tu cuota, las nuevas consultas se gestionarán según tu plan.
+                                </div>
+                            </li>
+                        <?php endif; ?>
                     </ul>
                 </div>
+
 
                 <div class="limit-block" style="margin-top:14px;">
                     <h3>Subir de plan</h3>
@@ -245,17 +253,69 @@
                         Si sueles estar por encima del 70–80% de tu cuota, suele salir más rentable subir al siguiente
                         plan en lugar de pagar exceso por consulta.
                     </p>
-                    <a href="<?=site_url() ?>prices" class="btn secondary" style="margin-top:6px;">
-                        Ver planes disponibles
+                    <a href="<?= site_url('billing') ?>" class="btn secondary" style="margin-top:6px;">
+                        Cambiar de plan
                     </a>
                 </div>
+
             </section>
         </div>
+
     </div>
 </main>
 
-<?=view('partials/footer') ?>
+<?= view('partials/footer') ?>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    (() => {
+        const el = document.getElementById('usageChart');
+        if (!el) return;
+
+        const labels = <?= json_encode($chart_labels ?? [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+        const values = <?= json_encode($chart_values ?? [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+
+        // Labels más legibles: "03/01"
+        const prettyLabels = labels.map(d => {
+            const parts = d.split('-'); // YYYY-MM-DD
+            return parts.length === 3 ? `${parts[2]}/${parts[1]}` : d;
+        });
+
+        new Chart(el, {
+            type: 'line',
+            data: {
+                labels: prettyLabels,
+                datasets: [{
+                    label: 'Consultas',
+                    data: values,
+                    tension: 0.35,
+                    pointRadius: 2,
+                    pointHoverRadius: 5,
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { maxTicksLimit: 10 }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
+                    }
+                }
+            }
+        });
+    })();
+</script>
 
 </body>
 </html>
-

@@ -4,24 +4,22 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class UserModel extends Model
+class ApikeysModel extends Model
 {
     protected $DBGroup       = 'default'; // asegúrate que sea el grupo correcto
-    protected $table         = 'users';
+    protected $table         = 'api_keys';
     protected $primaryKey    = 'id';
     protected $returnType    = 'object';
     protected $useSoftDeletes = false;
 
     protected $allowedFields = [
-        'name',
-        'company',
-        'email',
-        'password_hash',
+        'user_id',
+        'api_key',
         'is_active',
+        'last_used_at',
         'created_at',
         'updated_at',
-        'last_login_at',
     ];
 
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
 }

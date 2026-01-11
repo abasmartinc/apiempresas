@@ -3,14 +3,93 @@
 namespace App\Controllers;
 
 
+use App\Models\ApikeysModel;
+use App\Models\ApiRequestsModel;
+use App\Models\UserModel;
+use App\Models\UsersuscriptionsModel;
+
 class Usage extends BaseController
 {
+    /** @var UserModel */
+    protected $userModel;
+    protected $ApikeysModel;
+    protected $UsersuscriptionsModel;
+    protected $ApiRequestsModel;
+
+    public function __construct()
+    {
+        $this->userModel = new UserModel();
+        $this->ApikeysModel = new ApikeysModel();
+        $this->UsersuscriptionsModel = new UsersuscriptionsModel();
+        $this->ApiRequestsModel = new ApiRequestsModel();
+    }
     public function index()
     {
         if (!session('logged_in')) {
             return redirect()->to(site_url('dashboard'));
         }
-        return view('usage');
+
+        $userId = (int) session('user_id');
+        $user   = $this->userModel->find($userId);
+
+        $data['user']    = $user;
+        $data['api_key'] = $this->ApikeysModel->where(['user_id' => $userId, 'is_active' => 1])->first();
+        $data['plan']    = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
+
+        // KPIs
+        $data['api_request_total_month'] = $this->ApiRequestsModel->countRequestsForMonth(date('Y-m'), ['user_id' => $userId]);
+        $data['api_request_total_today'] = $this->ApiRequestsModel->countRequestsForDay(date('Y-m-d'), ['user_id' => $userId]);
+
+        // ===== RANGO para gráfico =====
+        $range = $this->request->getGet('range') ?: '30';
+
+        $from = $this->request->getGet('from');
+        $to   = $this->request->getGet('to');
+
+        if ($range === 'today') {
+            $from = date('Y-m-d');
+            $to   = date('Y-m-d');
+        } elseif ($range === '7') {
+            $from = date('Y-m-d', strtotime('-6 days'));
+            $to   = date('Y-m-d');
+        } elseif ($range === '30') {
+            $from = date('Y-m-d', strtotime('-29 days'));
+            $to   = date('Y-m-d');
+        } else {
+            // custom: si falta algo, fallback a 30
+            if (!$from || !$to) {
+                $from = date('Y-m-d', strtotime('-29 days'));
+                $to   = date('Y-m-d');
+            }
+        }
+
+        // Serie DB: solo días con requests
+        $rows = $this->ApiRequestsModel->getDailyCountsForRange($from, $to, ['user_id' => $userId]);
+
+        // Rellenar días faltantes con 0 (para una línea continua)
+        $map = [];
+        foreach ($rows as $r) {
+            $map[$r['day']] = (int)$r['total'];
+        }
+
+        $labels = [];
+        $values = [];
+
+        $cursor = strtotime($from);
+        $end    = strtotime($to);
+
+        while ($cursor <= $end) {
+            $day = date('Y-m-d', $cursor);
+            $labels[] = $day;
+            $values[] = $map[$day] ?? 0;
+            $cursor = strtotime('+1 day', $cursor);
+        }
+
+        $data['chart_labels'] = $labels; // ['2026-01-01', ...]
+        $data['chart_values'] = $values; // [0, 3, 1, ...]
+
+        return view('usage', $data);
     }
+
 }
 

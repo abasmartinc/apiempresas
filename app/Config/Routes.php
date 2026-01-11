@@ -17,9 +17,20 @@ $routes->get('dashboard', 'Dashboard::index');
 $routes->get('search_company', 'Search::search_company');
 $routes->post('search_company', 'Search::search_company_post');
 $routes->get('search', 'Search::index');
+// Billing
 $routes->get('billing', 'Billing::index');
 $routes->get('billing/purchase_success', 'Billing::purchase_success');
 $routes->get('billing/manage', 'Billing::billing_manage');
+$routes->get('billing', 'Billing::index');
+$routes->post('billing/checkout', 'Billing::checkout');
+$routes->get('billing/success', 'Billing::success'); // callback Stripe
+$routes->get('billing/cancel', 'Billing::cancel');   // cancel Stripe/PayPal
+$routes->get('billing/purchase-success', 'Billing::purchase_success');
+$routes->get('billing/manage', 'Billing::billing_manage');
+
+// PayPal return
+$routes->get('billing/paypal/return', 'Billing::paypalReturn');
+
 $routes->get('usage', 'Usage::index');
 $routes->get('prices', 'Prices::index');
 $routes->get('contact', 'Contact::index');

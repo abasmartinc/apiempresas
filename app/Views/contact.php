@@ -12,8 +12,7 @@
     <header>
         <div class="container nav">
             <div class="brand">
-                <!-- ICONO APIEMPRESAS -->
-                <a href="<?= site_url() ?>">
+                <a href="<?=site_url() ?>">
                     <svg class="ve-logo" width="32" height="32" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
                         <defs>
                             <linearGradient id="ve-g" x1="10" y1="54" x2="54" y2="10" gradientUnits="userSpaceOnUse">
@@ -57,27 +56,23 @@
             </div>
 
             <nav class="desktop-only" aria-label="Principal">
-                <a class="minor" href="<?= site_url() ?>dashboard">Dashboard</a>
+                <a class="minor" href="<?=site_url() ?>dashboard">Dashboard</a>
                 <span style="margin:0 12px; color:#cdd6ea">•</span>
-                <a class="minor" href="<?= site_url() ?>billing">Planes y facturación</a>
+                <a class="minor" href="<?=site_url() ?>documentation">Documentación</a>
                 <span style="margin:0 12px; color:#cdd6ea">•</span>
-                <a class="minor" href="<?= site_url() ?>usage">Consumo</a>
-                <span style="margin:0 12px; color:#cdd6ea">•</span>
-                <a class="minor" href="<?= site_url() ?>documentation">Documentación</a>
-                <span style="margin:0 12px; color:#cdd6ea">•</span>
-                <a class="minor" href="<?= site_url() ?>search_company">Buscador</a>
+                <a class="minor" href="<?=site_url() ?>search_company">Buscador</a>
             </nav>
 
             <div class="desktop-only">
-                <?php if (!session('logged_in')): ?>
-                    <a class="btn btn_header btn_header--ghost" href="<?= site_url() ?>enter">
+                <?php if(!session('logged_in')){ ?>
+                    <a class="btn btn_header btn_header--ghost" href="<?=site_url() ?>enter">
                         <span>Iniciar sesión</span>
                     </a>
-                <?php else: ?>
-                    <a class="btn btn_header btn_header--ghost logout" href="<?= site_url() ?>logout">
+                <?php } else { ?>
+                    <a class="btn btn_header btn_header--ghost logout" href="<?=site_url() ?>logout">
                         <span>Salir</span>
                     </a>
-                <?php endif; ?>
+                <?php } ?>
             </div>
         </div>
     </header>

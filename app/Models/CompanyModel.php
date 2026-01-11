@@ -20,7 +20,8 @@ class CompanyModel extends Model
      */
     public function getCompanyByCif(string $cif): ?array
     {
-        $cif = trim($cif);
+        $q = trim($cif);
+        if ($q === '') return null;
 
         $builder = $this->db->table($this->table . ' c');
 
@@ -35,10 +36,19 @@ class CompanyModel extends Model
             'c.estado              AS status',
         ]);
 
-        $builder->where('c.cif', $cif);
+        // (c.cif = :q:) OR (c.company_name = :q:)
+        $builder->groupStart()
+            ->where('c.cif', $q)
+            ->orWhere('c.company_name', $q)
+            ->groupEnd();
+
+        // Si hubiera duplicados por nombre, al menos devuelves 1 de forma estable.
+        // Ajusta el campo a tu PK real (id, company_id, etc.)
+        $builder->orderBy('c.id', 'DESC')->limit(1);
 
         $row = $builder->get()->getRowArray();
 
         return $row ?: null;
     }
+
 }

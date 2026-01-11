@@ -129,7 +129,7 @@
                         </div>
                     <?php endif; ?>
 
-                    <form class="auth-form" method="post" action="<?= site_url('signup') ?>">
+                    <form id="registerForm" class="auth-form" method="post" action="<?= site_url('signup') ?>">
                         <?= csrf_field() ?>
 
                         <!-- Nombre + Empresa -->
@@ -209,7 +209,7 @@
 
                         <!-- CTA + texto pequeño -->
                         <div class="auth-submit-row">
-                            <button type="submit" class="btn">
+                            <button id="registerSubmit" type="submit" class="btn">
                                 Crear cuenta gratis
                             </button>
                             <p class="auth-muted">
@@ -229,5 +229,28 @@
 
     <?=view('partials/footer') ?>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('registerForm');
+        const btn  = document.getElementById('registerSubmit');
+
+        if (!form || !btn) return;
+
+        const originalHTML = btn.innerHTML;
+
+        form.addEventListener('submit', () => {
+            // evita doble submit
+            if (btn.disabled) return;
+
+            btn.disabled = true;
+            btn.setAttribute('aria-disabled', 'true');
+
+            btn.dataset.originalHtml = originalHTML;
+            btn.innerHTML = '<span class="btn-spinner" aria-hidden="true"></span>Creando cuenta...';
+        });
+    });
+</script>
+
+
 </body>
 </html>
