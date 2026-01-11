@@ -5,19 +5,22 @@ namespace App\Controllers;
 use App\Models\UserModel;
 use App\Models\ApikeysModel;
 use App\Models\UsersuscriptionsModel;
-use CodeIgniter\HTTP\ResponseInterface;
 
 class Register extends BaseController
 {
     /** @var UserModel */
     protected $userModel;
+
+    /** @var ApikeysModel */
     protected $ApikeysModel;
+
+    /** @var UsersuscriptionsModel */
     protected $UsersuscriptionsModel;
 
     public function __construct()
     {
-        $this->userModel = new UserModel();
-        $this->ApikeysModel = new ApikeysModel();
+        $this->userModel            = new UserModel();
+        $this->ApikeysModel         = new ApikeysModel();
         $this->UsersuscriptionsModel = new UsersuscriptionsModel();
     }
 
@@ -93,56 +96,95 @@ class Register extends BaseController
                 ->with('validation', $this->validator);
         }
 
-        $email = strtolower(trim($this->request->getPost('email')));
+        $email = strtolower(trim((string) $this->request->getPost('email')));
 
         // Generar API key robusta (64 chars hex)
         $apiKey = bin2hex(random_bytes(32));
 
         $data = [
-            'name'          => trim($this->request->getPost('name')),
+            'name'          => trim((string) $this->request->getPost('name')),
             'company'       => trim((string) $this->request->getPost('company')),
             'email'         => $email,
-            'password_hash' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
+            'password_hash' => password_hash((string) $this->request->getPost('password'), PASSWORD_DEFAULT),
             'is_active'     => 1,
             'created_at'    => date('Y-m-d H:i:s'),
             'updated_at'    => date('Y-m-d H:i:s'),
         ];
 
         try {
+            // 1) Crear usuario
             $user_id = $this->userModel->insert($data);
-            if (!$user_id) {
-                return redirect()->back()->withInput()->with('validation', $this->validator)
+
+            if (! $user_id) {
+                return redirect()
+                    ->back()
+                    ->withInput()
+                    ->with('validation', $this->validator)
                     ->with('error', 'Ha ocurrido un error al crear tu cuenta. Inténtalo de nuevo.');
             }
 
-            // Insertar en la tabla api_keys
+            // 2) Crear API key
             $this->ApikeysModel->insert([
                 'user_id'    => $user_id,
-                'name'       => 'Default API Key', // Puedes personalizar este nombre
+                'name'       => 'Default API Key',
                 'api_key'    => $apiKey,
                 'is_active'  => 1,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
+            // 3) Crear suscripción (plan gratuito)
             $this->UsersuscriptionsModel->insert([
-                'user_id'    => $user_id,
-                'plan_id'    => 1, // Plan gratuito por defecto
-                'status'     => 'active',
-                'current_period_start' => date('Y-m-d H:i:s'),
-                'current_period_end'   => date('Y-m-d H:i:s', strtotime('+1 month')),
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
+                'user_id'               => $user_id,
+                'plan_id'               => 1,
+                'status'                => 'active',
+                'current_period_start'  => date('Y-m-d H:i:s'),
+                'current_period_end'    => date('Y-m-d H:i:s', strtotime('+1 month')),
+                'created_at'            => date('Y-m-d H:i:s'),
+                'updated_at'            => date('Y-m-d H:i:s'),
             ]);
 
-            // Enviar correo de notificación
+            // 4) Enviar correo (con FROM + BODY + DEBUG)
             $emailService = \Config\Services::email();
-            $emailService->setTo('papelo.amh@gmail.com');
-            $emailService->setSubject('Nuevo registro de usuario');
-            $emailService->send();
 
-            return redirect()->to(site_url('enter'))->with('message', 'Cuenta creada correctamente. Ya puedes iniciar sesión.');
+            // Forzar FROM válido (del mismo dominio del SMTP)
+            $emailService->setFrom('admin@abasmart.net', 'ABASmart');
+
+            // Destino (tu correo de notificación)
+            $emailService->setTo('papelo.amh@gmail.com');
+
+            // Opcional: responder al email del usuario registrado
+            $emailService->setReplyTo($email, $data['name']);
+
+            $emailService->setSubject('Nuevo registro de usuario');
+
+            $emailService->setMessage("
+                <h3>Nuevo registro</h3>
+                <p><b>Nombre:</b> " . esc($data['name']) . "</p>
+                <p><b>Empresa:</b> " . esc($data['company']) . "</p>
+                <p><b>Email:</b> " . esc($data['email']) . "</p>
+                <p><b>Fecha:</b> " . date('Y-m-d H:i:s') . "</p>
+                <hr>
+                <p><b>User ID:</b> " . (int) $user_id . "</p>
+            ");
+
+            $sent = $emailService->send();
+
+            if (! $sent) {
+                // Log detallado para diagnosticar SMTP/TLS/auth/headers
+                log_message('error', 'Email send failed: ' . $emailService->printDebugger(['headers', 'subject', 'body']));
+            } else {
+                log_message('info', 'Email sent OK to papelo.amh@gmail.com');
+            }
+
+            return redirect()
+                ->to(site_url('enter'))
+                ->with('message', 'Cuenta creada correctamente. Ya puedes iniciar sesión.');
         } catch (\Throwable $e) {
+
+            // Log del error real para depuración
+            log_message('error', 'Register store exception: ' . $e->getMessage());
+
             return redirect()
                 ->back()
                 ->withInput()
