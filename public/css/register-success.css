@@ -1,0 +1,307 @@
+/* ===============================
+   BASE (mismo look del login)
+   =============================== */
+
+.auth-wrapper{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-main{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:60px 0;
+}
+
+.auth-center{
+    max-width:520px;
+    margin: 0 auto;
+    width:100%;
+    position: relative;
+}
+
+.auth-card{
+    background:#ffffff;
+    border-radius:18px;
+    border:1px solid #e6ecf8;
+    box-shadow:0 18px 40px rgba(15,23,42,.12);
+    padding: 26px;
+    width:100%;
+    max-width:520px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+.auth-card h1{
+    margin:0 0 6px;
+    font-size:24px;
+    font-weight:800;
+    letter-spacing:-.02em;
+}
+
+.auth-card p{
+    margin:0 0 18px;
+    color:#4b5563;
+    font-size:14px;
+}
+
+.auth-muted{
+    font-size:13px;
+    color:#6b7280;
+    text-align:center;
+}
+
+@media (min-width: 1280px){
+    .auth-center,
+    .auth-card{
+        max-width: 480px;
+    }
+}
+
+@media (max-width:640px){
+    .auth-card{
+        padding:20px 18px 22px;
+        border-radius:16px;
+    }
+}
+
+/* Alerts */
+.auth-alert-success {
+    margin-bottom: 1.15rem;
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.65);
+    color: #10b981;
+    font-size: 0.92rem;
+}
+
+/* ===============================
+   SUCCESS PAGE (wow, profesional)
+   =============================== */
+
+.success-card{
+    text-align: left;
+}
+
+.success-icon{
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom: 12px;
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.10);
+    border: 1px solid rgba(16, 185, 129, 0.22);
+    box-shadow: 0 10px 24px rgba(16, 185, 129, 0.10);
+}
+
+.success-actions{
+    display:flex;
+    gap:10px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+}
+
+.success-actions .btn{
+    flex:1;
+    justify-content:center;
+    min-width: 160px;
+}
+
+.btn-ghost{
+    background: rgba(33, 82, 255, 0.08);
+    border: 1px solid rgba(33, 82, 255, 0.22);
+    color: #2152ff;
+}
+
+.success-foot{
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #eef2ff;
+}
+
+/* ===============================
+   CONFETTI BURST (solo success)
+   - detrás del card
+   =============================== */
+
+.aba-confetti-burst{
+    position: absolute;
+    inset: -48px;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 1;
+}
+
+.aba-confetti-burst .confetti{
+    position: absolute;
+    top: 52%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    opacity: 0.92;
+    transform-origin: center;
+    animation: confetti-burst 2.7s cubic-bezier(.16,.84,.22,1) forwards;
+    will-change: transform, opacity;
+    filter: blur(.12px);
+}
+
+@keyframes confetti-burst{
+    0%{
+        transform: translate(0, 0) scale(0.55) rotate(var(--spinBase, 0deg));
+        opacity: 0;
+    }
+    10%{ opacity: 1; }
+    60%{ opacity: 1; }
+    100%{
+        transform:
+                translate(var(--x), var(--y))
+                scale(1)
+                rotate(calc(var(--spinBase, 0deg) + 520deg));
+        opacity: 0;
+    }
+}
+
+/* Shapes “pro” */
+.aba-confetti-burst .confetti.dot{
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+}
+.aba-confetti-burst .confetti.pill{
+    width: 14px;
+    height: 6px;
+    border-radius: 999px;
+}
+.aba-confetti-burst .confetti.diamond{
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    transform: rotate(45deg);
+}
+.aba-confetti-burst .confetti.line{
+    width: 18px;
+    height: 3px;
+    border-radius: 999px;
+    opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: reduce){
+    .aba-confetti-burst{ display:none; }
+}
+
+/* ===============================
+   SUCCESS PAGE (más organizado)
+   =============================== */
+
+.success-card{
+    text-align: left;
+    padding: 26px;
+}
+
+.success-head{
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 12px;
+}
+
+.success-copy h1{
+    margin: 2px 0 6px;
+    font-size: 24px;
+    font-weight: 850;
+    letter-spacing: -.02em;
+}
+
+.success-copy p{
+    margin: 0;
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 1.55;
+    max-width: 42ch;
+}
+
+.success-icon{
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.10);
+    border: 1px solid rgba(16, 185, 129, 0.22);
+    box-shadow: 0 10px 24px rgba(16, 185, 129, 0.10);
+    flex: 0 0 auto;
+}
+
+.auth-alert-success{
+    margin: 14px 0 14px;
+    padding: 0.9rem 1rem;
+    border-radius: 12px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.40);
+    color: #0f9f76;
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+
+.success-actions{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.success-actions .btn{
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+}
+
+.btn-ghost{
+    background: rgba(33, 82, 255, 0.07);
+    border: 1px solid rgba(33, 82, 255, 0.22);
+    color: #2152ff;
+}
+
+.success-foot{
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #eef2ff;
+}
+
+.success-tip{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #6b7280;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.success-tip-dot{
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(33, 82, 255, 0.45);
+    box-shadow: 0 0 0 4px rgba(33, 82, 255, 0.10);
+    flex: 0 0 auto;
+}
+
+/* Responsive: botones en columna */
+@media (max-width: 520px){
+    .success-actions{
+        grid-template-columns: 1fr;
+    }
+    .success-copy p{
+        max-width: none;
+    }
+}

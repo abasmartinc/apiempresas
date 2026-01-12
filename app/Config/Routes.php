@@ -12,6 +12,7 @@ $routes->get('enter', 'Login::index');          // muestra login
 $routes->get('logout', 'Login::logout');        // cierre de sesión
 $routes->post('login', 'Login::authenticate');        // cierre de sesión
 $routes->get('register', 'Register::index');
+$routes->get('register_sucess', 'Register::register_sucess');
 $routes->post('signup', 'Register::store');
 $routes->get('dashboard', 'Dashboard::index');
 $routes->get('search_company', 'Search::search_company');

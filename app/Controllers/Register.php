@@ -178,7 +178,7 @@ class Register extends BaseController
             }
 
             return redirect()
-                ->to(site_url('enter'))
+                ->to(site_url('register_sucess'))
                 ->with('message', 'Cuenta creada correctamente. Ya puedes iniciar sesión.');
         } catch (\Throwable $e) {
 
@@ -191,5 +191,10 @@ class Register extends BaseController
                 ->with('validation', $this->validator)
                 ->with('error', 'Ha ocurrido un error al crear tu cuenta. Inténtalo de nuevo.');
         }
+    }
+
+    public function register_sucess()
+    {
+        return view('auth/register_success');
     }
 }
