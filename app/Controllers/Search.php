@@ -46,7 +46,6 @@ class Search extends BaseController
     {
         $req = $this->request;
 
-        // session_id estable (si no hay, lo generamos y lo persistimos)
         $sid = session()->get('sid');
         if (!$sid) {
             $sid = session_id();
@@ -56,7 +55,6 @@ class Search extends BaseController
             session()->set('sid', $sid);
         }
 
-        // user_id (ajusta según tu auth real)
         $userId = session('user_id') ?: (session('logged_in') ? (session('id') ?? null) : null);
 
         return [
@@ -73,7 +71,6 @@ class Search extends BaseController
 
     /**
      * Dedupe hash en ventana corta (absorbe doble click/reintentos)
-     * Cambia 5s si quieres más/menos.
      */
     private function buildEventHash(array $ctx, array $qInfo, string $resultStatus, int $httpStatus): string
     {
@@ -93,42 +90,44 @@ class Search extends BaseController
 
     /**
      * Inserta en company_search_logs sin romper el flujo.
-     * Requiere índice UNIQUE(event_hash) o similar si quieres dedupe real.
      */
     private function logSearch(array $payload): void
     {
         try {
             $db = Database::connect();
-            $builder = $db->table('company_search_logs');
-
-            // Si tu tabla tiene UNIQUE(event_hash), esto evita duplicados:
-            // CI4 soporta ignore(true) para generar INSERT IGNORE en MySQL.
-            $builder->ignore(true)->insert($payload);
+            $db->table('company_search_logs')->ignore(true)->insert($payload);
         } catch (\Throwable $e) {
             log_message('error', '[SEARCH] logSearch failed: ' . $e->getMessage());
         }
     }
 
     /**
-     * JSON API:
-     * GET /search?cif=B12345678
+     * JSON API (web):
+     * GET /search?q=...
+     * - Si q parece CIF => exact CIF
+     * - Si no => fuzzy por nombre (1 resultado)
+     * - Si parece CIF pero no hay => fallback a fuzzy
      */
     public function index()
     {
-        $cif = trim((string) $this->request->getGet('cif'));
+        $q = trim((string) $this->request->getGet('q'));
+        if ($q === '') {
+            // retrocompatibilidad: si te siguen llamando con ?cif=
+            $q = trim((string) $this->request->getGet('cif'));
+        }
 
         $ctx   = $this->getRequestContext();
-        $qInfo = $this->normalizeQuery($cif);
+        $qInfo = $this->normalizeQuery($q);
 
         // 1) VALIDATION ERROR
-        if ($cif === '') {
+        if ($q === '') {
             $http = ResponseInterface::HTTP_BAD_REQUEST;
 
             $this->logSearch([
                 'created_at'      => date('Y-m-d H:i:s'),
                 'user_id'         => $ctx['user_id'],
                 'session_id'      => $ctx['session_id'],
-                'channel'         => 'web', // si luego quieres distinguir api/web, lo refinamos
+                'channel'         => 'web',
                 'route'           => $ctx['route'],
                 'method'          => $ctx['method'],
                 'query_raw'       => '',
@@ -151,7 +150,7 @@ class Search extends BaseController
                 [
                     'success' => false,
                     'error'   => 'VALIDATION_ERROR',
-                    'message' => 'El parámetro "cif" es obligatorio.'
+                    'message' => 'El parámetro "q" es obligatorio.'
                 ],
                 $http
             );
@@ -159,9 +158,20 @@ class Search extends BaseController
 
         // 2) OK / NOT_FOUND / ERROR
         try {
-            $company = $this->companyModel->getCompanyByCif($cif);
+            $company = null;
 
-            // NOT FOUND
+            // A) Si parece CIF => exacto
+            if ($qInfo['type'] === 'cif') {
+                $company = $this->companyModel->getByCif($qInfo['norm']);
+            }
+
+            // B) Si no es CIF, o si CIF no encontró => fuzzy nombre (1 resultado)
+            if (!$company) {
+                $best = $this->companyModel->getBestByName($qInfo['raw']);
+                $company = is_array($best) && array_key_exists('data', $best) ? $best['data'] : $best;
+            }
+
+            // NOT FOUND (ni CIF ni fuzzy)
             if (!$company) {
                 $http = ResponseInterface::HTTP_NOT_FOUND;
 
@@ -192,7 +202,7 @@ class Search extends BaseController
                     [
                         'success' => false,
                         'error'   => 'COMPANY_NOT_FOUND',
-                        'message' => 'No se encontró ninguna empresa con ese CIF.'
+                        'message' => 'No se encontró ninguna empresa con ese CIF o nombre.'
                     ],
                     $http
                 );
@@ -216,7 +226,7 @@ class Search extends BaseController
                 'result_status'   => 'ok',
                 'http_status'     => $http,
                 'result_count'    => 1,
-                'company_cif'     => (string)($companyArr['cif'] ?? $companyArr['nif'] ?? $qInfo['norm']),
+                'company_cif'     => (string)($companyArr['cif'] ?? null),
                 'company_name'    => (string)($companyArr['name'] ?? null),
                 'ip'              => $ctx['ip'],
                 'user_agent'      => $ctx['user_agent'],
@@ -229,7 +239,7 @@ class Search extends BaseController
             return $this->respond(
                 [
                     'success' => true,
-                    'data'    => $company,
+                    'data'    => $companyArr,
                 ],
                 $http
             );
@@ -271,7 +281,7 @@ class Search extends BaseController
         }
     }
 
-    // --- Tus métodos HTML los dejo igual ---
+    // --- HTML (web) ---
     public function search_company()
     {
         $q = trim((string) $this->request->getGet('q'));
@@ -287,12 +297,27 @@ class Search extends BaseController
         ];
 
         if ($q !== '') {
-            try {
-                $company = $this->companyModel->getCompanyByCif($q);
-                if (is_object($company)) $company = (array) $company;
+            $qInfo = $this->normalizeQuery($q);
 
-                if (!$company) $data['errorMsg'] = 'No se encontró ninguna empresa con ese CIF.';
-                else $data['company'] = $company;
+            try {
+                $company = null;
+
+                // Si parece CIF => exacto
+                if ($qInfo['type'] === 'cif') {
+                    $company = $this->companyModel->getByCif($qInfo['norm']);
+                }
+
+                // Si no hay => fuzzy nombre
+                if (!$company) {
+                    $best = $this->companyModel->getBestByName($qInfo['raw']);
+                    $company = is_array($best) && array_key_exists('data', $best) ? $best['data'] : $best;
+                }
+
+                if (!$company) {
+                    $data['errorMsg'] = 'No se encontró ninguna empresa con ese CIF o nombre.';
+                } else {
+                    $data['company'] = is_object($company) ? (array) $company : (array) $company;
+                }
 
             } catch (\Throwable $e) {
                 $data['errorMsg'] = 'Se ha producido un error interno al consultar la empresa.';
