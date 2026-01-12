@@ -8,6 +8,7 @@
 <body>
 <div class="bg-halo" aria-hidden="true"></div>
 
+
 <div class="auth-wrapper">
     <!-- HEADER -->
     <header>
@@ -62,8 +63,13 @@
     </header>
 
     <!-- MAIN -->
-    <main class="auth-main">
-        <div class="container auth-center">
+    <main class="auth-main ">
+        <div class="container auth-center ">
+            <?php $showConfetti = (bool) session('message'); ?>
+
+            <?php if ($showConfetti or true): ?>
+                <div class="aba-confetti-burst" aria-hidden="true"></div>
+            <?php endif; ?>
             <div class="auth-card">
                 <h1>Iniciar sesión</h1>
                 <p>Accede a tu panel para ver tu API key, consumo y documentación.</p>
@@ -81,7 +87,7 @@
                 <form class="auth-form" method="post" action="<?=site_url() ?>login">
                     <?= csrf_field() ?>
 
-                    <div>
+                    <div class="">
                         <label for="email">Correo electrónico</label>
                         <input
                                 id="email"
@@ -137,6 +143,85 @@
         }
     });
 </script>
+<script>
+    (function () {
+        const container = document.querySelector('.aba-confetti-burst');
+        if (!container) return;
+
+        // Paleta “pro”
+        const COLORS = ['#2152FF', '#5C7CFF', '#12B48A'];
+
+        // Shapes más serias
+        const SHAPES = ['pill', 'diamond', 'line', 'dot'];
+        const COUNT  = 48; // un poco menos = más “premium”
+
+        for (let i = 0; i < COUNT; i++) {
+            const el = document.createElement('span');
+            const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+            el.className = `confetti ${shape}`;
+
+            // Color sólido (sin símbolos)
+            el.style.background = COLORS[Math.floor(Math.random() * COLORS.length)];
+
+            // Tamaño por forma (controlado, pro)
+            if (shape === 'dot') {
+                const s = 5 + Math.random() * 3;
+                el.style.width = `${s}px`;
+                el.style.height = `${s}px`;
+                el.style.borderRadius = '999px';
+                el.style.setProperty('--spinBase', '0deg');
+            } else if (shape === 'pill') {
+                const w = 12 + Math.random() * 10;
+                const h = 5 + Math.random() * 3;
+                el.style.width = `${w}px`;
+                el.style.height = `${h}px`;
+                el.style.borderRadius = '999px';
+                el.style.setProperty('--spinBase', `${Math.floor(Math.random() * 180)}deg`);
+            } else if (shape === 'line') {
+                const w = 14 + Math.random() * 14;
+                const h = 3 + Math.random() * 2;
+                el.style.width = `${w}px`;
+                el.style.height = `${h}px`;
+                el.style.borderRadius = '999px';
+                el.style.opacity = '0.85';
+                el.style.setProperty('--spinBase', `${Math.floor(Math.random() * 180)}deg`);
+            } else if (shape === 'diamond') {
+                const s = 8 + Math.random() * 6;
+                el.style.width = `${s}px`;
+                el.style.height = `${s}px`;
+                el.style.borderRadius = '3px';
+                // Rombo: rotación base fija a 45deg + variación ligera
+                el.style.setProperty('--spinBase', `${45 + Math.floor(Math.random() * 60) - 30}deg`);
+            }
+
+            // Micro dispersión en el origen (tubo detrás)
+            el.style.transform = `translate(${(-22 + Math.random() * 44).toFixed(1)}px, ${(-14 + Math.random() * 28).toFixed(1)}px)`;
+
+            // Dirección mayormente hacia ARRIBA
+            const angle = (-Math.PI / 2) + (Math.random() - 0.5) * (Math.PI / 1.35);
+
+            // Distancia
+            const distance = 210 + Math.random() * 230;
+
+            const x = Math.cos(angle) * distance;
+            const y = Math.sin(angle) * distance;
+
+            el.style.setProperty('--x', `${x.toFixed(1)}px`);
+            el.style.setProperty('--y', `${y.toFixed(1)}px`);
+
+            // Timing
+            el.style.animationDelay = `${(Math.random() * 0.22).toFixed(3)}s`;
+
+            container.appendChild(el);
+        }
+
+        setTimeout(() => {
+            container.innerHTML = '';
+        }, 3000);
+    })();
+</script>
+
+
 
 </body>
 </html>

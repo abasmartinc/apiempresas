@@ -43,7 +43,8 @@ $routes->get('get-posts-grid', 'Blog::get_posts_grid');
 
 // ----------- API ----------- //
 $routes->group('', ['filter' => 'apikey'], static function($routes) {
-    $routes->get('api/v1/companies', 'Api\V1\Companies::index');
+    $routes->get('api/v1/companies', 'Api\V1\CompaniesByCif::index');
+    $routes->get('api/v1/companies/search', 'Api\V1\CompaniesSearch::index');
 });
 // ----------- API ----------- //
 

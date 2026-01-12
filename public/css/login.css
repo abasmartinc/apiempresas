@@ -133,3 +133,114 @@
     opacity: 0.7;
     cursor: not-allowed;
 }
+/* ===============================
+   CONFETTI BURST (LOGIN SUCCESS)
+   - Sale desde detrás del card
+   - Dirección mayormente hacia arriba
+   =============================== */
+
+.auth-center{
+    position: relative;
+}
+
+/* El burst vive detrás del card */
+.aba-confetti-burst{
+    position: absolute;
+    inset: -40px;              /* un poco más grande que el área del card */
+    pointer-events: none;
+    overflow: visible;
+    z-index: 1;                /* detrás del card */
+}
+
+/* Card por encima del burst */
+.auth-card{
+    position: relative;
+    z-index: 2;
+}
+
+.aba-confetti-burst .confetti{
+    position: absolute;
+    top: 52%;                  /* origen “detrás” (ligeramente bajo el centro) */
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    opacity: 0.92;
+    transform-origin: center;
+    animation: confetti-burst 2.6s cubic-bezier(.16,.84,.22,1) forwards;
+    will-change: transform, opacity;
+    filter: blur(.12px);
+}
+
+/* Shapes */
+.aba-confetti-burst .confetti.circle{ border-radius: 50%; }
+
+.aba-confetti-burst .confetti.rect{
+    width: 10px;
+    height: 4px;
+    border-radius: 2px;
+}
+
+.aba-confetti-burst .confetti.check{
+    width: auto;
+    height: auto;
+    font-weight: 800;
+    line-height: 1;
+    filter: none;
+}
+
+/* Animación más lenta que tu ejemplo, y con “hold” de opacidad */
+@keyframes confetti-burst{
+    0%{
+        transform: translate(0, 0) scale(0.55) rotate(var(--spinBase, 0deg));
+        opacity: 0;
+    }
+    10%{ opacity: 1; }
+    60%{ opacity: 1; }
+    100%{
+        transform:
+                translate(var(--x), var(--y))
+                scale(1)
+                rotate(calc(var(--spinBase, 0deg) + 520deg));
+        opacity: 0;
+    }
+}
+
+
+/* Accesibilidad */
+@media (prefers-reduced-motion: reduce){
+    .aba-confetti-burst{ display:none; }
+}
+
+/* Shapes (más pro) */
+.aba-confetti-burst .confetti.dot{
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+}
+
+.aba-confetti-burst .confetti.pill{
+    width: 14px;
+    height: 6px;
+    border-radius: 999px;
+}
+
+.aba-confetti-burst .confetti.diamond{
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    transform: rotate(45deg); /* rombo */
+}
+
+.aba-confetti-burst .confetti.line{
+    width: 18px;
+    height: 3px;
+    border-radius: 999px;
+    opacity: 0.85;
+}
+
+.aba-confetti-burst .confetti.diamond{
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+}
+

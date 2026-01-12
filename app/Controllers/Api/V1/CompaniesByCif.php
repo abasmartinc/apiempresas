@@ -7,7 +7,7 @@ use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\CompanyModel;
 
-class Companies extends ResourceController
+class CompaniesByCif extends ResourceController
 {
     use ResponseTrait;
 
@@ -23,7 +23,6 @@ class Companies extends ResourceController
 
     public function index()
     {
-        // 1) Leer parámetro CIF
         $cif = trim((string) $this->request->getGet('cif'));
 
         if ($cif === '') {
@@ -37,11 +36,23 @@ class Companies extends ResourceController
             );
         }
 
-        try {
-            // 2) Llamar al modelo
-            $company = $this->companyModel->getCompanyByCif($cif);
+        // Cache interno por CIF (24h)
+        $cacheKey = 'company_by_cif_' . md5(mb_strtolower($cif, 'UTF-8'));
+        $cached = cache($cacheKey);
 
-            // 3) Si no se encuentra, 404
+        if (is_array($cached) && !empty($cached)) {
+            return $this->respond(
+                [
+                    'success' => true,
+                    'data'    => $cached,
+                ],
+                ResponseInterface::HTTP_OK
+            );
+        }
+
+        try {
+            $company = $this->companyModel->getByCif($cif);
+
             if (!$company) {
                 return $this->respond(
                     [
@@ -53,7 +64,9 @@ class Companies extends ResourceController
                 );
             }
 
-            // 4) Devolver datos en formato estándar
+            // Guardar SOLO data en cache
+            cache()->save($cacheKey, $company, 86400); // 24h
+
             return $this->respond(
                 [
                     'success' => true,
@@ -62,8 +75,7 @@ class Companies extends ResourceController
                 ResponseInterface::HTTP_OK
             );
         } catch (\Throwable $e) {
-            // Loguear si quieres, y devolver error genérico
-            log_message('error', '[Companies::index] ' . $e->getMessage());
+            log_message('error', '[CompaniesByCif::index] ' . $e->getMessage());
 
             return $this->respond(
                 [
