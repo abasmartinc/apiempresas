@@ -57,7 +57,7 @@ class Sitemap extends Controller
         // Obtener lote de empresas
         // Solo necesitamos CIF y Nombre para generar la URL
         $companies = $model->builder()
-            ->select('cif, company_name as name, updated_at') // Asumimos updated_at existe, si no, quitarlo
+            ->select('cif, company_name as name') 
             ->orderBy('id', 'ASC') // Orden consistente
             ->limit($this->perPage, $offset)
             ->get()
@@ -78,10 +78,8 @@ class Sitemap extends Controller
             // URL: /CIF-slug
             $loc = site_url($cif . ($slug ? ('-' . $slug) : ''));
             
-            // Lastmod: si hay updated_at, usarlo, si no, hoy (o omitir)
-            $lastmod = !empty($company['updated_at']) 
-                ? date('c', strtotime($company['updated_at'])) 
-                : date('c'); // Fallback a fecha actual
+            // Lastmod: al no tener fecha de modificación fiable, usamos el inicio del mes o hoy
+            $lastmod = date('c');
 
             $xml .= '<url>';
             $xml .= '<loc>' . $loc . '</loc>';
