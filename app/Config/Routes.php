@@ -65,3 +65,11 @@ $routes->get('api/map/search', 'CompanyMapV2Controller::search');
 $routes->get('api/map/export', 'CompanyMapV2Controller::export');
 
 $routes->post('contact/send', 'Contact::send');
+
+// Sitemap
+$routes->get('sitemap.xml', 'Sitemap::index');
+$routes->get('sitemap-companies-(:num).xml', 'Sitemap::companies/$1');
+
+// Company SEO Pages (Regex: Letter + 7 Digits + Char + optional slug)
+// Must be last to avoid conflicts
+$routes->get('([a-zA-Z][0-9]{7}[a-zA-Z0-9].*)', 'Company::show/$1');
