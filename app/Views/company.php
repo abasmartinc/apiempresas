@@ -81,6 +81,15 @@
 
 <main style="padding:40px 0 70px;">
     <section class="container search-section">
+        <!-- Breadcrumbs HTML -->
+        <nav aria-label="Breadcrumb" class="breadcrumb" style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
+            <a href="<?= site_url() ?>" style="color: inherit; text-decoration: none;">Inicio</a>
+            <span style="margin: 0 0.5rem;">/</span>
+            <a href="<?= site_url('search_company') ?>" style="color: inherit; text-decoration: none;">Buscador</a>
+            <span style="margin: 0 0.5rem;">/</span>
+            <span aria-current="page"><?= esc($company['name'] ?? 'Empresa') ?></span>
+        </nav>
+
         <div class="search-card">
             
             <div class="result">
@@ -95,6 +104,49 @@
 
                     $jsonForCode = ['success' => true, 'data' => $company];
                     $jsonPretty  = json_encode($jsonForCode, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                    
+                    // Schema.org Data
+                    $schemaOrg = [
+                        "@context" => "https://schema.org",
+                        "@graph" => [
+                            [
+                                "@type" => "Organization",
+                                "@id" => $canonical . "#organization",
+                                "name" => $company['name'] ?? '',
+                                "taxID" => $company['cif'] ?? $company['nif'] ?? '',
+                                "url" => $canonical,
+                                "address" => [
+                                    "@type" => "PostalAddress",
+                                    "addressRegion" => $company['province'] ?? $company['provincia'] ?? ''
+                                ],
+                                "foundingDate" => $company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '',
+                                "description" => $meta_description ?? ''
+                            ],
+                            [
+                                "@type" => "BreadcrumbList",
+                                "itemListElement" => [
+                                    [
+                                        "@type" => "ListItem",
+                                        "position" => 1,
+                                        "name" => "Inicio",
+                                        "item" => site_url()
+                                    ],
+                                    [
+                                        "@type" => "ListItem",
+                                        "position" => 2,
+                                        "name" => "Buscador",
+                                        "item" => site_url('search_company')
+                                    ],
+                                    [
+                                        "@type" => "ListItem",
+                                        "position" => 3,
+                                        "name" => $company['name'] ?? 'Empresa',
+                                        "item" => $canonical
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ];
                 ?>
                 <article class="company-card">
                     <header class="company-card__header">
@@ -127,11 +179,35 @@
 
                     <pre class="company-card__json is-hidden" id="jsonBlock"><code><?= esc($jsonPretty) ?></code></pre>
                 </article>
+                
+                <!-- Schema.org JSON-LD -->
+                <script type="application/ld+json">
+                    <?= json_encode($schemaOrg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
+                </script>
             </div>
             
             <div style="margin-top: 2rem; text-align: center;">
                 <a href="<?= site_url('search_company') ?>" class="minor">← Volver al buscador</a>
             </div>
+
+            <?php if (!empty($related)): ?>
+            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: #444;">Empresas relacionadas</h3>
+                <div style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
+                    <?php foreach ($related as $rel): 
+                        $relSlug = url_title($rel['name'] ?? '', '-', true);
+                        $relUrl  = site_url(($rel['cif'] ?? '') . ($relSlug ? ('-' . $relSlug) : ''));
+                    ?>
+                    <a href="<?= esc($relUrl) ?>" style="text-decoration: none; color: inherit; display: block; padding: 1rem; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; transition: all 0.2s;" onmouseover="this.style.borderColor='#2152FF'" onmouseout="this.style.borderColor='#e5e7eb'">
+                        <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 0.25rem; color: #111; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= esc($rel['name'] ?? 'Empresa') ?></div>
+                        <div style="font-size: 0.8rem; color: #666;">
+                            <?= esc($rel['province'] ?? '-') ?>
+                        </div>
+                    </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
 
         </div>
     </section>

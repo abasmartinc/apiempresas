@@ -230,4 +230,52 @@ class CompanyModel extends Model
 
         return ($pct * 0.75) + ($levScore * 0.25);
     }
+
+    public function getRelated(?string $cnae, ?string $province, string $excludeCif, int $limit = 5): array
+    {
+        $cnae = trim((string)$cnae);
+        $province = trim((string)$province);
+        
+        if ($cnae === '' && $province === '') {
+            return [];
+        }
+
+        $builder = $this->builder();
+        $builder->select(implode(', ', $this->selectFields));
+        $builder->where('cif !=', $excludeCif);
+        
+        // Prioridad: Mismo CNAE
+        if ($cnae !== '') {
+            $builder->where('cnae_code', $cnae);
+        } 
+        // Si no hay CNAE, usar provincia
+        elseif ($province !== '') {
+            $builder->where('registro_mercantil', $province);
+        }
+
+        $builder->orderBy('id', 'RANDOM'); // O por fecha si es muy lento
+        $builder->limit($limit);
+
+        $results = $builder->get()->getResultArray();
+
+        // Si no encontramos suficientes por CNAE, rellenar con Provincia (si tenemos provincia)
+        if (count($results) < $limit && $cnae !== '' && $province !== '') {
+            $needed = $limit - count($results);
+            
+            // Nota: selectFields NO incluye ID por defecto, así que mejor excluimos por CIF que sí está
+            $excludeCifs = array_column($results, 'cif');
+            $excludeCifs[] = $excludeCif;
+
+            $builder2 = $this->builder();
+            $builder2->select(implode(', ', $this->selectFields));
+            $builder2->whereNotIn('cif', $excludeCifs);
+            $builder2->where('registro_mercantil', $province);
+            $builder2->limit($needed);
+            
+            $more = $builder2->get()->getResultArray();
+            $results = array_merge($results, $more);
+        }
+
+        return $results;
+    }
 }

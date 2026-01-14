@@ -50,9 +50,15 @@ class Company extends BaseController
         // Prepare data for view
         $data = [
             'company' => $company,
-            'title' => "{$name} - CIF {$cif} | APIEmpresas.es",
+            'title'   => "{$name} - CIF {$cif} | APIEmpresas.es",
             'meta_description' => "Consulte la ficha de {$name} con CIF {$cif}. Dirección, CNAE, objeto social y más datos registrales en APIEmpresas.es.",
             'canonical' => site_url($expectedSegment),
+            'related'   => $this->companyModel->getRelated(
+                $company['cnae'] ?? null,
+                $company['province'] ?? null,
+                $cif,
+                5
+            ),
         ];
 
         return view('company', $data);
