@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <?= view('partials/head', ['title' => $title]) ?>
+</head>
+<body>
+<div class="bg-halo" aria-hidden="true"></div>
+
+<header>
+    <div class="container nav">
+        <div class="brand">
+            <a href="<?= site_url() ?>">
+                <span class="brand-name">API<span class="grad">Empresas</span> Admin</span>
+            </a>
+        </div>
+        <div class="desktop-only">
+            <a class="btn btn_header btn_header--ghost" href="<?= site_url('logout') ?>">Salir</a>
+        </div>
+    </div>
+</header>
+
+<main class="container" style="padding: 40px 0;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 class="title">Usuarios Registrados</h1>
+        <div style="display: flex; gap: 10px;">
+            <a href="<?= site_url('admin/users/create') ?>" class="btn">Nuevo Usuario</a>
+            <a href="<?= site_url('dashboard') ?>" class="btn ghost">Volver al Dashboard</a>
+        </div>
+    </div>
+
+    <?php if (session()->getFlashdata('message')): ?>
+        <div style="background: #dcfce7; color: #166534; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #bbf7d0;">
+            <?= session()->getFlashdata('message') ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')): ?>
+        <div style="background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #fecaca;">
+            <?= session()->getFlashdata('error') ?>
+        </div>
+    <?php endif; ?>
+
+    <div class="card" style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+            <thead>
+                <tr style="border-bottom: 2px solid #f1f5f9; text-align: left;">
+                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">ID</th>
+                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Nombre</th>
+                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Email</th>
+                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Estado</th>
+                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($users as $user): ?>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 12px; font-weight: 600;">#<?= $user->id ?></td>
+                    <td style="padding: 12px;">
+                        <div style="font-weight: 600;"><?= esc($user->name) ?></div>
+                        <div style="font-size: 0.8rem; color: #64748b;"><?= esc($user->company ?: '-') ?></div>
+                    </td>
+                    <td style="padding: 12px; color: #475569;"><?= esc($user->email) ?></td>
+                    <td style="padding: 12px;">
+                        <?php if ($user->is_admin): ?>
+                            <span class="pill" style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; font-size: 0.7rem;">Admin</span>
+                        <?php endif; ?>
+                        <?php if ($user->is_active): ?>
+                            <span class="pill estado--activa" style="font-size: 0.7rem;">Activo</span>
+                        <?php else: ?>
+                            <span class="pill estado--inactiva" style="font-size: 0.7rem;">Inactivo</span>
+                        <?php endif; ?>
+                    </td>
+                    <td style="padding: 12px;">
+                        <div style="display: flex; gap: 5px;">
+                            <a href="<?= site_url('admin/users/email/' . $user->id) ?>" class="btn secondary" style="padding: 4px 8px; font-size: 0.75rem;" title="Enviar Email">✉️</a>
+                            <a href="<?= site_url('admin/users/edit/' . $user->id) ?>" class="btn ghost" style="padding: 4px 8px; font-size: 0.75rem;" title="Editar">✏️</a>
+                            <a href="<?= site_url('admin/users/delete/' . $user->id) ?>" class="btn ghost" style="padding: 4px 8px; font-size: 0.75rem; color: #ef4444; border-color: #fee2e2;" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar este usuario?')">🗑️</a>
+                        </div>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <?= $pager->links('default', 'admin_full') ?>
+    </div>
+</main>
+
+<?= view('partials/footer') ?>
+</body>
+</html>

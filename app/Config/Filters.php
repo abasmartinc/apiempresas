@@ -37,6 +37,7 @@ class Filters extends BaseFilters
         'performance'   => PerformanceMetrics::class,
         'dbgroup'       => DbGroupFilter::class,
         'apikey'        => \App\Filters\ApiKeyFilter::class,
+        'admin'         => \App\Filters\AdminFilter::class,
     ];
 
     /**

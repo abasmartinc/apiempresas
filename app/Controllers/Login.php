@@ -97,6 +97,7 @@ class Login extends BaseController
             'user_id'    => $user->id,
             'user_email' => $user->email,
             'user_name'  => $user->name ?? '',
+            'is_admin'   => $user->is_admin ?? 0,
             'logged_in'  => true,
         ]);
 

@@ -66,6 +66,57 @@ $routes->get('api/map/export', 'CompanyMapV2Controller::export');
 
 $routes->post('contact/send', 'Contact::send');
 
+// Admin Routes
+$routes->group('admin', ['filter' => 'admin'], function($routes) {
+    $routes->get('dashboard', 'Admin\Dashboard::index');
+    $routes->get('users', 'Admin\Dashboard::index');
+    $routes->get('users/create', 'Admin\Dashboard::create');
+    $routes->post('users/store', 'Admin\Dashboard::store');
+    $routes->get('users/edit/(:num)', 'Admin\Dashboard::edit/$1');
+    $routes->post('users/update', 'Admin\Dashboard::update');
+    $routes->get('users/delete/(:num)', 'Admin\Dashboard::delete/$1');
+    $routes->get('users/email/(:num)', 'Admin\Dashboard::compose/$1');
+    $routes->post('users/send', 'Admin\Dashboard::send');
+    $routes->get('logs', 'Admin\Dashboard::logs');
+    $routes->get('api-requests', 'Admin\Dashboard::api_requests');
+    $routes->get('usage-daily', 'Admin\Dashboard::usage_daily');
+    
+    // Companies CRUD
+    $routes->get('companies', 'Admin\Dashboard::companies');
+    $routes->get('companies/create', 'Admin\Dashboard::company_create');
+    $routes->post('companies/store', 'Admin\Dashboard::company_store');
+    $routes->get('companies/edit/(:num)', 'Admin\Dashboard::company_edit/$1');
+    $routes->post('companies/update', 'Admin\Dashboard::company_update');
+    $routes->get('companies/delete/(:num)', 'Admin\Dashboard::company_delete/$1');
+
+    // Plans CRUD
+    $routes->get('plans', 'Admin\Dashboard::plans');
+    $routes->get('plans/create', 'Admin\Dashboard::plan_create');
+    $routes->post('plans/store', 'Admin\Dashboard::plan_store');
+    $routes->get('plans/edit/(:num)', 'Admin\Dashboard::plan_edit/$1');
+    $routes->post('plans/update', 'Admin\Dashboard::plan_update');
+    $routes->get('plans/delete/(:num)', 'Admin\Dashboard::plan_delete/$1');
+
+    // API Keys CRUD
+    $routes->get('api-keys', 'Admin\Dashboard::api_keys');
+    $routes->get('api-keys/create', 'Admin\Dashboard::api_key_create');
+    $routes->post('api-keys/store', 'Admin\Dashboard::api_key_store');
+    $routes->get('api-keys/edit/(:num)', 'Admin\Dashboard::api_key_edit/$1');
+    $routes->post('api-keys/update', 'Admin\Dashboard::api_key_update');
+    $routes->get('api-keys/delete/(:num)', 'Admin\Dashboard::api_key_delete/$1');
+
+    // Subscriptions CRUD
+    $routes->get('subscriptions', 'Admin\Dashboard::subscriptions');
+    $routes->get('subscriptions/create', 'Admin\Dashboard::subscription_create');
+    $routes->post('subscriptions/store', 'Admin\Dashboard::subscription_store');
+    $routes->get('subscriptions/edit/(:num)', 'Admin\Dashboard::subscription_edit/$1');
+    $routes->post('subscriptions/update', 'Admin\Dashboard::subscription_update');
+    $routes->get('subscriptions/delete/(:num)', 'Admin\Dashboard::subscription_delete/$1');
+
+    // Email Logs
+    $routes->get('email-logs', 'Admin\Dashboard::email_logs');
+});
+
 // Sitemap
 $routes->get('sitemap.xml', 'Sitemap::index');
 $routes->get('sitemap-companies-(:num).xml', 'Sitemap::companies/$1');

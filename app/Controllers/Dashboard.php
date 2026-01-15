@@ -37,6 +37,12 @@ class Dashboard extends BaseController
         $data['api_key'] = $this->ApikeysModel->where(['user_id' => $userId, 'is_active' => 1])->first();
         $data['plan'] = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
         $data['api_request_total_month'] = $this->ApiRequestsModel->countRequestsForMonth(date('Y-m'), ['user_id' => $userId]);
+
+        if (session('is_admin')) {
+            $data['title'] = 'Panel de Administración';
+            return view('admin/dashboard', $data);
+        }
+
         return view('dashboard_construction', $data);
     }
 }
