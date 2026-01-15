@@ -105,6 +105,28 @@
                     $jsonForCode = ['success' => true, 'data' => $company];
                     $jsonPretty  = json_encode($jsonForCode, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
                     
+                    // --- AUTO-GENERATED FAQS ---
+                    $companyName = $company['name'] ?? 'Esta empresa';
+                    $companyCif  = $company['cif'] ?? $company['nif'] ?? 'Desconocido';
+                    $companyProv = $company['province'] ?? $company['provincia'] ?? 'España';
+                    $companyAddr = "{$companyProv}, España"; // Simplificado si no tenemos dirección completa
+                    $companyAct  = $company['cnae_label'] ?? 'su actividad registrada';
+
+                    $faqs = [
+                        [
+                            'q' => "¿Cuál es el CIF de {$companyName}?",
+                            'a' => "El CIF de {$companyName} es **{$companyCif}**. Este identificador fiscal es único para la empresa y sirve para realizar trámites y facturación."
+                        ],
+                        [
+                            'q' => "¿A qué se dedica {$companyName}?",
+                            'a' => "Según la clasificación CNAE, la actividad principal de {$companyName} es: **{$companyAct}**. Esta clasificación permite categorizar su sector de negocio."
+                        ],
+                        [
+                            'q' => "¿Dónde está ubicada {$companyName}?",
+                            'a' => "La empresa tiene su domicilio social registrado en **{$companyProv}**. Para notificaciones oficiales o contacto, debe dirigirse a esta ubicación."
+                        ]
+                    ];
+
                     // Schema.org Data
                     $schemaOrg = [
                         "@context" => "https://schema.org",
@@ -112,12 +134,12 @@
                             [
                                 "@type" => "Organization",
                                 "@id" => $canonical . "#organization",
-                                "name" => $company['name'] ?? '',
-                                "taxID" => $company['cif'] ?? $company['nif'] ?? '',
+                                "name" => $companyName,
+                                "taxID" => $companyCif,
                                 "url" => $canonical,
                                 "address" => [
                                     "@type" => "PostalAddress",
-                                    "addressRegion" => $company['province'] ?? $company['provincia'] ?? ''
+                                    "addressRegion" => $companyProv
                                 ],
                                 "foundingDate" => $company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '',
                                 "description" => $meta_description ?? ''
@@ -140,10 +162,23 @@
                                     [
                                         "@type" => "ListItem",
                                         "position" => 3,
-                                        "name" => $company['name'] ?? 'Empresa',
+                                        "name" => $companyName,
                                         "item" => $canonical
                                     ]
                                 ]
+                            ],
+                            [
+                                "@type" => "FAQPage",
+                                "mainEntity" => array_map(function($item) {
+                                    return [
+                                        "@type" => "Question",
+                                        "name" => $item['q'],
+                                        "acceptedAnswer" => [
+                                            "@type" => "Answer",
+                                            "text" => $item['a'] // Google permite HTML básico aquí
+                                        ]
+                                    ];
+                                }, $faqs)
                             ]
                         ]
                     ];
@@ -166,12 +201,38 @@
                     <section class="company-card__body">
                         <dl class="company-card__grid">
                             <div><dt>CIF</dt><dd><?= esc($company['cif'] ?? $company['nif'] ?? '-') ?></dd></div>
-                            <div><dt>CNAE</dt><dd><?= esc($cnaeFull ?: '-') ?></dd></div>
-                            <div><dt>Provincia</dt><dd><?= esc($company['province'] ?? $company['provincia'] ?? '-') ?></dd></div>
+                            
+                            <div>
+                                <dt>CNAE</dt>
+                                <dd>
+                                    <?php if(!empty($company['cnae'])): ?>
+                                        <a href="<?= site_url('search_company?q=' . urlencode($company['cnae'])) ?>" style="text-decoration: underline; color: inherit;">
+                                            <?= esc($cnaeFull ?: '-') ?>
+                                        </a>
+                                    <?php else: ?>
+                                        <?= esc($cnaeFull ?: '-') ?>
+                                    <?php endif; ?>
+                                </dd>
+                            </div>
+                            
+                            <div>
+                                <dt>Provincia</dt>
+                                <dd>
+                                    <?php if(!empty($company['province'] ?? $company['provincia'])): ?>
+                                        <a href="<?= site_url('search_company?q=' . urlencode($company['province'] ?? $company['provincia'])) ?>" style="text-decoration: underline; color: inherit;">
+                                            <?= esc($company['province'] ?? $company['provincia']) ?>
+                                        </a>
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
+                                </dd>
+                            </div>
+                            
                             <div><dt>Fecha de constitución</dt><dd><?= esc($company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '-') ?></dd></div>
                             <div class="company-card__purpose"><dt>Objeto social</dt><dd><?= esc($company['corporate_purpose'] ?? $company['objeto_social'] ?? '-') ?></dd></div>
                         </dl>
                     </section>
+
 
                     <div class="company-card__footer">
                         <button type="button" class="btn-json-api" id="btnToggleJson">Ver JSON de la API</button>
@@ -179,6 +240,22 @@
 
                     <pre class="company-card__json is-hidden" id="jsonBlock"><code><?= esc($jsonPretty) ?></code></pre>
                 </article>
+
+                <!-- FAQ Section HTML -->
+                <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: #444;">Preguntas Frecuentes sobre <?= esc($companyName) ?></h3>
+                    <div style="display: grid; gap: 1.5rem;">
+                        <?php foreach($faqs as $faq): ?>
+                            <div>
+                                <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; color: #111;"><?= esc($faq['q']) ?></h4>
+                                <div style="font-size: 0.9rem; color: #555; line-height: 1.5;">
+                                    <?= strip_tags(str_replace('**', '', $faq['a'])) // Limpieza básica para HTML visual ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
                 
                 <!-- Schema.org JSON-LD -->
                 <script type="application/ld+json">

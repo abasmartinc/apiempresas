@@ -278,4 +278,68 @@ class CompanyModel extends Model
 
         return $results;
     }
+
+    /**
+     * Busca múltiples empresas por término (Nombre, CNAE o Provincia).
+     * Intenta usar FULLTEXT primero, fallback a LIKE.
+     */
+    public function searchMany(string $term, int $limit = 20): array
+    {
+        $term = trim($term);
+        if ($term === '' || mb_strlen($term) < 3) {
+            return [];
+        }
+
+        // 1. Intentar búsqueda FULLTEXT (Muy rápida)
+        // Requiere: ADD FULLTEXT INDEX idx_ft (company_name, cnae_label, registro_mercantil);
+        try {
+            // Preparamos término para modo booleano: "+termino*"
+            $cleanTerm = preg_replace('/[+\-><()~*\"@]+/', ' ', $term);
+            $parts = array_filter(explode(' ', $cleanTerm));
+            $booleanTerm = '';
+            foreach ($parts as $p) {
+                if (strlen($p) >= 3) {
+                    $booleanTerm .= '+' . $p . '* ';
+                }
+            }
+            $booleanTerm = trim($booleanTerm);
+
+            if ($booleanTerm !== '') {
+                $fields = implode(', ', $this->selectFields);
+                $sql = "SELECT {$fields}, 
+                        MATCH(company_name, cnae_label, registro_mercantil) AGAINST (? IN BOOLEAN MODE) as score
+                        FROM {$this->table}
+                        WHERE MATCH(company_name, cnae_label, registro_mercantil) AGAINST (? IN BOOLEAN MODE)
+                        ORDER BY score DESC
+                        LIMIT ?";
+                
+                $query = $this->db->query($sql, [$booleanTerm, $booleanTerm, $limit]);
+                $results = $query->getResultArray();
+                
+                if (!empty($results)) {
+                    return $results;
+                }
+            }
+        } catch (\Throwable $e) {
+            // Si falla (ej. no existe el índice), ignoramos y pasamos al fallback
+            log_message('debug', '[CompanyModel::searchMany] Fulltext falló: ' . $e->getMessage());
+        }
+
+        // 2. Fallback a LIKE (Lento, pero seguro)
+        $builder = $this->builder();
+        $builder->select(implode(', ', $this->selectFields));
+        
+        $builder->groupStart();
+            $builder->like('company_name', $term);
+            $builder->orLike('cnae_label', $term);
+            $builder->orLike('registro_mercantil', $term); // Provincia
+        $builder->groupEnd();
+
+        $builder->orderBy("CASE WHEN company_name LIKE '{$this->db->escapeLikeString($term)}%' THEN 0 ELSE 1 END", 'ASC');
+        $builder->orderBy('company_name', 'ASC');
+        
+        $builder->limit($limit);
+
+        return $builder->get()->getResultArray();
+    }
 }

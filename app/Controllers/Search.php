@@ -307,15 +307,22 @@ class Search extends BaseController
                     $company = $this->companyModel->getByCif($qInfo['norm']);
                 }
 
-                // Si no hay => fuzzy nombre
+                // Si no es CIF, o si CIF no encontró => búsqueda amplia (searchMany)
                 if (!$company) {
-                    $best = $this->companyModel->getBestByName($qInfo['raw']);
-                    $company = is_array($best) && array_key_exists('data', $best) ? $best['data'] : $best;
+                    $results = $this->companyModel->searchMany($qInfo['raw'], 50);
+                    
+                    if (count($results) === 1) {
+                        // Solo 1 resultado: comportamiento clásico (ficha directa)
+                        $company = $results[0];
+                    } elseif (count($results) > 1) {
+                        // Múltiples resultados: pasamos la lista
+                        $data['companies'] = $results;
+                    }
                 }
 
-                if (!$company) {
-                    $data['errorMsg'] = 'No se encontró ninguna empresa con ese CIF o nombre.';
-                } else {
+                if (!$company && empty($data['companies'])) {
+                    $data['errorMsg'] = 'No se encontró ninguna empresa con ese CIF, nombre, CNAE o provincia.';
+                } elseif ($company) {
                     $data['company'] = is_object($company) ? (array) $company : (array) $company;
                 }
 

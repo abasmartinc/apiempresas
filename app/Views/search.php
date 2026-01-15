@@ -154,6 +154,23 @@
 
                         <pre class="company-card__json is-hidden"><code><?= esc($jsonPretty) ?></code></pre>
                     </article>
+                <?php elseif (!empty($companies) && is_array($companies)): ?>
+                    <div style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+                        <?php foreach ($companies as $co): 
+                            $coSlug = url_title($co['name'] ?? '', '-', true);
+                            $coUrl  = site_url(($co['cif'] ?? '') . ($coSlug ? ('-' . $coSlug) : ''));
+                        ?>
+                        <a href="<?= esc($coUrl) ?>" style="text-decoration: none; color: inherit; display: block; padding: 1.5rem; background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s;" onmouseover="this.style.borderColor='#2152FF'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.transform='none'">
+                            <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem; color: #111;"><?= esc($co['name'] ?? 'Empresa') ?></div>
+                            <div style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">
+                                <?= esc($co['cif'] ?? '-') ?> · <?= esc($co['province'] ?? $co['provincia'] ?? '-') ?>
+                            </div>
+                            <div style="font-size: 0.85rem; color: #555; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; display: inline-block;">
+                                <?= esc($co['cnae_label'] ?? $co['cnae'] ?? 'Actividad no disponible') ?>
+                            </div>
+                        </a>
+                        <?php endforeach; ?>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
