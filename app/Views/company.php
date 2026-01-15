@@ -109,7 +109,11 @@
                     $companyName = $company['name'] ?? 'Esta empresa';
                     $companyCif  = $company['cif'] ?? $company['nif'] ?? 'Desconocido';
                     $companyProv = $company['province'] ?? $company['provincia'] ?? 'España';
-                    $companyAddr = "{$companyProv}, España"; // Simplificado si no tenemos dirección completa
+                    
+                    // Dirección inteligente: si hay domicilio, úsalo. Si no, provincia.
+                    $rawAddr     = $company['address'] ?? $company['address'] ?? '';
+                    $companyAddr = $rawAddr ? "{$rawAddr}, {$companyProv}" : "{$companyProv}, España";
+                    
                     $companyAct  = $company['cnae_label'] ?? 'su actividad registrada';
 
                     $faqs = [
@@ -123,7 +127,7 @@
                         ],
                         [
                             'q' => "¿Dónde está ubicada {$companyName}?",
-                            'a' => "La empresa tiene su domicilio social registrado en **{$companyProv}**. Para notificaciones oficiales o contacto, debe dirigirse a esta ubicación."
+                            'a' => "La empresa tiene su domicilio social registrado en **{$companyAddr}**. Para notificaciones oficiales o contacto, debe dirigirse a esta ubicación."
                         ]
                     ];
 
@@ -139,7 +143,9 @@
                                 "url" => $canonical,
                                 "address" => [
                                     "@type" => "PostalAddress",
-                                    "addressRegion" => $companyProv
+                                    "streetAddress" => $rawAddr ?: null,
+                                    "addressRegion" => $companyProv,
+                                    "addressCountry" => "ES"
                                 ],
                                 "foundingDate" => $company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '',
                                 "description" => $meta_description ?? ''

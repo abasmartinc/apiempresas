@@ -21,6 +21,7 @@ class CompanyModel extends Model
         'objeto_social      AS corporate_purpose',
         'fecha_constitucion AS founded',
         'registro_mercantil AS province',
+        'address',
         'estado             AS status',
     ];
 
