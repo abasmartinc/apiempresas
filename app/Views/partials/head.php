@@ -108,7 +108,7 @@ $googlebot = $googlebot ?? ($robots . ',max-snippet:-1,max-image-preview:large,m
 />
 
 <!-- Styles -->
-<link rel="stylesheet" href="<?= base_url('public/css/styles.css?v=' . time()) ?>" />
+<link rel="stylesheet" href="<?= base_url('public/css/styles.css?v=' . (file_exists(FCPATH . 'public/css/styles.css') ? filemtime(FCPATH . 'public/css/styles.css') : time())) ?>" />
 
 
 <!-- Favicons -->

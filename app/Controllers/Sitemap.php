@@ -55,9 +55,9 @@ class Sitemap extends Controller
         $offset = ($page - 1) * $this->perPage;
 
         // Obtener lote de empresas
-        // Solo necesitamos CIF y Nombre para generar la URL
+        // Necesitamos ID, CIF y Nombre
         $companies = $model->builder()
-            ->select('cif, company_name as name') 
+            ->select('id, cif, company_name as name') 
             ->orderBy('id', 'ASC') // Orden consistente
             ->limit($this->perPage, $offset)
             ->get()
@@ -73,10 +73,17 @@ class Sitemap extends Controller
         foreach ($companies as $company) {
             $cif  = $company['cif'];
             $name = $company['name'];
+            $id   = $company['id'];
             $slug = url_title($name, '-', true);
             
-            // URL: /CIF-slug
-            $loc = site_url($cif . ($slug ? ('-' . $slug) : ''));
+            // URL Logic:
+            // 1. Si tiene CIF -> /CIF-slug
+            // 2. Si NO tiene CIF -> /empresa/ID-slug
+            if (!empty($cif)) {
+                $loc = site_url($cif . ($slug ? ('-' . $slug) : ''));
+            } else {
+                $loc = site_url("empresa/{$id}" . ($slug ? ('-' . $slug) : ''));
+            }
             
             // Lastmod: al no tener fecha de modificación fiable, usamos el inicio del mes o hoy
             $lastmod = date('c');

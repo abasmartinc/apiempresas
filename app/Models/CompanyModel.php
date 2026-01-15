@@ -38,6 +38,16 @@ class CompanyModel extends Model
             ->getRowArray() ?: null;
     }
 
+    public function getById(int $id): ?array
+    {
+        return $this->asArray()
+            ->select(implode(', ', $this->selectFields))
+            ->where('id', $id)
+            ->limit(1)
+            ->get()
+            ->getRowArray() ?: null;
+    }
+
     /**
      * Best match por nombre.
      * Retorna:
