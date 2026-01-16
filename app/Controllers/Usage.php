@@ -40,6 +40,9 @@ class Usage extends BaseController
         $data['api_request_total_month'] = $this->ApiRequestsModel->countRequestsForMonth(date('Y-m'), ['user_id' => $userId]);
         $data['api_request_total_today'] = $this->ApiRequestsModel->countRequestsForDay(date('Y-m-d'), ['user_id' => $userId]);
 
+        // Log usage page visit
+        log_activity('usage_visit');
+
         // ===== RANGO para gráfico =====
         $range = $this->request->getGet('range') ?: '30';
 

@@ -101,6 +101,9 @@ class Login extends BaseController
             'logged_in'  => true,
         ]);
 
+        // Log successful login
+        log_activity('login');
+
         return redirect()->to(site_url('dashboard'));
     }
 
@@ -109,6 +112,9 @@ class Login extends BaseController
      */
     public function logout()
     {
+        // Log logout before destroying session
+        log_activity('logout');
+        
         session()->destroy();
 
         return redirect()

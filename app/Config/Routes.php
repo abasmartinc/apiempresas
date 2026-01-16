@@ -127,6 +127,11 @@ $routes->group('admin', ['filter' => 'admin'], function($routes) {
     // Invoices
     $routes->get('invoices', 'Admin\Dashboard::invoices');
     $routes->get('invoices/download/(:num)', 'Admin\Dashboard::invoice_download/$1');
+
+    // Activity Logs
+    $routes->get('activity-logs', 'Admin\ActivityLogs::index');
+    $routes->get('activity-logs/user/(:num)', 'Admin\ActivityLogs::user/$1');
+    $routes->get('activity-logs/export', 'Admin\ActivityLogs::export');
 });
 
 // Webhooks

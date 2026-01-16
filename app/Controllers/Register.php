@@ -177,6 +177,9 @@ class Register extends BaseController
                 log_message('info', 'Email sent OK to papelo.amh@gmail.com');
             }
 
+            // Log successful registration
+            log_activity('register', ['email' => $email], $user_id);
+
             return redirect()
                 ->to(site_url('register_sucess'))
                 ->with('message', 'Cuenta creada correctamente. Ya puedes iniciar sesión.');

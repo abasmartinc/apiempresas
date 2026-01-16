@@ -40,6 +40,9 @@ class Dashboard extends BaseController
         $data['avg_latency'] = $this->ApiRequestsModel->getAverageLatency(['user_id' => $userId]);
         $data['error_rate']  = $this->ApiRequestsModel->getErrorRate(['user_id' => $userId]);
 
+        // Log dashboard visit
+        log_activity('dashboard_visit');
+
         if ($user->is_admin ?? false) {
             $companyModel = new \App\Models\CompanyAdminModel();
             

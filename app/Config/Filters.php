@@ -38,6 +38,7 @@ class Filters extends BaseFilters
         'dbgroup'       => DbGroupFilter::class,
         'apikey'        => \App\Filters\ApiKeyFilter::class,
         'admin'         => \App\Filters\AdminFilter::class,
+        'activity_logger' => \App\Filters\ActivityLogger::class,
     ];
 
     /**
@@ -78,6 +79,7 @@ class Filters extends BaseFilters
             // 'invalidchars',
         ],
         'after' => [
+            'activity_logger',
             // 'honeypot',
             // 'secureheaders',
         ],

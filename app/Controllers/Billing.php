@@ -427,6 +427,9 @@ class Billing extends BaseController
             'updated_at' => date('Y-m-d H:i:s')
         ]);
 
+        // Log API key rotation
+        log_activity('api_key_rotated');
+
         return redirect()->to(site_url('dashboard'))->with('message', 'Tu API Key ha sido rotada con éxito. Recuerda actualizar tus aplicaciones.');
     }
 
@@ -453,6 +456,9 @@ class Billing extends BaseController
             'status' => 'canceled',
             'canceled_at' => date('Y-m-d H:i:s')
         ]);
+
+        // Log subscription cancellation
+        log_activity('subscription_cancelled', ['plan' => $plan->plan_name ?? 'Unknown']);
 
         return redirect()->to(site_url('billing'))->with('message', 'Tu suscripción ha sido cancelada. Seguirás teniendo acceso hasta el final del periodo facturado.');
     }
