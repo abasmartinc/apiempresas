@@ -19,6 +19,7 @@ class UserModel extends Model
         'password_hash',
         'is_active',
         'is_admin',
+        'api_access',
         'created_at',
         'updated_at',
         'last_login_at',

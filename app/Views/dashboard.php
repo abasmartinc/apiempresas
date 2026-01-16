@@ -152,46 +152,79 @@
                 <!-- RIGHT -->
                 <aside>
                     <!-- PLAN -->
-                    <section class="plan-card">
+                    <?php 
+                        $get = function($src, $key, $default = null) {
+                            if (is_array($src)) return $src[$key] ?? $default;
+                            if (is_object($src)) return $src->$key ?? $default;
+                            return $default;
+                        };
+                        $planNameRaw = $get($plan, 'plan_name', 'Free');
+                        $currentPlanSlug = strtolower(trim($planNameRaw));
+                        $planClass = '';
+                        if (strpos($currentPlanSlug, 'business') !== false) $planClass = 'plan-card--business';
+                        elseif (strpos($currentPlanSlug, 'pro') !== false) $planClass = 'plan-card--pro';
+                    ?>
+                    <!-- Debug: Plan name is "<?= esc($planNameRaw) ?>" -> slug: "<?= esc($currentPlanSlug) ?>" -->
+                    <section class="plan-card <?= $planClass ?>">
                         <div class="plan-pill">
                             <span>PLAN ACTUAL</span>
                         </div>
 
-                        <h2><?=$plan->plan_name ?? '' ?></h2>
-                        <div class="plan-price"><?=$plan->price_monthly ?> €/mes</div>
+                        <h2><?= esc($planNameRaw) ?></h2>
+                        <div class="plan-price"><?= esc($get($plan, 'price_monthly', '0')) ?> €/mes</div>
                         <p style="margin:0 0 12px; color:rgba(239,246,255,.9); font-size:13px;">
-                            Plan recomendado para pruebas, desarrollo y entornos de staging.
+                            <?php if($currentPlanSlug === 'business'): ?>
+                                Plan máximo para empresas con volumen alto y gestión de equipos.
+                            <?php elseif($currentPlanSlug === 'pro'): ?>
+                                Plan ideal para producción: límites ampliados y monitorización.
+                            <?php else: ?>
+                                Plan recomendado para pruebas, desarrollo y entornos de staging.
+                            <?php endif; ?>
                         </p>
 
                         <div class="plan-meta">
-                            <div>• Límite mensual bajo para validar PoC.</div>
-                            <div>• Ideal para integrar y testear endpoints.</div>
-                            <div>• Cuando pases a producción, cambia a Pro/Business.</div>
+                            <?php if($currentPlanSlug === 'business'): ?>
+                                <div>• Límite alto para uso intensivo y masivo.</div>
+                                <div>• SLA avanzado y soporte dedicado.</div>
+                                <div>• Gestión de equipos y roles incluida.</div>
+                            <?php elseif($currentPlanSlug === 'pro'): ?>
+                                <div>• Límite mensual superior para producción.</div>
+                                <div>• Métricas de latencia y errores incluidas.</div>
+                                <div>• Soporte prioritario para integración.</div>
+                            <?php else: ?>
+                                <div>• Límite mensual bajo para validar PoC.</div>
+                                <div>• Ideal para integrar y testear endpoints.</div>
+                                <div>• Cuando pases a producción, cambia a Pro/Business.</div>
+                            <?php endif; ?>
                         </div>
 
-                        <!--<button class="btn" type="button" onclick="window.location.href='<?php /*=site_url() */?>prices'">
-                            Ver planes y actualizar
-                        </button>-->
-
+                        <?php if($currentPlanSlug !== 'business'): ?>
                         <div class="alert-upgrade">
                             <strong>Consejo para producción</strong>
                             <span>
-                                Si tu caso de uso es validación en alta de clientes, scoring o KYC, te conviene Pro para evitar bloqueos por límite y tener visibilidad de métricas.
+                                <?php if($currentPlanSlug === 'pro'): ?>
+                                    ¿Tu volumen crece? Pasa al plan Business para SLA avanzado y gestión multicuenta.
+                                <?php else: ?>
+                                    Si vas a integrar en producción, te conviene Pro para evitar bloqueos y tener visibilidad.
+                                <?php endif; ?>
                             </span>
                             <button class="btn" type="button" onclick="window.location.href='<?=site_url() ?>billing'">
-                                Pasar a Pro
+                                <?= (strpos($currentPlanSlug, 'pro') !== false) ? 'Mejorar a Business' : 'Pasar a Pro' ?>
                             </button>
                             <span class="back_to_free">Puedes volver a Free cuando quieras.</span>
                         </div>
+                        <?php endif; ?>
                     </section>
 
                     <!-- ACCOUNT STATUS -->
                     <section class="mini-card">
                         <h3>Estado de tu cuenta</h3>
                         <p>
-                            Plan: <strong>Free</strong><br>
-                            Consultas este mes: <strong><?=$api_request_total_month ?? 0 ?></strong><br>
-                            Renovación: <strong><?=date('d-m-Y', strtotime($plan->current_period_end)) ?></strong>
+                            Plan: <strong><?= esc($plan->plan_name ?? 'Free') ?></strong><br>
+                            Consultas este mes: <strong><?= esc($api_request_total_month ?? 0) ?></strong><br>
+                            <?php if(!empty($plan->current_period_end)): ?>
+                                Renovación: <strong><?= date('d-m-Y', strtotime($plan->current_period_end)) ?></strong>
+                            <?php endif; ?>
                         </p>
                     </section>
 

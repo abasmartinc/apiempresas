@@ -3,26 +3,43 @@
 <head>
     <?= view('partials/head', ['title' => $title]) ?>
 </head>
-<body>
+<body class="admin-body">
 <div class="bg-halo" aria-hidden="true"></div>
 
-<header>
-    <div class="container nav">
-        <div class="brand">
-            <a href="<?= site_url() ?>">
-                <span class="brand-name">API<span class="grad">Empresas</span> Admin</span>
-            </a>
-        </div>
-        <div class="desktop-only">
-            <a class="btn btn_header btn_header--ghost" href="<?= site_url('logout') ?>">Salir</a>
-        </div>
-    </div>
-</header>
+<?= view('partials/header_admin') ?>
 
-<main class="container" style="padding: 40px 0;">
+<main class="container-admin" style="padding: 40px 0;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h1 class="title">Uso Diario API</h1>
         <a href="<?= site_url('dashboard') ?>" class="btn ghost">Volver al Dashboard</a>
+    </div>
+
+    <div class="card" style="margin-bottom: 2rem; padding: 1.5rem;">
+        <form action="<?= site_url('admin/usage-daily') ?>" method="get" class="grid" style="grid-template-columns: 1fr auto auto auto; gap: 1rem; align-items: end;">
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Usuario</label>
+                <select name="user_id" class="input" style="width: 100%;">
+                    <option value="">Todos los usuarios</option>
+                    <?php foreach ($users as $u): ?>
+                        <option value="<?= $u->id ?>" <?= $user_id == $u->id ? 'selected' : '' ?>>
+                            <?= esc($u->name) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Desde</label>
+                <input type="date" name="start_date" class="input" value="<?= esc($start_date) ?>">
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Hasta</label>
+                <input type="date" name="end_date" class="input" value="<?= esc($end_date) ?>">
+            </div>
+            <div style="display: flex; gap: 5px;">
+                <button type="submit" class="btn">Filtrar</button>
+                <a href="<?= site_url('admin/usage-daily') ?>" class="btn ghost" title="Limpiar filtros">🔄</a>
+            </div>
+        </form>
     </div>
 
     <div class="card" style="overflow-x: auto;">
@@ -74,3 +91,4 @@
 <?= view('partials/footer') ?>
 </body>
 </html>
+

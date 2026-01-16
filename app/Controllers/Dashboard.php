@@ -37,10 +37,42 @@ class Dashboard extends BaseController
         $data['api_key'] = $this->ApikeysModel->where(['user_id' => $userId, 'is_active' => 1])->first();
         $data['plan'] = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
         $data['api_request_total_month'] = $this->ApiRequestsModel->countRequestsForMonth(date('Y-m'), ['user_id' => $userId]);
+        $data['avg_latency'] = $this->ApiRequestsModel->getAverageLatency(['user_id' => $userId]);
+        $data['error_rate']  = $this->ApiRequestsModel->getErrorRate(['user_id' => $userId]);
 
-        if (session('is_admin')) {
+        if ($user->is_admin ?? false) {
+            $companyModel = new \App\Models\CompanyAdminModel();
+            
             $data['title'] = 'Panel de Administración';
+            
+            // KPIs de Empresas
+            $data['stats']['companies_total']    = $companyModel->countAllResults();
+            $data['stats']['companies_no_cif']   = $companyModel->where('cif', '')->orWhere('cif', null)->countAllResults();
+            $data['stats']['companies_active']   = $companyModel->where('estado', 'ACTIVA')->countAllResults();
+            $data['stats']['companies_inactive'] = $companyModel->where('estado !=', 'ACTIVA')->countAllResults();
+            
+            // KPIs de Usuarios
+            $data['stats']['users_total']  = $this->userModel->countAllResults();
+            $data['stats']['users_active'] = $this->userModel->where('is_active', 1)->countAllResults();
+            
+            // KPIs de API
+            $data['stats']['api_today'] = $this->ApiRequestsModel->countRequestsForDay(date('Y-m-d'));
+            $data['stats']['api_month'] = $this->ApiRequestsModel->countRequestsForMonth(date('Y-m'));
+            
+            // KPIs de Suscripciones
+            $data['stats']['subs_active'] = $this->UsersuscriptionsModel->where('status', 'active')->countAllResults();
+
             return view('admin/dashboard', $data);
+        }
+
+        // Si tiene plan activo, va al dashboard de pago
+        if ($data['plan']) {
+            return view('dashboard_paid', $data);
+        }
+
+        // Si tiene acceso API habilitado manualmente (gradual access)
+        if (($user->api_access ?? 0) == 1) {
+            return view('dashboard', $data);
         }
 
         return view('dashboard_construction', $data);

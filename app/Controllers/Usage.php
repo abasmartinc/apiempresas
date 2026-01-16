@@ -88,6 +88,19 @@ class Usage extends BaseController
         $data['chart_labels'] = $labels; // ['2026-01-01', ...]
         $data['chart_values'] = $values; // [0, 3, 1, ...]
 
+        // ===== ENDPOINT BREAKDOWN =====
+        $currentMonth = date('Y-m');
+        $endpointBreakdown = $this->ApiRequestsModel->getEndpointBreakdownForMonth($currentMonth, ['user_id' => $userId]);
+        
+        // Add today's count for each endpoint
+        $today = date('Y-m-d');
+        foreach ($endpointBreakdown as &$ep) {
+            $ep['today'] = $this->ApiRequestsModel->getEndpointCountForDay($ep['endpoint'], $today, ['user_id' => $userId]);
+        }
+        unset($ep); // Break reference
+        
+        $data['endpoint_breakdown'] = $endpointBreakdown;
+
         return view('usage', $data);
     }
 

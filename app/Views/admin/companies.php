@@ -3,23 +3,12 @@
 <head>
     <?= view('partials/head', ['title' => $title]) ?>
 </head>
-<body>
+<body class="admin-body">
 <div class="bg-halo" aria-hidden="true"></div>
 
-<header>
-    <div class="container nav">
-        <div class="brand">
-            <a href="<?= site_url() ?>">
-                <span class="brand-name">API<span class="grad">Empresas</span> Admin</span>
-            </a>
-        </div>
-        <div class="desktop-only">
-            <a class="btn btn_header btn_header--ghost" href="<?= site_url('logout') ?>">Salir</a>
-        </div>
-    </div>
-</header>
+<?= view('partials/header_admin') ?>
 
-<main class="container" style="padding: 40px 0;">
+<main class="container-admin" style="padding: 40px 0;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h1 class="title">Gestión de Empresas</h1>
         <div style="display: flex; gap: 10px;">
@@ -104,3 +93,4 @@
 <?= view('partials/footer') ?>
 </body>
 </html>
+

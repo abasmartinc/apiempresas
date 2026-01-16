@@ -3,26 +3,51 @@
 <head>
     <?= view('partials/head', ['title' => $title]) ?>
 </head>
-<body>
+<body class="admin-body">
 <div class="bg-halo" aria-hidden="true"></div>
 
-<header>
-    <div class="container nav">
-        <div class="brand">
-            <a href="<?= site_url() ?>">
-                <span class="brand-name">API<span class="grad">Empresas</span> Admin</span>
-            </a>
-        </div>
-        <div class="desktop-only">
-            <a class="btn btn_header btn_header--ghost" href="<?= site_url('logout') ?>">Salir</a>
-        </div>
-    </div>
-</header>
+<?= view('partials/header_admin') ?>
 
-<main class="container" style="padding: 40px 0;">
+<main class="container-admin" style="padding: 40px 0;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h1 class="title">Peticiones API</h1>
         <a href="<?= site_url('dashboard') ?>" class="btn ghost">Volver al Dashboard</a>
+    </div>
+
+    <div class="card" style="margin-bottom: 2rem; padding: 1.5rem;">
+        <form action="<?= site_url('admin/api-requests') ?>" method="get" class="grid" style="grid-template-columns: 1fr 1fr auto auto; gap: 1rem; align-items: end;">
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Endpoint</label>
+                <input type="text" name="q" class="input" style="width: 100%;" placeholder="Ej: /api/v1/companies..." value="<?= esc($q) ?>">
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Usuario</label>
+                <select name="user_id" class="input" style="width: 100%;">
+                    <option value="">Todos los usuarios</option>
+                    <?php foreach ($users as $u): ?>
+                        <option value="<?= $u->id ?>" <?= $user_id == $u->id ? 'selected' : '' ?>>
+                            <?= esc($u->name) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Estado</label>
+                <select name="status_code" class="input" style="width: 100%;">
+                    <option value="">Todos</option>
+                    <option value="200" <?= $status_code == '200' ? 'selected' : '' ?>>200 OK</option>
+                    <option value="400" <?= $status_code == '400' ? 'selected' : '' ?>>400 Bad Request</option>
+                    <option value="401" <?= $status_code == '401' ? 'selected' : '' ?>>401 Unauthorized</option>
+                    <option value="404" <?= $status_code == '404' ? 'selected' : '' ?>>404 Not Found</option>
+                    <option value="429" <?= $status_code == '429' ? 'selected' : '' ?>>429 Too Many Requests</option>
+                    <option value="500" <?= $status_code == '500' ? 'selected' : '' ?>>500 Server Error</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 5px;">
+                <button type="submit" class="btn">Filtrar</button>
+                <a href="<?= site_url('admin/api-requests') ?>" class="btn ghost" title="Limpiar filtros">🔄</a>
+            </div>
+        </form>
     </div>
 
     <div class="card" style="overflow-x: auto;">
@@ -90,3 +115,4 @@
 <?= view('partials/footer') ?>
 </body>
 </html>
+

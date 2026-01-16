@@ -2,8 +2,6 @@
 
 use CodeIgniter\Router\RouteCollection;
 
-
-
 /** @var RouteCollection $routes */
 $routes->get('/', 'Home::index');
 $routes->get('enter', 'Login::index');
@@ -28,6 +26,10 @@ $routes->get('billing/success', 'Billing::success'); // callback Stripe
 $routes->get('billing/cancel', 'Billing::cancel');   // cancel Stripe/PayPal
 $routes->get('billing/purchase-success', 'Billing::purchase_success');
 $routes->get('billing/manage', 'Billing::billing_manage');
+$routes->get('billing/invoices', 'Billing::invoices');
+$routes->get('billing/invoices/download/(:num)', 'Billing::invoice_download/$1');
+$routes->post('billing/rotate-key', 'Billing::rotate_key');
+$routes->post('billing/cancel-subscription', 'Billing::cancel_subscription');
 
 // PayPal return
 $routes->get('billing/paypal/return', 'Billing::paypalReturn');
@@ -76,8 +78,14 @@ $routes->group('admin', ['filter' => 'admin'], function($routes) {
     $routes->post('users/update', 'Admin\Dashboard::update');
     $routes->get('users/delete/(:num)', 'Admin\Dashboard::delete/$1');
     $routes->get('users/email/(:num)', 'Admin\Dashboard::compose/$1');
+    $routes->get('users/toggle-api-access/(:num)', 'Admin\Dashboard::toggle_api_access/$1');
     $routes->post('users/send', 'Admin\Dashboard::send');
+    
+    // Logs de búsqueda
     $routes->get('logs', 'Admin\Dashboard::logs');
+    $routes->get('logs/toggle-included/(:num)', 'Admin\Dashboard::toggle_log_included/$1');
+    $routes->get('logs/check-cif', 'Admin\Dashboard::check_cif');
+
     $routes->get('api-requests', 'Admin\Dashboard::api_requests');
     $routes->get('usage-daily', 'Admin\Dashboard::usage_daily');
     
@@ -115,7 +123,14 @@ $routes->group('admin', ['filter' => 'admin'], function($routes) {
 
     // Email Logs
     $routes->get('email-logs', 'Admin\Dashboard::email_logs');
+
+    // Invoices
+    $routes->get('invoices', 'Admin\Dashboard::invoices');
+    $routes->get('invoices/download/(:num)', 'Admin\Dashboard::invoice_download/$1');
 });
+
+// Webhooks
+$routes->post('webhook/stripe', 'Webhook::stripe');
 
 // Sitemap
 $routes->get('sitemap.xml', 'Sitemap::index');

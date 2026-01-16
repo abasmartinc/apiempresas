@@ -115,7 +115,7 @@
                     <div class="purchase-head">
                         <div>
                             <div class="purchase-title">Resumen de la compra</div>
-                            <div class="purchase-sub">Referencia: <strong>#<?= htmlspecialchars($order_ref ?? '—') ?></strong></div>
+                            <div class="purchase-sub">Referencia: <strong>#<?= htmlspecialchars($order_ref) ?></strong></div>
                         </div>
 
                         <!-- Badge compacto pero potente -->
@@ -126,20 +126,19 @@
                     </div>
 
                     <div class="purchase-lines">
-                        <div class="line"><span>Plan</span><strong><?= htmlspecialchars($plan_name ?? 'Pro') ?></strong></div>
-                        <div class="line"><span>Periodicidad</span><strong><?= htmlspecialchars($period_name ?? 'Mensual') ?></strong></div>
-                        <div class="line"><span>Precio base</span><strong><?= htmlspecialchars($base_price ?? '19') ?> €</strong></div>
+                        <div class="line"><span>Plan</span><strong><?= htmlspecialchars($plan_name) ?></strong></div>
+                        <div class="line"><span>Periodicidad</span><strong><?= htmlspecialchars($period_name) ?></strong></div>
+                        <div class="line"><span>Precio base</span><strong><?= htmlspecialchars($base_price) ?> €</strong></div>
                         <div class="line"><span>IVA</span><strong>Se calcula según país</strong></div>
-                        <div class="line total"><span>Total</span><strong><?= htmlspecialchars($base_price ?? '19') ?> € <span class="muted">+ IVA</span></strong></div>
+                        <div class="line total"><span>Total</span><strong><?= htmlspecialchars($base_price) ?> € <span class="muted">+ IVA</span></strong></div>
                     </div>
 
                     <div class="purchase-actions">
                         <a class="btn btn_light btn_full" href="<?=site_url()?>billing">Ver planes y facturas</a>
-                        <a class="link" href="#" aria-label="Ver comprobante (placeholder)">Ver comprobante</a>
                     </div>
 
                     <div class="purchase-foot">
-                        Método de pago: <strong><?= htmlspecialchars($payment_method ?? 'Tarjeta (Stripe) / PayPal') ?></strong>
+                        Método de pago: <strong><?= htmlspecialchars($payment_method) ?></strong>
                     </div>
                 </aside>
             </div>

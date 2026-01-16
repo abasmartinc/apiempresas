@@ -1,5 +1,45 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<?php if (session()->getFlashdata('message')): ?>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            title: '¡Operación exitosa!',
+            text: '<?= esc(session()->getFlashdata('message')) ?>',
+            icon: null,
+            iconHtml: '<span class="ve-swal-icon-inner">✓</span>',
+            customClass: {
+                popup: 've-swal',
+                title: 've-swal-title',
+                htmlContainer: 've-swal-text',
+                confirmButton: 'btn ve-swal-confirm',
+                icon: 've-swal-icon'
+            },
+            buttonsStyling: false
+        });
+    });
+</script>
+<?php endif; ?>
+
+<?php if (session()->getFlashdata('error')): ?>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            title: 'Se ha producido un error',
+            text: '<?= esc(session()->getFlashdata('error')) ?>',
+            icon: 'error',
+            customClass: {
+                popup: 've-swal',
+                title: 've-swal-title',
+                htmlContainer: 've-swal-text',
+                confirmButton: 'btn danger ve-swal-confirm'
+            },
+            buttonsStyling: false
+        });
+    });
+</script>
+<?php endif; ?>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const btn = document.getElementById('btnBuscar');

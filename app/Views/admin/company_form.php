@@ -3,20 +3,12 @@
 <head>
     <?= view('partials/head', ['title' => $title]) ?>
 </head>
-<body>
+<body class="admin-body">
 <div class="bg-halo" aria-hidden="true"></div>
 
-<header>
-    <div class="container nav">
-        <div class="brand">
-            <a href="<?= site_url() ?>">
-                <span class="brand-name">API<span class="grad">Empresas</span> Admin</span>
-            </a>
-        </div>
-    </div>
-</header>
+<?= view('partials/header_admin') ?>
 
-<main class="container" style="padding: 40px 0;">
+<main class="container-admin" style="padding: 40px 0;">
     <div style="max-width: 900px; margin: 0 auto;">
         <a href="<?= site_url('admin/companies') ?>" class="minor" style="display: inline-block; margin-bottom: 1rem;">← Volver al listado</a>
         
@@ -164,3 +156,4 @@
 <?= view('partials/footer') ?>
 </body>
 </html>
+

@@ -35,7 +35,7 @@ $apiKey   = $get($api_key, 'api_key', null);
 // En tu BD:
 // api_plans: name, monthly_quota
 // user_subscriptions: status, current_period_start, current_period_end
-$planName      = $get($plan, 'name', '—');
+$planName      = $get($plan, 'plan_name', '—'); // Corrected: was 'name', should be 'plan_name'
 $monthlyQuota  = $get($plan, 'monthly_quota', null);
 
 $subStatus     = $get($plan, 'status', null);
@@ -162,12 +162,22 @@ $barWidth = $percent !== null ? max(0, min(100, $percent)) : 0;
                         </tr>
                         </thead>
                         <tbody>
-                        <tr>
-                            <td><span class="usage-pill">/api/v1/companies</span></td>
-                            <td><?= $fmt($usedThisMonth) ?></td>
-                            <td><?= $percent !== null ? ($percent . '%') : '—' ?></td>
-                            <td><?= $usedToday !== null ? $fmt($usedToday) : '—' ?></td>
-                        </tr>
+                        <?php if (!empty($endpoint_breakdown)): ?>
+                            <?php foreach ($endpoint_breakdown as $ep): ?>
+                                <tr>
+                                    <td><span class="usage-pill"><?= esc($ep['endpoint']) ?></span></td>
+                                    <td><?= $fmt($ep['total']) ?></td>
+                                    <td><?= $monthlyQuotaInt ? round(($ep['total'] / $monthlyQuotaInt) * 100) . '%' : '—' ?></td>
+                                    <td><?= $fmt($ep['today'] ?? 0) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="4" style="text-align: center; opacity: 0.6; padding: 20px;">
+                                    No hay datos de endpoints para este mes
+                                </td>
+                            </tr>
+                        <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -184,7 +194,7 @@ $barWidth = $percent !== null ? max(0, min(100, $percent)) : 0;
                     <p style="margin-bottom:6px;">
                         Plan <strong><?= esc($planName) ?></strong>
                         <?php if ($subStatus): ?>
-                            — <span style="opacity:.8;"><?= esc($subStatus) ?></span>
+                            — <span class="status-badge status-badge--<?= $subStatus === 'active' ? 'active' : 'inactive' ?>"><?= esc(ucfirst($subStatus)) ?></span>
                         <?php endif; ?>
                         <br>
 

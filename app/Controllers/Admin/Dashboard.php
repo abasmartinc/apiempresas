@@ -43,10 +43,35 @@ class Dashboard extends BaseController
      */
     public function index()
     {
+        $q        = $this->request->getGet('q');
+        $active   = $this->request->getGet('is_active');
+        $admin    = $this->request->getGet('is_admin');
+        
+        $builder = $this->userModel;
+        
+        if ($q) {
+            $builder->groupStart()
+                    ->like('name', $q)
+                    ->orLike('email', $q)
+                    ->orLike('company', $q)
+                    ->groupEnd();
+        }
+        
+        if ($active !== null && $active !== '') {
+            $builder->where('is_active', $active);
+        }
+        
+        if ($admin !== null && $admin !== '') {
+            $builder->where('is_admin', $admin);
+        }
+
         $data = [
-            'title' => 'Admin Dashboard | APIEmpresas',
-            'users' => $this->userModel->orderBy('created_at', 'DESC')->paginate(20),
-            'pager' => $this->userModel->pager,
+            'title'     => 'Gestión de Usuarios | APIEmpresas',
+            'users'     => $builder->orderBy('created_at', 'DESC')->paginate(20),
+            'pager'     => $this->userModel->pager,
+            'q'         => $q,
+            'is_active' => $active,
+            'is_admin'  => $admin
         ];
 
         return view('admin/users', $data);
@@ -57,13 +82,56 @@ class Dashboard extends BaseController
      */
     public function logs()
     {
+        $httpStatus = $this->request->getGet('http_status');
+        
+        $builder = $this->searchLogModel;
+        
+        if ($httpStatus) {
+            $builder->where('http_status', $httpStatus);
+        }
+
         $data = [
-            'title' => 'Logs de Búsqueda | APIEmpresas',
-            'logs'  => $this->searchLogModel->orderBy('created_at', 'DESC')->paginate(30),
-            'pager' => $this->searchLogModel->pager,
+            'title'       => 'Logs de Búsqueda | APIEmpresas',
+            'logs'        => $builder->orderBy('created_at', 'DESC')->paginate(30),
+            'pager'       => $this->searchLogModel->pager,
+            'http_status' => $httpStatus
         ];
 
         return view('admin/logs', $data);
+    }
+
+    /**
+     * Cambiar estado de 'included' en un log
+     */
+    public function toggle_log_included($id)
+    {
+        $log = $this->searchLogModel->find($id);
+        if (!$log) {
+            return redirect()->back()->with('error', 'Log no encontrado.');
+        }
+
+        $newStatus = $log->included ? 0 : 1;
+        $this->searchLogModel->update($id, ['included' => $newStatus]);
+
+        return redirect()->back()->with('message', 'Estado actualizado correctamente.');
+    }
+
+    /**
+     * Verificar si un CIF existe en la base de datos (AJAX)
+     */
+    public function check_cif()
+    {
+        $cif = $this->request->getGet('cif');
+        if (!$cif) {
+            return $this->response->setJSON(['exists' => false, 'error' => 'CIF no proporcionado']);
+        }
+
+        $exists = $this->companyModel->where('cif', $cif)->first();
+
+        return $this->response->setJSON([
+            'exists' => $exists ? true : false,
+            'company_name' => $exists ? $exists->company_name : null
+        ]);
     }
 
     /**
@@ -71,14 +139,34 @@ class Dashboard extends BaseController
      */
     public function api_requests()
     {
-        // Usamos el builder para hacer un join con usuarios
-        $this->apiRequestsModel->select('api_requests.*, users.name as user_name, users.email as user_email');
-        $this->apiRequestsModel->join('users', 'users.id = api_requests.user_id', 'left');
+        $q          = $this->request->getGet('q');
+        $userId     = $this->request->getGet('user_id');
+        $statusCode = $this->request->getGet('status_code');
+
+        $builder = $this->apiRequestsModel;
+        $builder->select('api_requests.*, users.name as user_name, users.email as user_email');
+        $builder->join('users', 'users.id = api_requests.user_id', 'left');
         
+        if ($q) {
+            $builder->like('endpoint', $q);
+        }
+
+        if ($userId) {
+            $builder->where('api_requests.user_id', $userId);
+        }
+
+        if ($statusCode) {
+            $builder->where('status_code', $statusCode);
+        }
+
         $data = [
-            'title'    => 'Peticiones API | APIEmpresas',
-            'requests' => $this->apiRequestsModel->orderBy('created_at', 'DESC')->paginate(40, 'default'),
-            'pager'    => $this->apiRequestsModel->pager,
+            'title'       => 'Peticiones API | APIEmpresas',
+            'requests'    => $builder->orderBy('created_at', 'DESC')->paginate(40, 'default'),
+            'pager'       => $this->apiRequestsModel->pager,
+            'users'       => $this->userModel->orderBy('name', 'ASC')->findAll(),
+            'q'           => $q,
+            'user_id'     => $userId,
+            'status_code' => $statusCode
         ];
 
         return view('admin/api_requests', $data);
@@ -89,13 +177,34 @@ class Dashboard extends BaseController
      */
     public function usage_daily()
     {
-        $this->apiUsageDailyModel->select('api_usage_daily.*, users.name as user_name, users.email as user_email');
-        $this->apiUsageDailyModel->join('users', 'users.id = api_usage_daily.user_id', 'left');
+        $userId    = $this->request->getGet('user_id');
+        $startDate = $this->request->getGet('start_date');
+        $endDate   = $this->request->getGet('end_date');
+
+        $builder = $this->apiUsageDailyModel;
+        $builder->select('api_usage_daily.*, users.name as user_name, users.email as user_email');
+        $builder->join('users', 'users.id = api_usage_daily.user_id', 'left');
+
+        if ($userId) {
+            $builder->where('api_usage_daily.user_id', $userId);
+        }
+
+        if ($startDate) {
+            $builder->where('date >=', $startDate);
+        }
+
+        if ($endDate) {
+            $builder->where('date <=', $endDate);
+        }
 
         $data = [
-            'title' => 'Uso Diario API | APIEmpresas',
-            'usage' => $this->apiUsageDailyModel->orderBy('date', 'DESC')->paginate(30, 'default'),
-            'pager' => $this->apiUsageDailyModel->pager,
+            'title'      => 'Uso Diario API | APIEmpresas',
+            'usage'      => $builder->orderBy('date', 'DESC')->paginate(30, 'default'),
+            'pager'      => $this->apiUsageDailyModel->pager,
+            'users'      => $this->userModel->orderBy('name', 'ASC')->findAll(),
+            'user_id'    => $userId,
+            'start_date' => $startDate,
+            'end_date'   => $endDate
         ];
 
         return view('admin/usage_daily', $data);
@@ -155,6 +264,7 @@ class Dashboard extends BaseController
             'password_hash' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
             'is_active'     => $this->request->getPost('is_active') ? 1 : 0,
             'is_admin'      => $this->request->getPost('is_admin') ? 1 : 0,
+            'api_access'    => $this->request->getPost('api_access') ? 1 : 0,
             'created_at'    => date('Y-m-d H:i:s'),
             'updated_at'    => date('Y-m-d H:i:s'),
         ]);
@@ -202,6 +312,7 @@ class Dashboard extends BaseController
             'email'     => $this->request->getPost('email'),
             'is_active' => $this->request->getPost('is_active') ? 1 : 0,
             'is_admin'  => $this->request->getPost('is_admin') ? 1 : 0,
+            'api_access' => $this->request->getPost('api_access') ? 1 : 0,
             'updated_at' => date('Y-m-d H:i:s'),
         ];
 
@@ -228,6 +339,69 @@ class Dashboard extends BaseController
         $this->userModel->delete($id);
 
         return redirect()->to(site_url('admin/users'))->with('message', 'Usuario eliminado correctamente.');
+    }
+
+    /**
+     * Alternar acceso a la API (Dashboard Real)
+     */
+    public function toggle_api_access($id)
+    {
+        $user = $this->userModel->find($id);
+        if (!$user) {
+            return redirect()->back()->with('error', 'Usuario no encontrado.');
+        }
+
+        $newStatus = ($user->api_access ?? 0) == 1 ? 0 : 1;
+        $this->userModel->update($id, ['api_access' => $newStatus]);
+
+        return redirect()->back()->with('message', 'Acceso API actualizado correctamente.');
+    }
+
+    /**
+     * Listado de facturas
+     */
+    public function invoices()
+    {
+        $invoiceModel = new \App\Models\InvoiceModel();
+        
+        // Búsqueda simple
+        $search = $this->request->getGet('search');
+        if ($search) {
+            $invoiceModel->groupStart()
+                         ->like('invoice_number', $search)
+                         ->orLike('billing_name', $search)
+                         ->orLike('billing_email', $search)
+                         ->groupEnd();
+        }
+
+        $data = [
+            'title'    => 'Gestión de Facturas',
+            'invoices' => $invoiceModel->orderBy('created_at', 'DESC')->paginate(20),
+            'pager'    => $invoiceModel->pager,
+            'search'   => $search
+        ];
+
+        return view('admin/invoices', $data);
+    }
+
+    /**
+     * Descargar factura PDF
+     */
+    public function invoice_download($id)
+    {
+        $invoiceModel = new \App\Models\InvoiceModel();
+        $invoice = $invoiceModel->find($id);
+
+        if (!$invoice || !$invoice->pdf_path) {
+            return redirect()->back()->with('error', 'Factura no encontrada o PDF no generado.');
+        }
+
+        $fullPath = FCPATH . $invoice->pdf_path;
+        if (!file_exists($fullPath)) {
+            return redirect()->back()->with('error', 'El archivo físico de la factura no existe.');
+        }
+
+        return $this->response->download($fullPath, null)->setFileName($invoice->invoice_number . '.pdf');
     }
 
     /**
@@ -565,14 +739,36 @@ class Dashboard extends BaseController
      */
     public function subscriptions()
     {
-        $this->subscriptionModel->select('user_subscriptions.*, users.name as user_name, users.email as user_email, api_plans.name as plan_name');
-        $this->subscriptionModel->join('users', 'users.id = user_subscriptions.user_id', 'left');
-        $this->subscriptionModel->join('api_plans', 'api_plans.id = user_subscriptions.plan_id', 'left');
+        $userId = $this->request->getGet('user_id');
+        $planId = $this->request->getGet('plan_id');
+        $status = $this->request->getGet('status');
+
+        $builder = $this->subscriptionModel;
+        $builder->select('user_subscriptions.*, users.name as user_name, users.email as user_email, api_plans.name as plan_name');
+        $builder->join('users', 'users.id = user_subscriptions.user_id', 'left');
+        $builder->join('api_plans', 'api_plans.id = user_subscriptions.plan_id', 'left');
+
+        if ($userId) {
+            $builder->where('user_subscriptions.user_id', $userId);
+        }
+
+        if ($planId) {
+            $builder->where('user_subscriptions.plan_id', $planId);
+        }
+
+        if ($status) {
+            $builder->where('user_subscriptions.status', $status);
+        }
 
         $data = [
             'title'         => 'Gestión de Suscripciones | APIEmpresas',
-            'subscriptions' => $this->subscriptionModel->orderBy('created_at', 'DESC')->paginate(20),
+            'subscriptions' => $builder->orderBy('created_at', 'DESC')->paginate(20),
             'pager'         => $this->subscriptionModel->pager,
+            'users'         => $this->userModel->orderBy('name', 'ASC')->findAll(),
+            'plans'         => $this->planModel->orderBy('name', 'ASC')->findAll(),
+            'user_id'       => $userId,
+            'plan_id'       => $planId,
+            'status'        => $status
         ];
 
         return view('admin/subscriptions', $data);

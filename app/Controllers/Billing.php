@@ -6,6 +6,7 @@ use App\Models\ApikeysModel;
 use App\Models\ApiRequestsModel;
 use App\Models\UserModel;
 use App\Models\UsersuscriptionsModel;
+use App\Models\InvoiceModel;
 
 class Billing extends BaseController
 {
@@ -41,7 +42,7 @@ class Billing extends BaseController
         $data['api_request_total_month'] = $this->ApiRequestsModel->countRequestsForMonth(date('Y-m'), ['user_id' => $userId]);
 
         // Para la vista: plan actual en texto, etc.
-        $data['current_plan'] = is_array($data['plan']) ? ($data['plan']['name'] ?? null) : (is_object($data['plan']) ? ($data['plan']->name ?? null) : null);
+        $data['current_plan'] = is_array($data['plan']) ? ($data['plan']['plan_name'] ?? null) : (is_object($data['plan']) ? ($data['plan']->plan_name ?? null) : null);
 
         return view('billing', $data);
     }
@@ -77,8 +78,17 @@ class Billing extends BaseController
         $billEmail = trim((string) $this->request->getPost('email')) ?: (string)($user['email'] ?? '');
         $billName  = trim((string) $this->request->getPost('name'));
 
-        if ($pm === 'paypal') {
+        if ($pm === 'paypal' && getenv('BILLING_MODE') !== 'simulator') {
             return $this->startPaypalSubscription($userId, $plan, $period);
+        }
+
+        if (getenv('BILLING_MODE') === 'simulator') {
+            $simulator = new \App\Libraries\BillingSimulator();
+            if ($simulator->simulatePayment($userId, $plan, $period)) {
+                return redirect()->to(site_url('billing/success'))->with('message', 'Simulación de pago completada con éxito.');
+            } else {
+                return redirect()->back()->with('error', 'Error en la simulación del pago.');
+            }
         }
 
         return $this->startStripeCheckout($userId, $plan, $period, $billEmail, $billName);
@@ -90,12 +100,12 @@ class Billing extends BaseController
         // Sustituye estos placeholders por tus price_ reales:
         $stripePrices = [
             'pro' => [
-                'monthly' => 'price_PRO_MONTHLY_ID',
-                'annual'  => 'price_PRO_ANNUAL_ID',
+                'monthly' => getenv('STRIPE_PRICE_PRO_MONTHLY'),
+                'annual'  => getenv('STRIPE_PRICE_PRO_ANNUAL'),
             ],
             'business' => [
-                'monthly' => 'price_BUSINESS_MONTHLY_ID',
-                'annual'  => 'price_BUSINESS_ANNUAL_ID',
+                'monthly' => getenv('STRIPE_PRICE_BUSINESS_MONTHLY'),
+                'annual'  => getenv('STRIPE_PRICE_BUSINESS_ANNUAL'),
             ],
         ];
 
@@ -155,7 +165,34 @@ class Billing extends BaseController
         if (!session('logged_in')) {
             return redirect()->to(site_url('dashboard'));
         }
-        return view('purchase_success');
+
+        $userId = (int) session('user_id');
+        
+        // Fetch user's active subscription
+        $subscription = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
+        
+        if (!$subscription) {
+            // If no active subscription, redirect to billing
+            return redirect()->to(site_url('billing'));
+        }
+
+        // Prepare data for the view
+        $data = [];
+        
+        // Plan information (using object notation)
+        $data['plan_name'] = $subscription->plan_name ?? 'Pro';
+        $data['base_price'] = $subscription->price_monthly ?? '19';
+        
+        // Determine period (we'll assume monthly for now, could be enhanced)
+        $data['period_name'] = 'Mensual';
+        
+        // Payment method (from subscription or default)
+        $data['payment_method'] = 'Tarjeta (Stripe)';
+        
+        // Order reference (use subscription ID)
+        $data['order_ref'] = 'SUB-' . str_pad($subscription->id ?? '0', 6, '0', STR_PAD_LEFT);
+        
+        return view('purchase_success', $data);
     }
 
     public function cancel()
@@ -312,5 +349,111 @@ class Billing extends BaseController
             return redirect()->to(site_url('dashboard'));
         }
         return view('billing_manage');
+    }
+
+    /**
+     * Listado de facturas del usuario
+     */
+    public function invoices()
+    {
+        if (!session('logged_in')) {
+            return redirect()->to(site_url('enter'));
+        }
+
+        $userId = (int) session('user_id');
+        $invoiceModel = new InvoiceModel();
+
+        $data = [
+            'title'    => 'Mis Facturas',
+            'invoices' => $invoiceModel->where('user_id', $userId)->orderBy('created_at', 'DESC')->paginate(10),
+            'pager'    => $invoiceModel->pager,
+            'user'     => $this->userModel->find($userId)
+        ];
+
+        return view('billing/invoices', $data);
+    }
+
+    /**
+     * Descargar factura propia
+     */
+    public function invoice_download($id)
+    {
+        if (!session('logged_in')) {
+            return redirect()->to(site_url('enter'));
+        }
+
+        $userId = (int) session('user_id');
+        $invoiceModel = new InvoiceModel();
+        
+        // Seguridad: Solo puede descargar si le pertenece
+        $invoice = $invoiceModel->where(['id' => $id, 'user_id' => $userId])->first();
+
+        if (!$invoice || !$invoice->pdf_path) {
+            return redirect()->back()->with('error', 'Factura no encontrada o no tienes permiso.');
+        }
+
+        $fullPath = FCPATH . $invoice->pdf_path;
+        if (!file_exists($fullPath)) {
+            return redirect()->back()->with('error', 'El archivo de la factura no está disponible.');
+        }
+
+        return $this->response->download($fullPath, null)->setFileName($invoice->invoice_number . '.pdf');
+    }
+
+    /**
+     * Rotar la API Key del usuario
+     */
+    public function rotate_key()
+    {
+        if (!session('logged_in')) {
+            return redirect()->to(site_url('enter'));
+        }
+
+        $userId = (int) session('user_id');
+
+        // 1. Desactivar claves anteriores
+        $this->ApikeysModel->where('user_id', $userId)->set(['is_active' => 0])->update();
+
+        // 2. Generar nueva clave
+        $newKey = 'ak_' . bin2hex(random_bytes(16));
+
+        // 3. Insertar nueva clave
+        $this->ApikeysModel->insert([
+            'user_id'   => $userId,
+            'name'      => 'Clave Principal (Rotada)',
+            'api_key'   => $newKey,
+            'is_active' => 1,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+
+        return redirect()->to(site_url('dashboard'))->with('message', 'Tu API Key ha sido rotada con éxito. Recuerda actualizar tus aplicaciones.');
+    }
+
+    /**
+     * Cancelar suscripción activa
+     */
+    public function cancel_subscription()
+    {
+        if (!session('logged_in')) {
+            return redirect()->to(site_url('enter'));
+        }
+
+        $userId = (int) session('user_id');
+        $plan = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
+
+        if (!$plan) {
+            return redirect()->back()->with('error', 'No tienes ninguna suscripción activa para cancelar.');
+        }
+
+        // En un entorno real, aquí llamaríamos a Stripe/PayPal para cancelar
+        // Por ahora, lo marcamos como cancelado en nuestra DB (o simulamos)
+        
+        $this->UsersuscriptionsModel->update($plan->id, [
+            'status' => 'canceled',
+            'canceled_at' => date('Y-m-d H:i:s')
+        ]);
+
+        return redirect()->to(site_url('billing'))->with('message', 'Tu suscripción ha sido cancelada. Seguirás teniendo acceso hasta el final del periodo facturado.');
     }
 }

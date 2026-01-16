@@ -104,10 +104,10 @@
                     <article class="kpi">
                         <div class="kpi__left">
                             <p class="kpi__label">Consultas mes</p>
-                            <div class="kpi__meta">de 20.000 incluidas</div>
+                            <div class="kpi__meta">de <?= number_format($plan->monthly_quota ?? 0, 0, ',', '.') ?> incluidas</div>
                         </div>
                         <div class="kpi__right">
-                            <p class="kpi__number">8.420</p>
+                            <p class="kpi__number"><?= number_format($api_request_total_month ?? 0, 0, ',', '.') ?></p>
                         </div>
                         <p class="kpi__sub">
                             <span>Consumo del plan</span>
@@ -118,11 +118,11 @@
                     <!-- Latencia -->
                     <article class="kpi">
                         <div class="kpi__left">
-                            <p class="kpi__label">Latencia P95</p>
-                            <div class="kpi__meta">últimas 24h</div>
+                            <p class="kpi__label">Latencia Media</p>
+                            <div class="kpi__meta">últimas requests</div>
                         </div>
                         <div class="kpi__right">
-                            <p class="kpi__number">240<span class="kpi__unit">ms</span></p>
+                            <p class="kpi__number"><?= number_format($avg_latency ?? 0, 0, ',', '.') ?><span class="kpi__unit">ms</span></p>
                         </div>
                         <p class="kpi__sub">
                             <span>Tiempo de respuesta</span>
@@ -134,10 +134,10 @@
                     <article class="kpi">
                         <div class="kpi__left">
                             <p class="kpi__label">Errores</p>
-                            <div class="kpi__meta">últimos 7 días</div>
+                            <div class="kpi__meta">ratio histórico</div>
                         </div>
                         <div class="kpi__right">
-                            <p class="kpi__number">0,18<span class="kpi__unit">%</span></p>
+                            <p class="kpi__number"><?= number_format($error_rate ?? 0, 2, ',', '.') ?><span class="kpi__unit">%</span></p>
                         </div>
                         <p class="kpi__sub">
                             <span>Ratio de error</span>
@@ -179,21 +179,60 @@
                         <p>Uso recomendado: backend + variables de entorno. Si sospechas exposición, rota la clave.</p>
 
                         <div class="apikey-row">
-                            <div class="apikey-box" id="apiKeyBox" data-api-key="<?=htmlspecialchars($user->api_key ?? '') ?>">
+                            <div class="apikey-box" id="apiKeyBox" data-api-key="<?= esc($api_key->api_key ?? 'No generada') ?>">
                                 <div>
                                     <div class="apikey-label">API KEY</div>
-                                    <div class="apikey-value" id="apiKeyMasked"><?=htmlspecialchars($user->api_key ?? '') ?></div>
+                                    <div class="apikey-value" id="apiKeyMasked"><?= esc($api_key->api_key ?? 'No generada') ?></div>
                                 </div>
                             </div>
                             <div class="apikey-actions">
                                 <button type="button" class="btn-small" id="btnToggleKey">Mostrar</button>
                                 <button type="button" class="btn-small primary" id="btnCopyKey">Copiar</button>
                                 <!-- CTA de rotación (enlaza a tu ruta real si la tienes) -->
-                                <button type="button" class="btn-small danger" onclick="window.location.href='<?=site_url() ?>billing#api-keys'">
-                                    Rotar clave
-                                </button>
+                                <form id="formRotateKey" action="<?= site_url('billing/rotate-key') ?>" method="POST" style="display:inline;">
+                                    <?= csrf_field() ?>
+                                    <button type="submit" class="btn-small danger">
+                                        Rotar clave
+                                    </button>
+                                </form>
                             </div>
                         </div>
+
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const formRotate = document.getElementById('formRotateKey');
+                                if (!formRotate) return;
+
+                                formRotate.addEventListener('submit', function (e) {
+                                    e.preventDefault();
+
+                                    Swal.fire({
+                                        title: '¿Rotar API Key?',
+                                        html: 'Si rotas la clave, <strong>la anterior dejará de funcionar inmediatamente</strong>. Tendrás que actualizarla en tu integración.',
+                                        icon: null,
+                                        iconHtml: '<span class="ve-swal-icon-inner">!</span>',
+                                        showCancelButton: true,
+                                        confirmButtonText: 'Sí, rotar clave',
+                                        cancelButtonText: 'Cancelar',
+                                        reverseButtons: true,
+                                        focusCancel: true,
+                                        customClass: {
+                                            popup: 've-swal',
+                                            title: 've-swal-title',
+                                            htmlContainer: 've-swal-text',
+                                            confirmButton: 'btn btn-small danger ve-swal-confirm',
+                                            cancelButton: 'btn btn_header--ghost ve-swal-cancel',
+                                            icon: 've-swal-icon'
+                                        },
+                                        buttonsStyling: false
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            formRotate.submit();
+                                        }
+                                    });
+                                });
+                            });
+                        </script>
 
                         <p class="usage-footnote" style="margin-top:12px;">
                             Sugerencia: rota la key cada X meses (o tras cambios de equipo/repositorio) y revoca la anterior.
@@ -206,13 +245,18 @@
                         <h2>Consumo del mes</h2>
                         <p>Monitoriza consultas para mantenerte dentro de plan y detectar picos anómalos.</p>
 
+                        <?php 
+                        $quota = $plan->monthly_quota ?? 1;
+                        $used = $api_request_total_month ?? 0;
+                        $percent = min(100, ($used / $quota) * 100);
+                        ?>
                         <div class="usage-wrap">
                             <div class="usage-top">
-                                <span><span class="usage-strong">8.420</span> de 20.000 consultas usadas</span>
-                                <span>Renueva el <span class="usage-strong">01/<?=date('m')?></span></span>
+                                <span><span class="usage-strong"><?= number_format($used, 0, ',', '.') ?></span> de <?= number_format($quota, 0, ',', '.') ?> consultas usadas</span>
+                                <span>Renueva el <span class="usage-strong"><?= isset($plan->current_period_end) ? date('d/m', strtotime($plan->current_period_end)) : '--/--' ?></span></span>
                             </div>
                             <div class="usage-bar">
-                                <div class="usage-fill" style="width:58%;"></div>
+                                <div class="usage-fill" style="width:<?= $percent ?>%;"></div>
                             </div>
                             <div class="usage-footnote">
                                 Alertas activas: email al 80% y 100%. Recomendado: caché por CIF y retries con backoff.
@@ -254,22 +298,42 @@
                 <!-- RIGHT -->
                 <aside>
                     <!-- PLAN -->
-                    <section class="plan-card">
+                    <?php 
+                        $get = function($src, $key, $default = null) {
+                            if (is_array($src)) return $src[$key] ?? $default;
+                            if (is_object($src)) return $src->$key ?? $default;
+                            return $default;
+                        };
+                        $planNameRaw = $get($plan, 'plan_name', 'Free');
+                        $currentPlanSlug = strtolower(trim($planNameRaw));
+                        $planClass = '';
+                        if (strpos($currentPlanSlug, 'business') !== false) $planClass = 'plan-card--business';
+                        elseif (strpos($currentPlanSlug, 'pro') !== false) $planClass = 'plan-card--pro';
+                    ?>
+                    <!-- Debug: Plan name is "<?= esc($planNameRaw) ?>" -> slug: "<?= esc($currentPlanSlug) ?>" -->
+                    <section class="plan-card <?= $planClass ?>">
                         <div class="plan-pill">
                             <span>PLAN ACTUAL</span>
-                            <span>Pro</span>
                         </div>
 
-                        <h2>Pro</h2>
-                        <div class="plan-price">49 €/mes</div>
+                        <h2><?= esc($planNameRaw) ?></h2>
+                        <div class="plan-price"><?= esc($get($plan, 'price_monthly', '0')) ?> €/mes</div>
                         <p style="margin:0 0 12px; color:rgba(239,246,255,.92); font-size:13px;">
-                            Plan de producción para integraciones activas con visibilidad y estabilidad.
+                            <?php if($currentPlanSlug === 'business'): ?>
+                                Máximo rendimiento: volumen alto, SLA y gestión avanzada de equipos.
+                            <?php else: ?>
+                                Plan de producción para integraciones activas con visibilidad y estabilidad.
+                            <?php endif; ?>
                         </p>
 
                         <div class="plan-meta">
-                            <div>• Límite ampliado + métricas avanzadas.</div>
+                            <div>• <?= number_format($plan->monthly_quota ?? 0, 0, ',', '.') ?> consultas/mes.</div>
                             <div>• Alertas de consumo y soporte priorizado.</div>
-                            <div>• Recomendado para KYC/validación en alta.</div>
+                            <?php if($currentPlanSlug === 'business'): ?>
+                                <div>• Gestión de equipos y roles incluida.</div>
+                            <?php else: ?>
+                                <div>• Recomendado para KYC/validación en alta.</div>
+                            <?php endif; ?>
                         </div>
 
                         <button class="btn" type="button" onclick="window.location.href='<?=site_url() ?>billing'">
@@ -281,11 +345,11 @@
                     <section class="mini-card">
                         <h3>Facturación</h3>
                         <p>
-                            Próxima renovación: <strong>01/<?=date('m')?></strong><br>
+                            Próxima renovación: <strong><?= isset($plan->current_period_end) ? date('d/m/Y', strtotime($plan->current_period_end)) : '--/--/----' ?></strong><br>
                             Método de pago: <strong>Tarjeta</strong><br>
                             Estado: <strong>Activo</strong>
                         </p>
-                        <a href="<?=site_url() ?>billing">Ver facturas y datos fiscales →</a>
+                        <a href="<?=site_url() ?>billing/invoices">Ver facturas y datos fiscales →</a>
                         <div class="mini-note">
                             Si necesitas factura con datos fiscales específicos, actualízalo en “Facturación”.
                         </div>

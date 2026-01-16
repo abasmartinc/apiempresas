@@ -3,20 +3,12 @@
 <head>
     <?= view('partials/head', ['title' => $title]) ?>
 </head>
-<body>
+<body class="admin-body">
 <div class="bg-halo" aria-hidden="true"></div>
 
-<header>
-    <div class="container nav">
-        <div class="brand">
-            <a href="<?= site_url() ?>">
-                <span class="brand-name">API<span class="grad">Empresas</span> Admin</span>
-            </a>
-        </div>
-    </div>
-</header>
+<?= view('partials/header_admin') ?>
 
-<main class="container" style="padding: 40px 0;">
+<main class="container-admin" style="padding: 40px 0;">
     <div style="max-width: 700px; margin: 0 auto;">
         <a href="<?= site_url('admin/users') ?>" class="minor" style="display: inline-block; margin-bottom: 1rem;">← Volver al listado</a>
         
@@ -59,6 +51,10 @@
                         <input type="checkbox" name="is_admin" value="1" <?= old('is_admin', $user->is_admin ?? 0) ? 'checked' : '' ?>>
                         Administrador
                     </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" name="api_access" value="1" <?= old('api_access', $user->api_access ?? 0) ? 'checked' : '' ?>>
+                        Acceso API (Dashboard Real)
+                    </label>
                 </div>
 
                 <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1rem;">
@@ -73,3 +69,4 @@
 <?= view('partials/footer') ?>
 </body>
 </html>
+

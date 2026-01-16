@@ -69,4 +69,71 @@ class ApiRequestsModel extends Model
         $row = $builder->get()->getRowArray();
         return (int)($row['total'] ?? 0);
     }
+
+    public function getAverageLatency(array $where = []): int
+    {
+        $builder = $this->db->table($this->table)
+            ->selectAvg('duration_ms', 'avg_latency');
+
+        foreach ($where as $k => $v) {
+            $builder->where($k, $v);
+        }
+
+        $row = $builder->get()->getRowArray();
+        return (int)($row['avg_latency'] ?? 0);
+    }
+
+    public function getErrorRate(array $where = []): float
+    {
+        $builder = $this->db->table($this->table);
+        foreach ($where as $k => $v) {
+            $builder->where($k, $v);
+        }
+        $total = $builder->countAllResults(false);
+
+        if ($total === 0) return 0.0;
+
+        $errors = $builder->where('status_code >=', 400)->countAllResults();
+        
+        return round(($errors / $total) * 100, 2);
+    }
+
+    /**
+     * Get endpoint breakdown for a specific month
+     * Returns array of endpoints with their usage counts
+     */
+    public function getEndpointBreakdownForMonth(string $ym, array $where = []): array
+    {
+        $builder = $this->db->table($this->table)
+            ->select('endpoint, COUNT(*) AS total', false)
+            ->like('created_at', $ym, 'after');
+        
+        foreach ($where as $k => $v) {
+            $builder->where($k, $v);
+        }
+        
+        return $builder
+            ->groupBy('endpoint')
+            ->orderBy('total', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * Get count for a specific endpoint on a specific day
+     */
+    public function getEndpointCountForDay(string $endpoint, string $ymd, array $where = []): int
+    {
+        $builder = $this->db->table($this->table)
+            ->select('COUNT(*) AS total', false)
+            ->where('endpoint', $endpoint)
+            ->like('created_at', $ymd, 'after');
+        
+        foreach ($where as $k => $v) {
+            $builder->where($k, $v);
+        }
+        
+        $row = $builder->get()->getRowArray();
+        return (int)($row['total'] ?? 0);
+    }
 }
