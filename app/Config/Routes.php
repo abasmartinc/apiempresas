@@ -142,7 +142,14 @@ $routes->post('webhook/stripe', 'Webhook::stripe');
 
 // Sitemap
 $routes->get('sitemap.xml', 'Sitemap::index');
+$routes->get('sitemap-static.xml', 'Sitemap::static');
+$routes->get('sitemap-blog.xml', 'Sitemap::blog');
 $routes->get('sitemap-companies-(:num).xml', 'Sitemap::companies/$1');
+
+// Directorios SEO
+$routes->get('directorio', 'Directory::index');
+$routes->get('directorio/provincia/(:any)', 'Directory::province/$1');
+$routes->get('directorio/cnae/(:any)', 'Directory::cnae/$1');
 
 // Company SEO Pages (Regex: Letter + 7 Digits + Char + optional slug)
 // Must be last to avoid conflicts

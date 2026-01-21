@@ -183,6 +183,17 @@ $googlebot = $googlebot ?? ($robots . ',max-snippet:-1,max-image-preview:large,m
         { "@type": "WebPage", "@id": "<?= esc($urlDocs) ?>#webpage",   "url": "<?= esc($urlDocs) ?>",   "name": "Documentación API | APIEmpresas.es" },
         { "@type": "Blog",    "@id": "<?= esc($urlBlog) ?>#blog",      "url": "<?= esc($urlBlog) ?>",   "name": "Blog | APIEmpresas.es" }
       ]
+    },
+    {
+      "@type": "Service",
+      "name": "Verificación de Empresas en España",
+      "serviceType": "B2B Data Verification",
+      "provider": { "@id": "<?= esc($homeUrl) ?>#org" },
+      "areaServed": {
+        "@type": "Country",
+        "name": "España"
+      },
+      "description": "Servicio de verificación mercantil y validación de CIF en tiempo real."
     }
   ]
 }

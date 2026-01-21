@@ -61,6 +61,7 @@
             <div>
                 <h4 style="margin:0 0 8px">Producto</h4>
                 <a class="minor" href="<?=site_url() ?>blog">Guías y artículos</a><br />
+                <a class="minor" href="<?=site_url() ?>directorio">Directorio SEO</a><br />
                 <a class="minor" href="<?=site_url() ?>search_company">Buscador</a><br />
                 <a class="minor" href="<?=site_url() ?>documentation">Documentación</a><br />
             </div>

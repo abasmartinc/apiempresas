@@ -4754,3 +4754,7 @@ body::after,
         font-size: 20px;
     }
 }
+
+.dir-section {
+    padding: 30px;
+}

@@ -372,37 +372,34 @@
             </div>
 
             <div class="home-blog__grid" id="home-blog-grid">
-                <article class="home-blog__card home-blog__card--skeleton">
-                    <div class="home-blog__skeleton-eyebrow skeleton-block"></div>
-                    <div class="home-blog__skeleton-title skeleton-block"></div>
-                    <div class="home-blog__skeleton-line skeleton-block"></div>
-                    <div class="home-blog__skeleton-line skeleton-block"></div>
-                    <div class="home-blog__skeleton-meta skeleton-block"></div>
-                </article>
-
-                <article class="home-blog__card home-blog__card--skeleton">
-                    <div class="home-blog__skeleton-eyebrow skeleton-block"></div>
-                    <div class="home-blog__skeleton-title skeleton-block"></div>
-                    <div class="home-blog__skeleton-line skeleton-block"></div>
-                    <div class="home-blog__skeleton-line skeleton-block"></div>
-                    <div class="home-blog__skeleton-meta skeleton-block"></div>
-                </article>
-
-                <article class="home-blog__card home-blog__card--skeleton">
-                    <div class="home-blog__skeleton-eyebrow skeleton-block"></div>
-                    <div class="home-blog__skeleton-title skeleton-block"></div>
-                    <div class="home-blog__skeleton-line skeleton-block"></div>
-                    <div class="home-blog__skeleton-line skeleton-block"></div>
-                    <div class="home-blog__skeleton-meta skeleton-block"></div>
-                </article>
-
-                <article class="home-blog__card home-blog__card--skeleton">
-                    <div class="home-blog__skeleton-eyebrow skeleton-block"></div>
-                    <div class="home-blog__skeleton-title skeleton-block"></div>
-                    <div class="home-blog__skeleton-line skeleton-block"></div>
-                    <div class="home-blog__skeleton-line skeleton-block"></div>
-                    <div class="home-blog__skeleton-meta skeleton-block"></div>
-                </article>
+                <?php if (!empty($latest_posts)): ?>
+                    <?php foreach ($latest_posts as $post): ?>
+                        <article class="home-blog__card">
+                            <a href="<?= esc($post['url']) ?>" class="home-blog__link">
+                                <h3 class="home-blog__title"><?= esc($post['title']) ?></h3>
+                                <p class="home-blog__excerpt"><?= esc($post['excerpt']) ?></p>
+                                <p class="home-blog__meta muted">
+                                    <?= esc($post['date']) ?> · <?= esc($post['reading']) ?>
+                                </p>
+                            </a>
+                        </article>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <article class="home-blog__card home-blog__card--skeleton">
+                        <div class="home-blog__skeleton-eyebrow skeleton-block"></div>
+                        <div class="home-blog__skeleton-title skeleton-block"></div>
+                        <div class="home-blog__skeleton-line skeleton-block"></div>
+                        <div class="home-blog__skeleton-line skeleton-block"></div>
+                        <div class="home-blog__skeleton-meta skeleton-block"></div>
+                    </article>
+                    <article class="home-blog__card home-blog__card--skeleton">
+                        <div class="home-blog__skeleton-eyebrow skeleton-block"></div>
+                        <div class="home-blog__skeleton-title skeleton-block"></div>
+                        <div class="home-blog__skeleton-line skeleton-block"></div>
+                        <div class="home-blog__skeleton-line skeleton-block"></div>
+                        <div class="home-blog__skeleton-meta skeleton-block"></div>
+                    </article>
+                <?php endif; ?>
             </div>
         </div>
     </section>
@@ -544,6 +541,11 @@
     document.addEventListener('DOMContentLoaded', function () {
         const grid = document.getElementById('home-blog-grid');
         if (!grid) return;
+
+        // Only fetch if no posts were rendered server-side (empty or skeleton)
+        if (grid.querySelectorAll('.home-blog__card:not(.home-blog__card--skeleton)').length > 0) {
+            return;
+        }
 
         fetch('<?=site_url() ?>blog/get_posts', {
             headers: {
