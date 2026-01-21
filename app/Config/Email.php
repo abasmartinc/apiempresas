@@ -9,7 +9,7 @@ class Email extends BaseConfig
     /**
      * @var string
      */
-    public $fromEmail = 'admin@abasmart.net';
+    public $fromEmail = 'soporte@apiempresas.es';
 
     /**
      * @var string
@@ -47,28 +47,28 @@ class Email extends BaseConfig
      *
      * @var string
      */
-    public $SMTPHost = 'mail.abasmart.net';
+    public $SMTPHost = 'serv327.controldeservidor.com';
 
     /**
      * SMTP Username
      *
      * @var string
      */
-    public $SMTPUser = 'admin@abasmart.net';
+    public $SMTPUser = 'soporte@apiempresas.es';
 
     /**
      * SMTP Password
      *
      * @var string
      */
-    public $SMTPPass = '75eji@~.Ekg_*^L2';
+    public $SMTPPass = 'Ay1y925@h';
 
     /**
      * SMTP Port
      *
      * @var integer
      */
-    public $SMTPPort = 587; //465
+    public $SMTPPort = 465; //465
 
     /**
      * SMTP Timeout (in seconds)
@@ -89,7 +89,7 @@ class Email extends BaseConfig
      *
      * @var string
      */
-    public $SMTPCrypto = 'tls'; // ssl
+    public $SMTPCrypto = 'ssl'; // ssl
 
     /**
      * Enable word-wrap

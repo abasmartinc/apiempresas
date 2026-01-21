@@ -137,7 +137,7 @@ class Register extends BaseController
             $this->UsersuscriptionsModel->insert([
                 'user_id'               => $user_id,
                 'plan_id'               => 1,
-                'status'                => 'active',
+                'status'                => 'trialing',
                 'current_period_start'  => date('Y-m-d H:i:s'),
                 'current_period_end'    => date('Y-m-d H:i:s', strtotime('+1 month')),
                 'created_at'            => date('Y-m-d H:i:s'),
@@ -148,7 +148,7 @@ class Register extends BaseController
             $emailService = \Config\Services::email();
 
             // Forzar FROM válido (del mismo dominio del SMTP)
-            $emailService->setFrom('admin@abasmart.net', 'ABASmart');
+            $emailService->setFrom('soporte@apiempresas.es', 'APIEmpresas.es');
 
             // Destino (tu correo de notificación)
             $emailService->setTo('papelo.amh@gmail.com');
@@ -158,15 +158,14 @@ class Register extends BaseController
 
             $emailService->setSubject('Nuevo registro de usuario');
 
-            $emailService->setMessage("
-                <h3>Nuevo registro</h3>
-                <p><b>Nombre:</b> " . esc($data['name']) . "</p>
-                <p><b>Empresa:</b> " . esc($data['company']) . "</p>
-                <p><b>Email:</b> " . esc($data['email']) . "</p>
-                <p><b>Fecha:</b> " . date('Y-m-d H:i:s') . "</p>
-                <hr>
-                <p><b>User ID:</b> " . (int) $user_id . "</p>
-            ");
+            $emailBody = view('emails/admin_notification', [
+                'name'    => $data['name'],
+                'company' => $data['company'],
+                'email'   => $data['email'],
+                'user_id' => $user_id
+            ]);
+
+            $emailService->setMessage($emailBody);
 
             $sent = $emailService->send();
 
@@ -177,12 +176,26 @@ class Register extends BaseController
                 log_message('info', 'Email sent OK to papelo.amh@gmail.com');
             }
 
+            // 5) Enviar correo de BIENVENIDA al usuario
+            $welcomeEmail = \Config\Services::email();
+            $welcomeEmail->setFrom('soporte@apiempresas.es', 'APIEmpresas.es');
+            $welcomeEmail->setTo($email);
+            $welcomeEmail->setSubject('¡Bienvenido a APIEmpresas.es!');
+            
+            $emailBody = view('emails/welcome', ['name' => $data['name']]);
+            $welcomeEmail->setMessage($emailBody);
+            
+            if (!$welcomeEmail->send()) {
+                log_message('error', 'Welcome Email failed for ' . $email . ': ' . $welcomeEmail->printDebugger(['headers']));
+            } else {
+                log_message('info', 'Welcome Email sent OK to ' . $email);
+            }
+
             // Log successful registration
             log_activity('register', ['email' => $email], $user_id);
 
             return redirect()
-                ->to(site_url('register_sucess'))
-                ->with('message', 'Cuenta creada correctamente. Ya puedes iniciar sesión.');
+                ->to(site_url('register_sucess'));
         } catch (\Throwable $e) {
 
             // Log del error real para depuración

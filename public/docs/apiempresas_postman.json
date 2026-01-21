@@ -1,0 +1,115 @@
+{
+	"info": {
+		"_postman_id": "8c5e2a1b-7d3a-4f5a-9e2c-1b2a3d4f5g6h",
+		"name": "APIEmpresas.es - API V1",
+		"description": "Colección de peticiones para la API de APIEmpresas.es. Permite consultar datos de empresas por CIF y realizar búsquedas por nombre.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Consulta por CIF",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{API_KEY}}",
+						"description": "Tu clave de API obtenida en el panel",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://apiempresas.es/api/v1/companies?cif=B12345678",
+					"protocol": "https",
+					"host": [
+						"apiempresas",
+						"es"
+					],
+					"path": [
+						"api",
+						"v1",
+						"companies"
+					],
+					"query": [
+						{
+							"key": "cif",
+							"value": "B12345678"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Búsqueda por Nombre",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{API_KEY}}",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://apiempresas.es/api/v1/companies/search?name=Telefónica",
+					"protocol": "https",
+					"host": [
+						"apiempresas",
+						"es"
+					],
+					"path": [
+						"api",
+						"v1",
+						"companies",
+						"search"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "Telefónica"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "API_KEY",
+			"value": "tu_api_key_aqui",
+			"type": "string"
+		}
+	]
+}
