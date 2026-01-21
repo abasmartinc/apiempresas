@@ -20,7 +20,7 @@ class InvoiceService
     /**
      * Genera un registro de factura y su PDF correspondiente
      */
-    public function createInvoiceFromPayment(int $userId, int $planId, array $billingData = [])
+    public function createInvoiceFromPayment(int $userId, int $planId, array $billingData = [], ?string $stripeInvoiceId = null)
     {
         $userModel = new UserModel();
         $user = $userModel->find($userId);
@@ -32,6 +32,15 @@ class InvoiceService
             return null;
         }
 
+        // 1. Evitar duplicados si ya existe esta factura de Stripe
+        if ($stripeInvoiceId) {
+            $existing = $this->invoiceModel->where('stripe_invoice_id', $stripeInvoiceId)->first();
+            if ($existing) {
+                log_message('info', "[InvoiceService] Saltando creación de factura duplicada para Stripe ID: {$stripeInvoiceId}");
+                return $existing;
+            }
+        }
+
         // Datos de la factura
         $amount = (float)$plan->price_monthly;
         $taxRate = 0.21; // 21% IVA
@@ -39,17 +48,18 @@ class InvoiceService
         $totalAmount = $amount + $taxAmount;
 
         $invoiceData = [
-            'user_id'         => $userId,
-            'invoice_number'  => $this->invoiceModel->getNextInvoiceNumber(),
-            'amount'          => $amount,
-            'tax_amount'      => $taxAmount,
-            'total_amount'    => $totalAmount,
-            'currency'        => 'EUR',
-            'status'          => 'paid',
-            'billing_name'    => $billingData['name'] ?? $user->name,
-            'billing_email'   => $billingData['email'] ?? $user->email,
-            'billing_address' => $billingData['address'] ?? '',
-            'billing_vat'     => $billingData['vat'] ?? '',
+            'user_id'           => $userId,
+            'invoice_number'    => $this->invoiceModel->getNextInvoiceNumber(),
+            'amount'            => $amount,
+            'tax_amount'        => $taxAmount,
+            'total_amount'      => $totalAmount,
+            'currency'          => 'EUR',
+            'status'            => 'paid',
+            'stripe_invoice_id' => $stripeInvoiceId,
+            'billing_name'      => $billingData['name'] ?? $user->name,
+            'billing_email'     => $billingData['email'] ?? $user->email,
+            'billing_address'   => $billingData['address'] ?? '',
+            'billing_vat'       => $billingData['vat'] ?? '',
         ];
 
         $invoiceId = $this->invoiceModel->insert($invoiceData);

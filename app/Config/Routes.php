@@ -13,6 +13,7 @@ $routes->get('register', 'Register::index');
 $routes->get('register_sucess', 'Register::register_sucess');
 $routes->post('signup', 'Register::store');
 $routes->get('dashboard', 'Dashboard::index');
+$routes->get('stop-impersonation', 'Dashboard::stopImpersonating');
 $routes->get('search_company', 'Search::search_company');
 $routes->post('search_company', 'Search::search_company_post');
 $routes->get('search', 'Search::index');
@@ -28,6 +29,7 @@ $routes->get('billing/purchase-success', 'Billing::purchase_success');
 $routes->get('billing/manage', 'Billing::billing_manage');
 $routes->get('billing/invoices', 'Billing::invoices');
 $routes->get('billing/invoices/download/(:num)', 'Billing::invoice_download/$1');
+$routes->get('billing/portal', 'Billing::portal');
 $routes->post('billing/rotate-key', 'Billing::rotate_key');
 $routes->post('billing/cancel-subscription', 'Billing::cancel_subscription');
 
@@ -79,6 +81,7 @@ $routes->group('admin', ['filter' => 'admin'], function($routes) {
     $routes->get('users/delete/(:num)', 'Admin\Dashboard::delete/$1');
     $routes->get('users/email/(:num)', 'Admin\Dashboard::compose/$1');
     $routes->get('users/toggle-api-access/(:num)', 'Admin\Dashboard::toggle_api_access/$1');
+    $routes->get('users/impersonate/(:num)', 'Admin\Dashboard::impersonate/$1');
     $routes->post('users/send', 'Admin\Dashboard::send');
     
     // Logs de búsqueda

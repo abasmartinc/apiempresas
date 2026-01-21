@@ -163,16 +163,29 @@ class CompanyModel extends Model
             $candidateName = (string)($row['name'] ?? '');
             $nameNorm = $this->normalizeForSearch($candidateName);
 
+            // 1) Calcular overlap de tokens (0..100)
+            $overlap = $this->tokenOverlapScore($qClean, $nameNorm);
+            
+            // REGLA 1: Si no hay al menos la mitad de tokens coincidentes, descartar
+            // Evita que "Alessandro" haga match con "Alessandro Ignazio..." si busco "Alessandro Lapo Morelli"
+            if ($overlap < 50) {
+                continue;
+            }
+
+            // REGLA 2: Umbral adaptativo
+            // Si el overlap no es total, exigimos más similitud visual (70)
+            // Si el overlap es total (todas mis palabras están), somos más tolerantes (55 - igual que antes)
+            $minScore = ($overlap < 100) ? 70 : 55;
+
             $score = $this->similarityScore($qClean, $nameNorm); // 0..100
 
-            if ($score > $bestScore) {
+            if ($score >= $minScore && $score > $bestScore) {
                 $bestScore = $score;
                 $best = $row;
             }
         }
 
-        // Umbral para evitar resultados irrelevantes
-        if ($best === null || $bestScore < 55) {
+        if ($best === null) {
             return null;
         }
 
@@ -183,6 +196,26 @@ class CompanyModel extends Model
                 'score'  => (int) round($bestScore),
             ],
         ];
+    }
+    
+    /**
+     * Calcula qué porcentaje de tokens de $needle están presentes en $haystack
+     */
+    private function tokenOverlapScore(string $needle, string $haystack): float
+    {
+        $tokensA = array_filter(explode(' ', $needle), fn($t) => mb_strlen($t, 'UTF-8') >= 2);
+        $tokensB = array_filter(explode(' ', $haystack), fn($t) => mb_strlen($t, 'UTF-8') >= 2);
+        
+        if (empty($tokensA) || empty($tokensB)) return 0.0;
+
+        $matches = 0;
+        foreach ($tokensA as $ta) {
+            if (in_array($ta, $tokensB)) {
+                $matches++;
+            }
+        }
+
+        return ($matches / count($tokensA)) * 100;
     }
 
     private function normalizeForSearch(string $s): string

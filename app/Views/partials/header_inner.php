@@ -1,4 +1,10 @@
 <header>
+    <?php if (session('impersonator_id')): ?>
+    <div style="background: #e0f2fe; border-bottom: 1px solid #bae6fd; padding: 10px; text-align: center; color: #0369a1; font-size: 0.9rem; font-weight: 500;">
+        👀 Estás viendo el sitio como <strong><?= esc(session('user_name')) ?></strong>.
+        <a href="<?= site_url('stop-impersonation') ?>" style="margin-left: 10px; text-decoration: underline; color: #0284c7; font-weight: 700;">Volver a Admin &rarr;</a>
+    </div>
+    <?php endif; ?>
     <div class="container nav">
         <div class="brand">
             <a href="<?=site_url() ?>">

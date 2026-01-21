@@ -31,7 +31,7 @@ class Billing extends BaseController
         }
 
         $userId = (int) session('user_id');
-        $user   = $this->userModel->find($userId);
+        $user = $this->userModel->find($userId);
 
         $data['user'] = $user;
         $data['api_key'] = $this->ApikeysModel->where(['user_id' => $userId, 'is_active' => 1])->first();
@@ -43,6 +43,7 @@ class Billing extends BaseController
 
         // Para la vista: plan actual en texto, etc.
         $data['current_plan'] = is_array($data['plan']) ? ($data['plan']['plan_name'] ?? null) : (is_object($data['plan']) ? ($data['plan']->plan_name ?? null) : null);
+        $data['stripe_customer_id'] = $user->stripe_customer_id ?? null;
 
         return view('billing', $data);
     }
@@ -58,11 +59,11 @@ class Billing extends BaseController
         }
 
         $userId = (int) session('user_id');
-        $user   = $this->userModel->find($userId);
+        $user = $this->userModel->find($userId);
 
-        $plan   = strtolower(trim((string) $this->request->getPost('plan')));          // pro | business
+        $plan = strtolower(trim((string) $this->request->getPost('plan')));          // pro | business
         $period = strtolower(trim((string) $this->request->getPost('period')));        // monthly | annual
-        $pm     = strtolower(trim((string) $this->request->getPost('payment_method'))); // stripe | paypal
+        $pm = strtolower(trim((string) $this->request->getPost('payment_method'))); // stripe | paypal
 
         if (!in_array($plan, ['pro', 'business'], true)) {
             return redirect()->back()->with('error', 'Plan inválido.');
@@ -75,8 +76,8 @@ class Billing extends BaseController
         }
 
         // Datos opcionales de facturación (solo para pre-rellenar)
-        $billEmail = trim((string) $this->request->getPost('email')) ?: (string)($user['email'] ?? '');
-        $billName  = trim((string) $this->request->getPost('name'));
+        $billEmail = trim((string) $this->request->getPost('email')) ?: (string) ($user['email'] ?? '');
+        $billName = trim((string) $this->request->getPost('name'));
 
         if ($pm === 'paypal' && getenv('BILLING_MODE') !== 'simulator') {
             return $this->startPaypalSubscription($userId, $plan, $period);
@@ -96,16 +97,21 @@ class Billing extends BaseController
 
     private function startStripeCheckout(int $userId, string $plan, string $period, ?string $email, ?string $name)
     {
+        // Check for CURL extension (required by Stripe SDK)
+        if (!extension_loaded('curl')) {
+            return redirect()->back()->with('error', 'El servidor no tiene habilitada la extensión CURL, necesaria para procesar pagos con Stripe. Por favor, habilítala en Laragon (Menú -> PHP -> Extensions -> curl) y reinicia los servicios.');
+        }
+
         // 1) Mapea a PRICE IDs (creados en Stripe Dashboard)
         // Sustituye estos placeholders por tus price_ reales:
         $stripePrices = [
             'pro' => [
                 'monthly' => getenv('STRIPE_PRICE_PRO_MONTHLY'),
-                'annual'  => getenv('STRIPE_PRICE_PRO_ANNUAL'),
+                'annual' => getenv('STRIPE_PRICE_PRO_ANNUAL'),
             ],
             'business' => [
                 'monthly' => getenv('STRIPE_PRICE_BUSINESS_MONTHLY'),
-                'annual'  => getenv('STRIPE_PRICE_BUSINESS_ANNUAL'),
+                'annual' => getenv('STRIPE_PRICE_BUSINESS_ANNUAL'),
             ],
         ];
 
@@ -125,28 +131,37 @@ class Billing extends BaseController
 
         try {
             $successUrl = site_url('billing/success') . '?session_id={CHECKOUT_SESSION_ID}';
-            $cancelUrl  = site_url('billing/cancel');
+            $cancelUrl = site_url('billing/cancel');
 
-            $session = \Stripe\Checkout\Session::create([
+            // Preparar parámetros de sesión
+            $sessionParams = [
                 'mode' => 'subscription',
-                'line_items' => [[
-                    'price'    => $priceId,
-                    'quantity' => 1,
-                ]],
-                'success_url' => $successUrl,
-                'cancel_url'  => $cancelUrl,
-
-                // Para reconciliar en webhook:
-                'client_reference_id' => (string)$userId,
-                'metadata' => [
-                    'user_id' => (string)$userId,
-                    'plan'    => $plan,
-                    'period'  => $period,
+                'line_items' => [
+                    [
+                        'price' => $priceId,
+                        'quantity' => 1,
+                    ]
                 ],
+                'success_url' => $successUrl,
+                'cancel_url' => $cancelUrl,
+                'client_reference_id' => (string) $userId,
+                'metadata' => [
+                    'user_id' => (string) $userId,
+                    'plan' => $plan,
+                    'period' => $period,
+                ],
+            ];
 
-                // Pre-fill
-                'customer_email' => $email ?: null,
-            ]);
+            // Buscar si el usuario ya tiene un customer_id en Stripe
+            $user = $this->userModel->find($userId);
+            if (!empty($user->stripe_customer_id)) {
+                $sessionParams['customer'] = $user->stripe_customer_id;
+            } else {
+                // Solo enviamos email si no hay customer asignado (Stripe fallará si envías ambos)
+                $sessionParams['customer_email'] = $email ?: null;
+            }
+
+            $session = \Stripe\Checkout\Session::create($sessionParams);
 
             return redirect()->to($session->url);
 
@@ -167,10 +182,10 @@ class Billing extends BaseController
         }
 
         $userId = (int) session('user_id');
-        
+
         // Fetch user's active subscription
         $subscription = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
-        
+
         if (!$subscription) {
             // If no active subscription, redirect to billing
             return redirect()->to(site_url('billing'));
@@ -178,20 +193,20 @@ class Billing extends BaseController
 
         // Prepare data for the view
         $data = [];
-        
+
         // Plan information (using object notation)
         $data['plan_name'] = $subscription->plan_name ?? 'Pro';
         $data['base_price'] = $subscription->price_monthly ?? '19';
-        
+
         // Determine period (we'll assume monthly for now, could be enhanced)
         $data['period_name'] = 'Mensual';
-        
+
         // Payment method (from subscription or default)
         $data['payment_method'] = 'Tarjeta (Stripe)';
-        
+
         // Order reference (use subscription ID)
         $data['order_ref'] = 'SUB-' . str_pad($subscription->id ?? '0', 6, '0', STR_PAD_LEFT);
-        
+
         return view('purchase_success', $data);
     }
 
@@ -217,11 +232,11 @@ class Billing extends BaseController
         $paypalPlanIds = [
             'pro' => [
                 'monthly' => 'P-PRO-MONTHLY-PLAN-ID',
-                'annual'  => 'P-PRO-ANNUAL-PLAN-ID',
+                'annual' => 'P-PRO-ANNUAL-PLAN-ID',
             ],
             'business' => [
                 'monthly' => 'P-BUSINESS-MONTHLY-PLAN-ID',
-                'annual'  => 'P-BUSINESS-ANNUAL-PLAN-ID',
+                'annual' => 'P-BUSINESS-ANNUAL-PLAN-ID',
             ],
         ];
 
@@ -234,7 +249,7 @@ class Billing extends BaseController
         $base = ($mode === 'live') ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
 
         $clientId = getenv('PAYPAL_CLIENT_ID');
-        $secret   = getenv('PAYPAL_SECRET');
+        $secret = getenv('PAYPAL_SECRET');
 
         if (!$clientId || !$secret) {
             return redirect()->back()->with('error', 'PayPal no está configurado (PAYPAL_CLIENT_ID/SECRET).');
@@ -244,10 +259,10 @@ class Billing extends BaseController
         $ch = curl_init($base . '/v1/oauth2/token');
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_USERPWD        => $clientId . ':' . $secret,
-            CURLOPT_POST           => true,
-            CURLOPT_POSTFIELDS     => 'grant_type=client_credentials',
-            CURLOPT_HTTPHEADER     => ['Accept: application/json', 'Accept-Language: en_US'],
+            CURLOPT_USERPWD => $clientId . ':' . $secret,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => 'grant_type=client_credentials',
+            CURLOPT_HTTPHEADER => ['Accept: application/json', 'Accept-Language: en_US'],
         ]);
 
         $tokenRes = curl_exec($ch);
@@ -272,12 +287,12 @@ class Billing extends BaseController
         $cancelUrl = site_url('billing/cancel');
 
         $payload = [
-            'plan_id'   => $ppPlanId,
+            'plan_id' => $ppPlanId,
             'custom_id' => (string) $userId, // para reconciliar
             'application_context' => [
                 'brand_name' => 'APIEmpresas.es',
-                'locale'     => 'es-ES',
-                'user_action'=> 'SUBSCRIBE_NOW',
+                'locale' => 'es-ES',
+                'user_action' => 'SUBSCRIBE_NOW',
                 'return_url' => $returnUrl,
                 'cancel_url' => $cancelUrl,
             ],
@@ -286,12 +301,12 @@ class Billing extends BaseController
         $ch = curl_init($base . '/v1/billing/subscriptions');
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST           => true,
-            CURLOPT_HTTPHEADER     => [
+            CURLOPT_POST => true,
+            CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
                 'Authorization: Bearer ' . $accessToken,
             ],
-            CURLOPT_POSTFIELDS     => json_encode($payload),
+            CURLOPT_POSTFIELDS => json_encode($payload),
         ]);
 
         $subRes = curl_exec($ch);
@@ -304,7 +319,7 @@ class Billing extends BaseController
         }
 
         $subJson = json_decode($subRes, true);
-        $links   = $subJson['links'] ?? [];
+        $links = $subJson['links'] ?? [];
 
         $approveUrl = null;
         foreach ($links as $lnk) {
@@ -364,10 +379,10 @@ class Billing extends BaseController
         $invoiceModel = new InvoiceModel();
 
         $data = [
-            'title'    => 'Mis Facturas',
+            'title' => 'Mis Facturas',
             'invoices' => $invoiceModel->where('user_id', $userId)->orderBy('created_at', 'DESC')->paginate(10),
-            'pager'    => $invoiceModel->pager,
-            'user'     => $this->userModel->find($userId)
+            'pager' => $invoiceModel->pager,
+            'user' => $this->userModel->find($userId)
         ];
 
         return view('billing/invoices', $data);
@@ -384,7 +399,7 @@ class Billing extends BaseController
 
         $userId = (int) session('user_id');
         $invoiceModel = new InvoiceModel();
-        
+
         // Seguridad: Solo puede descargar si le pertenece
         $invoice = $invoiceModel->where(['id' => $id, 'user_id' => $userId])->first();
 
@@ -419,9 +434,9 @@ class Billing extends BaseController
 
         // 3. Insertar nueva clave
         $this->ApikeysModel->insert([
-            'user_id'   => $userId,
-            'name'      => 'Clave Principal (Rotada)',
-            'api_key'   => $newKey,
+            'user_id' => $userId,
+            'name' => 'Clave Principal (Rotada)',
+            'api_key' => $newKey,
             'is_active' => 1,
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s')
@@ -449,9 +464,25 @@ class Billing extends BaseController
             return redirect()->back()->with('error', 'No tienes ninguna suscripción activa para cancelar.');
         }
 
-        // En un entorno real, aquí llamaríamos a Stripe/PayPal para cancelar
-        // Por ahora, lo marcamos como cancelado en nuestra DB (o simulamos)
-        
+        // 1. Si es Stripe, cancelar en Stripe (al final del periodo)
+        if (!empty($plan->stripe_subscription_id)) {
+            try {
+                $secretKey = getenv('STRIPE_SECRET_KEY');
+                if ($secretKey) {
+                    \Stripe\Stripe::setApiKey($secretKey);
+                    \Stripe\Subscription::update($plan->stripe_subscription_id, [
+                        'cancel_at_period_end' => true,
+                    ]);
+                    log_message('info', "[Billing::cancel_subscription] Suscripción Stripe marcada para cancelar: {$plan->stripe_subscription_id}");
+                }
+            } catch (\Exception $e) {
+                log_message('error', "[Billing::cancel_subscription] Error al cancelar en Stripe: " . $e->getMessage());
+                // Podríamos decidir si continuar o no. Normalmente, si falla Stripe, queremos avisar.
+                return redirect()->back()->with('error', 'No se pudo comunicar la cancelación a Stripe: ' . $e->getMessage());
+            }
+        }
+
+        // 2. Marcar como cancelado en nuestra DB
         $this->UsersuscriptionsModel->update($plan->id, [
             'status' => 'canceled',
             'canceled_at' => date('Y-m-d H:i:s')
@@ -460,6 +491,42 @@ class Billing extends BaseController
         // Log subscription cancellation
         log_activity('subscription_cancelled', ['plan' => $plan->plan_name ?? 'Unknown']);
 
-        return redirect()->to(site_url('billing'))->with('message', 'Tu suscripción ha sido cancelada. Seguirás teniendo acceso hasta el final del periodo facturado.');
+        return redirect()->to(site_url('billing'))->with('message', 'Tu suscripción ha sido cancelada. Seguirás teniendo acceso hasta el final del periodo facturado y no se te cobrará de nuevo.');
+    }
+
+    /**
+     * Redirigir al Stripe Customer Portal
+     */
+    public function portal()
+    {
+        if (!session('logged_in')) {
+            return redirect()->to(site_url('enter'));
+        }
+
+        $userId = (int) session('user_id');
+        $user = $this->userModel->find($userId);
+
+        if (!$user || empty($user->stripe_customer_id)) {
+            return redirect()->to(site_url('billing'))->with('error', 'No tienes un historial de facturación en Stripe todavía o no tienes suscripciones activas.');
+        }
+
+        $secretKey = getenv('STRIPE_SECRET_KEY');
+        if (!$secretKey) {
+            return redirect()->back()->with('error', 'Stripe no está configurado.');
+        }
+
+        \Stripe\Stripe::setApiKey($secretKey);
+
+        try {
+            $session = \Stripe\BillingPortal\Session::create([
+                'customer' => $user->stripe_customer_id,
+                'return_url' => site_url('billing'),
+            ]);
+
+            return redirect()->to($session->url);
+        } catch (\Exception $e) {
+            log_message('error', '[Billing::portal] ' . $e->getMessage());
+            return redirect()->back()->with('error', 'No se pudo abrir el portal de Stripe: ' . $e->getMessage());
+        }
     }
 }

@@ -358,6 +358,45 @@ class Dashboard extends BaseController
     }
 
     /**
+     * Impersonar usuario (Login As)
+     */
+    public function impersonate($id)
+    {
+        // Doble verificación de seguridad: Solo admins
+        if (!session('is_admin')) {
+            return redirect()->to(site_url('dashboard'))->with('error', 'Acceso denegado.');
+        }
+
+        $user = $this->userModel->find($id);
+        if (!$user) {
+            return redirect()->back()->with('error', 'Usuario no encontrado.');
+        }
+        
+        // Evitar impersonarse a sí mismo (redundante pero limpia historial)
+        if ($user->id == session('user_id')) {
+             return redirect()->back()->with('message', 'Ya estás logueado como tú mismo.');
+        }
+
+        // Log de seguridad
+        log_activity('admin_impersonate', ['details' => "Admin " . session('user_email') . " logged in as " . $user->email]);
+
+        // Regenerar sesión
+        session()->regenerate();
+        
+        // Establecer sesión del usuario objetivo
+        session()->set([
+            'user_id'    => $user->id,
+            'user_email' => $user->email,
+            'user_name'  => $user->name ?? '',
+            'is_admin'   => $user->is_admin ?? 0,
+            'logged_in'  => true,
+            'impersonator_id' => session('user_id') // Opcional: para saber quién era el admin original si quisiéramos botón de "volver"
+        ]);
+
+        return redirect()->to(site_url('dashboard'));
+    }
+
+    /**
      * Listado de facturas
      */
     public function invoices()

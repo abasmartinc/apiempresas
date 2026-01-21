@@ -80,6 +80,38 @@ class Dashboard extends BaseController
 
         return view('dashboard_construction', $data);
     }
+
+    /**
+     * Terminar impersonación y volver a admin
+     */
+    public function stopImpersonating()
+    {
+        $impersonatorId = session('impersonator_id');
+        
+        if (!$impersonatorId) {
+            return redirect()->to(site_url('dashboard'));
+        }
+
+        $adminUser = $this->userModel->find($impersonatorId);
+        
+        if (!$adminUser || !$adminUser->is_admin) {
+             // Fallback raro: el impersonador ya no existe o no es admin
+             session()->destroy();
+             return redirect()->to(site_url('enter'))->with('error', 'Sesión de administrador no válida.');
+        }
+
+        // Restaurar sesión de admin
+        session()->regenerate();
+        session()->set([
+            'user_id'    => $adminUser->id,
+            'user_email' => $adminUser->email,
+            'user_name'  => $adminUser->name ?? '',
+            'is_admin'   => 1,
+            'logged_in'  => true,
+        ]);
+
+        return redirect()->to(site_url('admin/users'))->with('message', 'Has vuelto a tu cuenta de administrador.');
+    }
 }
 
 

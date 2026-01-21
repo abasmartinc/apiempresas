@@ -20,6 +20,7 @@ class UserModel extends Model
         'is_active',
         'is_admin',
         'api_access',
+        'stripe_customer_id',
         'created_at',
         'updated_at',
         'last_login_at',

@@ -97,6 +97,7 @@
                     </td>
                     <td style="padding: 12px;">
                         <div style="display: flex; gap: 5px;">
+                            <a href="<?= site_url('admin/users/impersonate/' . $user->id) ?>" class="btn secondary btn-impersonate" data-name="<?= esc($user->name) ?>" style="padding: 4px 8px; font-size: 0.75rem; background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd;" title="Entrar como este usuario (Impersonate)">🔑</a>
                             <a href="<?= site_url('admin/users/email/' . $user->id) ?>" class="btn secondary" style="padding: 4px 8px; font-size: 0.75rem;" title="Enviar Email">✉️</a>
                             <a href="<?= site_url('admin/users/edit/' . $user->id) ?>" class="btn ghost" style="padding: 4px 8px; font-size: 0.75rem;" title="Editar">✏️</a>
                             <a href="<?= site_url('admin/users/delete/' . $user->id) ?>" class="btn ghost" style="padding: 4px 8px; font-size: 0.75rem; color: #ef4444; border-color: #fee2e2;" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar este usuario?')">🗑️</a>
@@ -112,6 +113,41 @@
         <?= $pager->links('default', 'admin_full') ?>
     </div>
 </main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const impButtons = document.querySelectorAll('.btn-impersonate');
+        impButtons.forEach((btn) => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = this.getAttribute('href');
+                const name = this.getAttribute('data-name');
+                
+                Swal.fire({
+                    title: '¿Entrar como ' + name + '?',
+                    html: 'Verás la plataforma exactamente como este usuario. <br>Para volver, usa el enlace en la cabecera.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, entrar',
+                    cancelButtonText: 'Cancelar',
+                    reverseButtons: true,
+                    customClass: {
+                        popup: 've-swal',
+                        title: 've-swal-title',
+                        htmlContainer: 've-swal-text',
+                        confirmButton: 'btn ve-swal-confirm',
+                        cancelButton: 'btn btn_header--ghost ve-swal-cancel',
+                        icon: 've-swal-icon'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = url;
+                    }
+                });
+            });
+        });
+    });
+</script>
 
 <?= view('partials/footer') ?>
 </body>
