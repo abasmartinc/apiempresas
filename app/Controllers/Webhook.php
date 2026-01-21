@@ -156,6 +156,16 @@ class Webhook extends Controller
                     'currency'       => $invoice->currency,
                     'invoice_number' => $invoice->invoice_number
                 ]);
+                // Enviar notificación por email al usuario con su factura adjunta
+                $emailService->sendInvoiceToUser([
+                    'customer_name'  => $invoice->billing_name,
+                    'customer_email' => $invoice->billing_email,
+                    'plan_name'      => $sub->plan_name ?? 'Plan API',
+                    'amount'         => $invoice->total_amount,
+                    'currency'       => $invoice->currency,
+                    'invoice_number' => $invoice->invoice_number,
+                    'pdf_path'       => $invoice->pdf_path
+                ]);
             }
 
             log_message('info', "[Webhook::stripe] Subscription renewed/paid, invoice generated and email sent: {$stripeSubscriptionId}");

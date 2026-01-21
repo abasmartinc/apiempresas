@@ -70,6 +70,7 @@ class InvoiceService
         
         if ($pdfPath) {
             $this->invoiceModel->update($invoiceId, ['pdf_path' => $pdfPath]);
+            $invoice->pdf_path = $pdfPath; // Asegurar que el objeto en memoria tiene el valor
         }
 
         return $invoice;
@@ -94,7 +95,7 @@ class InvoiceService
 
         $output = $dompdf->output();
         
-        $directory = FCPATH . 'writable/invoices/' . date('Y/m');
+        $directory = ROOTPATH . 'writable/invoices/' . date('Y/m');
         if (!is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
