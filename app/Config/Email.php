@@ -9,87 +9,33 @@ class Email extends BaseConfig
     /**
      * @var string
      */
-    public $fromEmail = 'soporte@apiempresas.es';
-
-    /**
-     * @var string
-     */
-    public $fromName = 'APIEmpresas.es';
-
-    /**
-     * @var string
-     */
+    public $fromEmail = '';
+    public $fromName  = '';
     public $recipients;
-
-    /**
-     * The "user agent"
-     *
-     * @var string
-     */
     public $userAgent = 'CodeIgniter';
-
-    /**
-     * The mail sending protocol: mail, sendmail, smtp
-     *
-     * @var string
-     */
-    public $protocol = 'smtp';
-
-    /**
-     * The server path to Sendmail.
-     *
-     * @var string
-     */
-    public $mailPath = '/usr/sbin/sendmail';
-
-    /**
-     * SMTP Server Address
-     *
-     * @var string
-     */
-    public $SMTPHost = 'serv327.controldeservidor.com';
-
-    /**
-     * SMTP Username
-     *
-     * @var string
-     */
-    public $SMTPUser = 'soporte@apiempresas.es';
-
-    /**
-     * SMTP Password
-     *
-     * @var string
-     */
-    public $SMTPPass = 'Ay1y925@h';
-
-    /**
-     * SMTP Port
-     *
-     * @var integer
-     */
-    public $SMTPPort = 465; //465
-
-    /**
-     * SMTP Timeout (in seconds)
-     *
-     * @var integer
-     */
+    public $protocol  = 'smtp';
+    public $mailPath  = '/usr/sbin/sendmail';
+    public $SMTPHost  = '';
+    public $SMTPUser  = '';
+    public $SMTPPass  = '';
+    public $SMTPPort  = 587;
     public $SMTPTimeout = 5;
-
-    /**
-     * Enable persistent SMTP connections
-     *
-     * @var boolean
-     */
     public $SMTPKeepAlive = false;
+    public $SMTPCrypto = 'tls';
 
-    /**
-     * SMTP Encryption. Either tls or ssl
-     *
-     * @var string
-     */
-    public $SMTPCrypto = 'ssl'; // ssl
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->fromEmail  = env('email.fromEmail', 'soporte@apiempresas.es');
+        $this->fromName   = env('email.fromName', 'APIEmpresas.es');
+        $this->protocol   = env('email.protocol', 'smtp');
+        $this->SMTPHost   = env('email.SMTPHost', 'localhost');
+        $this->SMTPUser   = env('email.SMTPUser', '');
+        $this->SMTPPass   = env('email.SMTPPass', '');
+        $this->SMTPPort   = (int) env('email.SMTPPort', 465);
+        $this->SMTPCrypto = env('email.SMTPCrypto', 'ssl');
+    }
 
     /**
      * Enable word-wrap

@@ -56,12 +56,12 @@
                 <tr style="border-bottom: 1px solid #f1f5f9;">
                     <td style="padding: 12px; font-weight: 700; color: #2152ff;"><?= esc($company->cif) ?></td>
                     <td style="padding: 12px;">
-                        <div style="font-weight: 600;"><?= esc($company->company_name) ?></div>
-                        <div style="font-size: 0.75rem; color: #64748b;"><?= esc($company->cnae_label) ?></div>
+                        <div style="font-weight: 600;"><?= esc($company->company_name ?? '-') ?></div>
+                        <div style="font-size: 0.75rem; color: #64748b;"><?= esc($company->cnae_label ?? '') ?></div>
                     </td>
                     <td style="padding: 12px;">
-                        <div style="font-size: 0.85rem;"><?= esc($company->registro_mercantil) ?></div>
-                        <div style="font-size: 0.75rem; color: #94a3b8;"><?= esc($company->municipality) ?></div>
+                        <div style="font-size: 0.85rem;"><?= esc($company->registro_mercantil ?? '') ?></div>
+                        <div style="font-size: 0.75rem; color: #94a3b8;"><?= esc($company->municipality ?? '') ?></div>
                     </td>
                     <td style="padding: 12px;">
                         <span class="pill" style="font-size: 0.7rem; background: <?= $company->estado === 'ACTIVA' ? '#dcfce7; color: #166534;' : '#f1f5f9; color: #64748b;' ?>">
