@@ -639,54 +639,75 @@ body::before {
 }
 
 /* seleccionado: Pro (Azul) */
+/* seleccionado: Pro (Azul) - cleaner look */
 .plan-card[data-plan="pro"].is-selected {
-    border-color: rgba(33, 82, 255, .50);
-    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 80%);
-    box-shadow: 0 22px 50px rgba(33, 82, 255, .25);
-    color: #fff;
+    border-color: #2152FF;
+    background: #f0f4ff;
+    /* Azul muy suave */
+    box-shadow: 0 0 0 1px #2152FF, 0 12px 32px rgba(33, 82, 255, .15);
+    color: var(--text);
 }
 
-.plan-card[data-plan="pro"].is-selected .desc,
-.plan-card[data-plan="pro"].is-selected .price .unit,
-.plan-card[data-plan="pro"].is-selected .price .unit .muted,
-.plan-card[data-plan="pro"].is-selected .features {
-    color: rgba(255, 255, 255, .80);
+.plan-card[data-plan="pro"].is-selected::after {
+    content: "✓";
+    position: absolute;
+    top: -14px;
+    right: 0px;
+    width: 20px;
+    height: 20px;
+    background: #2152FF;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.plan-card[data-plan="pro"].is-selected .desc {
+    color: rgba(11, 18, 32, .75);
 }
 
 .plan-card[data-plan="pro"].is-selected .badge {
-    background: rgba(255, 255, 255, .15);
-    border-color: rgba(255, 255, 255, .30);
+    background: #2152FF;
+    border-color: #2152FF;
     color: #fff;
 }
 
-.plan-card[data-plan="pro"].is-selected .name,
-.plan-card[data-plan="pro"].is-selected .amount {
-    color: #fff;
-}
-
-/* seleccionado: Business (Verde) */
+/* seleccionado: Business (Verde) - cleaner look */
 .plan-card[data-plan="business"].is-selected {
-    border-color: rgba(18, 180, 138, .50);
-    background: linear-gradient(135deg, #065f46 0%, #10b981 80%);
-    box-shadow: 0 22px 50px rgba(18, 180, 138, .25);
-    color: #fff;
+    border-color: #10b981;
+    background: #ecfdf5;
+    /* Verde muy suave */
+    box-shadow: 0 0 0 1px #10b981, 0 12px 32px rgba(16, 185, 129, .15);
+    color: var(--text);
 }
 
-.plan-card[data-plan="business"].is-selected .desc,
-.plan-card[data-plan="business"].is-selected .price .unit,
-.plan-card[data-plan="business"].is-selected .price .unit .muted,
-.plan-card[data-plan="business"].is-selected .features {
-    color: rgba(255, 255, 255, .80);
+.plan-card[data-plan="business"].is-selected::after {
+    content: "✓";
+    position: absolute;
+    top: -14px;
+    right: 0px;
+    width: 20px;
+    height: 20px;
+    background: #10b981;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.plan-card[data-plan="business"].is-selected .desc {
+    color: rgba(11, 18, 32, .75);
 }
 
 .plan-card[data-plan="business"].is-selected .badge {
-    background: rgba(255, 255, 255, .15);
-    border-color: rgba(255, 255, 255, .30);
-    color: #fff;
-}
-
-.plan-card[data-plan="business"].is-selected .name,
-.plan-card[data-plan="business"].is-selected .amount {
+    background: #10b981;
+    border-color: #10b981;
     color: #fff;
 }
 

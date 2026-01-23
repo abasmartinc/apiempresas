@@ -110,6 +110,20 @@ class Search extends BaseController
      */
     public function index()
     {
+        // Rate limiting: 10 búsquedas por minuto por IP
+        $throttler = \Config\Services::throttler();
+        if ($throttler->check(md5($this->request->getIPAddress()), 10, 60) === false) {
+            return $this->respond([
+                'success' => false,
+                'message' => 'Demasiadas solicitudes. Por favor, espera un momento.'
+            ], 429);
+        }
+
+        // Solo permitir peticiones AJAX para este endpoint
+        if (!$this->request->isAJAX()) {
+            return $this->failForbidden('Acceso no permitido');
+        }
+
         $q = trim((string) $this->request->getGet('q'));
         if ($q === '') {
             // retrocompatibilidad: si te siguen llamando con ?cif=
@@ -284,6 +298,12 @@ class Search extends BaseController
     // --- HTML (web) ---
     public function search_company()
     {
+        // Rate limiting: 30 visualizaciones de búsqueda por minuto por IP
+        $throttler = \Config\Services::throttler();
+        if ($throttler->check(md5($this->request->getIPAddress() . '_view'), 30, 60) === false) {
+             return "Demasiadas solicitudes. Por favor, espera un momento.";
+        }
+
         $q = trim((string) $this->request->getGet('q'));
 
         $data = [

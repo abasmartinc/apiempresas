@@ -286,11 +286,7 @@
                                 <p style="margin:0; color:#64748b;">Validación manual para soporte o casos puntuales.</p>
                                 <a href="<?=site_url() ?>search_company">Abrir buscador →</a>
                             </div>
-                            <div class="quick-item">
-                                <strong>Webhooks (opcional)</strong>
-                                <p style="margin:0; color:#64748b;">Automatiza flujos cuando cambie el estado o se refresquen datos.</p>
-                                <a href="<?=site_url() ?>documentation#webhooks">Ver webhooks →</a>
-                            </div>
+
                         </div>
                     </section>
                 </div>

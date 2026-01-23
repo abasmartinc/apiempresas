@@ -260,8 +260,8 @@ $barWidth = $percent !== null ? max(0, min(100, $percent)) : 0;
                 <div class="limit-block" style="margin-top:14px;">
                     <h3>Subir de plan</h3>
                     <p>
-                        Si sueles estar por encima del 70–80% de tu cuota, suele salir más rentable subir al siguiente
-                        plan en lugar de pagar exceso por consulta.
+                        Si tu consumo se acerca al 100%, recuerda que el servicio se detendrá al alcanzar el límite.
+                        Sube al siguiente plan para aumentar tu capacidad y evitar interrupciones en producción.
                     </p>
                     <a href="<?= site_url('billing') ?>" class="btn secondary" style="margin-top:6px;">
                         Cambiar de plan

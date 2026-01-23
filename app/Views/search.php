@@ -102,6 +102,7 @@
                         aria-label="Buscar empresa por nombre o CIF"
                         autocomplete="off"
                 />
+                <?= honeypot_field() ?>
                 <button class="btn" id="btnBuscar" type="submit" aria-label="Buscar">Buscar empresa</button>
             </form>
 
@@ -322,7 +323,7 @@
                 out.innerHTML = '<div class="muted">Buscando empresa en la base de datos...</div>';
                 btn.disabled = true;
 
-                const endpoint = JSON_ENDPOINT_BASE + '?cif=' + encodeURIComponent(v);
+                const endpoint = JSON_ENDPOINT_BASE + '?q=' + encodeURIComponent(v);
 
                 try {
                     const res = await fetch(endpoint, {

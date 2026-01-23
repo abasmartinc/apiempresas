@@ -34,7 +34,32 @@ class Usage extends BaseController
 
         $data['user']    = $user;
         $data['api_key'] = $this->ApikeysModel->where(['user_id' => $userId, 'is_active' => 1])->first();
-        $data['plan']    = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
+        
+        // 1. Intentar plan activo
+        $plan = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
+        
+        // 2. Fallback: cualquier suscripción (ej. trialing, canceled)
+        if (!$plan) {
+            $plan = $this->UsersuscriptionsModel->getUserSubscriptionWithPlan($userId);
+        }
+
+        // 3. Fallback: Forzar lectura del plan FREE (ID 1) si no hay nada
+        if (!$plan) {
+            $apiPlanModel = new \App\Models\ApiPlanModel();
+            $freePlan = $apiPlanModel->find(1);
+            if ($freePlan) {
+                // Objeto dummy para la vista
+                $plan = (object)[
+                    'plan_name'            => $freePlan->name,
+                    'monthly_quota'        => $freePlan->monthly_quota,
+                    'status'               => 'inactive',
+                    'current_period_start' => null,
+                    'current_period_end'   => null
+                ];
+            }
+        }
+        
+        $data['plan'] = $plan;
 
         // KPIs
         $data['api_request_total_month'] = $this->ApiRequestsModel->countRequestsForMonth(date('Y-m'), ['user_id' => $userId]);

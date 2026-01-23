@@ -195,25 +195,8 @@
                             <h2 id="checkout-title">Completa la activación</h2>
                             <p class="muted" id="checkout-sub">
                                 Continuarás a una pasarela segura para pagar con <strong>Tarjeta (Stripe)</strong> o <strong>PayPal</strong>.
-                                <span style="white-space:nowrap;">El IVA se añade en el checkout según país.</span>
-                            </p>
 
-                            <div style="margin:10px 0 0;">
-                                <div class="muted" style="font-size:12px; margin-bottom:8px;">Método de pago</div>
-                                <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                                    <label class="pill" style="cursor:pointer;">
-                                        <input type="radio" name="payment_method_ui" id="pm_card" value="stripe" checked style="margin-right:8px;">
-                                        Tarjeta (Stripe)
-                                    </label>
-                                    <label class="pill" style="cursor:pointer;">
-                                        <input type="radio" name="payment_method_ui" id="pm_paypal" value="paypal" style="margin-right:8px;">
-                                        PayPal
-                                    </label>
-                                </div>
-                                <div class="muted" style="font-size:12px; margin-top:8px;">
-                                    Podrás confirmarlo en el paso final de pago.
-                                </div>
-                            </div>
+                            </p>
 
                             <form class="billing-form" method="post" action="<?= site_url() ?>billing/checkout">
                                 <?= csrf_field() ?>
@@ -236,13 +219,6 @@
                                     </div>
 
                                     <div class="field">
-                                        <label for="bill_country">País</label>
-                                        <select id="bill_country" name="country" autocomplete="country">
-                                            <option value="ES" selected>España</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="field">
                                         <label for="bill_vat">NIF/CIF (opcional)</label>
                                         <input id="bill_vat" name="vat" type="text" placeholder="ESB12345678" />
                                         <div class="muted" style="font-size:12px; margin-top:6px;">
@@ -251,12 +227,13 @@
                                     </div>
 
                                     <div class="field field-full">
-                                        <label for="bill_card">Datos de pago</label>
-                                        <input id="bill_card" name="card" type="text" placeholder="Se completa en Stripe/PayPal en el siguiente paso" readonly />
-                                        <div class="muted" style="font-size:12px; margin-top:16px;">
-                                            No guardamos datos de tarjeta. El pago se completa en Stripe/PayPal.
+                                        <div class="muted" style="font-size:12px; margin-bottom:8px;">Metodo de pago</div>
+                                        <div class="pill" style="display:inline-flex; align-items:center; cursor:default;">
+                                            Tarjeta de crédito / débito (Stripe)
                                         </div>
                                     </div>
+                                    
+                                    <input type="hidden" name="country" value="ES">
                                 </div>
 
                                 <div class="form-actions">

@@ -39,7 +39,7 @@
 
             <div class="code-card" aria-label="Ejemplo de respuesta">
                 <div class="code-top">
-                    <span>GET /company?cif=B12345678</span>
+                    <span>GET /api/v1/companies?cif=B12345678</span>
                     <span class="muted">200 OK • 142 ms</span>
                 </div>
                 <pre><code>{
@@ -355,7 +355,7 @@
         <div class="code-card">
             <div class="code-top"><span>curl</span><span>Ejemplo rápido</span></div>
             <pre><code>curl -H "Authorization: Bearer &lt;API_KEY&gt;" \
-"https://apiempresas.es/company?cif=B12345678"</code></pre>
+"https://apiempresas.es/api/v1/companies?cif=B12345678"</code></pre>
         </div>
     </section>
 

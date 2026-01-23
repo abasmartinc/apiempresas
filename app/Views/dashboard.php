@@ -102,11 +102,11 @@
                         <div class="quick-grid">
                             <div class="quick-item">
                                 <strong>cURL</strong>
-                                <code>GET /company?cif=B12345678</code>
+                                <code>GET /api/v1/companies?cif=B12345678</code>
                                 <p style="margin:10px 0 0; color:#64748b; font-size:12px;">
                                     Usa tu API key en header (Authorization / X-API-KEY según tu implementación).
                                 </p>
-                                <a href="<?=site_url() ?>documentation#company">Ver ejemplo completo →</a>
+                                <a href="<?=site_url() ?>documentation#endpoint-by-cif">Ver ejemplo completo →</a>
                             </div>
                             <div class="quick-item">
                                 <strong>Buscador web</strong>
@@ -126,14 +126,14 @@
 
                         <div class="quick-grid">
                             <div class="quick-item">
-                                <strong>SDK PHP / Laravel</strong>
-                                <p style="margin:4px 0 0; color:#64748b;">Cliente oficial y ejemplo de integración en middleware/servicio.</p>
-                                <a href="<?=site_url() ?>documentation#sdk-php">Guía rápida PHP →</a>
+                                <strong>Ejemplos PHP / Laravel</strong>
+                                <p style="margin:4px 0 0; color:#64748b;">Snippets de código listos para copiar y pegar en tu proyecto.</p>
+                                <a href="<?=site_url() ?>documentation#examples">Ver ejemplos PHP →</a>
                             </div>
                             <div class="quick-item">
-                                <strong>SDK Node / JS</strong>
-                                <p style="margin:4px 0 0; color:#64748b;">Ideal para Node backend o funciones serverless.</p>
-                                <a href="<?=site_url() ?>documentation#sdk-node">Guía rápida Node →</a>
+                                <strong>Ejemplos Node / JS</strong>
+                                <p style="margin:4px 0 0; color:#64748b;">Código para integrar en backend Node o frontend (fetch).</p>
+                                <a href="<?=site_url() ?>documentation#examples">Ver ejemplos Node →</a>
                             </div>
                             <div class="quick-item">
                                 <strong>Consumo y límites</strong>
