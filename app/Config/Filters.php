@@ -39,6 +39,7 @@ class Filters extends BaseFilters
         'apikey'        => \App\Filters\ApiKeyFilter::class,
         'admin'         => \App\Filters\AdminFilter::class,
         'activity_logger' => \App\Filters\ActivityLogger::class,
+        'botprotection' => \App\Filters\BotProtectionFilter::class,
     ];
 
     /**
@@ -74,6 +75,7 @@ class Filters extends BaseFilters
      */
     public array $globals = [
         'before' => [
+             'botprotection', // Check blocked IPs first
              'honeypot',
             // 'csrf',
             // 'invalidchars',

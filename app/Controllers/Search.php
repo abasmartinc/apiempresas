@@ -5,6 +5,7 @@ namespace App\Controllers;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\CompanyModel;
+use App\Services\BotDetectionService;
 use Config\Database;
 
 class Search extends BaseController
@@ -113,15 +114,29 @@ class Search extends BaseController
         // Rate limiting: 10 búsquedas por minuto por IP
         $throttler = \Config\Services::throttler();
         if ($throttler->check(md5($this->request->getIPAddress()), 10, 60) === false) {
+            // Block IP for rate limit violation
+            $botService = new BotDetectionService();
+            $botService->detectAndBlock($this->request, 'rate_limit_exceeded', [
+                'endpoint' => '/search',
+                'limit' => '10 requests per minute',
+            ]);
+            
             return $this->respond([
                 'success' => false,
-                'message' => 'Demasiadas solicitudes. Por favor, espera un momento.'
+                'message' => 'Demasiadas solicitudes. Tu IP ha sido bloqueada por actividad sospechosa.'
             ], 429);
         }
 
         // Solo permitir peticiones AJAX para este endpoint
         if (!$this->request->isAJAX()) {
-            return $this->failForbidden('Acceso no permitido');
+            // Block IP for non-AJAX request to protected endpoint
+            $botService = new BotDetectionService();
+            $botService->detectAndBlock($this->request, 'non_ajax_request', [
+                'endpoint' => '/search',
+                'attempted_access' => 'direct_browser_access',
+            ]);
+            
+            return $this->failForbidden('Acceso no permitido. Tu IP ha sido bloqueada.');
         }
 
         $q = trim((string) $this->request->getGet('q'));
