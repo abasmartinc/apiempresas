@@ -1,56 +1,56 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <?php if (session()->getFlashdata('message')): ?>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            title: '¡Operación exitosa!',
-            text: '<?= esc(session()->getFlashdata('message')) ?>',
-            icon: null,
-            iconHtml: '<span class="ve-swal-icon-inner">✓</span>',
-            customClass: {
-                popup: 've-swal',
-                title: 've-swal-title',
-                htmlContainer: 've-swal-text',
-                confirmButton: 'btn ve-swal-confirm',
-                icon: 've-swal-icon'
-            },
-            buttonsStyling: false
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            Swal.fire({
+                title: '¡Operación exitosa!',
+                text: '<?= esc(session()->getFlashdata('message')) ?>',
+                icon: null,
+                iconHtml: '<span class="ve-swal-icon-inner">✓</span>',
+                customClass: {
+                    popup: 've-swal',
+                    title: 've-swal-title',
+                    htmlContainer: 've-swal-text',
+                    confirmButton: 'btn ve-swal-confirm',
+                    icon: 've-swal-icon'
+                },
+                buttonsStyling: false
+            });
         });
-    });
-</script>
+    </script>
 <?php endif; ?>
 
 <?php if (session()->getFlashdata('error')): ?>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            title: 'Se ha producido un error',
-            text: '<?= esc(session()->getFlashdata('error')) ?>',
-            icon: 'error',
-            customClass: {
-                popup: 've-swal',
-                title: 've-swal-title',
-                htmlContainer: 've-swal-text',
-                confirmButton: 'btn danger ve-swal-confirm'
-            },
-            buttonsStyling: false
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            Swal.fire({
+                title: 'Se ha producido un error',
+                text: '<?= esc(session()->getFlashdata('error')) ?>',
+                icon: 'error',
+                customClass: {
+                    popup: 've-swal',
+                    title: 've-swal-title',
+                    htmlContainer: 've-swal-text',
+                    confirmButton: 'btn danger ve-swal-confirm'
+                },
+                buttonsStyling: false
+            });
         });
-    });
-</script>
+    </script>
 <?php endif; ?>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const btn = document.getElementById('btnBuscar');
-        const q   = document.getElementById('q');
+        const q = document.getElementById('q');
         const out = document.getElementById('resultado');
 
         if (!btn || !q || !out) return;
 
         function sectionRegistro(company, apiJson) {
             const statusRaw = (company.status || '').toString();
-            const isActive  = statusRaw.toUpperCase() === 'ACTIVA';
+            const isActive = statusRaw.toUpperCase() === 'ACTIVA';
 
             const statusClass = isActive
                 ? 'company-status company-status--active'
@@ -76,7 +76,7 @@
       <div class="company-card__eyebrow">Ficha registral</div>
       <h3 class="company-card__name">${company.name || '-'}</h3>
       <div class="company-card__meta">
-        ${(company.cif || company.nif || '-') } · ${(company.province || company.provincia || '-')}
+        ${(company.cif || company.nif || '-')} · ${(company.province || company.provincia || '-')}
       </div>
     </div>
     <div class="${statusClass}">
@@ -114,7 +114,7 @@
                     e.stopPropagation();
 
                     const card = b.closest('.company-card');
-                    const pre  = card?.querySelector('.company-card__json');
+                    const pre = card?.querySelector('.company-card__json');
                     if (!pre) return;
 
                     const nowHidden = pre.classList.toggle('is-hidden');
@@ -142,11 +142,14 @@
             try {
                 const res = await fetch(endpoint, {
                     method: 'GET',
-                    headers: { 'Accept': 'application/json' }
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
                 });
 
                 let json = null;
-                try { json = await res.json(); } catch(_) {}
+                try { json = await res.json(); } catch (_) { }
 
                 if (!res.ok) {
                     const msg = (json && json.message)
@@ -232,23 +235,23 @@
     });
 </script>
 <script>
-    (function(){
+    (function () {
         const body = document.body;
 
-        function openModal(id){
+        function openModal(id) {
             const overlay = document.getElementById(id);
-            if(!overlay) return;
+            if (!overlay) return;
 
             overlay.classList.add('active');
             overlay.setAttribute('aria-hidden', 'false');
             body.style.overflow = 'hidden';
 
             const dialog = overlay.querySelector('.modal');
-            if(dialog) dialog.focus({ preventScroll: true });
+            if (dialog) dialog.focus({ preventScroll: true });
         }
 
-        function closeModal(overlay){
-            if(!overlay) return;
+        function closeModal(overlay) {
+            if (!overlay) return;
 
             overlay.classList.remove('active');
             overlay.setAttribute('aria-hidden', 'true');
@@ -258,7 +261,7 @@
         // Abrir desde links/buttons con data-open-modal="id"
         document.addEventListener('click', (e) => {
             const opener = e.target.closest('[data-open-modal]');
-            if(opener){
+            if (opener) {
                 e.preventDefault();
                 openModal(opener.getAttribute('data-open-modal'));
                 return;
@@ -266,7 +269,7 @@
 
             // Cerrar desde botones con data-close-modal
             const closer = e.target.closest('[data-close-modal]');
-            if(closer){
+            if (closer) {
                 e.preventDefault();
                 const overlay = closer.closest('.modal-overlay');
                 closeModal(overlay);
@@ -275,16 +278,16 @@
 
             // Click fuera del modal (overlay)
             const overlay = e.target.classList && e.target.classList.contains('modal-overlay') ? e.target : null;
-            if(overlay){
+            if (overlay) {
                 closeModal(overlay);
             }
         });
 
         // ESC para cerrar el modal activo
         document.addEventListener('keydown', (e) => {
-            if(e.key !== 'Escape') return;
+            if (e.key !== 'Escape') return;
             const active = document.querySelector('.modal-overlay.active');
-            if(active) closeModal(active);
+            if (active) closeModal(active);
         });
     })();
 </script>
