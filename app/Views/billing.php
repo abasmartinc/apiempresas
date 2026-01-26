@@ -90,10 +90,7 @@
                         </div>
 
 
-                        <p class="muted" style="margin:12px 0 0;">
-                            Recomendación: si vas a integrar en producción (alta de clientes, KYC, scoring), Pro suele
-                            ser el punto óptimo.
-                        </p>
+                       
 
                         <?php if (session('error')): ?>
                             <div class="auth-error" style="margin-top:14px;">
@@ -115,11 +112,7 @@
                             <div>
                                 <div class="kicker">Selecciona plan</div>
                                 <h2>Elige el plan que encaja con tu volumen</h2>
-                                <p class="muted">
-                                    Empieza con Pro y sube a Business si necesitas más límite, SLA avanzado o gestión de
-                                    equipos.
-                                    <span style="white-space:nowrap;">Precios + IVA.</span>
-                                </p>
+                              
                             </div>
 
                             <div class="period-toggle" role="group" aria-label="Periodicidad">

@@ -464,7 +464,7 @@ class Dashboard extends BaseController
         $email->setSubject($subject);
         
         // Usar plantilla HTML
-        $body = view('emails/admin_notification', [
+        $body = view('emails/user_notification', [
             'user'    => $user,
             'content' => $message, // El mensaje puede contener HTML básico si usas un editor, o nl2br si es textarea
             'subject' => $subject

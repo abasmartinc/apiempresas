@@ -29,7 +29,7 @@
 
                 <div>
                     <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Mensaje</label>
-                    <textarea name="message" class="input" style="width: 100%; min-height: 250px; font-family: sans-serif;" required placeholder="Escribe tu mensaje aquí..."></textarea>
+                    <textarea name="message" class="input" style="width: 100%; min-height: 250px; font-family: sans-serif;" placeholder="Escribe tu mensaje aquí..."></textarea>
                     <p style="font-size: 0.8rem; color: #64748b; margin-top: 0.5rem;">Se enviará con la plantilla corporativa.</p>
                 </div>
 
@@ -43,6 +43,27 @@
 </main>
 
 <?= view('partials/footer') ?>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/7.5.0/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+    tinymce.init({
+        selector: 'textarea[name="message"]',
+        menubar: false,
+        plugins: 'lists link code',
+        toolbar: 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright | bullist numlist | link | code',
+        height: 350,
+        branding: false,
+        setup: function (editor) {
+            editor.on('change', function () {
+                editor.save();
+            });
+        }
+    });
+
+    // Ensure content is synced on submit
+    document.querySelector('form').addEventListener('submit', function() {
+        tinymce.triggerSave();
+    });
+</script>
 </body>
 </html>
 

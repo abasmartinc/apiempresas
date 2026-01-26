@@ -345,10 +345,7 @@
                             Método de pago: <strong>Tarjeta</strong><br>
                             Estado: <strong>Activo</strong>
                         </p>
-                        <a href="<?=site_url() ?>billing/invoices">Ver facturas y datos fiscales →</a>
-                        <div class="mini-note">
-                            Si necesitas factura con datos fiscales específicos, actualízalo en “Facturación”.
-                        </div>
+                        <a href="<?=site_url() ?>billing/invoices">Ver facturas →</a>
                     </section>
 
                     <!-- SUPPORT -->

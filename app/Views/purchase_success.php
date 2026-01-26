@@ -220,21 +220,7 @@
                 </div>
             </section>
 
-            <!-- SUPPORT -->
-            <section class="support-card">
-                <div class="support-left">
-                    <h3>¿Necesitas ayuda para integrar?</h3>
-                    <p class="muted">
-                        Si nos dices tu caso de uso (KYC, scoring, alta de clientes, risk), te recomendamos endpoints y buenas prácticas
-                        para ir a producción sin fricción.
-                    </p>
-                </div>
-                <div class="support-right">
-                    <a class="btn btn_primary" href="mailto:soporte@apiempresas.es">Hablar con soporte</a>
-                    <a class="btn btn_light" href="<?=site_url()?>documentation">Guía rápida</a>
-                </div>
-            </section>
-
+         
         </div>
     </main>
 
