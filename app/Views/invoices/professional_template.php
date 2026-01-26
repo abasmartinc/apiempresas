@@ -250,10 +250,9 @@
                 <td class="brand-section">
                     <h1 class="logo-text">API<span>Empresas</span></h1>
                     <div class="tagline">Infraestructura de datos para el ecosistema empresarial</div>
-                    <div style="margin-top: 20px; font-size: 9pt;">
-                        <strong>APIEmpresas S.L.</strong><br>
-                        Calle de la Innovación 42, 28001 Madrid<br>
-                        CIF: B12345678 • soporte@apiempresas.es
+                        <strong>Ariel Martinez Hernandez (APIEmpresas)</strong><br>
+                        C/ Paseo República dominicana 40, Bajo E, 28983, Parla, Madrid<br>
+                        NIF: 54994158P • soporte@apiempresas.es
                     </div>
                 </td>
                 <td class="invoice-section">
@@ -306,7 +305,7 @@
             <tbody>
                 <tr>
                     <td class="item-description">
-                        <strong>Suscripción APIEmpresas - Plan <?= esc($plan_name) ?></strong>
+                        <strong>Suscripción mensual API de verificación mercantil – Plan <?= esc($plan_name) ?></strong>
                         <div class="item-subtext">
                             Acceso full API, soporte prioritario 24/7 y actualizaciones en tiempo real.
                         </div>
@@ -355,7 +354,7 @@
         <div class="footer">
             <p class="footer-brand">APIEmpresas.es — Verificación Empresarial Inteligente</p>
             <p class="footer-text">
-                APIEmpresas S.L. Inscrita en el Registro Mercantil de Madrid, Tomo 12.345, Folio 67, Sección 8, Hoja M-987.654, Inscripción 1ª.<br>
+                Ariel Martinez Hernandez (APIEmpresas) - NIF: 54994158P<br>
                 Este documento es una factura electrónica válida. No requiere firma manuscrita según el RD 1619/2012.
             </p>
         </div>
