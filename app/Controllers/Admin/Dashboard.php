@@ -435,7 +435,7 @@ class Dashboard extends BaseController
             return redirect()->back()->with('error', 'Factura no encontrada o PDF no generado.');
         }
 
-        $fullPath = FCPATH . $invoice->pdf_path;
+        $fullPath = ROOTPATH . $invoice->pdf_path;
         if (!file_exists($fullPath)) {
             return redirect()->back()->with('error', 'El archivo físico de la factura no existe.');
         }

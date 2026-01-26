@@ -426,7 +426,7 @@ class Billing extends BaseController
             return redirect()->back()->with('error', 'Factura no encontrada o no tienes permiso.');
         }
 
-        $fullPath = FCPATH . $invoice->pdf_path;
+        $fullPath = ROOTPATH . $invoice->pdf_path;
         if (!file_exists($fullPath)) {
             return redirect()->back()->with('error', 'El archivo de la factura no está disponible.');
         }
