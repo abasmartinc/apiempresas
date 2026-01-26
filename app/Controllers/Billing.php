@@ -419,16 +419,37 @@ class Billing extends BaseController
         $userId = (int) session('user_id');
         $invoiceModel = new InvoiceModel();
 
-        // Seguridad: Solo puede descargar si le pertenece
-        $invoice = $invoiceModel->where(['id' => $id, 'user_id' => $userId])->first();
+        // Debugging: Log what we are looking for
+        log_message('info', "Attempting to download invoice $id for user $userId");
 
-        if (!$invoice || !$invoice->pdf_path) {
-            return redirect()->back()->with('error', 'Factura no encontrada o no tienes permiso.');
+        $invoice = $invoiceModel->find($id);
+
+        if (!$invoice) {
+            return redirect()->back()->with('error', 'Factura no encontrada.');
         }
 
-        $fullPath = ROOTPATH . $invoice->pdf_path;
+        // Fix: Castear a int para evitar error de "43" !== 43
+        if ((int)$invoice->user_id !== $userId) {
+             return redirect()->back()->with('error', 'No tienes permiso para ver esta factura.');
+        }
+
+        if (empty($invoice->pdf_path)) {
+            return redirect()->back()->with('error', 'El archivo PDF no está disponible.');
+        }
+
+        // Limpiamos 'writable/' del inicio por si acaso, para usar WRITEPATH que es más seguro
+        $relativePath = preg_replace('#^writable/#', '', $invoice->pdf_path);
+        $fullPath = WRITEPATH . $relativePath;
+        
         if (!file_exists($fullPath)) {
-            return redirect()->back()->with('error', 'El archivo de la factura no está disponible.');
+            // Intento alternativo con ROOTPATH por compatibilidad
+            $altPath = ROOTPATH . $invoice->pdf_path;
+            if (file_exists($altPath)) {
+                $fullPath = $altPath;
+            } else {
+                log_message('error', "[Billing] Invoice missing. Checked: $fullPath AND $altPath");
+                return redirect()->back()->with('error', 'El archivo no está en el servidor. (Err: ' . basename($fullPath) . ' not found)');
+            }
         }
 
         return $this->response->download($fullPath, null)->setFileName($invoice->invoice_number . '.pdf');

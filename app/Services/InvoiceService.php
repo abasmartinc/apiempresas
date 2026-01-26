@@ -95,17 +95,25 @@ class InvoiceService
 
         $output = $dompdf->output();
         
-        $directory = ROOTPATH . 'writable/invoices/' . date('Y/m');
+        // Usar WRITEPATH para asegurar consistencia con el Controller
+        $directory = WRITEPATH . 'invoices/' . date('Y/m');
+        
         if (!is_dir($directory)) {
-            mkdir($directory, 0755, true);
+            if (!mkdir($directory, 0755, true)) {
+                log_message('critical', "[InvoiceService] Failed to create directory: $directory");
+                return null;
+            }
         }
 
         $filename = $invoice->invoice_number . '.pdf';
         $fullPath = $directory . '/' . $filename;
         
-        file_put_contents($fullPath, $output);
+        if (file_put_contents($fullPath, $output) === false) {
+             log_message('critical', "[InvoiceService] Failed to write PDF to: $fullPath");
+             return null;
+        }
 
-        // Retornamos la ruta relativa para guardar en BD
+        // Retornamos la ruta relativa para guardar en BD (compatible con logic del controller)
         return 'writable/invoices/' . date('Y/m') . '/' . $filename;
     }
 }

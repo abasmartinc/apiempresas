@@ -132,14 +132,57 @@ class Webhook extends Controller
                 'updated_at'         => date('Y-m-d H:i:s'),
             ]);
 
+            // Extraer datos fiscales del objeto Invoice de Stripe
+            $billingAddress = '';
+            if (isset($invoice->customer_address)) {
+                $addr = $invoice->customer_address;
+                $parts = array_filter([
+                    $addr->line1 ?? '',
+                    $addr->line2 ?? '',
+                    $addr->postal_code ?? '',
+                    $addr->city ?? '',
+                    $addr->country ?? ''
+                ]);
+                $billingAddress = implode(', ', $parts);
+            }
+
+            // Tax ID (VAT/NIF) - A veces viene en customer_tax_ids (array)
+            $billingVat = '';
+            if (!empty($invoice->customer_tax_ids) && is_array($invoice->customer_tax_ids)) {
+                // Tomamos el primero
+                $firstTax = $invoice->customer_tax_ids[0];
+                $billingVat = $firstTax->value ?? ''; 
+            }
+            // Fallback: buscar en metadata si se guardó ahí
+            if (empty($billingVat) && isset($invoice->metadata->nif)) {
+                 $billingVat = $invoice->metadata->nif;
+            }
+
+            // PRIORIDAD DB LOCAL: Nombre y Empresa
+            $userModel = new \App\Models\UserModel();
+            $dbUser = $userModel->find($sub->user_id);
+            
+            $billingName = $invoice->customer_name ?? 'Cliente';
+            
+            if ($dbUser) {
+                // Usar nombre de la BD
+                $billingName = $dbUser->name;
+                // Concatenar empresa si existe
+                if (!empty($dbUser->company)) {
+                    $billingName .= " (" . $dbUser->company . ")";
+                }
+            }
+
             // Generar Factura
             $invoiceService = new \App\Services\InvoiceService();
             $invoice = $invoiceService->createInvoiceFromPayment(
                 (int)$sub->user_id, 
                 (int)$sub->plan_id, 
                 [
-                    'name'  => $invoice->customer_name ?? null,
-                    'email' => $invoice->customer_email ?? null,
+                    'name'    => $billingName,
+                    'email'   => ($dbUser ? $dbUser->email : null) ?? ($invoice->customer_email ?? null),
+                    'address' => $billingAddress,
+                    'vat'     => $billingVat
                 ],
                 $invoice->id // Stripe Invoice ID (in_...)
             );

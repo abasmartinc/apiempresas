@@ -248,8 +248,27 @@
         <table class="header-table">
             <tr>
                 <td class="brand-section">
-                    <h1 class="logo-text">API<span>Empresas</span></h1>
+                    <table style="width: 100%;">
+                        <tr>
+                            <td style="width: 60px; vertical-align: middle; padding-bottom: 0;">
+                                <?php
+                                    // Fix: Usar ROOTPATH y añadir 'public/' ya que FCPATH apunta a la raíz en este setup
+                                    $logoPath = ROOTPATH . 'public/images/logo.png';
+                                    if (file_exists($logoPath)) {
+                                        $type = pathinfo($logoPath, PATHINFO_EXTENSION);
+                                        $data = file_get_contents($logoPath);
+                                        $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                                        echo '<img src="' . $base64 . '" style="max-height: 50px;" alt="Logo">';
+                                    }
+                                ?>
+                            </td>
+                            <td style="vertical-align: middle; padding-bottom: 0;">
+                                <h1 class="logo-text" style="margin: 0;">API<span>Empresas</span><span style="font-size: 14pt; color: #64748b;">.es</span></h1>
+                            </td>
+                        </tr>
+                    </table>
                     <div class="tagline">Infraestructura de datos para el ecosistema empresarial</div>
+                    <div style="margin-top: 20px; font-size: 9pt;">
                         <strong>Ariel Martinez Hernandez (APIEmpresas)</strong><br>
                         C/ Paseo República dominicana 40, Bajo E, 28983, Parla, Madrid<br>
                         NIF: 54994158P • soporte@apiempresas.es

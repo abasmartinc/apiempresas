@@ -435,9 +435,17 @@ class Dashboard extends BaseController
             return redirect()->back()->with('error', 'Factura no encontrada o PDF no generado.');
         }
 
-        $fullPath = ROOTPATH . $invoice->pdf_path;
+        // Robustez: Usar WRITEPATH
+        $relativePath = preg_replace('#^writable/#', '', $invoice->pdf_path);
+        $fullPath = WRITEPATH . $relativePath;
+
         if (!file_exists($fullPath)) {
-            return redirect()->back()->with('error', 'El archivo físico de la factura no existe.');
+             $altPath = ROOTPATH . $invoice->pdf_path;
+             if (file_exists($altPath)) {
+                 $fullPath = $altPath;
+             } else {
+                return redirect()->back()->with('error', 'El archivo físico de la factura no existe en el servidor.');
+             }
         }
 
         return $this->response->download($fullPath, null)->setFileName($invoice->invoice_number . '.pdf');
