@@ -102,25 +102,33 @@ class Billing extends BaseController
             return redirect()->back()->with('error', 'El servidor no tiene habilitada la extensión CURL, necesaria para procesar pagos con Stripe. Por favor, habilítala en Laragon (Menú -> PHP -> Extensions -> curl) y reinicia los servicios.');
         }
 
-        // 1) Mapea a PRICE IDs (creados en Stripe Dashboard)
-        // Sustituye estos placeholders por tus price_ reales:
-        $stripePrices = [
-            'pro' => [
-                'monthly' => getenv('STRIPE_PRICE_PRO_MONTHLY'),
-                'annual' => getenv('STRIPE_PRICE_PRO_ANNUAL'),
-            ],
-            'business' => [
-                'monthly' => getenv('STRIPE_PRICE_BUSINESS_MONTHLY'),
-                'annual' => getenv('STRIPE_PRICE_BUSINESS_ANNUAL'),
-            ],
-        ];
+        // 1) Obtener Precio de la Base de Datos (ApiPlans)
+        $planModel = new \App\Models\ApiPlanModel();
+        $dbPlan = $planModel->where('slug', $plan)->first();
 
-        $priceId = $stripePrices[$plan][$period] ?? null;
-
-        if (!$priceId || strpos($priceId, 'price_') !== 0) {
-            return redirect()->back()->with('error', 'Stripe no está configurado (price_id faltante).');
+        if (!$dbPlan) {
+            return redirect()->back()->with('error', 'El plan seleccionado no existe.');
         }
 
+        // Determinar precio según periodicidad
+        $amount = 0.0;
+        if ($period === 'annual') {
+            // Asumimos que la columna existe. Si no, fallback o error.
+            if (isset($dbPlan->price_annual)) {
+                $amount = (float) $dbPlan->price_annual;
+            } else {
+                // Fallback temporal si no existe la columna (ej: x10) o error
+                 return redirect()->back()->with('error', 'El precio anual no está configurado para este plan.');
+            }
+        } else {
+            $amount = (float) $dbPlan->price_monthly;
+        }
+
+        // Validación de precio mínimo
+        if ($amount <= 0) {
+             return redirect()->back()->with('error', 'El precio del plan no es válido.');
+        }
+        
         $secretKey = getenv('STRIPE_SECRET_KEY');
         if (!$secretKey) {
             return redirect()->back()->with('error', 'Stripe no está configurado (STRIPE_SECRET_KEY).');
@@ -133,15 +141,26 @@ class Billing extends BaseController
             $successUrl = site_url('billing/success') . '?session_id={CHECKOUT_SESSION_ID}';
             $cancelUrl = site_url('billing/cancel');
 
+            // Usar price_data para crear el precio al vuelo basado en la DB
+            $lineItem = [
+                'quantity' => 1,
+                'price_data' => [
+                    'currency' => 'eur',
+                    'unit_amount' => (int)($amount * 100), // En céntimos
+                    'recurring' => [
+                        'interval' => ($period === 'annual' ? 'year' : 'month')
+                    ],
+                    'product_data' => [
+                        'name' => 'Suscripción ' . ($dbPlan->name ?? ucfirst($plan)),
+                        'description' => 'Acceso ' . ucfirst($period) . ' al plan ' . ucfirst($plan)
+                    ]
+                ]
+            ];
+
             // Preparar parámetros de sesión
             $sessionParams = [
                 'mode' => 'subscription',
-                'line_items' => [
-                    [
-                        'price' => $priceId,
-                        'quantity' => 1,
-                    ]
-                ],
+                'line_items' => [$lineItem],
                 'success_url' => $successUrl,
                 'cancel_url' => $cancelUrl,
                 'client_reference_id' => (string) $userId,

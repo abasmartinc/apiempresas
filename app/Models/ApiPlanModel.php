@@ -19,6 +19,7 @@ class ApiPlanModel extends Model
         'monthly_quota',
         'rate_limit_per_min',
         'price_monthly',
+        'price_annual',
         'is_active'
     ];
 }
