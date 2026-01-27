@@ -56,7 +56,7 @@
                 </div>
 
                 <div class="cta-container">
-                    <a href="<?= site_url('admin/users') ?>" class="btn">Gestionar en Panel Admin</a>
+                    <a href="<?= site_url('enter') ?>" class="btn">Gestionar en Panel Admin</a>
                 </div>
             </div>
             <div class="footer">

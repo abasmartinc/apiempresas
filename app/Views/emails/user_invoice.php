@@ -82,7 +82,7 @@
                 <p>Ya puedes seguir disfrutando de todas las ventajas de tu plan. No tienes que realizar ninguna acción adicional.</p>
 
                 <div class="cta-container">
-                    <a href="<?= site_url('dashboard') ?>" class="btn">Ir a mi Panel</a>
+                    <a href="<?= site_url('enter') ?>" class="btn">Ir a mi Panel</a>
                 </div>
             </div>
             <div class="footer">

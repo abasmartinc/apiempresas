@@ -46,7 +46,7 @@
             <p>Para empezar, te recomendamos explorar tu panel de control y revisar la documentación técnica para realizar tu primera integración.</p>
 
             <div class="cta-container">
-                <a href="<?= site_url('dashboard') ?>" class="btn">Entrar al Dashboard</a>
+                <a href="<?= site_url('enter') ?>" class="btn">Entrar al Dashboard</a>
             </div>
             
             <p style="margin-top: 30px; font-size: 14px; color: #64748b;">
