@@ -19,8 +19,8 @@ class Register extends BaseController
 
     public function __construct()
     {
-        $this->userModel            = new UserModel();
-        $this->ApikeysModel         = new ApikeysModel();
+        $this->userModel = new UserModel();
+        $this->ApikeysModel = new ApikeysModel();
         $this->UsersuscriptionsModel = new UsersuscriptionsModel();
     }
 
@@ -66,7 +66,7 @@ class Register extends BaseController
 
         $messages = [
             'name' => [
-                'required'   => 'El nombre es obligatorio.',
+                'required' => 'El nombre es obligatorio.',
                 'min_length' => 'El nombre debe tener al menos 3 caracteres.',
                 'max_length' => 'El nombre no puede superar los 100 caracteres.',
             ],
@@ -74,13 +74,13 @@ class Register extends BaseController
                 'max_length' => 'El nombre de empresa no puede superar los 150 caracteres.',
             ],
             'email' => [
-                'required'    => 'El correo electrónico es obligatorio.',
+                'required' => 'El correo electrónico es obligatorio.',
                 'valid_email' => 'Introduce un correo electrónico válido.',
-                'max_length'  => 'El correo electrónico no puede superar los 190 caracteres.',
-                'is_unique'   => 'Ya existe una cuenta registrada con este correo.',
+                'max_length' => 'El correo electrónico no puede superar los 190 caracteres.',
+                'is_unique' => 'Ya existe una cuenta registrada con este correo.',
             ],
             'password' => [
-                'required'   => 'La contraseña es obligatoria.',
+                'required' => 'La contraseña es obligatoria.',
                 'min_length' => 'La contraseña debe tener al menos 8 caracteres.',
                 'max_length' => 'La contraseña no puede superar los 255 caracteres.',
             ],
@@ -89,7 +89,7 @@ class Register extends BaseController
             ],
         ];
 
-        if (! $this->validate($rules, $messages)) {
+        if (!$this->validate($rules, $messages)) {
             return redirect()
                 ->back()
                 ->withInput()
@@ -102,20 +102,21 @@ class Register extends BaseController
         $apiKey = bin2hex(random_bytes(32));
 
         $data = [
-            'name'          => trim((string) $this->request->getPost('name')),
-            'company'       => trim((string) $this->request->getPost('company')),
-            'email'         => $email,
+            'name' => trim((string) $this->request->getPost('name')),
+            'company' => trim((string) $this->request->getPost('company')),
+            'email' => $email,
             'password_hash' => password_hash((string) $this->request->getPost('password'), PASSWORD_DEFAULT),
-            'is_active'     => 1,
-            'created_at'    => date('Y-m-d H:i:s'),
-            'updated_at'    => date('Y-m-d H:i:s'),
+            'is_active' => 1,
+            'api_access' => 1,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
         ];
 
         try {
             // 1) Crear usuario
             $user_id = $this->userModel->insert($data);
 
-            if (! $user_id) {
+            if (!$user_id) {
                 return redirect()
                     ->back()
                     ->withInput()
@@ -125,23 +126,23 @@ class Register extends BaseController
 
             // 2) Crear API key
             $this->ApikeysModel->insert([
-                'user_id'    => $user_id,
-                'name'       => 'Default API Key',
-                'api_key'    => $apiKey,
-                'is_active'  => 1,
+                'user_id' => $user_id,
+                'name' => 'Default API Key',
+                'api_key' => $apiKey,
+                'is_active' => 1,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
             // 3) Crear suscripción (plan gratuito)
             $this->UsersuscriptionsModel->insert([
-                'user_id'               => $user_id,
-                'plan_id'               => 1,
-                'status'                => 'trialing',
-                'current_period_start'  => date('Y-m-d H:i:s'),
-                'current_period_end'    => date('Y-m-d H:i:s', strtotime('+1 month')),
-                'created_at'            => date('Y-m-d H:i:s'),
-                'updated_at'            => date('Y-m-d H:i:s'),
+                'user_id' => $user_id,
+                'plan_id' => 1,
+                'status' => 'active',
+                'current_period_start' => date('Y-m-d H:i:s'),
+                'current_period_end' => date('Y-m-d H:i:s', strtotime('+1 month')),
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
             // 4) Enviar correo (con FROM + BODY + DEBUG)
@@ -159,9 +160,9 @@ class Register extends BaseController
             $emailService->setSubject('Nuevo registro de usuario');
 
             $emailBody = view('emails/admin_notification', [
-                'name'    => $data['name'],
+                'name' => $data['name'],
                 'company' => $data['company'],
-                'email'   => $data['email'],
+                'email' => $data['email'],
                 'user_id' => $user_id
             ]);
 
@@ -169,7 +170,7 @@ class Register extends BaseController
 
             $sent = $emailService->send();
 
-            if (! $sent) {
+            if (!$sent) {
                 // Log detallado para diagnosticar SMTP/TLS/auth/headers
                 log_message('error', 'Email send failed: ' . $emailService->printDebugger(['headers', 'subject', 'body']));
             } else {
@@ -181,10 +182,10 @@ class Register extends BaseController
             $welcomeEmail->setFrom('soporte@apiempresas.es', 'APIEmpresas.es');
             $welcomeEmail->setTo($email);
             $welcomeEmail->setSubject('¡Bienvenido a APIEmpresas.es!');
-            
+
             $emailBody = view('emails/welcome', ['name' => $data['name']]);
             $welcomeEmail->setMessage($emailBody);
-            
+
             if (!$welcomeEmail->send()) {
                 log_message('error', 'Welcome Email failed for ' . $email . ': ' . $welcomeEmail->printDebugger(['headers']));
             } else {

@@ -20,6 +20,23 @@ if (!function_exists('log_activity')) {
         if (!$userId) {
             return;
         }
+
+        // Check if user is admin
+        try {
+            $userModel = new \App\Models\UserModel();
+            $user = $userModel->find($userId);
+    
+            if ($user && isset($user->is_admin) && $user->is_admin == 1) {
+                return;
+            }
+        } catch (\Exception $e) {
+            // Ignore user lookup errors, proceed to try logging or return? 
+            // Better to proceed or return? If we can't find user, maybe we should log? 
+            // But if user doesn't exist, logActivity might fail too (FK constraint).
+            // Let's just log a warning and continue, effectively trying to log activity.
+            // Actually, if find fails, it might be safer to just return or ignore.
+            // Let's keep it simple.
+        }
         
         try {
             $model = new \App\Models\UserActivityLogModel();
