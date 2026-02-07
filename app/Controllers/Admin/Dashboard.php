@@ -474,7 +474,7 @@ class Dashboard extends BaseController
         // Usar plantilla HTML
         $body = view('emails/user_notification', [
             'user'    => $user,
-            'content' => $message, // El mensaje puede contener HTML básico si usas un editor, o nl2br si es textarea
+            'content' => $message,
             'subject' => $subject
         ]);
 
@@ -500,17 +500,172 @@ class Dashboard extends BaseController
     }
 
     /**
+     * Formulario para redactar email masivo
+     */
+    public function compose_bulk()
+    {
+        $ids = $this->request->getVar('user_ids'); // Array of IDs
+        $filter_q = $this->request->getVar('q');
+        $filter_active = $this->request->getVar('is_active');
+        $filter_admin = $this->request->getVar('is_admin');
+        $selectAll = $this->request->getVar('select_all_filtered');
+
+        $count = 0;
+        $usersPreview = [];
+        $targetDescription = "";
+
+        if ($selectAll) {
+            // Apply filters to count
+            $builder = $this->userModel;
+            if ($filter_q) {
+                $builder->groupStart()
+                        ->like('name', $filter_q)
+                        ->orLike('email', $filter_q)
+                        ->orLike('company', $filter_q)
+                        ->groupEnd();
+            }
+            if ($filter_active !== null && $filter_active !== '') {
+                $builder->where('is_active', $filter_active);
+            }
+            if ($filter_admin !== null && $filter_admin !== '') {
+                $builder->where('is_admin', $filter_admin);
+            }
+            $count = $builder->countAllResults(false); // false to not reset query for next call if needed, though here we just count
+            $targetDescription = "Todos los usuarios filtrados ($count)";
+        } elseif ($ids) {
+            if (is_string($ids)) {
+                $ids = explode(',', $ids);
+            }
+            $count = count($ids);
+            $targetDescription = "$count usuarios seleccionados";
+        } else {
+            return redirect()->to(site_url('admin/users'))->with('error', 'No has seleccionado ningún usuario.');
+        }
+
+        $data = [
+            'title' => 'Redactar Email Masivo',
+            'count' => $count,
+            'target_description' => $targetDescription,
+            // Pass hidden inputs to the view
+            'hidden_inputs' => [
+                'user_ids' => is_array($ids) ? implode(',', $ids) : $ids,
+                'q' => $filter_q,
+                'is_active' => $filter_active,
+                'is_admin' => $filter_admin,
+                'select_all_filtered' => $selectAll
+            ]
+        ];
+
+        return view('admin/email_compose_bulk', $data);
+    }
+
+    /**
+     * Enviar email masivo
+     */
+    public function send_bulk()
+    {
+        $subject = $this->request->getPost('subject');
+        $message = $this->request->getPost('message');
+        
+        $ids = $this->request->getPost('user_ids');
+        $selectAll = $this->request->getPost('select_all_filtered');
+        
+        $users = [];
+
+        if ($selectAll) {
+            $filter_q = $this->request->getPost('q');
+            $filter_active = $this->request->getPost('is_active');
+            $filter_admin = $this->request->getPost('is_admin');
+
+            $builder = $this->userModel;
+            if ($filter_q) {
+                $builder->groupStart()
+                        ->like('name', $filter_q)
+                        ->orLike('email', $filter_q)
+                        ->orLike('company', $filter_q)
+                        ->groupEnd();
+            }
+            if ($filter_active !== null && $filter_active !== '') {
+                $builder->where('is_active', $filter_active);
+            }
+            if ($filter_admin !== null && $filter_admin !== '') {
+                $builder->where('is_admin', $filter_admin);
+            }
+            $users = $builder->findAll();
+        } elseif ($ids) {
+             $idArray = explode(',', $ids);
+             $users = $this->userModel->whereIn('id', $idArray)->findAll();
+        }
+
+        if (empty($users)) {
+            return redirect()->to(site_url('admin/users'))->with('error', 'No hay destinatarios para enviar el correo.');
+        }
+
+        $emailService = \Config\Services::email();
+        $sentCount = 0;
+        $errorCount = 0;
+
+        foreach ($users as $user) {
+            // Reset email service for each iteration
+            $emailService->clear();
+            
+            $emailService->setTo($user->email);
+            $emailService->setSubject($subject);
+            
+             // Usar plantilla HTML
+            $body = view('emails/user_notification', [
+                'user'    => $user,
+                'content' => $message,
+                'subject' => $subject
+            ]);
+            
+            $emailService->setMessage($body);
+
+            $logData = [
+                'user_id'    => $user->id,
+                'subject'    => $subject,
+                'message'    => $message,
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($emailService->send()) {
+                $logData['status'] = 'success';
+                $sentCount++;
+            } else {
+                $logData['status'] = 'error';
+                $logData['error_message'] = $emailService->printDebugger(['headers']);
+                $errorCount++;
+            }
+            $this->emailLogModel->insert($logData);
+        }
+
+        $msg = "Proceso finalizado. Enviados: $sentCount.";
+        if ($errorCount > 0) {
+            $msg .= " Errores: $errorCount.";
+            session()->setFlashdata('error', "Hubo algunos errores al enviar.");
+        }
+
+        return redirect()->to(site_url('admin/users'))->with('message', $msg);
+    }
+
+    /**
      * Listado de empresas (CRUD)
      */
     public function companies()
     {
         $q = $this->request->getGet('q');
+        $noCif = $this->request->getGet('no_cif');
         
+        $filters = [
+            'no_cif' => $noCif
+        ];
+
         $data = [
             'title'     => 'Gestión de Empresas | APIEmpresas',
-            'companies' => $this->companyModel->searchAdmin($q, 20),
+            'companies' => $this->companyModel->searchAdmin($q, 20, $filters),
             'pager'     => $this->companyModel->pager,
-            'q'         => $q
+            'q'         => $q,
+            'filters'   => $filters
         ];
 
         return view('admin/companies', $data);
@@ -538,7 +693,7 @@ class Dashboard extends BaseController
         // Validación básica
         if (!$this->validate([
             'company_name' => 'required|min_length[3]',
-            'cif'          => 'required|is_unique[empresia_company_details.cif]',
+            'cif'          => 'required|is_unique[companies.cif]',
         ])) {
             return redirect()->back()->withInput()->with('error', 'Datos inválidos o CIF duplicado.');
         }
@@ -574,7 +729,7 @@ class Dashboard extends BaseController
 
         if (!$this->validate([
             'company_name' => 'required|min_length[3]',
-            'cif'          => "required|is_unique[empresia_company_details.cif,id,{$id}]",
+            'cif'          => "required|is_unique[companies.cif,id,{$id}]",
         ])) {
             return redirect()->back()->withInput()->with('error', 'Datos inválidos o CIF duplicado.');
         }

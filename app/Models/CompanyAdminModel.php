@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class CompanyAdminModel extends Model
 {
-    protected $table         = 'empresia_company_details';
+    protected $table         = 'companies';
     protected $primaryKey    = 'id';
     protected $returnType    = 'object';
     protected $useTimestamps = true;
@@ -42,7 +42,7 @@ class CompanyAdminModel extends Model
     /**
      * Búsqueda optimizada para el admin
      */
-    public function searchAdmin(?string $q, int $perPage = 20)
+    public function searchAdmin(?string $q, int $perPage = 20, array $filters = [])
     {
         $builder = $this->builder();
         
@@ -51,6 +51,13 @@ class CompanyAdminModel extends Model
             $builder->groupStart()
                 ->where('cif', $q)
                 ->orLike('company_name', $q, 'both')
+            ->groupEnd();
+        }
+
+        if (!empty($filters['no_cif'])) {
+            $builder->groupStart()
+                ->where('cif', '')
+                ->orWhere('cif', null)
             ->groupEnd();
         }
 

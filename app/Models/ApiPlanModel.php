@@ -20,6 +20,7 @@ class ApiPlanModel extends Model
         'rate_limit_per_min',
         'price_monthly',
         'price_annual',
-        'is_active'
+        'is_active',
+        'max_alerts'
     ];
 }

@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class CompanyModel extends Model
 {
-    protected $table      = 'empresia_company_details';
+    protected $table      = 'companies';
     protected $primaryKey = 'id';
     protected $returnType = 'array';
 
@@ -14,6 +14,7 @@ class CompanyModel extends Model
      * Campos a devolver (misma salida que antes)
      */
     private array $selectFields = [
+        'id',
         'company_name       AS name',
         'cif                AS cif',
         'cnae_code          AS cnae',
@@ -46,6 +47,46 @@ class CompanyModel extends Model
             ->limit(1)
             ->get()
             ->getRowArray() ?: null;
+    }
+
+    /**
+     * Busca empresa por slug.
+     * El slug se genera a partir del company_name.
+     */
+    public function getBySlug(string $slug): ?array
+    {
+        $slug = trim($slug);
+        if ($slug === '') return null;
+
+        // Convertir slug a nombre: "serviraibe-sl" -> "serviraibe sl"
+        $searchName = str_replace('-', ' ', $slug);
+        
+        // Usar getBestByName para encontrar la mejor coincidencia
+        $result = $this->getBestByName($searchName);
+        
+        if (!$result || !isset($result['data'])) {
+            return null;
+        }
+        
+        // Verificar que el slug generado coincida con el buscado
+        $company = $result['data'];
+        $generatedSlug = $this->generateSlug($company['name'] ?? '');
+        
+        // Permitir coincidencia exacta o muy cercana (para tolerancia)
+        if ($generatedSlug === $slug || similar_text($generatedSlug, $slug) > (strlen($slug) * 0.9)) {
+            return $company;
+        }
+        
+        return null;
+    }
+
+    /**
+     * Genera un slug único a partir del nombre de la empresa.
+     */
+    public function generateSlug(string $name): string
+    {
+        helper('text');
+        return url_title($name, '-', true);
     }
 
     /**
@@ -275,7 +316,7 @@ class CompanyModel extends Model
         return ($pct * 0.75) + ($levScore * 0.25);
     }
 
-    public function getRelated(?string $cnae, ?string $province, string $excludeCif, int $limit = 5): array
+    public function getRelated(?string $cnae, ?string $province, string $excludeCif, int $limit = 20): array
     {
         $cnae = trim((string)$cnae);
         $province = trim((string)$province);

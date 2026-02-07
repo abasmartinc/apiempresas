@@ -57,6 +57,7 @@
                     No somos servicio oficial del BOE. Cumplimiento RGPD (Art. 14) y
                     reutilización de información del sector público.
                 </p>
+                
             </div>
             <div>
                 <h4 style="margin:0 0 8px">Producto</h4>
@@ -64,6 +65,7 @@
                 <a class="minor" href="<?=site_url() ?>directorio">Directorio SEO</a><br />
                 <a class="minor" href="<?=site_url() ?>search_company">Buscador</a><br />
                 <a class="minor" href="<?=site_url() ?>documentation">Documentación</a><br />
+                <a class="minor" target="_blank" href="https://validatebusiness.com/">Validate your business in florida</a>
             </div>
             <div>
                 <h4 style="margin:0 0 8px">Legal</h4>

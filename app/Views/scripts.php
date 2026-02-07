@@ -40,6 +40,28 @@
     </script>
 <?php endif; ?>
 
+<?php if (session()->getFlashdata('upgrade_limit')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            Swal.fire({
+                title: '🚀 ¡Optimiza tu estrategia!',
+                html: '<?= session()->getFlashdata('upgrade_limit') ?>',
+                icon: null,
+                iconHtml: '<span class="ve-swal-icon-inner">✨</span>',
+                customClass: {
+                    popup: 've-swal',
+                    title: 've-swal-title',
+                    htmlContainer: 've-swal-text',
+                    confirmButton: 'btn btn_primary ve-swal-confirm',
+                    icon: 've-swal-icon'
+                },
+                buttonsStyling: false,
+                confirmButtonText: 'Ver opciones'
+            });
+        });
+    </script>
+<?php endif; ?>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const btn = document.getElementById('btnBuscar');
@@ -97,6 +119,7 @@
 
   <div class="company-card__footer">
     <button type="button" class="btn-json-api">Ver JSON de la API</button>
+    <a href="${BASE_URL}${company.cif || company.nif}" class="btn" style="text-decoration:none;">Ver ficha completa</a>
   </div>
 
   <pre class="company-card__json is-hidden"><code>${jsonPretty}</code></pre>
@@ -125,6 +148,8 @@
 
         // Endpoint absoluto correcto (respeta subcarpeta /apiempresas)
         const API_URL = '<?= site_url('search') ?>';
+        // Base URL for links
+        const BASE_URL = '<?= site_url() ?>';
 
         async function doSearch() {
             const v = (q.value || '').trim();
@@ -279,6 +304,8 @@
             // Click fuera del modal (overlay)
             const overlay = e.target.classList && e.target.classList.contains('modal-overlay') ? e.target : null;
             if (overlay) {
+                // If the modal has data-prevent-overlay-close, do not close
+                if (overlay.dataset.preventOverlayClose === 'true') return;
                 closeModal(overlay);
             }
         });

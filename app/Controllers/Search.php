@@ -369,10 +369,6 @@ class Search extends BaseController
         return view('search', $data);
     }
 
-    public function search_company_post()
-    {
-        $q = trim((string) $this->request->getPost('q'));
-        $url = site_url('search_company') . ($q ? ('?q=' . rawurlencode($q)) : '');
-        return redirect()->to($url)->setStatusCode(303);
-    }
 }
+
+

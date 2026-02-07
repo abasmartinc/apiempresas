@@ -8,6 +8,9 @@
 <body>
 <div class="bg-halo" aria-hidden="true"></div>
 
+<?php if(session('logged_in')): ?>
+    <?=view('partials/header_inner') ?>
+<?php else: ?>
 <header>
     <div class="container nav">
         <div class="brand">
@@ -75,6 +78,7 @@
         </div>
     </div>
 </header>
+<?php endif; ?>
 
 
 <main class="docs-main">

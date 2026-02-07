@@ -8,84 +8,95 @@
 
 <?= view('partials/header_admin') ?>
 
-<main class="container-admin" style="padding: 40px 0;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h1 class="title">Gestión de Empresas</h1>
-        <div style="display: flex; gap: 10px;">
+<main class="container-admin page-padding">
+    <div class="page-header">
+        <h1 class="title">
+            Gestión de Empresas 
+            <?php if(isset($pager)): ?>
+                <span class="text-slate font-normal" style="font-size: 1rem;">(<?= $pager->getTotal() ?> resultados)</span>
+            <?php endif; ?>
+        </h1>
+        <div class="flex-gap-10">
             <a href="<?= site_url('admin/companies/create') ?>" class="btn">Nueva Empresa</a>
             <a href="<?= site_url('dashboard') ?>" class="btn ghost">Volver al Dashboard</a>
         </div>
     </div>
 
     <!-- Buscador -->
-    <div class="card" style="margin-bottom: 2rem; padding: 20px;">
-        <form action="<?= site_url('admin/companies') ?>" method="get" style="display: flex; gap: 10px;">
-            <input type="text" name="q" class="input" placeholder="Buscar por Nombre o CIF..." value="<?= esc($q) ?>" style="flex: 1;">
+    <div class="card mb-8 p-5">
+        <form action="<?= site_url('admin/companies') ?>" method="get" class="flex-gap-10 flex-center" style="display: flex;">
+            <input type="text" name="q" class="input flex-1" placeholder="Buscar por Nombre o CIF..." value="<?= esc($q) ?>">
+            
+            <label class="flex-gap-5 flex-center cursor-pointer select-none text-09 text-slate-500">
+                <input type="checkbox" name="no_cif" value="1" <?= isset($filters['no_cif']) && $filters['no_cif'] ? 'checked' : '' ?>>
+                Sin CIF
+            </label>
+
             <button type="submit" class="btn">Buscar</button>
-            <?php if ($q): ?>
+            <?php if ($q || (isset($filters['no_cif']) && $filters['no_cif'])): ?>
                 <a href="<?= site_url('admin/companies') ?>" class="btn ghost">Limpiar</a>
             <?php endif; ?>
         </form>
     </div>
 
     <?php if (session()->getFlashdata('message')): ?>
-        <div style="background: #dcfce7; color: #166534; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #bbf7d0;">
+        <div class="alert-success">
             <?= session()->getFlashdata('message') ?>
         </div>
     <?php endif; ?>
 
     <?php if (session()->getFlashdata('error')): ?>
-        <div style="background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #fecaca;">
+        <div class="alert-error">
             <?= session()->getFlashdata('error') ?>
         </div>
     <?php endif; ?>
 
-    <div class="card" style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; min-width: 900px;">
+    <div class="card admin-table-wrapper">
+        <table class="admin-table">
             <thead>
-                <tr style="border-bottom: 2px solid #f1f5f9; text-align: left;">
-                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">CIF</th>
-                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Nombre</th>
-                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Provincia / Municipio</th>
-                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Estado</th>
-                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Acciones</th>
+                <tr>
+                    <th>CIF</th>
+                    <th>Nombre</th>
+                    <th>Provincia / Municipio</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($companies as $company): ?>
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                    <td style="padding: 12px; font-weight: 700; color: #2152ff;"><?= esc($company->cif) ?></td>
-                    <td style="padding: 12px;">
-                        <div style="font-weight: 600;"><?= esc($company->company_name ?? '-') ?></div>
-                        <div style="font-size: 0.75rem; color: #64748b;"><?= esc($company->cnae_label ?? '') ?></div>
+                <tr>
+                    <td class="font-bold-700 text-primary"><?= esc($company->cif) ?></td>
+                    <td>
+                        <div class="font-bold"><?= esc($company->company_name ?? '-') ?></div>
+                        <div class="text-xs text-slate"><?= esc($company->cnae_label ?? '') ?></div>
                     </td>
-                    <td style="padding: 12px;">
-                        <div style="font-size: 0.85rem;"><?= esc($company->registro_mercantil ?? '') ?></div>
-                        <div style="font-size: 0.75rem; color: #94a3b8;"><?= esc($company->municipality ?? '') ?></div>
+                    <td>
+                        <div class="text-sm"><?= esc($company->registro_mercantil ?? '') ?></div>
+                        <div class="text-xs text-slate-lighter"><?= esc($company->municipality ?? '') ?></div>
                     </td>
-                    <td style="padding: 12px;">
-                        <span class="pill" style="font-size: 0.7rem; background: <?= $company->estado === 'ACTIVA' ? '#dcfce7; color: #166534;' : '#f1f5f9; color: #64748b;' ?>">
+                    <td>
+                        <span class="pill pill-sm <?= $company->estado === 'ACTIVA' ? 'pill-green' : 'pill-slate' ?>">
                             <?= esc($company->estado ?: 'N/A') ?>
                         </span>
                     </td>
-                    <td style="padding: 12px;">
-                        <div style="display: flex; gap: 5px;">
-                            <a href="<?= site_url('admin/companies/edit/' . $company->id) ?>" class="btn ghost" style="padding: 4px 8px; font-size: 0.75rem;" title="Editar">✏️</a>
-                            <a href="<?= site_url('admin/companies/delete/' . $company->id) ?>" class="btn ghost" style="padding: 4px 8px; font-size: 0.75rem; color: #ef4444; border-color: #fee2e2;" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar esta empresa?')">🗑️</a>
+                    <td>
+                        <div class="flex-gap-5">
+                            <a href="<?= site_url('admin/companies/edit/' . $company->id) ?>" class="btn ghost btn-sm" title="Editar">✏️</a>
+                            <a href="<?= site_url('admin/companies/delete/' . $company->id) ?>" class="btn ghost btn-danger-ghost" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar esta empresa?')">🗑️</a>
                         </div>
                     </td>
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($companies)): ?>
                 <tr>
-                    <td colspan="5" style="padding: 40px; text-align: center; color: #94a3b8;">No se encontraron empresas.</td>
+                    <td colspan="5" class="p-10 text-center text-slate-lighter">No se encontraron empresas.</td>
                 </tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
 
-    <div style="margin-top: 2rem;">
+    <div class="mt-8">
         <?= $pager->links('default', 'admin_full') ?>
     </div>
 </main>

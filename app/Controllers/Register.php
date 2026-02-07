@@ -108,6 +108,7 @@ class Register extends BaseController
             'password_hash' => password_hash((string) $this->request->getPost('password'), PASSWORD_DEFAULT),
             'is_active' => 1,
             'api_access' => 1,
+            'source_app' => 'apiempresas', // Default source
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ];

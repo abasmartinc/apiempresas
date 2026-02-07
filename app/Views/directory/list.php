@@ -215,31 +215,122 @@
             <span style="color: var(--dir-slate-900)"><?= esc($header) ?></span>
         </nav>
 
-        <div class="company-grid">
-            <?php foreach($items as $company): 
-                $slug = url_title($company['name'] ?? '', '-', true);
-                $url  = site_url(($company['cif'] ?? '') . ($slug ? ('-' . $slug) : ''));
-            ?>
-                <a href="<?= esc($url) ?>" class="company-card">
-                    <div class="company-card__top">
-                        <span class="badge-official">Ficha Oficial</span>
-                        <span class="company-card__cif"><?= esc($company['cif'] ?? '-') ?></span>
-                    </div>
-                    
-                    <h3 class="company-card__name" title="<?= esc($company['name']) ?>">
-                        <?= esc($company['name']) ?>
-                    </h3>
-                    
-                    <div class="company-card__footer">
-                        <span class="company-card__location">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        <div class="table-container" style="background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow-x: auto; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+            <table style="width: 100%; min-width: 600px; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+                <thead>
+                    <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                        <th style="padding: 1rem 1.5rem; color: #64748b; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Empresa</th>
+                        <th style="padding: 1rem 1.5rem; color: #64748b; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">CIF</th>
+                        <th style="padding: 1rem 1.5rem; color: #64748b; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Ubicación</th>
+                        <th style="padding: 1rem 1.5rem; color: #64748b; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; text-align: right;">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php 
+                        helper('company');
+                        foreach($items as $company): 
+                        $url = company_url($company);
+                    ?>
+                    <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                        <td style="padding: 1rem 1.5rem;">
+                            <a href="<?= esc($url) ?>" style="font-weight: 600; color: #0f172a; text-decoration: none; display: block;">
+                                <?= esc($company['name']) ?>
+                            </a>
+                        </td>
+                        <td style="padding: 1rem 1.5rem; color: #475569; font-family: monospace; font-size: 0.9rem;">
+                            <?= esc($company['cif'] ?? '-') ?>
+                        </td>
+                        <td style="padding: 1rem 1.5rem; color: #475569;">
                             <?= esc($company['province'] ?? 'España') ?>
-                        </span>
-                        <span class="company-card__view">Detalles <span>→</span></span>
-                    </div>
-                </a>
-            <?php endforeach; ?>
+                        </td>
+                        <td style="padding: 1rem 1.5rem; text-align: right;">
+                            <a href="<?= esc($url) ?>" style="display: inline-flex; align-items: center; gap: 4px; color: #2152FF; font-weight: 600; font-size: 0.85rem; text-decoration: none;">
+                                Ver Ficha
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                            </a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
+
+        <?php if (!empty($pager) && ($pager['prev'] || $pager['next'])): ?>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e2e8f0;">
+            
+            <?php if ($pager['prev']): ?>
+            <a href="<?= esc($pager['prev']) ?>" class="btn secondary" style="display: flex; align-items: center; gap: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                Página Anterior
+            </a>
+            <?php else: ?>
+            <span class="btn secondary" style="opacity: 0.5; pointer-events: none; display: flex; align-items: center; gap: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                Página Anterior
+            </span>
+            <?php endif; ?>
+
+            <span style="font-weight: 600; color: var(--dir-slate-600);">
+                Página <?= esc($pager['current']) ?>
+            </span>
+
+            <?php if ($pager['next']): ?>
+            <a href="<?= esc($pager['next']) ?>" class="btn secondary" style="display: flex; align-items: center; gap: 8px;">
+                Siguiente Página
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </a>
+            <?php else: ?>
+            <span class="btn secondary" style="opacity: 0.5; pointer-events: none; display: flex; align-items: center; gap: 8px;">
+                Siguiente Página
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </span>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+
+        <?php if (!empty($cross_links) && !empty($cross_links['items'])): ?>
+        <div style="margin-top: 5rem; padding-top: 3rem; border-top: 1px solid #e2e8f0;">
+            <h3 style="font-size: 1.5rem; font-weight: 800; color: var(--dir-slate-900); margin-bottom: 2rem;"><?= esc($cross_links['title']) ?></h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem;">
+                <?php foreach($cross_links['items'] as $cl): ?>
+                    <?php 
+                        if($cross_links['type'] === 'cnae') {
+                            $clUrl = site_url('directorio/cnae/' . $cl['code']);
+                            $clName = $cl['label'] ?: "CNAE {$cl['code']}";
+                        } else {
+                            $clUrl = site_url('directorio/provincia/' . urlencode($cl['name']));
+                            $clName = $cl['name'];
+                        }
+                    ?>
+                    <a href="<?= esc($clUrl) ?>" style="text-decoration: none; color: var(--dir-slate-600); font-size: 0.95rem; font-weight: 500; display: block; padding: 0.5rem 0; transition: color 0.2s;" onmouseover="this.style.color='#2152FF'" onmouseout="this.style.color='#475569'">
+                        <?= esc($clName) ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php
+        // ItemList Schema for better visibility of the list in search results
+        $itemListSchema = [
+            "@context" => "https://schema.org",
+            "@type" => "ItemList",
+            "itemListElement" => []
+        ];
+        helper('company');
+        foreach($items as $index => $company) {
+            $url = company_url($company);
+            $itemListSchema["itemListElement"][] = [
+                "@type" => "ListItem",
+                "position" => $index + 1,
+                "url" => $url,
+                "name" => $company['name']
+            ];
+        }
+        ?>
+        <script type="application/ld+json">
+            <?= json_encode($itemListSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
+        </script>
         
         <div class="cta-bottom">
             <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--dir-slate-900); margin-bottom: 1rem;">¿No encuentra la empresa que busca?</h2>

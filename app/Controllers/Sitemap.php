@@ -7,7 +7,7 @@ use CodeIgniter\Controller;
 
 class Sitemap extends Controller
 {
-    protected $perPage = 1000;
+    protected $perPage = 40000;
 
     /**
      * Índice del sitemap (sitemap.xml)
@@ -23,22 +23,18 @@ class Sitemap extends Controller
         $xml .= '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
         // 1. Sitemap Estático
-        $xml .= '<sitemap>';
-        $xml .= '<loc>' . site_url("sitemap-static.xml") . '</loc>';
-        $xml .= '<lastmod>' . date('c') . '</lastmod>';
-        $xml .= '</sitemap>';
+        $xml .= '<sitemap><loc>' . site_url("sitemap-static.xml") . '</loc></sitemap>';
 
-        // 2. Sitemap del Blog (WP)
-        $xml .= '<sitemap>';
-        $xml .= '<loc>' . site_url("sitemap-blog.xml") . '</loc>';
-        $xml .= '<lastmod>' . date('c') . '</lastmod>';
-        $xml .= '</sitemap>';
+        // 2. Sitemap del Blog
+        $xml .= '<sitemap><loc>' . site_url("sitemap-blog.xml") . '</loc></sitemap>';
 
-        // 3. Páginas de empresas
+        // 3. Sitemap de Directorios (Provincias y CNAE)
+        $xml .= '<sitemap><loc>' . site_url("sitemap-directories.xml") . '</loc></sitemap>';
+
+        // 4. Páginas de empresas
         for ($i = 1; $i <= $pages; $i++) {
             $xml .= '<sitemap>';
             $xml .= '<loc>' . site_url("sitemap-companies-{$i}.xml") . '</loc>';
-            $xml .= '<lastmod>' . date('c') . '</lastmod>';
             $xml .= '</sitemap>';
         }
         
@@ -163,7 +159,7 @@ class Sitemap extends Controller
 
             $xml .= '<url>';
             $xml .= '<loc>' . $loc . '</loc>';
-            $xml .= '<lastmod>' . $lastmod . '</lastmod>';
+            // Removed lastmod: Google ignores "now" and it consumes crawl budget if it changes every time without real updates.
             $xml .= '<changefreq>monthly</changefreq>';
             $xml .= '<priority>0.7</priority>';
             $xml .= '</url>';
@@ -171,6 +167,53 @@ class Sitemap extends Controller
 
         $xml .= '</urlset>';
 
+        return $this->response->setContentType('application/xml')->setBody($xml);
+    }
+
+    /**
+     * Sitemap de Provincias y Sectores (Directorios)
+     */
+    public function directories()
+    {
+        $model = new CompanyModel();
+        
+        // Provincias (original)
+        $provinces = $model->builder()
+            ->select('registro_mercantil as name')
+            ->where('registro_mercantil IS NOT NULL')
+            ->groupBy('registro_mercantil')
+            ->get()
+            ->getResultArray();
+
+        // CNAEs principales
+        $cnaes = $model->builder()
+            ->select('cnae_code as code')
+            ->where('cnae_code IS NOT NULL')
+            ->groupBy('cnae_code')
+            ->get()
+            ->getResultArray();
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+
+        // Home del directorio
+        $xml .= '<url><loc>' . site_url('directorio') . '</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>';
+
+        foreach ($provinces as $p) {
+            $xml .= '<url>';
+            $xml .= '<loc>' . site_url('directorio/provincia/' . urlencode($p['name'])) . '</loc>';
+            $xml .= '<changefreq>weekly</changefreq><priority>0.8</priority>';
+            $xml .= '</url>';
+        }
+
+        foreach ($cnaes as $c) {
+            $xml .= '<url>';
+            $xml .= '<loc>' . site_url('directorio/cnae/' . $c['code']) . '</loc>';
+            $xml .= '<changefreq>weekly</changefreq><priority>0.8</priority>';
+            $xml .= '</url>';
+        }
+
+        $xml .= '</urlset>';
         return $this->response->setContentType('application/xml')->setBody($xml);
     }
 }

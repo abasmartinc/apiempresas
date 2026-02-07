@@ -399,6 +399,13 @@
                         <div class="home-blog__skeleton-line skeleton-block"></div>
                         <div class="home-blog__skeleton-meta skeleton-block"></div>
                     </article>
+                    <article class="home-blog__card home-blog__card--skeleton">
+                        <div class="home-blog__skeleton-eyebrow skeleton-block"></div>
+                        <div class="home-blog__skeleton-title skeleton-block"></div>
+                        <div class="home-blog__skeleton-line skeleton-block"></div>
+                        <div class="home-blog__skeleton-line skeleton-block"></div>
+                        <div class="home-blog__skeleton-meta skeleton-block"></div>
+                    </article>
                 <?php endif; ?>
             </div>
         </div>
@@ -414,85 +421,209 @@
                 VIES, KYB/KYC y uso en producción.
             </p>
 
-            <div class="faq-grid" style="margin-top: 18px; display: grid; gap: 14px;">
-                <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
-                    <summary style="cursor: pointer; font-weight: 700;">
-                        ¿Cómo validar un CIF en España?
-                    </summary>
-                    <div class="muted" style="margin-top: 10px;">
-                        Validar un CIF puede incluir dos cosas: comprobar el <strong>formato</strong> y, además, verificar datos de empresa
-                        como <strong>razón social</strong> y <strong>estado</strong>. En APIEmpresas.es puedes hacerlo desde el buscador web
-                        o automatizarlo por <strong>API REST</strong> con tu API Key.
-                    </div>
-                </details>
+            <!-- Two-column layout: FAQs + Sidebar -->
+            <div style="margin-top: 32px; display: grid; grid-template-columns: 1fr 320px; gap: 32px; align-items: start;">
+                
+                <!-- Left: FAQs -->
+                <div class="faq-grid" style="display: grid; gap: 14px;">
+                    <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
+                        <summary style="cursor: pointer; font-weight: 700;">
+                            ¿Cómo validar un CIF en España?
+                        </summary>
+                        <div class="muted" style="margin-top: 10px;">
+                            Validar un CIF puede incluir dos cosas: comprobar el <strong>formato</strong> y, además, verificar datos de empresa
+                            como <strong>razón social</strong> y <strong>estado</strong>. En APIEmpresas.es puedes hacerlo desde el buscador web
+                            o automatizarlo por <strong>API REST</strong> con tu API Key.
+                        </div>
+                    </details>
 
-                <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
-                    <summary style="cursor: pointer; font-weight: 700;">
-                        ¿Qué diferencia hay entre validar CIF y verificar una empresa?
-                    </summary>
-                    <div class="muted" style="margin-top: 10px;">
-                        “Validar CIF” suele referirse a la comprobación de <strong>estructura</strong> y consistencia.
-                        “Verificar empresa” implica contrastar información relevante (p. ej., <strong>razón social</strong>,
-                        <strong>estado</strong>, domicilio básico) para reducir errores en <strong>altas</strong> y <strong>facturación</strong>.
-                    </div>
-                </details>
+                    <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
+                        <summary style="cursor: pointer; font-weight: 700;">
+                            ¿Qué diferencia hay entre validar CIF y verificar una empresa?
+                        </summary>
+                        <div class="muted" style="margin-top: 10px;">
+                            "Validar CIF" suele referirse a la comprobación de <strong>estructura</strong> y consistencia.
+                            "Verificar empresa" implica contrastar información relevante (p. ej., <strong>razón social</strong>,
+                            <strong>estado</strong>, domicilio básico) para reducir errores en <strong>altas</strong> y <strong>facturación</strong>.
+                        </div>
+                    </details>
 
-                <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
-                    <summary style="cursor: pointer; font-weight: 700;">
-                        ¿Puedo comprobar un NIF-IVA intracomunitario (VIES)?
-                    </summary>
-                    <div class="muted" style="margin-top: 10px;">
-                        Sí. Puedes validar el NIF-IVA intracomunitario contra <strong>VIES</strong> y usar el resultado en procesos
-                        de onboarding, cumplimiento y validación fiscal en operaciones B2B.
-                    </div>
-                </details>
+                    <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
+                        <summary style="cursor: pointer; font-weight: 700;">
+                            ¿Puedo comprobar un NIF-IVA intracomunitario (VIES)?
+                        </summary>
+                        <div class="muted" style="margin-top: 10px;">
+                            Sí. Puedes validar el NIF-IVA intracomunitario contra <strong>VIES</strong> y usar el resultado en procesos
+                            de onboarding, cumplimiento y validación fiscal en operaciones B2B.
+                        </div>
+                    </details>
 
-                <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
-                    <summary style="cursor: pointer; font-weight: 700;">
-                        ¿Para qué sirve en KYB/KYC y prevención de fraude?
-                    </summary>
-                    <div class="muted" style="margin-top: 10px;">
-                        Para automatizar verificaciones, reducir altas con datos falsos o inconsistentes y mantener un rastro consultable
-                        del dato verificado. Es especialmente útil si vendes a empresas (B2B), trabajas con pagos, crédito o acceso a producto.
-                    </div>
-                </details>
+                    <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
+                        <summary style="cursor: pointer; font-weight: 700;">
+                            ¿Para qué sirve en KYB/KYC y prevención de fraude?
+                        </summary>
+                        <div class="muted" style="margin-top: 10px;">
+                            Para automatizar verificaciones, reducir altas con datos falsos o inconsistentes y mantener un rastro consultable
+                            del dato verificado. Es especialmente útil si vendes a empresas (B2B), trabajas con pagos, crédito o acceso a producto.
+                        </div>
+                    </details>
 
-                <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
-                    <summary style="cursor: pointer; font-weight: 700;">
-                        ¿La API es adecuada para producción?
-                    </summary>
-                    <div class="muted" style="margin-top: 10px;">
-                        Sí. Tienes <strong>API estable</strong>, control de consumo y planes preparados para producción.
-                        Puedes empezar en Sandbox, validar tu integración y escalar a Pro/Business cuando lo necesites.
-                    </div>
-                </details>
+                    <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
+                        <summary style="cursor: pointer; font-weight: 700;">
+                            ¿La API es adecuada para producción?
+                        </summary>
+                        <div class="muted" style="margin-top: 10px;">
+                            Sí. Tienes <strong>API estable</strong>, control de consumo y planes preparados para producción.
+                            Puedes empezar en Sandbox, validar tu integración y escalar a Pro/Business cuando lo necesites.
+                        </div>
+                    </details>
 
-                <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
-                    <summary style="cursor: pointer; font-weight: 700;">
-                        ¿Qué datos devuelvo y qué obtengo en una consulta?
-                    </summary>
-                    <div class="muted" style="margin-top: 10px;">
-                        Una consulta devuelve una ficha normalizada en JSON con los campos esenciales para automatización (CIF, razón social,
-                        estado, CNAE y datos básicos). El objetivo es integrarlo rápido en formularios de alta, ERPs/CRMs y flujos de riesgo.
-                    </div>
-                </details>
+                    <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
+                        <summary style="cursor: pointer; font-weight: 700;">
+                            ¿Qué datos devuelvo y qué obtengo en una consulta?
+                        </summary>
+                        <div class="muted" style="margin-top: 10px;">
+                            Una consulta devuelve una ficha normalizada en JSON con los campos esenciales para automatización (CIF, razón social,
+                            estado, CNAE y datos básicos). El objetivo es integrarlo rápido en formularios de alta, ERPs/CRMs y flujos de riesgo.
+                        </div>
+                    </details>
 
-                <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
-                    <summary style="cursor: pointer; font-weight: 700;">
-                        ¿Cómo integro la API para validar CIF?
-                    </summary>
-                    <div class="muted" style="margin-top: 10px;">
-                        Creas una cuenta, obtienes tu <strong>API Key</strong> y llamas al endpoint REST. En la documentación tienes ejemplos
-                        listos en cURL, PHP/Laravel, Node y Python para copiar y pegar.
-                        <div style="margin-top: 10px;">
-                            <a class="btn secondary" href="<?=site_url() ?>documentation">Ver documentación</a>
-                            <a class="btn btn_start" style="margin-left: 8px;" href="<?=site_url() ?>register">Crear cuenta gratis</a>
+                    <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
+                        <summary style="cursor: pointer; font-weight: 700;">
+                            ¿Cómo integro la API para validar CIF?
+                        </summary>
+                        <div class="muted" style="margin-top: 10px;">
+                            Creas una cuenta, obtienes tu <strong>API Key</strong> y llamas al endpoint REST. En la documentación tienes ejemplos
+                            listos en cURL, PHP/Laravel, Node y Python para copiar y pegar.
+                            <div style="margin-top: 10px;">
+                                <a class="btn secondary" href="<?=site_url() ?>documentation">Ver documentación</a>
+                                <a class="btn btn_start" style="margin-left: 8px;" href="<?=site_url() ?>register">Crear cuenta gratis</a>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- Right: Sidebar -->
+                <aside style="position: sticky; top: 100px; display: grid; gap: 20px;">
+                    
+                    <!-- Stats Card - Cleaner Design -->
+                    <div style="background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 28px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 24px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="2">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                            <h3 style="font-size: 0.95rem; margin: 0; color: #fff; font-weight: 600; letter-spacing: 0.5px;">PLATAFORMA</h3>
+                        </div>
+                        
+                        <div style="display: grid; gap: 20px;">
+                            <div style="border-left: 3px solid #2152ff; padding-left: 16px;">
+                                <div style="font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, #60A5FA 0%, #2152ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; margin-bottom: 6px;">+3M</div>
+                                <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 500;">Empresas en base de datos</div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.05);">
+                                <div>
+                                    <div style="font-size: 1.4rem; font-weight: 700; color: #60A5FA; line-height: 1; margin-bottom: 4px;">99.9%</div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">Uptime</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.4rem; font-weight: 700; color: #60A5FA; line-height: 1; margin-bottom: 4px;">&lt;200ms</div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">Respuesta</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </details>
+
+                    <!-- CTA Card - Premium Design -->
+                    <div style="background: linear-gradient(135deg, #2152ff 0%, #1a42cc 100%); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(33, 82, 255, 0.3);">
+                        <!-- Decorative gradient overlay -->
+                        <div style="position: absolute; top: -50%; right: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); pointer-events: none;"></div>
+                        
+                        <div style="position: relative; z-index: 1; text-align: center;">
+                            <h3 style="font-size: 1.2rem; margin: 0 0 10px 0; color: #fff; font-weight: 700;">¿Listo para empezar?</h3>
+                            <p style="font-size: 0.9rem; color: rgba(255,255,255,0.85); margin: 0 0 24px 0; line-height: 1.6;">Obtén tu API Key gratis y comienza a validar CIF en minutos.</p>
+                            
+                            <a href="<?= site_url('register') ?>" style="display: block; background: #fff; color: #2152ff; text-align: center; padding: 14px 24px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.95rem; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"
+                               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.2)'"
+                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'">
+                                Crear cuenta gratis →
+                            </a>
+                        </div>
+                    </div>
+
+                </aside>
+
             </div>
         </div>
     </section>
+
+    <!-- FAQ Schema for Rich Snippets -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "¿Cómo validar un CIF en España?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Validar un CIF puede incluir dos cosas: comprobar el formato y, además, verificar datos de empresa como razón social y estado. En APIEmpresas.es puedes hacerlo desde el buscador web o automatizarlo por API REST con tu API Key."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Qué diferencia hay entre validar CIF y verificar una empresa?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Validar CIF suele referirse a la comprobación de estructura y consistencia. Verificar empresa implica contrastar información relevante (p. ej., razón social, estado, domicilio básico) para reducir errores en altas y facturación."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Puedo comprobar un NIF-IVA intracomunitario (VIES)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí. Puedes validar el NIF-IVA intracomunitario contra VIES y usar el resultado en procesos de onboarding, cumplimiento y validación fiscal en operaciones B2B."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Para qué sirve en KYB/KYC y prevención de fraude?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Para automatizar verificaciones, reducir altas con datos falsos o inconsistentes y mantener un rastro consultable del dato verificado. Es especialmente útil si vendes a empresas (B2B), trabajas con pagos, crédito o acceso a producto."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿La API es adecuada para producción?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí. Tienes API estable, control de consumo y planes preparados para producción. Puedes empezar en Sandbox, validar tu integración y escalar a Pro/Business cuando lo necesites."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Qué datos devuelvo y qué obtengo en una consulta?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Una consulta devuelve una ficha normalizada en JSON con los campos esenciales para automatización (CIF, razón social, estado, CNAE y datos básicos). El objetivo es integrarlo rápido en formularios de alta, ERPs/CRMs y flujos de riesgo."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cómo integro la API para validar CIF?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Creas una cuenta, obtienes tu API Key y llamas al endpoint REST. En la documentación tienes ejemplos listos en cURL, PHP/Laravel, Node y Python para copiar y pegar."
+          }
+        }
+      ]
+    }
+    </script>
 
 
     <!-- CTA FINAL -->
@@ -536,6 +667,102 @@
 </main>
 
 
+
+    <!-- DIRECTORIO SEO (Very subtle for crawlers only) -->
+    <section id="directory-links" class="container" style="padding: 30px 0 20px; border-top: 1px solid rgba(255,255,255,0.02);">
+        <div class="band">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                <h3 style="font-size: 0.95rem; margin: 0; color: #475569; font-weight: 500;">Directorio por provincia</h3>
+                <a href="<?= site_url('directorio') ?>" style="color: #64748b; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-size: 0.8rem;">
+                    Ver todo
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px;">
+                <?php if (!empty($provinces)): ?>
+                    <?php foreach ($provinces as $prov): ?>
+                        <a href="<?= site_url('directorio/provincia/' . urlencode($prov['name'])) ?>" 
+                           style="color: #64748b; text-decoration: none; font-size: 12px; padding: 5px 8px; background: rgba(255,255,255,0.01); border-radius: 4px; border: 1px solid rgba(255,255,255,0.02); transition: all 0.2s;"
+                           onmouseover="this.style.borderColor='rgba(33, 82, 255, 0.2)'; this.style.color='#94a3b8'; this.style.background='rgba(255,255,255,0.03)'"
+                           onmouseout="this.style.borderColor='rgba(255,255,255,0.02)'; this.style.color='#64748b'; this.style.background='rgba(255,255,255,0.01)'">
+                            <?= esc($prov['name']) ?>
+                        </a>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================
+         MODAL · INTEGRACIÓN A MEDIDA (Marketing/WOW)
+         ========================= -->
+    <div class="modal-overlay" id="modalCustomIntegration" aria-hidden="true" data-prevent-overlay-close="true">
+        <div class="modal modal-wow" role="dialog" aria-modal="true" aria-labelledby="customTitle" tabindex="-1" style="max-width: 860px; padding: 0; border: 1px solid rgba(0,0,0,0.08); background: #ffffff; border-radius: 28px; box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.15); overflow: hidden;">
+            
+            <!-- Full Width Header -->
+            <div style="padding: 48px 56px 32px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.03); position: relative;">
+                <div>
+                    <div class="modal-kicker" style="color: #12b48a; font-weight: 800; font-size: 13px; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 10px;">Servicio Exclusivo</div>
+                    <h2 class="modal-title" id="customTitle" style="font-size: 38px; line-height: 1.1; margin: 0; color: #0f172a; font-weight: 900; letter-spacing: -0.03em;">
+                        Integración <span style="background: linear-gradient(90deg, #2152ff, #12b48a); -webkit-background-clip: text; background-clip: text; color: transparent;">personalizada</span>
+                    </h2>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1.2fr; min-height: 400px;">
+                <!-- Left Column: Visual -->
+                <div style="background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%); position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; border-right: 1px solid rgba(0,0,0,0.03);">
+                    <div style="position: absolute; inset: 0; opacity: 0.4; background-image: radial-gradient(#2152ff 0.5px, transparent 0.5px); background-size: 20px 20px;"></div>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; height: 320px; background: radial-gradient(circle, rgba(33, 82, 255, 0.08) 0%, transparent 70%);"></div>
+                    <img src="<?= base_url('public/images/custom-integration.png') ?>" 
+                         alt="Icono de integración empresarial" 
+                         style="width: 65%; height: auto; position: relative; z-index: 2; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);"
+                         onmouseover="this.style.transform='scale(1.08) rotate(3deg)'"
+                         onmouseout="this.style.transform='scale(1) rotate(0deg)'">
+                </div>
+
+                <!-- Right Column: Content -->
+                <div style="padding: 48px 56px; display: flex; flex-direction: column; justify-content: center; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); position: relative;">
+                    <div class="modal-body" style="padding: 0; margin-bottom: 40px;">
+                        <p style="font-size: 17px; color: #475569; line-height: 1.7; margin-bottom: 24px; font-weight: 400;">
+                            ¿Tu flujo de trabajo requiere algo único? Adaptamos nuestra tecnología para que se fusione perfectamente con tu infraestructura actual.
+                        </p>
+                        <ul style="list-style: none; padding: 0; margin: 0; color: #334155; font-size: 15px;">
+                            <li style="margin-bottom: 16px; display: flex; align-items: center; gap: 14px;">
+                                <div style="flex-shrink: 0; width: 22px; height: 22px; background: #e0f2fe; border: 1px solid #bae6fd; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #0369a1;">
+                                    <span style="font-size: 12px; font-weight: bold;">✓</span>
+                                </div>
+                                <span style="font-weight: 500;">Validaciones por lotes y Webhooks reales</span>
+                            </li>
+                            <li style="margin-bottom: 16px; display: flex; align-items: center; gap: 14px;">
+                                <div style="flex-shrink: 0; width: 22px; height: 22px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #15803d;">
+                                    <span style="font-size: 12px; font-weight: bold;">✓</span>
+                                </div>
+                                <span style="font-weight: 500;">Conectores nativos para ERP/CRM (SAP, Dynamics)</span>
+                            </li>
+                            <li style="margin-bottom: 0; display: flex; align-items: center; gap: 14px;">
+                                <div style="flex-shrink: 0; width: 22px; height: 22px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #c2410c;">
+                                    <span style="font-size: 12px; font-weight: bold;">✓</span>
+                                </div>
+                                <span style="font-weight: 500;">Enriquecimiento de datos a medida (KYB avanzado)</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="modal-footer" style="padding: 0; border: none; justify-content: flex-start; gap: 16px; display: flex; align-items: center; flex-wrap: wrap;">
+                        <a href="<?=site_url() ?>contact?interest=custom_integration" class="btn btn_start" style="text-decoration:none; padding: 18px 32px; font-size: 16px; background: var(--primary); border: none; box-shadow: 0 15px 30px rgba(19, 58, 130, 0.2); border-radius: 16px; font-weight: 700; color: #fff; transition: all 0.3s; display: inline-block; white-space: nowrap;">
+                            Consultar con un experto
+                        </a>
+                        <button class="modal-btn" type="button" data-close-modal style="background: transparent; border: 1.5px solid #e2e8f0; color: #64748b; padding: 16px 26px; border-radius: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                            Ahora no, gracias
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <?=view('partials/footer') ?>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -567,6 +794,43 @@
             .catch(function (err) {
                 console.error('Error al cargar posts:', err);
             });
+        // Custom Integration Modal Trigger
+        (function() {
+            const MODAL_ID = 'modalCustomIntegration';
+            const STORAGE_KEY = 've_custom_integration_modal_shown';
+            const DELAY_MS = 8000; // 8 segundos
+            const FREQUENCY_DAYS = 7;
+
+            function shouldShow() {
+                const lastShown = localStorage.getItem(STORAGE_KEY);
+                if (!lastShown) return true;
+                
+                const now = new Date().getTime();
+                const diffDays = (now - parseInt(lastShown)) / (1000 * 60 * 60 * 24);
+                return diffDays > FREQUENCY_DAYS;
+            }
+
+            const overlay = document.getElementById(MODAL_ID);
+            if (!overlay || !shouldShow()) return;
+
+            setTimeout(() => {
+                // Reutilizamos la función global openModal si está disponible, 
+                // o disparamos un click en un elemento dummy si fuera necesario.
+                // Sin embargo, como scripts.php define openModal dentro de un IIFE,
+                // la forma más limpia es replicar la lógica o exponerla.
+                // Dado el diseño de scripts.php, usaremos un trigger programático:
+                
+                overlay.classList.add('active');
+                overlay.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+                
+                const dialog = overlay.querySelector('.modal');
+                if (dialog) dialog.focus({ preventScroll: true });
+
+                // Guardar persistencia
+                localStorage.setItem(STORAGE_KEY, new Date().getTime().toString());
+            }, DELAY_MS);
+        })();
     });
 </script>
 </body>

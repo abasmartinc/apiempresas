@@ -227,6 +227,52 @@
             </div>
         </section>
 
+        <?php if (!empty($latest)): ?>
+        <section class="dir-section">
+            <div class="section-header">
+                <div style="display: flex; align-items: flex-end; gap: 1rem;">
+                    <h2 style="margin: 0;">Últimas Empresas Registradas</h2>
+                    <a href="<?= site_url('directorio/ultimas-empresas-registradas') ?>" style="color: var(--dir-primary); font-weight: 700; text-decoration: none; margin-bottom: 5px; font-size: 0.9rem;">Ver todas →</a>
+                </div>
+                <div class="line"></div>
+            </div>
+            <div class="table-container" style="background: #fff; border-radius: 20px; border: 1px solid #e2e8f0; overflow-x: auto; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+                <table style="width: 100%; min-width: 600px; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+                    <thead>
+                        <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                            <th style="padding: 1rem 1.5rem; color: #64748b; font-weight: 600; font-size: 0.85rem; text-transform: uppercase;">Empresa</th>
+                            <th style="padding: 1rem 1.5rem; color: #64748b; font-weight: 600; font-size: 0.85rem; text-transform: uppercase;">Incorporación</th>
+                            <th style="padding: 1rem 1.5rem; color: #64748b; font-weight: 600; font-size: 0.85rem; text-transform: uppercase;">Provincia</th>
+                            <th style="padding: 1rem 1.5rem; color: #64748b; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; text-align: right;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                            helper('company');
+                            foreach($latest as $company): 
+                            $url = company_url($company);
+                        ?>
+                        <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                            <td style="padding: 1rem 1.5rem;">
+                                <a href="<?= esc($url) ?>" style="font-weight: 600; color: #0f172a; text-decoration: none;"><?= esc($company['name']) ?></a>
+                            </td>
+                            <td style="padding: 1rem 1.5rem; color: #475569;">
+                                <?= date('d/m/Y', strtotime($company['date'])) ?>
+                            </td>
+                            <td style="padding: 1rem 1.5rem; color: #475569;">
+                                <?= esc($company['province'] ?? 'España') ?>
+                            </td>
+                            <td style="padding: 1rem 1.5rem; text-align: right;">
+                                <a href="<?= esc($url) ?>" style="color: #2152FF; font-weight: 600; text-decoration: none; font-size: 0.85rem;">Ficha →</a>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <?php endif; ?>
+
     </div>
 </main>
 

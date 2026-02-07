@@ -47,7 +47,7 @@ $routes->get('get-posts-grid', 'Blog::get_posts_grid');
 
 
 // ----------- API ----------- //
-$routes->group('', ['filter' => 'apikey'], static function($routes) {
+$routes->group('', ['filter' => 'apikey'], static function ($routes) {
     $routes->get('api/v1/companies', 'Api\V1\CompaniesByCif::index');
     $routes->get('api/v1/companies/search', 'Api\V1\CompaniesSearch::index');
 });
@@ -68,10 +68,13 @@ $routes->get('api/cnae/subclasses', 'CompanyMapV2Controller::cnaeSubclasses');
 $routes->get('api/map/search', 'CompanyMapV2Controller::search');
 $routes->get('api/map/export', 'CompanyMapV2Controller::export');
 
-$routes->post('contact/send', 'Contact::send');
+
+// Alerts
+$routes->get('alerts/confirm/(:any)', 'Alerts::confirm/$1');
+$routes->post('alerts/add', 'Alerts::add');
 
 // Admin Routes
-$routes->group('admin', ['filter' => 'admin'], function($routes) {
+$routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('dashboard', 'Admin\Dashboard::index');
     $routes->get('users', 'Admin\Dashboard::index');
     $routes->get('users/create', 'Admin\Dashboard::create');
@@ -80,10 +83,12 @@ $routes->group('admin', ['filter' => 'admin'], function($routes) {
     $routes->post('users/update', 'Admin\Dashboard::update');
     $routes->get('users/delete/(:num)', 'Admin\Dashboard::delete/$1');
     $routes->get('users/email/(:num)', 'Admin\Dashboard::compose/$1');
-    $routes->get('users/toggle-api-access/(:num)', 'Admin\Dashboard::toggle_api_access/$1');
-    $routes->get('users/impersonate/(:num)', 'Admin\Dashboard::impersonate/$1');
     $routes->post('users/send', 'Admin\Dashboard::send');
-    
+
+    // Bulk Email
+    $routes->match(['get', 'post'], 'users/email/bulk', 'Admin\Dashboard::compose_bulk');
+    $routes->post('users/email/send-bulk', 'Admin\Dashboard::send_bulk');
+
     // Logs de búsqueda
     $routes->get('logs', 'Admin\Dashboard::logs');
     $routes->get('logs/toggle-included/(:num)', 'Admin\Dashboard::toggle_log_included/$1');
@@ -91,7 +96,7 @@ $routes->group('admin', ['filter' => 'admin'], function($routes) {
 
     $routes->get('api-requests', 'Admin\Dashboard::api_requests');
     $routes->get('usage-daily', 'Admin\Dashboard::usage_daily');
-    
+
     // Companies CRUD
     $routes->get('companies', 'Admin\Dashboard::companies');
     $routes->get('companies/create', 'Admin\Dashboard::company_create');
@@ -144,16 +149,37 @@ $routes->post('webhook/stripe', 'Webhook::stripe');
 $routes->get('sitemap.xml', 'Sitemap::index');
 $routes->get('sitemap-static.xml', 'Sitemap::static');
 $routes->get('sitemap-blog.xml', 'Sitemap::blog');
+$routes->get('sitemap-directories.xml', 'Sitemap::directories');
 $routes->get('sitemap-companies-(:num).xml', 'Sitemap::companies/$1');
 
 // Directorios SEO
 $routes->get('directorio', 'Directory::index');
 $routes->get('directorio/provincia/(:any)', 'Directory::province/$1');
+$routes->get('directorio/provincia/(:any)/(:num)', 'Directory::province/$1/$2');
 $routes->get('directorio/cnae/(:any)', 'Directory::cnae/$1');
+$routes->get('directorio/cnae/(:any)/(:num)', 'Directory::cnae/$1/$2');
+$routes->get('directorio/ultimas-empresas-registradas', 'Directory::latest');
+$routes->get('directorio/ultimas-empresas-registradas/(:num)', 'Directory::latest/$1');
+$routes->get('directorio/provincia/(:any)/cnae/(:any)', 'Directory::provinceCnae/$1/$2');
+$routes->get('directorio/provincia/(:any)/cnae/(:any)/(:num)', 'Directory::provinceCnae/$1/$2/$3');
 
 // Company SEO Pages (Regex: Letter + 7 Digits + Char + optional slug)
 // Must be last to avoid conflicts
 $routes->get('empresa/(:num)-(:any)', 'Company::showById/$1/$2');
 $routes->get('empresa/(:num)', 'Company::showById/$1');
 $routes->get('test-pdf', 'TestPdf::index');
+
+// Fallback for broken "no disponible" links
+$routes->get('no%20disponible(:any)', 'Company::handleBrokenCif/$1');
+$routes->get('no disponible(:any)', 'Company::handleBrokenCif/$1');
+
+// Company Suggestions (Professional)
+$routes->get('company-suggestions', 'CompanySuggestions::index');
+$routes->get('company-suggestions/get', 'CompanySuggestions::getSuggestions');
+
+// Company pages: CIF-based URLs (must come before slug fallback)
 $routes->get('([a-zA-Z][0-9]{7}[a-zA-Z0-9].*)', 'Company::show/$1');
+
+// Company pages: Slug-only URLs (fallback for companies without valid CIF)
+// This must be the LAST route to avoid conflicts
+$routes->get('(:segment)', 'Company::show/$1');

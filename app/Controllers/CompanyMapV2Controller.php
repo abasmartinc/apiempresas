@@ -169,7 +169,7 @@ class CompanyMapV2Controller extends Controller
 
         try {
             $db = Database::connect();
-            $b  = $db->table('empresia_company_details');
+            $b  = $db->table('companies');
 
             $b->select([
                 'id',

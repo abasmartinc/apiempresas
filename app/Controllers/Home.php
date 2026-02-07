@@ -17,7 +17,7 @@ class Home extends BaseController
         // For now, I'll fetch them here to avoid breaking Blog controller's AJAX endpoint
         
         $siteUrl    = 'https://blog.apiempresas.es';
-        $endpoint   = '/index.php?rest_route=/wp/v2/posts&per_page=4';
+        $endpoint   = '/index.php?rest_route=/wp/v2/posts&per_page=6';
         $requestUrl = $siteUrl . $endpoint;
 
         $posts = [];
@@ -60,8 +60,83 @@ class Home extends BaseController
             log_message('error', '[Home::index] Blog SSR failed: ' . $e->getMessage());
         }
 
-        return view('home', ['latest_posts' => $posts]);
+        // Fetch provinces for internal linking (filtered and normalized)
+        $companyModel = new \App\Models\CompanyModel();
+        $provincesRaw = $companyModel->builder()
+            ->select('registro_mercantil as name')
+            ->where('registro_mercantil IS NOT NULL')
+            ->where('registro_mercantil !=', '')
+            ->where('LENGTH(registro_mercantil) >', 2) // Exclude single chars like '8'
+            ->groupBy('registro_mercantil')
+            ->orderBy('registro_mercantil', 'ASC')
+            ->get()
+            ->getResultArray();
+        
+        // Normalization map for province variants
+        $provinceMap = [
+            'guipuzcoa' => 'Guipúzcoa',
+            'guipúzcoa-gipuzkoa' => 'Guipúzcoa',
+            'gipuzkoa' => 'Guipúzcoa',
+            'vizcaya' => 'Vizcaya',
+            'bizkaia' => 'Vizcaya',
+            'vizcaya-bizkaia' => 'Vizcaya',
+            'alava' => 'Álava',
+            'álava' => 'Álava',
+            'araba' => 'Álava',
+            'álava-araba' => 'Álava',
+            'áraba/alava' => 'Álava',
+            'navarra' => 'Navarra',
+            'nafarroa' => 'Navarra',
+            'la coruña' => 'A Coruña',
+            'coruña' => 'A Coruña',
+            'a coruña' => 'A Coruña',
+            'orense' => 'Ourense',
+            'pontevedra' => 'Pontevedra',
+            'lugo' => 'Lugo',
+            'castellon' => 'Castellón',
+            'castellón' => 'Castellón',
+            'valencia' => 'Valencia',
+            'alicante' => 'Alicante',
+            'baleares' => 'Baleares',
+            'islas baleares' => 'Baleares',
+            'las palmas' => 'Las Palmas',
+            'santa cruz de tenerife' => 'Santa Cruz De Tenerife',
+            'sta. cruz de tenerife' => 'Santa Cruz De Tenerife',
+        ];
+        
+        // Invalid province names to exclude
+        $invalidProvinces = ['desconocida', 'desconocido', 'unknown', 'n/a', 'sin provincia'];
+        
+        // Normalize and deduplicate
+        $normalized = [];
+        foreach ($provincesRaw as $prov) {
+            $key = mb_strtolower($prov['name'], 'UTF-8');
+            
+            // Skip invalid provinces
+            if (in_array($key, $invalidProvinces)) {
+                continue;
+            }
+            
+            // Use mapped name if exists, otherwise use title case
+            if (isset($provinceMap[$key])) {
+                $canonicalName = $provinceMap[$key];
+            } else {
+                $canonicalName = mb_convert_case($prov['name'], MB_CASE_TITLE, 'UTF-8');
+            }
+            
+            // Deduplicate by canonical name
+            $normalized[$canonicalName] = ['name' => $canonicalName];
+        }
+        
+        // Convert back to indexed array and sort
+        $provinces = array_values($normalized);
+        usort($provinces, function($a, $b) {
+            return strcmp($a['name'], $b['name']);
+        });
+
+        return view('home', [
+            'latest_posts' => $posts,
+            'provinces'    => $provinces
+        ]);
     }
-
-
 }
