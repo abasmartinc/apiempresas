@@ -138,7 +138,7 @@
                             <div class="quick-item">
                                 <strong>Consumo y límites</strong>
                                 <p style="margin:4px 0 0; color:#64748b;">Cómo se contabiliza una consulta y mejores prácticas de caché.</p>
-                                <a href="<?=site_url() ?>usage">Ver consumo →</a>
+                                <a href="<?=site_url() ?>consumption">Ver consumo →</a>
                             </div>
                             <div class="quick-item">
                                 <strong>Buenas prácticas</strong>

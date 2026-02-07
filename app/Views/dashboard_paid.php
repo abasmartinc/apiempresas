@@ -206,7 +206,7 @@
                             <div class="quick-item">
                                 <strong>Logs y métricas</strong>
                                 <p style="margin:0; color:#64748b;">Revisa requests, rate limits, errores por endpoint y latencias.</p>
-                                <a href="<?=site_url() ?>usage">Abrir panel de consumo →</a>
+                                <a href="<?=site_url() ?>consumption">Abrir panel de consumo →</a>
                             </div>
                             <div class="quick-item">
                                 <strong>Documentación (prod)</strong>

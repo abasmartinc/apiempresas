@@ -36,7 +36,7 @@ $routes->post('billing/cancel-subscription', 'Billing::cancel_subscription');
 // PayPal return
 $routes->get('billing/paypal/return', 'Billing::paypalReturn');
 
-$routes->get('usage', 'Usage::index');
+$routes->get('consumption', 'Usage::index');
 $routes->get('prices', 'Prices::index');
 $routes->get('contact', 'Contact::index');
 $routes->get('blog', 'Blog::index');
@@ -94,9 +94,7 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('logs/toggle-included/(:num)', 'Admin\Dashboard::toggle_log_included/$1');
     $routes->get('logs/check-cif', 'Admin\Dashboard::check_cif');
 
-    $routes->get('api-requests', 'Admin\Dashboard::api_requests');
-    $routes->get('usage-daily', 'Admin\Dashboard::usage_daily');
-    $routes->get('usage', 'Admin\Dashboard::usage_daily'); // Alias for /usage
+    // $routes->get('usage', 'Admin\Dashboard::usage_daily'); // Removed incorrect alias
 
     // Companies CRUD
     $routes->get('companies', 'Admin\Dashboard::companies');

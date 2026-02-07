@@ -55,7 +55,7 @@
             <span style="margin:0 12px; color:#cdd6ea">•</span>
             <a class="minor" href="<?=site_url() ?>billing">Cambiar de plan</a>
             <span style="margin:0 12px; color:#cdd6ea">•</span>
-            <a class="minor" href="<?=site_url() ?>usage">Consumo</a>
+            <a class="minor" href="<?=site_url() ?>consumption">Consumo</a>
             <span style="margin:0 12px; color:#cdd6ea">•</span>
             <a class="minor" href="<?=site_url() ?>documentation">Documentación</a>
             <span style="margin:0 12px; color:#cdd6ea">•</span>

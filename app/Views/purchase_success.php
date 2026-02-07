@@ -59,7 +59,7 @@
             <nav class="desktop-only" aria-label="Principal">
                 <a class="minor" href="<?=site_url() ?>billing">Planes y facturación</a>
                 <span class="nav-dot">•</span>
-                <a class="minor" href="<?=site_url() ?>usage">Consumo</a>
+                <a class="minor" href="<?=site_url() ?>consumption">Consumo</a>
                 <span class="nav-dot">•</span>
                 <a class="minor" href="<?=site_url() ?>documentation">Documentación</a>
                 <span class="nav-dot">•</span>
@@ -101,7 +101,7 @@
 
                     <div class="hero-actions">
                         <a class="btn btn_primary" href="<?=site_url()?>dashboard">Ir al dashboard</a>
-                        <a class="btn btn_light" href="<?=site_url()?>usage">Ver consumo</a>
+                        <a class="btn btn_light" href="<?=site_url()?>consumption">Ver consumo</a>
                     </div>
 
                     <div class="hero-note">
@@ -211,7 +211,7 @@
                                 antes de que afecten a producción.
                             </p>
                             <div class="step-actions">
-                                <a class="btn btn_light" href="<?=site_url()?>usage">Ir a consumo</a>
+                                <a class="btn btn_light" href="<?=site_url()?>consumption">Ir a consumo</a>
                                 <span class="mini-hint">Alertas y métricas</span>
                             </div>
                         </div>
