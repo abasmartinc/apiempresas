@@ -247,9 +247,9 @@
                             <div>
                                 <dt>Provincia</dt>
                                 <dd>
-                                    <?php if(!empty($company['province'] ?? $company['provincia'])): ?>
-                                        <a href="<?= site_url('search_company?q=' . urlencode($company['province'] ?? $company['provincia'])) ?>" style="text-decoration: underline; color: inherit;">
-                                            <?= esc($company['province'] ?? $company['provincia']) ?>
+                                    <?php if(!empty($company['province'] ?? $company['provincia'] ?? null)): ?>
+                                        <a href="<?= site_url('search_company?q=' . urlencode($company['province'] ?? $company['provincia'] ?? '')) ?>" style="text-decoration: underline; color: inherit;">
+                                            <?= esc($company['province'] ?? $company['provincia'] ?? '-') ?>
                                         </a>
                                     <?php else: ?>
                                         -
