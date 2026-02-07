@@ -86,7 +86,7 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->post('users/send', 'Admin\Dashboard::send');
 
     // Bulk Email
-    $routes->match(['get', 'post'], 'users/email/bulk', 'Admin\Dashboard::compose_bulk');
+    $routes->match(['GET', 'POST'], 'users/email/bulk', 'Admin\Dashboard::compose_bulk');
     $routes->post('users/email/send-bulk', 'Admin\Dashboard::send_bulk');
 
     // Logs de búsqueda
