@@ -43,35 +43,35 @@ class Dashboard extends BaseController
      */
     public function index()
     {
-        $q        = $this->request->getGet('q');
-        $active   = $this->request->getGet('is_active');
-        $admin    = $this->request->getGet('is_admin');
-        
+        $q = $this->request->getGet('q');
+        $active = $this->request->getGet('is_active');
+        $admin = $this->request->getGet('is_admin');
+
         $builder = $this->userModel;
-        
+
         if ($q) {
             $builder->groupStart()
-                    ->like('name', $q)
-                    ->orLike('email', $q)
-                    ->orLike('company', $q)
-                    ->groupEnd();
+                ->like('name', $q)
+                ->orLike('email', $q)
+                ->orLike('company', $q)
+                ->groupEnd();
         }
-        
+
         if ($active !== null && $active !== '') {
             $builder->where('is_active', $active);
         }
-        
+
         if ($admin !== null && $admin !== '') {
             $builder->where('is_admin', $admin);
         }
 
         $data = [
-            'title'     => 'Gestión de Usuarios | APIEmpresas',
-            'users'     => $builder->orderBy('created_at', 'DESC')->paginate(20),
-            'pager'     => $this->userModel->pager,
-            'q'         => $q,
+            'title' => 'Gestión de Usuarios | APIEmpresas',
+            'users' => $builder->orderBy('created_at', 'DESC')->paginate(20),
+            'pager' => $this->userModel->pager,
+            'q' => $q,
             'is_active' => $active,
-            'is_admin'  => $admin
+            'is_admin' => $admin
         ];
 
         return view('admin/users', $data);
@@ -83,17 +83,17 @@ class Dashboard extends BaseController
     public function logs()
     {
         $httpStatus = $this->request->getGet('http_status');
-        
+
         $builder = $this->searchLogModel;
-        
+
         if ($httpStatus) {
             $builder->where('http_status', $httpStatus);
         }
 
         $data = [
-            'title'       => 'Logs de Búsqueda | APIEmpresas',
-            'logs'        => $builder->orderBy('created_at', 'DESC')->paginate(30),
-            'pager'       => $this->searchLogModel->pager,
+            'title' => 'Logs de Búsqueda | APIEmpresas',
+            'logs' => $builder->orderBy('created_at', 'DESC')->paginate(30),
+            'pager' => $this->searchLogModel->pager,
             'http_status' => $httpStatus
         ];
 
@@ -139,14 +139,14 @@ class Dashboard extends BaseController
      */
     public function api_requests()
     {
-        $q          = $this->request->getGet('q');
-        $userId     = $this->request->getGet('user_id');
+        $q = $this->request->getGet('q');
+        $userId = $this->request->getGet('user_id');
         $statusCode = $this->request->getGet('status_code');
 
         $builder = $this->apiRequestsModel;
         $builder->select('api_requests.*, users.name as user_name, users.email as user_email');
         $builder->join('users', 'users.id = api_requests.user_id', 'left');
-        
+
         if ($q) {
             $builder->like('endpoint', $q);
         }
@@ -160,12 +160,12 @@ class Dashboard extends BaseController
         }
 
         $data = [
-            'title'       => 'Peticiones API | APIEmpresas',
-            'requests'    => $builder->orderBy('created_at', 'DESC')->paginate(40, 'default'),
-            'pager'       => $this->apiRequestsModel->pager,
-            'users'       => $this->userModel->orderBy('name', 'ASC')->findAll(),
-            'q'           => $q,
-            'user_id'     => $userId,
+            'title' => 'Peticiones API | APIEmpresas',
+            'requests' => $builder->orderBy('created_at', 'DESC')->paginate(40, 'default'),
+            'pager' => $this->apiRequestsModel->pager,
+            'users' => $this->userModel->orderBy('name', 'ASC')->findAll(),
+            'q' => $q,
+            'user_id' => $userId,
             'status_code' => $statusCode
         ];
 
@@ -177,9 +177,9 @@ class Dashboard extends BaseController
      */
     public function usage_daily()
     {
-        $userId    = $this->request->getGet('user_id');
+        $userId = $this->request->getGet('user_id');
         $startDate = $this->request->getGet('start_date');
-        $endDate   = $this->request->getGet('end_date');
+        $endDate = $this->request->getGet('end_date');
 
         $builder = $this->apiUsageDailyModel;
         $builder->select('api_usage_daily.*, users.name as user_name, users.email as user_email');
@@ -198,13 +198,13 @@ class Dashboard extends BaseController
         }
 
         $data = [
-            'title'      => 'Uso Diario API | APIEmpresas',
-            'usage'      => $builder->orderBy('date', 'DESC')->paginate(30, 'default'),
-            'pager'      => $this->apiUsageDailyModel->pager,
-            'users'      => $this->userModel->orderBy('name', 'ASC')->findAll(),
-            'user_id'    => $userId,
+            'title' => 'Uso Diario API | APIEmpresas',
+            'usage' => $builder->orderBy('date', 'DESC')->paginate(30, 'default'),
+            'pager' => $this->apiUsageDailyModel->pager,
+            'users' => $this->userModel->orderBy('name', 'ASC')->findAll(),
+            'user_id' => $userId,
             'start_date' => $startDate,
-            'end_date'   => $endDate
+            'end_date' => $endDate
         ];
 
         return view('admin/usage_daily', $data);
@@ -223,7 +223,7 @@ class Dashboard extends BaseController
 
         $data = [
             'title' => 'Redactar Email',
-            'user'  => $user,
+            'user' => $user,
         ];
 
         return view('admin/email_compose', $data);
@@ -236,7 +236,7 @@ class Dashboard extends BaseController
     {
         $data = [
             'title' => 'Crear Usuario',
-            'user'  => null, // Para que la vista sepa que es creación
+            'user' => null, // Para que la vista sepa que es creación
         ];
 
         return view('admin/user_form', $data);
@@ -248,8 +248,8 @@ class Dashboard extends BaseController
     public function store()
     {
         $rules = [
-            'name'     => 'required|min_length[3]',
-            'email'    => 'required|valid_email|is_unique[users.email]',
+            'name' => 'required|min_length[3]',
+            'email' => 'required|valid_email|is_unique[users.email]',
             'password' => 'required|min_length[8]',
         ];
 
@@ -258,15 +258,15 @@ class Dashboard extends BaseController
         }
 
         $this->userModel->save([
-            'name'          => $this->request->getPost('name'),
-            'company'       => $this->request->getPost('company'),
-            'email'         => $this->request->getPost('email'),
+            'name' => $this->request->getPost('name'),
+            'company' => $this->request->getPost('company'),
+            'email' => $this->request->getPost('email'),
             'password_hash' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
-            'is_active'     => $this->request->getPost('is_active') ? 1 : 0,
-            'is_admin'      => $this->request->getPost('is_admin') ? 1 : 0,
-            'api_access'    => $this->request->getPost('api_access') ? 1 : 0,
-            'created_at'    => date('Y-m-d H:i:s'),
-            'updated_at'    => date('Y-m-d H:i:s'),
+            'is_active' => $this->request->getPost('is_active') ? 1 : 0,
+            'is_admin' => $this->request->getPost('is_admin') ? 1 : 0,
+            'api_access' => $this->request->getPost('api_access') ? 1 : 0,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
         ]);
 
         return redirect()->to(site_url('admin/users'))->with('message', 'Usuario creado correctamente.');
@@ -285,7 +285,7 @@ class Dashboard extends BaseController
 
         $data = [
             'title' => 'Editar Usuario',
-            'user'  => $user,
+            'user' => $user,
         ];
 
         return view('admin/user_form', $data);
@@ -298,7 +298,7 @@ class Dashboard extends BaseController
     {
         $id = $this->request->getPost('id');
         $rules = [
-            'name'  => 'required|min_length[3]',
+            'name' => 'required|min_length[3]',
             'email' => "required|valid_email|is_unique[users.email,id,{$id}]",
         ];
 
@@ -307,11 +307,11 @@ class Dashboard extends BaseController
         }
 
         $data = [
-            'name'      => $this->request->getPost('name'),
-            'company'   => $this->request->getPost('company'),
-            'email'     => $this->request->getPost('email'),
+            'name' => $this->request->getPost('name'),
+            'company' => $this->request->getPost('company'),
+            'email' => $this->request->getPost('email'),
             'is_active' => $this->request->getPost('is_active') ? 1 : 0,
-            'is_admin'  => $this->request->getPost('is_admin') ? 1 : 0,
+            'is_admin' => $this->request->getPost('is_admin') ? 1 : 0,
             'api_access' => $this->request->getPost('api_access') ? 1 : 0,
             'updated_at' => date('Y-m-d H:i:s'),
         ];
@@ -332,7 +332,7 @@ class Dashboard extends BaseController
     public function delete($id)
     {
         // Evitar que el admin se borre a sí mismo
-        if ((int)$id === (int)session()->get('user_id')) {
+        if ((int) $id === (int) session()->get('user_id')) {
             return redirect()->to(site_url('admin/users'))->with('error', 'No puedes eliminarte a ti mismo.');
         }
 
@@ -371,10 +371,10 @@ class Dashboard extends BaseController
         if (!$user) {
             return redirect()->back()->with('error', 'Usuario no encontrado.');
         }
-        
+
         // Evitar impersonarse a sí mismo (redundante pero limpia historial)
         if ($user->id == session('user_id')) {
-             return redirect()->back()->with('message', 'Ya estás logueado como tú mismo.');
+            return redirect()->back()->with('message', 'Ya estás logueado como tú mismo.');
         }
 
         // Log de seguridad
@@ -382,14 +382,14 @@ class Dashboard extends BaseController
 
         // Regenerar sesión
         session()->regenerate();
-        
+
         // Establecer sesión del usuario objetivo
         session()->set([
-            'user_id'    => $user->id,
+            'user_id' => $user->id,
             'user_email' => $user->email,
-            'user_name'  => $user->name ?? '',
-            'is_admin'   => $user->is_admin ?? 0,
-            'logged_in'  => true,
+            'user_name' => $user->name ?? '',
+            'is_admin' => $user->is_admin ?? 0,
+            'logged_in' => true,
             'impersonator_id' => session('user_id') // Opcional: para saber quién era el admin original si quisiéramos botón de "volver"
         ]);
 
@@ -402,22 +402,22 @@ class Dashboard extends BaseController
     public function invoices()
     {
         $invoiceModel = new \App\Models\InvoiceModel();
-        
+
         // Búsqueda simple
         $search = $this->request->getGet('search');
         if ($search) {
             $invoiceModel->groupStart()
-                         ->like('invoice_number', $search)
-                         ->orLike('billing_name', $search)
-                         ->orLike('billing_email', $search)
-                         ->groupEnd();
+                ->like('invoice_number', $search)
+                ->orLike('billing_name', $search)
+                ->orLike('billing_email', $search)
+                ->groupEnd();
         }
 
         $data = [
-            'title'    => 'Gestión de Facturas',
+            'title' => 'Gestión de Facturas',
             'invoices' => $invoiceModel->orderBy('created_at', 'DESC')->paginate(20),
-            'pager'    => $invoiceModel->pager,
-            'search'   => $search
+            'pager' => $invoiceModel->pager,
+            'search' => $search
         ];
 
         return view('admin/invoices', $data);
@@ -440,12 +440,12 @@ class Dashboard extends BaseController
         $fullPath = WRITEPATH . $relativePath;
 
         if (!file_exists($fullPath)) {
-             $altPath = ROOTPATH . $invoice->pdf_path;
-             if (file_exists($altPath)) {
-                 $fullPath = $altPath;
-             } else {
+            $altPath = ROOTPATH . $invoice->pdf_path;
+            if (file_exists($altPath)) {
+                $fullPath = $altPath;
+            } else {
                 return redirect()->back()->with('error', 'El archivo físico de la factura no existe en el servidor.');
-             }
+            }
         }
 
         return $this->response->download($fullPath, null)->setFileName($invoice->invoice_number . '.pdf');
@@ -456,7 +456,7 @@ class Dashboard extends BaseController
      */
     public function send()
     {
-        $userId  = $this->request->getPost('user_id');
+        $userId = $this->request->getPost('user_id');
         $subject = $this->request->getPost('subject');
         $message = $this->request->getPost('message');
 
@@ -470,10 +470,10 @@ class Dashboard extends BaseController
 
         $email->setTo($user->email);
         $email->setSubject($subject);
-        
+
         // Usar plantilla HTML
         $body = view('emails/user_notification', [
-            'user'    => $user,
+            'user' => $user,
             'content' => $message,
             'subject' => $subject
         ]);
@@ -481,9 +481,9 @@ class Dashboard extends BaseController
         $email->setMessage($body);
 
         $logData = [
-            'user_id'    => $userId,
-            'subject'    => $subject,
-            'message'    => $message,
+            'user_id' => $userId,
+            'subject' => $subject,
+            'message' => $message,
             'created_at' => date('Y-m-d H:i:s')
         ];
 
@@ -492,7 +492,7 @@ class Dashboard extends BaseController
             $this->emailLogModel->insert($logData);
             return redirect()->to(site_url('admin/users'))->with('message', 'Email enviado correctamente a ' . $user->email);
         } else {
-            $logData['status']        = 'error';
+            $logData['status'] = 'error';
             $logData['error_message'] = $email->printDebugger(['headers']);
             $this->emailLogModel->insert($logData);
             return redirect()->back()->withInput()->with('error', 'Error al enviar el email: ' . $email->printDebugger(['headers']));
@@ -519,10 +519,10 @@ class Dashboard extends BaseController
             $builder = $this->userModel;
             if ($filter_q) {
                 $builder->groupStart()
-                        ->like('name', $filter_q)
-                        ->orLike('email', $filter_q)
-                        ->orLike('company', $filter_q)
-                        ->groupEnd();
+                    ->like('name', $filter_q)
+                    ->orLike('email', $filter_q)
+                    ->orLike('company', $filter_q)
+                    ->groupEnd();
             }
             if ($filter_active !== null && $filter_active !== '') {
                 $builder->where('is_active', $filter_active);
@@ -566,10 +566,10 @@ class Dashboard extends BaseController
     {
         $subject = $this->request->getPost('subject');
         $message = $this->request->getPost('message');
-        
+
         $ids = $this->request->getPost('user_ids');
         $selectAll = $this->request->getPost('select_all_filtered');
-        
+
         $users = [];
 
         if ($selectAll) {
@@ -580,10 +580,10 @@ class Dashboard extends BaseController
             $builder = $this->userModel;
             if ($filter_q) {
                 $builder->groupStart()
-                        ->like('name', $filter_q)
-                        ->orLike('email', $filter_q)
-                        ->orLike('company', $filter_q)
-                        ->groupEnd();
+                    ->like('name', $filter_q)
+                    ->orLike('email', $filter_q)
+                    ->orLike('company', $filter_q)
+                    ->groupEnd();
             }
             if ($filter_active !== null && $filter_active !== '') {
                 $builder->where('is_active', $filter_active);
@@ -593,8 +593,8 @@ class Dashboard extends BaseController
             }
             $users = $builder->findAll();
         } elseif ($ids) {
-             $idArray = explode(',', $ids);
-             $users = $this->userModel->whereIn('id', $idArray)->findAll();
+            $idArray = explode(',', $ids);
+            $users = $this->userModel->whereIn('id', $idArray)->findAll();
         }
 
         if (empty($users)) {
@@ -608,23 +608,23 @@ class Dashboard extends BaseController
         foreach ($users as $user) {
             // Reset email service for each iteration
             $emailService->clear();
-            
+
             $emailService->setTo($user->email);
             $emailService->setSubject($subject);
-            
-             // Usar plantilla HTML
+
+            // Usar plantilla HTML
             $body = view('emails/user_notification', [
-                'user'    => $user,
+                'user' => $user,
                 'content' => $message,
                 'subject' => $subject
             ]);
-            
+
             $emailService->setMessage($body);
 
             $logData = [
-                'user_id'    => $user->id,
-                'subject'    => $subject,
-                'message'    => $message,
+                'user_id' => $user->id,
+                'subject' => $subject,
+                'message' => $message,
                 'created_at' => date('Y-m-d H:i:s')
             ];
 
@@ -655,17 +655,28 @@ class Dashboard extends BaseController
     {
         $q = $this->request->getGet('q');
         $noCif = $this->request->getGet('no_cif');
-        
+
         $filters = [
             'no_cif' => $noCif
         ];
 
+        // KPIs
+        $kpis = [
+            'total'                  => $this->companyModel->countAllResults(),
+            'sin_cif'               => $this->companyModel->where('cif', '')->orWhere('cif', null)->countAllResults(),
+            'sin_direccion'         => $this->companyModel->where('address', '')->orWhere('address', null)->countAllResults(),
+            'sin_estado'            => $this->companyModel->where('estado', '')->orWhere('estado', null)->countAllResults(),
+            'sin_cnae'              => $this->companyModel->where('cnae_code', '')->orWhere('cnae_code', null)->countAllResults(),
+            'sin_registro_mercantil' => $this->companyModel->where('registro_mercantil', '')->orWhere('registro_mercantil', null)->countAllResults(),
+        ];
+
         $data = [
-            'title'     => 'Gestión de Empresas | APIEmpresas',
+            'title' => 'Gestión de Empresas | APIEmpresas',
             'companies' => $this->companyModel->searchAdmin($q, 20, $filters),
-            'pager'     => $this->companyModel->pager,
-            'q'         => $q,
-            'filters'   => $filters
+            'pager' => $this->companyModel->pager,
+            'q' => $q,
+            'filters' => $filters,
+            'kpis' => $kpis
         ];
 
         return view('admin/companies', $data);
@@ -677,7 +688,7 @@ class Dashboard extends BaseController
     public function company_create()
     {
         $data = [
-            'title'   => 'Nueva Empresa | APIEmpresas',
+            'title' => 'Nueva Empresa | APIEmpresas',
             'company' => null
         ];
         return view('admin/company_form', $data);
@@ -689,12 +700,14 @@ class Dashboard extends BaseController
     public function company_store()
     {
         $data = $this->request->getPost();
-        
+
         // Validación básica
-        if (!$this->validate([
-            'company_name' => 'required|min_length[3]',
-            'cif'          => 'required|is_unique[companies.cif]',
-        ])) {
+        if (
+            !$this->validate([
+                'company_name' => 'required|min_length[3]',
+                'cif' => 'required|is_unique[companies.cif]',
+            ])
+        ) {
             return redirect()->back()->withInput()->with('error', 'Datos inválidos o CIF duplicado.');
         }
 
@@ -713,7 +726,7 @@ class Dashboard extends BaseController
         }
 
         $data = [
-            'title'   => 'Editar Empresa | APIEmpresas',
+            'title' => 'Editar Empresa | APIEmpresas',
             'company' => $company
         ];
         return view('admin/company_form', $data);
@@ -727,10 +740,12 @@ class Dashboard extends BaseController
         $id = $this->request->getPost('id');
         $data = $this->request->getPost();
 
-        if (!$this->validate([
-            'company_name' => 'required|min_length[3]',
-            'cif'          => "required|is_unique[companies.cif,id,{$id}]",
-        ])) {
+        if (
+            !$this->validate([
+                'company_name' => 'required|min_length[3]',
+                'cif' => "required|is_unique[companies.cif,id,{$id}]",
+            ])
+        ) {
             return redirect()->back()->withInput()->with('error', 'Datos inválidos o CIF duplicado.');
         }
 
@@ -767,7 +782,7 @@ class Dashboard extends BaseController
     {
         $data = [
             'title' => 'Nuevo Plan | APIEmpresas',
-            'plan'  => null
+            'plan' => null
         ];
         return view('admin/plan_form', $data);
     }
@@ -778,13 +793,15 @@ class Dashboard extends BaseController
     public function plan_store()
     {
         $data = $this->request->getPost();
-        
-        if (!$this->validate([
-            'name'          => 'required|min_length[3]',
-            'slug'          => 'required|is_unique[api_plans.slug]',
-            'monthly_quota' => 'required|numeric',
-            'price_monthly' => 'required|decimal',
-        ])) {
+
+        if (
+            !$this->validate([
+                'name' => 'required|min_length[3]',
+                'slug' => 'required|is_unique[api_plans.slug]',
+                'monthly_quota' => 'required|numeric',
+                'price_monthly' => 'required|decimal',
+            ])
+        ) {
             return redirect()->back()->withInput()->with('error', 'Datos del plan inválidos.');
         }
 
@@ -804,7 +821,7 @@ class Dashboard extends BaseController
 
         $data = [
             'title' => 'Editar Plan | APIEmpresas',
-            'plan'  => $plan
+            'plan' => $plan
         ];
         return view('admin/plan_form', $data);
     }
@@ -817,12 +834,14 @@ class Dashboard extends BaseController
         $id = $this->request->getPost('id');
         $data = $this->request->getPost();
 
-        if (!$this->validate([
-            'name'          => 'required|min_length[3]',
-            'slug'          => "required|is_unique[api_plans.slug,id,{$id}]",
-            'monthly_quota' => 'required|numeric',
-            'price_monthly' => 'required|decimal',
-        ])) {
+        if (
+            !$this->validate([
+                'name' => 'required|min_length[3]',
+                'slug' => "required|is_unique[api_plans.slug,id,{$id}]",
+                'monthly_quota' => 'required|numeric',
+                'price_monthly' => 'required|decimal',
+            ])
+        ) {
             return redirect()->back()->withInput()->with('error', 'Datos del plan inválidos.');
         }
 
@@ -849,7 +868,7 @@ class Dashboard extends BaseController
 
         $data = [
             'title' => 'Gestión de API Keys | APIEmpresas',
-            'keys'  => $this->apiKeyModel->orderBy('created_at', 'DESC')->paginate(20),
+            'keys' => $this->apiKeyModel->orderBy('created_at', 'DESC')->paginate(20),
             'pager' => $this->apiKeyModel->pager,
         ];
 
@@ -863,7 +882,7 @@ class Dashboard extends BaseController
     {
         $data = [
             'title' => 'Nueva API Key | APIEmpresas',
-            'key'   => null,
+            'key' => null,
             'users' => $this->userModel->orderBy('name', 'ASC')->findAll(),
             'generated_key' => bin2hex(random_bytes(32)) // Generar una key por defecto
         ];
@@ -876,12 +895,14 @@ class Dashboard extends BaseController
     public function api_key_store()
     {
         $data = $this->request->getPost();
-        
-        if (!$this->validate([
-            'user_id' => 'required|numeric',
-            'name'    => 'required|min_length[3]',
-            'api_key' => 'required|is_unique[api_keys.api_key]',
-        ])) {
+
+        if (
+            !$this->validate([
+                'user_id' => 'required|numeric',
+                'name' => 'required|min_length[3]',
+                'api_key' => 'required|is_unique[api_keys.api_key]',
+            ])
+        ) {
             return redirect()->back()->withInput()->with('error', 'Datos de la API Key inválidos.');
         }
 
@@ -901,7 +922,7 @@ class Dashboard extends BaseController
 
         $data = [
             'title' => 'Editar API Key | APIEmpresas',
-            'key'   => $key,
+            'key' => $key,
             'users' => $this->userModel->orderBy('name', 'ASC')->findAll()
         ];
         return view('admin/api_key_form', $data);
@@ -915,11 +936,13 @@ class Dashboard extends BaseController
         $id = $this->request->getPost('id');
         $data = $this->request->getPost();
 
-        if (!$this->validate([
-            'user_id' => 'required|numeric',
-            'name'    => 'required|min_length[3]',
-            'api_key' => "required|is_unique[api_keys.api_key,id,{$id}]",
-        ])) {
+        if (
+            !$this->validate([
+                'user_id' => 'required|numeric',
+                'name' => 'required|min_length[3]',
+                'api_key' => "required|is_unique[api_keys.api_key,id,{$id}]",
+            ])
+        ) {
             return redirect()->back()->withInput()->with('error', 'Datos de la API Key inválidos.');
         }
 
@@ -963,14 +986,14 @@ class Dashboard extends BaseController
         }
 
         $data = [
-            'title'         => 'Gestión de Suscripciones | APIEmpresas',
+            'title' => 'Gestión de Suscripciones | APIEmpresas',
             'subscriptions' => $builder->orderBy('created_at', 'DESC')->paginate(20),
-            'pager'         => $this->subscriptionModel->pager,
-            'users'         => $this->userModel->orderBy('name', 'ASC')->findAll(),
-            'plans'         => $this->planModel->orderBy('name', 'ASC')->findAll(),
-            'user_id'       => $userId,
-            'plan_id'       => $planId,
-            'status'        => $status
+            'pager' => $this->subscriptionModel->pager,
+            'users' => $this->userModel->orderBy('name', 'ASC')->findAll(),
+            'plans' => $this->planModel->orderBy('name', 'ASC')->findAll(),
+            'user_id' => $userId,
+            'plan_id' => $planId,
+            'status' => $status
         ];
 
         return view('admin/subscriptions', $data);
@@ -982,10 +1005,10 @@ class Dashboard extends BaseController
     public function subscription_create()
     {
         $data = [
-            'title'        => 'Nueva Suscripción | APIEmpresas',
+            'title' => 'Nueva Suscripción | APIEmpresas',
             'subscription' => null,
-            'users'        => $this->userModel->orderBy('name', 'ASC')->findAll(),
-            'plans'        => $this->planModel->where('is_active', 1)->findAll()
+            'users' => $this->userModel->orderBy('name', 'ASC')->findAll(),
+            'plans' => $this->planModel->where('is_active', 1)->findAll()
         ];
         return view('admin/subscription_form', $data);
     }
@@ -996,14 +1019,16 @@ class Dashboard extends BaseController
     public function subscription_store()
     {
         $data = $this->request->getPost();
-        
-        if (!$this->validate([
-            'user_id'              => 'required|numeric',
-            'plan_id'              => 'required|numeric',
-            'status'               => 'required',
-            'current_period_start' => 'required|valid_date',
-            'current_period_end'   => 'required|valid_date',
-        ])) {
+
+        if (
+            !$this->validate([
+                'user_id' => 'required|numeric',
+                'plan_id' => 'required|numeric',
+                'status' => 'required',
+                'current_period_start' => 'required|valid_date',
+                'current_period_end' => 'required|valid_date',
+            ])
+        ) {
             return redirect()->back()->withInput()->with('error', 'Datos de la suscripción inválidos.');
         }
 
@@ -1022,10 +1047,10 @@ class Dashboard extends BaseController
         }
 
         $data = [
-            'title'        => 'Editar Suscripción | APIEmpresas',
+            'title' => 'Editar Suscripción | APIEmpresas',
             'subscription' => $subscription,
-            'users'        => $this->userModel->orderBy('name', 'ASC')->findAll(),
-            'plans'        => $this->planModel->where('is_active', 1)->findAll()
+            'users' => $this->userModel->orderBy('name', 'ASC')->findAll(),
+            'plans' => $this->planModel->where('is_active', 1)->findAll()
         ];
         return view('admin/subscription_form', $data);
     }
@@ -1038,13 +1063,15 @@ class Dashboard extends BaseController
         $id = $this->request->getPost('id');
         $data = $this->request->getPost();
 
-        if (!$this->validate([
-            'user_id'              => 'required|numeric',
-            'plan_id'              => 'required|numeric',
-            'status'               => 'required',
-            'current_period_start' => 'required|valid_date',
-            'current_period_end'   => 'required|valid_date',
-        ])) {
+        if (
+            !$this->validate([
+                'user_id' => 'required|numeric',
+                'plan_id' => 'required|numeric',
+                'status' => 'required',
+                'current_period_start' => 'required|valid_date',
+                'current_period_end' => 'required|valid_date',
+            ])
+        ) {
             return redirect()->back()->withInput()->with('error', 'Datos de la suscripción inválidos.');
         }
 
@@ -1071,7 +1098,7 @@ class Dashboard extends BaseController
 
         $data = [
             'title' => 'Logs de Emails | APIEmpresas',
-            'logs'  => $this->emailLogModel->orderBy('created_at', 'DESC')->paginate(20),
+            'logs' => $this->emailLogModel->orderBy('created_at', 'DESC')->paginate(20),
             'pager' => $this->emailLogModel->pager,
         ];
 
