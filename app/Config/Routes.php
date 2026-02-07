@@ -96,6 +96,7 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
 
     $routes->get('api-requests', 'Admin\Dashboard::api_requests');
     $routes->get('usage-daily', 'Admin\Dashboard::usage_daily');
+    $routes->get('usage', 'Admin\Dashboard::usage_daily'); // Alias for /usage
 
     // Companies CRUD
     $routes->get('companies', 'Admin\Dashboard::companies');

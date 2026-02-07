@@ -111,32 +111,32 @@ class Search extends BaseController
      */
     public function index()
     {
-        // Rate limiting: 10 búsquedas por minuto por IP
+        // 1. Protección contra abuso masivo: 60 búsquedas por minuto -> BLOQUEO DE IP
+        // Esto sí es comportamiento de bot agresivo
         $throttler = \Config\Services::throttler();
-        if ($throttler->check(md5($this->request->getIPAddress()), 10, 60) === false) {
-            // Block IP for rate limit violation
+        if ($throttler->check(md5($this->request->getIPAddress() . '_abuse'), 60, 60) === false) {
             $botService = new BotDetectionService();
-            $botService->detectAndBlock($this->request, 'rate_limit_exceeded', [
+            $botService->detectAndBlock($this->request, 'rate_limit_exceeded_massive', [
                 'endpoint' => '/search',
-                'limit' => '10 requests per minute',
+                'limit' => '60 requests per minute',
             ]);
             
+            return $this->failForbidden('Tu IP ha sido bloqueada por actividad sospechosa.');
+        }
+
+        // 2. Rate limiting estándar: 10 búsquedas por minuto -> 429 Too Many Requests (SIN BLOQUEO)
+        // Solo le decimos que espere, no le baneamos la IP
+        if ($throttler->check(md5($this->request->getIPAddress()), 10, 60) === false) {
             return $this->respond([
                 'success' => false,
-                'message' => 'Demasiadas solicitudes. Tu IP ha sido bloqueada por actividad sospechosa.'
+                'message' => 'Demasiadas solicitudes. Por favor espera un minuto.'
             ], 429);
         }
 
-        // Solo permitir peticiones AJAX para este endpoint
+        // 3. Protección de acceso directo: Si no es AJAX, redirigir a la web
+        // No bloquear la IP, simplemente llevar al usuario al sitio correcto
         if (!$this->request->isAJAX()) {
-            // Block IP for non-AJAX request to protected endpoint
-            $botService = new BotDetectionService();
-            $botService->detectAndBlock($this->request, 'non_ajax_request', [
-                'endpoint' => '/search',
-                'attempted_access' => 'direct_browser_access',
-            ]);
-            
-            return $this->failForbidden('Acceso no permitido. Tu IP ha sido bloqueada.');
+            return redirect()->to('search_company');
         }
 
         $q = trim((string) $this->request->getGet('q'));
