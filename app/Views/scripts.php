@@ -21,7 +21,11 @@
     </script>
 <?php endif; ?>
 
-<?php if (session()->getFlashdata('error')): ?>
+<?php 
+$currentUri = service('uri')->getPath();
+$isLogin = strpos($currentUri, 'enter') !== false || strpos($currentUri, 'login') !== false;
+?>
+<?php if (session()->getFlashdata('error') && !$isLogin): ?>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             Swal.fire({
