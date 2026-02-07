@@ -66,7 +66,14 @@ class Company extends BaseController
         // Generar título y descripción
         $name = $company['name'] ?? 'Empresa';
         $cif  = $company['cif'] ?? $company['nif'] ?? '';
-        $prov = $company['province'] ?? $company['provincia'] ?? '';
+        
+        // Robust check for province
+        $prov = '';
+        if (!empty($company['province'])) {
+            $prov = $company['province'];
+        } elseif (!empty($company['provincia'])) {
+            $prov = $company['provincia'];
+        }
         
         $title = "{$name}";
         if ($cif)  $title .= " - {$cif}";
@@ -85,28 +92,31 @@ class Company extends BaseController
         // Related companies
         $related = $this->companyModel->getRelated(
             $company['cnae'] ?? null,
-            $company['province'] ?? $company['provincia'] ?? null,
-            $company['cif'] ?? 'NO_CIF_' . $company['id'] // Excluirse a sí misma
+            $prov,
+            $company['cif'] ?? 'NO_CIF_' . ($company['id'] ?? 0)
         );
 
         // Breadcrumb Links
         $provinceUrl = '';
-        if (!empty($company['province'] ?? $company['provincia'])) {
-            $provinceUrl = site_url('directorio/provincia/' . urlencode($company['province'] ?? $company['provincia']));
+        if ($prov) {
+            $provinceUrl = site_url('directorio/provincia/' . urlencode($prov));
         }
         
+        $cnaeCode = '';
+        if (!empty($company['cnae_code'])) {
+            $cnaeCode = $company['cnae_code'];
+        } elseif (!empty($company['cnae'])) {
+             $cnaeCode = $company['cnae'];
+        }
+
         $cnaeUrl = '';
-        if (!empty($company['cnae_code'] ?? $company['cnae'])) {
-             // Assuming cnae_code is what we have. Sometimes it might be just 'cnae'. 
-             // Logic: try cnae_code first.
-             $code = $company['cnae_code'] ?? $company['cnae'];
-             $cnaeUrl = site_url('directorio/cnae/' . $code);
+        if ($cnaeCode) {
+             $cnaeUrl = site_url('directorio/cnae/' . $cnaeCode);
         }
 
         $provinceCnaeUrl = '';
-        if (!empty($company['province'] ?? $company['provincia']) && !empty($company['cnae_code'] ?? $company['cnae'])) {
-            $code = $company['cnae_code'] ?? $company['cnae'];
-            $provinceCnaeUrl = site_url('directorio/provincia/' . urlencode($company['province'] ?? $company['provincia']) . '/cnae/' . $code);
+        if ($prov && $cnaeCode) {
+            $provinceCnaeUrl = site_url('directorio/provincia/' . urlencode($prov) . '/cnae/' . $cnaeCode);
         }
 
         return [
