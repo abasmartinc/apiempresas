@@ -7,6 +7,60 @@
         'canonical'   => $canonical,
         'robots'      => 'index,follow',
     ]) ?>
+    <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"></noscript>
+    <style>
+        #company-map {
+            height: 350px;
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            z-index: 1;
+        }
+    #map-area {
+        margin-top: 2rem;
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    .map-section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+    }
+    .map-section-title svg {
+        color: #3b82f6;
+    }
+    #company-map {
+        height: 350px;
+        width: 100%;
+        border-radius: 12px;
+        z-index: 1;
+        border: 1px solid #f1f5f9;
+    }
+    /* Modern Popup Styling */
+    .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+        padding: 0;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+    .leaflet-popup-content {
+        margin: 12px 16px;
+        font-family: inherit;
+        color: #334155;
+        line-height: 1.5;
+    }
+    .leaflet-popup-tip {
+        box-shadow: none;
+    }
+</style>
 </head>
 <body>
 <div class="bg-halo" aria-hidden="true"></div>
@@ -14,7 +68,7 @@
 <header>
     <div class="container nav">
         <div class="brand">
-            <a href="<?=site_url() ?>">
+            <a href="<?=site_url() ?>" aria-label="Volver al inicio de APIEmpresas.es">
                 <svg class="ve-logo" width="32" height="32" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient id="ve-g" x1="10" y1="54" x2="54" y2="10" gradientUnits="userSpaceOnUse">
@@ -98,9 +152,9 @@
             <span aria-current="page"><?= esc($company['name'] ?? 'Empresa') ?></span>
         </nav>
 
-        <div class="search-card">
+        <div>
             
-            <div class="result">
+
                 <?php
                     $statusRaw = (string)($company['status'] ?? '');
                     $isActive  = strtoupper($statusRaw) === 'ACTIVA';
@@ -156,8 +210,26 @@
                                     "addressCountry" => "ES"
                                 ],
                                 "foundingDate" => $company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '',
-                                "description" => $meta_description ?? ''
+                                "description" => $meta_description ?? '',
+                                "logo" => site_url('logo.png')
                             ],
+                            (!empty($company['lat']) && !empty($company['lng'])) ? [
+                                "@type" => "LocalBusiness",
+                                "@id" => $canonical . "#localbusiness",
+                                "name" => $companyName,
+                                "address" => [
+                                    "@type" => "PostalAddress",
+                                    "streetAddress" => $rawAddr ?: null,
+                                    "addressRegion" => $companyProv,
+                                    "addressCountry" => "ES"
+                                ],
+                                "geo" => [
+                                    "@type" => "GeoCoordinates",
+                                    "latitude" => $company['lng'], // Coords están invertidas en DB
+                                    "longitude" => $company['lat']
+                                ],
+                                "url" => $canonical
+                            ] : null,
                             [
                                 "@type" => "BreadcrumbList",
                                 "itemListElement" => [
@@ -209,17 +281,22 @@
                     <header class="company-card__header">
                         <div>
                             <div class="company-card__eyebrow">Ficha registral</div>
-                            <h1 class="company-card__name" style="font-size: 1.5rem; margin: 0;"><?= esc($company['name'] ?? '-') ?></h1>
+                            <h1 class="company-card__name" style="font-size: 1.5rem; margin: 0;">Información de empresa: <?= esc($company['name'] ?? '-') ?></h1>
                             <div class="company-card__meta">
                                 <?= esc(($company['cif'] ?? $company['nif'] ?? '-') . ' · ' . ($company['province'] ?? $company['provincia'] ?? '-')) ?>
                             </div>
-                            <?php if (getenv('ENABLE_COMPANY_ALERTS') === 'true'): ?>
-                            <div style="margin-top: 12px;">
-                                <a href="<?= site_url('alerts/confirm/' . ($company['cif'] ?? $company['nif'] ?? '-')) ?>" class="btn" style="padding: 8px 16px; font-size: 0.9rem; background: #2563eb; color: #ffffff; border: 1px solid #1d4ed8; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background 0.2s;">
-                                    🔔 Monitorizar cambios
+                            <div style="margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                <?php if (getenv('ENABLE_COMPANY_ALERTS') === 'true'): ?>
+                                    <a href="<?= site_url('alerts/confirm/' . ($company['cif'] ?? $company['nif'] ?? '-')) ?>" class="btn" style="padding: 8px 16px; font-size: 0.9rem; background: #2563eb; color: #ffffff; border: 1px solid #1d4ed8; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background 0.2s;">
+                                        🔔 Monitorizar cambios
+                                    </a>
+                                <?php endif; ?>
+
+                                <a href="<?= site_url('empresa/export/' . $company['id']) ?>" class="btn" aria-label="Descargar Informe PDF de <?= esc($companyName) ?>" style="padding: 8px 16px; font-size: 0.9rem; background: #ffffff; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                    Descargar Informe PDF
                                 </a>
                             </div>
-                            <?php endif; ?>
                         </div>
                         <div class="<?= esc($statusClass) ?>">
                             <span class="company-status__dot"></span>
@@ -257,10 +334,11 @@
                                 </dd>
                             </div>
                             
-                            <div><dt>Fecha de constitución</dt><dd><?= esc($company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '-') ?></dd></div>
+                            <div><dt>Fecha de constitución</dt><dd><time datetime="<?= esc($company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '') ?>"><?= esc($company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '-') ?></time></dd></div>
                             <div class="company-card__purpose"><dt>Objeto social</dt><dd><?= esc($company['corporate_purpose'] ?? $company['objeto_social'] ?? '-') ?></dd></div>
                         </dl>
                     </section>
+
 
 
                     <div class="company-card__footer">
@@ -287,6 +365,17 @@
                     
                     <pre class="company-card__json is-hidden" id="jsonBlock" style="margin-top: 1rem; background: #0f172a; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow: auto; max-height: 400px; font-size: 0.8rem;"><code><?= esc($jsonPretty) ?></code></pre>
                 </article>
+
+                <?php if (!empty($company['lat']) && !empty($company['lng'])): ?>
+                    <div id="map-area" class="map-card">
+                        <h2 class="map-section-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                            Ubicación de la empresa
+                        </h2>
+                        <div id="company-map"></div>
+                    </div>
+                <?php endif; ?>
+
 
                 <!-- SEO Text Block -->
                 <!-- SEO Text Block -->
@@ -338,11 +427,11 @@
                         </span>
                         
                         <div class="share-buttons">
-                            <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?= urlencode($canonical) ?>" target="_blank" rel="noopener noreferrer" class="share-btn share-linkedin" title="Compartir en LinkedIn">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                            <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?= urlencode($canonical) ?>" target="_blank" rel="noopener noreferrer nofollow" class="share-btn share-linkedin" title="Compartir en LinkedIn">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
                             </a>
-                            <a href="https://api.whatsapp.com/send?text=<?= urlencode("Mira esta empresa: " . $canonical) ?>" target="_blank" rel="noopener noreferrer" class="share-btn share-whatsapp" title="Compartir en WhatsApp">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                            <a href="https://api.whatsapp.com/send?text=<?= urlencode("Mira esta empresa: " . $canonical) ?>" target="_blank" rel="noopener noreferrer nofollow" class="share-btn share-whatsapp" title="Compartir en WhatsApp">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
                             </a>
                         </div>
                     </div>
@@ -364,22 +453,22 @@
                             // Defaults: File Icon
                             $iconColor = '#64748b'; // Slate 500
                             $iconBg    = '#f1f5f9'; // Slate 100
-                            $iconSvg   = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>';
+                            $iconSvg   = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>';
 
                             if (strpos($acts, 'nombramientos') !== false) {
                                 $iconColor = '#16a34a'; // Green 600
                                 $iconBg    = '#dcfce7'; // Green 100
                                 // Briefcase Icon
-                                $iconSvg   = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>';
+                                $iconSvg   = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>';
                             } elseif (strpos($acts, 'ceses') !== false || strpos($acts, 'dimisiones') !== false || strpos($acts, 'revocaciones') !== false) {
                                 $iconColor = '#dc2626'; // Red 600
                                 $iconBg    = '#fee2e2'; // Red 100
                                 // File Minus/Remove Icon
-                                $iconSvg   = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line></svg>';
+                                $iconSvg   = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line></svg>';
                             } elseif (strpos($acts, 'cuentas') !== false) {
                                 $iconColor = '#2563eb'; // Blue 600
                                 $iconBg    = '#dbeafe'; // Blue 100
-                                $iconSvg   = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"></path><path d="M14 2v6h6"></path><path d="M3 15h6"></path><path d="M3 18h6"></path></svg>';
+                                $iconSvg   = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"></path><path d="M14 2v6h6"></path><path d="M3 15h6"></path><path d="M3 18h6"></path></svg>';
                             }
                         ?>
                         <div class="borme-item">
@@ -440,7 +529,7 @@
                 <script type="application/ld+json">
                     <?= json_encode($schemaOrg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
                 </script>
-            </div>
+
             
             <div style="margin-top: 2rem; text-align: center;">
                 <a href="<?= site_url('search_company') ?>" class="minor">← Volver al buscador</a>
@@ -484,8 +573,8 @@
                                     <?= esc($rel['province'] ?? '-') ?>
                                 </td>
                                 <td style="padding: 0.75rem 1rem; text-align: right;">
-                                    <a href="<?= esc($relUrl) ?>" style="color: #2152FF; font-weight: 600; text-decoration: none; font-size: 0.85rem;">
-                                        Ver →
+                                    <a href="<?= esc($relUrl) ?>" title="Ver ficha de <?= esc($rel['name'] ?? 'empresa') ?>" style="color: #2152FF; font-weight: 600; text-decoration: none; font-size: 0.85rem;">
+                                        Ficha completa →
                                     </a>
                                 </td>
                             </tr>
@@ -502,6 +591,7 @@
 
 <?= view('partials/footer') ?>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const btn = document.getElementById('btnToggleJson');
@@ -514,6 +604,46 @@
                 btn.textContent = nowHidden ? 'Ver JSON de la API' : 'Ocultar JSON de la API';
             });
         }
+
+        <?php if (!empty($company['lat']) && !empty($company['lng'])): ?>
+            // Coordinates appear to be swapped in the DB (Lng in Lat field)
+            const lng = <?= (float)$company['lat'] ?>;
+            const lat = <?= (float)$company['lng'] ?>;
+            const companyName = "<?= esc($company['name'] ?? $company['nombre'] ?? 'Empresa') ?>";
+            const rawAddress = "<?= esc($company['address'] ?? '') ?>";
+            const province = "<?= esc($company['province'] ?? $company['provincia'] ?? '') ?>";
+
+            // Initialize Map with a cleaner zoom
+            const map = L.map('company-map', {
+                scrollWheelZoom: false,
+                zoomControl: true
+            }).setView([lat, lng], 16);
+
+            // Add Modern Tile Layer (CartoDB Voyager)
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 20
+            }).addTo(map);
+
+            // Modern SVG Marker Icon
+            const modernIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `
+                    <div style="background-color: #3b82f6; width: 40px; height: 40px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+                        <div style="width: 12px; height: 12px; background-color: white; border-radius: 50%; transform: rotate(45deg);"></div>
+                    </div>
+                `,
+                iconSize: [40, 40],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -35]
+            });
+
+            // Add Marker
+            L.marker([lat, lng], { icon: modernIcon }).addTo(map)
+                .bindPopup(`<strong>${companyName}</strong><br><span style="color: #64748b; font-size: 0.85rem;">${rawAddress}${province ? ', ' + province : ''}</span>`)
+                .openPopup();
+        <?php endif; ?>
     });
 </script>
 </body>

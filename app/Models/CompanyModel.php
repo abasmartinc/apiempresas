@@ -23,6 +23,9 @@ class CompanyModel extends Model
         'fecha_constitucion AS founded',
         'registro_mercantil AS province',
         'address',
+        'municipality',
+        'lat_num            AS lat',
+        'lng_num            AS lng',
         'estado             AS status',
     ];
 
@@ -338,7 +341,7 @@ class CompanyModel extends Model
             $builder->where('registro_mercantil', $province);
         }
 
-        $builder->orderBy('id', 'RANDOM'); // O por fecha si es muy lento
+        $builder->orderBy('id', 'DESC'); 
         $builder->limit($limit);
 
         $results = $builder->get()->getResultArray();

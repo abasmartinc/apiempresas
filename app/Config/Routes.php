@@ -164,6 +164,7 @@ $routes->get('directorio/provincia/(:any)/cnae/(:any)/(:num)', 'Directory::provi
 
 // Company SEO Pages (Regex: Letter + 7 Digits + Char + optional slug)
 // Must be last to avoid conflicts
+$routes->get('empresa/export/(:num)', 'Company::exportPdf/$1');
 $routes->get('empresa/(:num)-(:any)', 'Company::showById/$1/$2');
 $routes->get('empresa/(:num)', 'Company::showById/$1');
 $routes->get('test-pdf', 'TestPdf::index');

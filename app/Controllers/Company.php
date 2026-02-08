@@ -5,6 +5,8 @@ namespace App\Controllers;
 use App\Models\CompanyModel;
 use App\Models\BormePostsModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class Company extends BaseController
 {
@@ -75,19 +77,16 @@ class Company extends BaseController
             $prov = $company['provincia'];
         }
         
-        $title = "{$name}";
-        if ($cif)  $title .= " - {$cif}";
-        if ($prov) $title .= " - {$prov}";
-        $title .= " | APIEmpresas.es";
+        $title = "Información de {$name} - {$cif}";
+        if ($prov) $title .= " ({$prov})";
+        $title .= " | Datos Registrales y Scoring";
 
-        $desc = "Ficha detallada de {$name}";
-        if ($cif)  $desc .= " (CIF {$cif})";
-        if ($prov) $desc .= " en {$prov}";
-        
+        $desc = "Consulta los datos oficiales de {$name} ({$cif}): domicilio en {$prov}, actividad ";
         $act = $company['cnae_label'] ?? '';
-        if ($act) $desc .= ". Actividad: " . character_limiter($act, 50);
+        if ($act) $desc .= character_limiter($act, 50);
+        else $desc .= "social registrada";
         
-        $desc .= ". Datos registrales, contacto y scoring mercantil.";
+        $desc .= ", scoring de riesgo e informes comerciales. Información oficial actualizada.";
 
         // Related companies
         $related = $this->companyModel->getRelated(
@@ -295,5 +294,37 @@ class Company extends BaseController
         $searchTerm = str_replace('-', ' ', $cleanSlug);
         return redirect()->to(site_url('search_company?q=' . urlencode($searchTerm)))
                          ->with('message', 'La dirección que buscas ha cambiado. Te mostramos resultados relacionados.');
+    }
+
+    /**
+     * Exporta los datos de la empresa a un PDF profesional
+     */
+    public function exportPdf($id)
+    {
+        $company = $this->companyModel->getById((int)$id);
+
+        if (!$company) {
+            throw PageNotFoundException::forPageNotFound();
+        }
+
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
+        
+        $dompdf = new Dompdf($options);
+        
+        $html = view('reports/company_pdf', [
+            'company' => $company
+        ]);
+
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'informe_' . url_title($company['name'], '_', true) . '.pdf';
+        
+        return $this->response->setHeader('Content-Type', 'application/pdf')
+                              ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+                              ->setBody($dompdf->output());
     }
 }
