@@ -368,25 +368,42 @@ class CompanyModel extends Model
     }
 
     /**
-     * Busca múltiples empresas por término (Nombre, CNAE o Provincia).
-     * Intenta usar FULLTEXT primero, fallback a LIKE.
+     * Busca múltiples empresas por término (CIF, Nombre, CNAE o Provincia).
+     * Prioriza CIF, luego FULLTEXT y finalmente LIKE.
      */
     public function searchMany(string $term, int $limit = 20): array
     {
         $term = trim($term);
-        if ($term === '' || mb_strlen($term) < 3) {
+        if ($term === '' || mb_strlen($term) < 2) {
             return [];
         }
 
-        // 1. Intentar búsqueda FULLTEXT (Muy rápida)
-        // Requiere: ADD FULLTEXT INDEX idx_ft (company_name, cnae_label, registro_mercantil);
+        $results = [];
+        $seenCifs = [];
+
+        // 1. Prioridad 1: Búsqueda por CIF (Indexado, muy rápido)
+        // Si el usuario teclea algo que parece un CIF, lo buscamos directamente
+        $builderCif = $this->builder();
+        $builderCif->select(implode(', ', $this->selectFields));
+        $builderCif->like('cif', $term, 'after');
+        $builderCif->limit($limit);
+        
+        foreach ($builderCif->get()->getResultArray() as $row) {
+            $results[] = $row;
+            $seenCifs[$row['cif']] = true;
+        }
+
+        if (count($results) >= $limit) {
+            return $results;
+        }
+
+        // 2. Prioridad 2: FULLTEXT por nombre y etiquetas (Muy rápida)
         try {
-            // Preparamos término para modo booleano: "+termino*"
             $cleanTerm = preg_replace('/[+\-><()~*\"@]+/', ' ', $term);
             $parts = array_filter(explode(' ', $cleanTerm));
             $booleanTerm = '';
             foreach ($parts as $p) {
-                if (strlen($p) >= 3) {
+                if (mb_strlen($p) >= 3) {
                     $booleanTerm .= '+' . $p . '* ';
                 }
             }
@@ -401,33 +418,49 @@ class CompanyModel extends Model
                         ORDER BY score DESC
                         LIMIT ?";
                 
-                $query = $this->db->query($sql, [$booleanTerm, $booleanTerm, $limit]);
-                $results = $query->getResultArray();
-                
-                if (!empty($results)) {
-                    return $results;
+                // Pedimos un poco más para poder filtrar los que ya vimos por CIF
+                $query = $this->db->query($sql, [$booleanTerm, $booleanTerm, $limit + count($results)]);
+                foreach ($query->getResultArray() as $row) {
+                    if (count($results) >= $limit) break;
+                    if (!isset($seenCifs[$row['cif']])) {
+                        $results[] = $row;
+                        $seenCifs[$row['cif']] = true;
+                    }
                 }
             }
         } catch (\Throwable $e) {
-            // Si falla (ej. no existe el índice), ignoramos y pasamos al fallback
             log_message('debug', '[CompanyModel::searchMany] Fulltext falló: ' . $e->getMessage());
         }
 
-        // 2. Fallback a LIKE (Lento, pero seguro)
-        $builder = $this->builder();
-        $builder->select(implode(', ', $this->selectFields));
-        
-        $builder->groupStart();
-            $builder->like('company_name', $term);
-            $builder->orLike('cnae_label', $term);
-            $builder->orLike('registro_mercantil', $term); // Provincia
-        $builder->groupEnd();
+        if (count($results) >= $limit) {
+            return $results;
+        }
 
-        $builder->orderBy("CASE WHEN company_name LIKE '{$this->db->escapeLikeString($term)}%' THEN 0 ELSE 1 END", 'ASC');
-        $builder->orderBy('company_name', 'ASC');
+        // 3. Fallback: LIKE por nombre y otros (Lento pero seguro)
+        $builderFallback = $this->builder();
+        $builderFallback->select(implode(', ', $this->selectFields));
         
-        $builder->limit($limit);
+        $builderFallback->groupStart();
+            $builderFallback->like('company_name', $term);
+            $builderFallback->orLike('cnae_label', $term);
+            $builderFallback->orLike('registro_mercantil', $term);
+        $builderFallback->groupEnd();
 
-        return $builder->get()->getResultArray();
+        if (!empty($seenCifs)) {
+            $builderFallback->whereNotIn('cif', array_keys($seenCifs));
+        }
+
+        // Ordenar un poco para que los que empiezan por el término salgan antes
+        $escapedTerm = $this->db->escapeLikeString($term);
+        $builderFallback->orderBy("CASE WHEN company_name LIKE '{$escapedTerm}%' THEN 0 ELSE 1 END", 'ASC');
+        $builderFallback->orderBy('company_name', 'ASC');
+        
+        $builderFallback->limit($limit - count($results));
+
+        foreach ($builderFallback->get()->getResultArray() as $row) {
+            $results[] = $row;
+        }
+
+        return $results;
     }
 }

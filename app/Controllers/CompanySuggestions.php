@@ -21,7 +21,10 @@ class CompanySuggestions extends BaseController
      */
     public function index()
     {
-        return view('company_suggestions');
+        $data = [
+            'title' => 'Autocomplete de Empresas y Sugerencias en Tiempo Real | APIEmpresas'
+        ];
+        return view('company_suggestions', $data);
     }
 
     /**
@@ -45,9 +48,19 @@ class CompanySuggestions extends BaseController
         try {
             $results = $this->companyModel->searchMany($q, 10);
             
+            // Format results to return only specific fields
+            $formatted = array_map(function($item) {
+                return [
+                    'name'    => $item['company_name'] ?? ($item['name'] ?? ''),
+                    'cif'     => $item['cif'] ?? '',
+                    'address' => $item['address'] ?? '',
+                    'score'   => isset($item['score']) ? round((float)$item['score'], 2) : 1.00
+                ];
+            }, $results);
+
             return $this->respond([
                 'success' => true,
-                'data'    => $results
+                'data'    => $formatted
             ]);
         } catch (\Throwable $e) {
             return $this->respond([

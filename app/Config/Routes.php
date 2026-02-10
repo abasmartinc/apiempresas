@@ -175,9 +175,11 @@ $routes->get('test-pdf', 'TestPdf::index');
 $routes->get('no%20disponible(:any)', 'Company::handleBrokenCif/$1');
 $routes->get('no disponible(:any)', 'Company::handleBrokenCif/$1');
 
-// Company Suggestions (Professional)
-$routes->get('company-suggestions', 'CompanySuggestions::index');
-$routes->get('company-suggestions/get', 'CompanySuggestions::getSuggestions');
+// Company Suggestions (Professional Landing)
+$routes->get('autocompletado-cif-empresas', 'CompanySuggestions::index');
+$routes->get('autocompletado-cif-empresas/get', 'CompanySuggestions::getSuggestions');
+$routes->addRedirect('company-suggestions', 'autocompletado-cif-empresas');
+$routes->addRedirect('company-suggestions/get', 'autocompletado-cif-empresas/get');
 
 // Company pages: CIF-based URLs (must come before slug fallback)
 $routes->get('([a-zA-Z][0-9]{7}[a-zA-Z0-9].*)', 'Company::show/$1');
