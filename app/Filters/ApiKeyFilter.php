@@ -105,6 +105,50 @@ class ApiKeyFilter implements FilterInterface
             // fallback planId=1
         }
 
+        // 4.2) Verificar Límites de Consumo (ENFORCEMENT)
+        try {
+            // Obtener cuota del plan (mensual)
+            $planRow = $db->table('api_plans')
+                ->select('monthly_quota')
+                ->where('id', (int)$planId)
+                ->get()
+                ->getRow();
+            
+            // Fallback razonable si falla query: 100 peticiones (plan free habitual)
+            $monthlyQuota = $planRow ? (int)$planRow->monthly_quota : 100;
+
+            // Calcular consumo del mes actual
+            $currentMonth = date('Y-m'); // '2023-10'
+            $usageRow = $db->table('api_usage_daily')
+                ->selectSum('requests_count')
+                ->where('user_id', (int)$row->user_id)
+                ->like('date', $currentMonth, 'after') // date comienza con Y-m
+                ->get()
+                ->getRow();
+
+            $currentUsage = $usageRow ? (int)$usageRow->requests_count : 0;
+
+            // Bloquear si excede
+            if ($currentUsage >= $monthlyQuota) {
+                return service('response')
+                    ->setStatusCode(429) // Too Many Requests
+                    ->setJSON([
+                        'success' => false,
+                        'error'   => 'Quota Exceeded',
+                        'message' => 'Has superado el límite mensual de consultas de tu plan (' . $monthlyQuota . ').',
+                        'current_usage' => $currentUsage,
+                        'upgrade_url' => site_url('billing/manage') // O link directo a upgrade
+                    ]);
+            }
+
+        } catch (\Throwable $e) {
+            log_message('error', '[ApiKeyFilter::before:limit_check] ' . $e->getMessage());
+            // En caso de error de DB al chequear límites, ¿dejamos pasar o bloqueamos?
+            // "Fail open" suele ser mejor para UX si es un bug nuestro, 
+            // pero "Fail closed" protege la infra.
+            // Dejamos pasar (fail open) logueando error.
+        }
+
         // Guardamos meta para usarlo en after()
         $request->api_meta = [
             'user_id'         => (int)$row->user_id,
