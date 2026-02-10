@@ -224,6 +224,88 @@
         </div>
     </section>
 
+    <!-- CUSTOM INTEGRATIONS -->
+    <section id="custom-integrations" class="container" style="margin-top: 40px; margin-bottom: 40px;">
+        <div class="band" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 24px; padding: 60px 40px; color: white; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);">
+            
+            <!-- Decorative background elements -->
+            <div style="position: absolute; top: 0; right: 0; width: 400px; height: 400px; background: radial-gradient(circle, rgba(33, 82, 255, 0.15) 0%, transparent 70%); pointer-events: none;"></div>
+            <div style="position: absolute; bottom: 0; left: 0; width: 300px; height: 300px; background: radial-gradient(circle, rgba(18, 180, 138, 0.1) 0%, transparent 70%); pointer-events: none;"></div>
+
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; position: relative; z-index: 1;">
+                
+                <!-- Content -->
+                <div>
+                    <span class="eyebrow" style="color: #60A5FA; border-color: rgba(96, 165, 250, 0.3);">Enterprise & Medida</span>
+                    <h2 style="color: white; margin-top: 10px; margin-bottom: 20px; font-size: 2.5rem;">Integraciones a medida y Soluciones Enterprise</h2>
+                    <p style="color: #94a3b8; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px;">
+                        No nos limitamos a la API estándar. Adaptamos nuestra tecnología para que se fusione perfectamente con tu infraestructura y lógica de negocio.
+                    </p>
+
+                    <ul style="list-style: none; padding: 0; margin-bottom: 40px; display: grid; gap: 20px;">
+                        <li style="display: flex; gap: 15px; align-items: flex-start;">
+                            <div style="background: rgba(33, 82, 255, 0.2); color: #60A5FA; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                            </div>
+                            <div>
+                                <h4 style="color: white; margin: 0 0 5px 0; font-size: 1.1rem;">Endpoints Personalizados</h4>
+                                <p style="color: #94a3b8; margin: 0; font-size: 0.95rem;">¿Necesitas datos específicos cruzados o lógica de negocio en la respuesta? Construimos endpoints exclusivos para tu caso de uso.</p>
+                            </div>
+                        </li>
+                        <li style="display: flex; gap: 15px; align-items: flex-start;">
+                            <div style="background: rgba(18, 180, 138, 0.2); color: #34d399; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            </div>
+                            <div>
+                                <h4 style="color: white; margin: 0 0 5px 0; font-size: 1.1rem;">Validación Batch / Masiva</h4>
+                                <p style="color: #94a3b8; margin: 0; font-size: 0.95rem;">Procesa miles de registros vía CSV, Excel o API asíncrona de alto rendimiento. Ideal para limpieza de CRMs.</p>
+                            </div>
+                        </li>
+                        <li style="display: flex; gap: 15px; align-items: flex-start;">
+                            <div style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            </div>
+                            <div>
+                                <h4 style="color: white; margin: 0 0 5px 0; font-size: 1.1rem;">Conectores ERP/CRM</h4>
+                                <p style="color: #94a3b8; margin: 0; font-size: 0.95rem;">Integración nativa con SAP, Microsoft Dynamics, Salesforce, HubSpot y plataformas no-code.</p>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <a class="btn btn_start" href="<?=site_url() ?>contact?interest=custom_integration" style="background: white; color: #0f172a; border: none; font-weight: 700; padding: 15px 30px;">
+                        Hablemos de tu proyecto
+                    </a>
+                </div>
+
+                <!-- Visual/Image -->
+                <div style="position: relative; display: flex; justify-content: center; align-items: center;">
+                    <div style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 30px; width: 100%; max-width: 450px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 15px;">
+                            <div style="display: flex; gap: 8px;">
+                                <div style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444;"></div>
+                                <div style="width: 12px; height: 12px; border-radius: 50%; background: #f59e0b;"></div>
+                                <div style="width: 12px; height: 12px; border-radius: 50%; background: #10b981;"></div>
+                            </div>
+                            <span style="font-family: monospace; font-size: 12px; color: #94a3b8;">POST /api/v1/custom/verify-batch</span>
+                        </div>
+                        <pre style="font-family: 'Fira Code', monospace; font-size: 13px; line-height: 1.6; color: #e2e8f0; margin: 0; overflow-x: auto;">
+<span style="color: #c084fc;">{</span>
+  <span style="color: #60a5fa;">"job_id"</span>: <span style="color: #a5b4fc;">"job_8923_batch_kyb"</span>,
+  <span style="color: #60a5fa;">"status"</span>: <span style="color: #34d399;">"completed"</span>,
+  <span style="color: #60a5fa;">"processed"</span>: <span style="color: #fca5a5;">15420</span>,
+  <span style="color: #60a5fa;">"custom_fields"</span>: <span style="color: #c084fc;">[</span>
+    <span style="color: #a5b4fc;">"risk_score_v2"</span>,
+    <span style="color: #a5b4fc;">"erp_match_confidence"</span>
+  <span style="color: #c084fc;">]</span>,
+  <span style="color: #60a5fa;">"webhook_url"</span>: <span style="color: #a5b4fc;">"https://your-crm.com/hook"</span>
+<span style="color: #c084fc;">}</span></pre>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
     <!-- HOW -->
     <section class="how container">
         <h2>Empieza en menos de 5 minutos</h2>

@@ -655,31 +655,80 @@ class Dashboard extends BaseController
     {
         $q = $this->request->getGet('q');
         $noCif = $this->request->getGet('no_cif');
+        $noAddress = $this->request->getGet('no_address');
+        $noStatus = $this->request->getGet('no_status');
+        $noCnae = $this->request->getGet('no_cnae');
+        $noMercantile = $this->request->getGet('no_mercantile');
+        $today = $this->request->getGet('today');
 
         $filters = [
-            'no_cif' => $noCif
+            'no_cif' => $noCif,
+            'no_address' => $noAddress,
+            'no_status' => $noStatus,
+            'no_cnae' => $noCnae,
+            'no_mercantile' => $noMercantile,
+            'today' => $today,
         ];
 
-        // KPIs
-        $kpis = [
-            'total'                  => $this->companyModel->countAllResults(),
-            'sin_cif'               => $this->companyModel->where('cif', '')->orWhere('cif', null)->countAllResults(),
-            'sin_direccion'         => $this->companyModel->where('address', '')->orWhere('address', null)->countAllResults(),
-            'sin_estado'            => $this->companyModel->where('estado', '')->orWhere('estado', null)->countAllResults(),
-            'sin_cnae'              => $this->companyModel->where('cnae_code', '')->orWhere('cnae_code', null)->countAllResults(),
-            'sin_registro_mercantil' => $this->companyModel->where('registro_mercantil', '')->orWhere('registro_mercantil', null)->countAllResults(),
-        ];
+        $companies = $this->companyModel->searchAdmin($q, 20, $filters);
+        $pager = $this->companyModel->pager;
+
+        // Si es una petición AJAX, solo devolvemos la tabla
+        if ($this->request->isAJAX()) {
+            return view('admin/partials/companies_table', [
+                'companies' => $companies,
+                'pager' => $pager
+            ]);
+        }
 
         $data = [
             'title' => 'Gestión de Empresas | APIEmpresas',
-            'companies' => $this->companyModel->searchAdmin($q, 20, $filters),
-            'pager' => $this->companyModel->pager,
+            'companies' => $companies,
+            'pager' => $pager,
             'q' => $q,
-            'filters' => $filters,
-            'kpis' => $kpis
+            'filters' => $filters
         ];
 
         return view('admin/companies', $data);
+    }
+
+    /**
+     * Obtiene un KPI específico mediante AJAX
+     */
+    public function company_kpi_ajax($type)
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(403)->setBody('Acceso no permitido');
+        }
+
+        $value = 0;
+        switch ($type) {
+            case 'total':
+                $value = $this->companyModel->countAllResults();
+                break;
+            case 'sin_cif':
+                $value = $this->companyModel->where('cif', '')->orWhere('cif', null)->countAllResults();
+                break;
+            case 'sin_direccion':
+                $value = $this->companyModel->where('address', '')->orWhere('address', null)->countAllResults();
+                break;
+            case 'sin_estado':
+                $value = $this->companyModel->where('estado', '')->orWhere('estado', null)->countAllResults();
+                break;
+            case 'sin_cnae':
+                $value = $this->companyModel->where('cnae_code', '')->orWhere('cnae_code', null)->countAllResults();
+                break;
+            case 'sin_registro_mercantil':
+                $value = $this->companyModel->where('registro_mercantil', '')->orWhere('registro_mercantil', null)->countAllResults();
+                break;
+            case 'added_today':
+                $value = $this->companyModel->where('DATE(created_at)', date('Y-m-d'))->countAllResults();
+                break;
+        }
+
+        return $this->response->setJSON([
+            'value' => number_format($value, 0, ',', '.')
+        ]);
     }
 
     /**

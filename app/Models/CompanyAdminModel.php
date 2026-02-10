@@ -61,6 +61,38 @@ class CompanyAdminModel extends Model
             ->groupEnd();
         }
 
+        if (!empty($filters['no_address'])) {
+            $builder->groupStart()
+                ->where('address', '')
+                ->orWhere('address', null)
+            ->groupEnd();
+        }
+
+        if (!empty($filters['no_status'])) {
+            $builder->groupStart()
+                ->where('estado', '')
+                ->orWhere('estado', null)
+            ->groupEnd();
+        }
+
+        if (!empty($filters['no_cnae'])) {
+            $builder->groupStart()
+                ->where('cnae_code', '')
+                ->orWhere('cnae_code', null)
+            ->groupEnd();
+        }
+
+        if (!empty($filters['no_mercantile'])) {
+            $builder->groupStart()
+                ->where('registro_mercantil', '')
+                ->orWhere('registro_mercantil', null)
+            ->groupEnd();
+        }
+
+        if (!empty($filters['today'])) {
+            $builder->where('DATE(created_at)', date('Y-m-d'));
+        }
+
         return $this->orderBy('id', 'DESC')->paginate($perPage);
     }
 }
