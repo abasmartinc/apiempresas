@@ -23,7 +23,9 @@
             </div>
 
             <!-- Onboarding strip -->
-           <!-- <section class="onb-strip">
+            <!-- Onboarding strip -->
+            <?php if (empty($api_request_total_month) || $api_request_total_month == 0): ?>
+            <section class="onb-strip">
                 <div class="onb-top">
                     <div>
                         <div class="kicker">Inicio rápido</div>
@@ -34,15 +36,15 @@
                     </div>
 
                     <div class="onb-progress" aria-label="Progreso de onboarding">
-                        <strong>Progreso: 1/3</strong>
-                        <div class="onb-bar" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100">
-                            <div class="onb-fill"></div>
+                        <strong>Progreso: 0/3</strong>
+                        <div class="onb-bar" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100">
+                            <div class="onb-fill" style="width: 5%"></div>
                         </div>
                     </div>
                 </div>
 
                 <ul class="checklist">
-                    <li class="check done">
+                    <li class="check">
                         <div class="dot" aria-hidden="true"></div>
                         <div>
                             <strong>1) Copia tu API key</strong>
@@ -53,7 +55,7 @@
                         <div class="dot" aria-hidden="true"></div>
                         <div>
                             <strong>2) Haz tu primera consulta</strong>
-                            <span>Prueba con el endpoint básico y revisa la respuesta JSON. <a href="<?php /*=site_url() */?>documentation#company">Ver ejemplo</a></span>
+                            <span>Prueba con el endpoint básico y revisa la respuesta JSON. <a href="<?=site_url() ?>documentation#company">Ver ejemplo</a></span>
                         </div>
                     </li>
                     <li class="check">
@@ -64,7 +66,8 @@
                         </div>
                     </li>
                 </ul>
-            </section>-->
+            </section>
+            <?php endif; ?>
 
             <div class="dash-grid">
                 <!-- LEFT -->

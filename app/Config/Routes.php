@@ -84,6 +84,7 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('users/delete/(:num)', 'Admin\Dashboard::delete/$1');
     $routes->get('users/email/(:num)', 'Admin\Dashboard::compose/$1');
     $routes->post('users/send', 'Admin\Dashboard::send');
+    $routes->get('users/impersonate/(:num)', 'Admin\Dashboard::impersonate/$1');
 
     // Bulk Email
     $routes->match(['GET', 'POST'], 'users/email/bulk', 'Admin\Dashboard::compose_bulk');
