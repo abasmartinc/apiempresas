@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <?=view('partials/head') ?>
-    <link rel="stylesheet" href="<?= base_url('public/css/dashboard_paid.css') ?>" />
+    <link rel="stylesheet" href="<?= base_url('public/css/dashboard_paid.css?v=' . (file_exists(FCPATH . 'public/css/dashboard_paid.css') ? filemtime(FCPATH . 'public/css/dashboard_paid.css') : time())) ?>" />
 </head>
 
 <body>
