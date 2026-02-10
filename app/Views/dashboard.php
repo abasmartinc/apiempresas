@@ -28,44 +28,27 @@
             <section class="onb-strip">
                 <div class="onb-top">
                     <div>
-                        <div class="kicker">Inicio rápido</div>
-                        <p class="onb-title">Configura tu primera integración en menos de 5 minutos</p>
+                        <div class="kicker">Guía de Inicio</div>
+                        <p class="onb-title">Cómo realizar tu primera consulta</p>
                         <p class="onb-desc">
-                            Completa estos pasos y tendrás tu primer “lookup” por CIF funcionando. Si necesitas ayuda, la documentación tiene ejemplos listos para copiar/pegar.
+                            Sigue estos simples pasos para integrar la API en tu aplicación. Esta guía desaparecerá una vez recibamos tu primera petición.
                         </p>
                     </div>
-
-                    <div class="onb-progress" aria-label="Progreso de onboarding">
-                        <strong>Progreso: 0/3</strong>
-                        <div class="onb-bar" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100">
-                            <div class="onb-fill" style="width: 5%"></div>
-                        </div>
+                </div>
+                <div class="onb-steps">
+                    <div class="onb-step">
+                        <strong>1. Obtén tu API Key</strong>
+                        <p>Copia la clave que aparece en la sección "Tu API Key" situada más abajo.</p>
+                    </div>
+                    <div class="onb-step">
+                        <strong>2. Realiza una petición</strong>
+                        <p>Prueba el endpoint de empresas enviando un CIF válido en la cabecera <code>X-Authorization</code>.</p>
+                    </div>
+                    <div class="onb-step">
+                        <strong>3. Revisa la respuesta</strong>
+                        <p>Si todo es correcto, recibirás un JSON con los datos de la empresa. <a href="<?=site_url() ?>documentation#company">Ver documentación</a></p>
                     </div>
                 </div>
-
-                <ul class="checklist">
-                    <li class="check">
-                        <div class="dot" aria-hidden="true"></div>
-                        <div>
-                            <strong>1) Copia tu API key</strong>
-                            <span>Guárdala en variables de entorno (por ejemplo <code>APIEMPRESAS_KEY</code>).</span>
-                        </div>
-                    </li>
-                    <li class="check">
-                        <div class="dot" aria-hidden="true"></div>
-                        <div>
-                            <strong>2) Haz tu primera consulta</strong>
-                            <span>Prueba con el endpoint básico y revisa la respuesta JSON. <a href="<?=site_url() ?>documentation#company">Ver ejemplo</a></span>
-                        </div>
-                    </li>
-                    <li class="check">
-                        <div class="dot" aria-hidden="true"></div>
-                        <div>
-                            <strong>3) Activa el plan adecuado</strong>
-                            <span>Cuando pases a producción, evita límites de prueba y accede a métricas avanzadas.</span>
-                        </div>
-                    </li>
-                </ul>
             </section>
             <?php endif; ?>
 

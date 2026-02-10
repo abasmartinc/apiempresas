@@ -20,6 +20,35 @@
                 </p>
             </div>
 
+            <!-- Onboarding strip (Only if 0 requests) -->
+            <?php if (empty($api_request_total_month) || $api_request_total_month == 0): ?>
+            <section class="onb-strip">
+                <div class="onb-top">
+                    <div>
+                        <div class="kicker">Guía de Inicio</div>
+                        <p class="onb-title">Cómo realizar tu primera consulta</p>
+                        <p class="onb-desc">
+                            Sigue estos simples pasos para integrar la API en tu aplicación. Esta guía desaparecerá una vez recibamos tu primera petición.
+                        </p>
+                    </div>
+                </div>
+                <div class="onb-steps">
+                    <div class="onb-step">
+                        <strong>1. Obtén tu API Key</strong>
+                        <p>Copia la clave que aparece en la sección "Tu API Key" situada más abajo.</p>
+                    </div>
+                    <div class="onb-step">
+                        <strong>2. Realiza una petición</strong>
+                        <p>Prueba el endpoint de empresas enviando un CIF válido en la cabecera <code>X-Authorization</code>.</p>
+                    </div>
+                    <div class="onb-step">
+                        <strong>3. Revisa la respuesta</strong>
+                        <p>Si todo es correcto, recibirás un JSON con los datos de la empresa. <a href="<?=site_url() ?>documentation#company">Ver documentación</a></p>
+                    </div>
+                </div>
+            </section>
+            <?php endif; ?>
+
             <!-- KPI STRIP -->
             <section class="kpi-strip kpi-theme-a">
                 <div class="kpi-strip__header">
@@ -270,15 +299,18 @@
                     </section>
 
                     <!-- BILLING / INVOICES -->
+                    <!-- BILLING / INVOICES (Only for Paid Plans) -->
+                    <?php if (($plan->price_monthly ?? 0) > 0): ?>
                     <section class="mini-card">
                         <h3>Facturación</h3>
                         <p>
                             Próxima renovación: <strong><?= isset($plan->current_period_end) ? date('d/m/Y', strtotime($plan->current_period_end)) : '--/--/----' ?></strong><br>
-                            Método de pago: <strong>Tarjeta</strong><br>
-                            Estado: <strong>Activo</strong>
+                            Método de pago: <strong><?= !empty($plan->stripe_subscription_id) ? 'Tarjeta (Stripe)' : 'PayPal / Otro' ?></strong><br>
+                            Estado: <strong><?= ucfirst($plan->status ?? 'Activo') ?></strong>
                         </p>
                         <a href="<?=site_url() ?>billing/invoices">Ver facturas →</a>
                     </section>
+                    <?php endif; ?>
 
                     <!-- SUPPORT -->
                     <section class="mini-card">
