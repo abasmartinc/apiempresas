@@ -45,4 +45,11 @@ class InvoiceModel extends Model
 
         return "INV-{$year}-{$newNumber}";
     }
+    public function getMonthlyRevenue($ym)
+    {
+        return $this->selectSum('total_amount', 'total')
+                    ->where('status', 'paid')
+                    ->like('created_at', $ym, 'after')
+                    ->first();
+    }
 }

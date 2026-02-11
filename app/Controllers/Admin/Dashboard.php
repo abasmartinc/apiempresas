@@ -12,6 +12,8 @@ use App\Models\ApiPlanModel;
 use App\Models\ApikeysModel;
 use App\Models\SubscriptionModel;
 use App\Models\EmailLogModel;
+use App\Models\InvoiceModel;
+use App\Models\BlockedIpModel;
 
 class Dashboard extends BaseController
 {
@@ -24,6 +26,8 @@ class Dashboard extends BaseController
     protected $apiKeyModel;
     protected $subscriptionModel;
     protected $emailLogModel;
+    protected $invoiceModel;
+    protected $blockedIpModel;
 
     public function __construct()
     {
@@ -36,6 +40,8 @@ class Dashboard extends BaseController
         $this->apiKeyModel = new ApikeysModel();
         $this->subscriptionModel = new SubscriptionModel();
         $this->emailLogModel = new EmailLogModel();
+        $this->invoiceModel = new InvoiceModel();
+        $this->blockedIpModel = new BlockedIpModel();
     }
 
     /**
@@ -83,6 +89,7 @@ class Dashboard extends BaseController
     public function logs()
     {
         $httpStatus = $this->request->getGet('http_status');
+        $zeroResults = $this->request->getGet('zero');
 
         $builder = $this->searchLogModel;
 
@@ -90,12 +97,34 @@ class Dashboard extends BaseController
             $builder->where('http_status', $httpStatus);
         }
 
+        if ($zeroResults) {
+            $builder->where('result_count', 0);
+        }
+
         $data = [
             'title' => 'Logs de Búsqueda | APIEmpresas',
-            'logs' => $builder->orderBy('created_at', 'DESC')->paginate(30),
+            'logs' => $builder->orderBy('created_at', 'DESC')->paginate(30, 'default'),
             'pager' => $this->searchLogModel->pager,
-            'http_status' => $httpStatus
+            'http_status' => $httpStatus,
+            'zero' => $zeroResults
         ];
+
+        // Determinar qué logs de tipo CIF que fueron 0 ahora existen
+        $cifsToCheck = [];
+        foreach ($data['logs'] as $log) {
+            if ($log->result_count == 0 && $log->query_type == 'cif') {
+                $cifsToCheck[] = $log->query_raw;
+            }
+        }
+
+        $resolvedCifs = [];
+        if (!empty($cifsToCheck)) {
+            $existing = $this->companyModel->select('cif')
+                             ->whereIn('cif', $cifsToCheck)
+                             ->findAll();
+            $resolvedCifs = array_column($existing, 'cif');
+        }
+        $data['resolved_cifs'] = $resolvedCifs;
 
         return view('admin/logs', $data);
     }
@@ -208,6 +237,47 @@ class Dashboard extends BaseController
         ];
 
         return view('admin/usage_daily', $data);
+    }
+
+    /**
+     * Listado de IPs bloqueadas
+     */
+    public function blocked_ips()
+    {
+        $q = $this->request->getGet('q');
+
+        $builder = $this->blockedIpModel;
+
+        if ($q) {
+            $builder->like('ip_address', $q)
+                    ->orLike('reason', $q);
+        }
+
+        $data = [
+            'title' => 'Centro de Seguridad | APIEmpresas',
+            'blocked_ips' => $builder->orderBy('blocked_at', 'DESC')->paginate(30, 'default'),
+            'pager' => $this->blockedIpModel->pager,
+            'q' => $q
+        ];
+
+        return view('admin/blocked_ips', $data);
+    }
+
+    /**
+     * Limpiar todas las cachés
+     */
+    public function clear_cache()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(403)->setBody('Acceso no permitido');
+        }
+
+        try {
+            cache()->clean();
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Caché limpiada correctamente.']);
+        } catch (\Exception $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Error al limpiar la caché: ' . $e->getMessage()]);
+        }
     }
 
     /**
@@ -706,23 +776,69 @@ class Dashboard extends BaseController
             case 'total':
                 $value = $this->companyModel->countAllResults();
                 break;
+            case 'companies_active':
+                $value = $this->companyModel->where('estado', 'ACTIVA')->countAllResults();
+                break;
             case 'sin_cif':
-                $value = $this->companyModel->where('cif', '')->orWhere('cif', null)->countAllResults();
+                $value = $this->companyModel->groupStart()->where('cif', '')->orWhere('cif', null)->groupEnd()->countAllResults();
                 break;
             case 'sin_direccion':
-                $value = $this->companyModel->where('address', '')->orWhere('address', null)->countAllResults();
+                $value = $this->companyModel->groupStart()->where('address', '')->orWhere('address', null)->groupEnd()->countAllResults();
                 break;
             case 'sin_estado':
-                $value = $this->companyModel->where('estado', '')->orWhere('estado', null)->countAllResults();
+                $value = $this->companyModel->groupStart()->where('estado', '')->orWhere('estado', null)->groupEnd()->countAllResults();
                 break;
             case 'sin_cnae':
-                $value = $this->companyModel->where('cnae_code', '')->orWhere('cnae_code', null)->countAllResults();
+                $value = $this->companyModel->groupStart()->where('cnae_code', '')->orWhere('cnae_code', null)->groupEnd()->countAllResults();
                 break;
             case 'sin_registro_mercantil':
-                $value = $this->companyModel->where('registro_mercantil', '')->orWhere('registro_mercantil', null)->countAllResults();
+                $value = $this->companyModel->groupStart()->where('registro_mercantil', '')->orWhere('registro_mercantil', null)->groupEnd()->countAllResults();
                 break;
             case 'added_today':
                 $value = $this->companyModel->where('DATE(created_at)', date('Y-m-d'))->countAllResults();
+                break;
+            case 'users_total':
+                $value = $this->userModel->countAllResults();
+                break;
+            case 'users_active':
+                $value = $this->userModel->where('is_active', 1)->countAllResults();
+                break;
+            case 'subs_active':
+                $value = $this->subscriptionModel->where('status', 'active')->countAllResults();
+                break;
+            case 'api_today':
+                $value = $this->apiRequestsModel->countRequestsForDay(date('Y-m-d'));
+                break;
+            case 'api_month':
+                $value = $this->apiRequestsModel->countRequestsForMonth(date('Y-m'));
+                break;
+            case 'revenue_month':
+                $res = $this->invoiceModel->getMonthlyRevenue(date('Y-m'));
+                $value = $res->total ?? 0;
+                return $this->response->setJSON([
+                    'value' => number_format($value, 2, ',', '.') . ' €'
+                ]);
+            case 'api_error_rate':
+                $value = $this->apiRequestsModel->getErrorRate();
+                return $this->response->setJSON([
+                    'value' => $value . '%'
+                ]);
+            case 'api_latency_avg':
+                $value = $this->apiRequestsModel->getAverageLatency();
+                return $this->response->setJSON([
+                    'value' => $value . 'ms'
+                ]);
+            case 'blocked_ips_count':
+                $value = $this->blockedIpModel->countAllResults();
+                break;
+            case 'searches_zero_results':
+                $value = $this->searchLogModel->countZeroResults(date('Y-m'));
+                break;
+            case 'searches_resolved_count':
+                $value = $this->searchLogModel->countResolvedGaps();
+                break;
+            default:
+                $value = 0;
                 break;
         }
 

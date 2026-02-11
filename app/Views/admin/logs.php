@@ -73,6 +73,14 @@
                             <?= strtoupper($log->result_status) ?> (<?= $log->http_status ?>)
                         </span>
                         <div style="font-size: 0.75rem; color: #94a3b8;"><?= $log->result_count ?> resultados</div>
+                        
+                        <?php if ($log->result_count == 0 && $log->query_type == 'cif' && in_array($log->query_raw, $resolved_cifs)): ?>
+                            <div style="margin-top: 5px;">
+                                <span class="pill" style="background: #ecfdf5; color: #059669; font-size: 0.65rem; padding: 2px 8px; border: 1px solid #10b98140;">
+                                    ✅ YA DISPONIBLE
+                                </span>
+                            </div>
+                        <?php endif; ?>
                     </td>
                     <td style="padding: 12px;">
                         <?php if ($log->company_cif): ?>

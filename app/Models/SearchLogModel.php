@@ -36,4 +36,21 @@ class SearchLogModel extends Model
         'event_hash',
         'included'
     ];
+    public function countZeroResults($ymd = null)
+    {
+        $builder = $this->where('result_count', 0);
+        if ($ymd) {
+            $builder->like('created_at', $ymd, 'after');
+        }
+        return $builder->countAllResults();
+    }
+
+    public function countResolvedGaps()
+    {
+        return $this->db->table($this->table . ' l')
+            ->join('companies c', 'l.query_raw = c.cif')
+            ->where('l.result_count', 0)
+            ->where('l.query_type', 'cif')
+            ->countAllResults();
+    }
 }

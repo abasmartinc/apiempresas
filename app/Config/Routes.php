@@ -94,6 +94,10 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('logs', 'Admin\Dashboard::logs');
     $routes->get('logs/toggle-included/(:num)', 'Admin\Dashboard::toggle_log_included/$1');
     $routes->get('logs/check-cif', 'Admin\Dashboard::check_cif');
+    $routes->get('api-requests', 'Admin\Dashboard::api_requests');
+    $routes->get('usage-daily', 'Admin\Dashboard::usage_daily');
+    $routes->get('blocked-ips', 'Admin\Dashboard::blocked_ips');
+    $routes->get('clear-cache', 'Admin\Dashboard::clear_cache');
 
     // $routes->get('usage', 'Admin\Dashboard::usage_daily'); // Removed incorrect alias
 
