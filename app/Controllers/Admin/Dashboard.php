@@ -839,8 +839,8 @@ class Dashboard extends BaseController
                 log_message('error', 'Error loading heavy KPIs from system_stats: ' . $e->getMessage());
             }
 
-            // Guardar en caché por 2 minutos
-            cache()->save($cacheName, $data, 120);
+            // Guardar en caché por 24 horas (86400 segundos)
+            cache()->save($cacheName, $data, 86400);
         }
 
         return $this->response->setJSON($data);
