@@ -90,7 +90,16 @@
                 <span class="text-slate font-normal" style="font-size: 1rem;">(<?= $pager->getTotal() ?> resultados)</span>
             <?php endif; ?>
         </h1>
-        <div class="flex-gap-10">
+        <div class="flex-gap-10 flex-center">
+            <div id="stats-info" class="text-08 text-slate-400 mr-4">
+                Actualizado: <span id="stats-updated-at">Nunca</span>
+                <button id="btn-refresh-stats" class="btn ghost btn-sm ml-2" title="Recalcular estadísticas pesadas (puede tardar)">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 14px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+                    Refrescar
+                </button>
+            </div>
             <a href="<?= site_url('admin/companies/create') ?>" class="btn">Nueva Empresa</a>
             <a href="<?= site_url('dashboard') ?>" class="btn ghost">Volver al Dashboard</a>
         </div>
@@ -280,35 +289,77 @@
             // --- Carga de KPIs por AJAX con Skeleton ---
             function loadKpis() {
                 const kpiElements = document.querySelectorAll('.kpi-async-value');
-                kpiElements.forEach(el => {
-                    const type = el.getAttribute('data-type');
-                    fetch('<?= site_url('admin/companies/kpi/') ?>' + type, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
+                const statsInfo = document.getElementById('stats-info');
+                const statsUpdateAtEl = document.getElementById('stats-updated-at');
+                
+                fetch('<?= site_url('admin/kpis-all') ?>', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    kpiElements.forEach(el => {
+                        const type = el.getAttribute('data-type');
+                        const valueStr = data[type];
+                        
+                        if (valueStr !== undefined) {
+                            el.innerHTML = valueStr;
+                            
+                            // Aplicar color rojo si el valor es > 0 (excepto para total y added_today)
+                            if (type !== 'total' && type !== 'added_today') {
+                                const numericValue = parseInt(valueStr.replace(/\./g, ''));
+                                if (numericValue > 0) {
+                                    el.classList.add('text-red');
+                                } else {
+                                    el.classList.add('text-green');
+                                }
+                            } else if (type === 'added_today') {
+                                const numericValue = parseInt(valueStr.replace(/\./g, ''));
+                                if (numericValue > 0) {
+                                    el.classList.add('text-green');
+                                }
+                            }
                         }
+                    });
+
+                    if (data.stats_updated_at) {
+                        statsUpdateAtEl.innerText = data.stats_updated_at;
+                    } else {
+                        statsUpdateAtEl.innerText = 'Pendiente';
+                    }
+                    statsInfo.style.display = 'block';
+                })
+                .catch(err => {
+                    console.error('Error loading KPIs', err);
+                    kpiElements.forEach(el => {
+                        el.innerHTML = '<span class="text-red">Error</span>';
+                    });
+                });
+            }
+
+            // Manejar refresco manual de estadísticas
+            const btnRefresh = document.getElementById('btn-refresh-stats');
+            if (btnRefresh) {
+                btnRefresh.addEventListener('click', function() {
+                    this.disabled = true;
+                    this.classList.add('loading');
+                    const originalHtml = this.innerHTML;
+                    this.innerHTML = '⌛ Recalculando...';
+
+                    fetch('<?= site_url('admin/kpis-refresh') ?>', {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
                     })
                     .then(response => response.json())
                     .then(data => {
-                        el.innerHTML = data.value;
-                        
-                        // Aplicar color rojo si el valor es > 0 (excepto para total y added_today)
-                        if (type !== 'total' && type !== 'added_today') {
-                            const numericValue = parseInt(data.value.replace(/\./g, ''));
-                            if (numericValue > 0) {
-                                el.classList.add('text-red');
-                            } else {
-                                el.classList.add('text-green');
-                            }
-                        } else if (type === 'added_today') {
-                            const numericValue = parseInt(data.value.replace(/\./g, ''));
-                            if (numericValue > 0) {
-                                el.classList.add('text-green');
-                            }
+                        if (data.status === 'success') {
+                            loadKpis();
                         }
                     })
-                    .catch(err => {
-                        console.error('Error loading KPI ' + type, err);
-                        el.innerHTML = '<span class="text-red">Error</span>';
+                    .finally(() => {
+                        this.disabled = false;
+                        this.classList.remove('loading');
+                        this.innerHTML = originalHtml;
                     });
                 });
             }

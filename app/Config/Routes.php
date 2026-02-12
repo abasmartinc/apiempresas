@@ -104,6 +104,8 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     // Companies CRUD
     $routes->get('companies', 'Admin\Dashboard::companies');
     $routes->get('companies/kpi/(:any)', 'Admin\Dashboard::company_kpi_ajax/$1');
+    $routes->get('kpis-all', 'Admin\Dashboard::all_kpis_ajax');
+    $routes->get('kpis-refresh', 'Admin\Dashboard::refresh_kpis_ajax');
     $routes->get('companies/create', 'Admin\Dashboard::company_create');
     $routes->post('companies/store', 'Admin\Dashboard::company_store');
     $routes->get('companies/edit/(:num)', 'Admin\Dashboard::company_edit/$1');

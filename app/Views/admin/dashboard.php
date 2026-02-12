@@ -552,19 +552,24 @@
         document.addEventListener('DOMContentLoaded', function() {
             function loadKpis() {
                 const kpiElements = document.querySelectorAll('.kpi-async-value');
-                kpiElements.forEach(el => {
-                    const type = el.getAttribute('data-type');
-                    fetch('<?= site_url('admin/companies/kpi/') ?>' + type, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
+                
+                fetch('<?= site_url('admin/kpis-all') ?>', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    kpiElements.forEach(el => {
+                        const type = el.getAttribute('data-type');
+                        if (data[type] !== undefined) {
+                            el.innerHTML = data[type];
                         }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        el.innerHTML = data.value;
-                    })
-                    .catch(err => {
-                        console.error('Error loading KPI ' + type, err);
+                    });
+                })
+                .catch(err => {
+                    console.error('Error loading KPIs', err);
+                    kpiElements.forEach(el => {
                         el.innerHTML = '<span class="text-red">Error</span>';
                     });
                 });

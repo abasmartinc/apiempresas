@@ -14,6 +14,7 @@ use App\Models\SubscriptionModel;
 use App\Models\EmailLogModel;
 use App\Models\InvoiceModel;
 use App\Models\BlockedIpModel;
+use App\Models\SystemStatsModel;
 
 class Dashboard extends BaseController
 {
@@ -28,6 +29,7 @@ class Dashboard extends BaseController
     protected $emailLogModel;
     protected $invoiceModel;
     protected $blockedIpModel;
+    protected $systemStatsModel;
 
     public function __construct()
     {
@@ -42,6 +44,7 @@ class Dashboard extends BaseController
         $this->emailLogModel = new EmailLogModel();
         $this->invoiceModel = new InvoiceModel();
         $this->blockedIpModel = new BlockedIpModel();
+        $this->systemStatsModel = new SystemStatsModel();
     }
 
     /**
@@ -763,7 +766,97 @@ class Dashboard extends BaseController
     }
 
     /**
-     * Obtiene un KPI específico mediante AJAX
+     * Obtiene todos los KPIs mediante una sola petición AJAX (Optimizado con Caché)
+     */
+    public function all_kpis_ajax()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(403)->setBody('Acceso no permitido');
+        }
+
+        $cacheName = 'admin_dashboard_kpis_consolidated';
+        $data = cache($cacheName);
+
+        if (!$data) {
+            $ym = date('Y-m');
+            $today = date('Y-m-d');
+            $midnight = $today . ' 00:00:00';
+
+            // KPIs Rápidos (En tiempo real)
+            $data = [
+                'users_total' => number_format($this->userModel->countAllResults(), 0, ',', '.'),
+                'users_active' => number_format($this->userModel->where('is_active', 1)->countAllResults(), 0, ',', '.'),
+                'subs_active' => number_format($this->subscriptionModel->where('status', 'active')->countAllResults(), 0, ',', '.'),
+                
+                'api_today' => number_format($this->apiRequestsModel->where('created_at >=', $midnight)->countAllResults(), 0, ',', '.'),
+                'api_month' => number_format($this->apiRequestsModel->countRequestsForMonth($ym), 0, ',', '.'),
+                'api_error_rate' => $this->apiRequestsModel->getErrorRate() . '%',
+                'api_latency_avg' => $this->apiRequestsModel->getAverageLatency() . 'ms',
+                
+                'revenue_month' => number_format($this->invoiceModel->getMonthlyRevenue($ym)->total ?? 0, 2, ',', '.') . ' €',
+                'blocked_ips_count' => number_format($this->blockedIpModel->countAllResults(), 0, ',', '.'),
+                'searches_zero_results' => number_format($this->searchLogModel->countZeroResults($ym), 0, ',', '.'),
+                'searches_resolved_count' => number_format($this->searchLogModel->countResolvedGaps(), 0, ',', '.')
+            ];
+
+            // KPIs Pesados (Persistentes)
+            $heavyStats = $this->systemStatsModel->getStat('heavy_kpis');
+            if ($heavyStats) {
+                $heavyData = json_decode($heavyStats->stat_value, true);
+                $data = array_merge($data, $heavyData);
+                $data['stats_updated_at'] = $heavyStats->updated_at;
+            } else {
+                // Fallback si no hay estadísticas registradas
+                $data['total'] = '...';
+                $data['companies_active'] = '...';
+                $data['sin_cif'] = '...';
+                $data['sin_direccion'] = '...';
+                $data['sin_estado'] = '...';
+                $data['sin_cnae'] = '...';
+                $data['sin_registro_mercantil'] = '...';
+                $data['added_today'] = '...';
+                $data['stats_updated_at'] = null;
+            }
+
+            // Guardar en caché por 1 minuto (para los rápidos)
+            cache()->save($cacheName, $data, 60);
+        }
+
+        return $this->response->setJSON($data);
+    }
+
+    /**
+     * Fuerza el refresco de los KPIs pesados (AJAX)
+     */
+    public function refresh_kpis_ajax()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(403)->setBody('Acceso no permitido');
+        }
+
+        $midnight = date('Y-m-d') . ' 00:00:00';
+
+        $heavyData = [
+            'total' => number_format($this->companyModel->countAllResults(), 0, ',', '.'),
+            'companies_active' => number_format($this->companyModel->where('estado', 'ACTIVA')->countAllResults(), 0, ',', '.'),
+            'sin_cif' => number_format($this->companyModel->groupStart()->where('cif', '')->orWhere('cif', null)->groupEnd()->countAllResults(), 0, ',', '.'),
+            'sin_direccion' => number_format($this->companyModel->groupStart()->where('address', '')->orWhere('address', null)->groupEnd()->countAllResults(), 0, ',', '.'),
+            'sin_estado' => number_format($this->companyModel->groupStart()->where('estado', '')->orWhere('estado', null)->groupEnd()->countAllResults(), 0, ',', '.'),
+            'sin_cnae' => number_format($this->companyModel->groupStart()->where('cnae_code', '')->orWhere('cnae_code', null)->groupEnd()->countAllResults(), 0, ',', '.'),
+            'sin_registro_mercantil' => number_format($this->companyModel->groupStart()->where('registro_mercantil', '')->orWhere('registro_mercantil', null)->groupEnd()->countAllResults(), 0, ',', '.'),
+            'added_today' => number_format($this->companyModel->where('created_at >=', $midnight)->countAllResults(), 0, ',', '.'),
+        ];
+
+        $this->systemStatsModel->setStat('heavy_kpis', $heavyData);
+        
+        // Limpiar caché para forzar recarga
+        cache()->delete('admin_dashboard_kpis_consolidated');
+
+        return $this->response->setJSON(['status' => 'success', 'updated_at' => date('Y-m-d H:i:s')]);
+    }
+
+    /**
+     * Obtiene un KPI específico mediante AJAX (Legacy / Fallback)
      */
     public function company_kpi_ajax($type)
     {
@@ -795,7 +888,8 @@ class Dashboard extends BaseController
                 $value = $this->companyModel->groupStart()->where('registro_mercantil', '')->orWhere('registro_mercantil', null)->groupEnd()->countAllResults();
                 break;
             case 'added_today':
-                $value = $this->companyModel->where('DATE(created_at)', date('Y-m-d'))->countAllResults();
+                $midnight = date('Y-m-d') . ' 00:00:00';
+                $value = $this->companyModel->where('created_at >=', $midnight)->countAllResults();
                 break;
             case 'users_total':
                 $value = $this->userModel->countAllResults();
@@ -807,7 +901,8 @@ class Dashboard extends BaseController
                 $value = $this->subscriptionModel->where('status', 'active')->countAllResults();
                 break;
             case 'api_today':
-                $value = $this->apiRequestsModel->countRequestsForDay(date('Y-m-d'));
+                $midnight = date('Y-m-d') . ' 00:00:00';
+                $value = $this->apiRequestsModel->where('created_at >=', $midnight)->countAllResults();
                 break;
             case 'api_month':
                 $value = $this->apiRequestsModel->countRequestsForMonth(date('Y-m'));

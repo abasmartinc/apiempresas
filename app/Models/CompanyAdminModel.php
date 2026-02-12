@@ -90,7 +90,8 @@ class CompanyAdminModel extends Model
         }
 
         if (!empty($filters['today'])) {
-            $builder->where('DATE(created_at)', date('Y-m-d'));
+            $midnight = date('Y-m-d') . ' 00:00:00';
+            $builder->where('created_at >=', $midnight);
         }
 
         return $this->orderBy('id', 'DESC')->paginate($perPage);
