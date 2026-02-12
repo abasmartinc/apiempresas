@@ -44,7 +44,7 @@
             </div>
         </div>
         <nav class="desktop-only" aria-label="Admin">
-            <a class="minor" href="<?=site_url('admin/dashboard') ?>">Dashboard</a>
+            <a class="minor" href="<?=site_url('dashboard') ?>">Dashboard</a>
             <span style="margin:0 10px; color:#cdd6ea">•</span>
             <a class="minor" href="<?=site_url('admin/users') ?>">Usuarios</a>
             <span style="margin:0 10px; color:#cdd6ea">•</span>
