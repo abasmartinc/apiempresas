@@ -535,6 +535,18 @@
             </div>
         </a>
 
+        <a href="#" class="admin-card" id="btn-refresh-kpis">
+            <div class="admin-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                </svg>
+            </div>
+            <div class="admin-card-content">
+                <span>Actualizar KPIs</span>
+                <p>Recalcula las estadísticas de empresas manualmente.</p>
+            </div>
+        </a>
+
         <a href="<?= site_url('admin/blocked-ips') ?>" class="admin-card">
             <div class="admin-icon-wrapper">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -553,12 +565,23 @@
             function loadKpis() {
                 const kpiElements = document.querySelectorAll('.kpi-async-value');
                 
+                // Timeout de 30 segundos
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000);
+                
                 fetch('<?= site_url('admin/kpis-all') ?>', {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
-                    }
+                    },
+                    signal: controller.signal
                 })
-                .then(response => response.json())
+                .then(response => {
+                    clearTimeout(timeoutId);
+                    if (!response.ok) {
+                        throw new Error('HTTP error ' + response.status);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     kpiElements.forEach(el => {
                         const type = el.getAttribute('data-type');
@@ -566,12 +589,36 @@
                             el.innerHTML = data[type];
                         }
                     });
+                    
+                    // Mostrar última actualización si está disponible
+                    if (data.stats_updated_at) {
+                        console.log('KPIs pesados actualizados:', data.stats_updated_at);
+                    }
                 })
                 .catch(err => {
+                    clearTimeout(timeoutId);
                     console.error('Error loading KPIs', err);
+                    
+                    const errorMsg = err.name === 'AbortError' 
+                        ? '<span style="color: #f59e0b; font-size: 0.9rem;">Timeout</span>' 
+                        : '<span style="color: #dc2626; font-size: 0.9rem;">Error</span>';
+                    
                     kpiElements.forEach(el => {
-                        el.innerHTML = '<span class="text-red">Error</span>';
+                        el.innerHTML = errorMsg;
                     });
+                    
+                    // Mostrar mensaje de ayuda si hay timeout
+                    if (err.name === 'AbortError') {
+                        Swal.fire({
+                            title: 'Carga lenta de KPIs',
+                            html: 'Los KPIs están tardando más de lo esperado.<br><br>' +
+                                  '<strong>Solución:</strong> Ejecuta el script de inicialización:<br>' +
+                                  '<code style="background: #f1f5f9; padding: 8px; border-radius: 4px; display: inline-block; margin-top: 8px;">php init_kpis.php</code>',
+                            icon: 'warning',
+                            confirmButtonColor: '#2152ff',
+                            confirmButtonText: 'Entendido'
+                        });
+                    }
                 });
             }
 
@@ -618,6 +665,55 @@
                             .catch(err => {
                                 icon.innerHTML = originalHtml;
                                 Swal.fire('Error', 'No se pudo completar la acción', 'error');
+                            });
+                        }
+                    });
+                });
+            }
+
+            // Actualizar KPIs manualmente
+            const refreshKpisBtn = document.getElementById('btn-refresh-kpis');
+            if (refreshKpisBtn) {
+                refreshKpisBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    Swal.fire({
+                        title: '¿Actualizar KPIs?',
+                        text: "Esto recalculará todas las estadísticas de empresas. Puede tardar 10-30 segundos.",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#2152ff',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: 'Sí, actualizar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire({
+                                title: 'Actualizando KPIs...',
+                                html: 'Por favor espera, esto puede tardar hasta 30 segundos.',
+                                allowOutsideClick: false,
+                                didOpen: () => { Swal.showLoading(); }
+                            });
+                            
+                            fetch('<?= site_url('admin/kpis-refresh') ?>', {
+                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                Swal.fire({
+                                    title: data.status === 'success' ? '¡Actualizado!' : 'Error',
+                                    html: data.status === 'success' 
+                                        ? 'KPIs actualizados correctamente.<br><small>Última actualización: ' + data.updated_at + '</small>'
+                                        : 'No se pudieron actualizar los KPIs.',
+                                    icon: data.status === 'success' ? 'success' : 'error',
+                                    confirmButtonColor: '#2152ff'
+                                }).then(() => {
+                                    if (data.status === 'success') { loadKpis(); }
+                                });
+                            })
+                            .catch(err => {
+                                Swal.fire('Error', 'No se pudo completar la actualización.', 'error');
+                                console.error('Error refreshing KPIs:', err);
                             });
                         }
                     });
