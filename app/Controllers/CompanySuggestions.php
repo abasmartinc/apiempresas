@@ -33,9 +33,6 @@ class CompanySuggestions extends BaseController
      */
     public function getSuggestions()
     {
-        // Simple security check: enforce AJAX (or at least encourage it)
-        // if (!$this->request->isAJAX()) {} 
-
         $q = trim((string)$this->request->getGet('q'));
 
         if (mb_strlen($q) < 3) {
@@ -50,8 +47,9 @@ class CompanySuggestions extends BaseController
             
             // Format results to return only specific fields
             $formatted = array_map(function($item) {
+                // Ensure we handle both potential column names (aliased or original)
                 return [
-                    'name'    => $item['company_name'] ?? ($item['name'] ?? ''),
+                    'name'    => $item['name'] ?? ($item['company_name'] ?? ''),
                     'cif'     => $item['cif'] ?? '',
                     'address' => $item['address'] ?? '',
                     'score'   => isset($item['score']) ? round((float)$item['score'], 2) : 1.00

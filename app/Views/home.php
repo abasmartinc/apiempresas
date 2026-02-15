@@ -16,6 +16,9 @@
                 <span class="pill top">Datos oficiales · Valida CIF/NIF · API REST + Buscador</span>
 
                 <h1 class="title">
+                    <a href="<?=site_url() ?>autocompletado-cif-empresas" class="pill" style="margin-bottom:15px; background:rgba(33,82,255,0.1); border-color:rgba(33,82,255,0.2); text-decoration:none;">
+                        <span class="dot"></span> Nuevo: Autocompletado Predictivo Inteligente
+                    </a><br>
                     Valida un CIF y verifica una empresa española en segundos
                     <span class="grad">con datos oficiales y trazables</span>.
                 </h1>
@@ -91,6 +94,13 @@
             <div class="search-row">
                 <input class="input" id="q" placeholder="Ej. B12345678 o “Gestiones López”" aria-label="Buscar empresa por nombre o CIF" />
                 <button type="button" class="btn" id="btnBuscar" aria-label="Buscar">Validar CIF / Buscar empresa</button>
+            </div>
+
+            <div style="margin-top:12px; display:flex; align-items:center; gap:8px;">
+                <span class="pill mini-pill" style="font-size:10px; padding:2px 8px;">TIP</span>
+                <p class="muted" style="font-size:13px; margin:0;">
+                    ¿Buscas más velocidad? Prueba el <a href="<?=site_url() ?>autocompletado-cif-empresas" style="color:var(--primary); font-weight:700; text-decoration:underline;">Autocompletado Predictivo Pro</a>.
+                </p>
             </div>
 
             <div id="resultado" class="result"></div>
@@ -601,7 +611,7 @@
                         
                         <div style="display: grid; gap: 20px;">
                             <div style="border-left: 3px solid #2152ff; padding-left: 16px;">
-                                <div style="font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, #60A5FA 0%, #2152ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; margin-bottom: 6px;">+3M</div>
+                                <div style="font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, #60A5FA 0%, #2152ff 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; line-height: 1; margin-bottom: 6px;">+3M</div>
                                 <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 500;">Empresas en base de datos</div>
                             </div>
                             

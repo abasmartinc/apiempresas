@@ -381,8 +381,7 @@ class CompanyModel extends Model
         $results = [];
         $seenCifs = [];
 
-        // 1. Prioridad 1: Búsqueda por CIF (Indexado, muy rápido)
-        // Si el usuario teclea algo que parece un CIF, lo buscamos directamente
+        // 1. Priority 1: Búsqueda por CIF (Indexado, muy rápido)
         $builderCif = $this->builder();
         $builderCif->select(implode(', ', $this->selectFields));
         $builderCif->like('cif', $term, 'after');
@@ -397,7 +396,7 @@ class CompanyModel extends Model
             return $results;
         }
 
-        // 2. Prioridad 2: FULLTEXT por nombre y etiquetas (Muy rápida)
+        // 2. Priority 2: FULLTEXT por nombre y etiquetas (Muy rápida)
         try {
             $cleanTerm = preg_replace('/[+\-><()~*\"@]+/', ' ', $term);
             $parts = array_filter(explode(' ', $cleanTerm));
@@ -418,8 +417,7 @@ class CompanyModel extends Model
                         ORDER BY score DESC
                         LIMIT ?";
                 
-                // Pedimos un poco más para poder filtrar los que ya vimos por CIF
-                $query = $this->db->query($sql, [$booleanTerm, $booleanTerm, $limit + count($results)]);
+                $query = $this->db->query($sql, [$booleanTerm, $booleanTerm, $limit]);
                 foreach ($query->getResultArray() as $row) {
                     if (count($results) >= $limit) break;
                     if (!isset($seenCifs[$row['cif']])) {
@@ -436,29 +434,25 @@ class CompanyModel extends Model
             return $results;
         }
 
-        // 3. Fallback: LIKE por nombre y otros (Lento pero seguro)
-        $builderFallback = $this->builder();
-        $builderFallback->select(implode(', ', $this->selectFields));
-        
-        $builderFallback->groupStart();
-            $builderFallback->like('company_name', $term);
-            $builderFallback->orLike('cnae_label', $term);
-            $builderFallback->orLike('registro_mercantil', $term);
-        $builderFallback->groupEnd();
+        // 3. Fallback: B-Tree Index friendly LIKE (Evitando comodín inicial)
+        if (mb_strlen($term) >= 3) {
+            $builderFallback = $this->builder();
+            $builderFallback->select(implode(', ', $this->selectFields));
+            $builderFallback->like('company_name', $term, 'after');
 
-        if (!empty($seenCifs)) {
-            $builderFallback->whereNotIn('cif', array_keys($seenCifs));
-        }
+            if (!empty($seenCifs)) {
+                $builderFallback->whereNotIn('cif', array_keys($seenCifs));
+            }
 
-        // Ordenar un poco para que los que empiezan por el término salgan antes
-        $escapedTerm = $this->db->escapeLikeString($term);
-        $builderFallback->orderBy("CASE WHEN company_name LIKE '{$escapedTerm}%' THEN 0 ELSE 1 END", 'ASC');
-        $builderFallback->orderBy('company_name', 'ASC');
-        
-        $builderFallback->limit($limit - count($results));
+            $builderFallback->limit($limit - count($results));
 
-        foreach ($builderFallback->get()->getResultArray() as $row) {
-            $results[] = $row;
+            foreach ($builderFallback->get()->getResultArray() as $row) {
+                if (count($results) >= $limit) break;
+                if (!isset($seenCifs[$row['cif']])) {
+                    $results[] = $row;
+                    $seenCifs[$row['cif']] = true;
+                }
+            }
         }
 
         return $results;

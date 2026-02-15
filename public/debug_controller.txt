@@ -1,0 +1,2 @@
+Term: TELEFONICA | Count: 10
+Sample result keys: id,name,cif,cnae,cnae_label,corporate_purpose,founded,province,address,municipality,lat,lng,status,score

@@ -60,12 +60,19 @@
                 </div>
             </div>
 
-            <nav class="desktop-only" aria-label="Principal">
-                <a class="minor" href="#buscar">Buscar</a>
+            <nav class="desktop-only" aria-label="Principal" style="display:flex; align-items:center;">
+                <a class="minor" href="<?=site_url() ?>autocompletado-cif-empresas" 
+                   style="background: linear-gradient(90deg, #2152ff, #12b48a); color: #fff !important; padding: 6px 16px; border-radius: 999px; font-weight: 800; font-size: 13px; text-decoration: none; box-shadow: 0 4px 12px rgba(33, 82, 255, 0.2); transition: all 0.2s;"
+                   onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 16px rgba(33, 82, 255, 0.3)'"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(33, 82, 255, 0.2)'">
+                   Buscador Pro
+                </a>
                 <span style="margin:0 12px; color:#cdd6ea">•</span>
-                <a class="minor" href="#caracteristicas">Características</a>
+                <a class="minor" href="<?=site_url() ?>#buscar">Buscar</a>
                 <span style="margin:0 12px; color:#cdd6ea">•</span>
-                <a class="minor" href="#precios">Precios</a>
+                <a class="minor" href="<?=site_url() ?>#caracteristicas">Características</a>
+                <span style="margin:0 12px; color:#cdd6ea">•</span>
+                <a class="minor" href="<?=site_url() ?>#precios">Precios</a>
                 <span style="margin:0 12px; color:#cdd6ea">•</span>
                 <a class="minor" href="<?=site_url() ?>documentation">Docs</a>
             </nav>
