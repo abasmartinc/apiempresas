@@ -236,79 +236,78 @@
 
     <!-- CUSTOM INTEGRATIONS -->
     <section id="custom-integrations" class="container" style="margin-top: 40px; margin-bottom: 40px;">
-        <div class="band" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 24px; padding: 60px 40px; color: white; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);">
+        <div class="band" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 24px; padding: 60px 40px; color: #0f172a; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05); border: 1px solid #e2e8f0;">
             
             <!-- Decorative background elements -->
-            <div style="position: absolute; top: 0; right: 0; width: 400px; height: 400px; background: radial-gradient(circle, rgba(33, 82, 255, 0.15) 0%, transparent 70%); pointer-events: none;"></div>
-            <div style="position: absolute; bottom: 0; left: 0; width: 300px; height: 300px; background: radial-gradient(circle, rgba(18, 180, 138, 0.1) 0%, transparent 70%); pointer-events: none;"></div>
+            <div style="position: absolute; top: 0; right: 0; width: 400px; height: 400px; background: radial-gradient(circle, rgba(33, 82, 255, 0.08) 0%, transparent 70%); pointer-events: none;"></div>
+            <div style="position: absolute; bottom: 0; left: 0; width: 300px; height: 300px; background: radial-gradient(circle, rgba(18, 180, 138, 0.05) 0%, transparent 70%); pointer-events: none;"></div>
 
             <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; position: relative; z-index: 1;">
                 
                 <!-- Content -->
                 <div>
-                    <span class="eyebrow" style="color: #60A5FA; border-color: rgba(96, 165, 250, 0.3);">Enterprise & Medida</span>
-                    <h2 style="color: white; margin-top: 10px; margin-bottom: 20px; font-size: 2.5rem;">Integraciones a medida y Soluciones Enterprise</h2>
-                    <p style="color: #94a3b8; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px;">
+                    <span class="eyebrow" style="color: #2152ff; border-color: rgba(33, 82, 255, 0.2); background: rgba(33, 82, 255, 0.03);">Enterprise & Medida</span>
+                    <h2 style="color: #0f172a; margin-top: 10px; margin-bottom: 20px; font-size: 2.5rem;">Integraciones a medida y Soluciones Enterprise</h2>
+                    <p style="color: #475569; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px;">
                         No nos limitamos a la API estándar. Adaptamos nuestra tecnología para que se fusione perfectamente con tu infraestructura y lógica de negocio.
                     </p>
 
                     <ul style="list-style: none; padding: 0; margin-bottom: 40px; display: grid; gap: 20px;">
                         <li style="display: flex; gap: 15px; align-items: flex-start;">
-                            <div style="background: rgba(33, 82, 255, 0.2); color: #60A5FA; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                            <div style="background: rgba(33, 82, 255, 0.1); color: #2152ff; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 4px rgba(33, 82, 255, 0.1);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
                             </div>
                             <div>
-                                <h4 style="color: white; margin: 0 0 5px 0; font-size: 1.1rem;">Endpoints Personalizados</h4>
-                                <p style="color: #94a3b8; margin: 0; font-size: 0.95rem;">¿Necesitas datos específicos cruzados o lógica de negocio en la respuesta? Construimos endpoints exclusivos para tu caso de uso.</p>
+                                <h4 style="color: #0f172a; margin: 0 0 5px 0; font-size: 1.1rem; font-weight: 700;">Endpoints Personalizados</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 0.95rem;">¿Necesitas datos específicos cruzados o lógica de negocio en la respuesta? Construimos endpoints exclusivos para tu caso de uso.</p>
                             </div>
                         </li>
                         <li style="display: flex; gap: 15px; align-items: flex-start;">
-                            <div style="background: rgba(18, 180, 138, 0.2); color: #34d399; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            <div style="background: rgba(18, 180, 138, 0.1); color: #12b48a; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 4px rgba(18, 180, 138, 0.1);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                             </div>
                             <div>
-                                <h4 style="color: white; margin: 0 0 5px 0; font-size: 1.1rem;">Validación Batch / Masiva</h4>
-                                <p style="color: #94a3b8; margin: 0; font-size: 0.95rem;">Procesa miles de registros vía CSV, Excel o API asíncrona de alto rendimiento. Ideal para limpieza de CRMs.</p>
+                                <h4 style="color: #0f172a; margin: 0 0 5px 0; font-size: 1.1rem; font-weight: 700;">Validación Batch / Masiva</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 0.95rem;">Procesa miles de registros vía CSV, Excel o API asíncrona de alto rendimiento. Ideal para limpieza de CRMs.</p>
                             </div>
                         </li>
                         <li style="display: flex; gap: 15px; align-items: flex-start;">
-                            <div style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            <div style="background: rgba(245, 158, 11, 0.1); color: #d97706; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                             </div>
                             <div>
-                                <h4 style="color: white; margin: 0 0 5px 0; font-size: 1.1rem;">Conectores ERP/CRM</h4>
-                                <p style="color: #94a3b8; margin: 0; font-size: 0.95rem;">Integración nativa con SAP, Microsoft Dynamics, Salesforce, HubSpot y plataformas no-code.</p>
+                                <h4 style="color: #0f172a; margin: 0 0 5px 0; font-size: 1.1rem; font-weight: 700;">Conectores ERP/CRM</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 0.95rem;">Integración nativa con SAP, Microsoft Dynamics, Salesforce, HubSpot y plataformas no-code.</p>
                             </div>
                         </li>
                     </ul>
 
-                    <a class="btn btn_start" href="<?=site_url() ?>contact?interest=custom_integration" style="background: white; color: #0f172a; border: none; font-weight: 700; padding: 15px 30px;">
+                    <a class="btn" href="<?=site_url() ?>contact?interest=custom_integration" style="background: linear-gradient(90deg, #2152ff, #12b48a); color: white; border: none; font-weight: 700; padding: 15px 30px; border-radius: 12px; box-shadow: 0 8px 16px rgba(33, 82, 255, 0.15);">
                         Hablemos de tu proyecto
                     </a>
                 </div>
 
                 <!-- Visual/Image -->
                 <div style="position: relative; display: flex; justify-content: center; align-items: center;">
-                    <div style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 30px; width: 100%; max-width: 450px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 15px;">
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 30px; width: 100%; max-width: 450px; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.1);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;">
                             <div style="display: flex; gap: 8px;">
-                                <div style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444;"></div>
-                                <div style="width: 12px; height: 12px; border-radius: 50%; background: #f59e0b;"></div>
-                                <div style="width: 12px; height: 12px; border-radius: 50%; background: #10b981;"></div>
+                                <div style="width: 10px; height: 10px; border-radius: 50%; background: #ff5f56; box-shadow: 0 0 0 1px #e0443e;"></div>
+                                <div style="width: 10px; height: 10px; border-radius: 50%; background: #ffbd2e; box-shadow: 0 0 0 1px #dea123;"></div>
+                                <div style="width: 10px; height: 10px; border-radius: 50%; background: #27c93f; box-shadow: 0 0 0 1px #1aab29;"></div>
                             </div>
-                            <span style="font-family: monospace; font-size: 12px; color: #94a3b8;">POST /api/v1/custom/verify-batch</span>
+                            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #94a3b8; letter-spacing: 0.5px;">POST /api/v1/custom/verify-batch</span>
                         </div>
-                        <pre style="font-family: 'Fira Code', monospace; font-size: 13px; line-height: 1.6; color: #e2e8f0; margin: 0; overflow-x: auto;">
-<span style="color: #c084fc;">{</span>
-  <span style="color: #60a5fa;">"job_id"</span>: <span style="color: #a5b4fc;">"job_8923_batch_kyb"</span>,
-  <span style="color: #60a5fa;">"status"</span>: <span style="color: #34d399;">"completed"</span>,
-  <span style="color: #60a5fa;">"processed"</span>: <span style="color: #fca5a5;">15420</span>,
-  <span style="color: #60a5fa;">"custom_fields"</span>: <span style="color: #c084fc;">[</span>
-    <span style="color: #a5b4fc;">"risk_score_v2"</span>,
-    <span style="color: #a5b4fc;">"erp_match_confidence"</span>
-  <span style="color: #c084fc;">]</span>,
-  <span style="color: #60a5fa;">"webhook_url"</span>: <span style="color: #a5b4fc;">"https://your-crm.com/hook"</span>
-<span style="color: #c084fc;">}</span></pre>
+                        <pre style="font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; color: #334155; margin: 0; background: transparent; padding: 0;">
+<span style="color: #7c3aed;">{</span>
+  <span style="color: #2563eb;">"job_id"</span>: <span style="color: #0891b2;">"job_8923_batch_kyb"</span>,
+  <span style="color: #2563eb;">"status"</span>: <span style="color: #059669;">"completed"</span>,
+  <span style="color: #2563eb;">"processed"</span>: <span style="color: #dc2626;">15420</span>,
+  <span style="color: #2563eb;">"fields"</span>: <span style="color: #7c3aed;">[</span>
+    <span style="color: #0891b2;">"risk_score_v2"</span>,
+    <span style="color: #0891b2;">"erp_match"</span>
+  <span style="color: #7c3aed;">]</span>
+<span style="color: #7c3aed;">}</span></pre>
                     </div>
                 </div>
 
@@ -598,31 +597,46 @@
                 <!-- Right: Sidebar -->
                 <aside style="position: sticky; top: 100px; display: grid; gap: 20px;">
                     
-                    <!-- Stats Card - Cleaner Design -->
-                    <div style="background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 28px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 24px;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="2">
+                    <!-- Stats Card - High Impact Design -->
+                    <div style="background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.2), inset 0 0 20px rgba(255,255,255,0.02); position: relative; overflow: hidden;">
+                        
+                        <!-- Background Accent Icon -->
+                        <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.03; transform: rotate(-15deg); pointer-events: none;">
+                            <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1">
                                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
                             </svg>
-                            <h3 style="font-size: 0.95rem; margin: 0; color: #fff; font-weight: 600; letter-spacing: 0.5px;">PLATAFORMA</h3>
+                        </div>
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; position: relative; z-index: 1;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981; animation: pulse-green 2s infinite;"></div>
+                                    <h3 style="font-size: 0.85rem; margin: 0; color: rgba(255,255,255,0.7); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">PLATAFORMA</h3>
+                                </div>
+                            </div>
+                            <style>
+                                @keyframes pulse-green {
+                                    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+                                    70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+                                    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+                                }
+                            </style>
                         </div>
                         
-                        <div style="display: grid; gap: 20px;">
-                            <div style="border-left: 3px solid #2152ff; padding-left: 16px;">
-                                <div style="font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, #60A5FA 0%, #2152ff 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; line-height: 1; margin-bottom: 6px;">+3M</div>
-                                <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 500;">Empresas en base de datos</div>
+                        <div style="position: relative; z-index: 1;">
+                            <div style="margin-bottom: 24px;">
+                                <div style="font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, #fff 30%, #60A5FA 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; line-height: 1; letter-spacing: -1px;">+3M</div>
+                                <div style="font-size: 0.9rem; color: #94a3b8; font-weight: 500; margin-top: 4px;">Empresas verificadas</div>
                             </div>
                             
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.05);">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08);">
                                 <div>
-                                    <div style="font-size: 1.4rem; font-weight: 700; color: #60A5FA; line-height: 1; margin-bottom: 4px;">99.9%</div>
-                                    <div style="font-size: 0.75rem; color: #64748b;">Uptime</div>
+                                    <div style="font-size: 1.2rem; font-weight: 800; color: #fff; line-height: 1; margin-bottom: 4px;">99.9<span style="color: #60A5FA;">%</span></div>
+                                    <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Uptime</div>
                                 </div>
                                 <div>
-                                    <div style="font-size: 1.4rem; font-weight: 700; color: #60A5FA; line-height: 1; margin-bottom: 4px;">&lt;200ms</div>
-                                    <div style="font-size: 0.75rem; color: #64748b;">Respuesta</div>
+                                    <div style="font-size: 1.2rem; font-weight: 800; color: #fff; line-height: 1; margin-bottom: 4px;">&lt;200<span style="color: #60A5FA;">ms</span></div>
+                                    <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Respuesta</div>
                                 </div>
                             </div>
                         </div>

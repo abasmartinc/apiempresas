@@ -1,7 +1,11 @@
+<?php
+  $title = "API Autocompletado de Empresas por CIF y Nombre | API Empresas";
+  $excerptText = "API profesional de autocompletado de empresas en España. Busca por CIF o Nombre y obtén sugerencias en tiempo real con datos oficiales (BOE, BORME, AEAT). Ideal para onboarding B2B.";
+?>
 <!doctype html>
 <html lang="es">
 <head>
-    <?=view('partials/head') ?>
+    <?=view('partials/head', ['title' => $title, 'excerptText' => $excerptText]) ?>
     <style>
         :root{
             --bg: #ffffff;
@@ -58,6 +62,11 @@
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(18px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
         .animate-up{ opacity: 0; animation: fadeInUp .75s cubic-bezier(.16,1,.3,1) forwards; }
         .delay-1{ animation-delay: .08s; }
@@ -182,19 +191,21 @@
         }
         .search-outer{
             margin: 0 auto;
-            background: linear-gradient(180deg, rgba(255,255,255,.90), rgba(255,255,255,.70));
+            background: #ffffff;
             border-radius: 26px;
             border: 1px solid rgba(15,23,42,.08);
-            box-shadow: 0 36px 100px rgba(2,6,23,.10);
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.06);
             position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .search-outer:before{
             content:"";
             position:absolute;
             inset: 0;
-            background: radial-gradient(600px 220px at 20% -20%, rgba(33,82,255,.16), transparent 60%),
-                        radial-gradient(520px 220px at 90% 10%, rgba(18,180,138,.12), transparent 60%);
+            background: radial-gradient(600px 220px at 20% -20%, rgba(33,82,255,.05), transparent 70%),
+                        radial-gradient(520px 220px at 90% 10%, rgba(18,180,138,.04), transparent 60%);
             pointer-events:none;
+            border-radius: inherit;
         }
         .search-inner{
             position: relative;
@@ -335,21 +346,21 @@
             z-index: 2;
         }
 
-        /* Tech window polish */
+        /* Tech window polish - LIGHT PREMIUM */
         .tech-window{
-            background: #0b1220;
-            border-radius: 22px;
+            background: #ffffff;
+            border-radius: 24px;
             overflow:hidden;
-            box-shadow: 0 40px 90px rgba(2,6,23,.35);
-            border: 1px solid rgba(255,255,255,.06);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e2e8f0;
         }
         .tech-top{
-            background: rgba(255,255,255,.06);
-            padding: 12px 18px;
-            border-bottom: 1px solid rgba(255,255,255,.06);
+            background: #f8fafc;
+            padding: 16px 24px;
+            border-bottom: 1px solid #e2e8f0;
             display:flex;
             align-items:center;
-            gap: 10px;
+            gap: 12px;
         }
         .dots{
             display:flex; gap: 7px; align-items:center;
@@ -364,12 +375,12 @@
 
         /* Use cases */
         .use-case-card{
-            background: rgba(255,255,255,.86);
+            background: #ffffff;
             border: 1px solid rgba(15,23,42,.08);
             border-radius: 24px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(2,6,23,.05);
-            transition: transform .25s cubic-bezier(.16,1,.3,1), box-shadow .25s ease, border-color .25s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow:hidden;
         }
@@ -610,34 +621,75 @@
   max-width: 720px;
 }
 
-.hero-kpis{
-  display:flex;
-  flex-wrap:wrap;
-  gap: 12px;
-  margin-top: 14px;
+.hero-kpis {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+    max-width: 650px;
 }
 
-.kpi{
-  min-width: 150px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  border: 1px solid rgba(15,23,42,.08);
-  background: rgba(255,255,255,.66);
-  backdrop-filter: blur(10px);
+.kpi {
+    padding: 16px 8px;
+    border-radius: 20px;
+    border: 1px solid rgba(33, 82, 255, 0.08); /* Subtle blue border */
+    background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%); /* Subtle blueish tint at bottom */
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
 }
 
-.kpi-value{
-  font-weight: 950;
-  letter-spacing: -0.02em;
-  font-size: 18px;
+.kpi:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px -4px rgba(33, 82, 255, 0.08);
+    border-color: rgba(33, 82, 255, 0.25);
+    background: #ffffff;
 }
 
-.kpi-label{
-  font-size: 12px;
-  font-weight: 850;
-  color: #64748b;
-  margin-top: 2px;
+.kpi-value {
+    font-weight: 950;
+    letter-spacing: -0.03em;
+    font-size: 26px;
+    background: linear-gradient(135deg, #2152ff 0%, #1d4ed8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    line-height: 1;
+    margin-bottom: 2px;
 }
+
+.kpi-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    line-height: 1.1;
+}
+
+        .kpi:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #2152ff, #12b48a);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .kpi:hover:before {
+            opacity: 1;
+        }
 
 .hero-cta-row{
   display:flex;
@@ -675,11 +727,12 @@
 
 /* Right preview surface */
 .hero-surface{
-  border-radius: 22px;
-  border: 1px solid rgba(15,23,42,.10);
-  background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.60));
-  backdrop-filter: blur(12px);
-  box-shadow: 0 28px 80px rgba(2,6,23,.10);
+  border-radius: 24px;
+  border: 1px solid rgba(15,23,42,.08);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.06);
   padding: 16px;
   overflow:hidden;
   position: relative;
@@ -814,7 +867,7 @@
 
 <main style="position: relative; z-index: 1;">
 
-    <!-- HERO -->
+<!-- HERO -->
 <section class="hero-wrap hero-admin hero-admin--top">
   <div class="container">
     <div class="hero-top animate-up">
@@ -840,12 +893,12 @@
             <div class="kpi-label">Llamada API</div>
           </div>
           <div class="kpi">
-            <div class="kpi-value">&lt;250ms</div>
-            <div class="kpi-label">Respuesta típica</div>
+            <div class="kpi-value">250ms</div>
+            <div class="kpi-label">Respuesta</div>
           </div>
           <div class="kpi">
-            <div class="kpi-value">0</div>
-            <div class="kpi-label">Campos a mano</div>
+            <div class="kpi-value">Auto</div>
+            <div class="kpi-label">Formularios</div>
           </div>
         </div>
 
@@ -893,7 +946,10 @@
             </div>
             <div class="flow-arrow">→</div>
             <div class="flow-step">
-              <div class="flow-icon">✨</div>
+              <div class="flow-icon" style="position: relative;">
+                ✨
+                <div style="position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981; animation: pulse-green 2s infinite;"></div>
+              </div>
               <div>
                 <strong>Sugerencias</strong>
                 <span class="muted">Matching oficial</span>
@@ -909,14 +965,17 @@
             </div>
           </div>
 
-          <div class="hero-mini-code">
-            <div class="hero-mini-code-top">
+          <div class="hero-mini-code" style="background: #ffffff; border: 1px solid #e2e8f0;">
+            <div class="hero-mini-code-top" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
               <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
-              <span class="hero-mini-code-label">GET /v1/company?cif=B12345678</span>
+              <span class="hero-mini-code-label" style="color: #64748b; font-weight: 700;">GET /v1/company?cif=B12345678</span>
             </div>
-            <pre style="margin:0; padding: 16px 18px; font-size: 12.5px; line-height: 1.6; color:#e2e8f0; overflow-x:auto;"><code>{
-  "success": true,
-  "data": { "name": "EMPRESA EJEMPLO SL", "cif": "B12345678" }
+            <pre style="margin:0; padding: 18px; font-size: 13px; line-height: 1.6; color:#334155; font-family: \'JetBrains Mono\', monospace; background: transparent; overflow-x:auto;"><code>{
+  "success": <span style="color: #12b48a;">true</span>,
+  "data": { 
+    "name": "<span style="color: #2152ff;">EMPRESA EJEMPLO SL</span>", 
+    "cif": "<span style="color: #2152ff;">B12345678</span>" 
+  }
 }</code></pre>
           </div>
 
@@ -932,214 +991,246 @@
 
 
 
-    <!-- LIVE DEMO -->
-    <section id="demo" class="section-padding bg-gradient-soft" style="margin-top: -36px; position: relative; z-index: 2;">
-        <div class="container">
-            <div style="text-align:center; margin-bottom: 46px;" class="animate-up delay-1">
-                <span class="eyebrow">Demo en vivo</span>
-                <h2 style="font-size: clamp(30px, 4.2vw, 46px); font-weight: 950; margin: 12px 0 10px; letter-spacing: -0.03em;">
-                    Siéntelo en tus <span class="grad">propias manos</span>.
-                </h2>
-                <p class="muted" style="font-size: clamp(16px, 2vw, 19px); margin-top: 10px;">
-                    Escribe un CIF o nombre: autocompleta, elige, y mira la respuesta JSON.
-                </p>
-            </div>
-
-            <div class="demo-shell animate-up delay-1">
-                <div class="search-outer">
-                    <div class="search-inner">
-                        <div class="search-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6">
-                                <path d="M21 21l-4.3-4.3"/>
-                                <circle cx="11" cy="11" r="7"/>
-                            </svg>
-                        </div>
-
-                        <input type="text" id="company-search" placeholder="Escribe el nombre de una empresa o un CIF…" autocomplete="off">
-
-                        <div class="search-hints" aria-hidden="true">
-                            <span class="kbd">↵</span><span class="hint-text">Selecciona</span>
-                            <span class="kbd">Esc</span><span class="hint-text">Cerrar</span>
-                        </div>
-                    </div>
-
-                    <div class="loader" id="loading-spinner"></div>
-                    <div class="suggestions-dropdown" id="suggestions"></div>
-                </div>
-
-                <!-- RESULT PREVIEW -->
-                <div id="json-result" class="animate-up is-hidden" style="margin-top: 36px;">
-                    <div class="tech-window">
-                        <div class="tech-top">
-                            <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
-                            <span style="font-size: 12px; font-weight: 900; color: #22c55e; margin-left: 10px;">200 OK</span>
-                            <span style="font-size: 12px; color: rgba(226,232,240,.6); margin-left: auto;">application/json</span>
-                        </div>
-                        <pre style="padding: 26px; margin: 0; font-size: 14px; overflow-x:auto; line-height: 1.7;"><code id="json-code"></code></pre>
-                    </div>
-                    <p style="text-align:center; margin-top: 14px; color: var(--primary); font-weight: 850;">
-                        ✔ Todo con una sola llamada API
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- USE CASES -->
-    <section class="section-padding container">
-        <div style="text-align:center; margin-bottom: 64px;" class="animate-up">
-            <span class="eyebrow">Aplica la automatización</span>
-            <h3 style="font-size: clamp(28px, 4vw, 46px); font-weight: 950; margin-top: 12px; letter-spacing: -0.03em;">
-                Casos reales <span class="grad">de uso</span>
-            </h3>
-            <p class="muted" style="max-width: 820px; margin: 14px auto 0; font-size: 18px; line-height: 1.6;">
-                Diseñado para flujos B2B donde los datos fiscales correctos no son “nice to have”, sino requisito.
+<!-- LIVE DEMO -->
+<section id="demo" class="section-padding" style="position: relative; z-index: 10; background: #ffffff;">
+    <!-- Centered Radial Glow -->
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 1000px; height: 600px; background: radial-gradient(circle, rgba(33, 82, 255, 0.04) 0%, transparent 70%); pointer-events: none; z-index: 0;"></div>
+    
+    <div class="container" style="position: relative; z-index: 1;">
+        <div style="text-align:center; margin-bottom: 46px;" class="animate-up delay-1">
+            <span class="eyebrow">Demo en vivo</span>
+            <h2 style="font-size: clamp(30px, 4.2vw, 46px); font-weight: 950; margin: 12px 0 10px; letter-spacing: -0.03em;">
+                Siéntelo en tus <span class="grad">propias manos</span>.
+            </h2>
+            <p class="muted" style="font-size: clamp(16px, 2vw, 19px); margin-top: 10px;">
+                Escribe un CIF o nombre: autocompleta, elige, y mira la respuesta JSON.
             </p>
         </div>
 
-        <div class="grid animate-up delay-1" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 22px;">
-            <div class="use-case-card">
-                <div style="display:flex; gap: 12px; align-items:flex-start;">
-                    <span style="font-size: 26px; line-height: 1;">✅</span>
-                    <div>
-                        <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Autocompletar formularios B2B</h3>
-                        <p class="muted" style="line-height: 1.6; margin:0;">Reduce abandono: con el CIF rellenamos razón social, dirección y datos fiscales.</p>
+        <div class="demo-shell animate-up delay-1">
+            <div class="search-outer">
+                <div class="search-inner">
+                    <div class="search-icon" aria-hidden="true" style="position: relative;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6">
+                            <path d="M21 21l-4.3-4.3"/>
+                            <circle cx="11" cy="11" r="7"/>
+                        </svg>
+                        <div style="position: absolute; top: 10px; right: 10px; width: 6px; height: 6px; background: #10b981; border-radius: 50%; box-shadow: 0 0 6px #10b981; animation: pulse-green 2s infinite;"></div>
+                    </div>
+
+                    <input type="text" id="company-search" placeholder="Escribe el nombre de una empresa o un CIF…" autocomplete="off">
+
+                    <div class="search-hints" aria-hidden="true">
+                        <span class="kbd">↵</span><span class="hint-text">Selecciona</span>
+                        <span class="kbd">Esc</span><span class="hint-text">Cerrar</span>
                     </div>
                 </div>
+
+                <div class="loader" id="loading-spinner"></div>
+                <div class="suggestions-dropdown" id="suggestions"></div>
             </div>
 
-            <div class="use-case-card">
-                <div style="display:flex; gap: 12px; align-items:flex-start;">
-                    <span style="font-size: 26px; line-height: 1;">✅</span>
-                    <div>
-                        <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Evitar altas falsas</h3>
-                        <p class="muted" style="line-height: 1.6; margin:0;">Verifica existencia mercantil antes de permitir acceso o activar funcionalidades.</p>
+            <!-- RESULT PREVIEW -->
+            <div id="json-result" class="animate-up is-hidden" style="margin-top: 36px;">
+                <div class="tech-window" style="background: #ffffff; border-radius: 24px; box-shadow: 0 30px 60px -12px rgba(15, 23, 42, 0.12); border: 1px solid #e2e8f0;">
+                    <div class="tech-top" style="background: #f8fafc; padding: 18px 26px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="padding: 6px 12px; background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 99px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                                <div style="width: 6px; height: 6px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981; animation: pulse-green 2s infinite;"></div>
+                                LIVE: 200 OK
+                            </div>
+                            <span style="font-size: 13px; font-weight: 700; color: #0f172a;">Respuesta Verificada</span>
+                        </div>
+                        <span style="font-size: 12px; color: #64748b; font-weight: 600; font-family: 'JetBrains Mono', monospace;">application/json</span>
+                    </div>
+                    <div style="position: relative;">
+                        <!-- Subtle watermark -->
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg); font-size: 100px; font-weight: 900; color: rgba(15, 23, 42, 0.02); pointer-events: none; user-select: none; white-space: nowrap;">API OFICIAL</div>
+                        <pre style="padding: 34px; margin: 0; font-size: 15px; color: #334155; font-family: 'JetBrains Mono', monospace; overflow-x:auto; line-height: 1.8; background: transparent; position: relative; z-index: 1;"><code id="json-code"></code></pre>
                     </div>
                 </div>
-            </div>
-
-            <div class="use-case-card">
-                <div style="display:flex; gap: 12px; align-items:flex-start;">
-                    <span style="font-size: 26px; line-height: 1;">✅</span>
-                    <div>
-                        <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Dedupe automático</h3>
-                        <p class="muted" style="line-height: 1.6; margin:0;">El CIF como ID único: evita duplicados aunque el nombre llegue distinto.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="use-case-card">
-                <div style="display:flex; gap: 12px; align-items:flex-start;">
-                    <span style="font-size: 26px; line-height: 1;">✅</span>
-                    <div>
-                        <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Limpieza de CRM por CSV</h3>
-                        <p class="muted" style="line-height: 1.6; margin:0;">Sube listados de CIF y obtén datos actualizados para normalizar registros.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="use-case-card">
-                <div style="display:flex; gap: 12px; align-items:flex-start;">
-                    <span style="font-size: 26px; line-height: 1;">✅</span>
-                    <div>
-                        <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Validación KYB</h3>
-                        <p class="muted" style="line-height: 1.6; margin:0;">Trazabilidad y señales oficiales para procesos de onboarding B2B.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="use-case-card">
-                <div style="display:flex; gap: 12px; align-items:flex-start;">
-                    <span style="font-size: 26px; line-height: 1;">✅</span>
-                    <div>
-                        <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Prevención pre-factura</h3>
-                        <p class="muted" style="line-height: 1.6; margin:0;">Valida datos fiscales antes de emitir: menos rectificativas y menos soporte.</p>
-                    </div>
+                <div style="margin-top: 20px; display: flex; justify-content: center; gap: 16px;">
+                    <span style="font-size: 13px; font-weight: 800; color: #12b48a; display: flex; align-items: center; gap: 6px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Datos Directos de Fuente Oficial
+                    </span>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- DEVELOPER SECTION -->
-    <section class="section-padding bg-light">
-        <div class="container">
+    <!-- USE CASES -->
+<section class="section-padding" style="background-color: #f8fafc; background-image: radial-gradient(#e2e8f0 0.8px, transparent 0.8px); background-size: 24px 24px; position: relative; z-index: 5;">
+    <div style="position: absolute; inset: 0; background: linear-gradient(180deg, #ffffff 0%, transparent 15%, transparent 85%, #ffffff 100%); pointer-events: none;"></div>
+    <div class="container" style="position: relative; z-index: 1;">
+    <div style="text-align:center; margin-bottom: 64px;" class="animate-up">
+        <span class="eyebrow">Aplica la automatización</span>
+        <h3 style="font-size: clamp(28px, 4vw, 46px); font-weight: 950; margin-top: 12px; letter-spacing: -0.03em;">
+            Casos reales <span class="grad">de uso</span>
+        </h3>
+        <p class="muted" style="max-width: 820px; margin: 14px auto 0; font-size: 18px; line-height: 1.6;">
+            Diseñado para flujos B2B donde los datos fiscales correctos no son “nice to have”, sino requisito.
+        </p>
+    </div>
+
+    <div class="grid animate-up delay-1" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 22px;">
+        <div class="use-case-card">
+            <div style="display:flex; gap: 12px; align-items:flex-start;">
+                <span style="font-size: 26px; line-height: 1;">✅</span>
+                <div>
+                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Autocompletar formularios B2B</h3>
+                    <p class="muted" style="line-height: 1.6; margin:0;">Reduce abandono: con el CIF rellenamos razón social, dirección y datos fiscales.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="use-case-card">
+            <div style="display:flex; gap: 12px; align-items:flex-start;">
+                <span style="font-size: 26px; line-height: 1;">✅</span>
+                <div>
+                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Evitar altas falsas</h3>
+                    <p class="muted" style="line-height: 1.6; margin:0;">Verifica existencia mercantil antes de permitir acceso o activar funcionalidades.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="use-case-card">
+            <div style="display:flex; gap: 12px; align-items:flex-start;">
+                <span style="font-size: 26px; line-height: 1;">✅</span>
+                <div>
+                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Dedupe automático</h3>
+                    <p class="muted" style="line-height: 1.6; margin:0;">El CIF como ID único: evita duplicados aunque el nombre llegue distinto.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="use-case-card">
+            <div style="display:flex; gap: 12px; align-items:flex-start;">
+                <span style="font-size: 26px; line-height: 1;">✅</span>
+                <div>
+                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Limpieza de CRM por CSV</h3>
+                    <p class="muted" style="line-height: 1.6; margin:0;">Sube listados de CIF y obtén datos actualizados para normalizar registros.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="use-case-card">
+            <div style="display:flex; gap: 12px; align-items:flex-start;">
+                <span style="font-size: 26px; line-height: 1;">✅</span>
+                <div>
+                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Validación KYB</h3>
+                    <p class="muted" style="line-height: 1.6; margin:0;">Trazabilidad y señales oficiales para procesos de onboarding B2B.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="use-case-card">
+            <div style="display:flex; gap: 12px; align-items:flex-start;">
+                <span style="font-size: 26px; line-height: 1;">✅</span>
+                <div>
+                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Prevención pre-factura</h3>
+                    <p class="muted" style="line-height: 1.6; margin:0;">Valida datos fiscales antes de emitir: menos rectificativas y menos soporte.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- DEVELOPER SECTION -->
+<section class="section-padding" style="background: #ffffff; position: relative;">
+    <div class="container">
+        <div style="background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%); border: 1px solid #e2e8f0; border-radius: 40px; padding: 60px; box-shadow: 0 40px 100px -20px rgba(15, 23, 42, 0.05);">
             <div class="grid" style="grid-template-columns: 1fr 1.25fr; gap: 64px; align-items: center;">
-                <div class="animate-up">
-                    <span class="eyebrow" style="color: var(--primary);">Developer First</span>
-                    <h2 style="font-size: clamp(28px, 4vw, 46px); font-weight: 950; margin: 14px 0 18px; letter-spacing: -0.03em;">
-                        Pensado para <span class="grad">ingenieros</span>.
-                    </h2>
-                    <p class="muted" style="font-size: 18px; line-height: 1.7; margin-bottom: 26px;">
-                        Integra la búsqueda de empresas en tu producto con una llamada REST. Sin burocracia, sin fricción.
-                    </p>
+            <div class="animate-up">
+                <span class="eyebrow" style="color: var(--primary);">Developer First</span>
+                <h2 style="font-size: clamp(28px, 4vw, 46px); font-weight: 950; margin: 14px 0 18px; letter-spacing: -0.03em;">
+                    Pensado para <span class="grad">ingenieros</span>.
+                </h2>
+                <p class="muted" style="font-size: 18px; line-height: 1.7; margin-bottom: 26px;">
+                    Integra la búsqueda de empresas en tu producto con una llamada REST. Sin burocracia, sin fricción.
+                </p>
 
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-                        <div class="mini-card">
-                            <strong style="display:block; font-size: 16px; margin-bottom: 6px;">Sin contratos</strong>
-                            <span class="muted" style="font-size: 14px;">Paga por uso, cancela cuando quieras.</span>
-                        </div>
-                        <div class="mini-card">
-                            <strong style="display:block; font-size: 16px; margin-bottom: 6px;">Sin demos</strong>
-                            <span class="muted" style="font-size: 14px;">Empieza a probarlo en 2 minutos.</span>
-                        </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div class="mini-card" style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                        <strong style="display:block; font-size: 16px; margin-bottom: 6px; color: #0f172a;">Sin contratos</strong>
+                        <span class="muted" style="font-size: 14px; color: #64748b;">Paga por uso, cancela cuando quieras.</span>
+                    </div>
+                    <div class="mini-card" style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                        <strong style="display:block; font-size: 16px; margin-bottom: 6px; color: #0f172a;">Sin demos</strong>
+                        <span class="muted" style="font-size: 14px; color: #64748b;">Empieza a probarlo en 2 minutos.</span>
                     </div>
                 </div>
+            </div>
 
                 <div class="animate-up delay-2">
                     <div class="tech-window">
                         <div class="tech-top">
                             <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
-                            <span style="font-size: 13px; color: rgba(226,232,240,.75); font-weight: 850; margin-left: 10px;">
+                            <span style="font-size: 13px; color: #64748b; font-weight: 850; margin-left: 10px;">
                                 GET /v1/company?cif=B12345678
                             </span>
                         </div>
-                        <pre style="padding: 28px; margin:0; line-height: 1.8; font-size: 14px; color:#e2e8f0; overflow-x:auto;"><code><span style="color: #94a3b8;">// Funciona nativamente con:</span>
-<span style="color: #94a3b8;">// PHP, Laravel, Node, Python...</span>
+                        <pre style="padding: 28px; margin:0; line-height: 1.8; font-size: 14px; color: #334155; font-family: 'JetBrains Mono', monospace; background: transparent; overflow-x:auto;"><code><span style="color: #94a3b8; font-style: italic;">// Los datos se devuelven en JSON estándar</span>
+<span style="color: #94a3b8; font-style: italic;">// Compatible con cualquier CRM o lenguaje</span>
 
 {
-  <span style="color: #f472b6;">"success"</span>: <span style="color: #6ee7b7;">true</span>,
-  <span style="color: #f472b6;">"data"</span>: {
-    <span style="color: #f472b6;">"name"</span>: <span style="color: #fbbf24;">"EMPRESA EJEMPLO SL"</span>,
-    <span style="color: #f472b6;">"cif"</span>: <span style="color: #fbbf24;">"B12345678"</span>,
-    <span style="color: #f472b6;">"address"</span>: <span style="color: #fbbf24;">"CALLE MAYOR 1, MADRID"</span>,
-    <span style="color: #f472b6;">"cnae"</span>: <span style="color: #fbbf24;">"6201"</span>,
-    <span style="color: #f472b6;">"status"</span>: <span style="color: #fbbf24;">"ACTIVA"</span>
+  <span style="color: #0f172a; font-weight: 700;">"success"</span>: <span style="color: #12b48a; font-weight: 700;">true</span>,
+  <span style="color: #0f172a; font-weight: 700;">"data"</span>: {
+    <span style="color: #0f172a; font-weight: 700;">"name"</span>: <span style="color: #2152ff; font-weight: 700;">"EMPRESA EJEMPLO SL"</span>,
+    <span style="color: #0f172a; font-weight: 700;">"cif"</span>: <span style="color: #2152ff; font-weight: 700;">"B12345678"</span>,
+    <span style="color: #0f172a; font-weight: 700;">"address"</span>: <span style="color: #2152ff; font-weight: 700;">"CALLE MAYOR 1, MADRID"</span>,
+    <span style="color: #0f172a; font-weight: 700;">"status"</span>: <span style="color: #2152ff; font-weight: 700;">"ACTIVA"</span>
   }
 }</code></pre>
                     </div>
                 </div>
-            </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- FINAL CTA -->
-    <section class="cta">
-        <div class="container animate-up" style="text-align:center; position:relative; z-index:2;">
-            <h2 style="font-size: clamp(30px, 5.2vw, 44px); font-weight: 950; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 18px;">
-                ¿Listo para <span class="grad">automatizar</span> tu negocio?
-            </h2>
-            <p style="color: #64748b; font-size: 20px; margin-bottom: 34px; max-width: 860px; margin-inline:auto; line-height: 1.6;">
-                Únete a SaaS B2B, ERPs y Fintech que ya confían en una API de autocompletado en tiempo real.
-            </p>
+<!-- FINAL CTA -->
+<section class="cta" style="background: #ffffff; padding: 120px 0; position: relative; overflow: hidden;">
+    <!-- Background Accents -->
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 800px; height: 600px; background: radial-gradient(circle, rgba(33, 82, 255, 0.05) 0%, transparent 70%); pointer-events: none; z-index: 0;"></div>
+    
+    <div class="container animate-up" style="text-align:center; position:relative; z-index:2;">
+        <h2 style="color: #0f172a; font-size: clamp(34px, 5.5vw, 48px); font-weight: 950; letter-spacing: -0.04em; line-height: 1.1; margin-bottom: 22px;">
+            ¿Listo para <span class="grad">automatizar</span> tu negocio?
+        </h2>
+        <p style="color: #475569; font-size: clamp(18px, 2.2vw, 21px); margin-bottom: 40px; max-width: 800px; margin-inline:auto; line-height: 1.6; font-weight: 500;">
+            Únete a SaaS B2B, ERPs y Fintech que ya confían en una API de autocompletado en tiempo real. Configuración instantánea.
+        </p>
 
-            <div style="display:flex; flex-wrap:wrap; justify-content:center; gap: 14px;">
-                <a href="<?=site_url('register') ?>" class="btn primary"
-                   style="padding: 20px 46px; font-size: 18px; font-weight: 900; border-radius: 18px; box-shadow: 0 22px 50px rgba(33, 82, 255, 0.26);">
-                    👉 Prueba gratis ahora
-                </a>
-                <a href="<?=site_url('documentation') ?>" class="btn ghost"
-                   style="padding: 20px 46px; font-size: 18px; font-weight: 900; border-radius: 18px; color: var(--primary); background: rgba(255,255,255,.9); border: 2px solid rgba(19, 58, 130, 0.12);">
-                    👉 Ver documentación
-                </a>
-            </div>
-
-            <div style="margin-top: 34px; display:flex; flex-wrap:wrap; justify-content:center; gap: 26px; opacity: .8;">
-                <span style="font-weight: 850; color: #475569;">✔ Sin llamadas comerciales</span>
-                <span style="font-weight: 850; color: #475569;">✔ Sin contratos</span>
-                <span style="font-weight: 850; color: #475569;">✔ Sin demos</span>
-            </div>
+        <div style="display:flex; flex-wrap:wrap; justify-content:center; gap: 16px;">
+            <a href="<?=site_url('register') ?>" class="btn primary"
+                style="padding: 22px 50px; font-size: 18px; font-weight: 950; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(33, 82, 255, 0.35); display: flex; align-items: center; gap: 12px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 1 9 22 2"></polygon></svg>
+                <span>Empieza gratis ahora</span>
+            </a>
+            <a href="<?=site_url('documentation') ?>" class="btn ghost"
+                style="padding: 22px 50px; font-size: 18px; font-weight: 950; border-radius: 20px; color: var(--primary); background: #ffffff; border: 2px solid rgba(33, 82, 255, 0.1); display: flex; align-items: center; gap: 12px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M2 3h6a4 4 0 0 1 4 4v14a4 4 0 0 0-4-4H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a4 4 0 0 1 4-4h6z"></path></svg>
+                <span>Ver documentación</span>
+            </a>
         </div>
-    </section>
+
+        <div style="margin-top: 40px; display:flex; flex-wrap:wrap; justify-content:center; gap: 30px;">
+            <span style="font-weight: 850; color: #64748b; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Sin contratos
+            </span>
+            <span style="font-weight: 850; color: #64748b; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Sin demos
+            </span>
+            <span style="font-weight: 850; color: #64748b; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Sandbox Gratis
+            </span>
+        </div>
+    </div>
+</section>
 
 </main>
 
@@ -1237,15 +1328,15 @@
 
     function syntaxHighlight(json) {
         if (typeof json != 'string') json = JSON.stringify(json, undefined, 2);
-        json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g, function (match) {
-            var color = '#6ee7b7';
-            if (/^"/.test(match)) {
-                if (/:$/.test(match)) color = '#f472b6';
-                else color = '#fbbf24';
-            }
-            return '<span style="color:' + color + '">' + match + '</span>';
-        });
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g, function (match) {
+                var color = '#12b48a'; // Values: Green
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) color = '#0f172a'; // Keys: Dark
+                    else color = '#2152ff'; // Strings: Blue
+                }
+                return '<span style="color:' + color + '; font-weight: 700;">' + match + '</span>';
+            });
     }
 
     const observer = new IntersectionObserver((entries) => {
