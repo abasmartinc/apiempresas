@@ -513,12 +513,12 @@
             </p>
 
             <!-- Two-column layout: FAQs + Sidebar -->
-            <div style="margin-top: 32px; display: grid; grid-template-columns: 1fr 320px; gap: 32px; align-items: start;">
+            <div class="faq-grid-container">
                 
                 <!-- Left: FAQs -->
                 <div class="faq-grid" style="display: grid; gap: 14px;">
-                    <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
-                        <summary style="cursor: pointer; font-weight: 700;">
+                    <details class="faq-item">
+                        <summary>
                             ¿Cómo validar un CIF en España?
                         </summary>
                         <div class="muted" style="margin-top: 10px;">
@@ -528,8 +528,8 @@
                         </div>
                     </details>
 
-                    <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
-                        <summary style="cursor: pointer; font-weight: 700;">
+                    <details class="faq-item">
+                        <summary>
                             ¿Qué diferencia hay entre validar CIF y verificar una empresa?
                         </summary>
                         <div class="muted" style="margin-top: 10px;">
@@ -539,8 +539,8 @@
                         </div>
                     </details>
 
-                    <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
-                        <summary style="cursor: pointer; font-weight: 700;">
+                    <details class="faq-item">
+                        <summary>
                             ¿Puedo comprobar un NIF-IVA intracomunitario (VIES)?
                         </summary>
                         <div class="muted" style="margin-top: 10px;">
@@ -549,8 +549,8 @@
                         </div>
                     </details>
 
-                    <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
-                        <summary style="cursor: pointer; font-weight: 700;">
+                    <details class="faq-item">
+                        <summary>
                             ¿Para qué sirve en KYB/KYC y prevención de fraude?
                         </summary>
                         <div class="muted" style="margin-top: 10px;">
@@ -559,8 +559,8 @@
                         </div>
                     </details>
 
-                    <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
-                        <summary style="cursor: pointer; font-weight: 700;">
+                    <details class="faq-item">
+                        <summary>
                             ¿La API es adecuada para producción?
                         </summary>
                         <div class="muted" style="margin-top: 10px;">
@@ -569,8 +569,8 @@
                         </div>
                     </details>
 
-                    <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
-                        <summary style="cursor: pointer; font-weight: 700;">
+                    <details class="faq-item">
+                        <summary>
                             ¿Qué datos devuelvo y qué obtengo en una consulta?
                         </summary>
                         <div class="muted" style="margin-top: 10px;">
@@ -579,8 +579,8 @@
                         </div>
                     </details>
 
-                    <details class="faq-item" style="background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 16px;">
-                        <summary style="cursor: pointer; font-weight: 700;">
+                    <details class="faq-item">
+                        <summary>
                             ¿Cómo integro la API para validar CIF?
                         </summary>
                         <div class="muted" style="margin-top: 10px;">
@@ -823,7 +823,7 @@
                     <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; height: 320px; background: radial-gradient(circle, rgba(33, 82, 255, 0.08) 0%, transparent 70%);"></div>
                     <img src="<?= base_url('public/images/custom-integration.png') ?>" 
                          alt="Icono de integración empresarial" 
-                         style="width: 65%; height: auto; position: relative; z-index: 2; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);"
+                         style="position: relative; z-index: 2; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);"
                          onmouseover="this.style.transform='scale(1.08) rotate(3deg)'"
                          onmouseout="this.style.transform='scale(1) rotate(0deg)'">
                 </div>

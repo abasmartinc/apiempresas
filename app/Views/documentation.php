@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <?=view('partials/head') ?>
-    <link rel="stylesheet" href="<?= base_url('public/css/docs.css') ?>" />
+    <link rel="stylesheet" href="<?= base_url('public/css/docs.css?v=' . time()) ?>" />
 
 </head>
 <body>

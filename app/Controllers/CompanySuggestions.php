@@ -43,7 +43,7 @@ class CompanySuggestions extends BaseController
         }
 
         try {
-            $results = $this->companyModel->searchMany($q, 10);
+            $results = $this->companyModel->searchMany($q, 20);
             
             // Format results to return only specific fields
             $formatted = array_map(function($item) {

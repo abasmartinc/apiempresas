@@ -578,6 +578,71 @@ footer {
     display: inline-block
 }
 
+
+/* FAQ Section Responsive Fixes */
+.faq-grid-container {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 32px;
+    align-items: start;
+    margin-top: 32px;
+}
+
+@media (max-width: 980px) {
+    .faq-grid-container {
+        grid-template-columns: 1fr !important;
+    }
+
+    .faq-grid-container aside {
+        position: static !important;
+        width: 100%;
+        margin-top: 32px;
+    }
+}
+
+.faq-item {
+    background: rgba(255, 255, 255, .6);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 16px;
+    padding: 16px 20px;
+    transition: all 0.2s ease;
+}
+
+.faq-item[open] {
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    border-color: #cbd5e1;
+}
+
+.faq-item summary {
+    list-style: none;
+    cursor: pointer;
+    font-weight: 700;
+    color: #1e293b;
+    position: relative;
+    padding-right: 24px;
+}
+
+.faq-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.faq-item summary::after {
+    content: '+';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2em;
+    font-weight: 400;
+    color: #64748b;
+    transition: transform 0.2s;
+}
+
+.faq-item[open] summary::after {
+    transform: translateY(-50%) rotate(45deg);
+}
+
 .pill.estado--activa {
     background: #e6ffed;
     border: 1px solid #b7ebc6

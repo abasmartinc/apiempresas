@@ -857,6 +857,108 @@
     border-radius: 25px;;
 }
 
+/* Mobile Optimizations */
+@media (max-width: 980px) {
+    /* Better spacing for hero */
+    .hero-wrap { padding: 40px 0 20px; }
+    
+    /* Search Bar Fixes */
+    .search-hints { display: none !important; }
+    .search-inner { padding: 8px 10px !important; gap: 8px; }
+    .search-icon { width: 36px; height: 36px; }
+    .search-icon svg { width: 18px; height: 18px; }
+    
+    #company-search {
+        font-size: 16px !important; /* Prevents auto-zoom on iOS */
+        padding: 10px 4px !important;
+        height: auto;
+    }
+    
+    /* KPI adjustments */
+    .hero-kpis { gap: 8px; }
+    .kpi { padding: 12px 6px; }
+    .kpi-value { font-size: 20px; }
+    .kpi-label { font-size: 9px; }
+    
+    /* Grid fixes */
+    .hero-top-title { font-size: 32px; }
+    .hero-top-subtitle { font-size: 16px; }
+    
+    /* Ensure dropdown fits */
+    .suggestions-dropdown {
+        left: 0; right: 0;
+        border-radius: 12px;
+    }
+    
+    /* Adjust feature tags */
+    .feature-row { gap: 8px; }
+    .feature-tag { font-size: 11px; padding: 8px 10px; }
+    
+    .dev-grid { 
+        display: block !important; /* Switch to block to avoid grid spacing issues completely on mobile */
+    }
+    
+    .dev-grid > * {
+        margin-bottom: 40px;
+        min-width: 0; /* Important for flex/grid children shrinking */
+    }
+    
+    .dev-grid > *:last-child {
+        margin-bottom: 0;
+    }
+
+    .dev-wrapper {
+        padding: 40px 20px !important;
+        border-radius: 20px !important;
+        overflow: hidden; /* Prevent spill */
+        width: 100% !important;
+        box-sizing: border-box; /* Ensure padding doesn't add to width */
+    }
+
+    .mini-cards-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* Ensure code block doesn't break layout */
+    .tech-window {
+        max-width: 100% !important;
+        width: 100% !important;
+        overflow-x: hidden; /* Let the pre handle scroll */
+    }
+    
+    .tech-window pre {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    /* Force text wrapping */
+    h2 {
+        word-break: break-word;
+        hyphens: auto;
+    }
+}
+
+.dev-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.25fr;
+    gap: 64px;
+    align-items: center;
+}
+
+.dev-wrapper {
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%); 
+    border: 1px solid #e2e8f0; 
+    border-radius: 40px; 
+    padding: 60px; 
+    box-shadow: 0 40px 100px -20px rgba(15, 23, 42, 0.05);
+}
+
+.mini-cards-grid {
+    display:grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 14px;
+}
+
 
     </style>
 </head>
@@ -1140,8 +1242,8 @@
 <!-- DEVELOPER SECTION -->
 <section class="section-padding" style="background: #ffffff; position: relative;">
     <div class="container">
-        <div style="background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%); border: 1px solid #e2e8f0; border-radius: 40px; padding: 60px; box-shadow: 0 40px 100px -20px rgba(15, 23, 42, 0.05);">
-            <div class="grid" style="grid-template-columns: 1fr 1.25fr; gap: 64px; align-items: center;">
+        <div class="dev-wrapper">
+            <div class="grid dev-grid">
             <div class="animate-up">
                 <span class="eyebrow" style="color: var(--primary);">Developer First</span>
                 <h2 style="font-size: clamp(28px, 4vw, 46px); font-weight: 950; margin: 14px 0 18px; letter-spacing: -0.03em;">
@@ -1151,7 +1253,7 @@
                     Integra la búsqueda de empresas en tu producto con una llamada REST. Sin burocracia, sin fricción.
                 </p>
 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                <div class="mini-cards-grid">
                     <div class="mini-card" style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
                         <strong style="display:block; font-size: 16px; margin-bottom: 6px; color: #0f172a;">Sin contratos</strong>
                         <span class="muted" style="font-size: 14px; color: #64748b;">Paga por uso, cancela cuando quieras.</span>
