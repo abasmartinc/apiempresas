@@ -177,19 +177,27 @@
                     $companyAddr = $rawAddr ? "{$rawAddr}, {$companyProv}" : "{$companyProv}, España";
                     
                     $companyAct  = $company['cnae_label'] ?? 'su actividad registrada';
+                    
+                    // Phone logic
+                    $phone = $company['phone'] ?? $company['phone_mobile'] ?? null;
+                    $phoneHtml = $phone ? "**{$phone}**" : "el teléfono de {$companyName} en nuestro informe";
 
                     $faqs = [
                         [
-                            'q' => "¿Cuál es el CIF de {$companyName}?",
-                            'a' => "El CIF de {$companyName} es **{$companyCif}**. Este identificador fiscal es único para la empresa y sirve para realizar trámites y facturación."
+                            'q' => "¿Es fiable {$companyName}?",
+                            'a' => "Sí, **{$companyName}** es una sociedad registrada en España con CIF **{$companyCif}**. Su estado actual es **{$statusRaw}**, según consta en el Registro Mercantil. Puede consultar sus cuentas anuales, informes y actos del BORME para verificar su solvencia."
+                        ],
+                        [
+                            'q' => "¿Cuál es el teléfono y dirección de {$companyName}?",
+                            'a' => "La empresa tiene su domicilio social en **{$companyAddr}**. Para contactar, puede llamar al {$phoneHtml} o visitar su delegación más cercana en {$companyProv}."
+                        ],
+                        [
+                            'q' => "¿Quiénes son los administradores de {$companyName}?",
+                            'a' => "Para conocer a los administradores, directivos y cargos de la empresa, consulte la sección de **Actos del BORME**, donde se publican los nombramientos, ceses y dimisiones oficiales."
                         ],
                         [
                             'q' => "¿A qué se dedica {$companyName}?",
-                            'a' => "Según la clasificación CNAE, la actividad principal de {$companyName} es: **{$companyAct}**. Esta clasificación permite categorizar su sector de negocio."
-                        ],
-                        [
-                            'q' => "¿Dónde está ubicada {$companyName}?",
-                            'a' => "La empresa tiene su domicilio social registrado en **{$companyAddr}**. Para notificaciones oficiales o contacto, debe dirigirse a esta ubicación."
+                            'a' => "Su actividad principal CNAE es: **{$companyAct}**. Esta clasificación permite categorizar su sector de negocio y actividad económica."
                         ]
                     ];
 
@@ -370,7 +378,7 @@
                     <div id="map-area" class="map-card">
                         <h2 class="map-section-title">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                            Ubicación de la empresa
+                            Ubicación y Datos de Contacto
                         </h2>
                         <div id="company-map"></div>
                     </div>
@@ -380,17 +388,17 @@
                 <!-- SEO Text Block -->
                 <!-- SEO Text Block -->
                 <div class="company-seo-block">
-                    <h2 class="company-seo-title">Información Comercial de <?= esc($companyName) ?></h2>
+                    <h2 class="company-seo-title">Información General y de Contacto de <?= esc($companyName) ?></h2>
                     <p class="seo-text mb-4">
-                        La empresa <strong><?= esc($companyName) ?></strong>, con identificación fiscal NIF <strong><?= esc($companyCif) ?></strong>, 
-                        tiene su sede oficial y domicilio social activo en 
+                        La empresa <strong><?= esc($companyName) ?></strong> cuenta con el <strong>CIF <?= esc($companyCif) ?></strong> y mantiene su 
+                        <strong>domicilio social</strong> en 
                         <?php if(!empty($provinceUrl)): ?>
                             <a href="<?= esc($provinceUrl) ?>" style="color: inherit; font-weight: 700;"><?= esc($companyProv) ?></a>.
                         <?php else: ?>
                             <strong><?= esc($companyProv) ?></strong>.
                         <?php endif; ?>
                         
-                        Esta sociedad desarrolla su actividad principal dentro del sector de 
+                        Esta sociedad desarrolla su actividad en el sector de 
                         <?php if(!empty($provinceCnaeUrl)): ?>
                             <a href="<?= esc($provinceCnaeUrl) ?>" style="color: inherit; font-weight: 700;"><?= esc($companyAct) ?></a>,
                         <?php elseif(!empty($cnaeUrl)): ?>
@@ -398,7 +406,7 @@
                         <?php else: ?>
                             <em><?= esc($companyAct) ?></em>,
                         <?php endif; ?>
-                        bajo la clasificación del código CNAE <strong><?= esc($company['cnae'] ?? ($company['cnae_code'] ?? '-')) ?></strong>.
+                        registrada bajo el código <strong>CNAE <?= esc($company['cnae'] ?? ($company['cnae_code'] ?? '-')) ?></strong>.
                     </p>
                     
                     <?php 
@@ -411,9 +419,10 @@
                     <?php endif; ?>
 
                     <p class="seo-text mb-0">
-                        Constituida oficialmente el <strong><?= esc($company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '-') ?></strong>, 
-                        la empresa mantiene actualmente un estado mercantil <strong><?= esc($statusRaw) ?></strong>. 
-                        En esta ficha puede consultar de forma gratuita el scoring de crédito comercial, actos inscritos en el BORME y la validación oficial de su CIF para operaciones comerciales.
+                        La fecha de constitución de la empresa es el <strong><?= esc($company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '-') ?></strong> 
+                        y su estado mercantil actual es <strong><?= esc($statusRaw) ?></strong>. 
+                        En esta página podrá consultar el <strong>Informe Mercantil</strong>, el historial de <strong>Actos del BORME</strong>, 
+                        sus <strong>administradores</strong> y la validación de su <strong>CIF</strong> para fines comerciales y financieros.
                     </p>
                     
                     <div class="company-share-row">
@@ -444,7 +453,7 @@
                         <span style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #fff; padding: 8px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2);">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                         </span>
-                        Cronología Registral
+                        Actos del Registro Mercantil (BORME)
                     </h2>
                     
                     <div class="borme-timeline">

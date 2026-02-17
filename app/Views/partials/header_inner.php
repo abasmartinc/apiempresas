@@ -101,7 +101,7 @@
     </header>
 
     <style>
-        .mobile-menu-toggle { display: none; background: transparent; border: none; padding: 8px; cursor: pointer; z-index: 100; margin-right: -4px; }
+        .mobile-menu-toggle { display: none; background: transparent; border: none; padding: 8px; cursor: pointer; z-index: 100; }
         .hamburger-box { width: 24px; height: 18px; display: inline-block; position: relative; }
         .hamburger-inner, .hamburger-inner::before, .hamburger-inner::after { 
             width: 22px; 

@@ -27,6 +27,8 @@ class CompanyModel extends Model
         'lat_num            AS lat',
         'lng_num            AS lng',
         'estado             AS status',
+        'phone',
+        'phone_mobile',
     ];
 
     public function getByCif(string $cif): ?array

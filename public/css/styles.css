@@ -5045,6 +5045,35 @@ footer a.minor:hover {
     display: block;
 }
 
+/* PRO: Buscador PRO (gradient) */
+.nav .btn_header.btn_header--pro {
+    background: linear-gradient(90deg, #2152ff 0%, #12b48a 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(33, 82, 255, 0.3);
+    border: none;
+    margin-right: 14px;
+    padding: 0.5rem 1.4rem;
+    font-weight: 700;
+}
+
+.nav .btn_header.btn_header--pro:hover {
+    background: linear-gradient(90deg, #2e5cff 0%, #1bc49a 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(33, 82, 255, 0.45);
+    color: #ffffff;
+}
+
+.nav .btn_header.btn_header--pro:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(33, 82, 255, 0.4);
+}
+
+@media (max-width: 1024px) {
+    .nav .btn_header.btn_header--pro {
+        display: none !important;
+    }
+}
+
 
 .btn_start {
     border: none;

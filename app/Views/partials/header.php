@@ -51,8 +51,7 @@
 
             <!-- Programmatic Navigation (Desktop) -->
             <nav class="desktop-only" aria-label="Principal" style="display:flex; align-items:center;">
-                <a class="minor-nav-link" href="<?=site_url() ?>autocompletado-cif-empresas">Buscador Pro</a>
-                <span class="nav-sep">•</span>
+                <a class="btn_header btn_header--pro" href="<?=site_url() ?>autocompletado-cif-empresas">Buscador Pro</a>
                 <a class="minor-nav-link" href="<?=site_url() ?>#buscar">Buscar</a>
                 <span class="nav-sep">•</span>
                 <a class="minor-nav-link" href="<?=site_url() ?>#caracteristicas">Características</a>
@@ -109,7 +108,6 @@
             padding: 8px;
             cursor: pointer;
             z-index: 100;
-            margin-right: -4px;
         }
 
         .hamburger-box {

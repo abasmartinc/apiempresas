@@ -77,16 +77,20 @@ class Company extends BaseController
             $prov = $company['provincia'];
         }
         
-        $title = "Información de {$name} - {$cif}";
-        if ($prov) $title .= " ({$prov})";
-        $title .= " | Datos Registrales y Scoring";
+        $title = "{$name} - CIF, Teléfono, Dirección y Cargos";
+        if ($prov) $title .= " | {$prov}";
+        $title .= " - APIEmpresas.es";
 
-        $desc = "Consulta los datos oficiales de {$name} ({$cif}): domicilio en {$prov}, actividad ";
-        $act = $company['cnae_label'] ?? '';
-        if ($act) $desc .= character_limiter($act, 50);
-        else $desc .= "social registrada";
+        $desc = "Consulte el CIF, dirección, teléfono y cargos de {$name}";
+        if ($prov) $desc .= " en {$prov}";
+        $desc .= ". ";
         
-        $desc .= ", scoring de riesgo e informes comerciales. Información oficial actualizada.";
+        $act = $company['cnae_label'] ?? '';
+        if ($act) {
+            $desc .= "Su actividad es " . character_limiter($act, 100) . ". ";
+        }
+        
+        $desc .= "Consulte su balance, cuentas anuales y últimos actos inscritos en el Resgistro Mercantil (BORME).";
 
         // Related companies
         $related = $this->companyModel->getRelated(
