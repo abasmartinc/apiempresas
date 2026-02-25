@@ -127,6 +127,41 @@ class Webhook extends Controller
         $subscriptionModel = new UsersuscriptionsModel();
         $sub = $subscriptionModel->where('stripe_subscription_id', $stripeSubscriptionId)->first();
 
+        // FALLBACK: Si no existe localmente, puede que el webhook 'invoice.paid' llegara ANTES que 'checkout.session.completed'
+        // Intentamos recuperar la suscripción de Stripe para guardarla nosotros ahora mismo.
+        if (!$sub) {
+            log_message('info', "[Webhook::handleInvoicePaid] Suscripción no encontrada localmente ({$stripeSubscriptionId}). Intentando recuperación desde Stripe API...");
+            try {
+                $stripe = new \Stripe\StripeClient(getenv('STRIPE_SECRET_KEY'));
+                $stripeSub = $stripe->subscriptions->retrieve($stripeSubscriptionId);
+                
+                if ($stripeSub && isset($stripeSub->metadata->user_id)) {
+                    $userId   = (int)$stripeSub->metadata->user_id;
+                    $planSlug = $stripeSub->metadata->plan;
+                    
+                    $planModel = new \App\Models\ApiPlanModel();
+                    $plan = $planModel->where('slug', $planSlug)->first();
+                    
+                    if ($plan) {
+                        $subscriptionModel->insert([
+                            'user_id'                => $userId,
+                            'plan_id'                => $plan->id,
+                            'stripe_subscription_id' => $stripeSubscriptionId,
+                            'status'                 => 'active',
+                            'current_period_start'   => date('Y-m-d H:i:s', $stripeSub->current_period_start),
+                            'current_period_end'     => date('Y-m-d H:i:s', $stripeSub->current_period_end),
+                            'created_at'             => date('Y-m-d H:i:s'),
+                            'updated_at'             => date('Y-m-d H:i:s'),
+                        ]);
+                        $sub = $subscriptionModel->where('stripe_subscription_id', $stripeSubscriptionId)->first();
+                        log_message('info', "[Webhook::handleInvoicePaid] Suscripción recuperada y creada 'on-the-fly' para el usuario {$userId}");
+                    }
+                }
+            } catch (\Exception $e) {
+                log_message('error', "[Webhook::handleInvoicePaid] Error crítico recuperando suscripción de Stripe: " . $e->getMessage());
+            }
+        }
+
         if ($sub) {
             // Actualizar fecha de fin
             $subscriptionModel->update($sub->id, [
