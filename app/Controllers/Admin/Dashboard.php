@@ -544,21 +544,25 @@ class Dashboard extends BaseController
         $email->setTo($user->email);
         $email->setSubject($subject);
 
-        // Usar plantilla HTML
-        $body = view('emails/user_notification', [
-            'user' => $user,
-            'content' => $message,
-            'subject' => $subject
-        ]);
-
-        $email->setMessage($body);
+        $trackingCode = bin2hex(random_bytes(16));
 
         $logData = [
             'user_id' => $userId,
             'subject' => $subject,
             'message' => $message,
+            'tracking_code' => $trackingCode,
             'created_at' => date('Y-m-d H:i:s')
         ];
+
+        // Usar plantilla HTML
+        $body = view('emails/user_notification', [
+            'user' => $user,
+            'content' => $message,
+            'subject' => $subject,
+            'tracking_code' => $trackingCode
+        ]);
+
+        $email->setMessage($body);
 
         if ($email->send()) {
             $logData['status'] = 'success';
@@ -685,21 +689,25 @@ class Dashboard extends BaseController
             $emailService->setTo($user->email);
             $emailService->setSubject($subject);
 
-            // Usar plantilla HTML
-            $body = view('emails/user_notification', [
-                'user' => $user,
-                'content' => $message,
-                'subject' => $subject
-            ]);
-
-            $emailService->setMessage($body);
+            $trackingCode = bin2hex(random_bytes(16));
 
             $logData = [
                 'user_id' => $user->id,
                 'subject' => $subject,
                 'message' => $message,
+                'tracking_code' => $trackingCode,
                 'created_at' => date('Y-m-d H:i:s')
             ];
+
+            // Usar plantilla HTML
+            $body = view('emails/user_notification', [
+                'user' => $user,
+                'content' => $message,
+                'subject' => $subject,
+                'tracking_code' => $trackingCode
+            ]);
+
+            $emailService->setMessage($body);
 
             if ($emailService->send()) {
                 $logData['status'] = 'success';
@@ -1370,17 +1378,39 @@ class Dashboard extends BaseController
     }
 
     /**
-     * Listado de Logs de Emails
+     * Dashboard de KPIs de emails
      */
     public function email_logs()
     {
-        $this->emailLogModel->select('email_logs.*, users.name as user_name, users.email as user_email');
-        $this->emailLogModel->join('users', 'users.id = email_logs.user_id', 'left');
+        // Stats generales
+        $totalSent = $this->emailLogModel->where('status', 'success')->countAllResults();
+        $totalOpened = $this->emailLogModel->where('opened_at IS NOT NULL')->countAllResults();
+        $totalClicked = $this->emailLogModel->where('clicked_at IS NOT NULL')->countAllResults();
+        $totalLogged = $this->emailLogModel->where('logged_in_at IS NOT NULL')->countAllResults();
+
+        $openRate = $totalSent > 0 ? round(($totalOpened / $totalSent) * 100, 1) : 0;
+        $clickRate = $totalSent > 0 ? round(($totalClicked / $totalSent) * 100, 1) : 0;
+        $conversionRate = $totalSent > 0 ? round(($totalLogged / $totalSent) * 100, 1) : 0;
+
+        // Historial reciente con joins
+        $builder = $this->emailLogModel->select('email_logs.*, users.name as user_name, users.email as user_email');
+        $builder->join('users', 'users.id = email_logs.user_id', 'left');
+        
+        $logs = $builder->orderBy('created_at', 'DESC')->paginate(30);
 
         $data = [
-            'title' => 'Logs de Emails | APIEmpresas',
-            'logs' => $this->emailLogModel->orderBy('created_at', 'DESC')->paginate(20),
+            'title' => 'KPIs de Emails | APIEmpresas',
+            'logs' => $logs,
             'pager' => $this->emailLogModel->pager,
+            'stats' => [
+                'total_sent' => $totalSent,
+                'total_opened' => $totalOpened,
+                'total_clicked' => $totalClicked,
+                'total_logged' => $totalLogged,
+                'open_rate' => $openRate,
+                'click_rate' => $clickRate,
+                'conversion_rate' => $conversionRate
+            ]
         ];
 
         return view('admin/email_logs', $data);

@@ -32,7 +32,11 @@
                 </div>
 
                 <div class="cta-container">
-                    <a href="<?= site_url('enter') ?>" class="btn">Ir a mi Panel</a>
+                    <?php 
+                    $enterUrl = site_url('enter');
+                    $ctaUrl = isset($tracking_code) ? site_url('e/c/' . $tracking_code . '?t=' . urlencode($enterUrl)) : $enterUrl;
+                    ?>
+                    <a href="<?= $ctaUrl ?>" class="btn">Ir a mi Panel</a>
                 </div>
             </div>
             <div class="footer">
@@ -41,5 +45,8 @@
             </div>
         </div>
     </div>
+    <?php if (isset($tracking_code)): ?>
+        <img src="<?= site_url('e/o/' . $tracking_code) ?>" width="1" height="1" style="display:none !important;" />
+    <?php endif; ?>
 </body>
 </html>

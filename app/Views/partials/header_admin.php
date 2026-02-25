@@ -53,6 +53,8 @@
             <a class="minor" href="<?=site_url('admin/companies') ?>">Empresas</a>
             <span style="margin:0 10px; color:#cdd6ea">•</span>
             <a class="minor" href="<?=site_url('admin/invoices') ?>">Facturas</a>
+            <span style="margin:0 10px; color:#cdd6ea">•</span>
+            <a class="minor" href="<?=site_url('admin/email-logs') ?>">KPIs Emails</a>
         </nav>
 
         <div class="desktop-only">

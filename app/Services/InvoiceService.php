@@ -29,6 +29,7 @@ class InvoiceService
         $plan = $planModel->find($planId);
 
         if (!$user || !$plan) {
+            log_message('error', "[InvoiceService] User or Plan not found. UserID: $userId, PlanID: $planId");
             return null;
         }
 

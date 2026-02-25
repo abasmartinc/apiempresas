@@ -119,7 +119,10 @@ class Webhook extends Controller
     private function handleInvoicePaid($invoice)
     {
         $stripeSubscriptionId = $invoice->subscription;
-        if (!$stripeSubscriptionId) return;
+        if (!$stripeSubscriptionId) {
+            log_message('error', "[Webhook::handleInvoicePaid] No subscription ID in invoice: " . $invoice->id);
+            return;
+        }
 
         $subscriptionModel = new UsersuscriptionsModel();
         $sub = $subscriptionModel->where('stripe_subscription_id', $stripeSubscriptionId)->first();
@@ -212,6 +215,8 @@ class Webhook extends Controller
             }
 
             log_message('info', "[Webhook::stripe] Subscription renewed/paid, invoice generated and email sent: {$stripeSubscriptionId}");
+        } else {
+            log_message('error', "[Webhook::handleInvoicePaid] Subscription not found for Stripe Subscription ID: {$stripeSubscriptionId}");
         }
     }
 

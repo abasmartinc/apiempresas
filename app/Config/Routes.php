@@ -46,6 +46,10 @@ $routes->get('blog/(:segment)', 'Blog::post/$1');
 $routes->get('get-posts-grid', 'Blog::get_posts_grid');
 
 
+// Email Tracking
+$routes->get('e/o/(:any)', 'EmailTracking::open/$1');
+$routes->get('e/c/(:any)', 'EmailTracking::click/$1');
+
 // ----------- API ----------- //
 $routes->group('', ['filter' => 'apikey'], static function ($routes) {
     $routes->get('api/v1/companies', 'Api\V1\CompaniesByCif::index');

@@ -101,6 +101,16 @@ class Login extends BaseController
             'logged_in'  => true,
         ]);
 
+        // Track login from email if tracking code exists
+        if ($tc = session('email_tracking_code')) {
+            $emailLogModel = new \App\Models\EmailLogModel();
+            $log = $emailLogModel->where('tracking_code', $tc)->first();
+            if ($log && is_null($log->logged_in_at)) {
+                $emailLogModel->update($log->id, ['logged_in_at' => date('Y-m-d H:i:s')]);
+            }
+            session()->remove('email_tracking_code');
+        }
+
         // Log successful login
         log_activity('login');
 
