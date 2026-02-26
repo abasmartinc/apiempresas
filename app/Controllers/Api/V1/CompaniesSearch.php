@@ -19,6 +19,7 @@ class CompaniesSearch extends ResourceController
     public function __construct()
     {
         $this->companyModel = new CompanyModel();
+        helper('api');
     }
 
     public function index()
@@ -45,6 +46,12 @@ class CompaniesSearch extends ResourceController
         $cachedData = cache($cacheKey);
 
         if (is_array($cachedData) && !empty($cachedData)) {
+            // Apply masking if Free plan
+            $planId = $this->request->api_meta['plan_id'] ?? 1;
+            if ((int)$planId === 1) {
+                $cachedData = mask_company_data($cachedData);
+            }
+
             return $this->respond(
                 [
                     'success' => true,
@@ -71,8 +78,14 @@ class CompaniesSearch extends ResourceController
             // El modelo puede devolver ['data'=>..., 'meta'=>...]; aquí solo nos interesa data
             $data = $result['data'] ?? $result;
 
-            // Guardar SOLO data en cache
+            // Guardar SOLO data en cache (completa)
             cache()->save($cacheKey, $data, 3600);
+
+            // Apply masking if Free plan
+            $planId = $this->request->api_meta['plan_id'] ?? 1;
+            if ((int)$planId === 1) {
+                $data = mask_company_data($data);
+            }
 
             return $this->respond(
                 [

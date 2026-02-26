@@ -19,6 +19,7 @@ class CompaniesByCif extends ResourceController
     public function __construct()
     {
         $this->companyModel = new CompanyModel();
+        helper('api');
     }
 
     public function index()
@@ -41,6 +42,12 @@ class CompaniesByCif extends ResourceController
         $cached = cache($cacheKey);
 
         if (is_array($cached) && !empty($cached)) {
+            // Apply masking if Free plan
+            $planId = $this->request->api_meta['plan_id'] ?? 1;
+            if ((int)$planId === 1) {
+                $cached = mask_company_data($cached);
+            }
+
             return $this->respond(
                 [
                     'success' => true,
@@ -64,8 +71,14 @@ class CompaniesByCif extends ResourceController
                 );
             }
 
-            // Guardar SOLO data en cache
+            // Guardar SOLO data en cache (completa)
             cache()->save($cacheKey, $company, 86400); // 24h
+
+            // Apply masking if Free plan
+            $planId = $this->request->api_meta['plan_id'] ?? 1;
+            if ((int)$planId === 1) {
+                $company = mask_company_data($company);
+            }
 
             return $this->respond(
                 [
