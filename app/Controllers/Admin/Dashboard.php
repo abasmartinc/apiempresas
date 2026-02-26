@@ -888,6 +888,31 @@ class Dashboard extends BaseController
             cache()->save($cacheName, $data, 86400);
         }
 
+        // --- REAL TIME STATS (Calculated every time) ---
+        $fiveMinutesAgo = date('Y-m-d H:i:s', strtotime('-5 minutes'));
+        $data['total_online'] = $this->userModel->where('last_active_at >=', $fiveMinutesAgo)->countAllResults();
+        
+        $onlineUsers = $this->userModel->where('last_active_at >=', $fiveMinutesAgo)
+                                       ->orderBy('last_active_at', 'DESC')
+                                       ->limit(10)
+                                       ->find();
+        
+        $html = '';
+        foreach ($onlineUsers as $ou) {
+            $name = esc($ou->name ?: $ou->email);
+            $time = date('H:i', strtotime($ou->last_active_at));
+            $html .= "<div style='background: white; padding: 8px 16px; border-radius: 100px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 500; color: #1e293b;'>
+                        <span style='width: 8px; height: 8px; background: #10b981; border-radius: 50%;'></span>
+                        $name
+                        <span style='color: #94a3b8; font-size: 0.75rem; font-weight: 400;'>$time</span>
+                      </div>";
+        }
+        if ($data['total_online'] > count($onlineUsers)) {
+            $diff = $data['total_online'] - count($onlineUsers);
+            $html .= "<div style='padding: 8px 16px; color: #64748b; font-size: 0.9rem;'>y $diff más...</div>";
+        }
+        $data['online_users_html'] = $html;
+
         return $this->response->setJSON($data);
     }
 
