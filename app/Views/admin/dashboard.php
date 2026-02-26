@@ -536,6 +536,18 @@
                 <p>Gestión de baneo de IPs y cortafuegos de la API.</p>
             </div>
         </a>
+
+        <a href="<?= site_url('admin/ia-marketing') ?>" class="admin-card" style="border-color: rgba(16, 185, 129, 0.3);">
+            <div class="admin-icon-wrapper icon-sub-green">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                </svg>
+            </div>
+            <div class="admin-card-content">
+                <span>IA Marketing</span>
+                <p>Análisis de leads inteligentes e incentivación a suscripciones.</p>
+            </div>
+        </a>
     </div>
 
     <!-- Herramientas del Sistema Section -->

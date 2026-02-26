@@ -93,6 +93,10 @@ class Dashboard extends BaseController
     {
         $httpStatus = $this->request->getGet('http_status');
         $zeroResults = $this->request->getGet('zero');
+        $q = $this->request->getGet('q');
+        $fromDate = $this->request->getGet('from_date');
+        $toDate = $this->request->getGet('to_date');
+        $channel = $this->request->getGet('channel');
 
         $builder = $this->searchLogModel;
 
@@ -104,12 +108,38 @@ class Dashboard extends BaseController
             $builder->where('result_count', 0);
         }
 
+        if ($q) {
+            $builder->groupStart()
+                    ->like('query_raw', $q)
+                    ->orLike('ip_address', $q)
+                    ->orLike('user_agent', $q)
+                    ->groupEnd();
+        }
+
+        if ($fromDate) {
+            $builder->where('created_at >=', $fromDate . ' 00:00:00');
+        }
+
+        if ($toDate) {
+            $builder->where('created_at <=', $toDate . ' 23:59:59');
+        }
+
+        if ($channel) {
+            $builder->where('channel', $channel);
+        }
+
+        $paginatedLogs = $builder->orderBy('created_at', 'DESC')->paginate(30, 'default');
+        
         $data = [
             'title' => 'Logs de Búsqueda | APIEmpresas',
-            'logs' => $builder->orderBy('created_at', 'DESC')->paginate(30, 'default'),
+            'logs' => $paginatedLogs,
             'pager' => $this->searchLogModel->pager,
             'http_status' => $httpStatus,
-            'zero' => $zeroResults
+            'zero' => $zeroResults,
+            'q' => $q,
+            'from_date' => $fromDate,
+            'to_date' => $toDate,
+            'channel' => $channel,
         ];
 
         // Determinar qué logs de tipo CIF que fueron 0 ahora existen
@@ -174,6 +204,7 @@ class Dashboard extends BaseController
         $q = $this->request->getGet('q');
         $userId = $this->request->getGet('user_id');
         $statusCode = $this->request->getGet('status_code');
+        $date = $this->request->getGet('date');
 
         $builder = $this->apiRequestsModel;
         $builder->select('api_requests.*, users.name as user_name, users.email as user_email');
@@ -191,6 +222,11 @@ class Dashboard extends BaseController
             $builder->where('status_code', $statusCode);
         }
 
+        if ($date) {
+            $builder->where('api_requests.created_at >=', $date . ' 00:00:00');
+            $builder->where('api_requests.created_at <=', $date . ' 23:59:59');
+        }
+
         $data = [
             'title' => 'Peticiones API | APIEmpresas',
             'requests' => $builder->orderBy('created_at', 'DESC')->paginate(40, 'default'),
@@ -198,7 +234,8 @@ class Dashboard extends BaseController
             'users' => $this->userModel->orderBy('name', 'ASC')->findAll(),
             'q' => $q,
             'user_id' => $userId,
-            'status_code' => $statusCode
+            'status_code' => $statusCode,
+            'date' => $date
         ];
 
         return view('admin/api_requests', $data);
@@ -1056,9 +1093,28 @@ class Dashboard extends BaseController
      */
     public function plans()
     {
+        $q = $this->request->getGet('q');
+        $isActive = $this->request->getGet('is_active');
+
+        $builder = $this->planModel;
+
+        if ($q) {
+            $builder->groupStart()
+                    ->like('name', $q)
+                    ->orLike('slug', $q)
+                    ->groupEnd();
+        }
+
+        if ($isActive !== null && $isActive !== '') {
+            $builder->where('is_active', $isActive);
+        }
+
         $data = [
             'title' => 'Gestión de Planes | APIEmpresas',
-            'plans' => $this->planModel->orderBy('id', 'ASC')->findAll(),
+            'plans' => $builder->orderBy('id', 'ASC')->paginate(20),
+            'pager' => $this->planModel->pager,
+            'q' => $q,
+            'is_active' => $isActive,
         ];
 
         return view('admin/plans', $data);
@@ -1152,13 +1208,37 @@ class Dashboard extends BaseController
      */
     public function api_keys()
     {
-        $this->apiKeyModel->select('api_keys.*, users.name as user_name, users.email as user_email');
-        $this->apiKeyModel->join('users', 'users.id = api_keys.user_id', 'left');
+        $q = $this->request->getGet('q');
+        $userId = $this->request->getGet('user_id');
+        $isActive = $this->request->getGet('is_active');
+
+        $builder = $this->apiKeyModel;
+        $builder->select('api_keys.*, users.name as user_name, users.email as user_email');
+        $builder->join('users', 'users.id = api_keys.user_id', 'left');
+
+        if ($q) {
+            $builder->groupStart()
+                    ->like('api_keys.name', $q)
+                    ->orLike('api_keys.api_key', $q)
+                    ->groupEnd();
+        }
+
+        if ($userId) {
+            $builder->where('api_keys.user_id', $userId);
+        }
+
+        if ($isActive !== null && $isActive !== '') {
+            $builder->where('api_keys.is_active', $isActive);
+        }
 
         $data = [
             'title' => 'Gestión de API Keys | APIEmpresas',
-            'keys' => $this->apiKeyModel->orderBy('created_at', 'DESC')->paginate(20),
+            'keys' => $builder->orderBy('api_keys.created_at', 'DESC')->paginate(20),
             'pager' => $this->apiKeyModel->pager,
+            'users' => $this->userModel->orderBy('name', 'ASC')->findAll(),
+            'q' => $q,
+            'user_id' => $userId,
+            'is_active' => $isActive,
         ];
 
         return view('admin/api_keys', $data);
@@ -1392,27 +1472,178 @@ class Dashboard extends BaseController
         $clickRate = $totalSent > 0 ? round(($totalClicked / $totalSent) * 100, 1) : 0;
         $conversionRate = $totalSent > 0 ? round(($totalLogged / $totalSent) * 100, 1) : 0;
 
+        // Filtros para historial
+        $q = $this->request->getGet('q');
+        $status = $this->request->getGet('status');
+        $userId = $this->request->getGet('user_id');
+        $opened = $this->request->getGet('opened');
+        $clicked = $this->request->getGet('clicked');
+        $logged = $this->request->getGet('logged');
+        $dateFrom = $this->request->getGet('date_from');
+        $dateTo = $this->request->getGet('date_to');
+
         // Historial reciente con joins
         $builder = $this->emailLogModel->select('email_logs.*, users.name as user_name, users.email as user_email');
         $builder->join('users', 'users.id = email_logs.user_id', 'left');
+
+        if ($q) {
+            $builder->groupStart()
+                    ->like('users.name', $q)
+                    ->orLike('users.email', $q)
+                    ->orLike('email_logs.subject', $q)
+                    ->groupEnd();
+        }
+
+        if ($status) {
+            $builder->where('email_logs.status', $status);
+        }
+
+        if ($userId) {
+            $builder->where('email_logs.user_id', $userId);
+        }
+
+        if ($opened === 'yes') {
+            $builder->where('email_logs.opened_at IS NOT NULL');
+        } elseif ($opened === 'no') {
+            $builder->where('email_logs.opened_at IS NULL');
+        }
+
+        if ($clicked === 'yes') {
+            $builder->where('email_logs.clicked_at IS NOT NULL');
+        } elseif ($clicked === 'no') {
+            $builder->where('email_logs.clicked_at IS NULL');
+        }
+
+        if ($logged === 'yes') {
+            $builder->where('email_logs.logged_in_at IS NOT NULL');
+        } elseif ($logged === 'no') {
+            $builder->where('email_logs.logged_in_at IS NULL');
+        }
+
+        if ($dateFrom) {
+            $builder->where('email_logs.created_at >=', $dateFrom . ' 00:00:00');
+        }
+
+        if ($dateTo) {
+            $builder->where('email_logs.created_at <=', $dateTo . ' 23:59:59');
+        }
         
-        $logs = $builder->orderBy('created_at', 'DESC')->paginate(30);
+        $logs = $builder->orderBy('email_logs.created_at', 'DESC')->paginate(30);
 
         $data = [
-            'title' => 'KPIs de Emails | APIEmpresas',
-            'logs' => $logs,
-            'pager' => $this->emailLogModel->pager,
-            'stats' => [
-                'total_sent' => $totalSent,
-                'total_opened' => $totalOpened,
-                'total_clicked' => $totalClicked,
-                'total_logged' => $totalLogged,
-                'open_rate' => $openRate,
-                'click_rate' => $clickRate,
-                'conversion_rate' => $conversionRate
-            ]
-        ];
+        'title' => 'KPIs de Emails | APIEmpresas',
+        'logs' => $logs,
+        'pager' => $this->emailLogModel->pager,
+        'stats' => [
+            'total_sent' => $totalSent,
+            'total_opened' => $totalOpened,
+            'total_clicked' => $totalClicked,
+            'total_logged' => $totalLogged,
+            'open_rate' => $openRate,
+            'click_rate' => $clickRate,
+            'conversion_rate' => $conversionRate
+        ],
+        'q' => $q,
+        'status' => $status,
+        'user_id' => $userId,
+        'opened' => $opened,
+        'clicked' => $clicked,
+        'logged' => $logged,
+        'date_from' => $dateFrom,
+        'date_to' => $dateTo,
+        'all_users' => $this->userModel->orderBy('name', 'ASC')->findAll()
+    ];
 
         return view('admin/email_logs', $data);
+    }
+    /**
+     * Dashboard de IA Marketing: Lead Scoring
+     */
+    public function ia_marketing()
+    {
+        $db = \Config\Database::connect();
+        
+        $sql = "
+            SELECT 
+                u.id, u.name, u.email, u.created_at, u.last_login_at,
+                (SELECT COUNT(id) FROM company_search_logs sl WHERE sl.user_id = u.id) as total_searches,
+                IFNULL((SELECT SUM(requests_count) FROM api_usage_daily aud WHERE aud.user_id = u.id), 0) as total_api_requests,
+                (SELECT COUNT(id) FROM user_activity_logs al WHERE al.user_id = u.id) as total_activity,
+                IFNULL((SELECT status FROM user_subscriptions sub WHERE sub.user_id = u.id AND sub.status = 'active' LIMIT 1), 'inactive') as sub_status,
+                (SELECT plan_id FROM user_subscriptions sub WHERE sub.user_id = u.id AND sub.status = 'active' LIMIT 1) as plan_id
+            FROM users u
+            ORDER BY u.created_at DESC
+            LIMIT 100
+        ";
+        
+        $usersResult = $db->query($sql)->getResult();
+        
+        $leads = [];
+        $totalHotLeads = 0;
+        $totalScoreSum = 0;
+        $scoredUsersCount = 0;
+        
+        foreach($usersResult as $u) {
+            $score = 0;
+            
+            // 1. Recencia (25 ptos max)
+            if ($u->last_login_at) {
+                $daysSinceLogin = (strtotime(date('Y-m-d')) - strtotime($u->last_login_at)) / (60 * 60 * 24);
+                if ($daysSinceLogin <= 7) $score += 25;
+                elseif ($daysSinceLogin <= 30) $score += 15;
+                elseif ($daysSinceLogin <= 90) $score += 5;
+            }
+            
+            // 2. Búsquedas Web (25 ptos max)
+            if ($u->total_searches >= 30) $score += 25;
+            elseif ($u->total_searches >= 10) $score += 15;
+            elseif ($u->total_searches >= 1) $score += 5;
+
+            // 3. API Requests (25 ptos max)
+            if ($u->total_api_requests >= 1000) $score += 25;
+            elseif ($u->total_api_requests >= 100) $score += 15;
+            elseif ($u->total_api_requests >= 10) $score += 5;
+            
+            // 4. Activity Logs (25 ptos max)
+            if ($u->total_activity >= 50) $score += 25;
+            elseif ($u->total_activity >= 20) $score += 15;
+            elseif ($u->total_activity >= 5) $score += 5;
+            
+            $u->score = $score;
+            $u->total_searches     = (int) $u->total_searches;
+            $u->total_api_requests = (int) $u->total_api_requests;
+            $u->total_activity     = (int) $u->total_activity;
+            
+            // Skip users who already have an active PAID subscription (plan_id > 1)
+            // If they are 'active' but on 'plan_id = 1', they are still leads.
+            if ($u->sub_status === 'active' && $u->plan_id > 1) continue;
+
+            $leads[] = $u;
+            if ($score > 0) {
+                $scoredUsersCount++;
+                $totalScoreSum += $score;
+            }
+            
+            if ($score >= 50 && ($u->sub_status !== 'active' || $u->plan_id == 1)) {
+                $totalHotLeads++;
+            }
+        }
+        
+        // Ordenar mayor a menor score
+        usort($leads, function($a, $b) {
+            return $b->score <=> $a->score;
+        });
+
+        $data = [
+            'title' => 'IA Marketing: Lead Scoring | APIEmpresas',
+            'leads' => $leads,
+            'stats' => [
+                'total_leads' => count($leads),
+                'total_hot_leads' => $totalHotLeads,
+                'average_score' => $scoredUsersCount > 0 ? round($totalScoreSum / $scoredUsersCount) : 0
+            ]
+        ];
+        
+        return view('admin/ia_marketing', $data);
     }
 }

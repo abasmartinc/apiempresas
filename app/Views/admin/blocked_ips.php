@@ -12,12 +12,23 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h1 class="title">Centro de Seguridad: IPs Bloqueadas</h1>
         <div style="display: flex; gap: 10px;">
-            <form action="<?= site_url('admin/blocked-ips') ?>" method="get" style="display: flex; gap: 10px; align-items: center;">
-                <input type="text" name="q" class="input" placeholder="Buscar IP o motivo..." value="<?= esc($q) ?>" style="padding: 8px; font-size: 0.85rem;">
-                <button type="submit" class="btn primary" style="padding: 8px 15px;">Buscar</button>
-            </form>
             <a href="<?= site_url('dashboard') ?>" class="btn ghost">Volver al Dashboard</a>
         </div>
+    </div>
+
+    <!-- Buscador / Filtros -->
+    <div class="card" style="margin-bottom: 2rem; padding: 1.5rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;">
+        <form action="<?= site_url('admin/blocked-ips') ?>" method="get" class="grid" style="grid-template-columns: 1fr auto auto; gap: 1rem; align-items: end;">
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Búsqueda</label>
+                <input type="text" name="q" class="input" style="width: 100%;" placeholder="Buscar IP o motivo..." value="<?= esc($q ?? '') ?>">
+            </div>
+            
+            <div style="display: flex; gap: 5px; height: 42px;">
+                <button type="submit" class="btn" style="padding: 0 20px;">Filtrar</button>
+                <a href="<?= site_url('admin/blocked-ips') ?>" class="btn ghost" title="Limpiar filtros" style="padding: 0 15px; display: flex; align-items: center;">🔄</a>
+            </div>
+        </form>
     </div>
 
     <?php if (session()->getFlashdata('message')): ?>

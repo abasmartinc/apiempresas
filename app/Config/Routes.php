@@ -156,6 +156,9 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('activity-logs', 'Admin\ActivityLogs::index');
     $routes->get('activity-logs/user/(:num)', 'Admin\ActivityLogs::user/$1');
     $routes->get('activity-logs/export', 'Admin\ActivityLogs::export');
+
+    // IA Marketing
+    $routes->get('ia-marketing', 'Admin\Dashboard::ia_marketing');
 });
 
 // Webhooks

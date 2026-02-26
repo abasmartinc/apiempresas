@@ -21,7 +21,7 @@
         <form action="<?= site_url('admin/subscriptions') ?>" method="get" class="grid" style="grid-template-columns: 1fr 1fr auto auto; gap: 1rem; align-items: end;">
             <div>
                 <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Usuario</label>
-                <select name="user_id" class="input" style="width: 100%;">
+                <select name="user_id" id="user-select" class="input" style="width: 100%;">
                     <option value="">Todos los usuarios</option>
                     <?php foreach ($users as $u): ?>
                         <option value="<?= $u->id ?>" <?= $user_id == $u->id ? 'selected' : '' ?>>
@@ -129,6 +129,54 @@
 </main>
 
 <?= view('partials/footer') ?>
+<!-- Select2 para hacer el select buscable -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    /* Ajustes para Select2 encaje con el .input */
+    .select2-container--default .select2-selection--single {
+        border-radius: 8px;
+        height: 42px;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #0f172a;
+        font-size: 0.85rem;
+        line-height: normal;
+        padding-left: 12px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 40px;
+        right: 8px;
+    }
+    .select2-dropdown {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        font-size: 0.85rem;
+    }
+    .select2-search--dropdown .select2-search__field {
+        border-radius: 4px;
+        border: 1px solid #e2e8f0;
+    }
+    .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+        background-color: #2152ff;
+    }
+</style>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if(document.getElementById('user-select')) {
+            $('#user-select').select2({
+                placeholder: "Buscar usuario...",
+                width: '100%'
+            });
+        }
+    });
+</script>
+
 </body>
 </html>
 

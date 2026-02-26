@@ -17,6 +17,27 @@
         </div>
     </div>
 
+    <div class="card" style="margin-bottom: 2rem; padding: 1.5rem;">
+        <form action="<?= site_url('admin/plans') ?>" method="get" class="grid" style="grid-template-columns: 1fr 1fr auto auto; gap: 1rem; align-items: end;">
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Búsqueda</label>
+                <input type="text" name="q" class="input" style="width: 100%;" placeholder="Ej: Premium o básico..." value="<?= esc($q ?? '') ?>">
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Estado</label>
+                <select name="is_active" class="input" style="width: 100%;">
+                    <option value="">Todos</option>
+                    <option value="1" <?= ($is_active ?? '') === '1' ? 'selected' : '' ?>>Activo</option>
+                    <option value="0" <?= ($is_active ?? '') === '0' ? 'selected' : '' ?>>Inactivo</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 5px;">
+                <button type="submit" class="btn">Filtrar</button>
+                <a href="<?= site_url('admin/plans') ?>" class="btn ghost" title="Limpiar filtros">🔄</a>
+            </div>
+        </form>
+    </div>
+
     <?php if (session()->getFlashdata('message')): ?>
         <div style="background: #dcfce7; color: #166534; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #bbf7d0;">
             <?= session()->getFlashdata('message') ?>
@@ -42,6 +63,11 @@
                 </tr>
             </thead>
             <tbody>
+                <?php if (empty($plans)): ?>
+                    <tr>
+                        <td colspan="6" style="padding: 40px; text-align: center; color: #94a3b8;">No se encontraron planes.</td>
+                    </tr>
+                <?php endif; ?>
                 <?php foreach ($plans as $plan): ?>
                 <tr style="border-bottom: 1px solid #f1f5f9;">
                     <td style="padding: 12px;">
@@ -77,6 +103,13 @@
             </tbody>
         </table>
     </div>
+
+    <?php if (isset($pager)): ?>
+    <div style="margin-top: 2rem;">
+        <?= $pager->links('default', 'admin_full') ?>
+    </div>
+    <?php endif; ?>
+
 </main>
 
 <?= view('partials/footer') ?>
