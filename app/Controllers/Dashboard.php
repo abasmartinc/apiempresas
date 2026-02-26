@@ -45,9 +45,9 @@ class Dashboard extends BaseController
         // --- Personalization stats for non-admins ---
         $data['api_key'] = $this->ApikeysModel->where(['user_id' => $userId, 'is_active' => 1])->first();
         $data['plan'] = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
-        $data['api_request_total_month'] = $this->ApiRequestsModel->countRequestsForMonth(date('Y-m'), ['user_id' => $userId]);
-        $data['avg_latency'] = $this->ApiRequestsModel->getAverageLatency(['user_id' => $userId]);
-        $data['error_rate']  = $this->ApiRequestsModel->getErrorRate(['user_id' => $userId]);
+        
+        // Fast query just to know whether to show onboarding strip or not
+        $data['has_first_request'] = $this->ApiRequestsModel->hasFirstRequest(['user_id' => $userId]);
 
         // Si tiene plan activo, va al dashboard de pago
         if ($data['plan']) {
@@ -60,6 +60,36 @@ class Dashboard extends BaseController
         }
 
         return view('dashboard_construction', $data);
+    }
+
+    /**
+     * Devuelve los KPIs pesados vía AJAX para no bloquear la carga ni la sesión
+     */
+    public function kpis_ajax()
+    {
+        if (!session('logged_in')) {
+            return $this->response->setJSON(['error' => 'No autorizado'])->setStatusCode(401);
+        }
+
+        $userId = session('user_id');
+
+        // ¡CRÍTICO! Liberar el archivo de sesión de Inmediato antes de lanzar queries pesadas
+        session()->writeClose();
+
+        $cacheKey = 'kpis_user_' . $userId;
+        $kpis = cache($cacheKey);
+
+        if (!$kpis) {
+            $kpis = [
+                'api_request_total_month' => $this->ApiRequestsModel->countRequestsForMonth(date('Y-m'), ['user_id' => $userId]),
+                'avg_latency' => $this->ApiRequestsModel->getAverageLatency(['user_id' => $userId]),
+                'error_rate' => $this->ApiRequestsModel->getErrorRate(['user_id' => $userId])
+            ];
+            // Cachear 15 minutos (900 segundos) para mitigar stress
+            cache()->save($cacheKey, $kpis, 900);
+        }
+
+        return $this->response->setJSON($kpis);
     }
 
     /**

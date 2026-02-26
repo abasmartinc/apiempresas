@@ -21,7 +21,7 @@
             </div>
 
             <!-- Onboarding strip (Only if 0 requests) -->
-            <?php if (empty($api_request_total_month) || $api_request_total_month == 0): ?>
+            <?php if (empty($has_first_request)): ?>
             <section class="onb-strip">
                 <div class="onb-top">
                     <div>
@@ -68,7 +68,7 @@
                             <div class="kpi__meta">de <?= number_format($plan->monthly_quota ?? 0, 0, ',', '.') ?> incluidas</div>
                         </div>
                         <div class="kpi__right">
-                            <p class="kpi__number"><?= number_format($api_request_total_month ?? 0, 0, ',', '.') ?></p>
+                            <p class="kpi__number" id="kpi-requests">...</p>
                         </div>
                         <p class="kpi__sub">
                             <span>Consumo del plan</span>
@@ -83,7 +83,7 @@
                             <div class="kpi__meta">últimas requests</div>
                         </div>
                         <div class="kpi__right">
-                            <p class="kpi__number"><?= number_format($avg_latency ?? 0, 0, ',', '.') ?><span class="kpi__unit">ms</span></p>
+                            <p class="kpi__number"><span id="kpi-latency">...</span><span class="kpi__unit" style="display:none;" id="kpi-latency-unit">ms</span></p>
                         </div>
                         <p class="kpi__sub">
                             <span>Tiempo de respuesta</span>
@@ -98,7 +98,7 @@
                             <div class="kpi__meta">ratio histórico</div>
                         </div>
                         <div class="kpi__right">
-                            <p class="kpi__number"><?= number_format($error_rate ?? 0, 2, ',', '.') ?><span class="kpi__unit">%</span></p>
+                            <p class="kpi__number"><span id="kpi-error">...</span><span class="kpi__unit" style="display:none;" id="kpi-error-unit">%</span></p>
                         </div>
                         <p class="kpi__sub">
                             <span>Ratio de error</span>
@@ -127,8 +127,59 @@
 
                 </div>
             </section>
+            
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const monthlyQuota = <?= json_encode((int)($plan->monthly_quota ?? 0)) ?>;
+                    
+                    fetch('<?= site_url('dashboard/kpis') ?>', {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data.error) return;
+                        
+                        // Formatter
+                        const numFmt = new Intl.NumberFormat('es-ES');
+                        
+                        // Render Requests
+                        const requestsEl = document.getElementById('kpi-requests');
+                        if(requestsEl) requestsEl.innerText = numFmt.format(data.api_request_total_month || 0);
+                        
+                        // Update Usage Bar inside DOM
+                        const usedEl = document.getElementById('usage-used-text');
+                        if(usedEl) usedEl.innerText = numFmt.format(data.api_request_total_month || 0);
+                        
+                        const usageFillEl = document.getElementById('usage-fill-bar');
+                        if(usageFillEl) {
+                            let quota = monthlyQuota || 1;
+                            let percent = Math.min(100, ((data.api_request_total_month || 0) / quota) * 100);
+                            usageFillEl.style.width = percent + '%';
+                        }
+                        
+                        // Update Right Widget Monthly Status
+                        const statusReqEl = document.getElementById('status-requests-text');
+                        if(statusReqEl) statusReqEl.innerText = numFmt.format(data.api_request_total_month || 0);
 
-
+                        // Render Latency
+                        const latencyEl = document.getElementById('kpi-latency');
+                        if(latencyEl) {
+                            latencyEl.innerText = numFmt.format(data.avg_latency || 0);
+                            document.getElementById('kpi-latency-unit').style.display = 'inline-block';
+                        }
+                        
+                        // Render Error Rate
+                        const errorEl = document.getElementById('kpi-error');
+                        if(errorEl) {
+                            errorEl.innerText = numFmt.format(data.error_rate || 0);
+                            document.getElementById('kpi-error-unit').style.display = 'inline-block';
+                        }
+                    })
+                    .catch(e => console.error('Error fetching KPIs', e));
+                });
+            </script>
 
             <div class="dash-grid">
                 <!-- LEFT -->
@@ -208,16 +259,17 @@
 
                         <?php 
                         $quota = $plan->monthly_quota ?? 1;
-                        $used = $api_request_total_month ?? 0;
-                        $percent = min(100, ($used / $quota) * 100);
+                        // Use 0 as default before JS loads
+                        $used = 0;
+                        $percent = 0;
                         ?>
                         <div class="usage-wrap">
                             <div class="usage-top">
-                                <span><span class="usage-strong"><?= number_format($used, 0, ',', '.') ?></span> de <?= number_format($quota, 0, ',', '.') ?> consultas usadas</span>
+                                <span><span class="usage-strong" id="usage-used-text">...</span> de <?= number_format($quota, 0, ',', '.') ?> consultas usadas</span>
                                 <span>Renueva el <span class="usage-strong"><?= isset($plan->current_period_end) ? date('d/m', strtotime($plan->current_period_end)) : '--/--' ?></span></span>
                             </div>
                             <div class="usage-bar">
-                                <div class="usage-fill" style="width:<?= $percent ?>%;"></div>
+                                <div class="usage-fill" id="usage-fill-bar" style="width:0%;"></div>
                             </div>
                             <div class="usage-footnote">
                                 Alertas activas: email al 80% y 100%. Recomendado: caché por CIF y retries con backoff.

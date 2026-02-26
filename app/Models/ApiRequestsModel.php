@@ -43,9 +43,13 @@ class ApiRequestsModel extends Model
     public function countRequestsForMonth(string $ym, array $where = []): int
     {
         // ym = 'YYYY-MM'
+        $startDate = $ym . '-01 00:00:00';
+        $endDate = date('Y-m-d H:i:s', strtotime("$startDate +1 month"));
+
         $builder = $this->db->table($this->table)
             ->select('COUNT(*) AS total', false)
-            ->like('created_at', $ym, 'after');
+            ->where('created_at >=', $startDate)
+            ->where('created_at <', $endDate);
 
         foreach ($where as $k => $v) {
             $builder->where($k, $v);
@@ -58,9 +62,13 @@ class ApiRequestsModel extends Model
     public function countRequestsForDay(string $ymd, array $where = []): int
     {
         // ymd = 'YYYY-MM-DD'
+        $startDate = $ymd . ' 00:00:00';
+        $endDate = date('Y-m-d H:i:s', strtotime("$startDate +1 day"));
+
         $builder = $this->db->table($this->table)
             ->select('COUNT(*) AS total', false)
-            ->like('created_at', $ymd, 'after');
+            ->where('created_at >=', $startDate)
+            ->where('created_at <', $endDate);
 
         foreach ($where as $k => $v) {
             $builder->where($k, $v);
@@ -68,6 +76,19 @@ class ApiRequestsModel extends Model
 
         $row = $builder->get()->getRowArray();
         return (int)($row['total'] ?? 0);
+    }
+
+    public function hasFirstRequest(array $where = []): bool
+    {
+        $builder = $this->db->table($this->table)
+            ->select('id');
+            
+        foreach ($where as $k => $v) {
+            $builder->where($k, $v);
+        }
+        
+        $row = $builder->limit(1)->get()->getRowArray();
+        return !empty($row);
     }
 
     public function getAverageLatency(array $where = []): int

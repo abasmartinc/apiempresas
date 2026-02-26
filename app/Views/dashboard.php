@@ -207,7 +207,7 @@
                         <h3>Estado de tu cuenta</h3>
                         <p>
                             Plan: <strong><?= esc($plan->plan_name ?? 'Free') ?></strong><br>
-                            Consultas este mes: <strong><?= esc($api_request_total_month ?? 0) ?></strong><br>
+                            Consultas este mes: <strong id="status-requests-text">...</strong><br>
                             <?php if(!empty($plan->current_period_end)): ?>
                                 Renovación: <strong><?= date('d-m-Y', strtotime($plan->current_period_end)) ?></strong>
                             <?php endif; ?>
@@ -255,6 +255,31 @@
 
     <?=view('partials/footer') ?>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const monthlyQuota = <?= json_encode((int)($plan->monthly_quota ?? 0)) ?>;
+        
+        fetch('<?= site_url('dashboard/kpis') ?>', {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.error) return;
+            
+            // Formatter
+            const numFmt = new Intl.NumberFormat('es-ES');
+            
+            // Update Right Widget Monthly Status
+            const statusReqEl = document.getElementById('status-requests-text');
+            if(statusReqEl) statusReqEl.innerText = numFmt.format(data.api_request_total_month || 0);
+
+        })
+        .catch(e => console.error('Error fetching KPIs', e));
+    });
+</script>
 
 <script>
     // === Lógica sencilla para mostrar/ocultar y copiar API key ===

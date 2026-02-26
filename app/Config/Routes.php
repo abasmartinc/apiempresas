@@ -13,6 +13,7 @@ $routes->get('register', 'Register::index');
 $routes->get('register_sucess', 'Register::register_sucess');
 $routes->post('signup', 'Register::store');
 $routes->get('dashboard', 'Dashboard::index');
+$routes->get('dashboard/kpis', 'Dashboard::kpis_ajax');
 $routes->get('stop-impersonation', 'Dashboard::stopImpersonating');
 $routes->get('search_company', 'Search::search_company');
 $routes->post('search_company', 'Search::search_company_post');
