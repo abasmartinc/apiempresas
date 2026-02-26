@@ -140,6 +140,10 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->post('subscriptions/update', 'Admin\Dashboard::subscription_update');
     $routes->get('subscriptions/delete/(:num)', 'Admin\Dashboard::subscription_delete/$1');
 
+    // Stripe Test Page
+    $routes->get('stripe-test', 'Admin\StripeTest::index');
+    $routes->post('stripe-test/checkout', 'Admin\StripeTest::checkout');
+
     // Email Logs
     $routes->get('email-logs', 'Admin\Dashboard::email_logs');
 
