@@ -209,6 +209,12 @@
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
     </style>
 </head>
 <body class="admin-body">
@@ -372,7 +378,39 @@
                 <span style="color: #64748b;">(Ya en base de datos)</span>
             </div>
         </div>
+        <!-- Usuarios Online -->
+        <div class="kpi-card" style="color: #16a34a; border: 2px solid rgba(16, 185, 129, 0.2); background: rgba(240, 253, 244, 0.5);">
+            <div>
+                <div class="kpi-label">
+                    <span style="display: inline-block; width: 10px; height: 10px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; animation: pulse 2s infinite;"></span>
+                    Online ahora
+                </div>
+                <div class="kpi-value"><?= $total_online ?? 0 ?></div>
+            </div>
+            <div class="kpi-footer">
+                <span style="color: #64748b;">Usuarios activos (últimos 5 min)</span>
+            </div>
+        </div>
     </div>
+
+    <!-- Usuarios Online Detalle (solo si hay) -->
+    <?php if (!empty($online_users)): ?>
+    <div class="section-header" style="margin-top: -20px; margin-bottom: 20px;">
+        <h2 class="section-title" style="font-size: 1rem; color: #16a34a;">Actividad Reciente</h2>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 40px;">
+        <?php foreach ($online_users as $ou): ?>
+            <div style="background: white; padding: 8px 16px; border-radius: 100px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 500; color: #1e293b;">
+                <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></span>
+                <?= esc($ou->name ?: $ou->email) ?>
+                <span style="color: #94a3b8; font-size: 0.75rem; font-weight: 400;"><?= date('H:i', strtotime($ou->last_active_at)) ?></span>
+            </div>
+        <?php endforeach; ?>
+        <?php if ($total_online > count($online_users)): ?>
+            <div style="padding: 8px 16px; color: #64748b; font-size: 0.9rem;">y <?= $total_online - count($online_users) ?> más...</div>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
 
     <!-- Listados y Gestión Section -->
     <div class="section-header">

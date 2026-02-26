@@ -12,6 +12,7 @@ class EmailTracking extends Controller
      */
     public function open($code)
     {
+        log_message('debug', 'Email open tracking request. Code: ' . $code);
         $model = new EmailLogModel();
         $log = $model->where('tracking_code', $code)->first();
 
@@ -34,10 +35,12 @@ class EmailTracking extends Controller
      */
     public function click($code)
     {
+        log_message('debug', 'Email click tracking request. Code: ' . $code);
         $model = new EmailLogModel();
         $log = $model->where('tracking_code', $code)->first();
 
         if ($log) {
+            log_message('debug', 'Log found for code: ' . $code);
             $updateData = [];
             if (is_null($log->opened_at)) {
                 $updateData['opened_at'] = date('Y-m-d H:i:s');

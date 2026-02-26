@@ -40,6 +40,7 @@ class Filters extends BaseFilters
         'admin'         => \App\Filters\AdminFilter::class,
         'activity_logger' => \App\Filters\ActivityLogger::class,
         'botprotection' => \App\Filters\BotProtectionFilter::class,
+        'user_activity' => \App\Filters\UserActivityFilter::class,
     ];
 
     /**
@@ -77,6 +78,7 @@ class Filters extends BaseFilters
         'before' => [
              'botprotection', // Check blocked IPs first
              'honeypot',
+             'user_activity',
             // 'csrf',
             // 'invalidchars',
         ],

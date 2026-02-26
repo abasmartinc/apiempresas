@@ -39,6 +39,16 @@ class Dashboard extends BaseController
 
         if ($user->is_admin ?? false) {
             $data['title'] = 'Panel de Administración';
+
+            // --- Online Users Logic ---
+            $fiveMinutesAgo = date('Y-m-d H:i:s', strtotime('-5 minutes'));
+            
+            $onlineUsersQuery = $userModel->where('last_active_at >=', $fiveMinutesAgo);
+            
+            $data['total_online'] = $onlineUsersQuery->countAllResults(false); // false to keep the query for the next list
+            $data['online_users'] = $onlineUsersQuery->limit(10)->find();
+            // --------------------------
+
             return view('admin/dashboard', $data);
         }
 
