@@ -3,7 +3,7 @@
 
 <head>
     <?= view('partials/head') ?>
-    <link rel="stylesheet" href="<?= base_url('public/css/billing.css') ?>" />
+    <link rel="stylesheet" href="<?= base_url('public/css/billing.css') ?>?v=<?= filemtime(FCPATH . 'public/css/billing.css') ?>" />
     <style>
         /* Spinner simple (si no lo tienes ya en billing.css) */
         .btn-spinner {
