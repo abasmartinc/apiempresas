@@ -21,7 +21,7 @@ class Login extends BaseController
     {
         $data = [
             'message' => session('message'),
-            'error'   => session('error'),
+            'error' => session('error'),
         ];
 
         return view('auth/login', $data);
@@ -43,22 +43,23 @@ class Login extends BaseController
             ],
         ];
 
-        if (! $this->validate($rules)) {
+        if (!$this->validate($rules)) {
             return redirect()
                 ->back()
                 ->withInput()
                 ->with('error', 'Por favor revisa los datos introducidos.');
         }
 
-        $email    = strtolower(trim($this->request->getPost('email')));
+        $email = strtolower(trim($this->request->getPost('email')));
         $password = (string) $this->request->getPost('password');
 
-        // Buscar usuario por email
+        // Buscar usuario por email y filtrar por source_app
         $user = $this->userModel
             ->where('email', $email)
+            ->where('source_app', 'apiempresas')
             ->first();
 
-        if (! $user) {
+        if (!$user) {
             return redirect()
                 ->back()
                 ->withInput()
@@ -78,7 +79,7 @@ class Login extends BaseController
         // Depuración de verificación
         $verifyOk = ($hash !== '' && password_verify($password, $hash));
 
-        if (! $verifyOk) {
+        if (!$verifyOk) {
             return redirect()
                 ->back()
                 ->withInput()
@@ -94,11 +95,11 @@ class Login extends BaseController
         session()->regenerate();
 
         session()->set([
-            'user_id'    => $user->id,
+            'user_id' => $user->id,
             'user_email' => $user->email,
-            'user_name'  => $user->name ?? '',
-            'is_admin'   => $user->is_admin ?? 0,
-            'logged_in'  => true,
+            'user_name' => $user->name ?? '',
+            'is_admin' => $user->is_admin ?? 0,
+            'logged_in' => true,
         ]);
 
         // Track login from email if tracking code exists
@@ -124,7 +125,7 @@ class Login extends BaseController
     {
         // Log logout before destroying session
         log_activity('logout');
-        
+
         session()->destroy();
 
         return redirect()

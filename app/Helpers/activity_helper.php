@@ -21,7 +21,12 @@ if (!function_exists('log_activity')) {
             return;
         }
 
-        // Check if user is admin
+        // Evitar logs para administradores o sesiones de impersonación
+        if (session('is_admin') || session('impersonator_id')) {
+            return;
+        }
+
+        // Check if user is admin (fallback check if session is not enough or secondary)
         try {
             $userModel = new \App\Models\UserModel();
             $user = $userModel->find($userId);

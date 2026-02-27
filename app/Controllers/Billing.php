@@ -141,6 +141,9 @@ class Billing extends BaseController
             $successUrl = site_url('billing/success') . '?session_id={CHECKOUT_SESSION_ID}';
             $cancelUrl = site_url('billing/cancel');
 
+            // Tax Rate for IVA
+            $taxRateId = getenv('STRIPE_TAX_RATE_ID');
+
             // Usar price_data para crear el precio al vuelo basado en la DB
             $lineItem = [
                 'quantity' => 1,
@@ -156,6 +159,10 @@ class Billing extends BaseController
                     ]
                 ]
             ];
+
+            if ($taxRateId) {
+                $lineItem['tax_rates'] = [$taxRateId];
+            }
 
             // Preparar parámetros de sesión
             $sessionParams = [
