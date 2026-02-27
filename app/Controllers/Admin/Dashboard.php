@@ -1611,27 +1611,29 @@ class Dashboard extends BaseController
         foreach($usersResult as $u) {
             $score = 0;
             
-            // 1. Recencia (25 ptos max)
+            // 1. Recencia (20 ptos max)
             if ($u->last_login_at) {
                 $daysSinceLogin = (strtotime(date('Y-m-d')) - strtotime($u->last_login_at)) / (60 * 60 * 24);
-                if ($daysSinceLogin <= 7) $score += 25;
-                elseif ($daysSinceLogin <= 30) $score += 15;
+                if ($daysSinceLogin <= 3) $score += 20;
+                elseif ($daysSinceLogin <= 7) $score += 15;
+                elseif ($daysSinceLogin <= 30) $score += 10;
                 elseif ($daysSinceLogin <= 90) $score += 5;
             }
             
-            // 2. Búsquedas Web (25 ptos max)
-            if ($u->total_searches >= 30) $score += 25;
-            elseif ($u->total_searches >= 10) $score += 15;
-            elseif ($u->total_searches >= 1) $score += 5;
+            // 2. Búsquedas Web (15 ptos max)
+            if ($u->total_searches >= 50) $score += 15;
+            elseif ($u->total_searches >= 20) $score += 10;
+            elseif ($u->total_searches >= 5) $score += 5;
 
-            // 3. API Requests (25 ptos max)
-            if ($u->total_api_requests >= 1000) $score += 25;
-            elseif ($u->total_api_requests >= 100) $score += 15;
-            elseif ($u->total_api_requests >= 10) $score += 5;
+            // 3. API Requests (50 ptos max)
+            if ($u->total_api_requests >= 5000) $score += 50;
+            elseif ($u->total_api_requests >= 1000) $score += 35;
+            elseif ($u->total_api_requests >= 100) $score += 20;
+            elseif ($u->total_api_requests >= 10) $score += 10;
             
-            // 4. Activity Logs (25 ptos max)
-            if ($u->total_activity >= 50) $score += 25;
-            elseif ($u->total_activity >= 20) $score += 15;
+            // 4. Activity Logs (15 ptos max)
+            if ($u->total_activity >= 50) $score += 15;
+            elseif ($u->total_activity >= 20) $score += 10;
             elseif ($u->total_activity >= 5) $score += 5;
             
             $u->score = $score;
