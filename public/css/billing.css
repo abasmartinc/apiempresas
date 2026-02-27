@@ -1227,3 +1227,195 @@ body::before {
     background: rgba(33, 82, 255, 0.05) !important;
     color: #2152FF !important;
 }
+
+/* =========================
+   7) TRUST & FAQ
+   ========================= */
+.summary-security {
+    margin-top: 24px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.security-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin-bottom: 12px;
+}
+
+.security-header svg {
+    color: var(--blue);
+}
+
+.security-logos {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pm-logo-stripe {
+    height: 15px;
+    width: auto;
+    opacity: 0.9;
+}
+
+.logos-divider {
+    width: 1px;
+    height: 16px;
+    background: #e2e8f0;
+}
+
+.card-brands {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0.5;
+    filter: grayscale(1);
+}
+
+.card-brands img {
+    height: 27px;
+    width: auto;
+}
+
+.faq-section {
+    margin-top: 52px;
+    padding: 38px;
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(205, 214, 234, 0.4);
+    border-radius: 24px;
+    grid-column: 1 / -1;
+    backdrop-filter: blur(8px);
+}
+
+.faq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 32px;
+    margin-top: 28px;
+}
+
+@media (max-width: 680px) {
+    .faq-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+.faq-item h4 {
+    margin: 0 0 8px;
+    font-size: 15px;
+    color: var(--text);
+    font-weight: 800;
+}
+
+.faq-item p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--muted);
+}
+
+.plan-card:focus-within {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+}
+
+.summary-lines .line span {
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+.summary-lines .line strong {
+    font-variant-numeric: tabular-nums;
+}
+
+.summary-benefits {
+    list-style: none;
+    padding: 0;
+    margin: 24px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.summary-benefits li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.summary-benefits li svg {
+    color: var(--blue);
+    flex-shrink: 0;
+    margin-top: 2px;
+    opacity: 0.9;
+}
+
+.summary-benefits li strong {
+    display: block;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 2px;
+}
+
+.summary-benefits li p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.4;
+}
+
+.summary-tip {
+    margin-top: 32px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border-left: 4px solid var(--blue);
+}
+
+.summary-tip strong {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--blue);
+    margin-bottom: 4px;
+}
+
+.summary-tip p {
+    margin: 0;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.summary-lines .line {
+    margin-bottom: 4px;
+}
+
+.summary-lines .line.total {
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: rgba(33, 82, 255, 0.04);
+    border-radius: 14px;
+    border: 1px solid rgba(33, 82, 255, 0.08);
+}
+
+.summary-lines .line.total strong {
+    font-size: 19px;
+    color: var(--blue);
+}
+
+.faq-item {
+    padding: 15px 16px !important;
+}

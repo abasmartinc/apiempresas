@@ -21,6 +21,25 @@
     </script>
 <?php endif; ?>
 
+<?php if (session()->getFlashdata('info')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            Swal.fire({
+                title: 'Información',
+                text: '<?= esc(session()->getFlashdata('info')) ?>',
+                icon: 'info',
+                customClass: {
+                    popup: 've-swal',
+                    title: 've-swal-title',
+                    htmlContainer: 've-swal-text',
+                    confirmButton: 'btn btn_primary ve-swal-confirm'
+                },
+                buttonsStyling: false
+            });
+        });
+    </script>
+<?php endif; ?>
+
 <?php 
 $currentUri = service('uri')->getPath();
 $isLogin = strpos($currentUri, 'enter') !== false || strpos($currentUri, 'login') !== false;

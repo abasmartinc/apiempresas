@@ -63,14 +63,13 @@
                         <?php if ($plan): ?>
                             <h1>Gestiona tu suscripción <?= esc($planName) ?></h1>
                             <p class="sub">
-                                Gracias por confiar en nosotros. Aquí puedes ver los detalles de tu plan,
-                                descargar facturas o mejorar tu límite si tu volumen de negocio crece.
+                                Administra tus límites, descarga facturas o mejora tu plan para escalar tu negocio.
                             </p>
                         <?php else: ?>
-                            <h1>Activa tu plan y elimina límites para producción</h1>
+                            <h1>Impulsa tu negocio con datos oficiales</h1>
                             <p class="sub">
-                                Pasa a Pro para trabajar sin sustos: más consultas, métricas de calidad
-                                (latencia/errores) y SLA. Cambia de plan o cancela cuando quieras.
+                                Pasa a un plan Pro o Business para trabajar sin límites: más consultas, métricas avanzadas 
+                                de calidad (latencia/errores) y SLA garantizado.
                             </p>
                         <?php endif; ?>
 
@@ -117,8 +116,7 @@
 
                             <div class="period-toggle" role="group" aria-label="Periodicidad">
                                 <button type="button" class="period-btn active" data-period="monthly">Mensual</button>
-                                <button type="button" class="period-btn" data-period="annual">Anual <span
-                                        class="save">Ahorra</span></button>
+                                <button type="button" class="period-btn" data-period="annual">Anual </button>
                             </div>
                         </div>
                         <div class="plan-grid" role="radiogroup" aria-label="Planes">
@@ -353,40 +351,81 @@
                         <div class="summary-lines">
                             <div class="line"><span>Plan</span><strong id="sumPlan">Pro</strong></div>
                             <div class="line"><span>Periodicidad</span><strong id="sumPeriod">Mensual</strong></div>
-                            <div class="line total"><span>Total estimado</span><strong><span id="sumPrice">19</span> €
-                                    <span class="muted" style="font-size:12px;">+ IVA</span></strong></div>
+                            <div class="line"><span>Subtotal</span><strong><span id="sumSubtotal">19,00</span> €</strong></div>
+                            <div class="line"><span>IVA (21%)</span><strong><span id="sumIva">3,99</span> €</strong></div>
+                            <div class="line total"><span>Total estimado</span><strong><span id="sumPrice">22,99</span> €</strong></div>
                         </div>
 
-                        <div class="summary-box">
-                            <div class="srow">
-                                <span class="dot ok" aria-hidden="true"></span>
+                        <div class="summary-security">
+                            <div class="security-header">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                <span>Pago seguro garantizado</span>
+                            </div>
+                            <div class="security-logos">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" class="pm-logo-stripe">
+                                <div class="logos-divider"></div>
+                                <div class="card-brands">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal">
+                                </div>
+                            </div>
+                        </div>
+
+                        <ul class="summary-benefits">
+                            <li>
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                                 <div>
                                     <strong>Más límite para producción</strong>
-                                    <span>Evita bloqueos por volumen</span>
+                                    <p>Evita bloqueos por volumen operativo</p>
                                 </div>
-                            </div>
-                            <div class="srow">
-                                <span class="dot ok" aria-hidden="true"></span>
+                            </li>
+                            <li>
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                                 <div>
                                     <strong>Métricas de calidad</strong>
-                                    <span>Latencia, errores y consumo</span>
+                                    <p>Latencia, errores y consumo en tiempo real</p>
                                 </div>
-                            </div>
-                            <div class="srow">
-                                <span class="dot ok" aria-hidden="true"></span>
+                            </li>
+                            <li>
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                                 <div>
                                     <strong>Soporte prioritario</strong>
-                                    <span>Respuesta mejorada</span>
+                                    <p>Asistencia técnica experta y rápida</p>
                                 </div>
-                            </div>
-                        </div>
+                            </li>
+                        </ul>
 
-                        <p class="muted" style="margin:10px 0 0; font-size:12px;">
-                            Tip: si estás en staging, puedes seguir en Free y activar Pro cuando pases a producción.
-                        </p>
+                        <div class="summary-tip">
+                            <strong>Tip para desarrolladores:</strong>
+                            <p>Si estás en staging, puedes seguir en Free y activar Pro cuando pases a producción definitiva.</p>
+                        </div>
                     </section>
                 </aside>
 
+                <section class="faq-section">
+                    <div class="kicker">Dudas frecuentes</div>
+                    <h2>Preguntas sobre facturación</h2>
+                    
+                    <div class="faq-grid">
+                        <div class="faq-item">
+                            <h4>¿Recibiré factura oficial?</h4>
+                            <p>Sí, tras cada pago recibirás automáticamente una factura legal con el desglose del IVA correspondiente a tu NIF/CIF.</p>
+                        </div>
+                        <div class="faq-item">
+                            <h4>¿Puedo cancelar cuando quiera?</h4>
+                            <p>Sin compromiso. Puedes cancelar tu suscripción con un solo clic desde tu panel y seguirás teniendo acceso hasta el final del periodo pagado.</p>
+                        </div>
+                        <div class="faq-item">
+                            <h4>¿Cómo funciona el cambio de plan?</h4>
+                            <p>Si pasas de Pro a Business, Stripe prorrateará el importe y solo pagarás la diferencia por el tiempo restante.</p>
+                        </div>
+                        <div class="faq-item">
+                            <h4>¿El pago es seguro?</h4>
+                            <p>Utilizamos Stripe como pasarela de pago. Tus datos bancarios nunca tocan nuestros servidores y están protegidos por cifrado bancario.</p>
+                        </div>
+                    </div>
+                </section>
             </div>
     </div>
     </main>
@@ -421,6 +460,8 @@
 
             const sumPlan = document.getElementById('sumPlan');
             const sumPeriod = document.getElementById('sumPeriod');
+            const sumSubtotal = document.getElementById('sumSubtotal');
+            const sumIva = document.getElementById('sumIva');
             const sumPrice = document.getElementById('sumPrice');
 
             const btnCheckout = document.getElementById('btnCheckout');
@@ -458,9 +499,15 @@
 
                 if (card) {
                     const amountEl = card.querySelector('.amount');
-                    const value = (period === 'annual') ? amountEl.getAttribute('data-annual') : amountEl.getAttribute('data-monthly');
-                    if (amountEl) amountEl.textContent = value;
-                    if (sumPrice) sumPrice.textContent = value;
+                    const value = parseFloat((period === 'annual') ? amountEl.getAttribute('data-annual') : amountEl.getAttribute('data-monthly'));
+                    
+                    const iva = value * 0.21;
+                    const total = value + iva;
+
+                    if (amountEl) amountEl.textContent = value.toFixed(0);
+                    if (sumSubtotal) sumSubtotal.textContent = value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    if (sumIva) sumIva.textContent = iva.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    if (sumPrice) sumPrice.textContent = total.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 }
 
                 const pm = document.querySelector('input[name="payment_method_ui"]:checked')?.value || 'stripe';

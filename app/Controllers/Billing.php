@@ -242,7 +242,7 @@ class Billing extends BaseController
             return redirect()->to(site_url('dashboard'));
         }
         // puedes crear una vista billing_cancel si quieres
-        return redirect()->to(site_url('billing'))->with('error', 'Has cancelado el proceso de pago.');
+        return redirect()->to(site_url('billing'))->with('info', 'Has cancelado el proceso de pago.');
     }
 
     /**
