@@ -417,7 +417,7 @@
                     Pensado para fintech, marketplaces y plataformas críticas.
                 </p>
 
-                <a class="btn secondary" href="<?=site_url() ?>contact?interest=business">Empezar con Business</a>
+                <a class="btn secondary" href="<?=site_url() ?>register?plan=business">Empezar con Business</a>
             </div>
         </div>
 

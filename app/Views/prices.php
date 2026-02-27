@@ -146,8 +146,8 @@
                     <li><span class="ok"></span><span>Soporte técnico directo</span></li>
                     <li><span class="ok"></span><span>Cláusulas específicas de SLA</span></li>
                 </ul>
-                <button class="btn" onclick="window.location.href='mailto:sales@apiempresas.es'">
-                    Hablar con ventas
+                <button class="btn" onclick="window.location.href='/register?plan=business'">
+                    Continuar con Business
                 </button>
             </div>
         </div>
