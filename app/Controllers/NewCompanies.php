@@ -15,7 +15,7 @@ class NewCompanies extends BaseController
 
     public function index()
     {
-        $latestCompanies = $this->companyModel->getLatestCompanies(10);
+        $latestCompanies = $this->companyModel->getLatestCompanies(24);
 
         $data = [
             'title'            => 'Empresas nuevas constituidas en España | Detecta oportunidades comerciales',

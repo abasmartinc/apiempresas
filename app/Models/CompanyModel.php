@@ -482,15 +482,32 @@ class CompanyModel extends Model
 
     /**
      * Obtiene las últimas empresas constituidas.
+     * Optimizado para tablas grandes: 2 pasos para evitar filesort masivo.
      */
     public function getLatestCompanies(int $limit = 10): array
     {
+        // Paso 1: Obtener solo los IDs usando el índice de fecha_constitucion
+        $idsRaw = $this->db->table($this->table)
+            ->select('id')
+            ->orderBy('fecha_constitucion', 'DESC')
+            ->orderBy('id', 'DESC')
+            ->limit($limit)
+            ->get()
+            ->getResultArray();
+
+        $ids = array_column($idsRaw, 'id');
+
+        if (empty($ids)) {
+            return [];
+        }
+
+        // Paso 2: Traer los datos completos solo de esos IDs
         return $this->asArray()
             ->select(implode(', ', $this->selectFields))
             ->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left')
+            ->whereIn('companies.id', $ids)
             ->orderBy('companies.fecha_constitucion', 'DESC')
             ->orderBy('companies.id', 'DESC')
-            ->limit($limit)
             ->get()
             ->getResultArray();
     }
