@@ -139,10 +139,10 @@ class Search extends BaseController
             return redirect()->to('search_company');
         }
 
-        $q = trim((string) $this->request->getGet('q'));
+        $q = trim((string) $this->request->getVar('q'));
         if ($q === '') {
             // retrocompatibilidad: si te siguen llamando con ?cif=
-            $q = trim((string) $this->request->getGet('cif'));
+            $q = trim((string) $this->request->getVar('cif'));
         }
 
         $ctx   = $this->getRequestContext();
@@ -368,7 +368,15 @@ class Search extends BaseController
 
         return view('search', $data);
     }
-
+    public function search_company_post()
+    {
+        // Reuse index() logic by injecting the POST value into the GET parameters
+        // to avoid duplicating the complex rate-limiting and logging logic.
+        $q = $this->request->getPost('q');
+        $_GET['q'] = $q;
+        
+        return $this->index();
+    }
 }
 
 

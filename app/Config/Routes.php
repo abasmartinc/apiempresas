@@ -13,6 +13,7 @@ $routes->get('register', 'Register::index');
 $routes->get('register_sucess', 'Register::register_sucess');
 $routes->post('signup', 'Register::store');
 $routes->get('dashboard', 'Dashboard::index');
+$routes->get('empresas-nuevas', 'NewCompanies::index');
 $routes->get('dashboard/kpis', 'Dashboard::kpis_ajax');
 $routes->get('stop-impersonation', 'Dashboard::stopImpersonating');
 $routes->get('search_company', 'Search::search_company');
@@ -77,6 +78,9 @@ $routes->get('api/map/export', 'CompanyMapV2Controller::export');
 // Alerts
 $routes->get('alerts/confirm/(:any)', 'Alerts::confirm/$1');
 $routes->post('alerts/add', 'Alerts::add');
+
+// Leads
+$routes->post('leads/subscribe', 'Leads::subscribe');
 
 // Admin Routes
 $routes->group('admin', ['filter' => 'admin'], function ($routes) {

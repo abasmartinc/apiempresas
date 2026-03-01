@@ -55,6 +55,7 @@ class Sitemap extends Controller
             ['loc' => site_url('documentation'), 'priority' => '0.9', 'freq' => 'weekly'],
             ['loc' => site_url('search_company'), 'priority' => '0.9', 'freq' => 'daily'],
             ['loc' => site_url('blog'), 'priority' => '0.8', 'freq' => 'daily'],
+            ['loc' => site_url('empresas-nuevas'), 'priority' => '1.0', 'freq' => 'daily'],
         ];
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';

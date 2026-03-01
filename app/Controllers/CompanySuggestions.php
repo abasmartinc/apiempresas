@@ -49,10 +49,14 @@ class CompanySuggestions extends BaseController
             $formatted = array_map(function($item) {
                 // Ensure we handle both potential column names (aliased or original)
                 return [
-                    'name'    => $item['name'] ?? ($item['company_name'] ?? ''),
-                    'cif'     => $item['cif'] ?? '',
-                    'address' => $item['address'] ?? '',
-                    'score'   => isset($item['score']) ? round((float)$item['score'], 2) : 1.00
+                    'name'              => $item['name'] ?? ($item['company_name'] ?? ''),
+                    'cif'               => $item['cif'] ?? '',
+                    'address'           => $item['address'] ?? '',
+                    'cnae'              => $item['cnae'] ?? '',
+                    'cnae_label'        => $item['cnae_label'] ?? '',
+                    'cnae_2025'         => $item['cnae_2025'] ?? '',
+                    'cnae_2025_label'   => $item['cnae_2025_label'] ?? '',
+                    'score'             => isset($item['score']) ? round((float)$item['score'], 2) : 1.00
                 ];
             }, $results);
 

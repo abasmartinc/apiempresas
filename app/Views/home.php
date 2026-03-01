@@ -105,6 +105,8 @@
 
             <div id="resultado" class="result"></div>
 
+            <div id="resultado" class="result"></div>
+
             <p class="muted">
                 ¿Vas a automatizarlo en tu producto?
                 <a href="<?=site_url() ?>register">Crea tu cuenta y copia tu API Key</a> para integrar la validación en minutos.

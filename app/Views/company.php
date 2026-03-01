@@ -317,7 +317,7 @@
                             <div><dt>CIF</dt><dd><?= esc($company['cif'] ?? $company['nif'] ?? '-') ?></dd></div>
                             
                             <div>
-                                <dt>CNAE</dt>
+                                <dt>CNAE (2009)</dt>
                                 <dd>
                                     <?php if(!empty($company['cnae'])): ?>
                                         <a href="<?= site_url('search_company?q=' . urlencode($company['cnae'])) ?>" style="text-decoration: underline; color: inherit;">
@@ -328,6 +328,15 @@
                                     <?php endif; ?>
                                 </dd>
                             </div>
+
+                            <?php if(!empty($company['cnae_2025'])): ?>
+                            <div>
+                                <dt>CNAE (2025)</dt>
+                                <dd>
+                                    <?= esc($company['cnae_2025'] . ' · ' . $company['cnae_2025_label']) ?>
+                                </dd>
+                            </div>
+                            <?php endif; ?>
                             
                             <div>
                                 <dt>Provincia</dt>
@@ -616,8 +625,8 @@
 
         <?php if (!empty($company['lat']) && !empty($company['lng'])): ?>
             // Coordinates appear to be swapped in the DB (Lng in Lat field)
-            const lng = <?= (float)$company['lat'] ?>;
-            const lat = <?= (float)$company['lng'] ?>;
+            const lat = <?= (float)$company['lat'] ?>;
+            const lng = <?= (float)$company['lng'] ?>;
             const companyName = "<?= esc($company['name'] ?? $company['nombre'] ?? 'Empresa') ?>";
             const rawAddress = "<?= esc($company['address'] ?? '') ?>";
             const province = "<?= esc($company['province'] ?? $company['provincia'] ?? '') ?>";

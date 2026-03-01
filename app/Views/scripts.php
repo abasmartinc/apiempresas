@@ -1,142 +1,83 @@
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<?php if (session()->getFlashdata('message')): ?>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            Swal.fire({
-                title: '¡Operación exitosa!',
-                text: '<?= esc(session()->getFlashdata('message')) ?>',
-                icon: null,
-                iconHtml: '<span class="ve-swal-icon-inner">✓</span>',
-                customClass: {
-                    popup: 've-swal',
-                    title: 've-swal-title',
-                    htmlContainer: 've-swal-text',
-                    confirmButton: 'btn ve-swal-confirm',
-                    icon: 've-swal-icon'
-                },
-                buttonsStyling: false
-            });
-        });
-    </script>
-<?php endif; ?>
-
-<?php if (session()->getFlashdata('info')): ?>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            Swal.fire({
-                title: 'Información',
-                text: '<?= esc(session()->getFlashdata('info')) ?>',
-                icon: 'info',
-                customClass: {
-                    popup: 've-swal',
-                    title: 've-swal-title',
-                    htmlContainer: 've-swal-text',
-                    confirmButton: 'btn btn_primary ve-swal-confirm'
-                },
-                buttonsStyling: false
-            });
-        });
-    </script>
-<?php endif; ?>
-
-<?php 
-$currentUri = service('uri')->getPath();
-$isLogin = strpos($currentUri, 'enter') !== false || strpos($currentUri, 'login') !== false;
-?>
-<?php if (session()->getFlashdata('error') && !$isLogin): ?>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            Swal.fire({
-                title: 'Se ha producido un error',
-                text: '<?= esc(session()->getFlashdata('error')) ?>',
-                icon: 'error',
-                customClass: {
-                    popup: 've-swal',
-                    title: 've-swal-title',
-                    htmlContainer: 've-swal-text',
-                    confirmButton: 'btn danger ve-swal-confirm'
-                },
-                buttonsStyling: false
-            });
-        });
-    </script>
-<?php endif; ?>
-
-<?php if (session()->getFlashdata('upgrade_limit')): ?>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            Swal.fire({
-                title: '🚀 ¡Optimiza tu estrategia!',
-                html: '<?= session()->getFlashdata('upgrade_limit') ?>',
-                icon: null,
-                iconHtml: '<span class="ve-swal-icon-inner">✨</span>',
-                customClass: {
-                    popup: 've-swal',
-                    title: 've-swal-title',
-                    htmlContainer: 've-swal-text',
-                    confirmButton: 'btn btn_primary ve-swal-confirm',
-                    icon: 've-swal-icon'
-                },
-                buttonsStyling: false,
-                confirmButtonText: 'Ver opciones'
-            });
-        });
-    </script>
-<?php endif; ?>
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const btn = document.getElementById('btnBuscar');
-        const q = document.getElementById('q');
-        const out = document.getElementById('resultado');
+        const BASE_URL = '<?= site_url() ?>';
 
-        if (!btn || !q || !out) return;
+        const btnBuscar = document.getElementById('btnBuscar');
+        const inputQ = document.getElementById('q');
+        const searchResultContainer = document.getElementById('resultado');
 
-        function sectionRegistro(company, apiJson) {
-            const statusRaw = (company.status || '').toString();
-            const isActive = statusRaw.toUpperCase() === 'ACTIVA';
+        if (btnBuscar) {
+            btnBuscar.addEventListener('click', () => {
+                const query = inputQ.value.trim();
+                if (!query) return;
 
-            const statusClass = isActive
-                ? 'company-status company-status--active'
-                : 'company-status company-status--inactive';
+                btnBuscar.disabled = true;
+                btnBuscar.innerText = 'Buscando...';
+                searchResultContainer.innerHTML = '<div class="card"><p class="muted">Buscando datos oficiales...</p></div>';
 
-            const cnaeFull = company.cnae && company.cnae_label
-                ? `${company.cnae} · ${company.cnae_label}`
-                : (company.cnae_label || company.cnae || '-');
+                const formData = new FormData();
+                formData.append('q', query);
 
-            const jsonForCode = (apiJson && typeof apiJson === 'object')
-                ? apiJson
-                : { success: true, data: company };
+                fetch(`${BASE_URL}search_company`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    renderResult(data);
+                })
+                .catch(err => {
+                    searchResultContainer.innerHTML = '<div class="card"><p style="color:red">Error al consultar la API. Inténtalo de nuevo.</p></div>';
+                })
+                .finally(() => {
+                    btnBuscar.disabled = false;
+                    btnBuscar.innerText = 'Validar CIF / Buscar empresa';
+                });
+            });
+        }
 
-            const jsonPretty = JSON.stringify(jsonForCode, null, 2)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
+        function renderResult(data) {
+            if (!data.success) {
+                searchResultContainer.innerHTML = `<div class="card"><p class="muted">${data.message || 'No se han encontrado resultados.'}</p></div>`;
+                return;
+            }
 
-            return `
-<article class="company-card">
-  <header class="company-card__header">
-    <div>
-      <div class="company-card__eyebrow">Ficha registral</div>
-      <h3 class="company-card__name">${company.name || '-'}</h3>
-      <div class="company-card__meta">
-        ${(company.cif || company.nif || '-')} · ${(company.province || company.provincia || '-')}
+            const company = data.data;
+            const jsonPretty = JSON.stringify(data, null, 2);
+
+            searchResultContainer.innerHTML = `
+<article class="card company-card" style="margin-top:20px; animation: fadeIn 0.4s ease-out;">
+  <div class="card-head" style="display:flex; justify-content:space-between; align-items:flex-start;">
+    <div style="flex:1">
+      <h2 style="margin:0; font-size:1.4rem; color:var(--primary);">${company.name || 'N/A'}</h2>
+      <div class="meta" style="margin-top:4px">
+        <span class="pill mini-pill">${company.cif || company.nif || 'Sin CIF'}</span>
       </div>
     </div>
-    <div class="${statusClass}">
-      <span class="company-status__dot"></span>
-      <span>${statusRaw || '-'}</span>
-    </div>
-  </header>
+    <span class="pill estado--${(company.status || '').toLowerCase() === 'activa' ? 'activa' : 'inactiva'}" style="margin-top:4px;">${company.status || 'N/A'}</span>
+  </div>
 
-  <section class="company-card__body">
-    <dl class="company-card__grid">
-      <div><dt>CIF</dt><dd>${company.cif || company.nif || '-'}</dd></div>
-      <div><dt>CNAE</dt><dd>${cnaeFull}</dd></div>
-      <div><dt>Provincia</dt><dd>${company.province || company.provincia || '-'}</dd></div>
-      <div><dt>Fecha de constitución</dt><dd>${company.incorporation_date || company.founded || company.fecha_constitucion || '-'}</dd></div>
-      <div class="company-card__purpose"><dt>Objeto social</dt><dd>${company.corporate_purpose || company.objeto_social || '-'}</dd></div>
+  <section style="margin-top:16px;">
+    <dl class="grid-2">
+      <div>
+        <dt>Sector (CNAE)</dt>
+        <dd>${company.cnae || 'N/A'} - ${company.cnae_label || 'Sin sector'}</dd>
+      </div>
+      <div>
+        <dt>Provincia</dt>
+        <dd>${company.province || company.provincia || 'N/A'}</dd>
+      </div>
+      <div>
+        <dt>Fecha de constitución</dt>
+        <dd>${company.founded || 'N/A'}</dd>
+      </div>
+      <div style="grid-column: span 2; margin-top:8px;">
+        <dt>Objeto social</dt>
+        <dd style="font-weight:400; line-height:1.4; color:#334155;">${company.corporate_purpose || 'N/A'}</dd>
+      </div>
     </dl>
   </section>
 
@@ -145,8 +86,23 @@ $isLogin = strpos($currentUri, 'enter') !== false || strpos($currentUri, 'login'
     <a href="${BASE_URL}${company.cif || company.nif}" class="btn" style="text-decoration:none;">Ver ficha completa</a>
   </div>
 
+  <!-- Lead Gen Section -->
+  <div class="lead-form-container">
+    <h4 class="lead-form-title">¿Trabajas con empresas?</h4>
+    <p class="lead-form-subtitle">Recibe cada semana las nuevas empresas creadas en tu provincia.</p>
+    <form class="lead-form" onsubmit="handleLeadSubmit(event, this)">
+      <input type="email" name="email" class="input" placeholder="Tu correo electrónico" required>
+      <input type="text" name="province" class="input" placeholder="Provincia" value="${company.province || company.provincia || ''}">
+      <input type="hidden" name="source" value="home_search">
+      <button type="submit" class="btn secondary" style="padding: 12px 24px;">Recibir empresas nuevas</button>
+    </form>
+  </div>
+  <a href="${BASE_URL}empresas-nuevas" class="secondary-radar-link" style="display: block; text-align: center; margin-top: 15px;">Ver cómo funciona Radar →</a>
+
   <pre class="company-card__json is-hidden"><code>${jsonPretty}</code></pre>
 </article>`;
+            
+            bindJsonButtons(searchResultContainer);
         }
 
         function bindJsonButtons(container) {
@@ -169,175 +125,87 @@ $isLogin = strpos($currentUri, 'enter') !== false || strpos($currentUri, 'login'
             });
         }
 
-        // Endpoint absoluto correcto (respeta subcarpeta /apiempresas)
-        const API_URL = '<?= site_url('search') ?>';
-        // Base URL for links
-        const BASE_URL = '<?= site_url() ?>';
-
-        async function doSearch() {
-            const v = (q.value || '').trim();
-
-            if (!v) {
-                out.innerHTML = '<div class="muted">Escribe un CIF (ej. B12345678).</div>';
-                return;
-            }
-
-            out.innerHTML = '<div class="muted">Buscando empresa en la base de datos...</div>';
+        // Lead Submission Handler
+        window.handleLeadSubmit = function(event, form) {
+            event.preventDefault();
+            const btn = form.querySelector('button[type="submit"]');
+            const originalText = btn.innerText;
+            
             btn.disabled = true;
+            btn.innerText = 'Enviando...';
 
-            const endpoint = API_URL + '?cif=' + encodeURIComponent(v);
+            const formData = new FormData(form);
 
-            try {
-                const res = await fetch(endpoint, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
+            fetch(`${BASE_URL}leads/subscribe`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success' || (data.status >= 200 && data.status < 300)) {
+                    Swal.fire({
+                        title: '¡Registro completado!',
+                        text: data.message || 'Pronto empezarás a recibir las nuevas empresas.',
+                        icon: 'success',
+                        confirmButtonText: 'Genial',
+                        customClass: {
+                            popup: 've-swal',
+                            confirmButton: 'btn ve-swal-confirm'
+                        },
+                        buttonsStyling: false
+                    });
+                    form.reset();
+                } else {
+                    throw new Error(data.messages?.error || 'Error desconocido');
+                }
+            })
+            .catch(error => {
+                console.error('Lead submission error:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: error.message || 'Hubo un error al procesar tu solicitud.',
+                    icon: 'error',
+                    confirmButtonText: 'Entendido'
                 });
-
-                let json = null;
-                try { json = await res.json(); } catch (_) { }
-
-                if (!res.ok) {
-                    const msg = (json && json.message)
-                        ? json.message
-                        : (res.status === 404 ? 'No se encontró ninguna empresa con ese CIF.' : 'Error al consultar la API.');
-                    out.innerHTML = `<div class="muted">${msg}</div>`;
-                    return;
-                }
-
-                if (!json || json.success === false) {
-                    out.innerHTML = `<div class="muted">${(json && json.message) ? json.message : 'Se ha producido un error al consultar la empresa.'}</div>`;
-                    return;
-                }
-
-                const company = json.data || {};
-                out.innerHTML = sectionRegistro(company, json);
-                bindJsonButtons(out);
-
-                if (typeof track === 'function') {
-                    track('search_by_cif', { cif: v });
-                }
-
-            } catch (err) {
-                console.error(err);
-                out.innerHTML = '<div class="muted">Error de conexión con la API.</div>';
-            } finally {
+            })
+            .finally(() => {
                 btn.disabled = false;
-            }
-        }
-
-        // Click
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            doSearch();
-        });
-
-        // Enter en input (sin submit, sin doble)
-        q.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                doSearch();
-            }
-        });
-    });
-</script>
-
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const logoutLink = document.querySelector('.logout');
-        if (!logoutLink) return;
-
-        logoutLink.addEventListener('click', function (e) {
-            e.preventDefault();
-
-            const targetUrl = this.getAttribute('href') || '<?= site_url('logout') ?>';
-
-            Swal.fire({
-                title: '¿Cerrar sesión?',
-                html: 'Se cerrará tu sesión en <strong>APIEmpresas.es</strong> y volverás a la pantalla de acceso.',
-                icon: null,
-                iconHtml: '<span class="ve-swal-icon-inner">✓</span>',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, cerrar sesión',
-                cancelButtonText: 'Cancelar',
-                reverseButtons: true,
-                focusCancel: true,
-                customClass: {
-                    popup: 've-swal',
-                    title: 've-swal-title',
-                    htmlContainer: 've-swal-text',
-                    confirmButton: 'btn ve-swal-confirm',
-                    cancelButton: 'btn btn_header--ghost ve-swal-cancel',
-                    icon: 've-swal-icon'
-                },
-                buttonsStyling: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = targetUrl;
-                }
+                btn.innerText = originalText;
             });
-        });
-    });
-</script>
-<script>
-    (function () {
-        const body = document.body;
+        };
 
-        function openModal(id) {
-            const overlay = document.getElementById(id);
-            if (!overlay) return;
-
-            overlay.classList.add('active');
-            overlay.setAttribute('aria-hidden', 'false');
-            body.style.overflow = 'hidden';
-
-            const dialog = overlay.querySelector('.modal');
-            if (dialog) dialog.focus({ preventScroll: true });
-        }
-
-        function closeModal(overlay) {
-            if (!overlay) return;
-
-            overlay.classList.remove('active');
-            overlay.setAttribute('aria-hidden', 'true');
-            body.style.overflow = '';
-        }
-
-        // Abrir desde links/buttons con data-open-modal="id"
+        // Modal triggers
         document.addEventListener('click', (e) => {
-            const opener = e.target.closest('[data-open-modal]');
-            if (opener) {
+            const trigger = e.target.closest('[data-modal-target]');
+            if (trigger) {
                 e.preventDefault();
-                openModal(opener.getAttribute('data-open-modal'));
+                const targetId = trigger.getAttribute('data-modal-target');
+                const modal = document.getElementById(targetId);
+                if (modal) modal.classList.add('active');
                 return;
             }
 
-            // Cerrar desde botones con data-close-modal
-            const closer = e.target.closest('[data-close-modal]');
+            const closer = e.target.closest('[data-modal-close]');
             if (closer) {
                 e.preventDefault();
-                const overlay = closer.closest('.modal-overlay');
-                closeModal(overlay);
+                const modal = closer.closest('.modal-overlay');
+                if (modal) modal.classList.remove('active');
                 return;
             }
 
-            // Click fuera del modal (overlay)
-            const overlay = e.target.classList && e.target.classList.contains('modal-overlay') ? e.target : null;
-            if (overlay) {
-                // If the modal has data-prevent-overlay-close, do not close
-                if (overlay.dataset.preventOverlayClose === 'true') return;
-                closeModal(overlay);
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('active');
             }
         });
 
-        // ESC para cerrar el modal activo
         document.addEventListener('keydown', (e) => {
-            if (e.key !== 'Escape') return;
-            const active = document.querySelector('.modal-overlay.active');
-            if (active) closeModal(active);
+            if (e.key === 'Escape') {
+                const activeModal = document.querySelector('.modal-overlay.active');
+                if (activeModal) activeModal.classList.remove('active');
+            }
         });
-    })();
+    });
 </script>

@@ -172,20 +172,24 @@ class CompanyMapV2Controller extends Controller
             $b  = $db->table('companies');
 
             $b->select([
-                'id',
-                'company_name',
-                'address',
-                'cif',
-                'cnae_code',
-                'cnae_label',
-                'registro_mercantil',
-                'estado',
-                'estado_fecha',
-                'phone',
-                'phone_mobile',
-                'lat_num AS lat',
-                'lng_num AS lng',
+                'companies.id',
+                'companies.company_name',
+                'companies.address',
+                'companies.cif',
+                'companies.cnae_code',
+                'companies.cnae_label',
+                'cnae_2009_2025.cnae_2025',
+                'cnae_2009_2025.label_2025 AS cnae_2025_label',
+                'companies.registro_mercantil',
+                'companies.estado',
+                'companies.estado_fecha',
+                'companies.phone',
+                'companies.phone_mobile',
+                'companies.lat_num AS lat',
+                'companies.lng_num AS lng',
             ]);
+
+            $b->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
 
             if ($onlyGeocoded === 1) {
                 $b->where('lat_num IS NOT NULL', null, false)
@@ -218,7 +222,7 @@ class CompanyMapV2Controller extends Controller
                     $b->like('cnae_code', $norm, 'after'); // cnae_code LIKE 'norm%'
                 }
             } elseif ($cnaeText !== '') {
-                $b->like('cnae_label', $cnaeText, 'both');
+                $b->like('companies.cnae_label', $cnaeText, 'both');
             }
 
 
