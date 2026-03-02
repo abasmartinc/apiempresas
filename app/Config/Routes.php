@@ -4,6 +4,7 @@ use CodeIgniter\Router\RouteCollection;
 
 /** @var RouteCollection $routes */
 $routes->get('/', 'Home::index');
+$routes->post('submit-review', 'Home::submitReview');
 $routes->get('enter', 'Login::index');
 $routes->get('documentation', 'Documentation::index');
 $routes->get('enter', 'Login::index');          // muestra login

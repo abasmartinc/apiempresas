@@ -589,44 +589,167 @@
 
                     <!-- Form Card -->
                     <div style="position: relative; display: flex; justify-content: center; align-items: center;">
-                        <div
-                            style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 40px 30px; width: 100%; max-width: 450px; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.1);">
-                            <h3
-                                style="font-size: 1.4rem; color: #0f172a; margin-top: 0; margin-bottom: 10px; text-align: center; font-weight: 800;">
+                        <style>
+                            .radar-form-card {
+                                background: #ffffff; 
+                                border: 1px solid rgba(255,255,255,0.5); 
+                                border-radius: 24px; 
+                                padding: 40px 32px; 
+                                width: 100%; 
+                                max-width: 450px; 
+                                box-shadow: 0 20px 40px -10px rgba(33, 82, 255, 0.15), 0 0 0 1px rgba(33, 82, 255, 0.05);
+                                position: relative;
+                                backdrop-filter: blur(10px);
+                            }
+                            
+                            .radar-input-group {
+                                position: relative;
+                                margin-bottom: 24px;
+                                width: 100%;
+                            }
+                            .radar-input-group label {
+                                display: block; 
+                                font-size: 0.85rem; 
+                                font-weight: 600; 
+                                color: #475569; 
+                                margin-bottom: 8px;
+                                transition: color 0.2s;
+                            }
+                            .radar-input-group input.radar-input {
+                                width: 100%; 
+                                box-sizing: border-box;
+                                display: block;
+                                border: 1.5px solid #e2e8f0; 
+                                border-radius: 12px; 
+                                padding: 14px 16px 14px 44px;
+                                font-size: 1rem; 
+                                background: #f8fafc; 
+                                color: #1e293b;
+                                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                                line-height: 1.5;
+                                margin: 0;
+                            }
+                            .radar-input-group input.radar-input::placeholder {
+                                color: #94a3b8;
+                            }
+                            .radar-input-group input.radar-input:focus {
+                                outline: none;
+                                border-color: #2152ff;
+                                background: #ffffff;
+                                box-shadow: 0 0 0 4px rgba(33, 82, 255, 0.1);
+                            }
+                            .radar-input-group:focus-within label {
+                                color: #2152ff;
+                            }
+                            .radar-input-icon {
+                                position: absolute;
+                                left: 16px;
+                                top: 48px;
+                                color: #94a3b8;
+                                transition: color 0.3s;
+                                pointer-events: none;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                            }
+                            .radar-input-group:focus-within .radar-input-icon {
+                                color: #2152ff;
+                            }
+                            .radar-submit-btn {
+                                width: 100%; 
+                                background: linear-gradient(135deg, #2152ff 0%, #0f2c9c 100%); 
+                                color: white; 
+                                border: none; 
+                                font-weight: 700; 
+                                padding: 16px; 
+                                border-radius: 12px; 
+                                font-size: 1.05rem; 
+                                box-shadow: 0 10px 20px rgba(33, 82, 255, 0.3); 
+                                cursor: pointer; 
+                                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                                position: relative;
+                                overflow: hidden;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                gap: 8px;
+                            }
+                            .radar-submit-btn::before {
+                                content: '';
+                                position: absolute;
+                                top: 0;
+                                left: -100%;
+                                width: 100%;
+                                height: 100%;
+                                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+                                transition: left 0.7s ease;
+                            }
+                            .radar-submit-btn:hover {
+                                transform: translateY(-2px);
+                                box-shadow: 0 14px 28px rgba(33, 82, 255, 0.4);
+                            }
+                            .radar-submit-btn:hover::before {
+                                left: 100%;
+                            }
+                            .radar-submit-btn:active {
+                                transform: translateY(1px);
+                                box-shadow: 0 4px 10px rgba(33, 82, 255, 0.3);
+                            }
+                        </style>
+                        <div class="radar-form-card">
+                            <h3 style="font-size: 1.5rem; color: #0f172a; margin-top: 0; margin-bottom: 12px; text-align: center; font-weight: 800; letter-spacing: -0.02em;">
                                 Recibe nuevas empresas locales</h3>
-                            <p
-                                style="text-align: center; color: #64748b; margin-bottom: 25px; font-size: 0.95rem; line-height: 1.5;">
-                                Déjanos tu email y la provincia en la que trabajas para enviarte el radar semanal local.
+                            <p style="text-align: center; color: #64748b; margin-bottom: 30px; font-size: 0.95rem; line-height: 1.5;">
+                                Déjanos tu email y provincia. Te enviaremos el radar semanal directo a tu bandeja.
                             </p>
 
                             <!-- Using the same lead-form class and handleLeadSubmit logic -->
                             <form class="lead-form"
                                 onsubmit="window.handleLeadSubmit && window.handleLeadSubmit(event, this)">
-                                <div style="margin-bottom: 15px;">
-                                    <label
-                                        style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Correo
-                                        electrónico <span style="color:#ef4444">*</span></label>
-                                    <input type="email" name="email" class="input" placeholder="tu@empresa.com" required
-                                        style="width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px 16px; font-size: 1rem; background: #f8fafc; transition: all 0.2s;">
+                                
+                                <div class="radar-input-group">
+                                    <label>Correo electrónico <span style="color:#ef4444">*</span></label>
+                                    <div class="radar-input-icon">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                            <polyline points="22,6 12,13 2,6"></polyline>
+                                        </svg>
+                                    </div>
+                                    <input type="email" name="email" class="radar-input" placeholder="tu@empresa.com" required>
                                 </div>
-                                <div style="margin-bottom: 25px;">
-                                    <label
-                                        style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Provincia
-                                        de interés <span style="color:#ef4444">*</span></label>
-                                    <input type="text" name="province" class="input"
-                                        placeholder="Ej. Madrid, Barcelona, Valencia..." required
-                                        style="width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px 16px; font-size: 1rem; background: #f8fafc; transition: all 0.2s;">
+
+                                <div class="radar-input-group">
+                                    <label>Provincia de interés <span style="color:#ef4444">*</span></label>
+                                    <div class="radar-input-icon">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                            <circle cx="12" cy="10" r="3"></circle>
+                                        </svg>
+                                    </div>
+                                    <input type="text" name="province" class="radar-input" placeholder="Ej. Madrid, Barcelona..." required>
                                 </div>
+
                                 <input type="hidden" name="source" value="home_marketing_section">
-                                <button type="submit" class="btn"
-                                    style="width: 100%; background: linear-gradient(135deg, #2152ff 0%, #1d4ed8 100%); color: white; border: none; font-weight: 700; padding: 16px; border-radius: 12px; font-size: 1.05rem; box-shadow: 0 8px 16px rgba(33, 82, 255, 0.25); cursor: pointer; transition: all 0.2s;">
-                                    Apuntarme Gratis
+                                <button type="submit" class="btn radar-submit-btn">
+                                    <span>Apuntarme Gratis</span>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        <polyline points="12 5 19 12 12 19"></polyline>
+                                    </svg>
                                 </button>
                             </form>
-                            <div style="text-align: center; margin-top: 20px;">
+                            
+                            <div style="text-align: center; margin-top: 24px;">
                                 <a href="<?= site_url() ?>empresas-nuevas"
-                                    style="color: #64748b; font-size: 0.85rem; text-decoration: underline; font-weight: 500;">Conoce
-                                    más sobre APIEmpresas Radar</a>
+                                    style="color: #64748b; font-size: 0.85rem; font-weight: 500; text-decoration: none; transition: color 0.2s; display: inline-flex; align-items: center; gap: 4px;"
+                                    onmouseover="this.style.color='#2152ff'" onmouseout="this.style.color='#64748b'">
+                                    Conoce más sobre APIEmpresas Radar
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                    </svg>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -1078,6 +1201,147 @@
             </div>
         </div>
     </div>
+
+    <?php if (isset($showReviewModal) && $showReviewModal): ?>
+    <!-- =========================
+         MODAL · REVIEW USUARIO
+         ========================= -->
+    <div class="modal-overlay active" id="modalUserReview" aria-hidden="false" data-prevent-overlay-close="true" style="z-index: 10000; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px);">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reviewTitle" tabindex="-1"
+            style="max-width: 500px; padding: 0; background: #ffffff; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25); overflow: hidden; position: relative;">
+            
+            <button class="modal-close" type="button" aria-label="Cerrar modal" onclick="closeReviewModal()"
+                style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; font-size: 28px; color: #94a3b8; cursor: pointer; transition: color 0.2s; line-height: 1;">
+                &times;
+            </button>
+
+            <div style="padding: 40px 32px 32px; text-align: center;">
+                <div style="width: 56px; height: 56px; background: #f0fdf4; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #16a34a; margin: 0 auto 20px;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                    </svg>
+                </div>
+                <h2 id="reviewTitle" style="font-size: 24px; color: #0f172a; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.02em;">¿Qué te parece APIEmpresas?</h2>
+                <p style="color: #64748b; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">Hemos notado que estás usando bastante nuestro buscador. Nos ayudaría mucho saber tu opinión para seguir mejorando.</p>
+                
+                <form id="reviewForm" onsubmit="submitReview(event)">
+                    <!-- Stars -->
+                    <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 24px;" id="starRatingContainer">
+                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                            <button type="button" class="star-btn" data-value="<?= $i ?>" onclick="setRating(<?= $i ?>)" onmouseover="hoverRating(<?= $i ?>)" onmouseout="resetRating()"
+                                style="background: transparent; border: none; cursor: pointer; padding: 0; color: #cbd5e1; transition: color 0.2s, transform 0.2s;">
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                                </svg>
+                            </button>
+                        <?php endfor; ?>
+                    </div>
+                    <input type="hidden" name="rating" id="reviewRating" value="0" required>
+                    
+                    <textarea name="comment" id="reviewComment" placeholder="Comentarios, mejoras o funciones que eches en falta (opcional)..." rows="3"
+                        style="width: 100%; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px; font-size: 14px; color: #1e293b; background: #f8fafc; resize: none; margin-bottom: 24px; font-family: inherit; transition: border-color 0.2s; box-sizing: border-box;"
+                        onfocus="this.style.borderColor='#2152ff'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+                        
+                    <button type="submit" id="reviewSubmitBtn" disabled
+                        style="width: 100%; background: linear-gradient(135deg, #2152ff 0%, #1d4ed8 100%); color: white; border: none; font-weight: 700; padding: 16px; border-radius: 12px; font-size: 1.05rem; cursor: not-allowed; opacity: 0.6; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 14px rgba(33, 82, 255, 0.4);">
+                        Enviar valoración
+                    </button>
+                </form>
+                
+                <div id="reviewSuccess" style="display: none; padding: 20px 0;">
+                    <div style="color: #16a34a; font-size: 48px; margin-bottom: 16px;">✓</div>
+                    <h3 style="font-size: 20px; color: #0f172a; margin-bottom: 8px;">¡Gracias por tu reseña!</h3>
+                    <p style="color: #64748b; font-size: 15px;">Tu feedback es muy valioso para nosotros.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let currentRating = 0;
+    
+    function setRating(rating) {
+        currentRating = rating;
+        document.getElementById('reviewRating').value = rating;
+        updateStars(rating);
+        
+        const submitBtn = document.getElementById('reviewSubmitBtn');
+        submitBtn.disabled = false;
+        submitBtn.style.cursor = 'pointer';
+        submitBtn.style.opacity = '1';
+        submitBtn.style.transform = 'translateY(-2px)';
+        submitBtn.style.boxShadow = '0 10px 20px rgba(33, 82, 255, 0.3)';
+    }
+    
+    function hoverRating(rating) {
+        updateStars(rating);
+    }
+    
+    function resetRating() {
+        updateStars(currentRating);
+    }
+    
+    function updateStars(activeCount) {
+        const stars = document.querySelectorAll('#starRatingContainer .star-btn');
+        stars.forEach((star, index) => {
+            if (index < activeCount) {
+                star.style.color = '#fbbf24'; // yellow
+                star.style.transform = 'scale(1.1)';
+            } else {
+                star.style.color = '#cbd5e1'; // gray
+                star.style.transform = 'scale(1)';
+            }
+        });
+    }
+    
+    function closeReviewModal() {
+        const modal = document.getElementById('modalUserReview');
+        modal.classList.remove('active');
+        setTimeout(() => modal.style.display = 'none', 300);
+        document.body.style.overflow = '';
+    }
+    
+    function submitReview(e) {
+        e.preventDefault();
+        if(currentRating < 1) return;
+        
+        const btn = document.getElementById('reviewSubmitBtn');
+        const form = document.getElementById('reviewForm');
+        const success = document.getElementById('reviewSuccess');
+        
+        btn.innerHTML = 'Enviando...';
+        btn.disabled = true;
+        
+        const formData = new FormData();
+        formData.append('rating', currentRating);
+        formData.append('comment', document.getElementById('reviewComment').value);
+        
+        fetch('<?= site_url('submit-review') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                form.style.display = 'none';
+                success.style.display = 'block';
+                setTimeout(() => {
+                    closeReviewModal();
+                }, 3000);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            btn.innerHTML = 'Error al enviar. Reintentar';
+            btn.disabled = false;
+        });
+    }
+    document.body.style.overflow = 'hidden';
+    </script>
+    <?php endif; ?>
 
     <?= view('partials/footer') ?>
     <script>

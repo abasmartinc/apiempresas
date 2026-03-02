@@ -134,9 +134,80 @@ class Home extends BaseController
             return strcmp($a['name'], $b['name']);
         });
 
+        // Review Modal Logic
+        $showReviewModal = false;
+        $db = \Config\Database::connect();
+        $ip = $this->request->getIPAddress();
+        
+        // Check if user already submitted a review
+        $alreadyReviewed = $db->table('user_reviews')
+                              ->where('ip_address', $ip)
+                              ->countAllResults();
+                              
+        if ($alreadyReviewed == 0) {
+            // Check if user has >= 3 searches
+            $searchCount = $db->table('company_search_logs')
+                              ->where('ip', $ip)
+                              ->countAllResults();
+                              
+            if ($searchCount >= 3) {
+                $showReviewModal = true;
+            }
+        }
+
         return view('home', [
             'latest_posts' => $posts,
-            'provinces'    => $provinces
+            'provinces'    => $provinces,
+            'showReviewModal' => $showReviewModal
         ]);
+    }
+
+    public function submitReview()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'Invalid request']);
+        }
+
+        $rating = (int) $this->request->getPost('rating');
+        $comment = (string) $this->request->getPost('comment');
+        
+        if ($rating < 1 || $rating > 5) {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'Invalid rating']);
+        }
+
+        $ip = $this->request->getIPAddress();
+        $db = \Config\Database::connect();
+
+        // Check if already reviewed
+        $alreadyReviewed = $db->table('user_reviews')
+                              ->where('ip_address', $ip)
+                              ->countAllResults();
+                              
+        if ($alreadyReviewed > 0) {
+            return $this->response->setJSON(['success' => true]);
+        }
+
+        // Insert review
+        $data = [
+            'ip_address' => $ip,
+            'rating'     => $rating,
+            'comment'    => $comment ? esc($comment) : null,
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $db->table('user_reviews')->insert($data);
+
+        // Send email notification
+        try {
+            $emailService = \Config\Services::email();
+            $emailService->setTo('papelo.amh@gmail.com');
+            $emailService->setSubject('Nueva reseña en APIEmpresas');
+            $emailService->setMessage("¡Se ha recibido una nueva reseña en la web!\n\nEstrellas: {$rating}/5\nComentario: " . ($comment ?: 'Sin comentarios') . "\nIP: {$ip}");
+            $emailService->send();
+        } catch (\Exception $e) {
+            log_message('error', 'Error sending review email: ' . $e->getMessage());
+        }
+
+        return $this->response->setJSON(['success' => true]);
     }
 }
