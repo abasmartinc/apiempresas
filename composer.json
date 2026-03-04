@@ -16,6 +16,7 @@
         "darkaonline/l5-swagger": "^8.6",
         "dompdf/dompdf": "^3.1",
         "firebase/php-jwt": "^6.10",
+        "google/apiclient": "2.15.0",
         "laminas/laminas-escaper": "^2.13",
         "phpmailer/phpmailer": "^6.9",
         "phpoffice/phpword": "^1.4",

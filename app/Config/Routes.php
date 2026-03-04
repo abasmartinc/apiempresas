@@ -164,6 +164,10 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
 
     // IA Marketing
     $routes->get('ia-marketing', 'Admin\Dashboard::ia_marketing');
+
+    // Google Search Console
+    $routes->get('search-console', 'Admin\Dashboard::search_console');
+    $routes->get('search-console/kpis', 'Admin\Dashboard::search_console_kpis');
 });
 
 // Webhooks

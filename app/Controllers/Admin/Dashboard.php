@@ -1673,4 +1673,35 @@ class Dashboard extends BaseController
         
         return view('admin/ia_marketing', $data);
     }
+
+    /**
+     * Dashboard de Google Search Console
+     */
+    public function search_console()
+    {
+        $data = [
+            'title' => 'Google Search Console | APIEmpresas'
+        ];
+        
+        return view('admin/search_console', $data);
+    }
+    
+    /**
+     * AJAX endpoint para traer los datos de Google Search Console
+     */
+    public function search_console_kpis()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'Invalid request']);
+        }
+        
+        $gscService = new \App\Services\GoogleSearchConsoleService();
+        $result = $gscService->getKpisWithComparison();
+        
+        if ($result['status'] === 'error') {
+            return $this->response->setStatusCode(500)->setJSON($result);
+        }
+        
+        return $this->response->setJSON($result);
+    }
 }
