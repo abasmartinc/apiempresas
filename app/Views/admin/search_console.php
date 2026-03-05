@@ -204,7 +204,7 @@
             <button id="refreshGscBtn" class="btn" style="background: linear-gradient(135deg, #2152ff 0%, #1d4ed8 100%); color: white; border: none;">
                 <i class="fas fa-sync-alt mr-2"></i> Recargar
             </button>
-            <a href="<?= site_url('admin/dashboard') ?>" class="btn ghost">Volver al Dashboard</a>
+            <a href="<?= site_url('dashboard') ?>" class="btn ghost">Volver al Dashboard</a>
         </div>
     </div>
 
