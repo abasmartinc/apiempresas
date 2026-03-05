@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="es">
+
 <head>
     <?= view('partials/head', ['title' => $title]) ?>
     <style>
@@ -9,14 +10,14 @@
             --kpi-orange: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             --kpi-purple: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
         }
-        
+
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 24px;
             margin-bottom: 50px;
         }
-        
+
         .kpi-card {
             position: relative;
             overflow: hidden;
@@ -30,23 +31,25 @@
             flex-direction: column;
             justify-content: space-between;
         }
-        
+
         .kpi-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1);
         }
-        
+
         .kpi-card::before {
             content: '';
             position: absolute;
-            top: 0; right: 0;
-            width: 120px; height: 120px;
+            top: 0;
+            right: 0;
+            width: 120px;
+            height: 120px;
             background: currentColor;
             opacity: 0.03;
             border-radius: 0 0 0 100%;
             pointer-events: none;
         }
-        
+
         .kpi-label {
             font-size: 0.85rem;
             font-weight: 700;
@@ -58,7 +61,7 @@
             align-items: center;
             gap: 8px;
         }
-        
+
         .kpi-value {
             font-size: 2.5rem;
             font-weight: 900;
@@ -67,7 +70,7 @@
             margin-bottom: 16px;
             letter-spacing: -0.02em;
         }
-        
+
         .kpi-footer {
             display: flex;
             align-items: center;
@@ -82,7 +85,7 @@
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 24px;
         }
-        
+
         .admin-card {
             background: white;
             border-radius: 20px;
@@ -96,13 +99,13 @@
             gap: 20px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
-        
+
         .admin-card:hover {
             transform: translateY(-4px) scale(1.02);
             border-color: #2152ff;
             box-shadow: 0 20px 25px -5px rgba(33, 82, 255, 0.1), 0 10px 10px -5px rgba(33, 82, 255, 0.04);
         }
-        
+
         .admin-icon-wrapper {
             width: 48px;
             height: 48px;
@@ -115,26 +118,26 @@
             flex-shrink: 0;
             transition: all 0.3s ease;
         }
-        
+
         .admin-card:hover .admin-icon-wrapper {
             background: #2152ff;
             color: white;
             transform: rotate(-5deg);
         }
-        
+
         .admin-icon-wrapper svg {
             width: 24px;
             height: 24px;
             stroke-width: 2;
         }
-        
+
         .admin-card-content {
             display: flex;
             flex-direction: column;
             gap: 4px;
             text-align: left;
         }
-        
+
         .admin-card span {
             font-weight: 700;
             font-size: 1rem;
@@ -155,7 +158,7 @@
             margin-bottom: 24px;
             margin-top: 40px;
         }
-        
+
         .section-title {
             font-size: 1.25rem;
             font-weight: 800;
@@ -164,7 +167,7 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .section-title::before {
             content: '';
             width: 4px;
@@ -174,19 +177,70 @@
         }
 
         /* Subtle colors for icons */
-        .icon-sub-blue { background: #eff6ff !important; color: #2152ff !important; }
-        .icon-sub-indigo { background: #eef2ff !important; color: #6366f1 !important; }
-        .icon-sub-emerald { background: #ecfdf5 !important; color: #10b981 !important; }
-        .icon-sub-amber { background: #fffbeb !important; color: #f59e0b !important; }
-        .icon-sub-orange { background: #fff7ed !important; color: #ea580c !important; }
-        .icon-sub-purple { background: #f5f3ff !important; color: #8b5cf6 !important; }
-        .icon-sub-rose { background: #fff1f2 !important; color: #f43f5e !important; }
-        .icon-sub-sky { background: #f0f9ff !important; color: #0ea5e9 !important; }
-        .icon-sub-violet { background: #f5f3ff !important; color: #7c3aed !important; }
-        .icon-sub-pink { background: #fdf2f8 !important; color: #db2777 !important; }
-        .icon-sub-red { background: #fef2f2 !important; color: #dc2626 !important; }
-        .icon-sub-slate { background: #f8fafc !important; color: #475569 !important; }
-        .icon-sub-green { background: #f0fdf4 !important; color: #16a34a !important; }
+        .icon-sub-blue {
+            background: #eff6ff !important;
+            color: #2152ff !important;
+        }
+
+        .icon-sub-indigo {
+            background: #eef2ff !important;
+            color: #6366f1 !important;
+        }
+
+        .icon-sub-emerald {
+            background: #ecfdf5 !important;
+            color: #10b981 !important;
+        }
+
+        .icon-sub-amber {
+            background: #fffbeb !important;
+            color: #f59e0b !important;
+        }
+
+        .icon-sub-orange {
+            background: #fff7ed !important;
+            color: #ea580c !important;
+        }
+
+        .icon-sub-purple {
+            background: #f5f3ff !important;
+            color: #8b5cf6 !important;
+        }
+
+        .icon-sub-rose {
+            background: #fff1f2 !important;
+            color: #f43f5e !important;
+        }
+
+        .icon-sub-sky {
+            background: #f0f9ff !important;
+            color: #0ea5e9 !important;
+        }
+
+        .icon-sub-violet {
+            background: #f5f3ff !important;
+            color: #7c3aed !important;
+        }
+
+        .icon-sub-pink {
+            background: #fdf2f8 !important;
+            color: #db2777 !important;
+        }
+
+        .icon-sub-red {
+            background: #fef2f2 !important;
+            color: #dc2626 !important;
+        }
+
+        .icon-sub-slate {
+            background: #f8fafc !important;
+            color: #475569 !important;
+        }
+
+        .icon-sub-green {
+            background: #f0fdf4 !important;
+            color: #16a34a !important;
+        }
 
         .skeleton {
             display: inline-block;
@@ -206,612 +260,635 @@
         }
 
         @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
         }
 
         @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
         }
     </style>
 </head>
+
 <body class="admin-body">
-<div class="bg-halo" aria-hidden="true"></div>
+    <div class="bg-halo" aria-hidden="true"></div>
 
-<?= view('partials/header_admin') ?>
+    <?= view('partials/header_admin') ?>
 
-<main class="container-admin" style="padding: 40px 0 80px;">
-    <div style="margin-bottom: 48px;">
-        <h1 class="title" style="font-size: 2.8rem; margin-bottom: 8px;">Dashboard <span class="grad">Admin</span></h1>
-        <p style="color: #64748b; font-size: 1.1rem;">Bienvenido de nuevo, <?= esc(session('user_name')) ?>. Aquí tienes el resumen de hoy.</p>
-    </div>
+    <main class="container-admin" style="padding: 40px 0 80px;">
+        <div style="margin-bottom: 48px;">
+            <h1 class="title" style="font-size: 2.8rem; margin-bottom: 8px;">Dashboard <span class="grad">Admin</span>
+            </h1>
+            <p style="color: #64748b; font-size: 1.1rem;">Bienvenido de nuevo, <?= esc(session('user_name')) ?>. Aquí
+                tienes el resumen de hoy.</p>
+        </div>
 
-    <!-- KPIs Section -->
-    <div class="kpi-grid">
-        <!-- Empresas -->
-        <div class="kpi-card" style="color: #6366f1;">
-            <div>
-                <div class="kpi-label">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 16px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
+        <!-- KPIs Section -->
+        <div class="kpi-grid">
+
+
+            <!-- Usuarios -->
+            <div class="kpi-card" style="color: #10b981;">
+                <div>
+                    <div class="kpi-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                            stroke="currentColor" style="width: 16px;">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                        </svg>
+                        Usuarios
+                    </div>
+                    <div class="kpi-value kpi-async-value" data-type="users_total"><span class="skeleton"></span></div>
+                </div>
+                <div class="kpi-footer">
+                    <span style="color: #16a34a; font-weight: 700;"><span class="kpi-async-value"
+                            data-type="users_active"><span class="skeleton" style="width: 40px;"></span></span>
+                        Activos</span>
+                    <span style="color: #cbd5e1;">•</span>
+                    <span style="color: #6366f1; font-weight: 700;"><span class="kpi-async-value"
+                            data-type="subs_active"><span class="skeleton" style="width: 40px;"></span></span>
+                        Suscripciones</span>
+                </div>
+            </div>
+
+            <!-- API Hoy -->
+            <div class="kpi-card" style="color: #f59e0b;">
+                <div>
+                    <div class="kpi-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                            stroke="currentColor" style="width: 16px;">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                        </svg>
+                        Peticiones Hoy
+                    </div>
+                    <div class="kpi-value kpi-async-value" data-type="api_today"><span class="skeleton"></span></div>
+                </div>
+                <div class="kpi-footer">
+                    <span style="color: #64748b;">Tráfico en tiempo real</span>
+                </div>
+            </div>
+
+            <!-- API Mes -->
+            <div class="kpi-card" style="color: #8b5cf6;">
+                <div>
+                    <div class="kpi-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                            stroke="currentColor" style="width: 16px;">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M2.25 18L9 11.25l4.5 4.5L21.75 7.5" />
+                        </svg>
+                        Peticiones Mes
+                    </div>
+                    <div class="kpi-value kpi-async-value" data-type="api_month"><span class="skeleton"></span></div>
+                </div>
+                <div class="kpi-footer">
+                    <span style="color: #64748b;">Acumulado mensual</span>
+                </div>
+            </div>
+
+            <!-- Ingresos Mes -->
+            <div class="kpi-card" style="color: #059669;">
+                <div>
+                    <div class="kpi-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                            stroke="currentColor" style="width: 16px;">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        Ingresos Mes
+                    </div>
+                    <div class="kpi-value kpi-async-value" data-type="revenue_month"><span class="skeleton"></span>
+                    </div>
+                </div>
+                <div class="kpi-footer">
+                    <span style="color: #64748b;">Facturación total (Pagado)</span>
+                </div>
+            </div>
+
+            <!-- Tasa de Error -->
+            <div class="kpi-card" style="color: #dc2626;">
+                <div>
+                    <div class="kpi-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                            stroke="currentColor" style="width: 16px;">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                        </svg>
+                        Tasa de Error
+                    </div>
+                    <div class="kpi-value kpi-async-value" data-type="api_error_rate"><span class="skeleton"></span>
+                    </div>
+                </div>
+                <div class="kpi-footer">
+                    <span style="color: #64748b;">Peticiones con error (4xx/5xx)</span>
+                </div>
+            </div>
+
+            <!-- Latencia Media -->
+            <div class="kpi-card" style="color: #2563eb;">
+                <div>
+                    <div class="kpi-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                            stroke="currentColor" style="width: 16px;">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        Latencia Media
+                    </div>
+                    <div class="kpi-value kpi-async-value" data-type="api_latency_avg"><span class="skeleton"></span>
+                    </div>
+                </div>
+                <div class="kpi-footer">
+                    <span style="color: #64748b;">Tiempo de respuesta medio</span>
+                </div>
+            </div>
+
+            <!-- IPs Bloqueadas -->
+            <div class="kpi-card" style="color: #4b5563;">
+                <div>
+                    <div class="kpi-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                            stroke="currentColor" style="width: 16px;">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                        </svg>
+                        IPs Bloqueadas
+                    </div>
+                    <div class="kpi-value kpi-async-value" data-type="blocked_ips_count"><span class="skeleton"></span>
+                    </div>
+                </div>
+                <div class="kpi-footer">
+                    <span style="color: #64748b;">Acceso denegado actualmente</span>
+                </div>
+            </div>
+
+
+            <!-- Usuarios Online -->
+            <div class="kpi-card"
+                style="color: #16a34a; border: 2px solid rgba(16, 185, 129, 0.2); background: rgba(240, 253, 244, 0.5);">
+                <div>
+                    <div class="kpi-label">
+                        <span
+                            style="display: inline-block; width: 10px; height: 10px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; animation: pulse 2s infinite;"></span>
+                        Online ahora
+                        <span id="refresh-timer"
+                            style="margin-left: auto; font-size: 0.7rem; background: rgba(16, 185, 129, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 600; font-variant-numeric: tabular-nums;">60s</span>
+                    </div>
+                    <div class="kpi-value" id="kpi-total-online"><?= $total_online ?? 0 ?></div>
+                </div>
+                <div class="kpi-footer">
+                    <span style="color: #64748b;">Usuarios activos (últimos 5 min)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usuarios Online Detalle (siempre presente para AJAX, pero condicional en render inicial) -->
+        <div id="online-users-wrapper" style="<?= ($total_online ?? 0) > 0 ? '' : 'display:none;' ?>">
+            <div class="section-header" style="margin-top: -20px; margin-bottom: 20px;">
+                <h2 class="section-title" style="font-size: 1rem; color: #16a34a;">Actividad Reciente</h2>
+            </div>
+            <div id="online-users-list" style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 40px;">
+                <?= $online_users_html ?? '' ?>
+            </div>
+        </div>
+
+        <!-- Listados y Gestión Section -->
+        <div class="section-header">
+            <h2 class="section-title">Listados y Gestión</h2>
+        </div>
+
+        <div class="admin-grid">
+            <a href="<?= site_url('admin/users') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-blue">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                     </svg>
-                    Empresas Totales
                 </div>
-                <div class="kpi-value kpi-async-value" data-type="total"><span class="skeleton"></span></div>
-            </div>
-            <div class="kpi-footer">
-                <span style="color: #16a34a; font-weight: 700;"><span class="kpi-async-value" data-type="companies_active"><span class="skeleton" style="width: 40px;"></span></span> Activas</span>
-                <span style="color: #cbd5e1;">•</span>
-                <span style="color: #f59e0b; font-weight: 700;"><span class="kpi-async-value" data-type="sin_cif"><span class="skeleton" style="width: 40px;"></span></span> Pendientes</span>
-            </div>
-        </div>
+                <div class="admin-card-content">
+                    <span>Usuarios</span>
+                    <p>Gestión de cuentas, perfiles y permisos de acceso.</p>
+                </div>
+            </a>
 
-        <!-- Usuarios -->
-        <div class="kpi-card" style="color: #10b981;">
-            <div>
-                <div class="kpi-label">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 16px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+            <a href="<?= site_url('admin/companies') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-indigo">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
                     </svg>
-                    Usuarios
                 </div>
-                <div class="kpi-value kpi-async-value" data-type="users_total"><span class="skeleton"></span></div>
-            </div>
-            <div class="kpi-footer">
-                <span style="color: #16a34a; font-weight: 700;"><span class="kpi-async-value" data-type="users_active"><span class="skeleton" style="width: 40px;"></span></span> Activos</span>
-                <span style="color: #cbd5e1;">•</span>
-                <span style="color: #6366f1; font-weight: 700;"><span class="kpi-async-value" data-type="subs_active"><span class="skeleton" style="width: 40px;"></span></span> Suscripciones</span>
-            </div>
-        </div>
+                <div class="admin-card-content">
+                    <span>Empresas</span>
+                    <p>Base de datos maestra de empresas y su información.</p>
+                </div>
+            </a>
 
-        <!-- API Hoy -->
-        <div class="kpi-card" style="color: #f59e0b;">
-            <div>
-                <div class="kpi-label">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 16px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+            <a href="<?= site_url('admin/logs') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-amber">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75V16.5m0-4.5V9m0-4.5V3" />
                     </svg>
-                    Peticiones Hoy
                 </div>
-                <div class="kpi-value kpi-async-value" data-type="api_today"><span class="skeleton"></span></div>
-            </div>
-            <div class="kpi-footer">
-                <span style="color: #64748b;">Tráfico en tiempo real</span>
-            </div>
-        </div>
+                <div class="admin-card-content">
+                    <span>Logs Búsqueda</span>
+                    <p>Historial y depuración de consultas de empresas.</p>
+                </div>
+            </a>
 
-        <!-- API Mes -->
-        <div class="kpi-card" style="color: #8b5cf6;">
-            <div>
-                <div class="kpi-label">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 16px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.5 4.5L21.75 7.5" />
+            <a href="<?= site_url('admin/logs?zero=1') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-orange">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                     </svg>
-                    Peticiones Mes
                 </div>
-                <div class="kpi-value kpi-async-value" data-type="api_month"><span class="skeleton"></span></div>
-            </div>
-            <div class="kpi-footer">
-                <span style="color: #64748b;">Acumulado mensual</span>
-            </div>
-        </div>
+                <div class="admin-card-content">
+                    <span>Top Búsquedas</span>
+                    <p>Lo más buscado por los usuarios y lo que falta.</p>
+                </div>
+            </a>
 
-        <!-- Ingresos Mes -->
-        <div class="kpi-card" style="color: #059669;">
-            <div>
-                <div class="kpi-label">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 16px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            <a href="<?= site_url('admin/api-requests') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-purple">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" />
                     </svg>
-                    Ingresos Mes
                 </div>
-                <div class="kpi-value kpi-async-value" data-type="revenue_month"><span class="skeleton"></span></div>
-            </div>
-            <div class="kpi-footer">
-                <span style="color: #64748b;">Facturación total (Pagado)</span>
-            </div>
-        </div>
+                <div class="admin-card-content">
+                    <span>Peticiones API</span>
+                    <p>Monitorización de tráfico y endpoints de la API.</p>
+                </div>
+            </a>
 
-        <!-- Tasa de Error -->
-        <div class="kpi-card" style="color: #dc2626;">
-            <div>
-                <div class="kpi-label">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 16px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+            <a href="<?= site_url('admin/usage-daily') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-emerald">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                     </svg>
-                    Tasa de Error
                 </div>
-                <div class="kpi-value kpi-async-value" data-type="api_error_rate"><span class="skeleton"></span></div>
-            </div>
-            <div class="kpi-footer">
-                <span style="color: #64748b;">Peticiones con error (4xx/5xx)</span>
-            </div>
-        </div>
+                <div class="admin-card-content">
+                    <span>Consumo Diario</span>
+                    <p>Análisis de uso por día y picos de tráfico.</p>
+                </div>
+            </a>
 
-        <!-- Latencia Media -->
-        <div class="kpi-card" style="color: #2563eb;">
-            <div>
-                <div class="kpi-label">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 16px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            <a href="<?= site_url('admin/plans') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-rose">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75-6.75a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 .75.75v9a.75.75 0 0 1-.75.75H3.75a.75.75 0 0 1-.75-.75v-9ZM12 3v3.375m0 0c0 .621.504 1.125 1.125 1.125h2.25c.621 0 1.125-.504 1.125-1.125V3m-4.5 0h4.5" />
                     </svg>
-                    Latencia Media
                 </div>
-                <div class="kpi-value kpi-async-value" data-type="api_latency_avg"><span class="skeleton"></span></div>
-            </div>
-            <div class="kpi-footer">
-                <span style="color: #64748b;">Tiempo de respuesta medio</span>
-            </div>
-        </div>
+                <div class="admin-card-content">
+                    <span>Planes API</span>
+                    <p>Configuración de precios, límites y cuotas.</p>
+                </div>
+            </a>
 
-        <!-- IPs Bloqueadas -->
-        <div class="kpi-card" style="color: #4b5563;">
-            <div>
-                <div class="kpi-label">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 16px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+            <a href="<?= site_url('admin/api-keys') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-sky">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
                     </svg>
-                    IPs Bloqueadas
                 </div>
-                <div class="kpi-value kpi-async-value" data-type="blocked_ips_count"><span class="skeleton"></span></div>
-            </div>
-            <div class="kpi-footer">
-                <span style="color: #64748b;">Acceso denegado actualmente</span>
-            </div>
-        </div>
+                <div class="admin-card-content">
+                    <span>API Keys</span>
+                    <p>Emisión y revocación de llaves de acceso.</p>
+                </div>
+            </a>
 
-        <!-- Búsquedas Zero -->
-        <div class="kpi-card" style="color: #f59e0b;">
-            <div>
-                <div class="kpi-label">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 16px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            <a href="<?= site_url('admin/subscriptions') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-indigo">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 3h.008v.008H12V18Zm-3-6h.008v.008H9v-.008ZM9 15h.008v.008H9V15Zm0 3h.008v.008H9V18Zm6-6h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008V15Zm0 3h.008v.008h-.008V18Z" />
                     </svg>
-                    Búsquedas Zero
                 </div>
-                <div class="kpi-value kpi-async-value" data-type="searches_zero_results"><span class="skeleton"></span></div>
-            </div>
-            <div class="kpi-footer">
-                <span style="color: #16a34a; font-weight: 700;"><span class="kpi-async-value" data-type="searches_resolved_count"><span class="skeleton" style="width: 40px;"></span></span> Resueltas</span>
-                <span style="color: #64748b;">(Ya en base de datos)</span>
-            </div>
-        </div>
-        <!-- Usuarios Online -->
-        <div class="kpi-card" style="color: #16a34a; border: 2px solid rgba(16, 185, 129, 0.2); background: rgba(240, 253, 244, 0.5);">
-            <div>
-                <div class="kpi-label">
-                    <span style="display: inline-block; width: 10px; height: 10px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; animation: pulse 2s infinite;"></span>
-                    Online ahora
-                    <span id="refresh-timer" style="margin-left: auto; font-size: 0.7rem; background: rgba(16, 185, 129, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 600; font-variant-numeric: tabular-nums;">60s</span>
+                <div class="admin-card-content">
+                    <span>Suscripciones</span>
+                    <p>Gestión de ciclos de facturación y pagos activos.</p>
                 </div>
-                <div class="kpi-value" id="kpi-total-online"><?= $total_online ?? 0 ?></div>
-            </div>
-            <div class="kpi-footer">
-                <span style="color: #64748b;">Usuarios activos (últimos 5 min)</span>
-            </div>
+            </a>
+
+            <a href="<?= site_url('admin/invoices') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-violet">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg>
+                </div>
+                <div class="admin-card-content">
+                    <span>Facturas</span>
+                    <p>Consulta y descarga del historial de facturación.</p>
+                </div>
+            </a>
+
+            <a href="<?= site_url('admin/activity-logs') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-slate">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                </div>
+                <div class="admin-card-content">
+                    <span>Activity Logs</span>
+                    <p>Registro de acciones administrativas críticas.</p>
+                </div>
+            </a>
+
+            <a href="<?= site_url('admin/email-logs') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-pink">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                    </svg>
+                </div>
+                <div class="admin-card-content">
+                    <span>Logs Emails</span>
+                    <p>Trazabilidad de correos electrónicos enviados.</p>
+                </div>
+            </a>
+
+            <a href="<?= site_url('admin/blocked-ips') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-red">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                    </svg>
+                </div>
+                <div class="admin-card-content">
+                    <span>Centro de Seguridad</span>
+                    <p>Gestión de baneo de IPs y cortafuegos de la API.</p>
+                </div>
+            </a>
+
+            <a href="<?= site_url('admin/ia-marketing') ?>" class="admin-card"
+                style="border-color: rgba(16, 185, 129, 0.3);">
+                <div class="admin-icon-wrapper icon-sub-green">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                    </svg>
+                </div>
+                <div class="admin-card-content">
+                    <span>IA Marketing</span>
+                    <p>Análisis de leads inteligentes e incentivación a suscripciones.</p>
+                </div>
+            </a>
+            <a href="<?= site_url('admin/search-console') ?>" class="admin-card"
+                style="border-color: rgba(33, 150, 243, 0.3);">
+                <div class="admin-icon-wrapper icon-sub-sky">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                </div>
+                <div class="admin-card-content">
+                    <span>Search Console</span>
+                    <p>Métricas SEO, clics e impresiones desde Google.</p>
+                </div>
+            </a>
         </div>
-    </div>
 
-    <!-- Usuarios Online Detalle (siempre presente para AJAX, pero condicional en render inicial) -->
-    <div id="online-users-wrapper" style="<?= ($total_online ?? 0) > 0 ? '' : 'display:none;' ?>">
-    <div class="section-header" style="margin-top: -20px; margin-bottom: 20px;">
-        <h2 class="section-title" style="font-size: 1rem; color: #16a34a;">Actividad Reciente</h2>
-    </div>
-    <div id="online-users-list" style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 40px;">
-        <?= $online_users_html ?? '' ?>
-    </div>
-    </div>
+        <!-- Herramientas del Sistema Section -->
+        <div class="section-header">
+            <h2 class="section-title">Herramientas del Sistema</h2>
+        </div>
 
-    <!-- Listados y Gestión Section -->
-    <div class="section-header">
-        <h2 class="section-title">Listados y Gestión</h2>
-    </div>
+        <div class="admin-grid">
+            <a href="#" class="admin-card" id="btn-clear-cache">
+                <div class="admin-icon-wrapper icon-sub-blue">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+                </div>
+                <div class="admin-card-content">
+                    <span>Limpiar Caché</span>
+                    <p>Optimiza el rendimiento limpiando datos temporales.</p>
+                </div>
+            </a>
 
-    <div class="admin-grid">
-        <a href="<?= site_url('admin/users') ?>" class="admin-card">
-            <div class="admin-icon-wrapper icon-sub-blue">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                </svg>
-            </div>
-            <div class="admin-card-content">
-                <span>Usuarios</span>
-                <p>Gestión de cuentas, perfiles y permisos de acceso.</p>
-            </div>
-        </a>
 
-        <a href="<?= site_url('admin/companies') ?>" class="admin-card">
-            <div class="admin-icon-wrapper icon-sub-indigo">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
-                </svg>
-            </div>
-            <div class="admin-card-content">
-                <span>Empresas</span>
-                <p>Base de datos maestra de empresas y su información.</p>
-            </div>
-        </a>
+        </div>
 
-        <a href="<?= site_url('admin/logs') ?>" class="admin-card">
-            <div class="admin-icon-wrapper icon-sub-amber">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75V16.5m0-4.5V9m0-4.5V3" />
-                </svg>
-            </div>
-            <div class="admin-card-content">
-                <span>Logs Búsqueda</span>
-                <p>Historial y depuración de consultas de empresas.</p>
-            </div>
-        </a>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                function loadKpis() {
+                    const kpiElements = document.querySelectorAll('.kpi-async-value');
 
-        <a href="<?= site_url('admin/logs?zero=1') ?>" class="admin-card">
-            <div class="admin-icon-wrapper icon-sub-orange">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                </svg>
-            </div>
-            <div class="admin-card-content">
-                <span>Top Búsquedas</span>
-                <p>Lo más buscado por los usuarios y lo que falta.</p>
-            </div>
-        </a>
+                    // Timeout de 30 segundos
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-        <a href="<?= site_url('admin/api-requests') ?>" class="admin-card">
-            <div class="admin-icon-wrapper icon-sub-purple">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" />
-                </svg>
-            </div>
-            <div class="admin-card-content">
-                <span>Peticiones API</span>
-                <p>Monitorización de tráfico y endpoints de la API.</p>
-            </div>
-        </a>
+                    fetch('<?= site_url('admin/kpis-all') ?>', {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        signal: controller.signal
+                    })
+                        .then(response => {
+                            clearTimeout(timeoutId);
+                            if (!response.ok) {
+                                throw new Error('HTTP error ' + response.status);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            kpiElements.forEach(el => {
+                                const type = el.getAttribute('data-type');
+                                if (data[type] !== undefined) {
+                                    el.innerHTML = data[type];
+                                }
+                            });
 
-        <a href="<?= site_url('admin/usage-daily') ?>" class="admin-card">
-            <div class="admin-icon-wrapper icon-sub-emerald">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                </svg>
-            </div>
-            <div class="admin-card-content">
-                <span>Consumo Diario</span>
-                <p>Análisis de uso por día y picos de tráfico.</p>
-            </div>
-        </a>
+                            // Online Users
+                            if (data.total_online !== undefined) {
+                                const totalOnlineEl = document.getElementById('kpi-total-online');
+                                if (totalOnlineEl) totalOnlineEl.innerHTML = data.total_online;
+                            }
 
-        <a href="<?= site_url('admin/plans') ?>" class="admin-card">
-            <div class="admin-icon-wrapper icon-sub-rose">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75-6.75a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 .75.75v9a.75.75 0 0 1-.75.75H3.75a.75.75 0 0 1-.75-.75v-9ZM12 3v3.375m0 0c0 .621.504 1.125 1.125 1.125h2.25c.621 0 1.125-.504 1.125-1.125V3m-4.5 0h4.5" />
-                </svg>
-            </div>
-            <div class="admin-card-content">
-                <span>Planes API</span>
-                <p>Configuración de precios, límites y cuotas.</p>
-            </div>
-        </a>
+                            if (data.online_users_html !== undefined) {
+                                const listEl = document.getElementById('online-users-list');
+                                if (listEl) listEl.innerHTML = data.online_users_html;
+                            }
 
-        <a href="<?= site_url('admin/api-keys') ?>" class="admin-card">
-            <div class="admin-icon-wrapper icon-sub-sky">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
-                </svg>
-            </div>
-            <div class="admin-card-content">
-                <span>API Keys</span>
-                <p>Emisión y revocación de llaves de acceso.</p>
-            </div>
-        </a>
+                            // Mostrar última actualización si está disponible
+                            if (data.stats_updated_at) {
+                                console.log('KPIs pesados actualizados:', data.stats_updated_at);
+                            }
+                        })
+                        .catch(err => {
+                            clearTimeout(timeoutId);
+                            console.error('Error loading KPIs', err);
 
-        <a href="<?= site_url('admin/subscriptions') ?>" class="admin-card">
-            <div class="admin-icon-wrapper icon-sub-indigo">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 3h.008v.008H12V18Zm-3-6h.008v.008H9v-.008ZM9 15h.008v.008H9V15Zm0 3h.008v.008H9V18Zm6-6h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008V15Zm0 3h.008v.008h-.008V18Z" />
-                </svg>
-            </div>
-            <div class="admin-card-content">
-                <span>Suscripciones</span>
-                <p>Gestión de ciclos de facturación y pagos activos.</p>
-            </div>
-        </a>
+                            const errorMsg = err.name === 'AbortError'
+                                ? '<span style="color: #f59e0b; font-size: 0.9rem;">Timeout</span>'
+                                : '<span style="color: #dc2626; font-size: 0.9rem;">Error</span>';
 
-        <a href="<?= site_url('admin/invoices') ?>" class="admin-card">
-            <div class="admin-icon-wrapper icon-sub-violet">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                </svg>
-            </div>
-            <div class="admin-card-content">
-                <span>Facturas</span>
-                <p>Consulta y descarga del historial de facturación.</p>
-            </div>
-        </a>
+                            kpiElements.forEach(el => {
+                                el.innerHTML = errorMsg;
+                            });
 
-        <a href="<?= site_url('admin/activity-logs') ?>" class="admin-card">
-            <div class="admin-icon-wrapper icon-sub-slate">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
-            </div>
-            <div class="admin-card-content">
-                <span>Activity Logs</span>
-                <p>Registro de acciones administrativas críticas.</p>
-            </div>
-        </a>
-
-        <a href="<?= site_url('admin/email-logs') ?>" class="admin-card">
-            <div class="admin-icon-wrapper icon-sub-pink">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-                </svg>
-            </div>
-            <div class="admin-card-content">
-                <span>Logs Emails</span>
-                <p>Trazabilidad de correos electrónicos enviados.</p>
-            </div>
-        </a>
-
-        <a href="<?= site_url('admin/blocked-ips') ?>" class="admin-card">
-            <div class="admin-icon-wrapper icon-sub-red">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
-                </svg>
-            </div>
-            <div class="admin-card-content">
-                <span>Centro de Seguridad</span>
-                <p>Gestión de baneo de IPs y cortafuegos de la API.</p>
-            </div>
-        </a>
-
-        <a href="<?= site_url('admin/ia-marketing') ?>" class="admin-card" style="border-color: rgba(16, 185, 129, 0.3);">
-            <div class="admin-icon-wrapper icon-sub-green">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                </svg>
-            </div>
-            <div class="admin-card-content">
-                <span>IA Marketing</span>
-                <p>Análisis de leads inteligentes e incentivación a suscripciones.</p>
-            </div>
-        </a>
-        <a href="<?= site_url('admin/search-console') ?>" class="admin-card" style="border-color: rgba(33, 150, 243, 0.3);">
-            <div class="admin-icon-wrapper icon-sub-sky">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                </svg>
-            </div>
-            <div class="admin-card-content">
-                <span>Search Console</span>
-                <p>Métricas SEO, clics e impresiones desde Google.</p>
-            </div>
-        </a>
-    </div>
-
-    <!-- Herramientas del Sistema Section -->
-    <div class="section-header">
-        <h2 class="section-title">Herramientas del Sistema</h2>
-    </div>
-
-    <div class="admin-grid">
-        <a href="#" class="admin-card" id="btn-clear-cache">
-            <div class="admin-icon-wrapper icon-sub-blue">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-                </svg>
-            </div>
-            <div class="admin-card-content">
-                <span>Limpiar Caché</span>
-                <p>Optimiza el rendimiento limpiando datos temporales.</p>
-            </div>
-        </a>
-
-        <a href="#" class="admin-card" id="btn-refresh-kpis">
-            <div class="admin-icon-wrapper icon-sub-green">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                </svg>
-            </div>
-            <div class="admin-card-content">
-                <span>Actualizar KPIs</span>
-                <p>Recalcula las estadísticas de empresas manualmente.</p>
-            </div>
-        </a>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            function loadKpis() {
-                const kpiElements = document.querySelectorAll('.kpi-async-value');
-                
-                // Timeout de 30 segundos
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000);
-                
-                fetch('<?= site_url('admin/kpis-all') ?>', {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    signal: controller.signal
-                })
-                .then(response => {
-                    clearTimeout(timeoutId);
-                    if (!response.ok) {
-                        throw new Error('HTTP error ' + response.status);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    kpiElements.forEach(el => {
-                        const type = el.getAttribute('data-type');
-                        if (data[type] !== undefined) {
-                            el.innerHTML = data[type];
-                        }
-                    });
-
-                    // Online Users
-                    if (data.total_online !== undefined) {
-                      const totalOnlineEl = document.getElementById('kpi-total-online');
-                      if (totalOnlineEl) totalOnlineEl.innerHTML = data.total_online;
-                    }
-
-                    if (data.online_users_html !== undefined) {
-                      const listEl = document.getElementById('online-users-list');
-                      if (listEl) listEl.innerHTML = data.online_users_html;
-                    }
-                    
-                    // Mostrar última actualización si está disponible
-                    if (data.stats_updated_at) {
-                        console.log('KPIs pesados actualizados:', data.stats_updated_at);
-                    }
-                })
-                .catch(err => {
-                    clearTimeout(timeoutId);
-                    console.error('Error loading KPIs', err);
-                    
-                    const errorMsg = err.name === 'AbortError' 
-                        ? '<span style="color: #f59e0b; font-size: 0.9rem;">Timeout</span>' 
-                        : '<span style="color: #dc2626; font-size: 0.9rem;">Error</span>';
-                    
-                    kpiElements.forEach(el => {
-                        el.innerHTML = errorMsg;
-                    });
-                    
-                    // Mostrar mensaje de ayuda si hay timeout
-                    if (err.name === 'AbortError') {
-                        Swal.fire({
-                            title: 'Carga lenta de KPIs',
-                            html: 'Los KPIs están tardando más de lo esperado.<br><br>' +
-                                  '<strong>Solución:</strong> Ejecuta el script de inicialización:<br>' +
-                                  '<code style="background: #f1f5f9; padding: 8px; border-radius: 4px; display: inline-block; margin-top: 8px;">php init_kpis.php</code>',
-                            icon: 'warning',
-                            confirmButtonColor: '#2152ff',
-                            confirmButtonText: 'Entendido'
-                        });
-                    }
-                });
-            }
-
-            // Iniciar carga de KPIs
-            loadKpis();
-
-            // Lógica de cuenta atrás para el refresco
-            let timeLeft = 60;
-            const timerEl = document.getElementById('refresh-timer');
-            
-            setInterval(function() {
-                timeLeft--;
-                if (timeLeft <= 0) {
-                    loadKpis();
-                    timeLeft = 60;
-                }
-                if (timerEl) {
-                    timerEl.innerText = timeLeft + 's';
-                }
-            }, 1000);
-
-            // Gestor de Caché
-            const clearCacheBtn = document.getElementById('btn-clear-cache');
-            if (clearCacheBtn) {
-                clearCacheBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    Swal.fire({
-                        title: '¿Limpiar caché?',
-                        text: "Esta acción eliminará todos los datos temporales del sistema.",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#2152ff',
-                        cancelButtonColor: '#64748b',
-                        confirmButtonText: 'Sí, limpiar todo',
-                        cancelButtonText: 'Cancelar',
-                        background: '#ffffff',
-                        borderRadius: '20px'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            const icon = this.querySelector('.admin-icon-wrapper');
-                            const originalHtml = icon.innerHTML;
-                            icon.innerHTML = '⌛';
-                            
-                            fetch('<?= site_url('admin/clear-cache') ?>', {
-                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                icon.innerHTML = originalHtml;
+                            // Mostrar mensaje de ayuda si hay timeout
+                            if (err.name === 'AbortError') {
                                 Swal.fire({
-                                    title: data.status === 'success' ? '¡Limpiado!' : 'Error',
-                                    text: data.message,
-                                    icon: data.status === 'success' ? 'success' : 'error',
+                                    title: 'Carga lenta de KPIs',
+                                    html: 'Los KPIs están tardando más de lo esperado.<br><br>' +
+                                        '<strong>Solución:</strong> Ejecuta el script de inicialización:<br>' +
+                                        '<code style="background: #f1f5f9; padding: 8px; border-radius: 4px; display: inline-block; margin-top: 8px;">php init_kpis.php</code>',
+                                    icon: 'warning',
                                     confirmButtonColor: '#2152ff',
-                                    borderRadius: '20px'
+                                    confirmButtonText: 'Entendido'
                                 });
-                            })
-                            .catch(err => {
-                                icon.innerHTML = originalHtml;
-                                Swal.fire('Error', 'No se pudo completar la acción', 'error');
-                            });
-                        }
-                    });
-                });
-            }
+                            }
+                        });
+                }
 
-            // Actualizar KPIs manualmente
-            const refreshKpisBtn = document.getElementById('btn-refresh-kpis');
-            if (refreshKpisBtn) {
-                refreshKpisBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    Swal.fire({
-                        title: '¿Actualizar KPIs?',
-                        text: "Esto recalculará todas las estadísticas de empresas. Puede tardar 10-30 segundos.",
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonColor: '#2152ff',
-                        cancelButtonColor: '#64748b',
-                        confirmButtonText: 'Sí, actualizar',
-                        cancelButtonText: 'Cancelar'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            Swal.fire({
-                                title: 'Actualizando KPIs...',
-                                html: 'Por favor espera, esto puede tardar hasta 30 segundos.',
-                                allowOutsideClick: false,
-                                didOpen: () => { Swal.showLoading(); }
-                            });
-                            
-                            fetch('<?= site_url('admin/kpis-refresh') ?>', {
-                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                            })
-                            .then(response => response.json())
-                            .then(data => {
+                // Iniciar carga de KPIs
+                loadKpis();
+
+                // Lógica de cuenta atrás para el refresco
+                let timeLeft = 60;
+                const timerEl = document.getElementById('refresh-timer');
+
+                setInterval(function () {
+                    timeLeft--;
+                    if (timeLeft <= 0) {
+                        loadKpis();
+                        timeLeft = 60;
+                    }
+                    if (timerEl) {
+                        timerEl.innerText = timeLeft + 's';
+                    }
+                }, 1000);
+
+                // Gestor de Caché
+                const clearCacheBtn = document.getElementById('btn-clear-cache');
+                if (clearCacheBtn) {
+                    clearCacheBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+
+                        Swal.fire({
+                            title: '¿Limpiar caché?',
+                            text: "Esta acción eliminará todos los datos temporales del sistema.",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#2152ff',
+                            cancelButtonColor: '#64748b',
+                            confirmButtonText: 'Sí, limpiar todo',
+                            cancelButtonText: 'Cancelar',
+                            background: '#ffffff',
+                            borderRadius: '20px'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                const icon = this.querySelector('.admin-icon-wrapper');
+                                const originalHtml = icon.innerHTML;
+                                icon.innerHTML = '⌛';
+
+                                fetch('<?= site_url('admin/clear-cache') ?>', {
+                                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                                })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        icon.innerHTML = originalHtml;
+                                        Swal.fire({
+                                            title: data.status === 'success' ? '¡Limpiado!' : 'Error',
+                                            text: data.message,
+                                            icon: data.status === 'success' ? 'success' : 'error',
+                                            confirmButtonColor: '#2152ff',
+                                            borderRadius: '20px'
+                                        });
+                                    })
+                                    .catch(err => {
+                                        icon.innerHTML = originalHtml;
+                                        Swal.fire('Error', 'No se pudo completar la acción', 'error');
+                                    });
+                            }
+                        });
+                    });
+                }
+
+                // Actualizar KPIs manualmente
+                const refreshKpisBtn = document.getElementById('btn-refresh-kpis');
+                if (refreshKpisBtn) {
+                    refreshKpisBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+
+                        Swal.fire({
+                            title: '¿Actualizar KPIs?',
+                            text: "Esto recalculará todas las estadísticas de empresas. Puede tardar 10-30 segundos.",
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonColor: '#2152ff',
+                            cancelButtonColor: '#64748b',
+                            confirmButtonText: 'Sí, actualizar',
+                            cancelButtonText: 'Cancelar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
                                 Swal.fire({
-                                    title: data.status === 'success' ? '¡Actualizado!' : 'Error',
-                                    html: data.status === 'success' 
-                                        ? 'KPIs actualizados correctamente.<br><small>Última actualización: ' + data.updated_at + '</small>'
-                                        : 'No se pudieron actualizar los KPIs.',
-                                    icon: data.status === 'success' ? 'success' : 'error',
-                                    confirmButtonColor: '#2152ff'
-                                }).then(() => {
-                                    if (data.status === 'success') { loadKpis(); }
+                                    title: 'Actualizando KPIs...',
+                                    html: 'Por favor espera, esto puede tardar hasta 30 segundos.',
+                                    allowOutsideClick: false,
+                                    didOpen: () => { Swal.showLoading(); }
                                 });
-                            })
-                            .catch(err => {
-                                Swal.fire('Error', 'No se pudo completar la actualización.', 'error');
-                                console.error('Error refreshing KPIs:', err);
-                            });
-                        }
+
+                                fetch('<?= site_url('admin/kpis-refresh') ?>', {
+                                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                                })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        Swal.fire({
+                                            title: data.status === 'success' ? '¡Actualizado!' : 'Error',
+                                            html: data.status === 'success'
+                                                ? 'KPIs actualizados correctamente.<br><small>Última actualización: ' + data.updated_at + '</small>'
+                                                : 'No se pudieron actualizar los KPIs.',
+                                            icon: data.status === 'success' ? 'success' : 'error',
+                                            confirmButtonColor: '#2152ff'
+                                        }).then(() => {
+                                            if (data.status === 'success') { loadKpis(); }
+                                        });
+                                    })
+                                    .catch(err => {
+                                        Swal.fire('Error', 'No se pudo completar la actualización.', 'error');
+                                        console.error('Error refreshing KPIs:', err);
+                                    });
+                            }
+                        });
                     });
-                });
-            }
-        });
-    </script>
-</main>
+                }
+            });
+        </script>
+    </main>
 
-<?= view('partials/footer') ?>
+    <?= view('partials/footer') ?>
 </body>
-</html>
 
+</html>

@@ -827,7 +827,7 @@ class Dashboard extends BaseController
             $today = date('Y-m-d');
             $midnight = $today . ' 00:00:00';
 
-            // Inicializar con valores por defecto
+            // Inicializar con valores por defecto (Solo KPIs rápidos)
             $data = [
                 'users_total' => '...',
                 'users_active' => '...',
@@ -840,14 +840,6 @@ class Dashboard extends BaseController
                 'blocked_ips_count' => '...',
                 'searches_zero_results' => '...',
                 'searches_resolved_count' => '...',
-                'total' => '...',
-                'companies_active' => '...',
-                'sin_cif' => '...',
-                'sin_direccion' => '...',
-                'sin_estado' => '...',
-                'sin_cnae' => '...',
-                'sin_registro_mercantil' => '...',
-                'added_today' => '...',
                 'stats_updated_at' => null
             ];
 
@@ -925,20 +917,9 @@ class Dashboard extends BaseController
             return $this->response->setStatusCode(403)->setBody('Acceso no permitido');
         }
 
-        $midnight = date('Y-m-d') . ' 00:00:00';
-
-        $heavyData = [
-            'total' => number_format($this->companyModel->countAllResults(), 0, ',', '.'),
-            'companies_active' => number_format($this->companyModel->where('estado', 'ACTIVA')->countAllResults(), 0, ',', '.'),
-            'sin_cif' => number_format($this->companyModel->groupStart()->where('cif', '')->orWhere('cif', null)->groupEnd()->countAllResults(), 0, ',', '.'),
-            'sin_direccion' => number_format($this->companyModel->groupStart()->where('address', '')->orWhere('address', null)->groupEnd()->countAllResults(), 0, ',', '.'),
-            'sin_estado' => number_format($this->companyModel->groupStart()->where('estado', '')->orWhere('estado', null)->groupEnd()->countAllResults(), 0, ',', '.'),
-            'sin_cnae' => number_format($this->companyModel->groupStart()->where('cnae_code', '')->orWhere('cnae_code', null)->groupEnd()->countAllResults(), 0, ',', '.'),
-            'sin_registro_mercantil' => number_format($this->companyModel->groupStart()->where('registro_mercantil', '')->orWhere('registro_mercantil', null)->groupEnd()->countAllResults(), 0, ',', '.'),
-            'added_today' => number_format($this->companyModel->where('created_at >=', $midnight)->countAllResults(), 0, ',', '.'),
-        ];
-
-        $this->systemStatsModel->setStat('heavy_kpis', $heavyData);
+        // Los KPIs pesados de empresas se han eliminado por lentitud.
+        // Se mantiene el endpoint para evitar errores JS pero ya no realiza cálculos pesados.
+        $this->systemStatsModel->setStat('heavy_kpis', []);
         
         // Limpiar caché para forzar recarga
         cache()->delete('admin_dashboard_kpis_consolidated');
