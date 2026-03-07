@@ -48,11 +48,25 @@
                         <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Precio Mensual (€)</label>
                         <input type="number" step="0.01" name="price_monthly" class="input" style="width: 100%;" required value="<?= old('price_monthly', $plan->price_monthly ?? 0.00) ?>">
                     </div>
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Tipo de Producto</label>
+                        <select name="product_type" class="input" style="width: 100%;" required>
+                            <option value="api" <?= old('product_type', $plan->product_type ?? '') === 'api' ? 'selected' : '' ?>>API (Standard)</option>
+                            <option value="radar" <?= old('product_type', $plan->product_type ?? '') === 'radar' ? 'selected' : '' ?>>Radar (Nuevas Empresas)</option>
+                            <option value="bundle" <?= old('product_type', $plan->product_type ?? '') === 'bundle' ? 'selected' : '' ?>>Bundle (API + Radar)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-2">
                     <div style="display: flex; align-items: flex-end; padding-bottom: 10px;">
                         <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
                             <input type="checkbox" name="is_active" value="1" <?= old('is_active', $plan->is_active ?? 1) ? 'checked' : '' ?>>
                             Plan Activo
                         </label>
+                    </div>
+                    <div>
+                        <!-- Espacio vacío o más campos si fuese necesario -->
                     </div>
                 </div>
 

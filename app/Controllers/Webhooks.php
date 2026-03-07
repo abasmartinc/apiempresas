@@ -39,51 +39,71 @@ class Webhooks extends BaseController
 
             $subscriptionId = $session->subscription ?? null;
 
-            if ($userId && $subscriptionId) {
-                try {
-                    $sub = \Stripe\Subscription::retrieve($subscriptionId);
+            if ($userId) {
+                $db = \Config\Database::connect();
+                
+                // Determinamos preferencia según el plan comprado
+                if (strpos($planSlug, 'radar') !== false) {
+                    $userModel = new \App\Models\UserModel();
+                    $userModel->update($userId, ['preferred_product' => 'radar']);
+                } elseif (in_array($planSlug, ['pro', 'business'])) {
+                    $userModel = new \App\Models\UserModel();
+                    $userModel->update($userId, ['preferred_product' => 'api']);
+                }
 
-                    // Convertir timestamps
-                    $start = isset($sub->current_period_start) ? date('Y-m-d H:i:s', (int)$sub->current_period_start) : date('Y-m-d H:i:s');
-                    $end = isset($sub->current_period_end) ? date('Y-m-d H:i:s', (int)$sub->current_period_end) : date('Y-m-d H:i:s');
+                if ($subscriptionId) {
+                    try {
+                        $sub = \Stripe\Subscription::retrieve($subscriptionId);
 
-                    // Mapear tu planSlug -> plan_id de tu tabla api_plans
-                    // Ajusta esta parte a tu tabla real (api_plans.slug).
-                    $db = \Config\Database::connect();
-                    $planRow = $db->table('api_plans')->select('id')->where('slug', $planSlug)->get()->getRowArray();
+                        $start = isset($sub->current_period_start) ? date('Y-m-d H:i:s', (int)$sub->current_period_start) : date('Y-m-d H:i:s');
+                        $end = isset($sub->current_period_end) ? date('Y-m-d H:i:s', (int)$sub->current_period_end) : date('Y-m-d H:i:s');
+
+                        $planRow = $db->table('api_plans')->select('id')->where('slug', $planSlug)->get()->getRowArray();
+                        $planId = (int)($planRow['id'] ?? 0);
+
+                        if ($planId) {
+                            $existing = $db->table('user_subscriptions')
+                                ->where('user_id', $userId)
+                                ->whereIn('status', ['trialing', 'active', 'past_due'])
+                                ->orderBy('id', 'DESC')
+                                ->get()
+                                ->getRowArray();
+
+                            $subData = [
+                                'user_id' => $userId,
+                                'plan_id' => $planId,
+                                'status' => ($sub->status ?? 'active'),
+                                'current_period_start' => $start,
+                                'current_period_end' => $end,
+                                'updated_at' => date('Y-m-d H:i:s'),
+                            ];
+
+                            if ($existing) {
+                                $db->table('user_subscriptions')->where('id', (int)$existing['id'])->update($subData);
+                            } else {
+                                $subData['created_at'] = date('Y-m-d H:i:s');
+                                $db->table('user_subscriptions')->insert($subData);
+                            }
+                        }
+                    } catch (\Throwable $e) {
+                        log_message('error', '[Stripe webhook Sub] failed: ' . $e->getMessage());
+                    }
+                } elseif ($session->mode === 'payment' && $session->payment_status === 'paid') {
+                    // One-time payment (Single Download)
+                    $planRow = $db->table('api_plans')->select('id')->where('slug', 'radar_single')->get()->getRowArray();
                     $planId = (int)($planRow['id'] ?? 0);
 
                     if ($planId) {
-                        $subsModel = new UsersuscriptionsModel();
-
-                        // Upsert “activo”
-                        $existing = $db->table('user_subscriptions')
-                            ->where('user_id', $userId)
-                            ->whereIn('status', ['trialing', 'active', 'past_due'])
-                            ->orderBy('id', 'DESC')
-                            ->get()
-                            ->getRowArray();
-
-                        $data = [
+                        $db->table('user_subscriptions')->insert([
                             'user_id' => $userId,
                             'plan_id' => $planId,
-                            'status' => ($sub->status ?? 'active'),
-                            'current_period_start' => $start,
-                            'current_period_end' => $end,
+                            'status' => 'active',
+                            'current_period_start' => date('Y-m-d H:i:s'),
+                            'current_period_end' => date('Y-m-d H:i:s', strtotime('+24 hours')), 
+                            'created_at' => date('Y-m-d H:i:s'),
                             'updated_at' => date('Y-m-d H:i:s'),
-                        ];
-
-                        if ($existing) {
-                            $db->table('user_subscriptions')->where('id', (int)$existing['id'])->update($data);
-                        } else {
-                            $data['created_at'] = date('Y-m-d H:i:s');
-                            $db->table('user_subscriptions')->insert($data);
-                        }
+                        ]);
                     }
-
-                } catch (\Throwable $e) {
-                    log_message('error', '[Stripe webhook] failed: ' . $e->getMessage());
-                    // devolvemos 200 para que Stripe no reintente infinitamente si ya procesaste algo parcial
                 }
             }
         }

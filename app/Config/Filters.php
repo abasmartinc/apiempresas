@@ -41,6 +41,7 @@ class Filters extends BaseFilters
         'activity_logger' => \App\Filters\ActivityLogger::class,
         'botprotection' => \App\Filters\BotProtectionFilter::class,
         'user_activity' => \App\Filters\UserActivityFilter::class,
+        'subscription'  => \App\Filters\SubscriptionFilter::class,
     ];
 
     /**

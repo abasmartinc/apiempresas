@@ -19,9 +19,15 @@ class Login extends BaseController
      */
     public function index()
     {
+        if (session('logged_in')) {
+            $redirectUrl = $this->request->getGet('redirect') ?: 'dashboard';
+            return redirect()->to(site_url(ltrim($redirectUrl, '/')));
+        }
         $data = [
             'message' => session('message'),
             'error' => session('error'),
+            'info' => session('info'),
+            'prefill_email' => session('prefill_email'),
         ];
 
         return view('auth/login', $data);
@@ -99,6 +105,7 @@ class Login extends BaseController
             'user_email' => $user->email,
             'user_name' => $user->name ?? '',
             'is_admin' => $user->is_admin ?? 0,
+            'preferred_product' => $user->preferred_product ?? 'api',
             'logged_in' => true,
         ]);
 
@@ -115,7 +122,17 @@ class Login extends BaseController
         // Log successful login
         log_activity('login');
 
-        return redirect()->to(site_url('dashboard'));
+        // Redirección contextual o por defecto
+        $redirectUrl = $this->request->getPost('redirect') ?: 'dashboard';
+        
+        // Si el destino es el radar, marcamos la intención en sesión
+        if (strpos($redirectUrl, 'radar') !== false) {
+            session()->set('intended_product', 'radar');
+        } else {
+            session()->set('intended_product', 'api');
+        }
+
+        return redirect()->to(site_url(ltrim($redirectUrl, '/')));
     }
 
     /**

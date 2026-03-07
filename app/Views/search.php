@@ -265,7 +265,7 @@
                     const v = (rawValue || '').trim();
 
                     if (!v) {
-                        out.innerHTML = '<div class="muted">Escribe un CIF (ej. B12345678).</div>';
+                        out.innerHTML = '<div class="muted">Escribe un CIF (ej. B12345678).</div><div style="margin-top:20px;"><a href="<?= site_url('empresas-nuevas') ?>" class="btn secondary">Explorar empresas nuevas en España</a></div>';
                         return;
                     }
 
@@ -300,13 +300,13 @@
 
                         if (!res.ok) {
                             const msg = (json && json.message) ? json.message : 'No se encontró ninguna empresa con ese CIF.';
-                            out.innerHTML = `<div class="muted">${msg}</div>`;
+                            out.innerHTML = `<div class="muted">${msg}</div><div style="margin-top:20px;"><a href="<?= site_url('empresas-nuevas') ?>" class="btn secondary">Ver listado de empresas nuevas</a></div>`;
                             return;
                         }
 
                         if (!json || json.success === false) {
                             const msg = (json && json.message) ? json.message : 'Se ha producido un error al consultar la empresa.';
-                            out.innerHTML = `<div class="muted">${msg}</div>`;
+                            out.innerHTML = `<div class="muted">${msg}</div><div style="margin-top:20px;"><a href="<?= site_url('empresas-nuevas') ?>" class="btn secondary">Explorar empresas nuevas en España</a></div>`;
                             return;
                         }
 

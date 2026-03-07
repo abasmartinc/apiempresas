@@ -87,7 +87,7 @@
 
                             <div class="mini-actions">
                                 <a class="btn btn_primary" href="<?=site_url()?>billing">Cambiar plan</a>
-                                <a class="btn btn_light" href="<?=site_url()?>prices">Ver comparativa</a>
+                                <a class="btn btn_light" href="<?=site_url()?>precios-radar">Ver comparativa</a>
                             </div>
 
                             <p class="muted mini-note">

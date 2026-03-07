@@ -131,6 +131,9 @@
 
                     <form id="registerForm" class="auth-form" method="post" action="<?= site_url('signup') ?>">
                         <?= csrf_field() ?>
+                        <?php if(!empty($redirectUrl)): ?>
+                            <input type="hidden" name="redirect" value="<?= esc($redirectUrl) ?>">
+                        <?php endif; ?>
 
                         <!-- Nombre + Empresa -->
                         <div class="auth-row-inline">

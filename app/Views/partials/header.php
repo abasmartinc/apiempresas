@@ -54,11 +54,11 @@
                 <a class="btn_header btn_header--pro" href="<?=site_url() ?>autocompletado-cif-empresas">Buscador Pro</a>
                 <a class="minor-nav-link" href="<?=site_url() ?>#buscar">Buscar</a>
                 <span class="nav-sep">•</span>
-                <a class="minor-nav-link" href="<?=site_url() ?>#caracteristicas">Características</a>
+                <a class="minor-nav-link" href="<?=site_url('directorio') ?>">Empresas</a>
                 <span class="nav-sep">•</span>
-                <a class="minor-nav-link" href="<?=site_url() ?>#precios">Precios</a>
+                <a class="minor-nav-link" href="<?=site_url('empresas-nuevas/madrid') ?>">Nuevas</a>
                 <span class="nav-sep">•</span>
-                <a class="minor-nav-link" href="<?=site_url() ?>documentation">Docs</a>
+                <a class="minor-nav-link" href="<?=site_url('documentation') ?>">Docs</a>
             </nav>
 
             <div class="desktop-only auth-buttons">
@@ -87,7 +87,9 @@
                         <span class="badge">Nuevo</span>
                     </a>
                     <a href="<?=site_url() ?>#buscar" class="mobile-nav-link">Buscador</a>
-                    <a href="<?=site_url() ?>#caracteristicas" class="mobile-nav-link">Características</a>
+                    <a href="<?=site_url('directorio') ?>" class="mobile-nav-link">Empresas</a>
+                    <a href="<?=site_url('empresas-cnae/4121-construccion-de-edificios-residenciales') ?>" class="mobile-nav-link">Sectores</a>
+                    <a href="<?=site_url('empresas-nuevas/madrid') ?>" class="mobile-nav-link" style="color: var(--primary);">Empresas Nuevas</a>
                     <a href="<?=site_url() ?>#precios" class="mobile-nav-link">Precios</a>
                     <a href="<?=site_url() ?>documentation" class="mobile-nav-link">Documentación</a>
                     <div class="mobile-auth">
@@ -142,6 +144,7 @@
             background: none !important;
             background-color: transparent !important;
             -webkit-background-clip: unset !important;
+            background-clip: unset !important;
             -webkit-text-fill-color: initial !important;
             color: inherit !important;
             padding: 0 !important;

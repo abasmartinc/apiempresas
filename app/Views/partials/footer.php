@@ -68,6 +68,13 @@
                 <a class="minor" target="_blank" href="https://validatebusiness.com/">Validate your business in florida</a>
             </div>
             <div>
+                <h4 style="margin:0 0 8px">Top Provincias</h4>
+                <a class="minor" href="<?=site_url('empresas/madrid') ?>">Empresas en Madrid</a><br />
+                <a class="minor" href="<?=site_url('empresas/barcelona') ?>">Empresas en Barcelona</a><br />
+                <a class="minor" href="<?=site_url('empresas/valencia') ?>">Empresas en Valencia</a><br />
+                <a class="minor" href="<?=site_url('empresas/sevilla') ?>">Empresas en Sevilla</a><br />
+            </div>
+            <div>
                 <h4 style="margin:0 0 8px">Legal</h4>
                 <a href="#" class="minor" data-open-modal="modalPrivacy">Política de privacidad</a><br/>
                 <a href="#" class="minor" data-open-modal="modalTerms">Términos de uso</a><br/>

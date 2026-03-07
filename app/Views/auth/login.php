@@ -79,7 +79,16 @@
                     </div>
                 <?php endif; ?>
 
+                <?php if (session('info')): ?>
+                    <div style="background: #eef2ff; border: 1px solid #e0e7ff; color: var(--primary); padding: 12px; border-radius: 8px; margin-bottom: 24px; font-size: 0.9rem; font-weight: 600;">
+                        <?= esc(session('info')) ?>
+                    </div>
+                <?php endif; ?>
+
                 <form class="auth-form" method="post" action="<?=site_url() ?>login">
+                <?php if ($redirect = session('redirect') ?? request()->getGet('redirect')): ?>
+                    <input type="hidden" name="redirect" value="<?= esc($redirect) ?>">
+                <?php endif; ?>
                     <?= csrf_field() ?>
 
                     <div class="">
@@ -92,6 +101,7 @@
                                 required
                                 class="input"
                                 placeholder="tu@empresa.com"
+                                value="<?= esc($prefill_email ?? '') ?>"
                         />
                     </div>
 

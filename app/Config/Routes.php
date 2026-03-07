@@ -5,16 +5,19 @@ use CodeIgniter\Router\RouteCollection;
 /** @var RouteCollection $routes */
 $routes->get('/', 'Home::index');
 $routes->post('submit-review', 'Home::submitReview');
+$routes->get('billing/export-excel', 'SeoController::exportExcel');
 $routes->get('enter', 'Login::index');
 $routes->get('documentation', 'Documentation::index');
 $routes->get('enter', 'Login::index');          // muestra login
 $routes->get('logout', 'Login::logout');        // cierre de sesión
 $routes->post('login', 'Login::authenticate');        // cierre de sesión
 $routes->get('register', 'Register::index');
+$routes->get('register/quick', 'Register::quick');
 $routes->get('register_sucess', 'Register::register_sucess');
 $routes->post('signup', 'Register::store');
+$routes->post('register/quick_store', 'Register::quick_store');
 $routes->get('dashboard', 'Dashboard::index');
-$routes->get('empresas-nuevas', 'NewCompanies::index');
+// $routes->get('empresas-nuevas', 'NewCompanies::index'); // Deprecated route interfering with SeoController::newRadarHub (line 194)
 $routes->get('dashboard/kpis', 'Dashboard::kpis_ajax');
 $routes->get('stop-impersonation', 'Dashboard::stopImpersonating');
 $routes->get('search_company', 'Search::search_company');
@@ -25,7 +28,9 @@ $routes->get('billing', 'Billing::index');
 $routes->get('billing/purchase_success', 'Billing::purchase_success');
 $routes->get('billing/manage', 'Billing::billing_manage');
 $routes->get('billing', 'Billing::index');
-$routes->post('billing/checkout', 'Billing::checkout');
+$routes->match(['get', 'post'], 'billing/checkout', 'Billing::checkout');
+$routes->get('billing/single_checkout', 'Billing::single_checkout');
+$routes->get('checkout/radar-export', 'Billing::order_summary');
 $routes->get('billing/success', 'Billing::success'); // callback Stripe
 $routes->get('billing/cancel', 'Billing::cancel');   // cancel Stripe/PayPal
 $routes->get('billing/purchase-success', 'Billing::purchase_success');
@@ -40,7 +45,8 @@ $routes->post('billing/cancel-subscription', 'Billing::cancel_subscription');
 $routes->get('billing/paypal/return', 'Billing::paypalReturn');
 
 $routes->get('consumption', 'Usage::index');
-$routes->get('prices', 'Prices::index');
+$routes->get('precios-radar', 'RadarPrices::index');
+$routes->get('radar', 'Radar::index', ['filter' => 'subscription:radar']);
 $routes->get('contact', 'Contact::index');
 $routes->get('blog', 'Blog::index');
 $routes->get('blog/post', 'Blog::post');
@@ -54,7 +60,7 @@ $routes->get('e/o/(:any)', 'EmailTracking::open/$1');
 $routes->get('e/c/(:any)', 'EmailTracking::click/$1');
 
 // ----------- API ----------- //
-$routes->group('', ['filter' => 'apikey'], static function ($routes) {
+$routes->group('', ['filter' => ['apikey', 'subscription:api']], static function ($routes) {
     $routes->get('api/v1/companies', 'Api\V1\CompaniesByCif::index');
     $routes->get('api/v1/companies/search', 'Api\V1\CompaniesSearch::index');
 });
@@ -180,7 +186,28 @@ $routes->get('sitemap-blog.xml', 'Sitemap::blog');
 $routes->get('sitemap-directories.xml', 'Sitemap::directories');
 $routes->get('sitemap-companies-(:num).xml', 'Sitemap::companies/$1');
 
-// Directorios SEO
+// --- Webhook CRON SEO ---
+$routes->get('cron/seo-sync/(:any)', 'SeoController::syncStatsWebhook/$1');
+
+// --- Programmatic SEO Routes ---
+$routes->get('empresas/(:any)', 'SeoController::province/$1');
+$routes->get('empresas-cnae/(:any)', 'SeoController::cnae/$1');
+
+// Radar Hub (New Companies Strategy)
+$routes->get('empresas-nuevas', 'SeoController::newRadarHub'); // Central Hub
+$routes->get('empresas-nuevas-hoy', 'SeoController::newRadarTime/hoy');
+$routes->get('empresas-nuevas-semana', 'SeoController::newRadarTime/semana');
+$routes->get('empresas-nuevas-mes', 'SeoController::newRadarTime/mes');
+$routes->get('empresas-nuevas-sector/(:any)', 'SeoController::newRadarSector/$1'); // Long-Tail Sector National
+$routes->get('empresas-nuevas/(:any)-en-(:any)', 'SeoController::newRadarLongTail/$1/$2'); // Long-Tail Sector+Prov
+$routes->get('empresas-nuevas/(:any)', 'SeoController::newInProvince/$1');
+
+// Combination Sector + Province (e.g. /empresas-programacion-en-madrid)
+// This regex matches "empresas-[anything]-en-[anything]" // MUST BE AFTER RADAR LONG-TAIL
+$routes->get('empresas-(:any)-en-(:any)', 'SeoController::sectorProvince/$1/$2');
+// --- Programmatic SEO Routes ---
+
+// Directorios SEO (Legacy)
 $routes->get('directorio', 'Directory::index');
 $routes->get('directorio/provincia/(:any)', 'Directory::province/$1');
 $routes->get('directorio/provincia/(:any)/(:num)', 'Directory::province/$1/$2');

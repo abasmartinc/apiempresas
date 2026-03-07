@@ -29,10 +29,16 @@ class Register extends BaseController
      */
     public function index()
     {
+        if (session('logged_in')) {
+            $redirectUrl = $this->request->getGet('redirect') ?? 'dashboard';
+            return redirect()->to(site_url(ltrim($redirectUrl, '/')));
+        }
         $validation = session('validation') ?? \Config\Services::validation();
+        $redirectUrl = $this->request->getGet('redirect') ?? '';
 
         return view('auth/register', [
             'validation' => $validation,
+            'redirectUrl' => $redirectUrl
         ]);
     }
 
@@ -101,6 +107,9 @@ class Register extends BaseController
         // Generar API key robusta (64 chars hex)
         $apiKey = bin2hex(random_bytes(32));
 
+        $redirectUrl = $this->request->getGet('redirect') ?? $this->request->getPost('redirect');
+        $prefProduct = (strpos((string)$redirectUrl, 'radar') !== false) ? 'radar' : 'api';
+
         $data = [
             'name' => trim((string) $this->request->getPost('name')),
             'company' => trim((string) $this->request->getPost('company')),
@@ -109,6 +118,7 @@ class Register extends BaseController
             'is_active' => 1,
             'api_access' => 1,
             'source_app' => 'apiempresas', // Default source
+            'preferred_product' => $prefProduct,
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ];
@@ -138,7 +148,7 @@ class Register extends BaseController
             // 3) Crear suscripción (plan gratuito)
             $this->UsersuscriptionsModel->insert([
                 'user_id' => $user_id,
-                'plan_id' => 1,
+                'plan_id' => 1, // Plan gratuito (API por defecto)
                 'status' => 'active',
                 'current_period_start' => date('Y-m-d H:i:s'),
                 'current_period_end' => date('Y-m-d H:i:s', strtotime('+1 month')),
@@ -193,11 +203,46 @@ class Register extends BaseController
                 log_message('info', 'Welcome Email sent OK to ' . $email);
             }
 
+            // 6) Auto-Login al usuario
+            $this->userModel->update($user_id, [
+                'last_login_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            session()->regenerate();
+            session()->set([
+                'user_id' => $user_id,
+                'user_email' => $email,
+                'user_name' => $data['name'],
+                'is_admin' => 0,
+                'logged_in' => true,
+            ]);
+
+            // Track login from email if tracking code exists
+            if ($tc = session('email_tracking_code')) {
+                $emailLogModel = new \App\Models\EmailLogModel();
+                $log = $emailLogModel->where('tracking_code', $tc)->first();
+                if ($log && is_null($log->logged_in_at)) {
+                    $emailLogModel->update($log->id, ['logged_in_at' => date('Y-m-d H:i:s')]);
+                }
+                session()->remove('email_tracking_code');
+            }
+
             // Log successful registration
             log_activity('register', ['email' => $email], $user_id);
 
+            // 7) Redirección Contextual
+            if ($redirectUrl) {
+                // Seteamos la intención en sesión para el primer dashboard tras registro
+                session()->set('intended_product', $prefProduct);
+
+                // Ensure it's a relative path or safe local URL
+                $redirectUrl = filter_var($redirectUrl, FILTER_SANITIZE_URL);
+                return redirect()->to(site_url(ltrim($redirectUrl, '/')));
+            }
+
             return redirect()
-                ->to(site_url('register_sucess'));
+                ->to(site_url('dashboard'))
+                ->with('message', '¡Cuenta creada con éxito! Bienvenid@ a APIEmpresas.');
         } catch (\Throwable $e) {
 
             // Log del error real para depuración
@@ -211,8 +256,96 @@ class Register extends BaseController
         }
     }
 
-    public function register_sucess()
+    public function quick()
     {
-        return view('auth/register_success');
+        if (session('logged_in')) {
+            return redirect()->to(site_url('billing/checkout'));
+        }
+        return view('auth/quick_register');
+    }
+
+    public function quick_store()
+    {
+        $email = strtolower(trim((string) $this->request->getPost('email')));
+        
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return redirect()->back()->with('error', 'Por favor, introduce un email válido.');
+        }
+
+        // Check if user exists
+        $user = $this->userModel->where('email', $email)->first();
+
+        if ($user) {
+            // Safety: Admins must ALWAYS use their password
+            if (($user->is_admin ?? 0) == 1) {
+                return redirect()->to(site_url('enter?redirect=billing/checkout'))->with('info', 'Por seguridad, identifícate con tu cuenta de administrador para continuar.')->with('prefill_email', $email);
+            }
+
+            // Auto-Login for regular users to allow "launching to Stripe" immediately
+            session()->regenerate();
+            session()->set([
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'user_name' => $user->name ?? '',
+                'is_admin' => 0,
+                'logged_in' => true,
+            ]);
+
+            return redirect()->to(site_url('billing/checkout'));
+        }
+
+        // Create new user (Quick)
+        $password = bin2hex(random_bytes(8)); // Temporary password
+        $data = [
+            'name' => explode('@', $email)[0], // Use email part as name
+            'email' => $email,
+            'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+            'is_active' => 1,
+            'api_access' => 1,
+            'source_app' => 'apiempresas',
+            'preferred_product' => 'radar',
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+
+        try {
+            $user_id = $this->userModel->insert($data);
+            
+            // API key and Subscription (Free)
+            $this->ApikeysModel->insert([
+                'user_id' => $user_id,
+                'name' => 'Default API Key',
+                'api_key' => bin2hex(random_bytes(32)),
+                'is_active' => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            $this->UsersuscriptionsModel->insert([
+                'user_id' => $user_id,
+                'plan_id' => 1,
+                'status' => 'active',
+                'current_period_start' => date('Y-m-d H:i:s'),
+                'current_period_end' => date('Y-m-d H:i:s', strtotime('+1 month')),
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            // Auto-Login
+            session()->regenerate();
+            session()->set([
+                'user_id' => $user_id,
+                'user_email' => $email,
+                'user_name' => $data['name'],
+                'logged_in' => true,
+            ]);
+
+            // Redirect back to billing/checkout with original POST data preserved in session
+            return redirect()->to(site_url('billing/checkout'));
+
+        } catch (\Throwable $e) {
+            log_message('error', 'Quick Register failed: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al crear la cuenta. Inténtalo de nuevo.');
+        }
     }
 }

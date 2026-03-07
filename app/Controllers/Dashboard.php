@@ -75,8 +75,35 @@ class Dashboard extends BaseController
         // Fast query just to know whether to show onboarding strip or not
         $data['has_first_request'] = $this->ApiRequestsModel->hasFirstRequest(['user_id' => $userId]);
 
-        // Si tiene plan activo, va al dashboard de pago
+        // Si tiene plan activo, va al dashboard correspondiente
         if ($data['plan']) {
+            // Buscamos si alguno de sus planes activos es de tipo radar o bundle
+            $activePlans = $this->UsersuscriptionsModel->select('api_plans.product_type')
+                                ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id')
+                                ->where('user_subscriptions.user_id', $userId)
+                                ->where('user_subscriptions.status', 'active')
+                                ->where('user_subscriptions.current_period_end >', date('Y-m-d H:i:s'))
+                                ->findAll();
+            
+            $hasRadar = false;
+            foreach ($activePlans as $ap) {
+                if (in_array($ap->product_type, ['radar', 'bundle'])) {
+                    $hasRadar = true;
+                    break;
+                }
+            }
+
+            if ($hasRadar) {
+                return redirect()->to(site_url('radar'));
+            }
+
+            // CASO ESPECIAL: Si solo tiene el plan gratuito (o ninguno pagado), 
+            // pero su intención o preferencia es el Radar
+            if (session('intended_product') === 'radar' || session('preferred_product') === 'radar') {
+                return redirect()->to(site_url('radar'));
+            }
+
+            // Si es de tipo 'api', mostramos el dashboard de la API (actual dashboard_paid)
             return view('dashboard_paid', $data);
         }
 

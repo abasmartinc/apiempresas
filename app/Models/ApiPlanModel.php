@@ -21,6 +21,7 @@ class ApiPlanModel extends Model
         'price_monthly',
         'price_annual',
         'is_active',
-        'max_alerts'
+        'max_alerts',
+        'product_type'
     ];
 }

@@ -553,8 +553,49 @@
                 <a href="<?= site_url('search_company') ?>" class="minor">← Volver al buscador</a>
             </div>
 
+            <?php 
+            // --- SEO SILO INTERNAL LINKS ---
+            $seoProv = $company['province'] ?? $company['registro_mercantil'] ?? '';
+            $secoProvStr = !empty($seoProv) ? ucfirst(strtolower($seoProv)) : '';
+            $seoCnae = current(explode(' ', $company['cnae'] ?? ''));
+            $seoCnaeLabel = $company['cnae_label'] ?? '';
+            ?>
+            <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid #e2e8f0;">
+                <h3 style="font-size: 1.25rem; margin-bottom: 1.5rem; color: #0f172a; font-weight: 800; letter-spacing: -0.01em;">Explorar más empresas</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+                    <?php if ($secoProvStr): ?>
+                    <a href="<?= site_url('empresas/' . url_title($secoProvStr, '-', true)) ?>" style="display: block; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#e2e8f0'">
+                        <span style="display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Directorio Provincial</span>
+                        <span style="display: block; font-size: 1rem; font-weight: 700; color: var(--primary);">Empresas en <?= esc($secoProvStr) ?></span>
+                    </a>
+                    <?php endif; ?>
+
+                    <?php if ($seoCnae && $seoCnaeLabel): ?>
+                    <a href="<?= site_url('empresas-cnae/' . $seoCnae . '-' . url_title($seoCnaeLabel, '-', true)) ?>" style="display: block; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#e2e8f0'">
+                        <span style="display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Análisis Sectorial CNAE</span>
+                        <span style="display: block; font-size: 1rem; font-weight: 700; color: var(--primary);">Más empresas de <?= esc($seoCnaeLabel) ?></span>
+                    </a>
+                    <?php endif; ?>
+
+                    <?php if ($secoProvStr && $seoCnaeLabel): ?>
+                    <a href="<?= site_url('empresas-' . url_title($seoCnaeLabel, '-', true) . '-en-' . url_title($secoProvStr, '-', true)) ?>" style="display: block; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#e2e8f0'">
+                        <span style="display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Sector + Provincia</span>
+                        <span style="display: block; font-size: 1rem; font-weight: 700; color: var(--primary);">Empresas de <?= esc($seoCnaeLabel) ?> en <?= esc($secoProvStr) ?></span>
+                    </a>
+                    <?php endif; ?>
+
+                    <?php if ($secoProvStr): ?>
+                    <a href="<?= site_url('empresas-nuevas/' . url_title($secoProvStr, '-', true)) ?>" style="display: block; padding: 16px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.borderColor='#fbbf24'" onmouseout="this.style.borderColor='#fde68a'">
+                        <span style="display: block; font-size: 0.75rem; font-weight: 800; color: #d97706; text-transform: uppercase; margin-bottom: 4px;">B2B Lead Generation</span>
+                        <span style="display: block; font-size: 1rem; font-weight: 700; color: #b45309;">Empresas nuevas en <?= esc($secoProvStr) ?></span>
+                    </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+
             <?php if (!empty($related)): ?>
-            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee;">
+            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e2e8f0;">
                 <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem; color: #444;">Empresas relacionadas en el sector y provincia</h3>
                 
                 <div class="table-container" style="background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">

@@ -21,6 +21,7 @@ class UserModel extends Model
         'is_admin',
         'api_access',
         'source_app',
+        'preferred_product',
         'stripe_customer_id',
         'created_at',
         'updated_at',

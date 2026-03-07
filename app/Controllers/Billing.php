@@ -55,20 +55,29 @@ class Billing extends BaseController
     public function checkout()
     {
         if (!session('logged_in')) {
-            return redirect()->to(site_url('enter'));
+            // Store purchase context in session
+            session()->set('pending_checkout', $this->request->getPost());
+            return redirect()->to(site_url('register/quick'));
         }
 
         $userId = (int) session('user_id');
         $user = $this->userModel->find($userId);
 
-        $plan = strtolower(trim((string) $this->request->getPost('plan')));          // pro | business
-        $period = strtolower(trim((string) $this->request->getPost('period')));        // monthly | annual
-        $pm = strtolower(trim((string) $this->request->getPost('payment_method'))); // stripe | paypal
-
-        if (!in_array($plan, ['pro', 'business'], true)) {
-            return redirect()->back()->with('error', 'Plan inválido.');
+        // Check for pending context in session (after quick register)
+        $postData = $this->request->getPost();
+        if (empty($postData) || !isset($postData['plan'])) {
+            $postData = session('pending_checkout') ?? [];
+            session()->remove('pending_checkout');
         }
-        if (!in_array($period, ['monthly', 'annual'], true)) {
+
+        $plan = strtolower(trim((string) ($postData['plan'] ?? 'radar')));
+        $period = strtolower(trim((string) ($postData['period'] ?? 'single')));
+        $pm = strtolower(trim((string) ($postData['payment_method'] ?? 'stripe')));
+
+        if (!in_array($plan, ['pro', 'business', 'radar'], true)) {
+            $plan = 'radar'; // default fallback for single downloads
+        }
+        if (!in_array($period, ['monthly', 'annual', 'single'], true)) {
             $period = 'monthly';
         }
         if (!in_array($pm, ['stripe', 'paypal'], true)) {
@@ -76,7 +85,7 @@ class Billing extends BaseController
         }
 
         // Datos opcionales de facturación (solo para pre-rellenar)
-        $billEmail = trim((string) $this->request->getPost('email')) ?: (string) ($user['email'] ?? '');
+        $billEmail = trim((string) $this->request->getPost('email')) ?: (string) ($user->email ?? '');
         $billName = trim((string) $this->request->getPost('name'));
 
         if ($pm === 'paypal' && getenv('BILLING_MODE') !== 'simulator') {
@@ -85,6 +94,17 @@ class Billing extends BaseController
 
         if (getenv('BILLING_MODE') === 'simulator') {
             $simulator = new \App\Libraries\BillingSimulator();
+            
+            // Set context for simulator too if it's an excel download
+            if ($period === 'single') {
+                session()->set('checkout_context', [
+                    'type'      => 'excel',
+                    'sector'    => $postData['sector'] ?? 'General',
+                    'provincia' => $postData['provincia'] ?? 'España',
+                    'period'    => $postData['period_radar'] ?? '30days'
+                ]);
+            }
+
             if ($simulator->simulatePayment($userId, $plan, $period)) {
                 return redirect()->to(site_url('billing/success'))->with('message', 'Simulación de pago completada con éxito.');
             } else {
@@ -92,43 +112,26 @@ class Billing extends BaseController
             }
         }
 
-        return $this->startStripeCheckout($userId, $plan, $period, $billEmail, $billName);
+        return $this->startStripeCheckout($userId, $plan, $period, $billEmail, $billName, $postData);
     }
 
-    private function startStripeCheckout(int $userId, string $plan, string $period, ?string $email, ?string $name)
+    private function startStripeCheckout(int $userId, string $plan, string $period, ?string $email, ?string $name, array $postData = [])
     {
         // Check for CURL extension (required by Stripe SDK)
         if (!extension_loaded('curl')) {
             return redirect()->back()->with('error', 'El servidor no tiene habilitada la extensión CURL, necesaria para procesar pagos con Stripe. Por favor, habilítala en Laragon (Menú -> PHP -> Extensions -> curl) y reinicia los servicios.');
         }
 
-        // 1) Obtener Precio de la Base de Datos (ApiPlans)
+        // 1) Obtener Precio de la Base de Datos (ApiPlans) si no es un pago único o plan radar hardcoded
         $planModel = new \App\Models\ApiPlanModel();
-        $dbPlan = $planModel->where('slug', $plan)->first();
-
-        if (!$dbPlan) {
-            return redirect()->back()->with('error', 'El plan seleccionado no existe.');
-        }
-
-        // Determinar precio según periodicidad
-        $amount = 0.0;
-        if ($period === 'annual') {
-            // Asumimos que la columna existe. Si no, fallback o error.
-            if (isset($dbPlan->price_annual)) {
-                $amount = (float) $dbPlan->price_annual;
-            } else {
-                // Fallback temporal si no existe la columna (ej: x10) o error
-                 return redirect()->back()->with('error', 'El precio anual no está configurado para este plan.');
+        $dbPlan = null;
+        if ($period !== 'single' && $plan !== 'radar') {
+            $dbPlan = $planModel->where('slug', $plan)->first();
+            if (!$dbPlan) {
+                return redirect()->back()->with('error', 'El plan seleccionado no existe.');
             }
-        } else {
-            $amount = (float) $dbPlan->price_monthly;
         }
 
-        // Validación de precio mínimo
-        if ($amount <= 0) {
-             return redirect()->back()->with('error', 'El precio del plan no es válido.');
-        }
-        
         $secretKey = getenv('STRIPE_SECRET_KEY');
         if (!$secretKey) {
             return redirect()->back()->with('error', 'Stripe no está configurado (STRIPE_SECRET_KEY).');
@@ -144,18 +147,27 @@ class Billing extends BaseController
             // Tax Rate for IVA
             $taxRateId = getenv('STRIPE_TAX_RATE_ID');
 
-            // Usar price_data para crear el precio al vuelo basado en la DB
+        if ($period === 'single' || ($plan === 'radar' && $period === 'single')) {
+            // One-time payment (Payment mode)
+            $amount = 9.00; // 9€ fixed price for radar download
+
+            // Guardar contexto para la página de éxito
+            session()->set('checkout_context', [
+                'type'      => 'excel',
+                'sector'    => $postData['sector'] ?? 'General',
+                'cnae'      => $postData['cnae'] ?? '',
+                'provincia' => $postData['provincia'] ?? 'España',
+                'period'    => $postData['period_radar'] ?? '30days'
+            ]);
+            
             $lineItem = [
                 'quantity' => 1,
                 'price_data' => [
                     'currency' => 'eur',
-                    'unit_amount' => (int)($amount * 100), // En céntimos
-                    'recurring' => [
-                        'interval' => ($period === 'annual' ? 'year' : 'month')
-                    ],
+                    'unit_amount' => (int)($amount * 100),
                     'product_data' => [
-                        'name' => 'Suscripción ' . ($dbPlan->name ?? ucfirst($plan)),
-                        'description' => 'Acceso ' . ucfirst($period) . ' al plan ' . ucfirst($plan)
+                        'name' => 'Descarga Listado Radar B2B',
+                        'description' => 'Listado completo de nuevas empresas constituidas.'
                     ]
                 ]
             ];
@@ -164,7 +176,64 @@ class Billing extends BaseController
                 $lineItem['tax_rates'] = [$taxRateId];
             }
 
-            // Preparar parámetros de sesión
+            $sessionParams = [
+                'mode' => 'payment',
+                'line_items' => [$lineItem],
+                'success_url' => $successUrl,
+                'cancel_url' => $cancelUrl,
+                'client_reference_id' => (string) $userId,
+                'metadata' => [
+                    'user_id' => (string) $userId,
+                    'plan' => $plan,
+                    'period' => 'single',
+                ],
+            ];
+        } else {
+            // Subscription mode
+            // Determinar precio según periodicidad
+            $amount = 0.0;
+            $planName = $dbPlan->name ?? ucfirst($plan);
+            $planDesc = 'Acceso ' . ucfirst($period) . ' al plan ' . ucfirst($plan);
+
+        if ($plan === 'radar') {
+                $amount = 99.00;
+                $planName = 'Radar B2B';
+                $planDesc = 'Acceso ilimitado al Radar de nuevas empresas.';
+            } else {
+                if ($period === 'annual') {
+                    if (isset($dbPlan->price_annual)) {
+                        $amount = (float) $dbPlan->price_annual;
+                    } else {
+                         return redirect()->back()->with('error', 'El precio anual no está configurado para este plan.');
+                    }
+                } else {
+                    $amount = (float) $dbPlan->price_monthly;
+                }
+            }
+
+            if ($amount <= 0) {
+                 return redirect()->back()->with('error', 'El precio del plan no es válido.');
+            }
+
+            $lineItem = [
+                'quantity' => 1,
+                'price_data' => [
+                    'currency' => 'eur',
+                    'unit_amount' => (int)($amount * 100),
+                    'recurring' => [
+                        'interval' => ($period === 'annual' ? 'year' : 'month')
+                    ],
+                    'product_data' => [
+                        'name' => 'Suscripción ' . $planName,
+                        'description' => $planDesc
+                    ]
+                ]
+            ];
+
+            if ($taxRateId) {
+                $lineItem['tax_rates'] = [$taxRateId];
+            }
+
             $sessionParams = [
                 'mode' => 'subscription',
                 'line_items' => [$lineItem],
@@ -177,6 +246,7 @@ class Billing extends BaseController
                     'period' => $period,
                 ],
             ];
+        }
 
             // Buscar si el usuario ya tiene un customer_id en Stripe
             $user = $this->userModel->find($userId);
@@ -198,6 +268,54 @@ class Billing extends BaseController
     }
 
     /**
+     * GET /billing/single_checkout
+     * Starts a one-time Stripe payment session directly via GET (e.g. from SEO pages)
+     */
+    public function single_checkout()
+    {
+        // Now redirects to the order summary for better conversion/trust
+        $province = $this->request->getGet('provincia') ?? '';
+        $sector = $this->request->getGet('sector') ?? '';
+        $period = $this->request->getGet('period') ?? '';
+        
+        $params = [];
+        if ($province) $params['provincia'] = $province;
+        if ($sector) $params['sector'] = $sector;
+        if ($period) $params['period'] = $period;
+        
+        $queryString = $params ? '?' . http_build_query($params) : '';
+        return redirect()->to(site_url('checkout/radar-export' . $queryString));
+    }
+
+    /**
+     * GET /checkout/radar-export
+     * Show a pre-checkout summary to build trust
+     */
+    public function order_summary()
+    {
+        // NO MANDATORY LOGIN HERE - Allow user to see value first
+        $province = $this->request->getGet('provincia') ?? 'España';
+        $sector = $this->request->getGet('sector') ?? '';
+        $period = $this->request->getGet('period') ?? '';
+
+        // Instanciar SeoController para obtener el conteo real
+        $seo = new \App\Controllers\SeoController();
+        $radarData = $seo->getRadarData($province, $sector, $period, 1);
+        $count = $radarData['total_context_count'] ?? 0;
+
+        $data = [
+            'province' => $province,
+            'sector' => $sector,
+            'period' => $period,
+            'price' => 9.00,
+            'tax' => 1.89, // 21% IVA
+            'total_count' => $count
+        ];
+
+        return view('billing/order_summary', $data);
+    }
+
+    /**
      * GET /billing/success
      * (Pantalla de éxito). Estado real mejor por webhook Stripe.
      */
@@ -212,28 +330,49 @@ class Billing extends BaseController
         // Fetch user's active subscription
         $subscription = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
 
-        if (!$subscription) {
-            // If no active subscription, redirect to billing
-            return redirect()->to(site_url('billing'));
+        // 1. Specific Redirect for Full Radar Plan
+        if ($subscription && ($subscription->plan_slug ?? '') === 'radar' && ($subscription->status ?? '') === 'active') {
+             return redirect()->to(site_url('radar'))->with('success', '¡Bienvenido al Radar! Ya puedes acceder a todas las oportunidades.');
         }
 
-        // Prepare data for the view
-        $data = [];
+        // 2. Excel Single Purchase Flow
+        $checkoutData = session('checkout_context') ?? [];
+        if (($checkoutData['type'] ?? '') === 'excel') {
+            $exportParams = [
+                'sector'    => $checkoutData['sector']   ?? 'General',
+                'provincia' => $checkoutData['provincia'] ?? 'España',
+                'period'    => $checkoutData['period']    ?? '30days',
+            ];
+            // Si viene de combined.php, añadir cnae para exportar sin filtro de fecha
+            if (!empty($checkoutData['cnae'])) {
+                $exportParams['cnae'] = $checkoutData['cnae'];
+            }
+            $downloadUrl = site_url('billing/export-excel?' . http_build_query($exportParams));
 
-        // Plan information (using object notation)
-        $data['plan_name'] = $subscription->plan_name ?? 'Pro';
-        $data['base_price'] = $subscription->price_monthly ?? '19';
+            $data = [
+                'download_url' => $downloadUrl,
+                'order_ref' => 'EXC-' . date('Ymd') . '-' . rand(1000, 9999),
+            ];
 
-        // Determine period (we'll assume monthly for now, could be enhanced)
-        $data['period_name'] = 'Mensual';
+            // Limpiamos el contexto tras la compra
+            session()->remove('checkout_context');
 
-        // Payment method (from subscription or default)
-        $data['payment_method'] = 'Tarjeta (Stripe)';
+            return view('billing/success_single', $data);
+        }
 
-        // Order reference (use subscription ID)
-        $data['order_ref'] = 'SUB-' . str_pad($subscription->id ?? '0', 6, '0', STR_PAD_LEFT);
+        // 3. API Subscription Success (Pro/Business)
+        if ($subscription) {
+            $data = [
+                'plan_name' => $subscription->plan_name ?? 'Pro',
+                'base_price' => $subscription->price_monthly ?? '19',
+                'period_name' => 'Mensual',
+                'payment_method' => 'Tarjeta (Stripe)',
+                'order_ref' => 'SUB-' . str_pad($subscription->id ?? '0', 6, '0', STR_PAD_LEFT),
+            ];
+            return view('purchase_success', $data);
+        }
 
-        return view('purchase_success', $data);
+        return redirect()->to(site_url('dashboard'));
     }
 
     public function cancel()
