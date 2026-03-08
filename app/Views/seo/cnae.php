@@ -169,12 +169,12 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
                 </div>
             </div>
 
-            <?php 
+            <?php
             $companies = $companies ?? []; // Fallback safety
-            $paywall_level = $paywall_level ?? 'soft';
-            $freeCount = ($paywall_level === 'soft' ? 50 : ($paywall_level === 'medium' ? 20 : 10));
+            $paywall_level = $paywall_level ?? 'none';
+            $freeCount = ($paywall_level === 'none' ? 100 : 50);
             $freeLeads = array_slice($companies, 0, $freeCount);
-            $premiumLeads = array_slice($companies, $freeCount);
+            $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $freeCount);
             ?>
 
             <div class="lead-grid">

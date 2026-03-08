@@ -295,7 +295,7 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
                     </div>
                     <div>
                         <div class="v-label">Últimos 30 Días</div>
-                        <div class="v-value"><?= number_format($total_context_count ?? 0, 0, ',', '.') ?></div>
+                        <div class="v-value"><?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?></div>
                     </div>
                 </div>
             </div>
@@ -303,9 +303,13 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
             <!-- VOLUME INDICATOR -->
             <div style="margin-top: 24px; text-align: center; font-size: 0.95rem; color: #1e293b; font-weight: 700;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: -2px; margin-right: 4px;"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
-                <?= number_format($total_context_count ?? 0, 0, ',', '.') ?> nuevas empresas detectadas en <?= esc($heading_highlight) ?> en los últimos 30 días
+                <?php 
+                    if ($period === 'hoy') echo number_format($total_context_count ?? 0, 0, ',', '.') . ' nuevas empresas detectadas hoy en ' . esc($heading_highlight ?: 'España');
+                    elseif ($period === 'semana') echo number_format($total_context_count ?? 0, 0, ',', '.') . ' nuevas empresas detectadas esta semana en ' . esc($heading_highlight ?: 'España');
+                    else echo number_format($total_context_count ?? 0, 0, ',', '.') . ' nuevas empresas detectadas en ' . esc($heading_highlight ?: 'España') . ' en los últimos 30 días';
+                ?>
                 <?php if (!$province && !$sector_label): ?>
-                    <div style="font-size: 1rem; color: var(--primary); margin-top: 8px;">Más de 40.000 nuevas empresas detectadas en España en los últimos 30 días</div>
+                    <div style="font-size: 1rem; color: var(--primary); margin-top: 8px;">Más de <?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?> nuevas empresas detectadas en España en los últimos 30 días</div>
                 <?php endif; ?>
                 <div style="font-size: 0.8rem; font-weight: 600; color: #64748b; margin-top: 4px;">Detectadas automáticamente desde el BORME</div>
             </div>
@@ -367,11 +371,20 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
 
             <?php 
             $companies = $companies ?? []; // Fallback safety
-            // Nivel 1 (Soft): 50 | Nivel 3 (Medium): 20 | Nivel 2 (Strong): 10
             $paywall_level = $paywall_level ?? 'strong';
-            $freeCount = ($paywall_level === 'soft' ? 50 : ($paywall_level === 'medium' ? 20 : 10));
+            
+            // Define limits based on standardization document
+            if ($paywall_level === 'none') {
+                $freeCount = 100;
+            } elseif ($paywall_level === 'soft') {
+                $freeCount = 20; 
+            } else {
+                // strong level
+                $freeCount = ($period === 'hoy') ? 3 : 5;
+            }
+
             $freeLeads = array_slice($companies, 0, $freeCount);
-            $premiumLeads = array_slice($companies, $freeCount);
+            $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $freeCount);
             ?>
 
             <div class="lead-grid">
@@ -419,7 +432,7 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
                     </div>
                     
                     <?php if ($index === 4): ?>
-                        <div style="grid-column: 1 / -1; background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 16px; padding: 32px; text-align: center; color: white; margin: 16px 0; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); border: 1px solid rgba(255,255,255,0.1);">
+                        <div style="grid-column: 1 / -1; background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 16px; padding: 40px 32px; text-align: center; color: white; margin: 32px 0 60px 0; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); border: 1px solid rgba(255,255,255,0.1); position: relative; z-index: 50;">
                             <h3 style="font-size: 1.5rem; font-weight: 900; margin-bottom: 16px;">
                                 ⚡ <?php 
                                     if ($sector_label && $province) echo 'Accede a todas las empresas nuevas de ' . mb_strtolower($sector_label) . ' en ' . ucfirst(mb_strtolower($province));
@@ -449,10 +462,10 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
             <?php endif; ?>
 
             <?php if (!empty($premiumLeads)): 
-                // Evitamos pintar 50 tarjetas dummy que alargan la página infinitamente. Max 6 dummies.
-                $dummyLeads = array_slice($premiumLeads, 0, 6);
+                // Aumentamos a 9 dummies para dar más altura al fondo y que el paywall centrado no suba tanto
+                $dummyLeads = array_slice($premiumLeads, 0, 9);
             ?>
-            <div style="position: relative; margin-top: 24px;">
+            <div style="position: relative; margin-top: 150px !important; z-index: 10;">
                 <!-- Blurred Premium Background -->
                 <div style="filter: blur(8px); opacity: 0.5; pointer-events: none; user-select: none;" aria-hidden="true">
                     <div class="lead-grid">
@@ -475,7 +488,7 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
                 
                 <!-- Premium Paywall Overlay -->
                 <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 10;">
-                    <div class="paywall-box" style="background: white; padding: 48px 40px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1), 0 0 0 1px rgba(33, 82, 255, 0.1); text-align: left; max-width: 600px; width: 90%; position: relative; overflow: hidden;">
+                    <div class="paywall-box" style="background: white; padding: 32px 24px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1), 0 0 0 1px rgba(33, 82, 255, 0.1); text-align: left; max-width: 580px; width: 92%; position: relative; overflow: hidden;">
                         <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #133A82, #2152ff, #12b48a);"></div>
                         
                         <div style="text-align: center; margin-bottom: 24px;">
@@ -500,14 +513,14 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
                                 <span>Activar Suscripción Radar</span>
                                 <span style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 8px; font-size: 0.95rem;">99€/mes</span>
                             </a>
-                             <a href="<?= site_url('billing/single_checkout?provincia=' . urlencode($province ?? '') . '&sector=' . urlencode($sector_label ?? '') . '&period=' . urlencode($period === 'general' ? '30days' : ($period ?? ''))) ?>" style="background: white; color: #0f172a; border: 1px solid #cbd5e1; padding: 14px 20px; border-radius: 12px; font-size: 1.05rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; text-decoration: none; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
-                                <span><?php 
-                                    if ($period === 'hoy') echo 'Descargar listado de hoy en Excel';
-                                    elseif ($period === 'semana') echo 'Descargar empresas de la semana en Excel';
-                                    elseif ($period === 'mes') echo 'Descargar listado de este mes en Excel';
-                                    else echo 'Descargar listado (' . number_format($total_context_count ?? 0, 0, ',', '.') . ' empresas) en Excel';
+                              <a href="<?= site_url('billing/single_checkout?provincia=' . urlencode($province ?? '') . '&sector=' . urlencode($sector_label ?? '') . '&period=' . urlencode($period === 'general' ? '30days' : ($period ?? ''))) ?>" style="background: white; color: #0f172a; border: 1px solid #cbd5e1; padding: 14px 20px; border-radius: 12px; font-size: 0.95rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; text-decoration: none; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                                <span style="font-size: 0.9rem;"><?php 
+                                    if ($period === 'hoy') echo 'Descargar ' . number_format($total_context_count ?? 0, 0, ',', '.') . ' empresas (Hoy)';
+                                    elseif ($period === 'semana') echo 'Descargar ' . number_format($total_context_count ?? 0, 0, ',', '.') . ' empresas (Semana)';
+                                    elseif ($period === 'mes') echo 'Descargar ' . number_format($total_context_count ?? 0, 0, ',', '.') . ' empresas (Mes)';
+                                    else echo 'Descargar ' . number_format($total_context_count ?? 0, 0, ',', '.') . ' empresas';
                                 ?></span>
-                                <span style="color: #475569; font-size: 0.95rem;">9€</span>
+                                <span style="color: #475569; font-size: 0.9rem; font-weight: 850; white-space: nowrap; margin-left: 8px; flex-shrink: 0;">9€</span>
                             </a>
                         </div>
                         

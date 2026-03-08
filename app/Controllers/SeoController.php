@@ -57,12 +57,13 @@ class SeoController extends BaseController
         $data['companies'] = $data['latest'];
         $data['period'] = 'general';
         $data['active_menu'] = 'new_companies';
-        $data['paywall_level'] = 'soft';
+        $data['paywall_level'] = 'none';
+        $data['total_context_count'] = $data['stats']['30dias'] ?? 0;
 
-        // Split Heading logic (Radar Style)
-        $data['heading_prefix']    = "Nuevas empresas en ";
+        // Split Heading logic (General Directory — NOT "Nuevas")
+        $data['heading_prefix']    = "Empresas en ";
         $data['heading_suffix']    = "";
-        $data['heading_highlight'] = ucfirst($province);
+        $data['heading_highlight'] = ucfirst(strtolower($province));
         $data['heading_middle']    = "";   // evita que la plantilla añada ' en ' extra
         $data['heading_location']  = "";
         $data['heading_time']      = "";
@@ -72,7 +73,7 @@ class SeoController extends BaseController
         $data['related_sectors'] = $data['related_sectors'] ?? [];
         $data['sector_label'] = null;
 
-        return view('seo/new_province', $data);
+        return view('seo/new_province_v2', $data);
     }
 
     /**
@@ -132,7 +133,7 @@ class SeoController extends BaseController
         // Coherencia con la vista
         $data['total_companies'] = $data['total'];
         $data['cnae_label'] = $data['label'];
-        $data['paywall_level'] = 'soft';
+        $data['paywall_level'] = 'none';
         // Default to empty array if companies wasn't set in older caches
         $data['companies'] = $data['companies'] ?? [];
 
@@ -165,7 +166,7 @@ class SeoController extends BaseController
         $data['meta_description'] = "Encuentra las principales empresas de {$data['sector_label']} en {$province} y accede a datos comerciales listos para prospección B2B. Directorio actualizado.";
         $data['canonical'] = current_url();
         $data['total_companies'] = $data['total'];
-        $data['paywall_level'] = 'medium';
+        $data['paywall_level'] = 'soft';
 
         // Major hubs for national sector cluster
         $data['national_hubs'] = [
@@ -263,7 +264,7 @@ class SeoController extends BaseController
         $data['active_menu'] = 'new_companies';
         $data['paywall_level'] = 'strong';
 
-        return view('seo/new_province', $data);
+        return view('seo/new_province_v2', $data);
     }
     // --- END RADAR CLUSTER ---
 
@@ -306,10 +307,11 @@ class SeoController extends BaseController
                 SELECT cnae_code as cnae, cnae_label, COUNT(id) as total 
                 FROM companies 
                 WHERE registro_mercantil = ? AND cnae_label IS NOT NULL AND cnae_label != '' 
+                AND fecha_constitucion >= ?
                 GROUP BY cnae_code, cnae_label 
                 ORDER BY total DESC 
-                LIMIT 5
-            ", [$province])->getResultArray();
+                LIMIT 8
+            ", [$province, date('Y-m-d', strtotime('-90 days'))])->getResultArray();
 
             $sql = "INSERT INTO seo_stats (province, total_companies, growth_pct, top_sectors) 
                     VALUES (?, ?, ?, ?) 
@@ -341,10 +343,11 @@ class SeoController extends BaseController
                 SELECT registro_mercantil as provincia, COUNT(id) as total 
                 FROM companies 
                 WHERE cnae_code = ? AND registro_mercantil IS NOT NULL AND registro_mercantil != ''
+                AND fecha_constitucion >= ?
                 GROUP BY registro_mercantil 
                 ORDER BY total DESC 
-                LIMIT 10
-            ", [$cnaeCode])->getResultArray();
+                LIMIT 8
+            ", [$cnaeCode, date('Y-m-d', strtotime('-90 days'))])->getResultArray();
 
             $sql = "INSERT INTO seo_stats_cnae (cnae_code, cnae_label, total_companies, top_provinces) 
                     VALUES (?, ?, ?, ?) 
@@ -387,7 +390,7 @@ class SeoController extends BaseController
                 ->where('registro_mercantil', $province)
                 ->where('fecha_constitucion IS NOT NULL')
                 ->orderBy('fecha_constitucion', 'DESC')
-                ->limit(60)
+                ->limit(100)
                 ->get()
                 ->getResultArray();
         } else {
@@ -397,7 +400,7 @@ class SeoController extends BaseController
                 ->where('registro_mercantil', $province)
                 ->where('fecha_constitucion IS NOT NULL')
                 ->orderBy('fecha_constitucion', 'DESC')
-                ->limit(60)
+                ->limit(100)
                 ->get()
                 ->getResultArray();
         }
@@ -418,6 +421,7 @@ class SeoController extends BaseController
         $docsToday = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d'))->countAllResults();
         $docsWeek = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))->countAllResults();
         $docsMonth = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-01'))->countAllResults();
+        $docs30days = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))->countAllResults();
 
         return [
             'province' => $row['province'] ?? $province,
@@ -429,7 +433,8 @@ class SeoController extends BaseController
             'stats' => [
                 'hoy' => $docsToday,
                 'semana' => $docsWeek,
-                'mes' => $docsMonth
+                'mes' => $docsMonth,
+                '30dias' => $docs30days
             ]
         ];
     }
@@ -458,9 +463,10 @@ class SeoController extends BaseController
                 ->where('cnae_code LIKE', $cnaeCode . '%')
                 ->where('registro_mercantil IS NOT NULL')
                 ->where('registro_mercantil !=', '')
+                ->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')))
                 ->groupBy('registro_mercantil')
                 ->orderBy('total', 'DESC')
-                ->limit(6)
+                ->limit(8)
                 ->get()->getResultArray();
 
             return [
@@ -490,7 +496,7 @@ class SeoController extends BaseController
             ->where('cnae_code LIKE', $cnaeCode . '%')
             ->where('fecha_constitucion IS NOT NULL')
             ->orderBy('fecha_constitucion', 'DESC')
-            ->limit(60)
+            ->limit(100)
             ->get()
             ->getResultArray();
     }
@@ -551,7 +557,7 @@ class SeoController extends BaseController
         $db = \Config\Database::connect();
         $builder = $this->companyModel->builder();
 
-        $builder->select('id, company_name as name, cif, fecha_constitucion, cnae_label, registro_mercantil, municipality, objeto_social');
+        $builder->select('id, company_name as name, cif, fecha_constitucion, cnae_code as cnae, cnae_label, registro_mercantil, municipality, objeto_social');
 
         // Aplicar Filtro Provincial
         if ($province) {
@@ -586,14 +592,21 @@ class SeoController extends BaseController
 
         // Aplicar Filtros Temporales Dinámicos (Solo si se pide un rango temporal)
         if ($period === 'hoy') {
-            $builder->where('fecha_constitucion >=', date('Y-m-d'));
+            $builder->where('fecha_constitucion', date('Y-m-d'));
         } elseif ($period === 'semana') {
-            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')));
+            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))
+                    ->where('fecha_constitucion <=', date('Y-m-d'));
         } elseif ($period === 'mes') {
-            $builder->where('fecha_constitucion >=', date('Y-m-01'));
-        } elseif ($period === '30days' || $period === 'general') {
-            // Páginas de sector/provincia: siempre últimos 30 días
-            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')));
+            $builder->where('fecha_constitucion >=', date('Y-m-01'))
+                    ->where('fecha_constitucion <=', date('Y-m-d'));
+        } elseif ($period === '30days') {
+            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))
+                    ->where('fecha_constitucion <=', date('Y-m-d'));
+        } elseif ($period === 'general') {
+            // Long-tail pages (sector+province): use 90-day window for broader results.
+            // Province-only or sector-only pages also benefit from 90 days.
+            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')))
+                    ->where('fecha_constitucion <=', date('Y-m-d'));
         }
 
 
@@ -639,10 +652,16 @@ class SeoController extends BaseController
             $b->where('fecha_constitucion IS NOT NULL');
             return $b;
         };
-
-        $docsToday = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d'))->countAllResults();
-        $docsWeek = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))->countAllResults();
-        $docsMonth = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-01'))->countAllResults();
+        $docsToday = $baseBuilder()->where('fecha_constitucion', date('Y-m-d'))->countAllResults();
+        $docsWeek  = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))
+                                  ->where('fecha_constitucion <=', date('Y-m-d'))
+                                  ->countAllResults();
+        $docsMonth = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-01'))
+                                   ->where('fecha_constitucion <=', date('Y-m-d'))
+                                   ->countAllResults();
+        $docs30Days = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))
+                                    ->where('fecha_constitucion <=', date('Y-m-d'))
+                                    ->countAllResults();
 
         // Label Formateos — evitar "Empresas nuevas de empresas nuevas en Madrid"
         $headingLocation = $province ? ucfirst(mb_strtolower($province, 'UTF-8')) : "España";
@@ -686,10 +705,10 @@ class SeoController extends BaseController
                 ->where('cnae_code !=', '')
                 ->where('cnae_label IS NOT NULL')
                 ->where('cnae_label !=', '')
-                ->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))
-                ->groupBy('cnae_code, cnae_label')
+                ->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')))
+                ->groupBy(['cnae_code', 'cnae_label'])
                 ->orderBy('total', 'DESC')
-                ->limit(6);
+                ->limit(8);
             if (strtolower($province) === 'alicante') {
                 $topB->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
             } else {
@@ -711,10 +730,10 @@ class SeoController extends BaseController
                 ->select('registro_mercantil as cnae_label, COUNT(id) as total')
                 ->where('registro_mercantil IS NOT NULL')
                 ->where('registro_mercantil !=', '')
-                ->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))
+                ->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')))
                 ->groupBy('registro_mercantil')
                 ->orderBy('total', 'DESC')
-                ->limit(6);
+                ->limit(8);
 
             if ($sectorName && isset($res) && count($res['codes']) > 0) {
                 // Filtrar por cnae a calcular provincias de un sector nacional
@@ -760,13 +779,19 @@ class SeoController extends BaseController
 
         // Calculate volume context matching the actual period shown
         if ($period === 'hoy') {
-            $totalContextCount = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d'))->countAllResults();
+            $totalContextCount = $baseBuilder()->where('fecha_constitucion', date('Y-m-d'))->countAllResults();
         } elseif ($period === 'semana') {
-            $totalContextCount = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))->countAllResults();
+            $totalContextCount = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))
+                                               ->where('fecha_constitucion <=', date('Y-m-d'))
+                                               ->countAllResults();
         } elseif ($period === 'mes') {
-            $totalContextCount = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-01'))->countAllResults();
+            $totalContextCount = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-01'))
+                                               ->where('fecha_constitucion <=', date('Y-m-d'))
+                                               ->countAllResults();
         } else {
-            $totalContextCount = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))->countAllResults();
+            $totalContextCount = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))
+                                               ->where('fecha_constitucion <=', date('Y-m-d'))
+                                               ->countAllResults();
         }
 
         // Generate related sectors for internal linking (Join with cnae_2009_2025 for cleaner labels)
@@ -845,7 +870,8 @@ class SeoController extends BaseController
             'stats' => [
                 'hoy' => $docsToday,
                 'semana' => $docsWeek,
-                'mes' => $docsMonth
+                'mes' => $docsMonth,
+                '30days' => $docs30Days
             ]
         ];
     }

@@ -191,6 +191,36 @@
             .company-card { padding: 2rem; }
             .cta-bottom { padding: 3rem 1.5rem; }
         }
+
+        /* Paywall Styles */
+        .paywall-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 20%, #fff 60%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .paywall-card {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1), 0 0 0 1px rgba(33, 82, 255, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        .blurred-row {
+            filter: blur(4px);
+            opacity: 0.5;
+            pointer-events: none;
+            user-select: none;
+        }
     </style>
 </head>
 <body>
@@ -251,8 +281,41 @@
                         </td>
                     </tr>
                     <?php endforeach; ?>
+
+                    <?php if (isset($paywall_level) && $paywall_level === 'soft'): ?>
+                        <?php for ($i = 0; $i < 5; $i++): ?>
+                        <tr class="blurred-row" style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 1rem 1.5rem;">Empresa Restringida</td>
+                            <td style="padding: 1rem 1.5rem; font-family: monospace;">A00******</td>
+                            <td style="padding: 1rem 1.5rem;">Cargando...</td>
+                            <td style="padding: 1rem 1.5rem; text-align: right;">-</td>
+                        </tr>
+                        <?php endfor; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
+
+            <?php if (isset($paywall_level) && $paywall_level === 'soft'): ?>
+                <div class="paywall-overlay">
+                    <div class="paywall-card">
+                        <div style="width: 56px; height: 56px; background: #eef2ff; color: var(--dir-primary); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        </div>
+                        <h3 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 12px;">Acceso Restringido</h3>
+                        <p style="color: #475569; margin-bottom: 24px; line-height: 1.6;">
+                            Estás visualizando la muestra gratuita de las últimas empresas. Desbloquea el Radar para acceder a todas las nuevas constituciones diarias.
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <a href="<?= site_url('register?redirect=radar') ?>" style="background: var(--dir-primary); color: white; padding: 16px 24px; border-radius: 12px; font-weight: 800; text-decoration: none; box-shadow: 0 8px 16px rgba(33, 82, 255, 0.2);">
+                                Abrir Radar Premium
+                            </a>
+                            <a href="<?= site_url('billing/single_checkout?provincia=España&period=30days') ?>" style="background: white; color: #0f172a; border: 1px solid #cbd5e1; padding: 14px 24px; border-radius: 12px; font-weight: 700; text-decoration: none;">
+                                Descargar Últimas 30 Días (Excel) · 9€
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
 
         <?php if (!empty($pager) && ($pager['prev'] || $pager['next'])): ?>

@@ -100,6 +100,7 @@ class Billing extends BaseController
                 session()->set('checkout_context', [
                     'type'      => 'excel',
                     'sector'    => $postData['sector'] ?? 'General',
+                    'cnae'      => $postData['cnae'] ?? '',
                     'provincia' => $postData['provincia'] ?? 'España',
                     'period'    => $postData['period_radar'] ?? '30days'
                 ]);
@@ -277,11 +278,13 @@ class Billing extends BaseController
         $province = $this->request->getGet('provincia') ?? '';
         $sector = $this->request->getGet('sector') ?? '';
         $period = $this->request->getGet('period') ?? '';
+        $cnae = $this->request->getGet('cnae') ?? '';
         
         $params = [];
         if ($province) $params['provincia'] = $province;
         if ($sector) $params['sector'] = $sector;
         if ($period) $params['period'] = $period;
+        if ($cnae) $params['cnae'] = $cnae;
         
         $queryString = $params ? '?' . http_build_query($params) : '';
         return redirect()->to(site_url('checkout/radar-export' . $queryString));
@@ -295,20 +298,37 @@ class Billing extends BaseController
     {
         // NO MANDATORY LOGIN HERE - Allow user to see value first
         $province = $this->request->getGet('provincia') ?? 'España';
-        $sector = $this->request->getGet('sector') ?? '';
-        $period = $this->request->getGet('period') ?? '';
+        $sector   = $this->request->getGet('sector') ?? '';
+        $period   = $this->request->getGet('period') ?? '';
+        $cnae     = $this->request->getGet('cnae') ?? '';
 
-        // Instanciar SeoController para obtener el conteo real
-        $seo = new \App\Controllers\SeoController();
-        $radarData = $seo->getRadarData($province, $sector, $period, 1);
-        $count = $radarData['total_context_count'] ?? 0;
+        // Si viene de combined.php (cnae code), contar directamente sin filtro de fecha
+        if ($cnae !== '') {
+            $db      = \Config\Database::connect();
+            $builder = $db->table('companies');
+            $builder->where('cnae_code LIKE', $cnae . '%');
+            if ($province && strtolower($province) !== 'españa') {
+                if (strtolower($province) === 'alicante') {
+                    $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+                } else {
+                    $builder->where('registro_mercantil', $province);
+                }
+            }
+            $count = $builder->countAllResults();
+        } else {
+            // Radar mode: usar getRadarData con filtro de fecha
+            $seo = new \App\Controllers\SeoController();
+            $radarData = $seo->getRadarData($province, $sector, $period, 1);
+            $count = $radarData['total_context_count'] ?? 0;
+        }
 
         $data = [
-            'province' => $province,
-            'sector' => $sector,
-            'period' => $period,
-            'price' => 9.00,
-            'tax' => 1.89, // 21% IVA
+            'province'    => $province,
+            'sector'      => $sector,
+            'cnae'        => $cnae,
+            'period'      => $period,
+            'price'       => 9.00,
+            'tax'         => 1.89, // 21% IVA
             'total_count' => $count
         ];
 

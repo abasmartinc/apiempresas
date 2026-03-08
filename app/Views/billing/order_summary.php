@@ -215,6 +215,7 @@
                         <input type="hidden" name="period" value="single">
                         <input type="hidden" name="provincia" value="<?= esc($province) ?>">
                         <input type="hidden" name="sector" value="<?= esc($sector) ?>">
+                        <input type="hidden" name="cnae" value="<?= esc($cnae ?? '') ?>">
                         <input type="hidden" name="period_radar" value="<?= esc($period) ?>">
 
                         <button type="submit" class="btn" style="width: 100%; padding: 17px; font-size: 1.05rem; font-weight: 900; background: var(--primary); color: white; border-radius: 14px; border: none; cursor: pointer; box-shadow: 0 8px 16px -4px rgba(33, 82, 255, 0.4); text-transform: uppercase; letter-spacing: 0.02em; transition: transform 0.15s; display: flex; align-items: center; justify-content: center; gap: 10px;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">

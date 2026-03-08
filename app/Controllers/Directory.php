@@ -202,7 +202,7 @@ class Directory extends BaseController
     {
         $page = (int)$page;
         if ($page < 1) $page = 1;
-        $perPage = 100;
+        $perPage = 10;
         $offset = ($page - 1) * $perPage;
 
         // Filtramos por fecha <= hoy para evitar errores de fechas futuras en el dataset
@@ -221,6 +221,7 @@ class Directory extends BaseController
 
         return view('directory/list', [
             'items'     => $companies,
+            'paywall_level' => 'soft',
             'title'     => "Últimas empresas registradas en España | Página {$page} | APIEmpresas.es",
             'header'    => "Últimas Empresas Registradas",
             'meta_description' => "Consulte el listado de las sociedades de reciente creación en España. Datos actualizados del BORME y Registro Mercantil.",

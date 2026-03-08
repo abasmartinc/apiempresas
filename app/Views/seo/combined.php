@@ -217,8 +217,8 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
 
             <?php 
             $companies = $companies ?? []; // Fallback safety
-            $paywall_level = $paywall_level ?? 'medium';
-            $freeCount = ($paywall_level === 'soft' ? 50 : ($paywall_level === 'medium' ? 20 : 10));
+            $paywall_level = $paywall_level ?? 'soft';
+            $freeCount = 20; // Sector + Provincia -> paywall suave (20 items)
             $freeLeads = array_slice($companies, 0, $freeCount);
             $premiumLeads = array_slice($companies, $freeCount);
             ?>
