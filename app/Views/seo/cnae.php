@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $formatEsDate = function($dateStr, $format = 'd M Y') {
     if (empty($dateStr)) return 'Reciente';
     $dateStr = str_replace('/', '-', $dateStr);
@@ -226,7 +226,7 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
                             <h3 style="font-size: 1.5rem; font-weight: 900; margin-bottom: 16px;">
                                 ⚡ Accede a las <?= esc(number_format($total_companies, 0, ',', '.')) ?> empresas nacionales de <?= esc($cnae_label) ?>
                             </h3>
-                            <a href="<?= site_url('register?redirect=radar') ?>" style="display: inline-block; background: var(--primary); color: white; font-weight: 800; padding: 14px 28px; border-radius: 8px; text-decoration: none; transition: all 0.2s;">
+                            <a href="<?= site_url('precios-radar') ?>" style="display: inline-block; background: var(--primary); color: white; font-weight: 800; padding: 14px 28px; border-radius: 8px; text-decoration: none; transition: all 0.2s;">
                                 Desbloquear Radar Premium
                             </a>
                         </div>
@@ -239,7 +239,7 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
                 <div style="margin: 40px 0; background: #eef2ff; border: 1px solid #e0e7ff; border-radius: 16px; padding: 24px; text-align: center;">
                     <h3 style="font-size: 1.25rem; font-weight: 800; color: #1e1b4b; margin-bottom: 8px;">¿Buscas más empresas de <?= esc($cnae_label) ?>?</h3>
                     <p style="color: #4338ca; margin-bottom: 16px; font-weight: 500;">Accede al listado completo y detecta todas las nuevas aperturas en tiempo real con Radar.</p>
-                    <a href="<?= site_url('register?redirect=radar') ?>" style="display: inline-block; background: var(--primary); color: white; padding: 12px 24px; border-radius: 8px; font-weight: 700; text-decoration: none;">
+                    <a href="<?= site_url('precios-radar') ?>" style="display: inline-block; background: var(--primary); color: white; padding: 12px 24px; border-radius: 8px; font-weight: 700; text-decoration: none;">
                         Abrir Radar Premium
                     </a>
                 </div>
@@ -287,7 +287,7 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
                         <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px;">
                             <a href="<?= site_url('register?redirect=precios-radar') ?>" style="background: var(--primary); color: white; padding: 16px 20px; border-radius: 12px; font-size: 1.05rem; font-weight: 800; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 16px -4px rgba(33,82,255,0.3); text-decoration: none; transition: transform 0.2s;">
                                 <span>Contratar Radar Premium</span>
-                                <span style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 8px; font-size: 0.95rem;">99€/mes</span>
+                                <span style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 8px; font-size: 0.95rem;">79€/mes</span>
                             </a>
                             <a href="<?= site_url('billing/single_checkout?cnae=' . urlencode($cnae_code)) ?>" style="background: white; color: #0f172a; border: 1px solid #cbd5e1; padding: 14px 20px; border-radius: 12px; font-size: 1.05rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; text-decoration: none; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
                                 <span>Descargar Excel Completo</span>

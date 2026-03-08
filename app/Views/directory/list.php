@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
     <?= view('partials/head', ['title' => $title, 'excerptText' => $meta_description]) ?>
@@ -306,7 +306,7 @@
                             Estás visualizando la muestra gratuita de las últimas empresas. Desbloquea el Radar para acceder a todas las nuevas constituciones diarias.
                         </p>
                         <div style="display: flex; flex-direction: column; gap: 12px;">
-                            <a href="<?= site_url('register?redirect=radar') ?>" style="background: var(--dir-primary); color: white; padding: 16px 24px; border-radius: 12px; font-weight: 800; text-decoration: none; box-shadow: 0 8px 16px rgba(33, 82, 255, 0.2);">
+                            <a href="<?= site_url('precios-radar') ?>" style="background: var(--dir-primary); color: white; padding: 16px 24px; border-radius: 12px; font-weight: 800; text-decoration: none; box-shadow: 0 8px 16px rgba(33, 82, 255, 0.2);">
                                 Abrir Radar Premium
                             </a>
                             <a href="<?= site_url('billing/single_checkout?provincia=España&period=30days') ?>" style="background: white; color: #0f172a; border: 1px solid #cbd5e1; padding: 14px 24px; border-radius: 12px; font-weight: 700; text-decoration: none;">

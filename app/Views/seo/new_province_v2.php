@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $formatEsDate = function($dateStr, $format = 'd M Y') {
     if (empty($dateStr)) return 'Reciente';
     $dateStr = str_replace('/', '-', $dateStr);
@@ -124,7 +124,7 @@ $buildCheckoutUrl = site_url(
             </div>
 
             <div class="hero-buttons" style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 30px;">
-                <a href="<?= site_url('register?redirect=radar') ?>" class="btn" style="background: var(--primary); color: white; padding: 16px 32px; font-size: 1.1rem; border-radius: 12px; font-weight: 700; box-shadow: 0 8px 16px rgba(33,82,255,0.2);">
+                <a href="<?= site_url('precios-radar') ?>" class="btn" style="background: var(--primary); color: white; padding: 16px 32px; font-size: 1.1rem; border-radius: 12px; font-weight: 700; box-shadow: 0 8px 16px rgba(33,82,255,0.2);">
                     Abrir Radar
                 </a>
                 <a href="#leads-b2b-recientes" class="btn ghost" style="padding: 16px 32px; font-size: 1.1rem; border-radius: 12px; font-weight: 700; background: white; border: 1px solid #cbd5e1; color: #475569;">
@@ -144,7 +144,7 @@ $buildCheckoutUrl = site_url(
                         <li style="display: flex; align-items: center; gap: 8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>Exporta</strong> leads listos para prospección</li>
                     </ul>
                 </div>
-                <a href="<?= site_url('register?redirect=radar') ?>" class="btn" style="padding: 16px 32px; font-size: 1.05rem; background: var(--primary); color: white; border-radius: 12px; font-weight: 800; white-space: nowrap; box-shadow: 0 4px 12px rgba(33,82,255,0.2);">Abrir Radar</a>
+                <a href="<?= site_url('precios-radar') ?>" class="btn" style="padding: 16px 32px; font-size: 1.05rem; background: var(--primary); color: white; border-radius: 12px; font-weight: 800; white-space: nowrap; box-shadow: 0 4px 12px rgba(33,82,255,0.2);">Abrir Radar</a>
             </div>
 
             <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 60px;">
@@ -313,7 +313,7 @@ $buildCheckoutUrl = site_url(
                                 </div>
 
                                 <div class="premium-cta-stack">
-                                    <a href="<?= site_url('register?redirect=radar') ?>" class="premium-primary-btn">Abrir Radar</a>
+                                    <a href="<?= site_url('precios-radar') ?>" class="premium-primary-btn">Abrir Radar</a>
                                     <a href="<?= $buildCheckoutUrl ?>" class="premium-secondary-btn">Descargar listado · 9€</a>
                                 </div>
                             </div>
@@ -326,7 +326,7 @@ $buildCheckoutUrl = site_url(
                 <div style="margin: 40px 0; background: #eef2ff; border: 1px solid #e0e7ff; border-radius: 16px; padding: 24px; text-align: center;">
                     <h3 style="font-size: 1.25rem; font-weight: 800; color: #1e1b4b; margin-bottom: 8px;">¿Buscas más empresas en <?= esc($province ?? $heading_highlight) ?>?</h3>
                     <p style="color: #4338ca; margin-bottom: 16px; font-weight: 500;">Accede al listado completo y detecta todas las nuevas aperturas en tiempo real con Radar.</p>
-                    <a href="<?= site_url('register?redirect=radar') ?>" style="display: inline-block; background: var(--primary); color: white; padding: 12px 24px; border-radius: 8px; font-weight: 700; text-decoration: none;">
+                    <a href="<?= site_url('precios-radar') ?>" style="display: inline-block; background: var(--primary); color: white; padding: 12px 24px; border-radius: 8px; font-weight: 700; text-decoration: none;">
                         Abrir Radar Premium
                     </a>
                 </div>
@@ -436,9 +436,9 @@ $buildCheckoutUrl = site_url(
     </div>
 
     <div class="paywall-actions">
-        <a href="<?= site_url('register?redirect=radar') ?>" class="paywall-primary-cta">
+        <a href="<?= site_url('precios-radar') ?>" class="paywall-primary-cta">
             <span>Activar Suscripción Radar</span>
-            <span class="paywall-price-tag">99€/mes</span>
+            <span class="paywall-price-tag">79€/mes</span>
         </a>
 
         <a href="<?= $buildCheckoutUrl ?>" class="paywall-secondary-cta">

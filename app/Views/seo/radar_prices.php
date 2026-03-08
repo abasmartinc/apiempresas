@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
     <?= view('partials/head', [
@@ -591,7 +591,7 @@
             </div>
         </div>
 
-        <a href="<?= site_url('register?redirect=radar') ?>" class="cta-primary">
+        <a href="<?= site_url('precios-radar') ?>" class="cta-primary">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             Activar Radar
         </a>
@@ -615,7 +615,7 @@
                 <p>
                     Con Radar puedes detectar nuevas empresas cada día y contactar con ellas antes que otros proveedores del mercado.
                 </p>
-                <a href="<?= site_url('register?redirect=radar') ?>" class="cta-primary" style="font-size: 1rem; padding: 15px 32px;">
+                <a href="<?= site_url('precios-radar') ?>" class="cta-primary" style="font-size: 1rem; padding: 15px 32px;">
                     Activar Radar →
                 </a>
             </div>
@@ -701,7 +701,7 @@
         </table>
 
         <div class="table-cta-row">
-            <a href="<?= site_url('register?redirect=radar') ?>" class="cta-ghost">
+            <a href="<?= site_url('precios-radar') ?>" class="cta-ghost">
                 Ver todos los leads en el Radar →
             </a>
         </div>
@@ -861,7 +861,7 @@
                         Sin permanencia — cancela cuando quieras
                     </li>
                 </ul>
-                <a href="<?= site_url('register?redirect=radar') ?>" class="cta-primary" style="display: flex; width: 100%; font-size: 1.05rem; justify-content: center;">
+                <a href="<?= site_url('precios-radar') ?>" class="cta-primary" style="display: flex; width: 100%; font-size: 1.05rem; justify-content: center;">
                     Activar Radar
                 </a>
                 <p style="text-align: center; margin: 14px 0 0; font-size: 0.88rem; color: var(--slate-500);">
@@ -921,7 +921,7 @@
         </table>
 
         <div class="table-cta-row" style="margin-top: 36px;">
-            <a href="<?= site_url('register?redirect=radar') ?>" class="cta-primary">
+            <a href="<?= site_url('precios-radar') ?>" class="cta-primary">
                 Activar Radar →
             </a>
             <p style="margin-top: 12px; color: var(--slate-500); font-size: 0.88rem;">
@@ -976,7 +976,7 @@
         <p class="final-cta-sub">
             Accede al radar y descubre nuevas oportunidades comerciales cada día antes que tu competencia.
         </p>
-        <a href="<?= site_url('register?redirect=radar') ?>" class="cta-white">
+        <a href="<?= site_url('precios-radar') ?>" class="cta-white">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             Activar Radar
         </a>

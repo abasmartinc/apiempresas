@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
     <?= view('partials/head', [
@@ -238,7 +238,7 @@
                     <div style="text-align: center;">
                         <div style="font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px;">O elige acceso total</div>
                         <a href="<?= site_url('radar') ?>" style="color: var(--primary); font-weight: 800; text-decoration: none; font-size: 0.9rem;">
-                            Radar Ilimitado por 99€/mes →
+                            Radar Ilimitado por 79€/mes →
                         </a>
                     </div>
                 </div>
