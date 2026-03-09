@@ -1,5 +1,4 @@
-
-    <header>
+<header>
         <?php if (session('impersonator_id')): ?>
         <div style="background: #e0f2fe; border-bottom: 1px solid #bae6fd; padding: 10px; text-align: center; color: #0369a1; font-size: 0.9rem; font-weight: 500;">
             👀 Estás viendo el sitio como <strong><?= esc(session('user_name')) ?></strong>.

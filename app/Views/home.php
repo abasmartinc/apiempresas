@@ -5,10 +5,7 @@
     <?= view('partials/head') ?>
 </head>
 
-<body>
-    <div class="bg-halo" aria-hidden="true"></div>
-
-    <?= view('partials/header') ?>
+<body><div class="bg-halo" aria-hidden="true"></div><?= view('partials/header', [], ['debug' => false]) ?>
 
     <main>
         <!-- HERO -->

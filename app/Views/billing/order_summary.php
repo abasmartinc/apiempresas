@@ -165,7 +165,14 @@
                         <div class="stat-box">
                             <div class="stat-box-label">Empresas</div>
                             <div class="stat-box-value"><?= number_format($total_count ?? 0, 0, ',', '.') ?></div>
-                            <div class="stat-box-sub">Detectadas en los últimos 30 días</div>
+                            <div class="stat-box-sub">
+                                <?php
+                                if ($period === 'hoy') echo 'Detectadas hoy';
+                                elseif ($period === 'semana') echo 'Detectadas esta semana';
+                                elseif ($period === 'mes') echo 'Detectadas este mes';
+                                else echo 'Detectadas en los últimos 30 días';
+                                ?>
+                            </div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-box-label">Formato</div>
@@ -197,16 +204,16 @@
 
                     <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #64748b; font-size: 0.88rem;">
                         <span>Listado Excel (<?= number_format($total_count ?? 0, 0, ',', '.') ?> empresas)</span>
-                        <span style="font-weight: 700; color: #0f172a;"><?= number_format($price, 2) ?> €</span>
+                        <span style="font-weight: 700; color: #0f172a;"><?= number_format($price, 2, ',', '.') ?> €</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 6px; color: #64748b; font-size: 0.88rem;">
                         <span>IVA (21%)</span>
-                        <span style="font-weight: 700; color: #0f172a;"><?= number_format($tax, 2) ?> €</span>
+                        <span style="font-weight: 700; color: #0f172a;"><?= number_format($tax, 2, ',', '.') ?> €</span>
                     </div>
 
                     <div class="total-row">
                         <span>Total</span>
-                        <span style="color: var(--primary);"><?= number_format($price + $tax, 2) ?> €</span>
+                        <span style="color: var(--primary);"><?= number_format($price + $tax, 2, ',', '.') ?> €</span>
                     </div>
 
                     <form action="<?= site_url('billing/checkout') ?>" method="POST" style="margin-top: 20px;">

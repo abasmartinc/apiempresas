@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Controllers\BaseController;
 use App\Models\CompanyModel;
 use CodeIgniter\Cache\CacheInterface;
 
@@ -14,6 +15,7 @@ class SeoController extends BaseController
     {
         $this->companyModel = new CompanyModel();
         $this->cache = \Config\Services::cache();
+        helper(['form', 'url', 'pricing']); // Load pricing helper
     }
 
     /**
@@ -560,7 +562,7 @@ class SeoController extends BaseController
         $builder->select('id, company_name as name, cif, fecha_constitucion, cnae_code as cnae, cnae_label, registro_mercantil, municipality, objeto_social');
 
         // Aplicar Filtro Provincial
-        if ($province) {
+        if ($province && strtolower($province) !== 'españa') {
             if (strtolower($province) === 'alicante') {
                 $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
             } else {
@@ -592,12 +594,14 @@ class SeoController extends BaseController
 
         // Aplicar Filtros Temporales Dinámicos (Solo si se pide un rango temporal)
         if ($period === 'hoy') {
-            $builder->where('fecha_constitucion', date('Y-m-d'));
+            $lastDateRow = $db->query("SELECT MAX(fecha_constitucion) as last_date FROM companies WHERE fecha_constitucion IS NOT NULL AND fecha_constitucion <= CURDATE()")->getRowArray();
+            $targetDate = $lastDateRow['last_date'] ?? date('Y-m-d');
+            $builder->where('fecha_constitucion', $targetDate);
         } elseif ($period === 'semana') {
             $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))
                     ->where('fecha_constitucion <=', date('Y-m-d'));
         } elseif ($period === 'mes') {
-            $builder->where('fecha_constitucion >=', date('Y-m-01'))
+            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))
                     ->where('fecha_constitucion <=', date('Y-m-d'));
         } elseif ($period === '30days') {
             $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))
@@ -627,7 +631,7 @@ class SeoController extends BaseController
         // Clonamos el builder base (filtros de registro y cnae) para los conteos
         $baseBuilder = function () use ($province, $sectorName, $db) {
             $b = $db->table('companies');
-            if ($province) {
+            if ($province && strtolower($province) !== 'españa') {
                 if (strtolower($province) === 'alicante') {
                     $b->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
                 } else {
@@ -652,11 +656,15 @@ class SeoController extends BaseController
             $b->where('fecha_constitucion IS NOT NULL');
             return $b;
         };
-        $docsToday = $baseBuilder()->where('fecha_constitucion', date('Y-m-d'))->countAllResults();
+        
+        $lastDateRow = $db->query("SELECT MAX(fecha_constitucion) as last_date FROM companies WHERE fecha_constitucion IS NOT NULL AND fecha_constitucion <= CURDATE()")->getRowArray();
+        $targetDate = $lastDateRow['last_date'] ?? date('Y-m-d');
+
+        $docsToday = $baseBuilder()->where('fecha_constitucion', $targetDate)->countAllResults();
         $docsWeek  = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))
                                   ->where('fecha_constitucion <=', date('Y-m-d'))
                                   ->countAllResults();
-        $docsMonth = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-01'))
+        $docsMonth = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))
                                    ->where('fecha_constitucion <=', date('Y-m-d'))
                                    ->countAllResults();
         $docs30Days = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))
@@ -779,13 +787,17 @@ class SeoController extends BaseController
 
         // Calculate volume context matching the actual period shown
         if ($period === 'hoy') {
-            $totalContextCount = $baseBuilder()->where('fecha_constitucion', date('Y-m-d'))->countAllResults();
+            $lastDateRow = $db->query("SELECT MAX(fecha_constitucion) as last_date FROM companies WHERE fecha_constitucion IS NOT NULL AND fecha_constitucion <= CURDATE()")->getRowArray();
+            $targetDate = $lastDateRow['last_date'] ?? date('Y-m-d');
+            
+            // Debemos clonar de nuevo porque $baseBuilder ya fue consumida antes
+            $totalContextCount = $baseBuilder()->where('fecha_constitucion', $targetDate)->countAllResults();
         } elseif ($period === 'semana') {
             $totalContextCount = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))
                                                ->where('fecha_constitucion <=', date('Y-m-d'))
                                                ->countAllResults();
         } elseif ($period === 'mes') {
-            $totalContextCount = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-01'))
+            $totalContextCount = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))
                                                ->where('fecha_constitucion <=', date('Y-m-d'))
                                                ->countAllResults();
         } else {
@@ -852,8 +864,13 @@ class SeoController extends BaseController
             $headingTime      = "";
         }
 
+        // Calcula los precios dinámicos según el volumen para los CTA
+        $dynamicPriceContext = calculate_radar_price($totalContextCount);
+        $dynamicPrice30Days  = calculate_radar_price($docs30Days);
+
         return [
             'heading_title' => $fullHeading,
+
             'heading_prefix' => $headingPrefix,
             'heading_suffix' => $headingSuffix,
             'heading_highlight' => $headingHighlight,
@@ -867,6 +884,8 @@ class SeoController extends BaseController
             'top_sectors' => $topSectors,
             'related_sectors' => $relatedSectors,
             'total_context_count' => $totalContextCount,
+            'dynamic_price' => $dynamicPriceContext,       // Precio para el context actual (e.g. 'hoy')
+            'dynamic_price_30days' => $dynamicPrice30Days, // Precio garantizado para los botones de 30 días
             'stats' => [
                 'hoy' => $docsToday,
                 'semana' => $docsWeek,
@@ -1095,9 +1114,13 @@ class SeoController extends BaseController
         // --- MODO B: Radar nuevas empresas (new_province.php) ---
         // Viene con ?sector=LABEL&provincia=X&period=30days → con filtro de fecha
         } else {
-            $data      = $this->getRadarData($province, $sector, $period, 1000);
+            $data      = $this->getRadarData($province, $sector, $period, 100000);
             $companies = $data['companies'] ?? [];
             $filename  = "Listado_Nuevas_Empresas_" . str_replace(' ', '_', $sector) . "_" . str_replace(' ', '_', $province) . ".csv";
+        }
+
+        if (ob_get_length()) {
+            ob_clean();
         }
 
         header('Content-Type: text/csv; charset=UTF-8');

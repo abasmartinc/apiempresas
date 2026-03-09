@@ -19,6 +19,9 @@ class Login extends BaseController
      */
     public function index()
     {
+        $currentUri = (string) $this->request->getUri();
+        @file_put_contents(WRITEPATH . 'debug_redirect.txt', date('Y-m-d H:i:s') . " | LOGIN_INDEX | URI: {$currentUri} | Referer: " . ($this->request->getServer('HTTP_REFERER') ?? 'N/A') . "\n", FILE_APPEND);
+
         if (session('logged_in')) {
             $redirectUrl = $this->request->getGet('redirect') ?: 'dashboard';
             return redirect()->to(site_url(ltrim($redirectUrl, '/')));

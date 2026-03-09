@@ -28,22 +28,24 @@ class BotProtectionFilter implements FilterInterface
             $botService->recordBlockedAttempt($ip, [
                 'route'      => $request->getUri()->getPath(),
                 'method'     => $request->getMethod(),
-                'user_agent' => $request->getUserAgent() ? $request->getUserAgent()->getAgentString() : '',
+                'user_agent' => $request->getServer('HTTP_USER_AGENT') ?? '',
             ]);
             
             // Return 403 Forbidden response
             $response = Services::response();
             $response->setStatusCode(403);
             
-            // Check if it's an AJAX request to return JSON
-            if ($request->isAJAX()) {
+            // Check if it's an AJAX request OR an API route to return JSON
+            $currentUri = (string) $request->getUri()->getPath();
+            $isAjax = (strtolower($request->getServer('HTTP_X_REQUESTED_WITH') ?? '') === 'xmlhttprequest');
+            if ($isAjax || strpos($currentUri, 'api/') !== false) {
                 $response->setJSON([
                     'success' => false,
                     'error'   => 'ACCESS_DENIED',
                     'message' => 'Tu IP ha sido bloqueada por actividad sospechosa. Contacta con soporte si crees que es un error.',
                 ]);
             } else {
-                // For non-AJAX requests, return HTML error page
+                // For non-AJAX web requests, return HTML error page
                 $response->setBody(view('errors/html/error_403', [
                     'message' => 'Tu IP ha sido bloqueada por actividad sospechosa. Contacta con soporte si crees que es un error.',
                 ]));

@@ -303,7 +303,6 @@ class Register extends BaseController
             'is_active' => 1,
             'api_access' => 1,
             'source_app' => 'apiempresas',
-            'preferred_product' => 'radar',
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ];

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $formatEsDate = function($dateStr, $format = 'd M Y') {
     if (empty($dateStr)) return 'Reciente';
     $dateStr = str_replace('/', '-', $dateStr);
@@ -182,10 +182,7 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
     </style>
 </head>
 
-<body>
-    <div class="bg-halo" aria-hidden="true"></div>
-
-    <?= view('partials/header') ?>
+<body><div class="bg-halo" aria-hidden="true"></div><?= view('partials/header', [], ['debug' => false]) ?>
 
     <main>
         <!-- PREMIUM HERO SECTION -->

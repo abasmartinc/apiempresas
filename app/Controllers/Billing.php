@@ -22,6 +22,7 @@ class Billing extends BaseController
         $this->ApikeysModel = new ApikeysModel();
         $this->UsersuscriptionsModel = new UsersuscriptionsModel();
         $this->ApiRequestsModel = new ApiRequestsModel();
+        helper(['form', 'url', 'pricing']); // Load pricing helper
     }
 
     public function index()
@@ -149,16 +150,41 @@ class Billing extends BaseController
             $taxRateId = getenv('STRIPE_TAX_RATE_ID');
 
         if ($period === 'single' || ($plan === 'radar' && $period === 'single')) {
-            // One-time payment (Payment mode)
-            $amount = 9.00; // 9€ fixed price for radar download
+            // Recalculate count for security to determine price
+            $prov = $postData['provincia'] ?? 'España';
+            $sect = $postData['sector'] ?? '';
+            $cnae = $postData['cnae'] ?? '';
+            $per  = $postData['period_radar'] ?? '30days';
+
+            if ($cnae !== '') {
+                $db      = \Config\Database::connect();
+                $builder = $db->table('companies');
+                $builder->where('cnae_code LIKE', $cnae . '%');
+                if ($prov && strtolower($prov) !== 'españa') {
+                    if (strtolower($prov) === 'alicante') {
+                        $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+                    } else {
+                        $builder->where('registro_mercantil', $prov);
+                    }
+                }
+                $count = $builder->countAllResults();
+            } else {
+                $seo = new \App\Controllers\SeoController();
+                $radarData = $seo->getRadarData($prov, $sect, $per, 1);
+                $count = $radarData['total_context_count'] ?? 0;
+            }
+
+            // Dynamic Pricing based on scale
+            $pricing = calculate_radar_price($count);
+            $amount = $pricing['base_price'];
 
             // Guardar contexto para la página de éxito
             session()->set('checkout_context', [
                 'type'      => 'excel',
-                'sector'    => $postData['sector'] ?? 'General',
-                'cnae'      => $postData['cnae'] ?? '',
-                'provincia' => $postData['provincia'] ?? 'España',
-                'period'    => $postData['period_radar'] ?? '30days'
+                'sector'    => $sect,
+                'cnae'      => $cnae,
+                'provincia' => $prov,
+                'period'    => $per
             ]);
             
             $lineItem = [
@@ -167,7 +193,7 @@ class Billing extends BaseController
                     'currency' => 'eur',
                     'unit_amount' => (int)($amount * 100),
                     'product_data' => [
-                        'name' => 'Descarga Listado Radar B2B',
+                        'name' => 'Descarga Listado Radar B2B (' . $count . ' empresas)',
                         'description' => 'Listado completo de nuevas empresas constituidas.'
                     ]
                 ]
@@ -322,13 +348,16 @@ class Billing extends BaseController
             $count = $radarData['total_context_count'] ?? 0;
         }
 
+        // Dynamic Pricing based on scale
+        $pricing = calculate_radar_price($count);
+
         $data = [
             'province'    => $province,
             'sector'      => $sector,
             'cnae'        => $cnae,
             'period'      => $period,
-            'price'       => 9.00,
-            'tax'         => 1.89, // 21% IVA
+            'price'       => $pricing['base_price'],
+            'tax'         => $pricing['tax'],
             'total_count' => $count
         ];
 
@@ -735,4 +764,5 @@ class Billing extends BaseController
             return redirect()->back()->with('error', 'No se pudo abrir el portal de Stripe: ' . $e->getMessage());
         }
     }
+
 }

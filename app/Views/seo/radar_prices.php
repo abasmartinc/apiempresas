@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="es">
 <head>
     <?= view('partials/head', [
@@ -915,7 +915,7 @@
                 <tr>
                     <td>Precio</td>
                     <td class="col-radar"><strong>79€/mes</strong></td>
-                    <td>9€/vez</td>
+                    <td>desde 2€/vez</td>
                 </tr>
             </tbody>
         </table>
@@ -925,7 +925,7 @@
                 Activar Radar →
             </a>
             <p style="margin-top: 12px; color: var(--slate-500); font-size: 0.88rem;">
-                O <a href="<?= site_url('billing/single_checkout?period=30days') ?>" style="color: var(--primary); font-weight: 700;">descarga un listado puntual por 9€</a>
+                O <a href="<?= site_url('billing/single_checkout?period=30days') ?>" style="color: var(--primary); font-weight: 700;">descarga un listado puntual desde 2€</a>
             </p>
         </div>
     </div>
