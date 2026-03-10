@@ -190,17 +190,16 @@ $routes->get('sitemap-companies-(:num).xml', 'Sitemap::companies/$1');
 $routes->get('cron/seo-sync/(:any)', 'SeoController::syncStatsWebhook/$1');
 
 // --- Programmatic SEO Routes ---
-$routes->get('empresas/(:any)', 'SeoController::province/$1');
-$routes->get('empresas-cnae/(:any)', 'SeoController::cnae/$1');
+$routes->get('empresas/(:any)', 'RadarController::provinceCatalog/$1');
+$routes->get('empresas-cnae/(:any)', 'RadarController::cnae/$1');
 
 // Radar Hub (New Companies Strategy)
-$routes->get('empresas-nuevas', 'SeoController::newRadarHub'); // Central Hub
-$routes->get('empresas-nuevas-hoy', 'SeoController::newRadarTime/hoy');
-$routes->get('empresas-nuevas-semana', 'SeoController::newRadarTime/semana');
-$routes->get('empresas-nuevas-mes', 'SeoController::newRadarTime/mes');
-$routes->get('empresas-nuevas-sector/(:any)', 'SeoController::newRadarSector/$1'); // Long-Tail Sector National
-$routes->get('empresas-nuevas/(:any)-en-(:any)', 'SeoController::newRadarLongTail/$1/$2'); // Long-Tail Sector+Prov
-$routes->get('empresas-nuevas/(:any)', 'SeoController::newInProvince/$1');
+$routes->get('empresas-nuevas', 'RadarController::index'); // Central Hub
+$routes->get('empresas-nuevas-hoy', 'RadarController::today');
+$routes->get('empresas-nuevas-semana', 'RadarController::week');
+$routes->get('empresas-nuevas-mes', 'RadarController::month');
+$routes->get('empresas-nuevas-sector/(:any)', 'RadarController::sector/$1');
+$routes->get('empresas-nuevas/(:any)', 'RadarController::province/$1'); // Province Radar
 
 // Combination Sector + Province (e.g. /empresas-programacion-en-madrid)
 // This regex matches "empresas-[anything]-en-[anything]" // MUST BE AFTER RADAR LONG-TAIL

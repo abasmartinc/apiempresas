@@ -234,8 +234,31 @@ class SeoController extends BaseController
             }
         }
 
-        if (!$data || empty($data['companies'])) {
-            // Fallback si no hay data
+        // Threshold: 10 companies for long-tail pages (period=general) to be considered "good" results
+        $threshold = ($period === 'general') ? 10 : 3;
+        $contextCount = $data['total_context_count'] ?? 0;
+        
+        $isLowResults = empty($data['companies']) || $contextCount < $threshold;
+        $data['is_low_results'] = $isLowResults;
+
+        if ($isLowResults) {
+            // No index follow for thin pages
+            $data['robots'] = count($data['companies']) === 0 ? 'noindex, follow' : 'index, follow';
+            
+            // Provide alternatives
+            if ($province && $sectorName) {
+                // Alternative 1: National Radar for same sector
+                $data['national_sector_url'] = site_url("empresas-nuevas-sector/" . url_title($sectorName, '-', true));
+                // Alternative 2: General Directory for same sector + province
+                $data['general_directory_url'] = site_url("empresas-" . url_title($sectorName, '-', true) . "-en-" . url_title($province, '-', true));
+            } elseif ($province) {
+                // Alternative: General Directory for province
+                $data['general_directory_url'] = site_url("empresas/" . url_title($province, '-', true));
+            }
+        }
+
+        if (!$data || (empty($data['companies']) && !$isLowResults)) {
+            // Fallback si no hay data y no es un caso controlado de "pocos resultados" (ej: error de carga)
             if ($province && !$sectorName)
                 return redirect()->to(site_url("empresas/" . url_title($province, '-', true)));
             return redirect()->to(site_url("directorio"));
@@ -801,7 +824,8 @@ class SeoController extends BaseController
                                                ->where('fecha_constitucion <=', date('Y-m-d'))
                                                ->countAllResults();
         } else {
-            $totalContextCount = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))
+            // Match the 'general' window used in getRadarData (90 days)
+            $totalContextCount = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')))
                                                ->where('fecha_constitucion <=', date('Y-m-d'))
                                                ->countAllResults();
         }

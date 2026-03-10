@@ -2,514 +2,509 @@
 <html lang="es">
 <head>
     <?= view('partials/head', [
-        'title'       => 'Radar B2B - APIEmpresas',
-        'excerptText' => 'Herramienta de prospección profesional en tiempo real.',
+        'title'       => 'Radar B2B - Centro de Prospección Inteligente',
+        'excerptText' => 'Identifica nuevas oportunidades de negocio en tiempo real con el Radar de APIEmpresas.',
     ]) ?>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --sidebar-w: 280px;
-            --primary: #2152ff;
-            --primary-dark: #1a41cc;
-            --bg-body: #f1f5f9;
-            --bg-card: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --radius: 12px;
-            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-        }
 
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            margin: 0;
-            overflow: hidden; /* App shell feel */
-        }
-
-        /* App Layout */
-        .app-shell {
-            display: grid;
-            grid-template-columns: var(--sidebar-w) 1fr;
-            height: 100vh;
-            width: 100vw;
-        }
-
-        /* Sidebar Container */
-        .sidebar {
-            background: #fff;
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            z-index: 50;
-        }
-
-        .sidebar-brand {
-            padding: 24px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .sidebar-nav {
-            flex: 1;
-            padding: 24px 16px;
-            overflow-y: auto;
-        }
-
-        .nav-label {
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 12px;
-            display: block;
-            padding-left: 12px;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 10px 12px;
-            border-radius: 10px;
-            color: var(--slate-700);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 4px;
-            transition: all 0.2s;
-        }
-        .nav-link:hover { background: #f8fafc; color: var(--primary); }
-        .nav-link.active { background: #eff6ff; color: var(--primary); }
-        .nav-link i { margin-right: 12px; font-size: 1.1rem; }
-
-        /* Main Area */
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Header / Top Bar */
-        .header {
-            height: 64px;
-            background: #fff;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 32px;
-            flex-shrink: 0;
-        }
-
-        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--text-muted); }
-        .breadcrumb span.active { color: var(--text-main); font-weight: 700; }
-
-        /* Scrollable Content */
-        .content-body {
-            flex: 1;
-            overflow-y: auto;
-            padding: 32px;
-        }
-
-        /* Stats Section - Wide */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-        .stat-card {
-            background: #fff;
-            padding: 24px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-        }
-        .stat-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; display: block; }
-        .stat-value { font-size: 24px; font-weight: 900; color: var(--text-main); letter-spacing: -0.02em; }
-        
-        /* Filter Bar - Full Width */
-        .filter-bar {
-            background: #fff;
-            padding: 16px 24px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            margin-bottom: 32px;
-            display: flex;
-            gap: 20px;
-            align-items: flex-end;
-            box-shadow: var(--shadow);
-        }
-        .filter-group { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-        .filter-label { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
-        .filter-select {
-            width: 100%;
-            padding: 10px 14px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: #f9fafb;
-            font-size: 14px;
-            font-weight: 600;
-            outline: none;
-            cursor: pointer;
-        }
-
-        /* DataTable Card */
-        .data-card {
-            background: #fff;
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            overflow: hidden;
-        }
-        .data-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #fafafb; }
-        
-        .table-wrap { overflow-x: auto; }
-        .table { width: 100%; border-collapse: collapse; text-align: left; }
-        .table th { padding: 16px 24px; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border); }
-        .table td { padding: 16px 24px; border-bottom: 1px solid #f8fafc; font-size: 14px; vertical-align: middle; }
-        .table tr:hover { background: #fcfdfe; }
-
-        .company-name { font-weight: 800; color: var(--text-main); font-size: 15px; }
-        .company-cif { font-size: 12px; color: var(--text-muted); font-family: monospace; }
-        
-        .badge { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-        .badge-sector { background: #eff6ff; color: var(--primary); border: 1px solid #dbeafe; }
-        .badge-new { background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; }
-
-        .btn-action {
-            height: 36px;
-            width: 36px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            background: #f3f4f6;
-            color: var(--text-muted);
-            border: 1px solid var(--border);
-            transition: 0.2s;
-            cursor: pointer;
-        }
-        .btn-action:hover { background: var(--text-main); color: #fff; }
-
-        .live-dot { height: 8px; width: 8px; background: #10b981; border-radius: 50%; display: inline-block; margin-right: 8px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(0.95); opacity: 0.7; } 70% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.7; } }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        .banner-limited {
-            background: linear-gradient(90deg, #fffbeb, #fef3c7);
-            border: 1px solid #fcd34d;
-            padding: 12px 24px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            color: #92400e;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        .banner-limited i { margin-right: 8px; font-size: 1.2rem; vertical-align: middle; }
-        .btn-upgrade-sm {
-            background: #92400e;
-            color: white;
-            padding: 6px 14px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 12px;
-            font-weight: 800;
-        }
-
-        .locked-tag {
-            position: absolute;
-            right: 8px;
-            background: #f1f5f9;
-            color: #64748b;
-            font-size: 9px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: 800;
-        }
-
-        /* Paywall */
-        .paywall-container {
-            position: relative;
-        }
-        .paywall-blur {
-            filter: blur(6px);
-            pointer-events: none;
-            user-select: none;
-            opacity: 0.6;
-        }
-        .paywall-overlay {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.4);
-            z-index: 10;
-        }
-        .paywall-card {
-            background: #fff;
-            padding: 40px;
-            border-radius: 24px;
-            text-align: center;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            max-width: 450px;
-            border: 1px solid var(--border);
-        }
-    </style>
+    <link rel="stylesheet" href="<?= base_url('public/css/radar.css?v=5') ?>">
 </head>
 <body>
 
-    <?php
-    $formatEsDate = function($dateStr, $format = 'd M Y') {
-        if (empty($dateStr)) return 'Reciente';
-        $timestamp = strtotime($dateStr);
-        if (!$timestamp || $timestamp > strtotime('+1 year') || $timestamp < strtotime('1900-01-01')) return 'Reciente';
-        $mesesEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        $mesesEs = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-        $formatted = date($format, $timestamp);
-        return str_replace($mesesEn, $mesesEs, $formatted);
-    };
+<?php
+$formatEsDate = function($dateStr, $format = 'd M Y') {
+    if (empty($dateStr)) return 'Reciente';
+    $timestamp = strtotime($dateStr);
+    if (!$timestamp) return 'Reciente';
 
-    // Si es free, solo mostramos las primeras 5 empresas de forma real, el resto ocultas/blurry
-    $displayCompanies = $isFree ? array_slice($companies, 0, 5) : $companies;
-    ?>
+    $mesesEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    $mesesEs = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-    <div class="app-shell">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-brand">
-                <img src="<?= base_url('assets/img/logo-dark.png') ?>" alt="APIEmpresas" height="32" onerror="this.src='https://via.placeholder.com/150x40?text=APIEmpresas'">
+    return str_replace($mesesEn, $mesesEs, date($format, $timestamp));
+};
+
+$isLockedView = true;
+$visibleCompanies = array_slice($companies, 0, 10);
+
+$lockedRows = [
+    ['Empresa bloqueada · Acceso PRO', '02 Mar 2026', 'Madrid', 'Actividad disponible en Radar PRO'],
+    ['Listado premium oculto', '02 Mar 2026', 'Barcelona', 'Segmentación completa disponible'],
+    ['Registro bloqueado para usuarios Free', '01 Mar 2026', 'Valencia', 'Desbloquea exportación y detalle'],
+    ['Empresa visible solo en PRO', '01 Mar 2026', 'Sevilla', 'Prospección B2B avanzada'],
+    ['Lead protegido por suscripción', '28 Feb 2026', 'Málaga', 'Actividad principal bloqueada'],
+    ['Nueva constitución bloqueada', '28 Feb 2026', 'A Coruña', 'Disponible con acceso completo'],
+    ['Oportunidad premium bloqueada', '27 Feb 2026', 'Bilbao', 'Filtrado por CNAE solo en PRO'],
+    ['Empresa detectada en tiempo real', '27 Feb 2026', 'Zaragoza', 'Acceso avanzado requerido'],
+    ['Registro oculto por plan Free', '26 Feb 2026', 'Murcia', 'Exportación Excel incluida en PRO'],
+    ['Lead empresarial restringido', '26 Feb 2026', 'Alicante', 'Disponible con suscripción activa'],
+    ['Vista previa limitada', '25 Feb 2026', 'Granada', 'El detalle completo está bloqueado'],
+    ['Empresa incluida en Radar PRO', '25 Feb 2026', 'Valladolid', 'Activa el acceso completo'],
+];
+?>
+
+<div class="ae-radar-page">
+    <div class="ae-radar-page__shell">
+
+        <aside class="ae-radar-page__sidebar">
+            <div class="ae-radar-page__brand">
+                <a href="<?=site_url() ?>" class="ae-radar-page__brand-header">
+                    <svg class="ve-logo" width="32" height="32" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="ve-g" x1="10" y1="54" x2="54" y2="10" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#2152FF"/>
+                                <stop offset=".65" stop-color="#5C7CFF"/>
+                                <stop offset="1" stop-color="#12B48A"/>
+                            </linearGradient>
+                            <filter id="ve-cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity=".20"/>
+                            </filter>
+                            <filter id="ve-checkShadow" x="-30%" y="-30%" width="160%" height="160%">
+                                <feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#0B1A36" flood-opacity=".22"/>
+                            </filter>
+                            <radialGradient id="ve-gloss" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+                                            gradientTransform="translate(20 16) rotate(45) scale(28)">
+                                <stop stop-color="#FFFFFF" stop-opacity=".32"/>
+                                <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+                            </radialGradient>
+                            <linearGradient id="ve-rim" x1="12" y1="52" x2="52" y2="12">
+                                <stop stop-color="#FFFFFF" stop-opacity=".6"/>
+                                <stop offset="1" stop-color="#FFFFFF" stop-opacity=".35"/>
+                            </linearGradient>
+                        </defs>
+                        <g filter="url(#ve-cardShadow)">
+                            <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#ve-g)"/>
+                            <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#ve-gloss)"/>
+                            <rect x="6.5" y="6.5" width="51" height="51" rx="13.5" fill="none" stroke="url(#ve-rim)"/>
+                        </g>
+                        <path d="M18 33 L28 43 L46 22"
+                               stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"
+                               fill="none" filter="url(#ve-checkShadow)"/>
+                    </svg>
+                    <div class="brand-text">
+                        <span class="brand-name">API<span class="grad">Empresas</span>.es</span>
+                        <span class="brand-tag">Verificación empresarial</span>
+                    </div>
+                </a>
+
+                <div class="ae-radar-page__brand-note">
+                    <span class="ae-radar-page__pulse"></span>
+                    Inteligencia comercial en tiempo real
+                </div>
             </div>
-            <div class="sidebar-nav">
-                <span class="nav-label">Radar Real-Time</span>
-                <a href="<?= site_url('radar') ?>" class="nav-link active">
-                    <i>📊</i> Radar Principal
-                </a>
-                <a href="<?= site_url('precios-radar') ?>" class="nav-link <?= ($isFree) ? 'locked' : '' ?>">
-                    <i>🔔</i> Alertas Diarias <?= ($isFree) ? '<span class="locked-tag">PRO</span>' : '' ?>
-                </a>
-                <a href="<?= site_url('precios-radar') ?>" class="nav-link <?= ($isFree) ? 'locked' : '' ?>">
-                    <i>🤖</i> IA Leads <?= ($isFree) ? '<span class="locked-tag">PRO</span>' : '' ?>
-                </a>
-                
-                <div style="margin-top: 32px;">
-                    <span class="nav-label">Sectores Hot</span>
-                    <?php foreach(array_slice($topSectors, 0, 8) as $s): ?>
-                        <a href="<?= site_url('radar?cnae=' . $s['code']) ?>" class="nav-link <?= ($filters['cnae'] === $s['code']) ? 'active' : '' ?>">
-                            <span style="opacity: 0.3; margin-right: 12px; font-weight: 900;">#</span>
-                            <?= esc(substr($s['label'], 0, 22)) ?>...
-                        </a>
+
+            <div class="ae-radar-page__sidebar-body">
+                <div class="ae-radar-page__nav-group">
+                    <span class="ae-radar-page__nav-label">Radar</span>
+
+                    <a href="<?= site_url('radar') ?>" class="ae-radar-page__nav-link is-active">
+                        <span class="ae-radar-page__nav-icon">📊</span>
+                        Dashboard principal
+                    </a>
+                </div>
+
+                <div class="ae-radar-page__nav-group">
+                    <span class="ae-radar-page__nav-label">Sectores destacados</span>
+
+                    <?php foreach (array_slice($topSectors, 0, 10) as $s): ?>
+                        <?php if ($isLockedView): ?>
+                            <a href="<?= site_url('precios-radar') ?>" class="ae-radar-page__nav-link ae-radar-page__nav-link--locked">
+                                <span class="ae-radar-page__nav-icon ae-radar-page__nav-muted">🔒</span>
+                                <?= esc(mb_strimwidth($s['label'], 0, 28, '...')) ?>
+                            </a>
+                        <?php else: ?>
+                            <a href="<?= site_url('radar?cnae=' . $s['code']) ?>" class="ae-radar-page__nav-link <?= ($filters['cnae'] === $s['code']) ? 'is-active' : '' ?>">
+                                <span class="ae-radar-page__nav-icon ae-radar-page__nav-muted">#</span>
+                                <?= esc(mb_strimwidth($s['label'], 0, 28, '...')) ?>
+                            </a>
+                        <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
+            </div>
 
-                <div style="margin-top: auto; padding-top: 32px;">
-                    <span class="nav-label">Mi Cuenta</span>
-                    <a href="<?= site_url('dashboard') ?>" class="nav-link"><i>🏠</i> Dashboard API</a>
-                    <a href="<?= site_url('billing') ?>" class="nav-link"><i>💳</i> Billing</a>
-                    <a href="<?= site_url('logout') ?>" class="nav-link"><i>🚪</i> Salir</a>
-                </div>
+            <div class="ae-radar-page__sidebar-footer">
+                <a href="<?= site_url('dashboard') ?>" class="ae-radar-page__nav-link">
+                    <span class="ae-radar-page__nav-icon">🏠</span>
+                    Volver al portal
+                </a>
+
+                <a href="<?= site_url('logout') ?>" class="ae-radar-page__nav-link">
+                    <span class="ae-radar-page__nav-icon">🚪</span>
+                    Cerrar sesión
+                </a>
             </div>
         </aside>
 
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <!-- Header -->
-            <header class="header">
-                <div class="breadcrumb">
+        <main class="ae-radar-page__main">
+            <header class="ae-radar-page__topbar">
+                <div class="ae-radar-page__breadcrumb">
                     <span>APIEmpresas</span>
                     <span>/</span>
-                    <span class="active">Radar B2B</span>
+                    <strong>Radar B2B</strong>
                 </div>
-                <div style="display: flex; gap: 12px;">
-                    <?php if (!$isFree): ?>
-                    <button onclick="alert('Exportando CSV...')" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: #fff; font-weight: 700; cursor: pointer;">CSV</button>
-                    <button onclick="alert('Generando Excel...')" style="padding: 8px 16px; border-radius: 8px; border: none; background: var(--text-main); color: #fff; font-weight: 800; cursor: pointer;">Descargar Excel</button>
+
+                <div class="ae-radar-page__topbar-actions">
+                    <?php if ($isLockedView): ?>
+                        <div class="ae-radar-page__pill ae-radar-page__pill--free">
+                            Plan Free · Vista limitada
+                        </div>
+
+                        <a href="<?= site_url('precios-radar') ?>" class="ae-radar-page__cta-top">
+                            Activar Radar PRO
+                        </a>
                     <?php else: ?>
-                    <a href="<?= site_url('precios-radar') ?>" style="padding: 8px 16px; border-radius: 8px; border: none; background: var(--primary); color: #fff; font-weight: 800; text-decoration: none; font-size: 13px;">DESBLOQUEAR EXPORTACIÓN</a>
+                        <div class="ae-radar-page__pill ae-radar-page__pill--live">
+                            <span class="ae-radar-page__pulse"></span>
+                            Suscripción activa
+                        </div>
                     <?php endif; ?>
                 </div>
             </header>
 
-            <!-- Scrollable Body -->
-            <div class="content-body">
-                <?php if ($userPlan['isTemporary']): ?>
-                <div class="banner-limited">
-                    <div>
-                        <i>⏳</i> <strong>Acceso Temporal:</strong> Tu acceso de descarga única caduca en <strong><?= $userPlan['hoursLeft'] ?> horas</strong>.
-                    </div>
-                    <a href="<?= site_url('precios-radar') ?>" class="btn-upgrade-sm">PASAR A RADAR PRO</a>
-                </div>
-                <?php endif; ?>
+            <div class="ae-radar-page__content">
+                <div class="ae-radar-page__container">
 
-                <div style="margin-bottom: 32px;">
-                    <h1 class="radar-title" style="font-size: 2.2rem; font-weight: 900; margin-bottom: 8px;">Radar de Constituciones</h1>
-                    <p class="radar-subtitle" style="font-size: 1.1rem; color: var(--text-muted); font-weight: 500;">Monitoreando el mercado español para tu equipo comercial.</p>
-                </div>
+                    <section class="ae-radar-page__hero">
+                        <div class="ae-radar-page__hero-grid">
+                            <div>
+                                <div class="ae-radar-page__eyebrow">
+                                    <span class="ae-radar-page__pulse"></span>
+                                    Nuevas constituciones · captación B2B
+                                </div>
 
-                <!-- Stats Grid - 4 Columns -->
-                <div class="stats-row">
-                    <div class="stat-card">
-                        <span class="stat-label">Constituidas Hoy <span class="live-dot"></span></span>
-                        <div class="stat-value"><?= number_format($stats['hoy']) ?></div>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-label">Esta Semana</span>
-                        <div class="stat-value"><?= number_format($stats['semana']) ?></div>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-label">Este Mes</span>
-                        <div class="stat-value"><?= number_format($stats['mes']) ?></div>
-                    </div>
-                    <div class="stat-card" style="background: var(--primary); color: white; border: none;">
-                        <span class="stat-label" style="color: rgba(255,255,255,0.7);">Sincronización</span>
-                        <div class="stat-value" style="font-size: 1.1rem; color: #fff; margin-top: 5px;">BORME LIVE ACTIVADO</div>
-                    </div>
-                </div>
+                                <h1 class="ae-radar-page__hero-title">
+                                    Radar de constituciones para detectar clientes antes que tu competencia
+                                </h1>
 
-                <!-- Filter Panel - Wide -->
-                <form action="<?= site_url('radar') ?>" method="GET" class="filter-bar">
-                    <div class="filter-group">
-                        <label class="filter-label">Provincia</label>
-                        <select name="provincia" class="filter-select" onchange="this.form.submit()">
-                            <option value="">Todas las provincias</option>
-                            <?php foreach($provinces as $p): ?>
-                                <option value="<?= url_title($p['name'], '-', true) ?>" <?= ($filters['provincia'] === url_title($p['name'], '-', true)) ? 'selected' : '' ?>>
-                                    <?= esc(ucfirst(strtolower($p['name']))) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Sector Económico</label>
-                        <select name="cnae" class="filter-select" onchange="this.form.submit()">
-                            <option value="">Todos los CNAE</option>
-                            <?php foreach($topSectors as $s): ?>
-                                <option value="<?= esc($s['code']) ?>" <?= ($filters['cnae'] === $s['code']) ? 'selected' : '' ?>>
-                                    <?= esc($s['label']) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Ventana de Tiempo</label>
-                        <select name="rango" class="filter-select" onchange="this.form.submit()">
-                            <option value="7" <?= ($filters['rango'] === '7') ? 'selected' : '' ?>>7 días</option>
-                            <option value="30" <?= ($filters['rango'] === '30') ? 'selected' : '' ?>>30 días</option>
-                            <option value="90" <?= ($filters['rango'] === '90') ? 'selected' : '' ?>>90 días</option>
-                        </select>
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button type="button" class="btn-action" style="width: auto; padding: 0 20px; font-weight: 800; font-size: 0.8rem;" onclick="<?= $isFree ? "window.location.href='".site_url('precios-radar')."'" : "alert('Búsqueda Guardada')" ?>">
-                            <?= $isFree ? 'DESBLOQUEAR FILTROS' : 'GUARDAR BÚSQUEDA' ?>
-                        </button>
-                    </div>
-                </form>
+                                <p class="ae-radar-page__hero-text">
+                                    Descubre nuevas empresas registradas en España y convierte la información societaria en oportunidades comerciales reales. Con Radar PRO desbloqueas el acceso completo al listado, filtros avanzados y exportaciones listas para tu equipo.
+                                </p>
 
-                <!-- Main Data Card -->
-                <div class="data-card <?= $isFree ? 'paywall-container' : '' ?>">
-                    <div class="data-header">
-                        <div style="font-weight: 900; color: var(--text-main);"><?= count($companies) ?> Resultados encontrados</div>
-                        <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Mostrando últimas constituciones registradas</div>
-                    </div>
-                    
-                    <div class="table-wrap <?= $isFree ? 'paywall-blur' : '' ?>">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Empresa</th>
-                                    <th>Constitución</th>
-                                    <th>Provincia</th>
-                                    <th>Sector</th>
-                                    <th style="text-align: right;">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach($displayCompanies as $co): 
-                                    $link = company_url(['cif' => $co['cif'], 'name' => $co['company_name']]);
-                                    $isNew = (strtotime($co['fecha_constitucion']) >= strtotime('-3 days'));
-                                ?>
-                                <tr>
-                                    <td>
-                                        <div class="company-name"><?= esc($co['company_name']) ?></div>
-                                        <div class="company-cif"><?= esc($co['cif']) ?></div>
-                                    </td>
-                                    <td>
-                                        <div style="font-weight: 700; color: var(--text-main);"><?= $formatEsDate($co['fecha_constitucion']) ?></div>
-                                        <?php if($isNew): ?>
-                                            <span class="badge badge-new" style="margin-top: 4px;">NUEVA</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <span style="font-weight: 700; color: var(--slate-700);"><?= esc(ucfirst(strtolower($co['registro_mercantil']))) ?></span>
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-sector" title="<?= esc($co['cnae_label']) ?>">
-                                            <?= esc(substr($co['cnae_label'], 0, 35)) ?><?= strlen($co['cnae_label']) > 35 ? '...' : '' ?>
-                                        </span>
-                                    </td>
-                                    <td style="text-align: right;">
-                                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                                            <button onclick="<?= $isFree ? "window.location.href='".site_url('precios-radar')."'" : "navigator.clipboard.writeText('".esc($co['company_name'])."'); alert('Copiado')" ?>" class="btn-action" title="Copiar">📋</button>
-                                            <a href="<?= $isFree ? site_url('precios-radar') : $link ?>" <?= !$isFree ? 'target="_blank"' : '' ?> class="btn-action" title="Ficha">➔</a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
-                                
-                                <?php if ($isFree): ?>
-                                    <!-- Filas dummy para el relleno visual del blur -->
-                                    <?php for($i=0; $i<10; $i++): ?>
-                                    <tr>
-                                        <td><div class="company-name">EMPRESA BLOQUEADA</div><div class="company-cif">B12345678</div></td>
-                                        <td><div style="font-weight: 700;">XX XXX 2024</div></td>
-                                        <td><span>MADRID</span></td>
-                                        <td><span class="badge badge-sector">SECTOR OCULTO</span></td>
-                                        <td style="text-align: right;"><button class="btn-action">➔</button></td>
-                                    </tr>
-                                    <?php endfor; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
+                                <div class="ae-radar-page__hero-actions">
+                                    <a href="<?= site_url('precios-radar') ?>" class="ae-radar-page__hero-btn ae-radar-page__hero-btn--primary">
+                                        Desbloquear Radar PRO
+                                    </a>
 
-                    <?php if ($isFree): ?>
-                    <div class="paywall-overlay">
-                        <div class="paywall-card">
-                            <h2 style="font-size: 1.8rem; font-weight: 900; color: var(--text-main); margin-bottom: 1rem;">💼 Radar Profesional</h2>
-                            <p style="color: var(--text-muted); font-weight: 500; line-height: 1.6; margin-bottom: 2rem;">
-                                Accede a los datos completos de las <strong><?= number_format($stats['mes']) ?></strong> empresas constituidas este mes. Exporta a Excel y recibe alertas diarias.
-                            </p>
-                            <div style="display: flex; flex-direction: column; gap: 12px;">
-                                <a href="<?= site_url('precios-radar') ?>" style="display: block; background: var(--primary); color: white; padding: 16px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 1.1rem; box-shadow: 0 10px 15px -3px rgba(33, 82, 255, 0.3);">
-                                    DESBLOQUEAR ACCESO COMPLETO
-                                </a>
-                                <p style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Desde solo 1€ por descarga única o suscripción mensual.</p>
+                                    <a href="<?= site_url('precios-radar') ?>" class="ae-radar-page__hero-btn ae-radar-page__hero-btn--secondary">
+                                        Ver planes y acceso completo
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="ae-radar-page__hero-aside">
+                                <div class="ae-radar-page__hero-aside-title">Qué desbloqueas con PRO</div>
+
+                                <ul class="ae-radar-page__hero-list">
+                                    <li>
+                                        <span class="ae-radar-page__hero-dot"></span>
+                                        <span>Acceso completo al listado de empresas registradas en el periodo seleccionado.</span>
+                                    </li>
+                                    <li>
+                                        <span class="ae-radar-page__hero-dot"></span>
+                                        <span>Filtros estratégicos para encontrar oportunidades por zona y sector.</span>
+                                    </li>
+                                    <li>
+                                        <span class="ae-radar-page__hero-dot"></span>
+                                        <span>Exportación a Excel para campañas comerciales, CRM y prospección.</span>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
-                    </div>
-                    <?php endif; ?>
-                </div>
+                    </section>
 
-                <footer style="margin-top: 40px; padding: 24px; text-align: center; color: var(--text-muted); font-size: 13px; font-weight: 600;">
-                    &copy; <?= date('Y') ?> APIEmpresas - Panel de Inteligencia Comercial B2B
-                </footer>
+                    <section class="ae-radar-page__metrics">
+                        <article class="ae-radar-page__metric">
+                            <div class="ae-radar-page__metric-label">
+                                Registradas hoy
+                                <span class="ae-radar-page__pulse"></span>
+                            </div>
+                            <p class="ae-radar-page__metric-value"><?= number_format($stats['hoy']) ?></p>
+                            <div class="ae-radar-page__metric-help">Constituciones detectadas en tiempo real.</div>
+                        </article>
+
+                        <article class="ae-radar-page__metric">
+                            <div class="ae-radar-page__metric-label">Últimos 7 días</div>
+                            <p class="ae-radar-page__metric-value"><?= number_format($stats['semana']) ?></p>
+                            <div class="ae-radar-page__metric-help">Volumen reciente de nuevas oportunidades.</div>
+                        </article>
+
+                        <article class="ae-radar-page__metric">
+                            <div class="ae-radar-page__metric-label">Este mes</div>
+                            <p class="ae-radar-page__metric-value"><?= number_format($stats['mes']) ?></p>
+                            <div class="ae-radar-page__metric-help">Empresas potencialmente captables este mes.</div>
+                        </article>
+
+                        <article class="ae-radar-page__metric ae-radar-page__metric--highlight">
+                            <div class="ae-radar-page__metric-label">Estado del acceso</div>
+                            <p class="ae-radar-page__metric-value"><?= $isLockedView ? 'Free' : 'PRO' ?></p>
+                            <div class="ae-radar-page__metric-help">
+                                <?= $isLockedView ? 'Activa tu plan para ver el 100% del radar.' : 'Acceso completo habilitado.' ?>
+                            </div>
+                        </article>
+                    </section>
+
+                    <form action="<?= site_url('radar') ?>" method="GET" class="ae-radar-page__filters <?= $isLockedView ? 'is-locked' : '' ?>">
+                        <div class="ae-radar-page__filters-head">
+                            <div>
+                                <h2 class="ae-radar-page__filters-title">Filtrar oportunidades</h2>
+                                <div class="ae-radar-page__filters-sub">
+                                    <?= $isLockedView
+                                        ? 'Los filtros avanzados se activan con Radar PRO.'
+                                        : 'Explora por ubicación, actividad y ventana temporal.' ?>
+                                </div>
+                            </div>
+
+                            <?php if ($isLockedView): ?>
+                                <a href="<?= site_url('precios-radar') ?>" class="ae-radar-page__mini-chip ae-radar-page__mini-chip--locked">
+                                    🔒 Filtros avanzados solo en PRO
+                                </a>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="ae-radar-page__filters-grid">
+                            <div class="ae-radar-page__field">
+                                <label>Provincia</label>
+                                <select name="provincia" class="ae-radar-page__select" <?= $isLockedView ? 'disabled' : '' ?>>
+                                    <option value="">Toda España</option>
+                                    <?php foreach ($provinces as $p): ?>
+                                        <option value="<?= url_title($p['name'], '-', true) ?>" <?= ($filters['provincia'] === url_title($p['name'], '-', true)) ? 'selected' : '' ?>>
+                                            <?= esc($p['name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="ae-radar-page__field">
+                                <label>Sector de actividad</label>
+                                <select name="cnae" class="ae-radar-page__select" <?= $isLockedView ? 'disabled' : '' ?>>
+                                    <option value="">Cualquier actividad</option>
+                                    <?php foreach ($topSectors as $s): ?>
+                                        <option value="<?= esc($s['code']) ?>" <?= ($filters['cnae'] === $s['code']) ? 'selected' : '' ?>>
+                                            <?= esc($s['label']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="ae-radar-page__field">
+                                <label>Ventana temporal</label>
+                                <select name="rango" class="ae-radar-page__select" <?= $isLockedView ? 'disabled' : '' ?>>
+                                    <option value="7" <?= ($filters['rango'] === '7') ? 'selected' : '' ?>>Últimos 7 días</option>
+                                    <option value="30" <?= ($filters['rango'] === '30') ? 'selected' : '' ?>>Últimos 30 días</option>
+                                    <option value="90" <?= ($filters['rango'] === '90') ? 'selected' : '' ?>>Últimos 90 días</option>
+                                </select>
+                            </div>
+
+                            <div class="ae-radar-page__field">
+                                <label>&nbsp;</label>
+                                <?php if ($isLockedView): ?>
+                                    <a href="<?= site_url('precios-radar') ?>" class="ae-radar-page__filters-cta ae-radar-page__filters-cta--locked">
+                                        Activar PRO para filtrar
+                                    </a>
+                                <?php else: ?>
+                                    <button type="submit" class="ae-radar-page__filters-cta">
+                                        Aplicar filtros
+                                    </button>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </form>
+
+                    <section class="ae-radar-page__lead-wrap <?= $isLockedView ? 'is-paywalled' : '' ?>">
+                        <div class="ae-radar-page__lead-top">
+                            <div class="ae-radar-page__lead-headings">
+                                <h2 class="ae-radar-page__lead-title">Oportunidades detectadas</h2>
+                                <div class="ae-radar-page__lead-desc">
+                                    <?= $isLockedView
+                                        ? 'Has visto una muestra del radar. Desbloquea el resto de empresas registradas para acceder al listado completo.'
+                                        : 'Listado completo disponible para análisis y exportación.' ?>
+                                </div>
+                            </div>
+
+                            <div class="ae-radar-page__lead-actions">
+                                <?php if ($isLockedView): ?>
+                                    <div class="ae-radar-page__mini-chip">Exportación XLSX incluida en PRO</div>
+                                    <a href="<?= site_url('precios-radar') ?>" class="ae-radar-page__export-btn">Activar acceso completo</a>
+                                <?php else: ?>
+                                    <a href="<?= site_url('billing/export-excel?' . http_build_query($filters)) ?>" class="ae-radar-page__export-btn">
+                                        Exportar XLSX
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <div class="ae-radar-page__table-scroll">
+                            <table class="ae-radar-page__table">
+                                <thead>
+                                    <tr>
+                                        <th>Razón social</th>
+                                        <th>Fecha</th>
+                                        <th>Provincia</th>
+                                        <th>Actividad principal</th>
+                                        <th style="text-align:right;">Acceso</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <?php foreach ($visibleCompanies as $co): ?>
+                                        <tr class="ae-radar-page__row-visible">
+                                            <td>
+                                                <div class="ae-radar-page__company">
+                                                    <span class="ae-radar-page__company-name"><?= esc($co['company_name']) ?></span>
+                                                    <span class="ae-radar-page__company-cif"><?= esc($co['cif']) ?></span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="ae-radar-page__date"><?= $formatEsDate($co['fecha_constitucion']) ?></span>
+                                            </td>
+                                            <td>
+                                                <span class="ae-radar-page__badge ae-radar-page__badge--province">
+                                                    <?= esc($co['registro_mercantil']) ?>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="ae-radar-page__badge ae-radar-page__badge--sector">
+                                                    <?= esc(mb_strimwidth($co['cnae_label'], 0, 48, '...')) ?>
+                                                </span>
+                                            </td>
+                                            <td style="text-align:right;">
+                                                <a href="<?= $isLockedView ? site_url('precios-radar') : company_url(['cif' => $co['cif'], 'name' => $co['company_name']]) ?>" class="ae-radar-page__row-link">
+                                                    <?= $isLockedView ? '🔒' : '→' ?>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <?php if ($isLockedView): ?>
+                            <div class="ae-radar-page__locked-zone">
+                                <div class="ae-radar-page__locked-zone-table">
+                                    <div class="ae-radar-page__table-scroll ae-radar-page__table-scroll--locked">
+                                        <table class="ae-radar-page__table">
+                                            <tbody>
+                                                <?php foreach ($lockedRows as $row): ?>
+                                                    <tr class="ae-radar-page__row-locked">
+                                                        <td>
+                                                            <div class="ae-radar-page__company">
+                                                                <span class="ae-radar-page__company-name"><?= esc($row[0]) ?></span>
+                                                                <span class="ae-radar-page__company-cif">B12345678</span>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <span class="ae-radar-page__date"><?= esc($row[1]) ?></span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="ae-radar-page__badge ae-radar-page__badge--province">
+                                                                <?= esc($row[2]) ?>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="ae-radar-page__badge ae-radar-page__badge--sector">
+                                                                <?= esc($row[3]) ?>
+                                                            </span>
+                                                        </td>
+                                                        <td style="text-align:right;">
+                                                            <span class="ae-radar-page__row-link">🔒</span>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="ae-radar-page__paywall">
+                                    <div class="ae-radar-page__paywall-card">
+                                        <div class="ae-radar-page__paywall-band"></div>
+
+                                        <div class="ae-radar-page__paywall-inner">
+                                            <div class="ae-radar-page__paywall-icon">🚀</div>
+
+                                            <h3 class="ae-radar-page__paywall-title">
+                                                Desbloquea el resto del radar y empieza a prospectar con ventaja
+                                            </h3>
+
+                                            <p class="ae-radar-page__paywall-text">
+                                                Ya has visto una muestra real del radar. Activa Radar PRO para consultar todas las empresas detectadas, aplicar filtros estratégicos y exportar leads a Excel para tu proceso comercial.
+                                            </p>
+
+                                            <div class="ae-radar-page__paywall-kpis">
+                                                <div class="ae-radar-page__paywall-kpi">
+                                                    <strong><?= number_format($stats['mes']) ?></strong>
+                                                    <span>Empresas este mes</span>
+                                                </div>
+                                                <div class="ae-radar-page__paywall-kpi">
+                                                    <strong>100%</strong>
+                                                    <span>Listado desbloqueado</span>
+                                                </div>
+                                                <div class="ae-radar-page__paywall-kpi">
+                                                    <strong>XLSX</strong>
+                                                    <span>Exportación incluida</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="ae-radar-page__paywall-benefits">
+                                                <div class="ae-radar-page__paywall-benefit">
+                                                    <div class="ae-radar-page__paywall-check">✓</div>
+                                                    <div>
+                                                        <strong>Listado completo</strong>
+                                                        <span>Consulta todas las empresas registradas según tus criterios comerciales.</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="ae-radar-page__paywall-benefit">
+                                                    <div class="ae-radar-page__paywall-check">✓</div>
+                                                    <div>
+                                                        <strong>Exportación a Excel</strong>
+                                                        <span>Lleva los leads a tu CRM, campañas o equipo de ventas.</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="ae-radar-page__paywall-benefit">
+                                                    <div class="ae-radar-page__paywall-check">✓</div>
+                                                    <div>
+                                                        <strong>Filtros estratégicos</strong>
+                                                        <span>Segmenta por provincia, actividad y rango temporal.</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="ae-radar-page__paywall-benefit">
+                                                    <div class="ae-radar-page__paywall-check">✓</div>
+                                                    <div>
+                                                        <strong>Ventaja competitiva</strong>
+                                                        <span>Llega antes que otros proveedores a empresas recién constituidas.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="ae-radar-page__paywall-actions">
+                                                <a href="<?= site_url('precios-radar') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--primary">
+                                                    Activar Radar PRO ahora
+                                                </a>
+
+                                                <a href="<?= site_url('precios-radar') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--secondary">
+                                                    Ver planes y condiciones
+                                                </a>
+                                            </div>
+
+                                            <div class="ae-radar-page__paywall-meta">
+                                                Sin permanencia · Activación inmediata · Acceso completo al radar
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </section>
+
+                    <footer class="ae-radar-page__footer">
+                        &copy; <?= date('Y') ?> APIEmpresas · Inteligencia comercial para captación B2B
+                    </footer>
+                </div>
             </div>
         </main>
     </div>
+</div>
 
 </body>
 </html>
