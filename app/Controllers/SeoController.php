@@ -585,7 +585,7 @@ class SeoController extends BaseController
         $builder->select('id, company_name as name, cif, fecha_constitucion, cnae_code as cnae, cnae_label, registro_mercantil, municipality, objeto_social');
 
         // Aplicar Filtro Provincial
-        if ($province && strtolower($province) !== 'españa') {
+        if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
             if (strtolower($province) === 'alicante') {
                 $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
             } else {
@@ -621,19 +621,15 @@ class SeoController extends BaseController
             $targetDate = $lastDateRow['last_date'] ?? date('Y-m-d');
             $builder->where('fecha_constitucion', $targetDate);
         } elseif ($period === 'semana') {
-            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))
-                    ->where('fecha_constitucion <=', date('Y-m-d'));
+            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')));
         } elseif ($period === 'mes') {
-            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))
-                    ->where('fecha_constitucion <=', date('Y-m-d'));
+            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')));
         } elseif ($period === '30days') {
-            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))
-                    ->where('fecha_constitucion <=', date('Y-m-d'));
+            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')));
         } elseif ($period === 'general') {
             // Long-tail pages (sector+province): use 90-day window for broader results.
             // Province-only or sector-only pages also benefit from 90 days.
-            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')))
-                    ->where('fecha_constitucion <=', date('Y-m-d'));
+            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')));
         }
 
 
@@ -654,7 +650,7 @@ class SeoController extends BaseController
         // Clonamos el builder base (filtros de registro y cnae) para los conteos
         $baseBuilder = function () use ($province, $sectorName, $db) {
             $b = $db->table('companies');
-            if ($province && strtolower($province) !== 'españa') {
+            if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
                 if (strtolower($province) === 'alicante') {
                     $b->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
                 } else {
@@ -685,13 +681,10 @@ class SeoController extends BaseController
 
         $docsToday = $baseBuilder()->where('fecha_constitucion', $targetDate)->countAllResults();
         $docsWeek  = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))
-                                  ->where('fecha_constitucion <=', date('Y-m-d'))
                                   ->countAllResults();
         $docsMonth = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))
-                                   ->where('fecha_constitucion <=', date('Y-m-d'))
                                    ->countAllResults();
         $docs30Days = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))
-                                    ->where('fecha_constitucion <=', date('Y-m-d'))
                                     ->countAllResults();
 
         // Label Formateos — evitar "Empresas nuevas de empresas nuevas en Madrid"
@@ -817,16 +810,13 @@ class SeoController extends BaseController
             $totalContextCount = $baseBuilder()->where('fecha_constitucion', $targetDate)->countAllResults();
         } elseif ($period === 'semana') {
             $totalContextCount = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))
-                                               ->where('fecha_constitucion <=', date('Y-m-d'))
                                                ->countAllResults();
         } elseif ($period === 'mes') {
             $totalContextCount = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))
-                                               ->where('fecha_constitucion <=', date('Y-m-d'))
                                                ->countAllResults();
         } else {
             // Match the 'general' window used in getRadarData (90 days)
             $totalContextCount = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')))
-                                               ->where('fecha_constitucion <=', date('Y-m-d'))
                                                ->countAllResults();
         }
 

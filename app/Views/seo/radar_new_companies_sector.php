@@ -65,6 +65,8 @@ $getCommercialSignals = function($sectorData, $object) {
 };
 
 $sectorLabel = $sector['label'] ?? 'Sector';
+$province = $province ?? 'España';
+
 $buildCheckoutUrl = site_url('billing/single_checkout') . 
     '?period=30days&sector=' . urlencode($sectorLabel);
 
@@ -83,7 +85,7 @@ $premiumLeads = array_slice($companies, $freeCount);
         'robots'      => $robots ?? 'index,follow',
     ]) ?>
 
-    <link rel="stylesheet" href="<?= base_url('public/css/radar_period.css?v=' . (file_exists(FCPATH . 'public/css/radar_period.css') ? filemtime(FCPATH . 'public/css/radar_period.css') : time())) ?>" />
+    <link rel="stylesheet" href="<?= base_url('public/css/radar_new_companies_sector.css?v=' . (file_exists(FCPATH . 'public/css/radar_new_companies_sector.css') ? filemtime(FCPATH . 'public/css/radar_new_companies_sector.css') : time())) ?>" />
 </head>
 
 <body>
@@ -98,7 +100,7 @@ $premiumLeads = array_slice($companies, $freeCount);
                 </span>
 
                 <h1 class="ae-radar-page__title">
-                    Nuevas empresas de <span class="ae-radar-page__title-grad"><?= esc($sectorLabel) ?></span> en España
+                    Empresas nuevas de <span class="ae-radar-page__title-grad"><?= esc($sectorLabel) ?></span> en España
                     <span class="ae-radar-page__title-sub">Análisis de competitividad y tracción</span>
                 </h1>
 
@@ -107,12 +109,29 @@ $premiumLeads = array_slice($companies, $freeCount);
                 </p>
 
                 <div class="ae-radar-page__hero-actions">
-                    <a href="<?= site_url('precios-radar') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary">
+                    <a href="<?= site_url('radar') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary">
                         Abrir Radar Completo
                     </a>
                     <a href="#leads-sectoriales" class="ae-radar-page__btn ae-radar-page__btn--ghost">
                         Ver muestra gratuita
                     </a>
+                </div>
+
+                <div class="ae-radar-page__hero-panel">
+                    <div class="ae-radar-page__hero-panel-copy">
+                        <h2 class="ae-radar-page__hero-panel-title">Accede al Radar de <?= esc($sectorLabel) ?></h2>
+                        <ul class="ae-radar-page__hero-list">
+                            <li>Monitoriza constituciones en <?= esc($sectorLabel) ?></li>
+                            <li>Filtra por sector y periodo temporal</li>
+                            <li>Exporta leads diarios para tu CRM</li>
+                        </ul>
+                    </div>
+
+                    <div class="ae-radar-page__hero-panel-actions">
+                        <a href="<?= site_url('radar') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary ae-radar-page__btn--panel">
+                            Abrir Radar
+                        </a>
+                    </div>
                 </div>
 
                 <div class="ae-radar-page__stats">
@@ -170,7 +189,7 @@ $premiumLeads = array_slice($companies, $freeCount);
             </div>
 
             <div class="ae-radar-page__lead-grid">
-                <?php foreach ($freeLeads as $co): ?>
+                <?php foreach ($freeLeads as $index => $co): ?>
                     <?php
                     $companyName = $formatCompanyName($co['name'] ?? '');
                     $leadBadge = $getLeadBadge($co['fecha_constitucion'] ?? null);
@@ -182,45 +201,333 @@ $premiumLeads = array_slice($companies, $freeCount);
                                 <div class="ae-radar-page__lead-badge"><?= esc($leadBadge) ?></div>
                                 <div class="ae-radar-page__lead-date"><?= esc($formatEsDate($co['fecha_constitucion'] ?? null)) ?></div>
                             </div>
+
                             <h3 class="ae-radar-page__lead-title"><?= esc($companyName) ?></h3>
+
                             <div class="ae-radar-page__lead-chips">
-                                <div class="ae-radar-page__lead-chip"><span> Sector <?= esc($co['cnae'] ?? $sectorLabel) ?></span></div>
-                                <div class="ae-radar-page__lead-chip"><span><?= esc($co['registro_mercantil'] ?? 'España') ?></span></div>
+                                <div class="ae-radar-page__lead-chip">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"></path>
+                                    </svg>
+                                    <span>Sector <?= esc($co['cnae'] ?? $sectorLabel) ?></span>
+                                </div>
+
+                                <div class="ae-radar-page__lead-chip">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    <span><?= esc($co['registro_mercantil'] ?? 'España') ?></span>
+                                </div>
                             </div>
+
+                            <div class="ae-radar-page__lead-box">
+                                <div class="ae-radar-page__lead-box-label">Objeto social</div>
+                                <div class="ae-radar-page__lead-box-text">
+                                    <?= esc($co['objeto_social'] ?? 'Actividad no detallada en la publicación disponible.') ?>
+                                </div>
+                            </div>
+
                             <div class="ae-radar-page__lead-intent">
+                                <div class="ae-radar-page__lead-intent-label">Potenciales necesidades</div>
                                 <div class="ae-radar-page__lead-intent-text"><?= esc($leadSignals) ?></div>
                             </div>
                         </div>
-                        <a href="<?= site_url($co['cif'] ?? '') ?>" class="ae-radar-page__lead-btn">Ver empresa</a>
+
+                        <a href="<?= site_url($co['cif'] . '-' . url_title($co['name'], '-', true)) ?>" class="ae-radar-page__lead-btn">
+                            Ver empresa
+                        </a>
                     </article>
+
+                    <?php if ($index === 4 && !empty($premiumLeads)): ?>
+                        <div class="ae-radar-page__premium-strip-wrap">
+                            <div class="ae-radar-page__premium-strip">
+                                <div class="ae-radar-page__premium-strip-copy">
+                                    <h3>Desbloquea el listado completo de <?= esc($sectorLabel) ?></h3>
+                                    <p>
+                                        Accede a todas las sociedades detectadas en este periodo en <?= esc($sectorLabel) ?>, filtra por provincia y exporta leads preparados para prospección comercial.
+                                    </p>
+
+                                    <div class="ae-radar-page__premium-points">
+                                        <span>Filtros geográficos avanzados</span>
+                                        <span>Exportación Excel directa</span>
+                                        <span>Datos de BORME actualizados</span>
+                                    </div>
+                                </div>
+
+                                <div class="ae-radar-page__premium-strip-actions">
+                                    <a href="<?= site_url('radar') ?>" class="ae-radar-page__premium-btn ae-radar-page__premium-btn--light">
+                                        Abrir Radar
+                                    </a>
+                                    <a href="<?= $buildCheckoutUrl ?>" class="ae-radar-page__premium-btn ae-radar-page__premium-btn--dark">
+                                        Descargar Excel · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 <?php endforeach; ?>
             </div>
 
-            <div class="ae-radar-page__paywall-zone" style="margin-top: 40px;">
-                <div class="ae-radar-page__paywall-card">
-                    <div class="ae-radar-page__paywall-body" style="text-align: center; padding: 60px 40px;">
-                        <h3 class="ae-radar-page__paywall-title">Desbloquea el radar completo de <?= esc($sectorLabel) ?></h3>
-                        <p class="ae-radar-page__paywall-subtitle">Accede a las <?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas detectadas en este sector y filtra por provincias para tu prospección.</p>
-                        <div class="ae-radar-page__paywall-actions" style="justify-content: center;">
-                            <a href="<?= site_url('precios-radar') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--primary">Ver Planes Radar</a>
-                            <a href="<?= $buildCheckoutUrl ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--secondary">Descargar Excel · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€</a>
+            <?php if (!empty($premiumLeads)): ?>
+                <div class="ae-radar-page__paywall-zone">
+                    <div class="ae-radar-page__paywall-overlay">
+                        <div class="ae-radar-page__paywall-card">
+                            <div class="ae-radar-page__paywall-topbar"></div>
+
+                            <div class="ae-radar-page__paywall-body">
+                                <div class="ae-radar-page__paywall-header">
+                                    <div class="ae-radar-page__paywall-icon">
+                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                                            <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                                            <path d="M7 11V8a5 5 0 0 1 10 0v3"></path>
+                                        </svg>
+                                    </div>
+
+                                    <div class="ae-radar-page__paywall-kicker">Acceso Premium Sectorial</div>
+
+                                    <h3 class="ae-radar-page__paywall-title">
+                                        Listado completo de empresas de <?= esc($sectorLabel) ?>
+                                    </h3>
+
+                                    <p class="ae-radar-page__paywall-subtitle">
+                                        Accede al directorio completo de nuevas empresas en el sector de <?= esc($sectorLabel) ?> y trabaja con leads filtrables por provincia y fecha de constitución.
+                                    </p>
+                                </div>
+
+                                <div class="ae-radar-page__paywall-stats">
+                                    <div class="ae-radar-page__paywall-stat">
+                                        <div class="ae-radar-page__paywall-stat-value"><?= number_format($total_context_count ?? 0, 0, ',', '.') ?></div>
+                                        <div class="ae-radar-page__paywall-stat-label">Empresas detectadas</div>
+                                    </div>
+
+                                    <div class="ae-radar-page__paywall-stat">
+                                        <div class="ae-radar-page__paywall-stat-value"><?= number_format($stats['semana'] ?? 0, 0, ',', '.') ?></div>
+                                        <div class="ae-radar-page__paywall-stat-label">Últimos 7 días</div>
+                                    </div>
+
+                                    <div class="ae-radar-page__paywall-stat">
+                                        <div class="ae-radar-page__paywall-stat-value"><?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?></div>
+                                        <div class="ae-radar-page__paywall-stat-label">Últimos 30 días</div>
+                                    </div>
+                                </div>
+
+                                <div class="ae-radar-page__paywall-actions">
+                                    <a href="<?= site_url('radar') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--primary">
+                                        <span>Activar Suscripción Radar</span>
+                                        <span class="ae-radar-page__paywall-price-tag">79€/mes</span>
+                                    </a>
+
+                                    <a href="<?= $buildCheckoutUrl ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--secondary">
+                                        <span>Descargar Listado Sectorial</span>
+                                        <span class="ae-radar-page__paywall-secondary-price"><?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€</span>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+        </section>
+
+         <section class="ae-radar-page__section ae-radar-page__section--sectors container">
+                <div class="ae-radar-page__sectors-layout">
+                    <div class="ae-radar-page__sectors-intro">
+                        <span class="ae-radar-page__section-kicker">Radar sectorial</span>
+
+                        <h3 class="ae-radar-page__section-title ae-radar-page__section-title--left">
+                            Sectores con alta actividad en España
+                        </h3>
+
+                        <p class="ae-radar-page__section-subtitle ae-radar-page__section-subtitle--left">
+                            Una lectura rápida de los sectores donde se están concentrando más nuevas constituciones mercantiles y donde suele existir mayor potencial de prospección B2B.
+                        </p>
+
+                        <div class="ae-radar-page__sectors-summary">
+                            <div class="ae-radar-page__sectors-summary-item">
+                                <strong><?= number_format(min(6, count($related_sectors ?? [])), 0, ',', '.') ?></strong>
+                                <span>Sectores destacados</span>
+                            </div>
+
+                            <div class="ae-radar-page__sectors-summary-item">
+                                <strong>Alta</strong>
+                                <span>Actividad reciente</span>
+                            </div>
+
+                            <div class="ae-radar-page__sectors-summary-item">
+                                <strong>B2B</strong>
+                                <span>Enfoque comercial</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ae-radar-page__sectors-list">
+                        <?php foreach (array_slice($related_sectors, 0, 4) as $index => $rs): ?>
+                            <?php
+                            $sectorLabel = $rs['label'] ?? 'Sector no disponible';
+                            $sectorText = mb_strtolower($sectorLabel, 'UTF-8');
+
+                            $sectorMeta = [
+                                'title' => $sectorLabel,
+                                'desc'  => 'Nuevas sociedades detectadas con potencial de prospección B2B.',
+                                'tag'   => 'Radar activo',
+                            ];
+
+                            if (str_contains($sectorText, 'constru')) {
+                                $sectorMeta = [
+                                    'title' => $sectorLabel,
+                                    'desc'  => 'Demanda temprana de seguros, PRL, software y financiación.',
+                                    'tag'   => 'Alta demanda B2B',
+                                ];
+                            } elseif (str_contains($sectorText, 'comerc')) {
+                                $sectorMeta = [
+                                    'title' => $sectorLabel,
+                                    'desc'  => 'Potencial para ERP, pagos, asesoría y digitalización comercial.',
+                                    'tag'   => 'Volumen recurrente',
+                                ];
+                            } elseif (str_contains($sectorText, 'inmobil')) {
+                                $sectorMeta = [
+                                    'title' => $sectorLabel,
+                                    'desc'  => 'Buen encaje para CRM, marketing, firma digital y gestión documental.',
+                                    'tag'   => 'Nicho comercial',
+                                ];
+                            } elseif (str_contains($sectorText, 'restaur') || str_contains($sectorText, 'hostel')) {
+                                $sectorMeta = [
+                                    'title' => $sectorLabel,
+                                    'desc'  => 'Necesidades frecuentes de TPV, reservas, software y proveedores.',
+                                    'tag'   => 'Alta rotación',
+                                ];
+                            } elseif (str_contains($sectorText, 'tecnolog') || str_contains($sectorText, 'inform')) {
+                                $sectorMeta = [
+                                    'title' => $sectorLabel,
+                                    'desc'  => 'Empresas orientadas a software, cloud, servicios IT y captación digital.',
+                                    'tag'   => 'Sector dinámico',
+                                ];
+                            } elseif (str_contains($sectorText, 'servic')) {
+                                $sectorMeta = [
+                                    'title' => $sectorLabel,
+                                    'desc'  => 'Actividad transversal con hueco para asesoría, software y automatización.',
+                                    'tag'   => 'Prospección activa',
+                                ];
+                            }
+                            ?>
+                            <article class="ae-radar-page__sector-row">
+                                <div class="ae-radar-page__sector-row-index">
+                                    <?= str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) ?>
+                                </div>
+
+                                <div class="ae-radar-page__sector-row-main">
+                                    <div class="ae-radar-page__sector-row-head">
+                                        <h4 class="ae-radar-page__sector-row-title"><?= esc($sectorMeta['title']) ?></h4>
+                                        <span class="ae-radar-page__sector-row-tag"><?= esc($sectorMeta['tag']) ?></span>
+                                    </div>
+
+                                    <p class="ae-radar-page__sector-row-desc"><?= esc($sectorMeta['desc']) ?></p>
+                                </div>
+
+                                <div class="ae-radar-page__sector-row-action">
+                                    <a
+                                        href="<?= site_url('empresas-nuevas-sector/' . url_title($rs['label'], '-', true)) ?>"
+                                        class="ae-radar-page__sector-row-link"
+                                        title="<?= esc($rs['label']) ?>"
+                                    >
+                                        Explorar
+                                    </a>
+                                </div>
+                            </article>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </section>
+
+        <?php if (!empty($companies)): ?>
+        <section class="ae-radar-page__section ae-radar-page__section--excel container">
+            <div class="ae-radar-page__excel-box">
+                <div class="ae-radar-page__excel-content">
+                    <span class="ae-radar-page__excel-kicker">Exportación directa</span>
+
+                    <h3 class="ae-radar-page__excel-title">¿Necesitas el listado de <?= esc($sectorLabel) ?> en Excel?</h3>
+
+                    <p class="ae-radar-page__excel-subtitle">
+                        Descarga el directorio completo de nuevas empresas de <?= esc($sectorLabel) ?> en formato XLSX, listo para prospección comercial.
+                    </p>
+
+                    <div class="ae-radar-page__excel-actions">
+                        <a href="<?= site_url('checkout/radar-export?sector=' . urlencode($sectorLabel ?? '') . '&period=' . urlencode(empty($period) || $period === 'general' ? '30days' : $period)) ?>" class="ae-radar-page__excel-btn">
+                            Descargar listado (<?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€
+                        </a>
                     </div>
                 </div>
             </div>
         </section>
+        <?php endif; ?>
 
-        <section class="ae-radar-page__section ae-radar-page__section--sectors container">
+        <section class="ae-radar-page__section ae-radar-page__section--strategic container">
             <div class="ae-radar-page__section-head ae-radar-page__section-head--center">
-                <span class="ae-radar-page__section-kicker">Otros Sectores</span>
-                <h3 class="ae-radar-page__section-title">Explora más industrias</h3>
+                <span class="ae-radar-page__section-kicker">Exploración rápida</span>
+                <h3 class="ae-radar-page__section-title">Directorios estratégicos de empresas nuevas</h3>
+                <p class="ae-radar-page__section-subtitle">
+                    Accede a rutas clave para descubrir nuevas oportunidades de prospección.
+                </p>
             </div>
-            <div class="ae-radar-page__sector-pills">
-                <?php foreach ($related_sectors as $rs): ?>
-                    <a href="<?= site_url('empresas-nuevas-sector/' . url_title($rs['label'], '-', true)) ?>" class="ae-radar-page__sector-pill">
-                        <span><?= esc($rs['label']) ?></span>
-                    </a>
-                <?php endforeach; ?>
+
+            <div class="ae-radar-page__strategic-grid">
+                <div class="ae-radar-page__strategic-card">
+                    <div class="ae-radar-page__strategic-card-head">
+                        <span class="ae-radar-page__strategic-card-dot"></span>
+                        <h3>Periodos nacionales</h3>
+                    </div>
+                    <ul>
+                        <li><a href="<?= site_url('empresas-nuevas-hoy') ?>">Constituidas hoy</a></li>
+                        <li><a href="<?= site_url('empresas-nuevas-semana') ?>">Esta semana</a></li>
+                        <li><a href="<?= site_url('empresas-nuevas-mes') ?>">Este mes</a></li>
+                    </ul>
+                </div>
+
+                <div class="ae-radar-page__strategic-card">
+                    <div class="ae-radar-page__strategic-card-head">
+                        <span class="ae-radar-page__strategic-card-dot"></span>
+                        <h3>Provincias top</h3>
+                    </div>
+                    <ul>
+                        <li><a href="<?= site_url('empresas-nuevas/madrid') ?>">Empresas nuevas en Madrid</a></li>
+                        <li><a href="<?= site_url('empresas-nuevas/barcelona') ?>">Empresas nuevas en Barcelona</a></li>
+                        <li><a href="<?= site_url('empresas-nuevas/valencia') ?>">Empresas nuevas en Valencia</a></li>
+                    </ul>
+                </div>
+
+                <div class="ae-radar-page__strategic-card">
+                    <div class="ae-radar-page__strategic-card-head">
+                        <span class="ae-radar-page__strategic-card-dot"></span>
+                        <h3>Exploración por sector</h3>
+                    </div>
+                    <ul>
+                        <li><a href="<?= site_url('empresas-nuevas-sector/construccion') ?>">Nuevas en Construcción</a></li>
+                        <li><a href="<?= site_url('empresas-nuevas-sector/hosteleria') ?>">Nuevas en Hostelería</a></li>
+                        <li><a href="<?= site_url('empresas-nuevas-sector/tecnologia') ?>">Nuevas en Tecnología</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="ae-radar-page__section ae-radar-page__section--seo container">
+            <div class="ae-radar-page__seo-box">
+                <div class="ae-radar-page__section-head ae-radar-page__section-head--left">
+                    <span class="ae-radar-page__section-kicker">Contexto de mercado</span>
+                    <h2 class="ae-radar-page__section-title ae-radar-page__section-title--left">
+                        Sobre las nuevas empresas de <?= esc($sectorLabel) ?>
+                    </h2>
+                </div>
+
+                <div class="ae-radar-page__seo-content">
+                    <p>
+                        El sector de <?= esc(mb_strtolower($sectorLabel)) ?> es un motor económico fundamental. Cada mes detectamos decenas de nuevas sociedades creadas recientemente en este ámbito en toda España.
+                    </p>
+
+                    <p>
+                        Con el Radar puedes detectar estas nuevas empresas antes que tu competencia y posicionarte como su proveedor desde el primer día, ofreciendo servicios adaptados a sus necesidades iniciales.
+                    </p>
+                </div>
             </div>
         </section>
     </main>

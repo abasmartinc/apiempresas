@@ -255,11 +255,10 @@
     gap: 10px;
     font-size: 14px;
     font-weight: 700;
-    color: var(--ae-radar-muted);
 }
 
 .ae-radar-page__breadcrumb strong {
-    color: var(--ae-radar-text);
+    color: #fff;
 }
 
 .ae-radar-page__topbar-actions {
@@ -1373,11 +1372,11 @@
     gap: 10px;
     font-size: 14px;
     font-weight: 700;
-    color: var(--ae-radar-muted);
+    color: #fff;
 }
 
 .ae-radar-page__breadcrumb strong {
-    color: var(--ae-radar-text);
+    color: #fff;
 }
 
 .ae-radar-page__topbar-actions {

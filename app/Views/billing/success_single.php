@@ -54,7 +54,7 @@
         .btn-download:hover { transform: translateY(-2px); }
         
         .upsell-card {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
+            background: linear-gradient(135deg, #334155, #1e293b);
             border-radius: 24px;
             padding: 40px;
             color: white;

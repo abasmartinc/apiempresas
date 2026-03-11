@@ -150,11 +150,11 @@ class RadarController extends BaseController
             $metaDesc = "Listado de empresas recién constituidas hoy en $locationLabel. Accede a datos de BORME en tiempo real.";
         } elseif ($period === 'semana') {
             $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')));
-            $title = "Nuevas Empresas de $locationLabel esta Semana";
+            $title = "Empresas nuevas de $locationLabel esta Semana";
             $metaDesc = "Descubre las sociedades constituidas en los últimos 7 días en $locationLabel. Datos actualizados para prospección comercial.";
         } elseif ($period === 'mes') {
             $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')));
-            $title = "Nuevas Empresas de $locationLabel este Mes";
+            $title = "Empresas nuevas de $locationLabel este Mes";
             $metaDesc = "Análisis de empresas de $locationLabel constituidas recientemente. Listado completo de nuevas sociedades.";
         } else {
             // General Hub / Sector Hub
@@ -213,18 +213,18 @@ class RadarController extends BaseController
         $isLowResults = $totalCount < 5;
 
         // Heading Variables
-        $heading_highlight = $province ? $locationLabel : "Hoy";
-        $heading_prefix = $province ? "Nuevas Empresas en " : "Nuevas Empresas ";
-        $heading_location = $province ? "" : "España";
+        $heading_highlight = $province ? $locationLabel : "Hoy ";
+        $heading_prefix = $province ? "Empresas nuevas en " : "Empresas nuevas ";
+        $heading_location = $province ? "" : " en España";
         $heading_middle = "";
 
         if (!$province) {
             if ($period === 'semana') {
-                $heading_prefix = "Nuevas Empresas esta ";
-                $heading_highlight = "Semana";
+                $heading_prefix = "Empresas nuevas esta ";
+                $heading_highlight = "Semana ";
             } elseif ($period === 'mes') {
-                $heading_prefix = "Nuevas Empresas este ";
-                $heading_highlight = "Mes";
+                $heading_prefix = "Empresas nuevas este ";
+                $heading_highlight = "Mes ";
             }
         }
 
