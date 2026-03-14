@@ -193,7 +193,6 @@ body {
 /* HERO */
 .radar-hero {
     position: relative;
-    padding: 76px 0 82px;
     background:
         radial-gradient(circle at 18% 0%, rgba(43, 86, 222, 0.045), transparent 28%),
         radial-gradient(circle at 82% 100%, rgba(244, 182, 34, 0.05), transparent 20%),
@@ -205,7 +204,6 @@ body {
 .radar-hero__shell {
     position: relative;
     padding: 42px 38px 34px;
-    border-radius: 30px;
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, #ffffff 100%);
     border: 1px solid rgba(226, 232, 240, 0.9);
@@ -251,7 +249,7 @@ body {
 
 .radar-hero__title span {
     display: block;
-    background: linear-gradient(90deg, #183b86 0%, #2b56de 55%, #f4b622 100%);
+    background: linear-gradient(90deg, #183b86 0%, #2b56de 55%, #13ac94 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;

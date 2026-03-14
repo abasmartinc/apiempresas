@@ -1,4 +1,4 @@
-.ae-radar-page {
+﻿.ae-radar-page {
     --ae-primary: #2f5be8;
     --ae-primary-dark: #1b3f91;
     --ae-primary-soft: #f3f6fb;
@@ -771,7 +771,7 @@
 }
 
 .ae-radar-page__lead-btn::after {
-    content: "→";
+    content: "â†’";
     font-size: 0.92rem;
     transition: transform 0.18s ease;
 }
@@ -1058,7 +1058,7 @@
 }
 
 .ae-radar-page__strategic-card a::before {
-    content: "→";
+    content: "â†’";
     position: absolute;
     left: 0;
     top: 2px;
@@ -1823,64 +1823,46 @@
     flex-grow: 1;
 }
 
-.ae-radar-page__empty-form {
+.ae-radar-page__alert-form {
     display: flex;
     gap: 10px;
     margin-top: auto;
 }
 
-.ae-radar-page__empty-input {
+.ae-radar-page__alert-form input {
     flex: 1;
-    min-width: 0;
     min-height: 48px;
     padding: 0 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 12px;
     color: #fff;
     font-size: 0.95rem;
-    font-weight: 600;
-    transition: all 0.22s ease;
+    transition: all 0.2s ease;
 }
 
-.ae-radar-page__empty-input:focus {
-    outline: none;
-    background: rgba(255, 255, 255, 0.08);
-    border-color: #facc15;
-    box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.12);
-}
-
-.ae-radar-page__empty-input::placeholder {
-    color: rgba(255, 255, 255, 0.4);
-}
-
-.ae-radar-page__empty-submit,
 .ae-radar-page__empty-state .ae-radar-page__btn--primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 48px;
-    padding: 0 20px;
     background: radial-gradient(circle at 0% 0%, #fefce8 0, #facc15 35%, #f97316 100%);
-    border: none;
-    border-radius: 12px;
     color: #0b1020;
-    font-size: 0.88rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    transition: all 0.22s ease;
-    box-shadow: 0 8px 20px -8px rgba(249, 115, 22, 0.5);
-    text-decoration: none;
+    box-shadow: 
+        0 0 0 1px rgba(248, 250, 252, 0.18),
+        0 12px 30px rgba(249, 115, 22, 0.35);
+    border: none;
 }
 
-.ae-radar-page__empty-submit:hover,
 .ae-radar-page__empty-state .ae-radar-page__btn--primary:hover {
-    transform: translateY(-1px);
     background: radial-gradient(circle at 0% 0%, #fef9c3 0, #eab308 40%, #ea580c 100%);
-    box-shadow: 0 12px 24px -8px rgba(249, 115, 22, 0.6);
-    color: #0b1020;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 0 0 1px rgba(248, 250, 252, 0.22),
+        0 16px 40px rgba(249, 115, 22, 0.45);
+}
+
+.ae-radar-page__alert-form input:focus {
+    outline: none;
+    border-color: #facc15;
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.15);
 }
 
 @media (max-width: 768px) {
@@ -1890,11 +1872,8 @@
     .ae-radar-page__empty-grid {
         grid-template-columns: 1fr;
     }
-    .ae-radar-page__empty-form {
+    .ae-radar-page__alert-form {
         flex-direction: column;
-    }
-    .ae-radar-page__empty-submit {
-        width: 100%;
     }
 }
 .ae-radar-page__section--sectors {
@@ -2051,7 +2030,7 @@
 }
 
 .ae-radar-page__sector-row-link::after {
-    content: "→";
+    content: "â†’";
     font-size: 0.88rem;
     transition: transform 0.18s ease;
 }

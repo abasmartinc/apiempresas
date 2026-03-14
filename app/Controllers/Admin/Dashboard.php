@@ -827,8 +827,9 @@ class Dashboard extends BaseController
             $today = date('Y-m-d');
             $midnight = $today . ' 00:00:00';
 
-            // Inicializar con valores por defecto (Solo KPIs rápidos)
+            // Inicializar con valores por defecto
             $data = [
+                // KPIs de Dashboard (Dashboard.php)
                 'users_total' => '...',
                 'users_active' => '...',
                 'subs_active' => '...',
@@ -840,11 +841,21 @@ class Dashboard extends BaseController
                 'blocked_ips_count' => '...',
                 'searches_zero_results' => '...',
                 'searches_resolved_count' => '...',
+                
+                // KPIs de Empresas (Companies.php)
+                'total' => '...',
+                'added_today' => '...',
+                'sin_cif' => '...',
+                'sin_direccion' => '...',
+                'sin_estado' => '...',
+                'sin_cnae' => '...',
+                'sin_registro_mercantil' => '...',
+                
                 'stats_updated_at' => null
             ];
 
             try {
-                // KPIs Rápidos (Con timeout implícito)
+                // KPIs Rápidos (Dashboard)
                 $data['users_total'] = number_format($this->userModel->countAllResults(), 0, ',', '.');
                 $data['users_active'] = number_format($this->userModel->where('is_active', 1)->countAllResults(), 0, ',', '.');
                 $data['subs_active'] = number_format($this->subscriptionModel->where('status', 'active')->countAllResults(), 0, ',', '.');
@@ -858,6 +869,9 @@ class Dashboard extends BaseController
                 $data['blocked_ips_count'] = number_format($this->blockedIpModel->countAllResults(), 0, ',', '.');
                 $data['searches_zero_results'] = number_format($this->searchLogModel->countZeroResults($ym), 0, ',', '.');
                 $data['searches_resolved_count'] = number_format($this->searchLogModel->countResolvedGaps(), 0, ',', '.');
+                
+                // KPIs Rápidos (Empresas)
+                $data['added_today'] = number_format($this->companyModel->where('created_at >=', $midnight)->countAllResults(), 0, ',', '.');
             } catch (\Exception $e) {
                 log_message('error', 'Error loading fast KPIs: ' . $e->getMessage());
             }
@@ -867,10 +881,15 @@ class Dashboard extends BaseController
                 $heavyStats = $this->systemStatsModel->getStat('heavy_kpis');
                 if ($heavyStats) {
                     $heavyData = json_decode($heavyStats->stat_value, true);
-                    if ($heavyData) {
+                    if ($heavyData && is_array($heavyData)) {
                         $data = array_merge($data, $heavyData);
                         $data['stats_updated_at'] = $heavyStats->updated_at;
                     }
+                }
+                
+                // Si faltan datos críticos tras el merge, intentamos cargarlos (fuerza bruta si no hay caché)
+                if ($data['total'] === '...') {
+                    $data['total'] = number_format($this->companyModel->countAllResults(), 0, ',', '.');
                 }
             } catch (\Exception $e) {
                 log_message('error', 'Error loading heavy KPIs from system_stats: ' . $e->getMessage());
@@ -917,11 +936,20 @@ class Dashboard extends BaseController
             return $this->response->setStatusCode(403)->setBody('Acceso no permitido');
         }
 
-        // Los KPIs pesados de empresas se han eliminado por lentitud.
-        // Se mantiene el endpoint para evitar errores JS pero ya no realiza cálculos pesados.
-        $this->systemStatsModel->setStat('heavy_kpis', []);
+        // Calcular KPIs pesados de empresas
+        $heavyData = [
+            'total' => number_format($this->companyModel->countAllResults(), 0, ',', '.'),
+            'sin_cif' => number_format($this->companyModel->groupStart()->where('cif', '')->orWhere('cif', null)->groupEnd()->countAllResults(), 0, ',', '.'),
+            'sin_direccion' => number_format($this->companyModel->groupStart()->where('address', '')->orWhere('address', null)->groupEnd()->countAllResults(), 0, ',', '.'),
+            'sin_estado' => number_format($this->companyModel->groupStart()->where('estado', '')->orWhere('estado', null)->groupEnd()->countAllResults(), 0, ',', '.'),
+            'sin_cnae' => number_format($this->companyModel->groupStart()->where('cnae_code', '')->orWhere('cnae_code', null)->groupEnd()->countAllResults(), 0, ',', '.'),
+            'sin_registro_mercantil' => number_format($this->companyModel->groupStart()->where('registro_mercantil', '')->orWhere('registro_mercantil', null)->groupEnd()->countAllResults(), 0, ',', '.'),
+        ];
+
+        // Guardar en persistencia para que all_kpis_ajax los use
+        $this->systemStatsModel->setStat('heavy_kpis', $heavyData);
         
-        // Limpiar caché para forzar recarga
+        // Limpiar caché consolidada para forzar recarga con los nuevos datos pesados
         cache()->delete('admin_dashboard_kpis_consolidated');
 
         return $this->response->setJSON(['status' => 'success', 'updated_at' => date('Y-m-d H:i:s')]);
@@ -1013,6 +1041,7 @@ class Dashboard extends BaseController
             'value' => number_format($value, 0, ',', '.')
         ]);
     }
+
 
     /**
      * Formulario crear empresa

@@ -97,8 +97,9 @@ $province = 'España';
                 </span>
 
                 <h1 class="ae-radar-page__title">
-                    Radar de <span class="ae-radar-page__title-grad">Nuevas Empresas</span> en España
-                    <span class="ae-radar-page__title-sub">Monitorización BORME en Tiempo Real</span>
+                    <?= esc($heading_prefix) ?>
+                    <span class="ae-radar-page__title-grad"><?= esc($heading_time) ?></span>
+                    <?= esc($heading_suffix) ?><?= esc($heading_highlight) ?><?= esc($heading_middle) ?><?= esc($heading_location) ?>
                 </h1>
 
                 <p class="ae-radar-page__subtitle">

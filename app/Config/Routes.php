@@ -5,7 +5,7 @@ use CodeIgniter\Router\RouteCollection;
 /** @var RouteCollection $routes */
 $routes->get('/', 'Home::index');
 $routes->post('submit-review', 'Home::submitReview');
-$routes->get('billing/export-excel', 'SeoController::exportExcel');
+$routes->get('billing/export-excel', 'RadarController::exportExcel');
 $routes->get('enter', 'Login::index');
 $routes->get('documentation', 'Documentation::index');
 $routes->get('enter', 'Login::index');          // muestra login
@@ -46,7 +46,13 @@ $routes->get('billing/paypal/return', 'Billing::paypalReturn');
 
 $routes->get('consumption', 'Usage::index');
 $routes->get('precios-radar', 'RadarPrices::index');
-$routes->get('radar', 'Radar::index', ['filter' => 'subscription:radar']);
+$routes->get('radar', 'Radar::index', ['filter' => 'subscription:radar']); // Radar PRO
+$routes->get('radar/quickview/(:num)', 'Radar::quickView/$1');
+$routes->get('radar/favoritos', 'Radar::favorites');
+$routes->get('radar/exportar', 'Radar::export');
+$routes->post('radar/toggle-favorite', 'Radar::toggleFavorite');
+$routes->post('radar/save-note', 'Radar::saveNote');
+$routes->get('radar/map-data', 'Radar::mapData');
 $routes->get('contact', 'Contact::index');
 $routes->get('blog', 'Blog::index');
 $routes->get('blog/post', 'Blog::post');
@@ -187,11 +193,10 @@ $routes->get('sitemap-directories.xml', 'Sitemap::directories');
 $routes->get('sitemap-companies-(:num).xml', 'Sitemap::companies/$1');
 
 // --- Webhook CRON SEO ---
-$routes->get('cron/seo-sync/(:any)', 'SeoController::syncStatsWebhook/$1');
+$routes->get('cron/seo-sync/(:any)', 'RadarController::syncStatsWebhook/$1');
 
 // --- Programmatic SEO Routes ---
 $routes->get('empresas/(:any)', 'RadarController::provinceCatalog/$1');
-$routes->get('empresas-cnae/(:any)', 'RadarController::cnae/$1');
 
 // Radar Hub (New Companies Strategy)
 $routes->get('empresas-nuevas', 'RadarController::index'); // Central Hub
@@ -199,11 +204,15 @@ $routes->get('empresas-nuevas-hoy', 'RadarController::today');
 $routes->get('empresas-nuevas-semana', 'RadarController::week');
 $routes->get('empresas-nuevas-mes', 'RadarController::month');
 $routes->get('empresas-nuevas-sector/(:any)', 'RadarController::sector/$1');
+
+// Combinations (e.g. /empresas-nuevas/hosteleria-en-madrid) -> NEW
+$routes->get('empresas-nuevas/(:any)-en-(:any)', 'RadarController::newRadarLongTail/$1/$2');
+
 $routes->get('empresas-nuevas/(:any)', 'RadarController::province/$1'); // Province Radar
 
 // Combination Sector + Province (e.g. /empresas-programacion-en-madrid)
 // This regex matches "empresas-[anything]-en-[anything]" // MUST BE AFTER RADAR LONG-TAIL
-$routes->get('empresas-(:any)-en-(:any)', 'SeoController::sectorProvince/$1/$2');
+$routes->get('empresas-(:any)-en-(:any)', 'RadarController::sectorProvince/$1/$2');
 // --- Programmatic SEO Routes ---
 
 // Directorios SEO (Legacy)

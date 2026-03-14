@@ -64,8 +64,11 @@ $getCommercialSignals = function($sector, $object) {
     return 'asesoría · software · marketing';
 };
 
+$sectorLabel = $sector_label ?? ($sector['label'] ?? '');
+
 $buildCheckoutUrl = site_url('billing/single_checkout') . 
     '?provincia=' . urlencode($province ?? '') .
+    '&sector=' . urlencode($sectorLabel) .
     '&period=' . urlencode($period === 'general' ? '30days' : ($period ?? ''));
 
 $companies = $companies ?? [];
@@ -103,13 +106,15 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
         <section class="ae-radar-page__hero container">
             <div class="ae-radar-page__hero-inner">
                 <span class="ae-radar-page__pill">
-                    RADAR PROVINCIAL • <?= esc($province) ?>
+                    <?= !empty($sectorLabel) ? 'RADAR SECTORIAL' : 'RADAR PROVINCIAL' ?> • <?= esc($province) ?>
                 </span>
 
                 <h1 class="ae-radar-page__title">
-                    <?= esc($heading_prefix) ?><span class="ae-radar-page__title-grad"><?= esc($heading_highlight) ?></span><?= esc($heading_middle) ?><?= esc($heading_location) ?>
-                    <span class="ae-radar-page__title-sub">Análisis B2B y Distribución por Sectores</span>
+                    <?= esc($heading_prefix) ?>
+                    <span class="ae-radar-page__title-grad"><?= esc($heading_time) ?></span>
+                    <?= esc($heading_suffix) ?><?= esc($heading_highlight) ?><?= esc($heading_middle) ?><?= esc($heading_location) ?>
                 </h1>
+                <span class="ae-radar-page__title-sub">Análisis B2B y Distribución por Sectores</span>
 
                 <p class="ae-radar-page__subtitle">
                     Detecta nuevas empresas constituidas recientemente en <?= esc(ucfirst(mb_strtolower($province))) ?> y accede a oportunidades comerciales antes que tu competencia.
@@ -201,170 +206,78 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
             </div>
         </section>
 
-        <?php if (!empty($top_sectors)): ?>
-        <section class="ae-radar-page__section ae-radar-page__section--sectors container">
-                <div class="ae-radar-page__sectors-layout">
-                    <div class="ae-radar-page__sectors-intro">
-                        <span class="ae-radar-page__section-kicker">Radar sectorial</span>
-
-                        <h3 class="ae-radar-page__section-title ae-radar-page__section-title--left">
-                            Sectores con alta actividad en España
-                        </h3>
-
-                        <p class="ae-radar-page__section-subtitle ae-radar-page__section-subtitle--left">
-                            Una lectura rápida de los sectores donde se están concentrando más nuevas constituciones mercantiles y donde suele existir mayor potencial de prospección B2B.
-                        </p>
-
-                        <div class="ae-radar-page__sectors-summary">
-                            <div class="ae-radar-page__sectors-summary-item">
-                                <strong><?= number_format(min(6, count($related_sectors ?? [])), 0, ',', '.') ?></strong>
-                                <span>Sectores destacados</span>
-                            </div>
-
-                            <div class="ae-radar-page__sectors-summary-item">
-                                <strong>Alta</strong>
-                                <span>Actividad reciente</span>
-                            </div>
-
-                            <div class="ae-radar-page__sectors-summary-item">
-                                <strong>B2B</strong>
-                                <span>Enfoque comercial</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="ae-radar-page__sectors-list">
-                        <?php foreach (array_slice($related_sectors, 0, 4) as $index => $rs): ?>
-                            <?php
-                            $sectorLabel = $rs['label'] ?? 'Sector no disponible';
-                            $sectorText = mb_strtolower($sectorLabel, 'UTF-8');
-
-                            $sectorMeta = [
-                                'title' => $sectorLabel,
-                                'desc'  => 'Nuevas sociedades detectadas con potencial de prospección B2B.',
-                                'tag'   => 'Radar activo',
-                            ];
-
-                            if (str_contains($sectorText, 'constru')) {
-                                $sectorMeta = [
-                                    'title' => $sectorLabel,
-                                    'desc'  => 'Demanda temprana de seguros, PRL, software y financiación.',
-                                    'tag'   => 'Alta demanda B2B',
-                                ];
-                            } elseif (str_contains($sectorText, 'comerc')) {
-                                $sectorMeta = [
-                                    'title' => $sectorLabel,
-                                    'desc'  => 'Potencial para ERP, pagos, asesoría y digitalización comercial.',
-                                    'tag'   => 'Volumen recurrente',
-                                ];
-                            } elseif (str_contains($sectorText, 'inmobil')) {
-                                $sectorMeta = [
-                                    'title' => $sectorLabel,
-                                    'desc'  => 'Buen encaje para CRM, marketing, firma digital y gestión documental.',
-                                    'tag'   => 'Nicho comercial',
-                                ];
-                            } elseif (str_contains($sectorText, 'restaur') || str_contains($sectorText, 'hostel')) {
-                                $sectorMeta = [
-                                    'title' => $sectorLabel,
-                                    'desc'  => 'Necesidades frecuentes de TPV, reservas, software y proveedores.',
-                                    'tag'   => 'Alta rotación',
-                                ];
-                            } elseif (str_contains($sectorText, 'tecnolog') || str_contains($sectorText, 'inform')) {
-                                $sectorMeta = [
-                                    'title' => $sectorLabel,
-                                    'desc'  => 'Empresas orientadas a software, cloud, servicios IT y captación digital.',
-                                    'tag'   => 'Sector dinámico',
-                                ];
-                            } elseif (str_contains($sectorText, 'servic')) {
-                                $sectorMeta = [
-                                    'title' => $sectorLabel,
-                                    'desc'  => 'Actividad transversal con hueco para asesoría, software y automatización.',
-                                    'tag'   => 'Prospección activa',
-                                ];
-                            }
-                            ?>
-                            <article class="ae-radar-page__sector-row">
-                                <div class="ae-radar-page__sector-row-index">
-                                    <?= str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) ?>
-                                </div>
-
-                                <div class="ae-radar-page__sector-row-main">
-                                    <div class="ae-radar-page__sector-row-head">
-                                        <h4 class="ae-radar-page__sector-row-title"><?= esc($sectorMeta['title']) ?></h4>
-                                        <span class="ae-radar-page__sector-row-tag"><?= esc($sectorMeta['tag']) ?></span>
-                                    </div>
-
-                                    <p class="ae-radar-page__sector-row-desc"><?= esc($sectorMeta['desc']) ?></p>
-                                </div>
-
-                                <div class="ae-radar-page__sector-row-action">
-                                    <a
-                                        href="<?= site_url('empresas-nuevas-sector/' . url_title($rs['label'], '-', true)) ?>"
-                                        class="ae-radar-page__sector-row-link"
-                                        title="<?= esc($rs['label']) ?>"
-                                    >
-                                        Explorar
-                                    </a>
-                                </div>
-                            </article>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            </section>
-        <?php endif; ?>
-
         <section id="leads-b2b-recientes" class="ae-radar-page__section ae-radar-page__section--leads container">
             <div class="ae-radar-page__leads-shell">
-                <div class="ae-radar-page__leads-header">
-                    <div>
-                        <div class="ae-radar-page__section-kicker ae-radar-page__section-kicker--with-dot">
-                            <span class="ae-radar-page__section-kicker-dot"></span>
-                            <?= ($is_low_results ?? false) ? 'Búsqueda de mercado local' : 'Muestra comercial en tiempo real' ?>
-                        </div>
-
-                        <h2 class="ae-radar-page__section-title ae-radar-page__section-title--left">
-                            <?= ($is_low_results ?? false) ? (empty($companies) ? 'Sin resultados recientes' : 'Resultados limitados en esta provincia') : 'Leads B2B en ' . esc(ucfirst(mb_strtolower($province))) ?>
-                        </h2>
-
-                        <p class="ae-radar-page__section-subtitle ae-radar-page__section-subtitle--left">
-                            <?php if ($is_low_results ?? false): ?>
-                                No hemos detectado nuevas constituciones en <?= esc($province) ?> en las últimas horas, pero puedes explorar el histórico provincial o alertas nacionales.
-                            <?php else: ?>
-                                Empresas recién constituidas en <?= esc($province) ?> detectadas en BORME y listas para prospección comercial. Ideal para proveedores locales y nacionales B2B.
-                            <?php endif; ?>
-                        </p>
-                    </div>
-
-                    <?php if (!($is_low_results ?? false)): ?>
-                    <div class="ae-radar-page__live-badge">
-                        <span class="ae-radar-page__live-badge-dot"></span>
-                        Actualizado hoy
-                    </div>
-                    <?php endif; ?>
-                </div>
-
-                <?php if ($is_low_results ?? false): ?>
-                    <div class="ae-radar-page__no-results-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 40px; text-align: center; margin-bottom: 40px;">
-                        <h3 style="color: #fff; margin-bottom: 20px;">¿Cómo quieres continuar?</h3>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                            <div style="padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px;">
-                                <h4 style="color: var(--ae-accent, #4f46e5); margin-bottom: 10px;">Directorio de <?= esc(ucfirst(mb_strtolower($province))) ?></h4>
-                                <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 15px;">Explora el listado histórico de todas las empresas de la provincia.</p>
-                                <a href="<?= site_url('directorio/provincia/' . url_title($province, '-', true)) ?>" class="ae-radar-page__btn ae-radar-page__btn--ghost" style="width: 100%;">Ver directorio</a>
+                <?php if (!($is_low_results ?? false)): ?>
+                    <div class="ae-radar-page__leads-header">
+                        <div>
+                            <div class="ae-radar-page__section-kicker ae-radar-page__section-kicker--with-dot">
+                                <span class="ae-radar-page__section-kicker-dot"></span>
+                                Muestra comercial en tiempo real
                             </div>
 
-                            <div id="avisarme-seccion" style="padding: 20px; background: rgba(79, 70, 229, 0.1); border: 1px solid rgba(79, 70, 229, 0.3); border-radius: 12px;">
-                                <h4 style="color: #fff; margin-bottom: 10px;">Alertas en <?= esc(ucfirst(mb_strtolower($province))) ?></h4>
-                                <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 15px;">Recibe un email cada vez que detectemos una nueva constitución en esta zona.</p>
-                                <form action="#" method="POST" onsubmit="alert('Alerta activa.'); return false;" style="display: flex; gap: 8px;">
-                                    <input type="email" placeholder="Email" required style="flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: #fff;">
-                                    <button type="submit" class="ae-radar-page__btn ae-radar-page__btn--primary" style="padding: 8px 16px;">OK</button>
-                                </form>
+                            <h2 class="ae-radar-page__section-title ae-radar-page__section-title--left">
+                                Leads B2B en <?= esc(ucfirst(mb_strtolower($province))) ?>
+                            </h2>
+
+                            <p class="ae-radar-page__section-subtitle ae-radar-page__section-subtitle--left">
+                                Empresas recién constituidas en <?= esc($province) ?> detectadas en BORME y listas para prospección comercial. Ideal para proveedores locales y nacionales B2B.
+                            </p>
+                        </div>
+
+                        <div class="ae-radar-page__live-badge">
+                            <span class="ae-radar-page__live-badge-dot"></span>
+                            Actualizado hoy
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($is_low_results ?? false): ?>
+                    <div class="ae-radar-page__empty-state">
+                        <div class="ae-radar-page__empty-state-inner">
+                            <div class="ae-radar-page__empty-state-header">
+                                <div class="ae-radar-page__empty-state-kicker">Búsqueda de mercado local</div>
+                                <h3 class="ae-radar-page__empty-state-title-main">Sin resultados recientes</h3>
+                                <p class="ae-radar-page__empty-state-subtitle">
+                                    No hemos detectado nuevas constituciones en <?= esc($province) ?> en las últimas horas, pero puedes explorar el histórico provincial o alertas nacionales.
+                                </p>
+                            </div>
+
+                            <h3 class="ae-radar-page__empty-state-title">¿Cómo quieres continuar?</h3>
+                            
+                            <div class="ae-radar-page__empty-grid">
+                                <div class="ae-radar-page__empty-card">
+                                    <div class="ae-radar-page__empty-card-icon">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <h4 class="ae-radar-page__empty-card-title">Directorio de <?= esc(ucfirst(mb_strtolower($province))) ?></h4>
+                                    <p class="ae-radar-page__empty-card-text">Explora el listado histórico completo de todas las empresas constituidas en esta provincia.</p>
+                                    <a href="<?= site_url('directorio/provincia/' . url_title($province, '-', true)) ?>" class="ae-radar-page__btn ae-radar-page__btn--primary">Ver directorio provincial</a>
+                                </div>
+
+                                <div id="avisarme-seccion" class="ae-radar-page__empty-card ae-radar-page__empty-card--accent">
+                                    <div class="ae-radar-page__empty-card-icon">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                        </svg>
+                                    </div>
+                                    <h4 class="ae-radar-page__empty-card-title">Alertas en <?= esc(ucfirst(mb_strtolower($province))) ?></h4>
+                                    <p class="ae-radar-page__empty-card-text">Recibe un email inmediato cada vez que detectemos una nueva constitución en esta zona.</p>
+                                    <form class="ae-radar-page__empty-form" action="#" method="POST" onsubmit="alert('Alerta activa.'); return false;">
+                                        <input type="email" placeholder="Tu email profesional" required class="ae-radar-page__empty-input">
+                                        <button type="submit" class="ae-radar-page__empty-submit">Activar</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
                 <?php endif; ?>
 
+                <?php if (!empty($freeLeads)): ?>
                 <div class="ae-radar-page__lead-grid">
                     <?php foreach ($freeLeads as $index => $co): ?>
                         <?php
@@ -445,6 +358,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                         <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
+                <?php endif; ?>
 
                 <?php if (!empty($premiumLeads)): ?>
                     <div class="ae-radar-page__paywall-zone">
@@ -542,48 +456,48 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     <div class="ae-radar-page__sectors-list">
                         <?php foreach (array_slice($related_sectors, 0, 4) as $index => $rs): ?>
                             <?php
-                            $sectorLabel = $rs['label'] ?? 'Sector no disponible';
-                            $sectorText = mb_strtolower($sectorLabel, 'UTF-8');
+                            $rowLabel = $rs['label'] ?? 'Sector no disponible';
+                            $rowText = mb_strtolower($rowLabel, 'UTF-8');
 
                             $sectorMeta = [
-                                'title' => $sectorLabel,
+                                'title' => $rowLabel,
                                 'desc'  => 'Nuevas sociedades detectadas con potencial de prospección B2B.',
                                 'tag'   => 'Radar activo',
                             ];
 
-                            if (str_contains($sectorText, 'constru')) {
+                            if (str_contains($rowText, 'constru')) {
                                 $sectorMeta = [
-                                    'title' => $sectorLabel,
+                                    'title' => $rowLabel,
                                     'desc'  => 'Demanda temprana de seguros, PRL, software y financiación.',
                                     'tag'   => 'Alta demanda B2B',
                                 ];
-                            } elseif (str_contains($sectorText, 'comerc')) {
+                            } elseif (str_contains($rowText, 'comerc')) {
                                 $sectorMeta = [
-                                    'title' => $sectorLabel,
+                                    'title' => $rowLabel,
                                     'desc'  => 'Potencial para ERP, pagos, asesoría y digitalización comercial.',
                                     'tag'   => 'Volumen recurrente',
                                 ];
-                            } elseif (str_contains($sectorText, 'inmobil')) {
+                            } elseif (str_contains($rowText, 'inmobil')) {
                                 $sectorMeta = [
-                                    'title' => $sectorLabel,
+                                    'title' => $rowLabel,
                                     'desc'  => 'Buen encaje para CRM, marketing, firma digital y gestión documental.',
                                     'tag'   => 'Nicho comercial',
                                 ];
-                            } elseif (str_contains($sectorText, 'restaur') || str_contains($sectorText, 'hostel')) {
+                            } elseif (str_contains($rowText, 'restaur') || str_contains($rowText, 'hostel')) {
                                 $sectorMeta = [
-                                    'title' => $sectorLabel,
+                                    'title' => $rowLabel,
                                     'desc'  => 'Necesidades frecuentes de TPV, reservas, software y proveedores.',
                                     'tag'   => 'Alta rotación',
                                 ];
-                            } elseif (str_contains($sectorText, 'tecnolog') || str_contains($sectorText, 'inform')) {
+                            } elseif (str_contains($rowText, 'tecnolog') || str_contains($rowText, 'inform')) {
                                 $sectorMeta = [
-                                    'title' => $sectorLabel,
+                                    'title' => $rowLabel,
                                     'desc'  => 'Empresas orientadas a software, cloud, servicios IT y captación digital.',
                                     'tag'   => 'Sector dinámico',
                                 ];
-                            } elseif (str_contains($sectorText, 'servic')) {
+                            } elseif (str_contains($rowText, 'servic')) {
                                 $sectorMeta = [
-                                    'title' => $sectorLabel,
+                                    'title' => $rowLabel,
                                     'desc'  => 'Actividad transversal con hueco para asesoría, software y automatización.',
                                     'tag'   => 'Prospección activa',
                                 ];
@@ -631,7 +545,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     </p>
 
                     <div class="ae-radar-page__excel-actions">
-                        <a href="<?= site_url('checkout/radar-export?provincia=' . urlencode($province ?? '') . '&period=' . urlencode(empty($period) || $period === 'general' ? '30days' : $period)) ?>" class="ae-radar-page__excel-btn">
+                        <a href="<?= site_url('checkout/radar-export?provincia=' . urlencode($province ?? '') . '&sector=' . urlencode($sectorLabel) . '&period=' . urlencode(empty($period) || $period === 'general' ? '30days' : $period)) ?>" class="ae-radar-page__excel-btn">
                             Descargar listado (<?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€
                         </a>
                     </div>

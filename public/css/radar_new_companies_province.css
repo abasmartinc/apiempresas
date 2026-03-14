@@ -88,7 +88,6 @@
 .ae-radar-page__title-sub {
     display: block;
     margin-top: 14px;
-    font-size: 0.38em;
     line-height: 1.25;
     color: var(--ae-text);
     font-weight: 850;
@@ -1667,6 +1666,237 @@
 /* Paywall */
 
 /* Sectores */
+
+/* Empty State / No Results - Premium Redesign */
+.ae-radar-page__empty-state {
+    margin: 40px 0 60px;
+}
+
+.ae-radar-page__empty-state-inner {
+    position: relative;
+    padding: 60px 40px;
+    background: linear-gradient(135deg, #1b3f91 0%, #133a82 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 32px;
+    overflow: hidden;
+    text-align: center;
+    box-shadow: 
+        0 25px 60px -25px rgba(15, 23, 42, 0.35);
+}
+
+.ae-radar-page__empty-state-inner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top left, rgba(250, 204, 21, 0.1), transparent 70%);
+    pointer-events: none;
+}
+
+.ae-radar-page__empty-state-header {
+    max-width: 720px;
+    margin: 0 auto 50px;
+}
+
+.ae-radar-page__empty-state-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.74rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.ae-radar-page__empty-state-kicker::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    background: #facc15;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #facc15;
+}
+
+.ae-radar-page__empty-state-title-main {
+    margin: 0 0 16px;
+    font-size: 2.25rem;
+    line-height: 1.1;
+    font-weight: 950;
+    letter-spacing: -0.035em;
+    color: #fff;
+}
+
+.ae-radar-page__empty-state-subtitle {
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.75);
+    text-wrap: balance;
+}
+
+.ae-radar-page__empty-state-title {
+    margin-bottom: 30px;
+    font-size: 0.78rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.45);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 40px;
+    display: inline-block;
+    width: 100%;
+}
+
+.ae-radar-page__empty-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.ae-radar-page__empty-card {
+    position: relative;
+    padding: 32px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    text-align: left;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.ae-radar-page__empty-card:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.25);
+}
+
+.ae-radar-page__empty-card--accent {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(250, 204, 21, 0.25);
+}
+
+.ae-radar-page__empty-card--accent:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(250, 204, 21, 0.4);
+}
+
+.ae-radar-page__empty-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    color: #facc15;
+}
+
+.ae-radar-page__empty-card--accent .ae-radar-page__empty-card-icon {
+    background: rgba(250, 204, 21, 0.12);
+    border-color: rgba(250, 204, 21, 0.25);
+    color: #facc15;
+}
+
+.ae-radar-page__empty-card-title {
+    margin-bottom: 12px;
+    font-size: 1.25rem;
+    font-weight: 850;
+    color: #fff;
+}
+
+.ae-radar-page__empty-card-text {
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.7);
+    flex-grow: 1;
+}
+
+.ae-radar-page__empty-form {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+}
+
+.ae-radar-page__empty-input {
+    flex: 1;
+    min-width: 0;
+    min-height: 48px;
+    padding: 0 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.22s ease;
+}
+
+.ae-radar-page__empty-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #facc15;
+    box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.12);
+}
+
+.ae-radar-page__empty-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.ae-radar-page__empty-submit,
+.ae-radar-page__empty-state .ae-radar-page__btn--primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 20px;
+    background: radial-gradient(circle at 0% 0%, #fefce8 0, #facc15 35%, #f97316 100%);
+    border: none;
+    border-radius: 12px;
+    color: #0b1020;
+    font-size: 0.88rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    box-shadow: 0 8px 20px -8px rgba(249, 115, 22, 0.5);
+    text-decoration: none;
+}
+
+.ae-radar-page__empty-submit:hover,
+.ae-radar-page__empty-state .ae-radar-page__btn--primary:hover {
+    transform: translateY(-1px);
+    background: radial-gradient(circle at 0% 0%, #fef9c3 0, #eab308 40%, #ea580c 100%);
+    box-shadow: 0 12px 24px -8px rgba(249, 115, 22, 0.6);
+    color: #0b1020;
+}
+
+@media (max-width: 768px) {
+    .ae-radar-page__empty-state-inner {
+        padding: 40px 24px;
+    }
+    .ae-radar-page__empty-grid {
+        grid-template-columns: 1fr;
+    }
+    .ae-radar-page__empty-form {
+        flex-direction: column;
+    }
+    .ae-radar-page__empty-submit {
+        width: 100%;
+    }
+}
 .ae-radar-page__section--sectors {
     position: relative;
     margin-top: 6px;

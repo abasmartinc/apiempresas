@@ -64,7 +64,7 @@ $getCommercialSignals = function($sectorData, $object) {
     return 'asesoría · software · marketing';
 };
 
-$sectorLabel = $sector['label'] ?? 'Sector';
+$sectorLabel = $sector_label ?? ($sector['label'] ?? 'Sector');
 $province = $province ?? 'España';
 
 $buildCheckoutUrl = site_url('billing/single_checkout') . 
@@ -100,8 +100,9 @@ $premiumLeads = array_slice($companies, $freeCount);
                 </span>
 
                 <h1 class="ae-radar-page__title">
-                    Empresas nuevas de <span class="ae-radar-page__title-grad"><?= esc($sectorLabel) ?></span> en España
-                    <span class="ae-radar-page__title-sub">Análisis de competitividad y tracción</span>
+                    <?= esc($heading_prefix) ?>
+                    <span class="ae-radar-page__title-grad"><?= esc($heading_time) ?></span>
+                    <?= esc($heading_suffix) ?><?= esc($heading_highlight) ?><?= esc($heading_middle) ?><?= esc($heading_location) ?>
                 </h1>
 
                 <p class="ae-radar-page__subtitle">
@@ -180,13 +181,60 @@ $premiumLeads = array_slice($companies, $freeCount);
         </section>
 
         <section id="leads-sectoriales" class="ae-radar-page__section ae-radar-page__section--leads container">
-            <div class="ae-radar-page__leads-header">
-                <h2 class="ae-radar-page__section-title ae-radar-page__section-title--left">Oportunidades en <?= esc($sectorLabel) ?></h2>
-                <div class="ae-radar-page__live-badge">
-                    <span class="ae-radar-page__live-badge-dot"></span>
-                    Actualizado BORME
+            <?php if (!($is_low_results ?? false)): ?>
+                <div class="ae-radar-page__leads-header">
+                    <h2 class="ae-radar-page__section-title ae-radar-page__section-title--left">Oportunidades en <?= esc($sectorLabel) ?></h2>
+                    <div class="ae-radar-page__live-badge">
+                        <span class="ae-radar-page__live-badge-dot"></span>
+                        Actualizado BORME
+                    </div>
                 </div>
-            </div>
+            <?php endif; ?>
+
+            <?php if ($is_low_results ?? false): ?>
+                <div class="ae-radar-page__empty-state">
+                    <div class="ae-radar-page__empty-state-inner">
+                        <div class="ae-radar-page__empty-state-header">
+                            <div class="ae-radar-page__empty-state-kicker">Análisis Sectorial B2B</div>
+                            <h3 class="ae-radar-page__empty-state-title-main">Sin resultados recientes</h3>
+                            <p class="ae-radar-page__empty-state-subtitle">
+                                No hemos detectado nuevas constituciones en <?= esc($sectorLabel) ?> en las últimas horas, pero puedes explorar el histórico nacional o activar alertas.
+                            </p>
+                        </div>
+
+                        <h3 class="ae-radar-page__empty-state-title">¿Cómo quieres continuar?</h3>
+                        
+                        <div class="ae-radar-page__empty-grid">
+                            <div class="ae-radar-page__empty-card">
+                                <div class="ae-radar-page__empty-card-icon">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                    </svg>
+                                </div>
+                                <h4 class="ae-radar-page__empty-card-title">Explorar Sector</h4>
+                                <p class="ae-radar-page__empty-card-text">Consulta todas las empresas constituidas históricamente en esta actividad.</p>
+                                <a href="<?= $general_directory_url ?? site_url('directorio') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary">Ver directorio sectorial</a>
+                            </div>
+
+                            <div class="ae-radar-page__empty-card ae-radar-page__empty-card--accent" id="avisarme-seccion">
+                                <div class="ae-radar-page__empty-card-icon">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                    </svg>
+                                </div>
+                                <h4 class="ae-radar-page__empty-card-title">Email semanal</h4>
+                                <p class="ae-radar-page__empty-card-text">Recibe un resumen con las nuevas empresas de este sector cada lunes.</p>
+                                <form action="#" method="POST" onsubmit="alert('Alerta activa.'); return false;" class="ae-radar-page__empty-form">
+                                    <input type="email" placeholder="Tu email profesional" required class="ae-radar-page__empty-input">
+                                    <button type="submit" class="ae-radar-page__empty-submit">OK</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <div class="ae-radar-page__lead-grid">
                 <?php foreach ($freeLeads as $index => $co): ?>
@@ -364,11 +412,11 @@ $premiumLeads = array_slice($companies, $freeCount);
                     <div class="ae-radar-page__sectors-list">
                         <?php foreach (array_slice($related_sectors, 0, 4) as $index => $rs): ?>
                             <?php
-                            $sectorLabel = $rs['label'] ?? 'Sector no disponible';
-                            $sectorText = mb_strtolower($sectorLabel, 'UTF-8');
+                            $rowLabel = $rs['label'] ?? 'Sector no disponible';
+                            $rowText = mb_strtolower($rowLabel, 'UTF-8');
 
                             $sectorMeta = [
-                                'title' => $sectorLabel,
+                                'title' => $rowLabel,
                                 'desc'  => 'Nuevas sociedades detectadas con potencial de prospección B2B.',
                                 'tag'   => 'Radar activo',
                             ];
@@ -399,13 +447,13 @@ $premiumLeads = array_slice($companies, $freeCount);
                                 ];
                             } elseif (str_contains($sectorText, 'tecnolog') || str_contains($sectorText, 'inform')) {
                                 $sectorMeta = [
-                                    'title' => $sectorLabel,
+                                    'title' => $rowLabel,
                                     'desc'  => 'Empresas orientadas a software, cloud, servicios IT y captación digital.',
                                     'tag'   => 'Sector dinámico',
                                 ];
                             } elseif (str_contains($sectorText, 'servic')) {
                                 $sectorMeta = [
-                                    'title' => $sectorLabel,
+                                    'title' => $rowLabel,
                                     'desc'  => 'Actividad transversal con hueco para asesoría, software y automatización.',
                                     'tag'   => 'Prospección activa',
                                 ];

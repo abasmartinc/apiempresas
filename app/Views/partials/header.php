@@ -87,7 +87,7 @@
                     </a>
                     <a href="<?=site_url() ?>#buscar" class="mobile-nav-link">Buscador</a>
                     <a href="<?=site_url('directorio') ?>" class="mobile-nav-link">Empresas</a>
-                    <a href="<?=site_url('empresas-cnae/4121-construccion-de-edificios-residenciales') ?>" class="mobile-nav-link">Sectores</a>
+                    <a href="<?=site_url('empresas-nuevas-sector/construccion') ?>" class="mobile-nav-link">Sectores</a>
                     <a href="<?=site_url('empresas-nuevas/madrid') ?>" class="mobile-nav-link" style="color: var(--primary);">Empresas Nuevas</a>
                     <a href="<?=site_url() ?>#precios" class="mobile-nav-link">Precios</a>
                     <a href="<?=site_url() ?>documentation" class="mobile-nav-link">Documentación</a>

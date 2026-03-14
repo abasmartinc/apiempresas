@@ -107,8 +107,9 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     </span>
 
                     <h1 class="ae-radar-page__title">
-                        <?= esc($heading_prefix) ?><span class="ae-radar-page__title-grad"><?= esc($heading_highlight) ?></span><?= esc($heading_middle ?? ' en ') ?><?= esc($heading_location ?? ' España') ?>
-                        <span class="ae-radar-page__title-sub">Análisis B2B y Distribución Nacional</span>
+                        <?= esc($heading_prefix) ?>
+                        <span class="ae-radar-page__title-grad"><?= esc($heading_time) ?></span>
+                        <?= esc($heading_suffix) ?><?= esc($heading_highlight) ?><?= esc($heading_middle) ?><?= esc($heading_location) ?>
                     </h1>
 
                     <p class="ae-radar-page__subtitle">
@@ -289,51 +290,70 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
 
         <section id="leads-b2b-recientes" class="ae-radar-page__section ae-radar-page__section--leads container">
             <div class="ae-radar-page__leads-shell">
+                <?php if (!($is_low_results ?? false)): ?>
                 <div class="ae-radar-page__leads-header">
                     <div>
                         <div class="ae-radar-page__section-kicker ae-radar-page__section-kicker--with-dot">
                             <span class="ae-radar-page__section-kicker-dot"></span>
-                            <?= ($is_low_results ?? false) ? 'Búsqueda de mercado' : 'Muestra comercial en tiempo real' ?>
+                            Muestra comercial en tiempo real
                         </div>
 
                         <h2 class="ae-radar-page__section-title ae-radar-page__section-title--left">
-                            <?= ($is_low_results ?? false) ? (empty($companies) ? 'Sin resultados recientes' : 'Pocos resultados en esta ubicación') : 'Leads B2B Recientes' ?>
+                            Leads B2B Recientes
                         </h2>
 
                         <p class="ae-radar-page__section-subtitle ae-radar-page__section-subtitle--left">
-                            <?php if ($is_low_results ?? false): ?>
-                                No hemos detectado un volumen alto de nuevas constituciones en las últimas horas, pero puedes explorar el histórico nacional.
-                            <?php else: ?>
-                                Empresas recién constituidas detectadas en BORME y listas para prospección comercial. Ideal para despachos, software, marketing, seguros, asesoría, financiación y proveedores B2B.
-                            <?php endif; ?>
+                            Empresas recién constituidas detectadas en BORME y listas para prospección comercial. Ideal para despachos, software, marketing, seguros, asesoría, financiación y proveedores B2B.
                         </p>
                     </div>
 
-                    <?php if (!($is_low_results ?? false)): ?>
                     <div class="ae-radar-page__live-badge">
                         <span class="ae-radar-page__live-badge-dot"></span>
                         Actualizado hoy
                     </div>
-                    <?php endif; ?>
                 </div>
+                <?php endif; ?>
 
                 <?php if ($is_low_results ?? false): ?>
-                    <div class="ae-radar-page__no-results-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 40px; text-align: center; margin-bottom: 40px;">
-                        <h3 style="color: #fff; margin-bottom: 20px;">¿Cómo quieres continuar?</h3>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                            <div style="padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px;">
-                                <h4 style="color: var(--ae-accent, #4f46e5); margin-bottom: 10px;">Directorio General</h4>
-                                <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 15px;">Explora el listado histórico de todas las empresas de España.</p>
-                                <a href="<?= site_url('directorio') ?>" class="ae-radar-page__btn ae-radar-page__btn--ghost" style="width: 100%;">Ver directorio</a>
+                    <div class="ae-radar-page__empty-state">
+                        <div class="ae-radar-page__empty-state-inner">
+                            <div class="ae-radar-page__empty-state-header">
+                                <div class="ae-radar-page__empty-state-kicker">Búsqueda de mercado B2B</div>
+                                <h3 class="ae-radar-page__empty-state-title-main">Sin resultados recientes</h3>
+                                <p class="ae-radar-page__empty-state-subtitle">
+                                    No hemos detectado nuevas constituciones en las últimas horas para este filtro, pero puedes explorar el histórico nacional o activar alertas.
+                                </p>
                             </div>
 
-                            <div id="avisarme-seccion" style="padding: 20px; background: rgba(79, 70, 229, 0.1); border: 1px solid rgba(79, 70, 229, 0.3); border-radius: 12px;">
-                                <h4 style="color: #fff; margin-bottom: 10px;">Alertas personalizadas</h4>
-                                <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 15px;">Recibe un email cada vez que detectemos una nueva constitución hoy.</p>
-                                <form action="#" method="POST" onsubmit="alert('Alerta activa.'); return false;" style="display: flex; gap: 8px;">
-                                    <input type="email" placeholder="Email" required style="flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: #fff;">
-                                    <button type="submit" class="ae-radar-page__btn ae-radar-page__btn--primary" style="padding: 8px 16px;">OK</button>
-                                </form>
+                            <h3 class="ae-radar-page__empty-state-title">¿Cómo quieres continuar?</h3>
+                            
+                            <div class="ae-radar-page__empty-grid">
+                                <div class="ae-radar-page__empty-card">
+                                    <div class="ae-radar-page__empty-card-icon">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <h4 class="ae-radar-page__empty-card-title">Directorio General</h4>
+                                    <p class="ae-radar-page__empty-card-text">Explora el listado histórico completo de todas las empresas de España.</p>
+                                    <a href="<?= $general_directory_url ?? site_url('directorio') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary">Ver directorio general</a>
+                                </div>
+
+                                <div class="ae-radar-page__empty-card ae-radar-page__empty-card--accent" id="avisarme-seccion">
+                                    <div class="ae-radar-page__empty-card-icon">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                        </svg>
+                                    </div>
+                                    <h4 class="ae-radar-page__empty-card-title">Alertas personalizadas</h4>
+                                    <p class="ae-radar-page__empty-card-text">Recibe un email cada vez que detectemos una nueva constitución hoy.</p>
+                                    <form action="#" method="POST" onsubmit="alert('Alerta activa.'); return false;" class="ae-radar-page__empty-form">
+                                        <input type="email" placeholder="Tu email profesional" required class="ae-radar-page__empty-input">
+                                        <button type="submit" class="ae-radar-page__empty-submit">OK</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>

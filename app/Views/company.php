@@ -572,7 +572,7 @@
                     <?php endif; ?>
 
                     <?php if ($seoCnae && $seoCnaeLabel): ?>
-                    <a href="<?= site_url('empresas-cnae/' . $seoCnae . '-' . url_title($seoCnaeLabel, '-', true)) ?>" style="display: block; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#e2e8f0'">
+                    <a href="<?= site_url('empresas-nuevas-sector/' . url_title($seoCnaeLabel, '-', true)) ?>" style="display: block; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#e2e8f0'">
                         <span style="display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Análisis Sectorial CNAE</span>
                         <span style="display: block; font-size: 1rem; font-weight: 700; color: var(--primary);">Más empresas de <?= esc($seoCnaeLabel) ?></span>
                     </a>

@@ -25,6 +25,7 @@ class Pager extends BaseConfig
         'default_simple' => 'CodeIgniter\Pager\Views\default_simple',
         'default_head'   => 'CodeIgniter\Pager\Views\default_head',
         'admin_full'     => 'App\Views\partials\admin_pager',
+        'radar_es'       => 'App\Views\Pagers\radar_es',
     ];
 
     /**

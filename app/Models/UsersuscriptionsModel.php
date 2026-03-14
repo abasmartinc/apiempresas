@@ -29,7 +29,7 @@ class UsersuscriptionsModel extends Model
 
     public function getActivePlanByUserId($userId)
     {
-        return $this->select('user_subscriptions.*, api_plans.name as plan_name, api_plans.price_monthly, api_plans.monthly_quota, api_plans.max_alerts, api_plans.product_type')
+        return $this->select('user_subscriptions.*, api_plans.name as plan_name, api_plans.slug as plan_slug, api_plans.price_monthly, api_plans.monthly_quota, api_plans.max_alerts, api_plans.product_type')
                     ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id')
                     ->where('user_subscriptions.user_id', $userId)
                     ->where('user_subscriptions.status', 'active')

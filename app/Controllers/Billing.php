@@ -169,8 +169,8 @@ class Billing extends BaseController
                 }
                 $count = $builder->countAllResults();
             } else {
-                $seo = new \App\Controllers\SeoController();
-                $radarData = $seo->getRadarData($prov, $sect, $per, 1);
+                $radar = new \App\Controllers\RadarController();
+                $radarData = $radar->getRadarData($prov, $sect, $per, 1);
                 $count = $radarData['total_context_count'] ?? 0;
             }
 
@@ -223,7 +223,7 @@ class Billing extends BaseController
             $planDesc = 'Acceso ' . ucfirst($period) . ' al plan ' . ucfirst($plan);
 
         if ($plan === 'radar') {
-                $amount = 99.00;
+                $amount = 79.00;
                 $planName = 'Radar B2B';
                 $planDesc = 'Acceso ilimitado al Radar de nuevas empresas.';
             } else {
@@ -327,37 +327,53 @@ class Billing extends BaseController
         $sector   = $this->request->getGet('sector') ?? '';
         $period   = $this->request->getGet('period') ?? '';
         $cnae     = $this->request->getGet('cnae') ?? '';
+        $type     = $this->request->getGet('type') ?? 'single'; // 'single' or 'subscription'
 
-        // Si viene de combined.php (cnae code), contar directamente sin filtro de fecha
-        if ($cnae !== '') {
+        $count = 0;
+        $price = 0;
+        $tax   = 0;
+
+        if ($type === 'subscription') {
+            $price = 79.00;
+            $tax   = $price * 0.21;
+            // No count needed for subscription intro usually, but we can show "Total Radar"
             $db      = \Config\Database::connect();
-            $builder = $db->table('companies');
-            $builder->where('cnae_code LIKE', $cnae . '%');
-            if ($province && strtolower($province) !== 'españa') {
-                if (strtolower($province) === 'alicante') {
-                    $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
-                } else {
-                    $builder->where('registro_mercantil', $province);
-                }
-            }
-            $count = $builder->countAllResults();
+            $count   = $db->table('companies')->countAllResults();
         } else {
-            // Radar mode: usar getRadarData con filtro de fecha
-            $seo = new \App\Controllers\SeoController();
-            $radarData = $seo->getRadarData($province, $sector, $period, 1);
-            $count = $radarData['total_context_count'] ?? 0;
+            // Si viene de combined.php (cnae code), contar directamente sin filtro de fecha
+            if ($cnae !== '') {
+                $db      = \Config\Database::connect();
+                $builder = $db->table('companies');
+                $builder->where('cnae_code LIKE', $cnae . '%');
+                if ($province && strtolower($province) !== 'españa') {
+                    if (strtolower($province) === 'alicante') {
+                        $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+                    } else {
+                        $builder->where('registro_mercantil', $province);
+                    }
+                }
+                $count = $builder->countAllResults();
+            } else {
+                // Radar mode: usar getRadarData con filtro de fecha
+                $radar = new \App\Controllers\RadarController();
+                $radarData = $radar->getRadarData($province, $sector, $period, 1);
+                $count = $radarData['total_context_count'] ?? 0;
+            }
+
+            // Dynamic Pricing based on scale
+            $pricing = calculate_radar_price($count);
+            $price   = $pricing['base_price'];
+            $tax     = $pricing['tax'];
         }
 
-        // Dynamic Pricing based on scale
-        $pricing = calculate_radar_price($count);
-
         $data = [
+            'type'        => $type,
             'province'    => $province,
             'sector'      => $sector,
             'cnae'        => $cnae,
             'period'      => $period,
-            'price'       => $pricing['base_price'],
-            'tax'         => $pricing['tax'],
+            'price'       => $price,
+            'tax'         => $tax,
             'total_count' => $count
         ];
 
@@ -379,9 +395,12 @@ class Billing extends BaseController
         // Fetch user's active subscription
         $subscription = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
 
-        // 1. Specific Redirect for Full Radar Plan
+        // 1. Specific View for Full Radar Plan
         if ($subscription && ($subscription->plan_slug ?? '') === 'radar' && ($subscription->status ?? '') === 'active') {
-             return redirect()->to(site_url('radar'))->with('success', '¡Bienvenido al Radar! Ya puedes acceder a todas las oportunidades.');
+             $data = [
+                 'order_ref' => 'SUB-' . str_pad($subscription->id ?? '0', 6, '0', STR_PAD_LEFT),
+             ];
+             return view('billing/success_radar', $data);
         }
 
         // 2. Excel Single Purchase Flow

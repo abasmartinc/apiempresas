@@ -14,7 +14,7 @@ class SubscriptionFilter implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        $currentUri = (string) $request->getUri()->getPath();
+        $currentUri = uri_string();
         $isApiAuthenticated = isset($request->api_meta['user_id']); // Set by ApiKeyFilter
         $isLoggedIn = session()->get('logged_in');
         

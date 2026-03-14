@@ -47,13 +47,18 @@
                 </div>
 
                 <div class="radar-hero__actions">
-                    <a href="<?= site_url('billing/checkout?plan=radar&period=monthly') ?>" class="radar-btn radar-btn--primary">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                        Activar Radar
-                    </a>
+                    <form method="post" action="<?= site_url('billing/checkout') ?>" style="display:contents;">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="plan" value="radar">
+                        <input type="hidden" name="period" value="monthly">
+                        <button type="submit" class="radar-btn radar-btn--primary">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            Activar Radar
+                        </button>
+                    </form>
 
                     <a href="#radar-pricing" class="radar-btn radar-btn--ghost">
                         Ver plan Radar
@@ -108,9 +113,14 @@
                     <p class="radar-text">
                         Si llegas antes que otros proveedores, tu probabilidad de cerrar una primera venta aumenta significativamente. Radar te permite detectar esas empresas justo en el momento adecuado.
                     </p>
-                    <a href="<?= site_url('billing/checkout?plan=radar&period=monthly') ?>" class="radar-btn radar-btn--primary radar-btn--inline">
-                        Activar Radar
-                    </a>
+                    <form method="post" action="<?= site_url('billing/checkout') ?>" style="display:contents;">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="plan" value="radar">
+                        <input type="hidden" name="period" value="monthly">
+                        <button type="submit" class="radar-btn radar-btn--primary radar-btn--inline">
+                            Activar Radar
+                        </button>
+                    </form>
                 </div>
 
                 <div class="radar-timeline">
@@ -338,9 +348,14 @@
                             <li>Sin permanencia</li>
                         </ul>
 
-                        <a href="<?= site_url('billing/checkout?plan=radar&period=monthly') ?>" class="radar-btn radar-btn--primary radar-btn--full">
-                            Activar Radar
-                        </a>
+                        <form method="post" action="<?= site_url('billing/checkout') ?>" style="display:contents;">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="plan" value="radar">
+                            <input type="hidden" name="period" value="monthly">
+                            <button type="submit" class="radar-btn radar-btn--primary radar-btn--full">
+                                Activar Radar
+                            </button>
+                        </form>
 
                         <div class="radar-pricing-card__footnote">
                             Cancela cuando quieras
@@ -420,9 +435,14 @@
                 </table>
 
                 <div class="radar-comparison__cta">
-                    <a href="<?= site_url('billing/checkout?plan=radar&period=monthly') ?>" class="radar-btn radar-btn--primary">
-                        Activar Radar
-                    </a>
+                    <form method="post" action="<?= site_url('billing/checkout') ?>" style="display:inline;">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="plan" value="radar">
+                        <input type="hidden" name="period" value="monthly">
+                        <button type="submit" class="radar-btn radar-btn--primary">
+                            Activar Radar
+                        </button>
+                    </form>
                     <p>
                         O <a href="<?= site_url('billing/single_checkout?period=30days') ?>">descarga un listado puntual</a>
                     </p>
@@ -471,9 +491,14 @@
                 <p>
                     Accede al Radar y convierte nuevas constituciones mercantiles en oportunidades comerciales reales cada día.
                 </p>
-                <a href="<?= site_url('billing/checkout?plan=radar&period=monthly') ?>" class="radar-btn radar-btn--white">
-                    Activar Radar
-                </a>
+                <form method="post" action="<?= site_url('billing/checkout') ?>" style="display:contents;">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="plan" value="radar">
+                    <input type="hidden" name="period" value="monthly">
+                    <button type="submit" class="radar-btn radar-btn--white">
+                        Activar Radar
+                    </button>
+                </form>
                 <small>Sin permanencia · Cancela cuando quieras</small>
             </div>
         </div>

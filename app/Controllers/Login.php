@@ -69,6 +69,7 @@ class Login extends BaseController
             ->first();
 
         if (!$user) {
+            log_message('error', "[Login DEBUG] User not found for email: {$email} and source_app: apiempresas");
             return redirect()
                 ->back()
                 ->withInput()
@@ -77,6 +78,7 @@ class Login extends BaseController
 
         // Comprobar si está activo
         if (isset($user->is_active) && (int) $user->is_active !== 1) {
+            log_message('error', "[Login DEBUG] User inactive: {$email}");
             return redirect()
                 ->back()
                 ->withInput()
@@ -89,6 +91,7 @@ class Login extends BaseController
         $verifyOk = ($hash !== '' && password_verify($password, $hash));
 
         if (!$verifyOk) {
+            log_message('error', "[Login DEBUG] Password verification failed for user: {$email}");
             return redirect()
                 ->back()
                 ->withInput()
