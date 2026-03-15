@@ -45,7 +45,7 @@ $routes->post('billing/cancel-subscription', 'Billing::cancel_subscription');
 $routes->get('billing/paypal/return', 'Billing::paypalReturn');
 
 $routes->get('consumption', 'Usage::index');
-$routes->get('precios-radar', 'RadarPrices::index');
+$routes->get('leads-empresas-nuevas', 'RadarPrices::index');
 $routes->get('radar', 'Radar::index', ['filter' => 'subscription:radar']); // Radar PRO
 $routes->get('radar/quickview/(:num)', 'Radar::quickView/$1');
 $routes->get('radar/favoritos', 'Radar::favorites');
@@ -53,6 +53,11 @@ $routes->get('radar/exportar', 'Radar::export');
 $routes->post('radar/toggle-favorite', 'Radar::toggleFavorite');
 $routes->post('radar/save-note', 'Radar::saveNote');
 $routes->get('radar/map-data', 'Radar::mapData');
+$routes->get('radar/kanban', 'Radar::kanban', ['filter' => 'subscription:radar']);
+$routes->post('radar/updateFavoriteStatus', 'Radar::updateFavoriteStatus', ['filter' => 'subscription:radar']);
+$routes->get('radar/trends', 'Radar::trends', ['filter' => 'subscription:radar']);
+$routes->get('radar/trend-data', 'Radar::getTrendData', ['filter' => 'subscription:radar']);
+$routes->get('radar/ai-analyze/(:num)', 'Radar::aiAnalyze/$1', ['filter' => 'subscription:radar']);
 $routes->get('contact', 'Contact::index');
 $routes->get('blog', 'Blog::index');
 $routes->get('blog/post', 'Blog::post');

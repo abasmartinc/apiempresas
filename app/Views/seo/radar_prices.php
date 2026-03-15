@@ -2,9 +2,9 @@
 <html lang="es">
 <head>
     <?= view('partials/head', [
-        'title'       => 'Radar de Nuevas Empresas en España | Detecta Leads B2B Cada Día',
-        'excerptText' => 'Detecta empresas recién creadas en España y accede a oportunidades comerciales antes que tu competencia. Datos del BORME actualizados diariamente.',
-        'canonical'   => site_url('precios-radar'),
+        'title'       => 'Leads de Empresas Nuevas en España | Captación Comercial B2B',
+        'excerptText' => 'Consigue leads diarios de empresas recién constituidas en España. Accede a oportunidades comerciales antes que tu competencia con análisis de IA.',
+        'canonical'   => site_url('leads-empresas-nuevas'),
         'robots'      => 'index,follow',
     ]) ?>
     <link rel="stylesheet" href="<?= base_url('public/css/precios_radar.css?v=' . (file_exists(FCPATH . 'public/css/precios_radar.css') ? filemtime(FCPATH . 'public/css/precios_radar.css') : time())) ?>" />
@@ -28,7 +28,7 @@
                 </h1>
 
                 <p class="radar-hero__subtitle">
-                    Accede cada día a nuevas sociedades detectadas desde el BORME, filtra por sector o provincia y exporta leads listos para prospección comercial.
+                    Accede cada día a nuevas sociedades, analízalas con <strong>Inteligencia Artificial</strong> para detectar nichos y puntos de dolor, y exporta leads listos para prospección.
                 </p>
 
                 <div class="radar-hero__proof">
@@ -47,18 +47,13 @@
                 </div>
 
                 <div class="radar-hero__actions">
-                    <form method="post" action="<?= site_url('billing/checkout') ?>" style="display:contents;">
-                        <?= csrf_field() ?>
-                        <input type="hidden" name="plan" value="radar">
-                        <input type="hidden" name="period" value="monthly">
-                        <button type="submit" class="radar-btn radar-btn--primary">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <polyline points="12 6 12 12 16 14"></polyline>
-                            </svg>
-                            Activar Radar
-                        </button>
-                    </form>
+                    <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="radar-btn radar-btn--primary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        Activar Radar
+                    </a>
 
                     <a href="#radar-pricing" class="radar-btn radar-btn--ghost">
                         Ver plan Radar
@@ -113,14 +108,9 @@
                     <p class="radar-text">
                         Si llegas antes que otros proveedores, tu probabilidad de cerrar una primera venta aumenta significativamente. Radar te permite detectar esas empresas justo en el momento adecuado.
                     </p>
-                    <form method="post" action="<?= site_url('billing/checkout') ?>" style="display:contents;">
-                        <?= csrf_field() ?>
-                        <input type="hidden" name="plan" value="radar">
-                        <input type="hidden" name="period" value="monthly">
-                        <button type="submit" class="radar-btn radar-btn--primary radar-btn--inline">
-                            Activar Radar
-                        </button>
-                    </form>
+                    <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="radar-btn radar-btn--primary radar-btn--inline">
+                        Activar Radar
+                    </a>
                 </div>
 
                 <div class="radar-timeline">
@@ -145,6 +135,56 @@
                             <p>Descargas los leads en Excel o CSV y empiezas tu prospección comercial ese mismo día.</p>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    <section class="radar-section radar-section--ai">
+        <div class="container">
+            <div class="radar-ai-grid">
+                <div class="radar-ai-visual">
+                    <div class="radar-ai-card">
+                        <div class="radar-ai-card__header">
+                            <span class="radar-ai-card__tag">Análisis IA</span>
+                            <h3>ACME Software Solutions</h3>
+                        </div>
+                        <div class="radar-ai-card__body">
+                            <div class="radar-ai-feature">
+                                <strong>🎯 Nicho Comercial</strong>
+                                <p>SaaS de gestión logística para última milla.</p>
+                            </div>
+                            <div class="radar-ai-feature">
+                                <strong>👤 Persona Ideal</strong>
+                                <p>Director de Operaciones / CTO</p>
+                            </div>
+                            <div class="radar-ai-feature">
+                                <strong>🔥 Puntos de Dolor</strong>
+                                <ul>
+                                    <li>Ineficiencia en rutas de reparto.</li>
+                                    <li>Falta de trazabilidad en tiempo real.</li>
+                                    <li>Altos costes operativos por devoluciones.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="radar-ai-card__footer">
+                            <div class="radar-ai-script">
+                                <span>Cold Call Script:</span>
+                                "Hola [Nombre], he visto que acabáis de constituir ACME. Muchas empresas en logística tienen problemas con [Dolor]..."
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="radar-ai-content">
+                    <div class="radar-kicker">Nuevo: Inteligencia Artificial</div>
+                    <h2 class="radar-title">Análisis profundo de cada lead con IA</h2>
+                    <p class="radar-text">
+                        No pierdas tiempo investigando qué hace cada empresa. Nuestra IA analiza el nombre, sector y ubicación para darte información accionable al instante.
+                    </p>
+                    <ul class="radar-ai-list">
+                        <li><strong>Detección de Nicho:</strong> Entiende exactamente a qué se dedican en segundos.</li>
+                        <li><strong>Buyer Persona:</strong> Identifica al cargo con mayor probabilidad de compra.</li>
+                        <li><strong>Pain Points:</strong> Descubre los desafíos que probablemente enfrentan.</li>
+                        <li><strong>Scripts de Venta:</strong> Guiones personalizados para llamadas y emails listos para usar.</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -268,6 +308,14 @@
 
             <div class="radar-includes">
                 <div class="radar-include">
+                    <div class="radar-include__icon">✨</div>
+                    <span>Análisis inteligente con IA incluído</span>
+                </div>
+                <div class="radar-include">
+                    <div class="radar-include__icon">📞</div>
+                    <span>Guiones de venta y email personalizados</span>
+                </div>
+                <div class="radar-include">
                     <div class="radar-include__icon">✓</div>
                     <span>Empresas nuevas detectadas diariamente</span>
                 </div>
@@ -281,14 +329,6 @@
                 </div>
                 <div class="radar-include">
                     <div class="radar-include__icon">✓</div>
-                    <span>Fecha de constitución</span>
-                </div>
-                <div class="radar-include">
-                    <div class="radar-include__icon">✓</div>
-                    <span>Filtros por actividad y provincia</span>
-                </div>
-                <div class="radar-include">
-                    <div class="radar-include__icon">✓</div>
                     <span>Exportación a Excel / CSV</span>
                 </div>
             </div>
@@ -299,7 +339,7 @@
         <div class="container">
             <div class="radar-band__header">
                 <div class="radar-kicker radar-kicker--dark">Datos del mercado</div>
-                <h2 class="radar-band__title">La base de datos más completa de nuevas empresas en España</h2>
+                <h2 class="radar-band__title">La base de datos más completa <br> de nuevas empresas en España</h2>
             </div>
 
             <div class="radar-metrics">
@@ -348,14 +388,9 @@
                             <li>Sin permanencia</li>
                         </ul>
 
-                        <form method="post" action="<?= site_url('billing/checkout') ?>" style="display:contents;">
-                            <?= csrf_field() ?>
-                            <input type="hidden" name="plan" value="radar">
-                            <input type="hidden" name="period" value="monthly">
-                            <button type="submit" class="radar-btn radar-btn--primary radar-btn--full">
-                                Activar Radar
-                            </button>
-                        </form>
+                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="radar-btn radar-btn--primary radar-btn--full">
+                            Activar Radar
+                        </a>
 
                         <div class="radar-pricing-card__footnote">
                             Cancela cuando quieras
@@ -401,48 +436,70 @@
                     <thead>
                         <tr>
                             <th></th>
-                            <th class="radar-comparison__col-main">Radar mensual</th>
-                            <th>Excel puntual</th>
+                            <th class="radar-comparison__col-radar">
+                                <div class="radar-comparison__badge">Suscripción</div>
+                                Radar mensual
+                            </th>
+                            <th class="radar-comparison__col-excel">Excel puntual</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td>Actualización</td>
-                            <td class="radar-comparison__col-main">Diaria automática</td>
-                            <td>Descarga única</td>
+                            <td class="radar-comparison__col-radar">
+                                <span class="radar-comparison__val-icon">⚡</span>
+                                Diaria automática
+                            </td>
+                            <td class="radar-comparison__col-excel">Descarga única</td>
                         </tr>
                         <tr>
                             <td>Filtros</td>
-                            <td class="radar-comparison__col-main">Avanzados por sector, provincia y fecha</td>
-                            <td>Sin filtros dinámicos</td>
+                            <td class="radar-comparison__col-radar">
+                                <span class="radar-comparison__val-icon">🔍</span>
+                                Avanzados e ilimitados
+                            </td>
+                            <td class="radar-comparison__col-excel">Sin filtros dinámicos</td>
                         </tr>
                         <tr>
                             <td>Leads nuevos</td>
-                            <td class="radar-comparison__col-main">Cada día</td>
-                            <td>Datos estáticos</td>
+                            <td class="radar-comparison__col-radar">
+                                <span class="radar-comparison__val-icon">✨</span>
+                                Cada día (BORME)
+                            </td>
+                            <td class="radar-comparison__col-excel">Datos estáticos</td>
                         </tr>
                         <tr>
                             <td>Exportación</td>
-                            <td class="radar-comparison__col-main">Ilimitada</td>
-                            <td>Puntual</td>
+                            <td class="radar-comparison__col-radar">
+                                <span class="radar-comparison__val-icon">📂</span>
+                                Ilimitada
+                            </td>
+                            <td class="radar-comparison__col-excel">Puntual / Por pago</td>
+                        </tr>
+                        <tr>
+                            <td>IA Analysis</td>
+                            <td class="radar-comparison__col-radar">
+                                <span class="radar-comparison__val-icon">🤖</span>
+                                Incluido (Nichos/Guiones)
+                            </td>
+                            <td class="radar-comparison__col-excel">No incluido</td>
                         </tr>
                         <tr>
                             <td>Precio</td>
-                            <td class="radar-comparison__col-main"><strong>79€/mes</strong></td>
-                            <td>Desde 2€ por listado</td>
+                            <td class="radar-comparison__col-radar">
+                                <div class="radar-comparison__price">79€<span>/mes</span></div>
+                            </td>
+                            <td class="radar-comparison__col-excel">
+                                <div class="radar-comparison__price-alt">Desde 2€<span>/listado</span></div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
 
                 <div class="radar-comparison__cta">
-                    <form method="post" action="<?= site_url('billing/checkout') ?>" style="display:inline;">
-                        <?= csrf_field() ?>
-                        <input type="hidden" name="plan" value="radar">
-                        <input type="hidden" name="period" value="monthly">
-                        <button type="submit" class="radar-btn radar-btn--primary">
-                            Activar Radar
-                        </button>
-                    </form>
+                    <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="radar-btn radar-btn--primary">
+                        Activar Radar
+                    </a>
                     <p>
                         O <a href="<?= site_url('billing/single_checkout?period=30days') ?>">descarga un listado puntual</a>
                     </p>
@@ -485,20 +542,15 @@
 
     <section class="radar-final">
         <div class="container">
-            <div class="radar-final__shell">
+            <div class="radar-final__card">
                 <div class="radar-kicker radar-kicker--dark">Empieza hoy</div>
                 <h2>Empieza a detectar nuevas empresas hoy</h2>
                 <p>
                     Accede al Radar y convierte nuevas constituciones mercantiles en oportunidades comerciales reales cada día.
                 </p>
-                <form method="post" action="<?= site_url('billing/checkout') ?>" style="display:contents;">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="plan" value="radar">
-                    <input type="hidden" name="period" value="monthly">
-                    <button type="submit" class="radar-btn radar-btn--white">
-                        Activar Radar
-                    </button>
-                </form>
+                <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="radar-btn radar-btn--yellow">
+                    Activar Radar
+                </a>
                 <small>Sin permanencia · Cancela cuando quieras</small>
             </div>
         </div>

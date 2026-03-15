@@ -64,8 +64,8 @@ $getCommercialSignals = function($sector, $object) {
     return 'asesoría · software · marketing';
 };
 
-$buildCheckoutUrl = site_url('billing/single_checkout') .
-    '?period=' . urlencode($period === 'general' ? '30days' : ($period ?? ''));
+$buildCheckoutUrl = site_url('checkout/radar-export') .
+    '?type=single&period=' . urlencode($period === 'general' ? '30days' : ($period ?? ''));
 
 $companies = $companies ?? [];
 $paywall_level = $paywall_level ?? 'strong';
@@ -132,8 +132,8 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                         </a>
 
                         <?php if (!($is_low_results ?? false)): ?>
-                            <a href="<?= site_url('precios-radar') ?>" class="ae-radar-page__btn ae-radar-page__btn--ghost">
-                                Ver planes
+                            <a href="<?= site_url('leads-empresas-nuevas') ?>" class="ae-radar-page__btn ae-radar-page__btn--ghost">
+                                Descubre los beneficios del Radar PRO
                             </a>
 
                             <a href="<?= $buildCheckoutUrl ?>" class="ae-radar-page__btn ae-radar-page__btn--soft">
@@ -157,9 +157,9 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                         </div>
 
                         <div class="ae-radar-page__hero-panel-actions">
-                            <a href="<?= site_url('radar') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary ae-radar-page__btn--panel">
-                                Abrir Radar
-                            </a>
+                                <a href="<?= site_url('leads-empresas-nuevas') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary ae-radar-page__btn--panel">
+                                    Conoce el Radar y capta más clientes
+                                </a>
                         </div>
                     </div>
 
@@ -517,7 +517,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     </div>
 
                     <div class="ae-radar-page__paywall-actions">
-                        <a href="<?= site_url('radar') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--primary">
+                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--primary">
                             <span>Abrir Radar</span>
                             <span class="ae-radar-page__paywall-price-tag">79€/mes</span>
                         </a>

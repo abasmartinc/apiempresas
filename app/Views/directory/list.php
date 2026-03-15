@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="es">
 <head>
     <?= view('partials/head', ['title' => $title, 'excerptText' => $meta_description]) ?>
@@ -306,8 +306,8 @@
                             Estás visualizando la muestra gratuita de las últimas empresas. Desbloquea el Radar para acceder a todas las nuevas constituciones diarias.
                         </p>
                         <div style="display: flex; flex-direction: column; gap: 12px;">
-                            <a href="<?= site_url('precios-radar') ?>" style="background: var(--dir-primary); color: white; padding: 16px 24px; border-radius: 12px; font-weight: 800; text-decoration: none; box-shadow: 0 8px 16px rgba(33, 82, 255, 0.2);">
-                                Abrir Radar Premium
+                            <a href="<?= site_url('leads-empresas-nuevas') ?>" style="background: var(--dir-primary); color: white; padding: 16px 24px; border-radius: 12px; font-weight: 800; text-decoration: none; box-shadow: 0 8px 16px rgba(33, 82, 255, 0.2);">
+                                Activar Radar PRO ahora
                             </a>
                             <a href="<?= site_url('billing/single_checkout?provincia=España&period=30days') ?>" style="background: white; color: #0f172a; border: 1px solid #cbd5e1; padding: 14px 24px; border-radius: 12px; font-weight: 700; text-decoration: none;">
                                 Descargar Últimas 30 Días (Excel) · 9€
@@ -318,11 +318,11 @@
             <?php endif; ?>
         </div>
 
-        <?php if (!empty($pager) && ($pager['prev'] || $pager['next'])): ?>
+        <?php if (!empty($pagination) && ($pagination['prev'] || $pagination['next'])): ?>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e2e8f0;">
             
-            <?php if ($pager['prev']): ?>
-            <a href="<?= esc($pager['prev']) ?>" class="btn secondary" style="display: flex; align-items: center; gap: 8px;">
+            <?php if ($pagination['prev']): ?>
+            <a href="<?= esc($pagination['prev']) ?>" class="btn secondary" style="display: flex; align-items: center; gap: 8px;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                 Página Anterior
             </a>
@@ -334,11 +334,11 @@
             <?php endif; ?>
 
             <span style="font-weight: 600; color: var(--dir-slate-600);">
-                Página <?= esc($pager['current']) ?>
+                Página <?= esc($pagination['current']) ?>
             </span>
 
-            <?php if ($pager['next']): ?>
-            <a href="<?= esc($pager['next']) ?>" class="btn secondary" style="display: flex; align-items: center; gap: 8px;">
+            <?php if ($pagination['next']): ?>
+            <a href="<?= esc($pagination['next']) ?>" class="btn secondary" style="display: flex; align-items: center; gap: 8px;">
                 Siguiente Página
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
             </a>

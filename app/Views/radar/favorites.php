@@ -127,6 +127,16 @@
                         <span class="ae-radar-page__nav-icon">⭐</span>
                         Mis favoritos
                     </a>
+                    
+                    <a href="<?= site_url('radar/kanban') ?>" class="ae-radar-page__nav-link">
+                        <span class="ae-radar-page__nav-icon">📋</span>
+                        Embudo (Kanban)
+                    </a>
+                    
+                    <a href="<?= site_url('radar/trends') ?>" class="ae-radar-page__nav-link">
+                        <span class="ae-radar-page__nav-icon">📈</span>
+                        Análisis de Tendencias
+                    </a>
                 </div>
             </div>
             <div class="ae-radar-page__sidebar-footer">

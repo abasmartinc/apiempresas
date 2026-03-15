@@ -64,7 +64,7 @@ $getCommercialSignals = function($sector, $object) {
     return 'asesoría · software · marketing';
 };
 
-$buildCheckoutUrl = site_url('billing/single_checkout') . '?period=30days';
+$buildCheckoutUrl = site_url('checkout/radar-export') . '?type=single&provincia=España&period=30days';
 
 $companies = $companies ?? [];
 $freeCount = 10; // More leads for the national hub
@@ -107,8 +107,8 @@ $province = 'España';
                 </p>
 
                 <div class="ae-radar-page__hero-actions">
-                    <a href="<?= site_url('precios-radar') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary">
-                        Abrir Radar Pro
+                    <a href="<?= site_url('leads-empresas-nuevas') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary">
+                        Descubrir nuevas empresas ahora
                     </a>
                     <a href="#leads-b2b-recientes" class="ae-radar-page__btn ae-radar-page__btn--ghost">
                         Ver últimas 10
@@ -126,8 +126,8 @@ $province = 'España';
                     </div>
 
                     <div class="ae-radar-page__hero-panel-actions">
-                        <a href="<?= site_url('precios-radar') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary ae-radar-page__btn--panel">
-                            Abrir Radar
+                        <a href="<?= site_url('leads-empresas-nuevas') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary ae-radar-page__btn--panel">
+                            Impulsar mis ventas con Radar
                         </a>
                     </div>
                 </div>
@@ -298,8 +298,8 @@ $province = 'España';
                                 </div>
 
                                 <div class="ae-radar-page__premium-strip-actions">
-                                    <a href="<?= site_url('precios-radar') ?>" class="ae-radar-page__premium-btn ae-radar-page__premium-btn--light">
-                                        Abrir Radar
+                                    <a href="<?= site_url('leads-empresas-nuevas') ?>" class="ae-radar-page__premium-btn ae-radar-page__premium-btn--light">
+                                        Impulsar mis ventas con Radar
                                     </a>
                                     <a href="<?= site_url('billing/single_checkout?period=30days') ?>" class="ae-radar-page__premium-btn ae-radar-page__premium-btn--dark">
                                         Descargar Nacional · <?= number_format($dynamic_price['base_price'] ?? 19, 0) ?>€
@@ -355,12 +355,12 @@ $province = 'España';
                                 </div>
 
                                 <div class="ae-radar-page__paywall-actions">
-                                    <a href="<?= site_url('precios-radar') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--primary">
-                                        <span>Planes Radar Pro</span>
+                                    <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--primary">
+                                        <span>Activar Radar PRO ahora</span>
                                         <span class="ae-radar-page__paywall-price-tag">79€/mes</span>
                                     </a>
 
-                                    <a href="<?= site_url('billing/single_checkout?period=30days') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--secondary">
+                                    <a href="<?= site_url('checkout/radar-export?type=single&provincia=España&period=30days') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--secondary">
                                         <span>Descargar Excel Nacional</span>
                                         <span class="ae-radar-page__paywall-secondary-price">19€</span>
                                     </a>

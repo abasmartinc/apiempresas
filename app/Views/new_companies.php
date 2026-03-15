@@ -27,7 +27,7 @@
                     </p>
 
                     <div class="cta-row">
-                        <a class="btn btn_start" href="<?= site_url() ?>register">Ver empresas nuevas ahora</a>
+                        <a class="btn btn_start" href="<?= site_url('register/quick') ?>">Ver empresas nuevas ahora</a>
                         <a class="btn ghost" href="#como-funciona">Saber cómo funciona</a>
                     </div>
                 </div>
@@ -195,12 +195,12 @@
                             </li>
                         </ul>
 
-                        <a class="btn secondary" style="width:100%; margin-top:30px; justify-content:center;" href="<?= site_url() ?>register?interest=radar">Activar Radar PRO</a>
+                        <a class="btn secondary" style="width:100%; margin-top:30px; justify-content:center;" href="<?= site_url('billing/checkout?plan=radar&period=monthly') ?>">Activar Radar PRO</a>
                     </div>
                 </div>
                 
                 <p class="muted" style="margin-top:20px; font-size:14px;">
-                    ¿Prefieres probarlo? <a href="<?= site_url() ?>register" style="color:var(--primary); text-decoration:underline; font-weight:700;">Regístrate gratis</a> y consulta las últimas 10 empresas de hoy.
+                    ¿Prefieres probarlo? <a href="<?= site_url('register/quick') ?>" style="color:var(--primary); text-decoration:underline; font-weight:700;">Regístrate gratis</a> y consulta las últimas 10 empresas de hoy.
                 </p>
             </div>
         </section>
@@ -243,7 +243,7 @@
                         <p class="muted">Únete a cientos de empresas que ya utilizan el Radar para hacer crecer su negocio.</p>
                     </div>
                     <div class="cta-actions">
-                        <a class="btn btn_start" href="<?= site_url() ?>register">Probar Radar Gratis</a>
+                        <a class="btn btn_start" href="<?= site_url('register/quick') ?>">Probar Radar Gratis</a>
                     </div>
                 </div>
             </div>

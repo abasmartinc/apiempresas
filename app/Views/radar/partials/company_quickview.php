@@ -103,8 +103,8 @@
         </div>
 
         <div class="ae-qv__actions">
-            <a href="<?= $isFree ? site_url('precios-radar') : company_url(['cif' => $co['cif'], 'name' => $co['company_name']]) ?>" class="ae-qv__btn ae-qv__btn--primary">
-                Ver ficha completa <?= $isFree ? '🔒' : '→' ?>
+            <a href="<?= $isFree ? site_url('leads-empresas-nuevas') : company_url(['cif' => $co['cif'], 'name' => $co['company_name']]) ?>" class="ae-qv__btn ae-qv__btn--primary">
+                <?= $isFree ? 'Activar Radar PRO ahora' : 'Ver perfil completo' ?>
             </a>
             <button type="button" class="ae-qv__btn ae-qv__btn--text" onclick="closeQuickView()">Cerrar</button>
         </div>

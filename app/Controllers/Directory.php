@@ -127,7 +127,7 @@ class Directory extends BaseController
                 'items' => $topCnaes,
                 'province' => $provinceName
             ],
-            'pager'     => [
+            'pagination' => [
                 'current' => $page,
                 'next'    => site_url("directorio/provincia/" . urlencode($provinceName) . "/" . ($page + 1)),
                 'prev'    => ($page > 1) ? site_url("directorio/provincia/" . urlencode($provinceName) . "/" . ($page - 1)) : null,
@@ -189,7 +189,7 @@ class Directory extends BaseController
                 'items' => $topProvinces,
                 'cnae' => $cnaeCode
             ],
-            'pager'     => [
+            'pagination' => [
                 'current' => $page,
                 'next'    => site_url("directorio/cnae/{$cnaeCode}/" . ($page + 1)),
                 'prev'    => ($page > 1) ? site_url("directorio/cnae/{$cnaeCode}/" . ($page - 1)) : null,
@@ -225,7 +225,7 @@ class Directory extends BaseController
             'title'     => "Últimas empresas registradas en España | Página {$page} | APIEmpresas.es",
             'header'    => "Últimas Empresas Registradas",
             'meta_description' => "Consulte el listado de las sociedades de reciente creación en España. Datos actualizados del BORME y Registro Mercantil.",
-            'pager'     => [
+            'pagination' => [
                 'current' => $page,
                 'next'    => site_url("directorio/ultimas-empresas-registradas/" . ($page + 1)),
                 'prev'    => ($page > 1) ? site_url("directorio/ultimas-empresas-registradas/" . ($page - 1)) : null,
@@ -265,7 +265,7 @@ class Directory extends BaseController
             'title'     => "Empresas de {$cnaeLabel} en {$provinceName} | Página {$page}",
             'header'    => "{$cnaeLabel} en {$provinceName}",
             'meta_description' => "Listado de empresas en el sector {$cnaeLabel} ubicadas en {$provinceName} (Página {$page}). Datos de contacto y CIF.",
-            'pager'     => [
+            'pagination' => [
                 'current' => $page,
                 'next'    => site_url("directorio/provincia/" . urlencode($provinceName) . "/cnae/{$cnaeCode}/" . ($page + 1)),
                 'prev'    => ($page > 1) ? site_url("directorio/provincia/" . urlencode($provinceName) . "/cnae/{$cnaeCode}/" . ($page - 1)) : null,

@@ -62,7 +62,7 @@ class SubscriptionFilter implements FilterInterface
             }
 
             // Si no tiene acceso vía web, redirigir a la página de precios correspondiente
-            $redirectUrl = ($productType === 'radar') ? 'precios-radar' : 'prices';
+            $redirectUrl = ($productType === 'radar') ? 'leads-empresas-nuevas' : 'prices';
             return redirect()->to(site_url($redirectUrl))->with('error', 'Necesitas una suscripción activa para acceder a esta sección.');
         }
 

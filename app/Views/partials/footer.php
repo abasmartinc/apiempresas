@@ -48,7 +48,7 @@
 
 
                     <div class="brand-text">
-                        <span class="brand-name">Verifica<span class="grad">Empresas</span>.es</span>
+                        <span class="brand-name">API<span class="grad">Empresas</span>.es</span>
                         <span class="brand-tag">API de verificación mercantil en segundos</span>
                     </div>
                 </div>
@@ -60,25 +60,38 @@
                 
             </div>
             <div>
-                <h4 style="margin:0 0 8px">Producto</h4>
-                <a class="minor" href="<?=site_url() ?>blog">Guías y artículos</a><br />
-                <a class="minor" href="<?=site_url() ?>directorio">Directorio SEO</a><br />
-                <a class="minor" href="<?=site_url() ?>search_company">Buscador</a><br />
-                <a class="minor" href="<?=site_url() ?>documentation">Documentación</a><br />
-                <a class="minor" target="_blank" href="https://validatebusiness.com/">Validate your business in florida</a>
+                <h4 style="margin:0 0 12px">Radar Pro</h4>
+                <a class="minor" href="<?=site_url('empresas-nuevas-hoy') ?>">Empresas nuevas hoy</a><br />
+                <a class="minor" href="<?=site_url('empresas-nuevas-semana') ?>">Empresas esta semana</a><br />
+                <a class="minor" href="<?=site_url('empresas-nuevas-mes') ?>">Empresas este mes</a><br />
+                <a class="minor" href="<?=site_url('empresas-nuevas') ?>">Listado Nacional</a>
             </div>
             <div>
-                <h4 style="margin:0 0 8px">Top Provincias</h4>
+                <h4 style="margin:0 0 12px">Top Provincias</h4>
                 <a class="minor" href="<?=site_url('empresas/madrid') ?>">Empresas en Madrid</a><br />
                 <a class="minor" href="<?=site_url('empresas/barcelona') ?>">Empresas en Barcelona</a><br />
                 <a class="minor" href="<?=site_url('empresas/valencia') ?>">Empresas en Valencia</a><br />
                 <a class="minor" href="<?=site_url('empresas/sevilla') ?>">Empresas en Sevilla</a><br />
+                <a class="minor" href="<?=site_url('empresas-nuevas/madrid') ?>">Nuevas en Madrid</a><br />
+                <a class="minor" href="<?=site_url('empresas-nuevas/barcelona') ?>">Nuevas en Barcelona</a><br />
+                <a class="minor" href="<?=site_url('directorio') ?>">Ver todas</a>
             </div>
             <div>
-                <h4 style="margin:0 0 8px">Legal</h4>
-                <a href="#" class="minor" data-open-modal="modalPrivacy">Política de privacidad</a><br/>
-                <a href="#" class="minor" data-open-modal="modalTerms">Términos de uso</a><br/>
-                <a class="minor" href="<?=site_url() ?>contact">Contacto</a>
+                <h4 style="margin:0 0 12px">Sectores</h4>
+                <a class="minor" href="<?=site_url('empresas-nuevas-sector/hosteleria') ?>">Hostelería</a><br />
+                <a class="minor" href="<?=site_url('empresas-nuevas-sector/construccion') ?>">Construcción</a><br />
+                <a class="minor" href="<?=site_url('empresas-nuevas-sector/programacion-informatica') ?>">Programación e IT</a><br />
+                <a class="minor" href="<?=site_url('empresas-nuevas-sector/hosteleria/madrid') ?>">Hostelería en Madrid</a><br />
+                <a class="minor" href="<?=site_url('empresas-nuevas-sector/programacion-informatica/barcelona') ?>">IT en Barcelona</a><br />
+                <a class="minor" href="<?=site_url('blog') ?>">Más sectores</a>
+            </div>
+            <div>
+                <h4 style="margin:0 0 12px">Producto</h4>
+                <a class="minor" href="<?=site_url() ?>leads-empresas-nuevas">Planes y Beneficios Radar</a><br />
+                <a class="minor" href="<?=site_url() ?>search_company">Buscador</a><br />
+                <a class="minor" href="<?=site_url() ?>documentation">Documentación API</a><br />
+                <a class="minor" href="<?=site_url() ?>contact">Contacto</a><br />
+                <a href="#" class="minor" data-open-modal="modalPrivacy">Privacidad</a> · <a href="#" class="minor" data-open-modal="modalTerms">Términos</a>
             </div>
         </div>
     </div>

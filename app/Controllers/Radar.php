@@ -195,32 +195,11 @@ class Radar extends BaseController
         // 3. Datos para Filtros
         $provinces = $db->query("SELECT province as name FROM seo_stats ORDER BY total_companies DESC LIMIT 52")->getResultArray();
         
-        // Sectores: Mostramos las secciones que han tenido actividad REAL reciente (empresas en los últimos 90 días)
-        $topSectors = $db->query("
-            SELECT s.id as code, s.name as label, COUNT(c.id) as total
-            FROM cnae_sections s
-            JOIN cnae_groups g ON g.parent_section_id = s.id
-            JOIN cnae_classes cl ON cl.parent_group_id = g.id
-            JOIN cnae_subclasses sub ON sub.parent_class_id = cl.id
-            JOIN cnae_2009_2025 c2009 ON CONVERT(c2009.label_2009 USING utf8mb4) = CONVERT(sub.name USING utf8mb4)
-            JOIN companies c ON CONVERT(c.cnae_code USING utf8mb4) = CONVERT(c2009.cnae_2009 USING utf8mb4)
-            WHERE c.fecha_constitucion >= ?
-            GROUP BY s.id, s.name
-            ORDER BY total DESC
-            LIMIT 12
-        ", [date('Y-m-d', strtotime('-90 days'))])->getResultArray();
-
-        // Si por alguna razón no hay datos suficientes, fallback a lista ordenada
-        if (empty($topSectors)) {
-            $topSectors = $db->query("SELECT id as code, name as label FROM cnae_sections ORDER BY name ASC LIMIT 12")->getResultArray();
-        }
-
         $data = [
             'stats' => $stats,
             'companies' => $companies,
             'pager' => $pager,
             'provinces' => $provinces,
-            'topSectors' => $topSectors,
             'filters' => [
                 'provincia' => $province,
                 'cnae' => $cnae,
@@ -349,6 +328,73 @@ class Radar extends BaseController
     }
 
     /**
+     * Vista de Embudo de Ventas (Kanban)
+     */
+    public function kanban()
+    {
+        if (!session('logged_in')) {
+            return redirect()->to(site_url('enter'));
+        }
+
+        $userId = session('user_id');
+        $favorites = $this->favoriteModel->getFavoritesWithCompanyData($userId);
+
+        // Agrupar por estado
+        $columns = [
+            'nuevo' => [],
+            'contactado' => [],
+            'negociacion' => [],
+            'ganado' => []
+        ];
+
+        foreach ($favorites as &$f) {
+            $f['lead_score'] = $this->getLeadScore($f);
+            $status = $f['status'] ?: 'nuevo';
+            if (isset($columns[$status])) {
+                $columns[$status][] = $f;
+            } else {
+                $columns['nuevo'][] = $f;
+            }
+        }
+
+        $data = [
+            'columns' => $columns,
+            'title' => 'Embudo de Ventas - Radar PRO'
+        ];
+
+        return view('radar/kanban', $data);
+    }
+
+    /**
+     * Actualizar el estado de un favorito (AJAX para Kanban)
+     */
+    public function updateFavoriteStatus()
+    {
+        if (!session('logged_in')) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
+        }
+
+        $userId = session('user_id');
+        $favoriteId = $this->request->getPost('favorite_id');
+        $status = $this->request->getPost('status');
+
+        $allowedStatuses = ['nuevo', 'contactado', 'negociacion', 'ganado'];
+        if (!in_array($status, $allowedStatuses)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid status']);
+        }
+
+        $favorite = $this->favoriteModel->where(['id' => $favoriteId, 'user_id' => $userId])->first();
+
+        if (!$favorite) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Favorite not found']);
+        }
+
+        $this->favoriteModel->update($favoriteId, ['status' => $status]);
+
+        return $this->response->setJSON(['status' => 'success']);
+    }
+
+    /**
      * Exportar resultados actuales a CSV
      */
     /**
@@ -364,7 +410,7 @@ class Radar extends BaseController
         $activePlan = $this->subscriptionModel->getActivePlanByUserId($userId);
         
         if (!$activePlan || !in_array($activePlan->product_type, ['radar', 'bundle'])) {
-            return redirect()->to(site_url('precios-radar'))->with('message', 'La exportación requiere un plan activo.');
+            return redirect()->to(site_url('leads-empresas-nuevas'))->with('message', 'La exportación requiere un plan activo.');
         }
 
         $format = $this->request->getGet('format') ?? 'csv';
@@ -523,5 +569,220 @@ class Radar extends BaseController
         if ($score >= 70) return 'A';
         if ($score >= 50) return 'B';
         return 'C';
+    }
+
+    /**
+     * Vista principal de Análisis de Tendencias
+     */
+    public function trends()
+    {
+        if (!session('logged_in')) {
+            return redirect()->to(site_url('enter'));
+        }
+
+        $userId = session('user_id');
+        $activePlan = $this->subscriptionModel->getActivePlanByUserId($userId);
+        $isFree = (!$activePlan || !in_array($activePlan->product_type, ['radar', 'bundle']));
+
+        if ($isFree) {
+            return redirect()->to(site_url('leads-empresas-nuevas'))->with('message', 'El análisis de tendencias requiere un plan Radar PRO activo.');
+        }
+
+        $db = \Config\Database::connect();
+        $provinces = $db->query("SELECT province as name FROM seo_stats ORDER BY total_companies DESC LIMIT 52")->getResultArray();
+        $sections = $db->query("SELECT id, name FROM cnae_sections ORDER BY name ASC")->getResultArray();
+
+        $data = [
+            'title' => 'Análisis de Tendencias - Radar PRO',
+            'provinces' => $provinces,
+            'sections' => $sections
+        ];
+
+        return view('radar/trends', $data);
+    }
+
+    /**
+     * Obtener datos históricos para gráficas (AJAX)
+     */
+    public function getTrendData()
+    {
+        if (!session('logged_in')) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
+        }
+
+        $db = \Config\Database::connect();
+        $province = $this->request->getGet('provincia');
+        $sectionId = $this->request->getGet('seccion');
+
+        // 1. Evolución Mensual (últimos 12 meses, excluyendo futuro)
+        $builder = $db->table('companies');
+        $builder->select("DATE_FORMAT(fecha_constitucion, '%Y-%m') as month, COUNT(*) as total");
+        $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-12 months')));
+        $builder->where('fecha_constitucion <=', date('Y-m-d'));
+
+        if ($province) {
+            $builder->where('registro_mercantil', strtoupper(str_replace('-', ' ', $province)));
+        }
+
+        if ($sectionId) {
+            $builder->join('cnae_2009_2025', 'CONVERT(cnae_2009_2025.cnae_2009 USING utf8mb4) = CONVERT(companies.cnae_code USING utf8mb4)', 'inner');
+            $builder->join('cnae_subclasses', 'CONVERT(cnae_subclasses.name USING utf8mb4) = CONVERT(cnae_2009_2025.label_2009 USING utf8mb4)', 'inner');
+            $builder->join('cnae_classes', 'cnae_classes.id = cnae_subclasses.parent_class_id', 'inner');
+            $builder->join('cnae_groups', 'cnae_groups.id = cnae_classes.parent_group_id', 'inner');
+            $builder->where('cnae_groups.parent_section_id', $sectionId);
+        }
+
+        $results = $builder->groupBy('month')
+                               ->orderBy('month', 'ASC')
+                               ->get()
+                               ->getResultArray();
+
+        // 1.1 Rellenar huecos para que siempre haya 12 meses
+        $evolutionRaw = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $m = date('Y-m', strtotime("-$i months"));
+            $found = false;
+            foreach ($results as $row) {
+                if ($row['month'] === $m) {
+                    $evolutionRaw[] = $row;
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $evolutionRaw[] = ['month' => $m, 'total' => 0];
+            }
+        }
+
+        // 2. Comparativa por Sectores Top (últimos 6 meses, excluyendo futuro)
+        $sectorsBuilder = $db->table('cnae_sections s');
+        $sectorsBuilder->select('s.name as label, COUNT(c.id) as total');
+        $sectorsBuilder->join('cnae_groups g', 'g.parent_section_id = s.id');
+        $sectorsBuilder->join('cnae_classes cl', 'cl.parent_group_id = g.id');
+        $sectorsBuilder->join('cnae_subclasses sub', 'sub.parent_class_id = cl.id');
+        $sectorsBuilder->join('cnae_2009_2025 c2', 'CONVERT(c2.label_2009 USING utf8mb4) = CONVERT(sub.name USING utf8mb4)');
+        $sectorsBuilder->join('companies c', 'CONVERT(c.cnae_code USING utf8mb4) = CONVERT(c2.cnae_2009 USING utf8mb4)');
+        $sectorsBuilder->where('c.fecha_constitucion >=', date('Y-m-d', strtotime('-6 months')));
+        $sectorsBuilder->where('c.fecha_constitucion <=', date('Y-m-d'));
+        
+        if ($province) {
+            $sectorsBuilder->where('c.registro_mercantil', strtoupper(str_replace('-', ' ', $province)));
+        }
+        
+        $sectorsRaw = $sectorsBuilder->groupBy('s.id, s.name')
+                                    ->orderBy('total', 'DESC')
+                                    ->limit(8)
+                                    ->get()
+                                    ->getResultArray();
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'evolution' => $evolutionRaw,
+            'sectors' => $sectorsRaw
+        ]);
+    }
+
+    /**
+     * Análisis IA bajo demanda del objeto social (Gemini 1.5 Flash)
+     */
+    public function aiAnalyze($id)
+    {
+        if (!session('logged_in')) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'No autorizado']);
+        }
+
+        $company = $this->companyModel->find($id);
+        if (!$company) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Empresa no encontrada']);
+        }
+
+        $purpose = $company['objeto_social'] ?? '';
+        if (empty($purpose)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'La empresa no tiene objeto social definido para analizar']);
+        }
+
+        $apiKey = trim(env('OPENAI_API_KEY'));
+        if (empty($apiKey)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'IA no configurada. Por favor, añade OPENAI_API_KEY al archivo .env']);
+        }
+
+        $companyName = $company['company_name'] ?? 'Empresa';
+        $location = $company['municipality'] ?? ($company['registro_mercantil'] ?? 'España');
+        $sector = $company['cnae_label'] ?? 'Sector no especificado';
+
+        $prompt = "Analiza el siguiente objeto social de una empresa española recién creada:
+        - Nombre: $companyName
+        - Ubicación: $location
+        - Sector (CNAE): $sector
+        - Objeto Social: \"$purpose\"
+
+        Extrae y devuelve ÚNICAMENTE un objeto JSON con las siguientes claves:
+        1. 'niche': El nicho comercial real en 2 o 3 palabras (ej: 'Paneles Solares', 'Consultoría IA').
+        2. 'summary': Un resumen ejecutivo de 15 palabras máximo que explique qué hace la empresa de forma clara.
+        3. 'target_persona': El cargo o perfil ideal de la persona con la que un vendedor debería contactar (ej: 'Gerente de Mantenimiento', 'Director de Operaciones').
+        4. 'pain_points': Una lista de 3 puntos de dolor (retos o necesidades) que probablemente tenga esta empresa según su actividad (un array de strings).
+        5. 'cold_call': Un script de apertura para llamada en frío de máx 25 palabras para captar su atención.
+        6. 'email_hook': Un objeto con 'subject' (asunto potente) y 'opening' (primera frase gancho) para un email de prospección.";
+
+        $url = "https://api.openai.com/v1/chat/completions";
+
+        $data = [
+            "model" => "gpt-4o-mini",
+            "messages" => [
+                [
+                    "role" => "system",
+                    "content" => "Eres un experto en análisis de datos empresariales y prospección B2B. Responde siempre en formato JSON puro."
+                ],
+                [
+                    "role" => "user",
+                    "content" => $prompt
+                ]
+            ],
+            "response_format" => ["type" => "json_object"],
+            "temperature" => 0.4
+        ];
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $apiKey
+        ]);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            $errorDetail = json_decode($response, true);
+            $msg = $errorDetail['error']['message'] ?? 'Error desconocido';
+            return $this->response->setJSON(['status' => 'error', 'message' => "IA Error ($httpCode): $msg"]);
+        }
+
+        $result = json_decode($response, true);
+        $rawText = $result['choices'][0]['message']['content'] ?? null;
+
+        if (!$rawText) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'La IA no devolvió contenido']);
+        }
+
+        $cleanJson = json_decode($rawText, true);
+
+        if (!$cleanJson) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Error al procesar el formato de la IA']);
+        }
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'niche' => $cleanJson['niche'] ?? 'N/D',
+            'summary' => $cleanJson['summary'] ?? 'No disponible',
+            'target_persona' => $cleanJson['target_persona'] ?? 'Gerente',
+            'pain_points' => $cleanJson['pain_points'] ?? [],
+            'cold_call' => $cleanJson['cold_call'] ?? 'No disponible',
+            'email_hook' => $cleanJson['email_hook'] ?? ['subject' => 'Consulta', 'opening' => 'Hola']
+        ]);
     }
 }

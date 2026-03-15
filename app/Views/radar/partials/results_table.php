@@ -52,15 +52,20 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
                                     <span class="ae-radar-page__score ae-radar-page__score--<?= strtolower(str_replace('+', 'plus', $co['lead_score'])) ?>" title="Score de calidad: <?= $co['lead_score'] ?>">
                                         <?= $co['lead_score'] ?>
                                     </span>
-                                    <a href="<?= $isFree ? site_url('precios-radar') : company_url(['cif' => $co['cif'], 'name' => $co['company_name']]) ?>" class="ae-radar-page__company-link">
+                                    <a href="<?= $isFree ? site_url('leads-empresas-nuevas') : company_url(['cif' => $co['cif'], 'name' => $co['company_name']]) ?>" class="ae-radar-page__company-link">
                                         <span class="ae-radar-page__company-name"><?= esc($co['company_name']) ?></span>
                                     </a>
                                 </div>
                                 <span class="ae-radar-page__company-cif"><?= esc($co['cif']) ?></span>
                             </div>
                             <div class="ae-radar-page__company-actions">
-                                <button type="button" class="ae-radar-page__btn-qv" onclick="openQuickView('<?= $co['id'] ?>')">
-                                    Vista rápida
+                                <button type="button" class="ae-radar-page__btn-qv" onclick="openQuickView('<?= $co['id'] ?>')" title="Vista rápida">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                                <button type="button" class="ae-radar-page__btn-ai" 
+                                        onclick="analyzeAI('<?= $co['id'] ?>', this)" 
+                                        title="Analizar con Inteligencia Artificial">
+                                    ✨ IA
                                 </button>
                                 <button type="button" 
                                         class="ae-radar-page__btn-fav <?= ($co['is_favorite'] ?? false) ? 'is-active' : '' ?>" 
@@ -104,8 +109,8 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
                             </div>
                         </td>
                         <td class="ae-radar-page__td-action" style="text-align:right;">
-                            <a href="<?= $isFree ? site_url('precios-radar') : company_url(['cif' => $co['cif'], 'name' => $co['company_name']]) ?>" class="ae-radar-page__btn-action <?= $isFree ? 'ae-radar-page__btn-action--free' : '' ?>">
-                                <?= $isFree ? 'Ver planes' : 'Ver ficha' ?>
+                            <a href="<?= $isFree ? site_url('leads-empresas-nuevas') : company_url(['cif' => $co['cif'], 'name' => $co['company_name']]) ?>" class="ae-radar-page__btn-action <?= $isFree ? 'ae-radar-page__btn-action--free' : '' ?>">
+                                <?= $isFree ? 'Activar Radar PRO ahora' : 'Ver ficha' ?>
                             </a>
                         </td>
                     </tr>

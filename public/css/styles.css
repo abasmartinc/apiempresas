@@ -518,8 +518,8 @@ footer {
 
 .foot-grid {
     display: grid;
-    gap: 18px;
-    grid-template-columns: 2fr 1fr 1fr
+    gap: 32px;
+    grid-template-columns: 1.5fr repeat(4, 1fr);
 }
 
 @media (max-width: 980px) {
@@ -532,8 +532,10 @@ footer {
     .steps,
     .tiers,
     .foot-grid {
-        grid-template-columns: 1fr
-    }
+    display: grid;
+    gap: 32px;
+    grid-template-columns: 1.5fr repeat(4, 1fr);
+}
 
     .nav .desktop-only {
         display: none
@@ -3785,9 +3787,10 @@ footer a.minor:hover {
 
     /* ——— Footer enlaces ——— */
     footer .foot-grid {
-        grid-template-columns: 1fr !important;
-        gap: 14px
-    }
+    display: grid;
+    gap: 32px;
+    grid-template-columns: 1.5fr repeat(4, 1fr);
+}
 }
 
 /* =========================================================

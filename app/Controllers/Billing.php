@@ -55,17 +55,25 @@ class Billing extends BaseController
      */
     public function checkout()
     {
+        // Enforce preview step if accessed via GET (direct link)
+        if ($this->request->getMethod() === 'get') {
+            $params = $this->request->getGet();
+            // Map plan to type if needed, but order_summary handles generic params well
+            $queryString = $params ? '?' . http_build_query($params) : '';
+            return redirect()->to(site_url('checkout/radar-export' . $queryString));
+        }
+
         if (!session('logged_in')) {
-            // Store purchase context in session
-            session()->set('pending_checkout', $this->request->getPost());
+            // Store purchase context in session (Support GET/POST)
+            session()->set('pending_checkout', $this->request->getVar());
             return redirect()->to(site_url('register/quick'));
         }
 
         $userId = (int) session('user_id');
         $user = $this->userModel->find($userId);
 
-        // Check for pending context in session (after quick register)
-        $postData = $this->request->getPost();
+        // Check for pending context in session (after quick register) or direct params
+        $postData = $this->request->getVar();
         if (empty($postData) || !isset($postData['plan'])) {
             $postData = session('pending_checkout') ?? [];
             session()->remove('pending_checkout');

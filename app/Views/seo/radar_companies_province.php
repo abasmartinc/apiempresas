@@ -98,11 +98,11 @@ $slugProvince = url_title($province, '-', true);
                         </a>
 
                         <?php if (!($is_low_results ?? false)): ?>
-                            <a href="<?= site_url('precios-radar') ?>" class="ae-radar-page__btn ae-radar-page__btn--ghost">
-                                Ver planes
+                            <a href="<?= site_url('leads-empresas-nuevas') ?>" class="ae-radar-page__btn ae-radar-page__btn--ghost">
+                                Ver cómo captar clientes con el Radar
                             </a>
 
-                            <a href="<?= site_url('billing/single_checkout?provincia=' . urlencode($province)) ?>" class="ae-radar-page__btn ae-radar-page__btn--soft">
+                            <a href="<?= site_url('checkout/radar-export?type=single&provincia=' . urlencode($province)) ?>" class="ae-radar-page__btn ae-radar-page__btn--soft">
                                 Descargar listado (<?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€
                             </a>
                         <?php else: ?>

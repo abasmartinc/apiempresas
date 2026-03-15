@@ -93,26 +93,18 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                         <span class="ae-radar-page__nav-icon">⭐</span>
                         Mis favoritos
                     </a>
+
+                    <a href="<?= site_url('radar/kanban') ?>" class="ae-radar-page__nav-link">
+                        <span class="ae-radar-page__nav-icon">📋</span>
+                        Embudo (Kanban)
+                    </a>
+
+                    <a href="<?= site_url('radar/trends') ?>" class="ae-radar-page__nav-link">
+                        <span class="ae-radar-page__nav-icon">📈</span>
+                        Análisis de Tendencias
+                    </a>
                 </div>
 
-                <div class="ae-radar-page__nav-group">
-                    <span class="ae-radar-page__nav-label">Sectores destacados</span>
-
-                    <?php foreach ($topSectors as $s): ?>
-                        <?php if ($isFree): ?>
-                            <a href="<?= site_url('checkout/radar-export?type=subscription') ?>" class="ae-radar-page__nav-link ae-radar-page__nav-link--locked">
-                                <span class="ae-radar-page__nav-icon ae-radar-page__nav-muted">🔒</span>
-                                <?= esc($s['label']) ?>
-                            </a>
-                        <?php else: ?>
-                            <a href="<?= site_url('radar?cnae=' . $s['code']) ?>" 
-                               class="ae-radar-page__nav-link <?= ($filters['cnae'] === (string)$s['code']) ? 'is-active' : '' ?>"
-                               data-sidebar-cnae="<?= $s['code'] ?>">
-                                <?= esc($s['label']) ?>
-                            </a>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-                </div>
                 <div class="ae-radar-page__nav-group">
                     <span class="ae-radar-page__nav-label">Alertas</span>
                     <div class="ae-radar-page__nav-teaser">
@@ -166,7 +158,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                             Plan Free · Vista limitada
                         </div>
 
-                        <a href="<?= site_url('checkout/radar-export?type=subscription') ?>" class="ae-radar-page__cta-top">
+                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__cta-top">
                             Activar Radar PRO (79€)
                         </a>
                     <?php else: ?>
@@ -182,6 +174,8 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                 <div class="ae-radar-page__container">
 
                     <section class="ae-radar-page__hero <?= !$isFree ? 'ae-radar-page__hero--pro' : '' ?>">
+                        <div class="ae-radar-page__hero-glass"></div>
+                        <div class="ae-radar-page__hero-glow"></div>
                         <div class="ae-radar-page__hero-grid">
                             <div>
                                 <div class="ae-radar-page__eyebrow">
@@ -201,7 +195,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
 
                                 <?php if ($isFree): ?>
                                     <div class="ae-radar-page__hero-actions">
-                                        <a href="<?= site_url('checkout/radar-export?type=subscription') ?>" class="ae-radar-page__hero-btn ae-radar-page__hero-btn--primary">
+                                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__hero-btn ae-radar-page__hero-btn--primary">
                                             Desbloquear Radar PRO (79€)
                                         </a>
                                     </div>
@@ -324,17 +318,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                 </select>
                             </div>
 
-                            <div class="ae-radar-page__field">
-                                <label>Sector de actividad</label>
-                                <select name="cnae" class="ae-radar-page__select" <?= $isFree ? 'disabled' : '' ?>>
-                                    <option value="">Cualquier actividad</option>
-                                    <?php foreach ($topSectors as $s): ?>
-                                        <option value="<?= esc($s['code']) ?>" <?= ((string)$filters['cnae'] === (string)$s['code']) ? 'selected' : '' ?>>
-                                            <?= esc($s['label']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
+                            <!-- Sector de actividad: Eliminado por optimización -->
 
                             <div class="ae-radar-page__field">
                                 <label>Ventana temporal</label>
@@ -349,7 +333,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                             <div class="ae-radar-page__field">
                                 <label>&nbsp;</label>
                                 <?php if ($isFree): ?>
-                                    <a href="<?= site_url('checkout/radar-export?type=subscription') ?>" class="ae-radar-page__filters-cta ae-radar-page__filters-cta--locked">
+                                    <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__filters-cta ae-radar-page__filters-cta--locked">
                                         Activar PRO (79€) para filtrar
                                     </a>
                                 <?php else: ?>
@@ -415,7 +399,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                         </div>
                                     </div>
                                 <?php else: ?>
-                                    <a href="<?= site_url('checkout/radar-export?type=subscription') ?>" class="ae-radar-page__export-btn" style="background:#0f172a; padding: 11px 18px; border-radius:12px; color:#fff; text-decoration:none; font-size:13px; font-weight:800;">Activar PRO (79€)</a>
+                                    <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__export-btn" style="background:#0f172a; padding: 11px 18px; border-radius:12px; color:#fff; text-decoration:none; font-size:13px; font-weight:800;">Activar PRO (79€)</a>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -552,7 +536,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                             </div>
 
                                             <div class="ae-radar-page__paywall-actions">
-                                                <a href="<?= site_url('checkout/radar-export?type=subscription') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--primary">
+                                                <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--primary">
                                                     Activar Radar PRO (79€) ahora
                                                 </a>
                                             </div>
@@ -582,6 +566,23 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
         <div class="ae-qv-modal__backdrop" onclick="closeQuickView()"></div>
         <div class="ae-qv-modal__container">
             <div id="ae-qv-content" class="ae-qv-modal__content">
+                <!-- Se cargará por AJAX -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal AI Analysis -->
+    <div id="ae-ai-modal" class="ae-ai-modal" style="display:none;">
+        <div class="ae-ai-modal__backdrop" onclick="closeAIModal()"></div>
+        <div class="ae-ai-modal__container">
+            <div class="ae-ai-modal__header">
+                <div class="ae-ai-modal__title">
+                    <span>✨</span>
+                    Análisis Inteligente Radar
+                </div>
+                <button type="button" class="ae-ai-modal__close" onclick="closeAIModal()">&times;</button>
+            </div>
+            <div id="ae-ai-content" class="ae-ai-modal__body">
                 <!-- Se cargará por AJAX -->
             </div>
         </div>
@@ -630,9 +631,157 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
         document.body.style.overflow = '';
     }
 
+    /**
+     * Análisis IA bajo demanda
+     */
+    function analyzeAI(id, btn) {
+        if (!id) return;
+
+        const $modal = document.getElementById('ae-ai-modal');
+        const $content = document.getElementById('ae-ai-content');
+        
+        // Bloquear botón y mostrar loading en modal
+        const originalBtnHtml = btn.innerHTML;
+        btn.innerHTML = '⏳...';
+        btn.disabled = true;
+
+        $content.innerHTML = `
+            <div style="text-align:center; padding: 40px 0;">
+                <div class="ae-spinner"></div>
+                <p style="margin-top:20px; font-weight:700; color:#1e293b; font-size:18px;">
+                    Consultando con la Inteligencia Artificial...
+                </p>
+                <p style="color:#64748b; font-size:14px;">
+                    Analizando objeto social y extrayendo nichos estratégicos.
+                </p>
+            </div>
+        `;
+        $modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        fetch('<?= site_url('radar/ai-analyze/') ?>' + id, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            btn.innerHTML = originalBtnHtml;
+            btn.disabled = false;
+
+            if (data.status === 'success') {
+                $content.innerHTML = `
+                    <div class="ae-ai-result">
+                        <div class="ae-ai-result__header-row">
+                            <div class="ae-ai-result__main-info">
+                                <span class="ae-ai-result__label">Nicho estratégico</span>
+                                <div class="ae-ai-result__niche">${data.niche}</div>
+                                <p class="ae-ai-result__summary">${data.summary}</p>
+                            </div>
+                            <div class="ae-ai-result__target">
+                                <span class="ae-ai-result__label">Interlocutor ideal</span>
+                                <div class="ae-ai-result__persona-badge">
+                                    <span>👤</span> ${data.target_persona}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ae-ai-result__grid">
+                            <div class="ae-ai-result__section">
+                                <span class="ae-ai-result__label">Puntos de dolor (Pain Points)</span>
+                                <ul class="ae-ai-result__list">
+                                    ${data.pain_points.map(p => `<li>${p}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="ae-ai-result__scripts">
+                            <div class="ae-ai-result__section">
+                                <span class="ae-ai-result__label">Script de llamada (Apertura)</span>
+                                <div class="ae-ai-result__script-box">
+                                    <p id="ae-script-call" class="ae-ai-result__script-text">"${data.cold_call}"</p>
+                                    <button type="button" class="ae-ai-result__copy-btn" onclick="copyToClipboard('ae-script-call', this)">
+                                        <span>📋</span> Copiar script
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="ae-ai-result__section">
+                                <span class="ae-ai-result__label">Email Gancho</span>
+                                <div class="ae-ai-result__script-box ae-ai-result__script-box--email">
+                                    <div class="ae-ai-result__email-field">
+                                        <strong>Asunto:</strong> <span id="ae-email-subject">${data.email_hook.subject}</span>
+                                    </div>
+                                    <div class="ae-ai-result__email-field">
+                                        <strong>Cuerpo:</strong> <span id="ae-email-opening">"${data.email_hook.opening}"</span>
+                                    </div>
+                                    <button type="button" class="ae-ai-result__copy-btn" onclick="copyEmailHook(this)">
+                                        <span>✉️</span> Copiar asunto y cuerpo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                throw new Error(data.message || 'Error en el análisis');
+            }
+        })
+        .catch(err => {
+            btn.innerHTML = originalBtnHtml;
+            btn.disabled = false;
+            $content.innerHTML = `
+                <div style="text-align:center; padding: 40px 0; color:#ef4444;">
+                    <p style="font-size:32px;">⚠️</p>
+                    <p style="font-weight:700; margin-top:16px;">Error en el análisis</p>
+                    <p style="color:#64748b;">${err.message}</p>
+                    <button type="button" class="ae-radar-page__hero-btn ae-radar-page__hero-btn--secondary" 
+                            onclick="closeAIModal()" style="margin-top:24px; min-height:40px;">
+                        Cerrar
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    function closeAIModal() {
+        document.getElementById('ae-ai-modal').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    function copyToClipboard(elementId, btn) {
+        const text = document.getElementById(elementId).innerText.replace(/^"|"$/g, '');
+        navigator.clipboard.writeText(text).then(() => {
+            const original = btn.innerHTML;
+            btn.innerHTML = '✅ Copiado';
+            btn.classList.add('is-copied');
+            setTimeout(() => {
+                btn.innerHTML = original;
+                btn.classList.remove('is-copied');
+            }, 2000);
+        });
+    }
+
+    function copyEmailHook(btn) {
+        const subject = document.getElementById('ae-email-subject').innerText;
+        const opening = document.getElementById('ae-email-opening').innerText.replace(/^"|"$/g, '');
+        const fullText = `Asunto: ${subject}\n\n${opening}`;
+        
+        navigator.clipboard.writeText(fullText).then(() => {
+            const original = btn.innerHTML;
+            btn.innerHTML = '✅ Copiado';
+            btn.classList.add('is-copied');
+            setTimeout(() => {
+                btn.innerHTML = original;
+                btn.classList.remove('is-copied');
+            }, 2000);
+        });
+    }
+
     // Cerrar con Escape
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeQuickView();
+        if (e.key === 'Escape') {
+            closeQuickView();
+            closeAIModal();
+        }
     });
 
     // --- Radar Map Logic ---

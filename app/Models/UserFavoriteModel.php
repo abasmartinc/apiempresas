@@ -14,7 +14,7 @@ class UserFavoriteModel extends Model
     protected $returnType     = 'array';
     protected $useSoftDeletes = false;
 
-    protected $allowedFields = ['user_id', 'company_id', 'notes'];
+    protected $allowedFields = ['user_id', 'company_id', 'notes', 'status'];
 
     protected $useTimestamps = true;
     protected $createdField  = 'created_at';

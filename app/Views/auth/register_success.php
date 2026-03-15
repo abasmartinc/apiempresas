@@ -49,7 +49,7 @@
                 </a>
 
                 <div class="brand-text">
-                    <span class="brand-name">Verifica<span class="grad">Empresas</span>.es</span>
+                    <span class="brand-name">API<span class="grad">Empresas</span>.es</span>
                     <span class="brand-tag">Verificación mercantil en segundos</span>
                 </div>
             </div>
