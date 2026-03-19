@@ -141,29 +141,15 @@ class Sitemap extends Controller
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
         foreach ($companies as $company) {
-            $cif  = $company['cif'];
-            $name = $company['name'];
-            $id   = $company['id'];
-            $slug = url_title($name, '-', true);
+            helper('company');
+            $url = company_url($company);
             
-            // URL Logic:
-            // 1. Si tiene CIF -> /CIF-slug
-            // 2. Si NO tiene CIF -> /empresa/ID-slug
-            if (!empty($cif)) {
-                $loc = site_url($cif . ($slug ? ('-' . $slug) : ''));
-            } else {
-                $loc = site_url("empresa/{$id}" . ($slug ? ('-' . $slug) : ''));
-            }
-            
-            // Lastmod: al no tener fecha de modificación fiable, usamos el inicio del mes o hoy
-            $lastmod = date('c');
-
-            $xml .= '<url>';
-            $xml .= '<loc>' . $loc . '</loc>';
-            // Removed lastmod: Google ignores "now" and it consumes crawl budget if it changes every time without real updates.
-            $xml .= '<changefreq>monthly</changefreq>';
-            $xml .= '<priority>0.7</priority>';
-            $xml .= '</url>';
+            $xml .= '<url>' . PHP_EOL;
+            $xml .= '  <loc>' . esc($url) . '</loc>' . PHP_EOL;
+            $xml .= '  <lastmod>' . date('Y-m-d') . '</lastmod>' . PHP_EOL;
+            $xml .= '  <changefreq>monthly</changefreq>' . PHP_EOL;
+            $xml .= '  <priority>0.6</priority>' . PHP_EOL;
+            $xml .= '</url>' . PHP_EOL;
         }
 
         $xml .= '</urlset>';

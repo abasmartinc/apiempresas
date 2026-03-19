@@ -19,13 +19,13 @@ $formatCompanyName = function($name) {
 };
 
 $getLeadBadge = function($dateStr) {
-    if (empty($dateStr)) return 'Empresa B2B';
+    if (empty($dateStr)) return 'Nueva empresa';
     $timestamp = strtotime(str_replace('/', '-', $dateStr));
-    if (!$timestamp) return 'Empresa B2B';
+    if (!$timestamp) return 'Nueva empresa';
     $diffDays = floor((time() - $timestamp) / 86400);
-    if ($diffDays <= 7) return 'Constituida reciente';
+    if ($diffDays <= 7) return 'Nueva empresa';
     if ($diffDays <= 30) return 'Últimos 30 días';
-    return 'Lead B2B';
+    return 'Nueva empresa';
 };
 
 $getCommercialSignals = function($sectorLabel, $object) {
@@ -263,7 +263,7 @@ $slugProvince = url_title($province, '-', true);
                                     </div>
                                     <h4 class="ae-radar-page__empty-card-title">Alertas por email</h4>
                                     <p class="ae-radar-page__empty-card-text">Recibe un aviso el mismo día que detectemos nuevas empresas en <?= esc($province) ?>.</p>
-                                    <form action="#" method="POST" onsubmit="alert('Alerta activa.'); return false;" class="ae-radar-page__empty-form">
+                                    <form action="#" method="POST" onsubmit="event.preventDefault(); fetch('<?= site_url('leads/subscribe') ?>', {method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: new URLSearchParams({email: this.querySelector('input[type=email]').value, province: '<?= esc($province ?? 'España') ?>', source: 'empty_state'})}).then(r => r.json()).then(d => { if(d.status === 'success') { Swal.fire('¡Listo!', d.message, 'success'); this.reset(); } else { Swal.fire('Error', 'Error al suscribirse.', 'error'); } }).catch(() => Swal.fire('Error', 'Error al suscribirse.', 'error'));" class="ae-radar-page__empty-form">
                                         <input type="email" placeholder="Email" required class="ae-radar-page__empty-input">
                                         <button type="submit" class="ae-radar-page__empty-submit">OK</button>
                                     </form>

@@ -369,7 +369,7 @@
                                 Obtener API Key
                             </a>
                         </div>
-
+                        <br/>                        
                         <div class="company-code-card">
                             <div class="company-code-header">
                                 <span class="company-code-lang">BASH</span>
@@ -382,6 +382,26 @@
                     
                     <pre class="company-card__json is-hidden" id="jsonBlock" style="margin-top: 1rem; background: #0f172a; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow: auto; max-height: 400px; font-size: 0.8rem;"><code><?= esc($jsonPretty) ?></code></pre>
                 </article>
+
+                <!-- RADAR PRO CTA -->
+                <div class="dash-cta-card" style="margin-top: 30px; display: grid; grid-template-columns: 1fr auto; gap: 30px; align-items: center;">
+                    <div>
+                        <h3>
+                            <div class="dash-cta-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                            </div>
+                            ¿Te interesa recibir leads como <?= esc($company['name'] ?? 'esta') ?>?
+                        </h3>
+                        <p style="margin-bottom: 0;">
+                            Monitorizamos el <strong>BORME</strong> en tiempo real. Configura tu Radar para recibir alertas de nuevas empresas en tu sector y provincia antes que nadie.
+                        </p>
+                    </div>
+                    <div style="min-width: 200px;">
+                        <a href="<?=site_url() ?>leads-empresas-nuevas" class="btn">
+                            Activar Radar PRO →
+                        </a>
+                    </div>
+                </div>
 
                 <?php if (!empty($company['lat']) && !empty($company['lng'])): ?>
                     <div id="map-area" class="map-card">
@@ -610,14 +630,8 @@
                         </thead>
                         <tbody>
                             <?php foreach ($related as $rel): 
-                                $relSlug = url_title($rel['name'] ?? '', '-', true);
-                                $relCif  = $rel['cif'] ?? '';
-                                
-                                if (preg_match('/^[A-Z][0-9]{7}[A-Z0-9]$/', $relCif)) {
-                                    $relUrl = site_url($relCif . ($relSlug ? ('-' . $relSlug) : ''));
-                                } else {
-                                    $relUrl = site_url('empresa/' . ($rel['id'] ?? 0) . ($relSlug ? ('-' . $relSlug) : ''));
-                                }
+                                helper('company');
+                                $relUrl = company_url($rel);
                             ?>
                             <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
                                 <td style="padding: 0.75rem 1rem;">
@@ -626,7 +640,7 @@
                                     </a>
                                 </td>
                                 <td style="padding: 0.75rem 1rem; color: #475569; font-family: monospace;">
-                                    <?= esc($relCif ?: '-') ?>
+                                    <?= esc($rel['cif'] ?? '-') ?>
                                 </td>
                                 <td style="padding: 0.75rem 1rem; color: #475569;">
                                     <?= esc($rel['province'] ?? '-') ?>

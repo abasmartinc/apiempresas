@@ -14,7 +14,12 @@
     <main class="dash-main">
         <div class="container">
             <div class="dash-header">
-                <h1>Hola, <?=htmlspecialchars($user->name ?? 'Cliente') ?></h1>
+                <?php 
+                    $userName = 'Cliente';
+                    if (is_object($user)) $userName = $user->name ?? 'Cliente';
+                    elseif (is_array($user)) $userName = $user['name'] ?? 'Cliente';
+                ?>
+                <h1>Hola, <?= htmlspecialchars($userName) ?></h1>
                 <p class="dash-sub">
                     Panel de producción: consumo, calidad del servicio y acciones rápidas de operación (rotación de clave, logs y facturación).
                 </p>
@@ -130,7 +135,15 @@
             
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
-                    const monthlyQuota = <?= json_encode((int)($plan->monthly_quota ?? 0)) ?>;
+                    <?php 
+                        $get = function($src, $key, $default = null) {
+                            if (is_array($src)) return $src[$key] ?? $default;
+                            if (is_object($src)) return $src->$key ?? $default;
+                            return $default;
+                        };
+                        $quota_raw = (int)$get($plan, 'monthly_quota', 0);
+                    ?>
+                    const monthlyQuota = <?= json_encode($quota_raw) ?>;
                     
                     fetch('<?= site_url('dashboard/kpis') ?>', {
                         headers: {
@@ -258,7 +271,7 @@
                         <p>Monitoriza consultas para mantenerte dentro de plan y detectar picos anómalos.</p>
 
                         <?php 
-                        $quota = $plan->monthly_quota ?? 1;
+                        $quota = (int)$get($plan, 'monthly_quota', 1);
                         // Use 0 as default before JS loads
                         $used = 0;
                         $percent = 0;
@@ -266,7 +279,8 @@
                         <div class="usage-wrap">
                             <div class="usage-top">
                                 <span><span class="usage-strong" id="usage-used-text">...</span> de <?= number_format($quota, 0, ',', '.') ?> consultas usadas</span>
-                                <span>Renueva el <span class="usage-strong"><?= isset($plan->current_period_end) ? date('d/m', strtotime($plan->current_period_end)) : '--/--' ?></span></span>
+                                <?php $p_end = $get($plan, 'current_period_end'); ?>
+                                <span>Renueva el <span class="usage-strong"><?= $p_end ? date('d/m', strtotime($p_end)) : '--/--' ?></span></span>
                             </div>
                             <div class="usage-bar">
                                 <div class="usage-fill" id="usage-fill-bar" style="width:0%;"></div>
@@ -352,17 +366,34 @@
 
                     <!-- BILLING / INVOICES -->
                     <!-- BILLING / INVOICES (Only for Paid Plans) -->
-                    <?php if (($plan->price_monthly ?? 0) > 0): ?>
+                    <?php if ((int)$get($plan, 'price_monthly', 0) > 0): ?>
                     <section class="mini-card">
                         <h3>Facturación</h3>
                         <p>
-                            Próxima renovación: <strong><?= isset($plan->current_period_end) ? date('d/m/Y', strtotime($plan->current_period_end)) : '--/--/----' ?></strong><br>
-                            Método de pago: <strong><?= !empty($plan->stripe_subscription_id) ? 'Tarjeta (Stripe)' : 'PayPal / Otro' ?></strong><br>
-                            Estado: <strong><?= ucfirst($plan->status ?? 'Activo') ?></strong>
+                            <?php $p_end = $get($plan, 'current_period_end'); ?>
+                            Próxima renovación: <strong><?= $p_end ? date('d/m/Y', strtotime($p_end)) : '--/--/----' ?></strong><br>
+                            Método de pago: <strong><?= !empty($get($plan, 'stripe_subscription_id')) ? 'Tarjeta (Stripe)' : 'PayPal / Otro' ?></strong><br>
+                            Estado: <strong><?= ucfirst((string)$get($plan, 'status', 'Activo')) ?></strong>
                         </p>
                         <a href="<?=site_url() ?>billing/invoices">Ver facturas →</a>
                     </section>
                     <?php endif; ?>
+
+                    <!-- RADAR CTA -->
+                    <section class="dash-cta-card">
+                        <h3>
+                            <div class="dash-cta-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                            </div>
+                            Potencia tu captación
+                        </h3>
+                        <p>
+                            ¿Buscas leads frescos de <strong>BORME</strong>? Usa nuestra tecnología Radar para recibir empresas recién creadas en tu bandeja.
+                        </p>
+                        <a href="<?=site_url() ?>leads-empresas-nuevas" class="btn">
+                            Ver Radar PRO →
+                        </a>
+                    </section>
 
                     <!-- SUPPORT -->
                     <section class="mini-card">

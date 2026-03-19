@@ -11,6 +11,13 @@ $routes->get('documentation', 'Documentation::index');
 $routes->get('enter', 'Login::index');          // muestra login
 $routes->get('logout', 'Login::logout');        // cierre de sesión
 $routes->post('login', 'Login::authenticate');        // cierre de sesión
+
+// Forgot Password Flow
+$routes->get('forgot-password', 'Login::forgotPassword');
+$routes->post('forgot-password', 'Login::sendResetLink');
+$routes->get('reset-password/(:any)', 'Login::resetPassword/$1');
+$routes->post('reset-password', 'Login::updatePassword');
+
 $routes->get('register', 'Register::index');
 $routes->get('register/quick', 'Register::quick');
 $routes->get('register_sucess', 'Register::register_sucess');
@@ -181,6 +188,7 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
 
     // IA Marketing
     $routes->get('ia-marketing', 'Admin\Dashboard::ia_marketing');
+    $routes->get('email-history/(:num)', 'Admin\Dashboard::email_history_ajax/$1');
 
     // Google Search Console
     $routes->get('search-console', 'Admin\Dashboard::search_console');

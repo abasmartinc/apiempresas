@@ -16,7 +16,12 @@
     <main class="dash-main">
         <div class="container">
             <div class="dash-header">
-                <h1>Bienvenido, <?=htmlspecialchars($user->name ?? 'Cliente') ?></h1>
+                <?php 
+                    $userName = 'Cliente';
+                    if (is_object($user)) $userName = $user->name ?? 'Cliente';
+                    elseif (is_array($user)) $userName = $user['name'] ?? 'Cliente';
+                ?>
+                <h1>Bienvenido, <?= htmlspecialchars($userName) ?></h1>
                 <p class="dash-sub">
                     Tu cuenta está lista. Te recomendamos completar los pasos de inicio para hacer tu primera consulta y dejar la integración funcionando en producción.
                 </p>
@@ -202,14 +207,30 @@
                         <?php endif; ?>
                     </section>
 
+                    <!-- RADAR CTA -->
+                    <section class="dash-cta-card">
+                        <h3>
+                            <div class="dash-cta-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                            </div>
+                            ¿Vendes a otras empresas?
+                        </h3>
+                        <p>
+                            Monitorizamos el <strong>BORME</strong> cada día para entregarte leads cualificados antes que nadie. Descubre el potencial del Radar.
+                        </p>
+                        <a href="<?=site_url() ?>leads-empresas-nuevas" class="btn">
+                            Descubrir Radar PRO →
+                        </a>
+                    </section>
+
                     <!-- ACCOUNT STATUS -->
                     <section class="mini-card">
                         <h3>Estado de tu cuenta</h3>
                         <p>
-                            Plan: <strong><?= esc($plan->plan_name ?? 'Free') ?></strong><br>
+                            Plan: <strong><?= esc($get($plan, 'plan_name', 'Free')) ?></strong><br>
                             Consultas este mes: <strong id="status-requests-text">...</strong><br>
-                            <?php if(!empty($plan->current_period_end)): ?>
-                                Renovación: <strong><?= date('d-m-Y', strtotime($plan->current_period_end)) ?></strong>
+                            <?php $p_end = $get($plan, 'current_period_end'); if(!empty($p_end)): ?>
+                                Renovación: <strong><?= date('d-m-Y', strtotime($p_end)) ?></strong>
                             <?php endif; ?>
                         </p>
                     </section>
@@ -258,7 +279,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const monthlyQuota = <?= json_encode((int)($plan->monthly_quota ?? 0)) ?>;
+        const monthlyQuota = <?= json_encode((int)($get($plan, 'monthly_quota', 0))) ?>;
         
         fetch('<?= site_url('dashboard/kpis') ?>', {
             headers: {

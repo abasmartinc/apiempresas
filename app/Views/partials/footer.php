@@ -1,98 +1,135 @@
-<footer >
+<footer>
     <div class="container">
-        <div class="foot-grid">
+        <!-- TOP ROW: Links in 4 Columns -->
+        <div class="foot-top-grid">
+            <!-- Radar by Time -->
             <div>
+                <h4 class="foot-title">Radar por Tiempo</h4>
+                <ul class="foot-links">
+                    <li><a href="<?=site_url('empresas-nuevas-hoy') ?>">Nuevas empresas hoy</a></li>
+                    <li><a href="<?=site_url('empresas-nuevas-semana') ?>">Creadas esta semana</a></li>
+                    <li><a href="<?=site_url('empresas-nuevas-mes') ?>">Constituidas este mes</a></li>
+                    <li><a href="<?=site_url('empresas-nuevas') ?>">Radar Nacional (Hub)</a></li>
+                    <li><a href="<?=site_url('directorio/ultimas-empresas-registradas') ?>">Últimas registradas</a></li>
+                </ul>
+            </div>
+
+            <!-- Radar by Province -->
+            <div>
+                <h4 class="foot-title">Radar por Provincia</h4>
+                <ul class="foot-links">
+                    <li><a href="<?=site_url('empresas-nuevas/madrid') ?>">Nuevas en Madrid</a></li>
+                    <li><a href="<?=site_url('empresas-nuevas/barcelona') ?>">Nuevas en Barcelona</a></li>
+                    <li><a href="<?=site_url('empresas-nuevas/valencia') ?>">Nuevas en Valencia</a></li>
+                    <li><a href="<?=site_url('empresas-nuevas/sevilla') ?>">Nuevas en Sevilla</a></li>
+                    <li><a href="<?=site_url('empresas-nuevas/malaga') ?>">Nuevas en Málaga</a></li>
+                    <li><a href="<?=site_url('directorio') ?>">Ver todas las provincias</a></li>
+                </ul>
+            </div>
+
+            <!-- Radar by Sector -->
+            <div>
+                <h4 class="foot-title">Radar por Sector</h4>
+                <ul class="foot-links">
+                    <li><a href="<?=site_url('empresas-nuevas-sector/hosteleria') ?>">Hostelería y Restauración</a></li>
+                    <li><a href="<?=site_url('empresas-nuevas-sector/construccion') ?>">Construcción e Inmobiliaria</a></li>
+                    <li><a href="<?=site_url('empresas-nuevas-sector/programacion-informatica') ?>">Tecnología y Software</a></li>
+                    <li><a href="<?=site_url('empresas-nuevas-sector/marketing') ?>">Marketing y Publicidad</a></li>
+                    <li><a href="<?=site_url('empresas-nuevas-sector/transporte') ?>">Logística y Transporte</a></li>
+                    <li><a href="<?=site_url('blog') ?>">Más sectores e informes</a></li>
+                </ul>
+            </div>
+
+            <!-- Products & API -->
+            <div>
+                <h4 class="foot-title">Directorio y API</h4>
+                <ul class="foot-links">
+                    <li><a href="<?=site_url('leads-empresas-nuevas') ?>">Beneficios de Radar Pro</a></li>
+                    <li><a href="<?=site_url('search_company') ?>">Buscador de Empresas</a></li>
+                    <li><a href="<?=site_url('autocompletado-cif-empresas') ?>">Autocompletado Pro</a></li>
+                    <li><a href="<?=site_url('documentation') ?>">Documentación API</a></li>
+                    <li><a href="<?=site_url('contact') ?>">Atención al Cliente</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- BOTTOM ROW: Brand Info & Trust -->
+        <div class="foot-bottom-brand">
+            <div class="foot-brand-content">
                 <div class="brand">
-                    <!-- ICONO APIEMPRESAS (check limpio, sin triángulo) -->
                     <svg class="ve-logo" width="32" height="32" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
                         <defs>
-                            <!-- Degradado de marca -->
                             <linearGradient id="ve-g" x1="10" y1="54" x2="54" y2="10" gradientUnits="userSpaceOnUse">
                                 <stop stop-color="#2152FF"/>
                                 <stop offset=".65" stop-color="#5C7CFF"/>
                                 <stop offset="1" stop-color="#12B48A"/>
                             </linearGradient>
-                            <!-- Halo del bloque -->
                             <filter id="ve-cardShadow" x="-20%" y="-20%" width="140%" height="140%">
                                 <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity=".20"/>
                             </filter>
-                            <!-- Sombra suave del check (no genera triángulos) -->
                             <filter id="ve-checkShadow" x="-30%" y="-30%" width="160%" height="160%">
                                 <feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#0B1A36" flood-opacity=".22"/>
                             </filter>
-                            <!-- Brillo muy leve arriba-izquierda -->
                             <radialGradient id="ve-gloss" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
                                             gradientTransform="translate(20 16) rotate(45) scale(28)">
                                 <stop stop-color="#FFFFFF" stop-opacity=".32"/>
                                 <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
                             </radialGradient>
-                            <!-- Aro exterior para definir borde en fondos muy claros -->
                             <linearGradient id="ve-rim" x1="12" y1="52" x2="52" y2="12">
                                 <stop stop-color="#FFFFFF" stop-opacity=".6"/>
                                 <stop offset="1" stop-color="#FFFFFF" stop-opacity=".35"/>
                             </linearGradient>
                         </defs>
-
-                        <!-- Tarjeta con halo + brillo sutil -->
                         <g filter="url(#ve-cardShadow)">
                             <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#ve-g)"/>
                             <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#ve-gloss)"/>
                             <rect x="6.5" y="6.5" width="51" height="51" rx="13.5" fill="none" stroke="url(#ve-rim)"/>
                         </g>
-
-                        <!-- Check principal sin trazo oscuro debajo, con sombra de filtro -->
                         <path d="M18 33 L28 43 L46 22"
-                              stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"
-                              fill="none" filter="url(#ve-checkShadow)"/>
+                               stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"
+                               fill="none" filter="url(#ve-checkShadow)"/>
                     </svg>
-
-
                     <div class="brand-text">
                         <span class="brand-name">API<span class="grad">Empresas</span>.es</span>
-                        <span class="brand-tag">API de verificación mercantil en segundos</span>
+                        <span class="brand-tag">Verificación mercantil en segundos</span>
                     </div>
                 </div>
-                <p>
-                    Datos procedentes de fuentes públicas: BOE/BORME, AEAT, INE, VIES.
-                    No somos servicio oficial del BOE. Cumplimiento RGPD (Art. 14) y
-                    reutilización de información del sector público.
+                <p class="foot-desc">
+                    Datos oficiales procedentes de BORME, AEAT, INE y VIES. Cumplimiento normativo y trazabilidad para procesos KYB/KYC y facturación B2B.
                 </p>
-                
+                <div class="foot-legal-row">
+                    <a href="#" class="minor" data-modal-target="modalPrivacy">Privacidad</a> · 
+                    <a href="#" class="minor" data-modal-target="modalTerms">Términos</a>
+                </div>
             </div>
-            <div>
-                <h4 style="margin:0 0 12px">Radar Pro</h4>
-                <a class="minor" href="<?=site_url('empresas-nuevas-hoy') ?>">Empresas nuevas hoy</a><br />
-                <a class="minor" href="<?=site_url('empresas-nuevas-semana') ?>">Empresas esta semana</a><br />
-                <a class="minor" href="<?=site_url('empresas-nuevas-mes') ?>">Empresas este mes</a><br />
-                <a class="minor" href="<?=site_url('empresas-nuevas') ?>">Listado Nacional</a>
+
+            <!-- Trust Signals -->
+            <!-- Trust Signals -->
+<div class="foot-trust foot-trust--minimal">
+    <div class="trust-item">
+        <span class="trust-label">Pasarela segura</span>
+
+        <div class="trust-panel">
+            <div class="trust-panel__logos">
+                <img src="<?= base_url('public/images/stripe.png') ?>" alt="Stripe">
+                <span class="trust-panel__divider"></span>
+                <img src="<?= base_url('public/images/ssl.png') ?>" alt="SSL Secure">
             </div>
-            <div>
-                <h4 style="margin:0 0 12px">Top Provincias</h4>
-                <a class="minor" href="<?=site_url('empresas/madrid') ?>">Empresas en Madrid</a><br />
-                <a class="minor" href="<?=site_url('empresas/barcelona') ?>">Empresas en Barcelona</a><br />
-                <a class="minor" href="<?=site_url('empresas/valencia') ?>">Empresas en Valencia</a><br />
-                <a class="minor" href="<?=site_url('empresas/sevilla') ?>">Empresas en Sevilla</a><br />
-                <a class="minor" href="<?=site_url('empresas-nuevas/madrid') ?>">Nuevas en Madrid</a><br />
-                <a class="minor" href="<?=site_url('empresas-nuevas/barcelona') ?>">Nuevas en Barcelona</a><br />
-                <a class="minor" href="<?=site_url('directorio') ?>">Ver todas</a>
+        </div>
+    </div>
+
+    <div class="trust-badges">
+        <div class="badge-item premium">
+            <div class="badge-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
             </div>
-            <div>
-                <h4 style="margin:0 0 12px">Sectores</h4>
-                <a class="minor" href="<?=site_url('empresas-nuevas-sector/hosteleria') ?>">Hostelería</a><br />
-                <a class="minor" href="<?=site_url('empresas-nuevas-sector/construccion') ?>">Construcción</a><br />
-                <a class="minor" href="<?=site_url('empresas-nuevas-sector/programacion-informatica') ?>">Programación e IT</a><br />
-                <a class="minor" href="<?=site_url('empresas-nuevas-sector/hosteleria/madrid') ?>">Hostelería en Madrid</a><br />
-                <a class="minor" href="<?=site_url('empresas-nuevas-sector/programacion-informatica/barcelona') ?>">IT en Barcelona</a><br />
-                <a class="minor" href="<?=site_url('blog') ?>">Más sectores</a>
-            </div>
-            <div>
-                <h4 style="margin:0 0 12px">Producto</h4>
-                <a class="minor" href="<?=site_url() ?>leads-empresas-nuevas">Planes y Beneficios Radar</a><br />
-                <a class="minor" href="<?=site_url() ?>search_company">Buscador</a><br />
-                <a class="minor" href="<?=site_url() ?>documentation">Documentación API</a><br />
-                <a class="minor" href="<?=site_url() ?>contact">Contacto</a><br />
-                <a href="#" class="minor" data-open-modal="modalPrivacy">Privacidad</a> · <a href="#" class="minor" data-open-modal="modalTerms">Términos</a>
-            </div>
+            <span>Fuentes Oficiales (BORME)</span>
+        </div>
+    </div>
+</div>
         </div>
     </div>
 </footer>

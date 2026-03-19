@@ -32,7 +32,13 @@ class UsersuscriptionsModel extends Model
         return $this->select('user_subscriptions.*, api_plans.name as plan_name, api_plans.slug as plan_slug, api_plans.price_monthly, api_plans.monthly_quota, api_plans.max_alerts, api_plans.product_type')
                     ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id')
                     ->where('user_subscriptions.user_id', $userId)
-                    ->where('user_subscriptions.status', 'active')
+                    ->groupStart()
+                        ->where('user_subscriptions.status', 'active')
+                        ->orGroupStart()
+                            ->where('user_subscriptions.status', 'canceled')
+                            ->where('user_subscriptions.current_period_end >', date('Y-m-d H:i:s'))
+                        ->groupEnd()
+                    ->groupEnd()
                     ->orderBy('user_subscriptions.current_period_end', 'DESC')
                     ->first();
     }
@@ -48,6 +54,7 @@ class UsersuscriptionsModel extends Model
                     ->orderBy('user_subscriptions.created_at', 'DESC')
                     ->first();
     }
+    
     /**
      * Verifica si el usuario tiene una suscripción activa para un tipo de producto específico.
      * 
@@ -60,8 +67,13 @@ class UsersuscriptionsModel extends Model
         $builder = $this->select('user_subscriptions.id')
                     ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id')
                     ->where('user_subscriptions.user_id', $userId)
-                    ->where('user_subscriptions.status', 'active')
-                    ->where('user_subscriptions.current_period_end >', date('Y-m-d H:i:s'));
+                    ->groupStart()
+                        ->where('user_subscriptions.status', 'active')
+                        ->orGroupStart()
+                            ->where('user_subscriptions.status', 'canceled')
+                            ->where('user_subscriptions.current_period_end >', date('Y-m-d H:i:s'))
+                        ->groupEnd()
+                    ->groupEnd();
 
         if ($productType !== 'bundle') {
             // Un plan 'bundle' daría acceso a ambos, pero un plan específico solo a su tipo

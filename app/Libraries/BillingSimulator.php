@@ -25,12 +25,12 @@ class BillingSimulator
             ]
         ];
 
+        if ($period === 'single') {
+            log_message('info', "[Simulator] One-time purchase simulated for user {$userId}. Skipping plan activation.");
+            return true;
+        }
+
         // Llamamos a la lógica del Webhook de forma interna
-        // Nota: En una arquitectura más limpia, esto estaría en un Service
-        $webhook = new Webhook();
-        
-        // Usamos reflexión para acceder al método privado o simplemente lo hacemos público temporalmente
-        // Para este caso, vamos a replicar la lógica aquí o moverla a un Service compartido
         return $this->processSubscription($userId, $planSlug, $session->subscription);
     }
 

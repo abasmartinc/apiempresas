@@ -216,7 +216,9 @@ class Radar extends BaseController
             'userPlan' => [
                 'isTemporary' => $isTemporary,
                 'hoursLeft' => $hoursLeft,
-                'planName' => $activePlan ? $activePlan->plan_name : 'Gratuito'
+                'planName' => $activePlan ? $activePlan->plan_name : 'Gratuito',
+                'status' => $activePlan ? $activePlan->status : 'none',
+                'period_end' => $activePlan ? $activePlan->current_period_end : null,
             ],
             'freshness' => [
                 'lastUpdate' => date('H:i', strtotime('-12 minutes')),

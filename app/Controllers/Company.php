@@ -35,26 +35,15 @@ class Company extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
 
-        // 1. REDIRECCIÓN 301: Si tiene CIF, mandarlo a la URL canónica (/CIF-slug)
-        // Esto transfiere la autoridad SEO si la empresa gana un CIF en el futuro.
+        // REDIRECCIÓN 301: Mandar siempre a la nueva URL canónica
+        $slug = url_title($company['name'], '-', true);
         if (!empty($company['cif'])) {
-            $canonicalSlug = url_title($company['name'], '-', true);
-            $canonicalUrl  = site_url($company['cif'] . ($canonicalSlug ? ('-' . $canonicalSlug) : ''));
+            $canonicalUrl = site_url($company['cif'] . ($slug ? ('-' . $slug) : ''));
             return redirect()->to($canonicalUrl, 301);
         }
 
-        // 2. Validación de Slug (Canonicalización ID)
-        $correctSlug = url_title($company['name'], '-', true);
-        if ($slug !== $correctSlug) {
-            return redirect()->to(site_url("empresa/{$id}-{$correctSlug}"), 301);
-        }
-
-        // 3. Renderizar vista (reutilizamos la misma vista)
-        // Ajustamos canonical para que apunte a esta URL de ID
-        $data = $this->prepareViewData($company);
-        $data['canonical'] = site_url("empresa/{$id}-{$correctSlug}");
-        
-        return view('company', $data);
+        // Si no tiene CIF, la URL ahora es simplemente el slug
+        return redirect()->to(site_url($slug), 301);
     }
 
     /**
@@ -288,9 +277,13 @@ class Company extends BaseController
             $company = $this->companyModel->like('company_name', $wildcardTerm)->first();
             
             if ($company) {
-                // Éxito: Redirigir
+                // Éxito: Redirigir a formato canónico (CIF-slug o slug)
                 $correctSlug = url_title($company['company_name'], '-', true);
-                return redirect()->to(site_url("empresa/{$company['id']}-{$correctSlug}"), 301);
+                $targetUrl = !empty($company['cif']) 
+                    ? site_url($company['cif'] . ($correctSlug ? ('-' . $correctSlug) : ''))
+                    : site_url($correctSlug);
+                
+                return redirect()->to($targetUrl, 301);
             }
         }
 

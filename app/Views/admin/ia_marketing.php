@@ -71,11 +71,11 @@
             <thead>
                 <tr style="border-bottom: 2px solid #f1f5f9; text-align: left;">
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem; width: 5%;">Score</th>
-                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem; width: 25%;">Lead</th>
+                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem; width: 20%;">Lead</th>
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem; text-align: center;">Días Inactivo</th>
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem; text-align: center;">Búsquedas Web</th>
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem; text-align: center;">Llamadas API</th>
-                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem; text-align: center;">Actividad General</th>
+                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem; text-align: center; width: 18%;">Seguimiento Email</th>
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem; text-align: right;">Acciones</th>
                 </tr>
             </thead>
@@ -133,11 +133,31 @@
                             <?= number_format($l->total_api_requests) ?>
                         </span>
                     </td>
-                    
-                    <td style="padding: 12px; text-align: center;">
-                        <span style="font-weight: 600; color: <?= $l->total_activity > 30 ? '#10b981' : '#64748b' ?>;">
-                            <?= number_format($l->total_activity) ?>
-                        </span>
+
+                    <td style="padding: 12px;">
+                        <?php if ($l->last_email_at): ?>
+                            <div style="font-size: 0.8rem; margin-bottom: 4px;">
+                                <span style="color: #64748b;">Último:</span> 
+                                <span style="font-weight: 600;"><?= date('d/m/y H:i', strtotime($l->last_email_at)) ?></span>
+                            </div>
+                            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                <?php if ($l->last_email_clicked): ?>
+                                    <span class="pill" style="background: #ecfdf5; color: #059669; border: 1px solid #10b98140; font-size: 0.65rem; padding: 2px 6px;">Clicado</span>
+                                <?php elseif ($l->last_email_opened): ?>
+                                    <span class="pill" style="background: #eff6ff; color: #2563eb; border: 1px solid #3b82f640; font-size: 0.65rem; padding: 2px 6px;">Leído</span>
+                                <?php elseif ($l->last_email_status === 'success'): ?>
+                                    <span class="pill" style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; font-size: 0.65rem; padding: 2px 6px;">Enviado</span>
+                                <?php else: ?>
+                                    <span class="pill" style="background: #fef2f2; color: #dc2626; border: 1px solid #ef444440; font-size: 0.65rem; padding: 2px 6px;">Error</span>
+                                <?php endif; ?>
+                                
+                                <button onclick="showEmailHistory(<?= $l->id ?>, '<?= esc($l->name) ?>')" style="background: none; border: none; color: #2152ff; font-size: 0.7rem; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 0;">
+                                    (Ver <?= $l->total_emails_sent ?>)
+                                </button>
+                            </div>
+                        <?php else: ?>
+                            <span style="color: #94a3b8; font-size: 0.8rem; font-style: italic;">Sin emails enviados</span>
+                        <?php endif; ?>
                     </td>
                     
                     <td style="padding: 12px; text-align: right;">
@@ -161,6 +181,17 @@
     </div>
 
 </main>
+
+<!-- Modal Historial Email -->
+<div id="emailHistoryModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; backdrop-filter: blur(4px); align-items: center; justify-content: center;">
+    <div style="background: white; width: 90%; max-width: 600px; border-radius: 20px; padding: 30px; position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+        <button onclick="closeEmailModal()" style="position: absolute; top: 20px; right: 20px; background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; color: #64748b;">&times;</button>
+        <h2 id="modalTitle" style="margin-bottom: 20px; font-size: 1.25rem;">Historial de Emails</h2>
+        <div id="modalContent" style="max-height: 400px; overflow-y: auto;">
+            <p style="text-align: center; color: #64748b;">Cargando historial...</p>
+        </div>
+    </div>
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -186,6 +217,56 @@
 
         liveSearchVal.addEventListener('input', filterRows);
     });
+
+    function showEmailHistory(userId, userName) {
+        const modal = document.getElementById('emailHistoryModal');
+        const content = document.getElementById('modalContent');
+        const title = document.getElementById('modalTitle');
+        
+        modal.style.display = 'flex';
+        title.innerText = 'Historial: ' + userName;
+        content.innerHTML = '<p style="text-align: center; color: #64748b; padding: 20px;">Cargando historial...</p>';
+
+        fetch('<?= site_url('admin/email-history/') ?>' + userId, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(logs => {
+            if (logs.length === 0) {
+                content.innerHTML = '<p style="text-align: center; color: #64748b; padding: 20px;">No hay historial de correos.</p>';
+                return;
+            }
+
+            let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
+            logs.forEach(log => {
+                let statusBadge = '<span style="font-size: 0.7rem; color: #64748b;">Enviado</span>';
+                if (log.clicked_at) statusBadge = '<span style="font-size: 0.7rem; color: #059669; font-weight: 700;">Clicado</span>';
+                else if (log.opened_at) statusBadge = '<span style="font-size: 0.7rem; color: #2563eb; font-weight: 700;">Leído</span>';
+                
+                html += `
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <span style="font-size: 0.75rem; color: #94a3b8;">${log.created_at}</span>
+                            ${statusBadge}
+                        </div>
+                        <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a; margin-bottom: 5px;">${log.subject}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            ${log.message.replace(/<[^>]*>?/gm, '')}
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            content.innerHTML = html;
+        })
+        .catch(err => {
+            content.innerHTML = '<p style="text-align: center; color: #ef4444; padding: 20px;">Error al cargar el historial.</p>';
+        });
+    }
+
+    function closeEmailModal() {
+        document.getElementById('emailHistoryModal').style.display = 'none';
+    }
 </script>
 
 <?= view('partials/footer') ?>

@@ -103,6 +103,11 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                         <span class="ae-radar-page__nav-icon">📈</span>
                         Análisis de Tendencias
                     </a>
+                    
+                    <a href="<?= site_url('billing/invoices') ?>" class="ae-radar-page__nav-link">
+                        <span class="ae-radar-page__nav-icon">🧾</span>
+                        Mis facturas
+                    </a>
                 </div>
 
                 <div class="ae-radar-page__nav-group">
@@ -162,10 +167,20 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                             Activar Radar PRO (79€)
                         </a>
                     <?php else: ?>
-                        <div class="ae-radar-page__pill ae-radar-page__pill--live">
-                            <span class="ae-radar-page__pulse"></span>
-                            Suscripción activa
-                        </div>
+                        <?php if (isset($userPlan['status']) && $userPlan['status'] === 'canceled'): ?>
+                            <a href="<?= site_url('billing') ?>" class="ae-radar-page__pill ae-radar-page__pill--live" style="text-decoration:none; background:#fef2f2; border:1px solid #fee2e2; color:#ef4444;" title="Gestionar facturación">
+                                <span class="ae-radar-page__pulse" style="background:#ef4444;"></span>
+                                Cancelada (Acceso hasta <?= date('d/m/Y', strtotime($userPlan['period_end'])) ?>)
+                            </a>
+                        <?php else: ?>
+                            <a href="<?= site_url('billing') ?>" class="ae-radar-page__pill ae-radar-page__pill--live" style="text-decoration:none;" title="Gestionar facturación">
+                                <span class="ae-radar-page__pulse"></span>
+                                Suscripción activa
+                            </a>
+                            <button type="button" class="ae-radar-page__cta-top" style="background:transparent; border:1px solid #ef4444; color:#ef4444; cursor:pointer;" onclick="cancelRadarSubscription()">
+                                Cancelar PRO
+                            </button>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </header>
@@ -1008,6 +1023,87 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
 
         bindPagination();
     });
+
+    function cancelRadarSubscription() {
+        Swal.fire({
+            title: '¿Cancelar suscripción PRO?',
+            html: 'Lamentamos que te vayas. Seguirás teniendo acceso a <strong>Radar PRO</strong> hasta el final de tu periodo de facturación actual.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, cancelar PRO',
+            cancelButtonText: 'Mantener plan',
+            reverseButtons: true,
+            focusCancel: true,
+            customClass: {
+                popup: 've-swal',
+                title: 've-swal-title',
+                htmlContainer: 've-swal-text',
+                confirmButton: 'btn danger ve-swal-confirm',
+                cancelButton: 'btn btn_header--ghost ve-swal-cancel',
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const btn = document.querySelector('.ae-radar-page__cta-top');
+                const originalHtml = btn.innerHTML;
+                if(btn) {
+                    btn.innerHTML = 'Cancelando...';
+                    btn.style.opacity = '0.7';
+                    btn.disabled = true;
+                }
+
+                fetch('<?= site_url("billing/cancel-subscription") ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: 'ajax=1&<?= csrf_token() ?>=<?= csrf_hash() ?>'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            title: 'Cancelada',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonText: 'Entendido',
+                            customClass: {
+                                popup: 've-swal',
+                                title: 've-swal-title',
+                                htmlContainer: 've-swal-text',
+                                confirmButton: 'btn btn_primary ve-swal-confirm',
+                            },
+                            buttonsStyling: false
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        throw new Error(data.message || 'Error desconocido');
+                    }
+                })
+                .catch(err => {
+                    if(btn) {
+                        btn.innerHTML = originalHtml;
+                        btn.style.opacity = '1';
+                        btn.disabled = false;
+                    }
+                    Swal.fire({
+                        title: 'Error', 
+                        text: err.message || 'No se ha podido procesar la baja. Inténtalo de nuevo o contáctanos.', 
+                        icon: 'error',
+                        customClass: {
+                            popup: 've-swal',
+                            title: 've-swal-title',
+                            htmlContainer: 've-swal-text',
+                            confirmButton: 'btn btn_primary ve-swal-confirm',
+                        },
+                        buttonsStyling: false
+                    });
+                });
+            }
+        });
+    }
     </script>
 
 </body>

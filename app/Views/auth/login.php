@@ -116,6 +116,9 @@
                                 class="input"
                                 placeholder="Tu contraseña"
                         />
+                        <div style="margin-top: 8px; text-align: right;">
+                            <a href="<?= site_url('forgot-password') ?>" class="auth-muted" style="font-size: 0.85rem;">¿Has olvidado tu contraseña?</a>
+                        </div>
                     </div>
 
                     <div class="auth-submit-row">

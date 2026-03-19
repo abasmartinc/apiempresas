@@ -28,8 +28,7 @@ $getLeadBadge = function($dateStr) {
 
     $diffDays = floor((time() - $timestamp) / 86400);
 
-    if ($diffDays <= 0) return 'Constituida hoy';
-    if ($diffDays <= 7) return 'Últimos 7 días';
+    if ($diffDays <= 7) return 'Nueva empresa';
     if ($diffDays <= 30) return 'Últimos 30 días';
     return 'Nueva empresa';
 };
@@ -146,6 +145,19 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                         <?php endif; ?>
                     </div>
 
+                    <div class="ae-radar-page__hero-alt-downloads">
+                        <span>O prefieres descargar:</span>
+                        <?php if ($period !== 'hoy'): ?>
+                            <a href="<?= site_url('checkout/radar-export?period=hoy') ?>">Nacional Hoy (<?= number_format($stats['hoy'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€</a>
+                        <?php endif; ?>
+                        <?php if ($period !== 'semana'): ?>
+                            <a href="<?= site_url('checkout/radar-export?period=semana') ?>">Nacional Semana (<?= number_format($stats['semana'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€</a>
+                        <?php endif; ?>
+                        <?php if ($period !== 'mes' && $period !== 'general'): ?>
+                            <a href="<?= site_url('checkout/radar-export?period=30days') ?>">Nacional Mes (<?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€</a>
+                        <?php endif; ?>
+                    </div>
+
                     <div class="ae-radar-page__hero-panel">
                         <div class="ae-radar-page__hero-panel-copy">
                             <h2 class="ae-radar-page__hero-panel-title">Accede al Radar de empresas nuevas</h2>
@@ -165,7 +177,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
 
                     <div class="ae-radar-page__stats-wrap">
                         <div class="ae-radar-page__stats">
-                            <div class="ae-radar-page__stat-card ae-radar-page__stat-card--today">
+                            <a href="<?= site_url('empresas-nuevas-hoy') ?>" class="ae-radar-page__stat-card ae-radar-page__stat-card--today <?= ($period === 'hoy') ? 'ae-radar-page__stat-card--active' : '' ?>">
                                 <div class="ae-radar-page__stat-icon">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                                         <circle cx="12" cy="12" r="10"></circle>
@@ -173,12 +185,12 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                                     </svg>
                                 </div>
                                 <div>
-                                    <div class="ae-radar-page__stat-label">Nuevas hoy</div>
+                                    <div class="ae-radar-page__stat-label">Constituidas hoy</div>
                                     <div class="ae-radar-page__stat-value"><?= number_format($stats['hoy'] ?? 0, 0, ',', '.') ?></div>
                                 </div>
-                            </div>
+                            </a>
 
-                            <div class="ae-radar-page__stat-card ae-radar-page__stat-card--week">
+                            <a href="<?= site_url('empresas-nuevas-semana') ?>" class="ae-radar-page__stat-card ae-radar-page__stat-card--week <?= ($period === 'semana') ? 'ae-radar-page__stat-card--active' : '' ?>">
                                 <div class="ae-radar-page__stat-icon">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                                         <rect x="3" y="4" width="18" height="18" rx="2"></rect>
@@ -191,9 +203,9 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                                     <div class="ae-radar-page__stat-label">Últimos 7 días</div>
                                     <div class="ae-radar-page__stat-value"><?= number_format($stats['semana'] ?? 0, 0, ',', '.') ?></div>
                                 </div>
-                            </div>
+                            </a>
 
-                            <div class="ae-radar-page__stat-card ae-radar-page__stat-card--month">
+                            <a href="<?= site_url('empresas-nuevas-mes') ?>" class="ae-radar-page__stat-card ae-radar-page__stat-card--month <?= ($period === 'mes') ? 'ae-radar-page__stat-card--active' : '' ?>">
                                 <div class="ae-radar-page__stat-icon">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                                         <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
@@ -204,7 +216,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                                     <div class="ae-radar-page__stat-label">Últimos 30 días</div>
                                     <div class="ae-radar-page__stat-value"><?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?></div>
                                 </div>
-                            </div>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -349,7 +361,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                                     </div>
                                     <h4 class="ae-radar-page__empty-card-title">Alertas personalizadas</h4>
                                     <p class="ae-radar-page__empty-card-text">Recibe un email cada vez que detectemos una nueva constitución hoy.</p>
-                                    <form action="#" method="POST" onsubmit="alert('Alerta activa.'); return false;" class="ae-radar-page__empty-form">
+                                    <form action="#" method="POST" onsubmit="event.preventDefault(); fetch('<?= site_url('leads/subscribe') ?>', {method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: new URLSearchParams({email: this.querySelector('input[type=email]').value, province: '<?= esc($province ?? 'España') ?>', source: 'empty_state'})}).then(r => r.json()).then(d => { if(d.status === 'success') { Swal.fire('¡Listo!', d.message, 'success'); this.reset(); } else { Swal.fire('Error', 'Error al suscribirse.', 'error'); } }).catch(() => Swal.fire('Error', 'Error al suscribirse.', 'error'));" class="ae-radar-page__empty-form">
                                         <input type="email" placeholder="Tu email profesional" required class="ae-radar-page__empty-input">
                                         <button type="submit" class="ae-radar-page__empty-submit">OK</button>
                                     </form>
@@ -405,7 +417,11 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                                 </div>
                             </div>
 
-                            <a href="<?= site_url($co['cif'] . '-' . url_title($co['name'], '-', true)) ?>" class="ae-radar-page__lead-btn">
+                            <?php 
+                            helper('company');
+                            $coUrl = company_url($co);
+                            ?>
+                            <a href="<?= $coUrl ?>" class="ae-radar-page__lead-btn">
                                 Ver empresa
                             </a>
                         </article>
@@ -664,6 +680,19 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                         <a href="<?= site_url('checkout/radar-export?period=' . urlencode(empty($period) || $period === 'general' ? '30days' : $period)) ?>" class="ae-radar-page__excel-btn">
                             Descargar listado (<?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€
                         </a>
+
+                        <div class="ae-radar-page__excel-alt-links">
+                            <span class="ae-radar-page__excel-alt-label">Otras opciones:</span>
+                            <?php if ($period !== 'hoy'): ?>
+                                <a href="<?= site_url('checkout/radar-export?period=hoy') ?>">Nacional Hoy (<?= number_format($stats['hoy'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€</a>
+                            <?php endif; ?>
+                            <?php if ($period !== 'semana'): ?>
+                                <a href="<?= site_url('checkout/radar-export?period=semana') ?>">Nacional Semana (<?= number_format($stats['semana'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€</a>
+                            <?php endif; ?>
+                            <?php if ($period !== 'mes' && $period !== 'general'): ?>
+                                <a href="<?= site_url('checkout/radar-export?period=30days') ?>">Nacional Mes (<?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€</a>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -63,6 +63,20 @@ class Webhook extends Controller
             return;
         }
 
+        // 0. Only process as subscription if mode is 'subscription'
+        // If mode is 'payment', it's a one-time purchase (Excel list) so we don't grant periodic access.
+        if (($session->mode ?? '') !== 'subscription') {
+            log_message('info', "[Webhook::stripe] One-time payment completed for user {$userId}. No subscription created.");
+            
+            // Still save customer ID if available
+            $userModel = new \App\Models\UserModel();
+            $user = $userModel->find($userId);
+            if ($user && empty($user->stripe_customer_id) && $stripeCustomerId) {
+                $userModel->update($userId, ['stripe_customer_id' => $stripeCustomerId]);
+            }
+            return;
+        }
+
         // 1. Guardar el stripe_customer_id en el usuario si aún no lo tiene
         $userModel = new \App\Models\UserModel();
         $user = $userModel->find($userId);
@@ -118,9 +132,17 @@ class Webhook extends Controller
 
     private function handleInvoicePaid($invoice)
     {
-        $stripeSubscriptionId = $invoice->subscription;
+        $stripeSubscriptionId = $invoice->subscription ?? null;
+
         if (!$stripeSubscriptionId) {
-            log_message('error', "[Webhook::handleInvoicePaid] No subscription ID in invoice: " . $invoice->id);
+            // Pago único (ej. descarga de Excel)
+            $userId = $invoice->metadata->user_id ?? $invoice->lines->data[0]->metadata->user_id ?? null;
+            if ($userId) {
+                // Fetch the inner invoice if invoice isn't passed fully with metadata, although invoice_data should map it
+                $this->processSinglePaymentInvoice($invoice);
+            } else {
+                log_message('error', "[Webhook::handleInvoicePaid] Factura sin suscripción ni user_id en metadata: " . $invoice->id);
+            }
             return;
         }
 
@@ -252,6 +274,87 @@ class Webhook extends Controller
             log_message('info', "[Webhook::stripe] Subscription renewed/paid, invoice generated and email sent: {$stripeSubscriptionId}");
         } else {
             log_message('error', "[Webhook::handleInvoicePaid] Subscription not found for Stripe Subscription ID: {$stripeSubscriptionId}");
+        }
+    }
+
+    private function processSinglePaymentInvoice($invoice)
+    {
+        // Stripe usually passes metadata either directly on invoice if created via session.invoice_creation, or inside lines
+        $metadata = $invoice->metadata ?? ($invoice->lines->data[0]->metadata ?? null);
+        $userId = $metadata->user_id ?? null;
+        $planSlug = $metadata->plan ?? 'radar_single';
+
+        if (!$userId) return;
+
+        $planModel = new \App\Models\ApiPlanModel();
+        $plan = $planModel->where('slug', $planSlug)->first();
+        if (!$plan) {
+            $plan = $planModel->where('slug', 'radar')->first();
+        }
+
+        $billingAddress = '';
+        if (isset($invoice->customer_address)) {
+            $addr = $invoice->customer_address;
+            $parts = array_filter([
+                $addr->line1 ?? '', $addr->line2 ?? '', $addr->postal_code ?? '',
+                $addr->city ?? '', $addr->country ?? ''
+            ]);
+            $billingAddress = implode(', ', $parts);
+        }
+
+        $billingVat = '';
+        if (!empty($invoice->customer_tax_ids) && is_array($invoice->customer_tax_ids)) {
+            $billingVat = $invoice->customer_tax_ids[0]->value ?? ''; 
+        }
+        if (empty($billingVat) && isset($metadata->nif)) {
+            $billingVat = $metadata->nif;
+        }
+
+        $userModel = new \App\Models\UserModel();
+        $dbUser = $userModel->find($userId);
+        
+        $billingName = $invoice->customer_name ?? 'Cliente';
+        if ($dbUser) {
+            $billingName = $dbUser->name;
+            if (!empty($dbUser->company)) {
+                $billingName .= " (" . $dbUser->company . ")";
+            }
+        }
+
+        $invoiceService = new \App\Services\InvoiceService();
+        $dbInvoice = $invoiceService->createInvoiceFromPayment(
+            (int)$userId, 
+            (int)($plan->id ?? 5),
+            [
+                'name'    => $billingName,
+                'email'   => ($dbUser ? $dbUser->email : null) ?? ($invoice->customer_email ?? null),
+                'address' => $billingAddress,
+                'vat'     => $billingVat
+            ],
+            $invoice->id
+        );
+
+        if ($dbInvoice) {
+            $emailService = new \App\Services\EmailService();
+            $emailService->sendPaymentNotification([
+                'invoice'        => $dbInvoice,
+                'customer_name'  => $dbInvoice->billing_name,
+                'customer_email' => $dbInvoice->billing_email,
+                'plan_name'      => $plan->name ?? 'Descarga Excel',
+                'amount'         => $dbInvoice->total_amount,
+                'currency'       => $dbInvoice->currency,
+                'invoice_number' => $dbInvoice->invoice_number
+            ]);
+            $emailService->sendInvoiceToUser([
+                'customer_name'  => $dbInvoice->billing_name,
+                'customer_email' => $dbInvoice->billing_email,
+                'plan_name'      => $plan->name ?? 'Descarga Excel',
+                'amount'         => $dbInvoice->total_amount,
+                'currency'       => $dbInvoice->currency,
+                'invoice_number' => $dbInvoice->invoice_number,
+                'pdf_path'       => $dbInvoice->pdf_path
+            ]);
+            log_message('info', "[Webhook::stripe] One-time payment invoice generated and email sent: {$invoice->id}");
         }
     }
 

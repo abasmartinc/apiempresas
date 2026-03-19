@@ -55,10 +55,15 @@ class Billing extends BaseController
      */
     public function checkout()
     {
-        // Enforce preview step if accessed via GET (direct link)
+        // Enforce preview step / registration if accessed via GET (direct link)
         if ($this->request->getMethod() === 'get') {
             $params = $this->request->getGet();
-            // Map plan to type if needed, but order_summary handles generic params well
+
+            if (!session('logged_in')) {
+                session()->set('pending_checkout', $params);
+                return redirect()->to(site_url('register/quick'));
+            }
+
             $queryString = $params ? '?' . http_build_query($params) : '';
             return redirect()->to(site_url('checkout/radar-export' . $queryString));
         }
@@ -217,9 +222,19 @@ class Billing extends BaseController
                 'success_url' => $successUrl,
                 'cancel_url' => $cancelUrl,
                 'client_reference_id' => (string) $userId,
+                'invoice_creation' => [
+                    'enabled' => true,
+                    'invoice_data' => [
+                        'metadata' => [
+                            'user_id' => (string) $userId,
+                            'plan' => 'radar_single',
+                            'period' => 'single',
+                        ]
+                    ]
+                ],
                 'metadata' => [
                     'user_id' => (string) $userId,
-                    'plan' => $plan,
+                    'plan' => 'radar_single',
                     'period' => 'single',
                 ],
             ];
@@ -403,16 +418,9 @@ class Billing extends BaseController
         // Fetch user's active subscription
         $subscription = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
 
-        // 1. Specific View for Full Radar Plan
-        if ($subscription && ($subscription->plan_slug ?? '') === 'radar' && ($subscription->status ?? '') === 'active') {
-             $data = [
-                 'order_ref' => 'SUB-' . str_pad($subscription->id ?? '0', 6, '0', STR_PAD_LEFT),
-             ];
-             return view('billing/success_radar', $data);
-        }
-
-        // 2. Excel Single Purchase Flow
         $checkoutData = session('checkout_context') ?? [];
+
+        // 1. Excel Single Purchase Flow (Check this first to prioritize the immediate transaction)
         if (($checkoutData['type'] ?? '') === 'excel') {
             $exportParams = [
                 'sector'    => $checkoutData['sector']   ?? 'General',
@@ -434,6 +442,14 @@ class Billing extends BaseController
             session()->remove('checkout_context');
 
             return view('billing/success_single', $data);
+        }
+
+        // 2. Specific View for Full Radar Plan (Only if we haven't just cleared an Excel context)
+        if ($subscription && ($subscription->plan_slug ?? '') === 'radar' && ($subscription->status ?? '') === 'active' && empty($checkoutData)) {
+             $data = [
+                 'order_ref' => 'SUB-' . str_pad($subscription->id ?? '0', 6, '0', STR_PAD_LEFT),
+             ];
+             return view('billing/success_radar', $data);
         }
 
         // 3. API Subscription Success (Pro/Business)
@@ -716,6 +732,9 @@ class Billing extends BaseController
     public function cancel_subscription()
     {
         if (!session('logged_in')) {
+            if ($this->request->isAJAX() || $this->request->getPost('ajax')) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Sesión expirada. Por favor, inicia sesión.']);
+            }
             return redirect()->to(site_url('enter'));
         }
 
@@ -723,6 +742,9 @@ class Billing extends BaseController
         $plan = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
 
         if (!$plan) {
+            if ($this->request->isAJAX() || $this->request->getPost('ajax')) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'No tienes ninguna suscripción activa para cancelar.']);
+            }
             return redirect()->back()->with('error', 'No tienes ninguna suscripción activa para cancelar.');
         }
 
@@ -737,9 +759,24 @@ class Billing extends BaseController
                     ]);
                     log_message('info', "[Billing::cancel_subscription] Suscripción Stripe marcada para cancelar: {$plan->stripe_subscription_id}");
                 }
+            } catch (\Stripe\Exception\InvalidRequestException $e) {
+                // If the subscription doesn't exist in Stripe (e.g. test environment resets),
+                // we should still cancel it locally so the user isn't permanently stuck.
+                $msg = $e->getMessage();
+                if (strpos($msg, 'No such subscription') !== false) {
+                    log_message('warning', "[Billing::cancel_subscription] Stripe no encontró la suscripción, forzando cancelación local: " . $msg);
+                } else {
+                    log_message('error', "[Billing::cancel_subscription] Error al cancelar en Stripe: " . $msg);
+                    if ($this->request->isAJAX() || $this->request->getPost('ajax')) {
+                        return $this->response->setJSON(['status' => 'error', 'message' => 'No se pudo comunicar la cancelación a Stripe: ' . $msg]);
+                    }
+                    return redirect()->back()->with('error', 'No se pudo comunicar la cancelación a Stripe: ' . $msg);
+                }
             } catch (\Exception $e) {
                 log_message('error', "[Billing::cancel_subscription] Error al cancelar en Stripe: " . $e->getMessage());
-                // Podríamos decidir si continuar o no. Normalmente, si falla Stripe, queremos avisar.
+                if ($this->request->isAJAX() || $this->request->getPost('ajax')) {
+                    return $this->response->setJSON(['status' => 'error', 'message' => 'No se pudo comunicar la cancelación a Stripe: ' . $e->getMessage()]);
+                }
                 return redirect()->back()->with('error', 'No se pudo comunicar la cancelación a Stripe: ' . $e->getMessage());
             }
         }
@@ -752,6 +789,13 @@ class Billing extends BaseController
 
         // Log subscription cancellation
         log_activity('subscription_cancelled', ['plan' => $plan->plan_name ?? 'Unknown']);
+
+        if ($this->request->isAJAX() || $this->request->getPost('ajax')) {
+            return $this->response->setJSON([
+                'status' => 'success', 
+                'message' => 'Tu suscripción ha sido cancelada. Seguirás teniendo acceso hasta el final del periodo facturado y no se te cobrará de nuevo.'
+            ]);
+        }
 
         return redirect()->to(site_url('billing'))->with('message', 'Tu suscripción ha sido cancelada. Seguirás teniendo acceso hasta el final del periodo facturado y no se te cobrará de nuevo.');
     }

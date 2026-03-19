@@ -155,4 +155,100 @@ class Login extends BaseController
             ->to(site_url('enter'))
             ->with('message', 'Has cerrado sesión correctamente.');
     }
+
+    /**
+     * Muestra el formulario de solicitud de reseteo
+     */
+    public function forgotPassword()
+    {
+        return view('auth/forgot_password');
+    }
+
+    /**
+     * Envía el enlace de reseteo por email
+     */
+    public function sendResetLink()
+    {
+        $email = strtolower(trim($this->request->getPost('email')));
+        
+        $user = $this->userModel
+            ->where('email', $email)
+            ->where('source_app', 'apiempresas')
+            ->first();
+
+        if ($user) {
+            $token = bin2hex(random_bytes(32));
+            $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+            $this->userModel->update($user->id, [
+                'reset_token' => $token,
+                'reset_expires' => $expires
+            ]);
+
+            // Enviar email
+            $emailService = \Config\Services::email();
+            $emailService->setTo($email);
+            $emailService->setSubject('Restablecer contraseña - APIEmpresas.es');
+            $emailService->setMessage(view('emails/reset_email', ['token' => $token]));
+
+            if (!$emailService->send()) {
+                log_message('error', 'Error enviando email de reseteo: ' . $emailService->printDebugger(['headers']));
+            }
+        }
+
+        // Siempre mostrar el mismo mensaje para evitar enumeración de usuarios
+        return redirect()->back()->with('message', 'Si el correo existe en nuestro sistema, recibirás un enlace para restablecer tu contraseña en unos minutos.');
+    }
+
+    /**
+     * Muestra el formulario para establecer la nueva contraseña
+     */
+    public function resetPassword($token)
+    {
+        $user = $this->userModel
+            ->where('reset_token', $token)
+            ->where('reset_expires >=', date('Y-m-d H:i:s'))
+            ->first();
+
+        if (!$user) {
+            return redirect()->to(site_url('enter'))->with('error', 'El enlace de restablecimiento es inválido o ha caducado.');
+        }
+
+        return view('auth/reset_password', ['token' => $token]);
+    }
+
+    /**
+     * Procesa la actualización de la contraseña
+     */
+    public function updatePassword()
+    {
+        $token = $this->request->getPost('token');
+        $password = $this->request->getPost('password');
+        $passwordConfirm = $this->request->getPost('password_confirm');
+
+        if ($password !== $passwordConfirm) {
+            return redirect()->back()->with('error', 'Las contraseñas no coinciden.');
+        }
+
+        if (strlen($password) < 8) {
+            return redirect()->back()->with('error', 'La contraseña debe tener al menos 8 caracteres.');
+        }
+
+        $user = $this->userModel
+            ->where('reset_token', $token)
+            ->where('reset_expires >=', date('Y-m-d H:i:s'))
+            ->first();
+
+        if (!$user) {
+            return redirect()->to(site_url('enter'))->with('error', 'El enlace de restablecimiento es inválido o ha caducado.');
+        }
+
+        $this->userModel->update($user->id, [
+            'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+            'reset_token' => null,
+            'reset_expires' => null
+        ]);
+
+        return redirect()->to(site_url('enter'))->with('message', 'Contraseña actualizada correctamente. Ya puedes iniciar sesión.');
+    }
 }

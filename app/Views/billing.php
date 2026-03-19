@@ -48,6 +48,8 @@
             $planName = 'Pro';
         if (strcasecmp($planNameRaw, 'business') === 0)
             $planName = 'Business';
+        if (strcasecmp($planNameRaw, 'radar b2b') === 0)
+            $planName = 'Radar B2B';
         $periodEnd = $get($plan, 'current_period_end', null);
 
         $fmt = function ($n) {

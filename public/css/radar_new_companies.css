@@ -249,6 +249,8 @@
     border: 1px solid rgba(226, 232, 240, 0.9);
     box-shadow: var(--ae-shadow-card);
     transition: all 0.28s ease;
+    text-decoration: none;
+    color: inherit;
 }
 
 .ae-radar-page__stat-card:hover {
@@ -695,6 +697,7 @@
     overflow: hidden;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
+    line-clamp: 1;
 }
 
 .ae-radar-page__lead-box {
@@ -720,6 +723,7 @@
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    line-clamp: 2;
     font-size: 0.87rem;
     line-height: 1.58;
     font-weight: 600;
@@ -947,6 +951,8 @@
 
 .ae-radar-page__excel-actions {
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
 }
 

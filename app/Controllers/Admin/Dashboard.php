@@ -1605,7 +1605,12 @@ class Dashboard extends BaseController
                 IFNULL((SELECT SUM(requests_count) FROM api_usage_daily aud WHERE aud.user_id = u.id), 0) as total_api_requests,
                 (SELECT COUNT(id) FROM user_activity_logs al WHERE al.user_id = u.id) as total_activity,
                 IFNULL((SELECT status FROM user_subscriptions sub WHERE sub.user_id = u.id AND sub.status = 'active' LIMIT 1), 'inactive') as sub_status,
-                (SELECT plan_id FROM user_subscriptions sub WHERE sub.user_id = u.id AND sub.status = 'active' LIMIT 1) as plan_id
+                (SELECT plan_id FROM user_subscriptions sub WHERE sub.user_id = u.id AND sub.status = 'active' LIMIT 1) as plan_id,
+                (SELECT created_at FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_at,
+                (SELECT status FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_status,
+                (SELECT opened_at FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_opened,
+                (SELECT clicked_at FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_clicked,
+                (SELECT COUNT(id) FROM email_logs el WHERE el.user_id = u.id) as total_emails_sent
             FROM users u
             ORDER BY u.created_at DESC
             LIMIT 100
@@ -1713,5 +1718,22 @@ class Dashboard extends BaseController
         }
         
         return $this->response->setJSON($result);
+    }
+
+    /**
+     * Obtener el historial de emails de un usuario por AJAX
+     */
+    public function email_history_ajax($userId)
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(403)->setBody('Forbidden');
+        }
+
+        $logs = $this->emailLogModel->where('user_id', $userId)
+                                    ->orderBy('created_at', 'DESC')
+                                    ->limit(10)
+                                    ->findAll();
+
+        return $this->response->setJSON($logs);
     }
 }

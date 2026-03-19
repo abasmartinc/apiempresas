@@ -108,9 +108,10 @@
                     <?php elseif (!empty($companies) && is_array($companies)): ?>
                         <div
                             style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
-                            <?php foreach ($companies as $co):
-                                $coSlug = url_title($co['name'] ?? '', '-', true);
-                                $coUrl = site_url(($co['cif'] ?? '') . ($coSlug ? ('-' . $coSlug) : ''));
+                            <?php
+                            helper('company');
+                            foreach ($companies as $co):
+                                $coUrl = company_url($co);
                                 ?>
                                 <a href="<?= esc($coUrl) ?>"
                                     style="text-decoration: none; color: inherit; display: block; padding: 1.5rem; background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s;"
@@ -129,6 +130,28 @@
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
+                </div>
+            </div>
+        </section>
+
+        <!-- RADAR PRO CTA -->
+        <section class="container" style="margin-top: 40px;">
+            <div class="dash-cta-card" style="display: grid; grid-template-columns: 1fr auto; gap: 30px; align-items: center; max-width: 1000px; margin-inline: auto;">
+                <div>
+                    <h3>
+                        <div class="dash-cta-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                        </div>
+                        ¿Necesitas monitorizar nuevas empresas en tiempo real?
+                    </h3>
+                    <p style="margin-bottom: 0;">
+                        Nuestro motor <strong>Radar Pro</strong> analiza el BORME diariamente para ofrecerte leads frescos de cualquier sector o provincia. Impulsa tu estrategia comercial con datos oficiales en tiempo real.
+                    </p>
+                </div>
+                <div style="min-width: 240px;">
+                    <a href="<?=site_url() ?>leads-empresas-nuevas" class="btn">
+                        Ver Radar PRO →
+                    </a>
                 </div>
             </div>
         </section>

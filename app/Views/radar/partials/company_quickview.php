@@ -97,7 +97,7 @@
                 </div>
                 <div class="ae-qv__item">
                     <label>Acceso Web</label>
-                    <p>No disponible en QuickView</p>
+                    <p>N/D</p>
                 </div>
             </div>
         </div>

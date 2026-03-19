@@ -22,6 +22,8 @@ class UserModel extends Model
         'api_access',
         'source_app',
         'stripe_customer_id',
+        'reset_token',
+        'reset_expires',
         'created_at',
         'updated_at',
         'last_login_at',

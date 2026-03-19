@@ -163,7 +163,7 @@
                 </ul>
 
                 <a href="<?= site_url('radar') ?>" style="display: inline-flex; justify-content: center; align-items: center; gap: 10px; background: radial-gradient(circle at 0% 0%, #fefce8 0, #facc15 35%, #f97316 100%); color: #0f172a; font-weight: 800; text-decoration: none; font-size: 1.15rem; padding: 14px 24px; border-radius: 12px; box-shadow: 0 12px 30px rgba(249, 115, 22, 0.4); transition: transform 0.2s, box-shadow 0.2s; width: 100%;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 16px 40px rgba(249, 115, 22, 0.5)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 12px 30px rgba(249, 115, 22, 0.4)';">
-                    Probar Radar gratis <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    Ver empresas en el Radar <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                 </a>
             </div>
         </div>

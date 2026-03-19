@@ -137,6 +137,11 @@
                         <span class="ae-radar-page__nav-icon">📈</span>
                         Análisis de Tendencias
                     </a>
+                    
+                    <a href="<?= site_url('billing/invoices') ?>" class="ae-radar-page__nav-link">
+                        <span class="ae-radar-page__nav-icon">🧾</span>
+                        Mis facturas
+                    </a>
                 </div>
             </div>
             <div class="ae-radar-page__sidebar-footer">

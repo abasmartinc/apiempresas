@@ -28,8 +28,7 @@ $getLeadBadge = function($dateStr) {
 
     $diffDays = floor((time() - $timestamp) / 86400);
 
-    if ($diffDays <= 0) return 'Constituida hoy';
-    if ($diffDays <= 7) return 'Últimos 7 días';
+    if ($diffDays <= 7) return 'Nueva empresa';
     if ($diffDays <= 30) return 'Últimos 30 días';
     return 'Nueva empresa';
 };
@@ -276,7 +275,11 @@ $province = 'España';
                             </div>
                         </div>
 
-                        <a href="<?= site_url($co['cif'] . '-' . url_title($co['name'], '-', true)) ?>" class="ae-radar-page__lead-btn">
+                        <?php
+                        helper('company');
+                        $coUrl = company_url($co);
+                        ?>
+                        <a href="<?= $coUrl ?>" class="ae-radar-page__lead-btn">
                             Ver empresa
                         </a>
                     </article>

@@ -513,242 +513,121 @@
             </p>
 
             <div class="code-card">
-                <div class="code-top"><span>curl</span><span>Ejemplo rápido</span></div>
                 <pre><code>curl -H "Authorization: Bearer &lt;API_KEY&gt;" \
 "https://apiempresas.es/api/v1/companies?cif=B12345678"</code></pre>
             </div>
         </section>
-        <!-- RADAR LEAD CAPTURE -->
-        <section id="radar-leads" class="container" style="margin-top: 40px; margin-bottom: 40px;">
+
+        <!-- RADAR SHOWCASE -->
+        <section id="radar-leads" class="container" style="margin-top: 30px; margin-bottom: 30px;">
             <div class="band"
-                style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius: 24px; padding: 60px 40px; color: #0f172a; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05); border: 1px solid #bfdbfe;">
-
-                <!-- Decorative background elements -->
-                <div
-                    style="position: absolute; top: -50px; right: -50px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(33, 82, 255, 0.1) 0%, transparent 70%); pointer-events: none;">
-                </div>
-                <div
-                    style="position: absolute; bottom: -50px; left: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(29, 78, 216, 0.05) 0%, transparent 70%); pointer-events: none;">
-                </div>
-
+                style="background: radial-gradient(circle at 100% 100%, #f0f4ff 0%, #ffffff 40%); border-radius: 32px; padding: 80px 60px; color: #0f172a; position: relative; overflow: hidden; border: none;">
+                
                 <div class="grid"
-                    style="grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; position: relative; z-index: 1;">
+                    style="grid-template-columns: 1.1fr 0.9fr; gap: 80px; align-items: center; position: relative; z-index: 1;">
 
                     <!-- Content -->
-                    <div>
-                        <span class="eyebrow"
-                            style="color: #2152ff; border-color: rgba(33, 82, 255, 0.2); background: rgba(33, 82, 255, 0.1);">APIEmpresas
-                            Radar</span>
+                    <div style="padding-right: 20px;">
+                        <span class="pill"
+                            style="background: #edf2ff; color: #2152ff; border: none; font-weight: 700; font-size: 0.8rem; padding: 6px 14px; margin-bottom: 24px; display: inline-flex; align-items: center; border-radius: 8px;">
+                            INTELIGENCIA B2B AVANZADA
+                        </span>
+                        
                         <h2
-                            style="color: #0f172a; margin-top: 10px; margin-bottom: 20px; font-size: 2.5rem; letter-spacing: -0.02em; font-weight: 800; line-height: 1.1;">
-                            ¿Trabajas B2B? Descubre a tus clientes antes que nadie</h2>
-                        <p style="color: #475569; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px;">
-                            Cada semana se constituyen cientos de nuevas empresas en España. Sé el primero en ofrecerles
-                            tus servicios (asesoría, marketing, software, suministros).
+                            style="color: #0f172a; margin-top: 0; margin-bottom: 24px; font-size: 3rem; letter-spacing: -0.03em; font-weight: 800; line-height: 1.1;">
+                            ¿Vendes a otras empresas?<br>
+                            Descubre a tus clientes <span style="color: #2152ff;">antes que nadie</span>
+                        </h2>
+                        
+                        <p style="color: #64748b; font-size: 1.25rem; line-height: 1.6; margin-bottom: 40px; font-weight: 500;">
+                            Monitorizamos el BORME cada día para entregarte oportunidades de negocio antes de que lleguen a manos de tu competencia.
                         </p>
 
-                        <ul style="list-style: none; padding: 0; margin-bottom: 40px; display: grid; gap: 16px;">
-                            <li style="display: flex; gap: 12px; align-items: center;">
-                                <div
-                                    style="background: rgba(33, 82, 255, 0.15); color: #2152ff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="20 6 9 17 4 12"></polyline>
-                                    </svg>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 48px;">
+                            <div style="display: flex; gap: 16px; align-items: flex-start;">
+                                <div style="background: #ffffff; color: #2152ff; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
                                 </div>
-                                <span style="color: #334155; font-size: 1rem; font-weight: 500;">Alerta semanal gratuita
-                                    en tu correo.</span>
-                            </li>
-                            <li style="display: flex; gap: 12px; align-items: center;">
-                                <div
-                                    style="background: rgba(33, 82, 255, 0.15); color: #2152ff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="20 6 9 17 4 12"></polyline>
-                                    </svg>
+                                <div>
+                                    <h4 style="margin: 0 0 2px; font-weight: 750; color: #1e293b; font-size: 1.05rem;">Detección Diaria</h4>
+                                    <p style="margin: 0; color: #94a3b8; font-size: 0.9rem; line-height: 1.4;">Nuevas empresas del día en tiempo real.</p>
                                 </div>
-                                <span style="color: #334155; font-size: 1rem; font-weight: 500;">Filtrado directo por tu
-                                    provincia.</span>
-                            </li>
-                            <li style="display: flex; gap: 12px; align-items: center;">
-                                <div
-                                    style="background: rgba(33, 82, 255, 0.15); color: #2152ff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="20 6 9 17 4 12"></polyline>
-                                    </svg>
-                                </div>
-                                <span style="color: #334155; font-size: 1rem; font-weight: 500;">Datos oficiales recién
-                                    salidos del BORME.</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Form Card -->
-                    <div style="position: relative; display: flex; justify-content: center; align-items: center;">
-                        <style>
-                            .radar-form-card {
-                                background: #ffffff; 
-                                border: 1px solid rgba(255,255,255,0.5); 
-                                border-radius: 24px; 
-                                padding: 40px 32px; 
-                                width: 100%; 
-                                max-width: 450px; 
-                                box-shadow: 0 20px 40px -10px rgba(33, 82, 255, 0.15), 0 0 0 1px rgba(33, 82, 255, 0.05);
-                                position: relative;
-                                backdrop-filter: blur(10px);
-                            }
+                            </div>
                             
-                            .radar-input-group {
-                                position: relative;
-                                margin-bottom: 24px;
-                                width: 100%;
-                            }
-                            .radar-input-group label {
-                                display: block; 
-                                font-size: 0.85rem; 
-                                font-weight: 600; 
-                                color: #475569; 
-                                margin-bottom: 8px;
-                                transition: color 0.2s;
-                            }
-                            .radar-input-group input.radar-input {
-                                width: 100%; 
-                                box-sizing: border-box;
-                                display: block;
-                                border: 1.5px solid #e2e8f0; 
-                                border-radius: 12px; 
-                                padding: 14px 16px 14px 44px;
-                                font-size: 1rem; 
-                                background: #f8fafc; 
-                                color: #1e293b;
-                                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                                line-height: 1.5;
-                                margin: 0;
-                            }
-                            .radar-input-group input.radar-input::placeholder {
-                                color: #94a3b8;
-                            }
-                            .radar-input-group input.radar-input:focus {
-                                outline: none;
-                                border-color: #2152ff;
-                                background: #ffffff;
-                                box-shadow: 0 0 0 4px rgba(33, 82, 255, 0.1);
-                            }
-                            .radar-input-group:focus-within label {
-                                color: #2152ff;
-                            }
-                            .radar-input-icon {
-                                position: absolute;
-                                left: 16px;
-                                top: 48px;
-                                color: #94a3b8;
-                                transition: color 0.3s;
-                                pointer-events: none;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                            }
-                            .radar-input-group:focus-within .radar-input-icon {
-                                color: #2152ff;
-                            }
-                            .radar-submit-btn {
-                                width: 100%; 
-                                background: linear-gradient(135deg, #2152ff 0%, #0f2c9c 100%); 
-                                color: white; 
-                                border: none; 
-                                font-weight: 700; 
-                                padding: 16px; 
-                                border-radius: 12px; 
-                                font-size: 1.05rem; 
-                                box-shadow: 0 10px 20px rgba(33, 82, 255, 0.3); 
-                                cursor: pointer; 
-                                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                                position: relative;
-                                overflow: hidden;
-                                display: flex;
-                                justify-content: center;
-                                align-items: center;
-                                gap: 8px;
-                            }
-                            .radar-submit-btn::before {
-                                content: '';
-                                position: absolute;
-                                top: 0;
-                                left: -100%;
-                                width: 100%;
-                                height: 100%;
-                                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-                                transition: left 0.7s ease;
-                            }
-                            .radar-submit-btn:hover {
-                                transform: translateY(-2px);
-                                box-shadow: 0 14px 28px rgba(33, 82, 255, 0.4);
-                            }
-                            .radar-submit-btn:hover::before {
-                                left: 100%;
-                            }
-                            .radar-submit-btn:active {
-                                transform: translateY(1px);
-                                box-shadow: 0 4px 10px rgba(33, 82, 255, 0.3);
-                            }
-                        </style>
-                        <div class="radar-form-card">
-                            <h3 style="font-size: 1.5rem; color: #0f172a; margin-top: 0; margin-bottom: 12px; text-align: center; font-weight: 800; letter-spacing: -0.02em;">
-                                Recibe nuevas empresas locales</h3>
-                            <p style="text-align: center; color: #64748b; margin-bottom: 30px; font-size: 0.95rem; line-height: 1.5;">
-                                Déjanos tu email y provincia. Te enviaremos el radar semanal directo a tu bandeja.
-                            </p>
-
-                            <!-- Using the same lead-form class and handleLeadSubmit logic -->
-                            <form class="lead-form"
-                                onsubmit="window.handleLeadSubmit && window.handleLeadSubmit(event, this)">
-                                
-                                <div class="radar-input-group">
-                                    <label>Correo electrónico <span style="color:#ef4444">*</span></label>
-                                    <div class="radar-input-icon">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                                            <polyline points="22,6 12,13 2,6"></polyline>
-                                        </svg>
-                                    </div>
-                                    <input type="email" name="email" class="radar-input" placeholder="tu@empresa.com" required>
+                            <div style="display: flex; gap: 16px; align-items: flex-start;">
+                                <div style="background: #ffffff; color: #12b48a; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                 </div>
-
-                                <div class="radar-input-group">
-                                    <label>Provincia de interés <span style="color:#ef4444">*</span></label>
-                                    <div class="radar-input-icon">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                            <circle cx="12" cy="10" r="3"></circle>
-                                        </svg>
-                                    </div>
-                                    <input type="text" name="province" class="radar-input" placeholder="Ej. Madrid, Barcelona..." required>
+                                <div>
+                                    <h4 style="margin: 0 0 2px; font-weight: 750; color: #1e293b; font-size: 1.05rem;">Exportación Directa</h4>
+                                    <p style="margin: 0; color: #94a3b8; font-size: 0.9rem; line-height: 1.4;">Descarga listados filtrados en 1 clic.</p>
                                 </div>
+                            </div>
 
-                                <input type="hidden" name="source" value="home_marketing_section">
-                                <button type="submit" class="btn radar-submit-btn">
-                                    <span>Apuntarme Gratis</span>
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                                        <polyline points="12 5 19 12 12 19"></polyline>
-                                    </svg>
-                                </button>
-                            </form>
-                            
-                            <div style="text-align: center; margin-top: 24px;">
-                                <a href="<?= site_url() ?>empresas-nuevas"
-                                    style="color: #64748b; font-size: 0.85rem; font-weight: 500; text-decoration: none; transition: color 0.2s; display: inline-flex; align-items: center; gap: 4px;"
-                                    onmouseover="this.style.color='#2152ff'" onmouseout="this.style.color='#64748b'">
-                                    Conoce más sobre APIEmpresas Radar
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                                    </svg>
-                                </a>
+                            <div style="display: flex; gap: 16px; align-items: flex-start;">
+                                <div style="background: #ffffff; color: #d97706; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/><path d="M12 8l4 4-4 4M8 12h7"/></svg>
+                                </div>
+                                <div>
+                                    <h4 style="margin: 0 0 2px; font-weight: 750; color: #1e293b; font-size: 1.05rem;">Consejos con IA</h4>
+                                    <p style="margin: 0; color: #94a3b8; font-size: 0.9rem; line-height: 1.4;">Estrategias personalizadas para cada lead.</p>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 16px; align-items: flex-start;">
+                                <div style="background: #ffffff; color: #7c3aed; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                </div>
+                                <div>
+                                    <h4 style="margin: 0 0 2px; font-weight: 750; color: #1e293b; font-size: 1.05rem;">Datos Oficiales</h4>
+                                    <p style="margin: 0; color: #94a3b8; font-size: 0.9rem; line-height: 1.4;">Información 100% verificada del BORME.</p>
+                                </div>
                             </div>
                         </div>
+
+                        <div style="display: flex; gap: 20px;">
+                            <a href="<?= site_url('leads-empresas-nuevas') ?>" class="btn" style="background: #2152ff; color: #ffffff; border: none; font-weight: 700; padding: 18px 36px; border-radius: 16px; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(33, 82, 255, 0.2);">
+                                Ver beneficios del radar
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Visual (Seamless Fade) -->
+                    <div style="position: relative; display: flex; justify-content: center; align-items: center;">
+                        <div style="position: relative; z-index: 1; width: 100%; max-width: 520px;">
+                            <img src="<?= base_url('public/img/radar_showcase.png?v=' . time()) ?>" 
+                                 alt="Radar B2B Profesional" 
+                                 style="width: 100%; display: block; -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%); mask-image: radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%); filter: contrast(1.01);">
+                            
+                            <!-- Heartbeat Pulse Dots -->
+                            <div class="radar-pulse" style="position: absolute; top: 40%; left: 35%; width: 8px; height: 8px; background: #2152ff; border-radius: 50%; box-shadow: 0 0 12px #2152ff; animation: heartbeat_sync 3s infinite;"></div>
+                            <div class="radar-pulse" style="position: absolute; top: 30%; right: 40%; width: 6px; height: 6px; background: #2152ff; border-radius: 50%; box-shadow: 0 0 10px #2152ff; animation: heartbeat_sync 3s infinite 0.5s;"></div>
+                            <div class="radar-pulse" style="position: absolute; bottom: 45%; right: 30%; width: 7px; height: 7px; background: #2152ff; border-radius: 50%; box-shadow: 0 0 12px #2152ff; animation: heartbeat_sync 3s infinite 1.2s;"></div>
+                            <div class="radar-pulse" style="position: absolute; top: 55%; left: 50%; width: 5px; height: 5px; background: #2152ff; border-radius: 50%; box-shadow: 0 0 8px #2152ff; animation: heartbeat_sync 3s infinite 0.8s;"></div>
+
+                            <!-- Floating Status Indicator -->
+                            <div style="position: absolute; bottom: -8%; left: 0; right: 0; padding: 0 24px; display: flex; justify-content: center;">
+                                <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); padding: 10px 18px; border-radius: 99px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid rgba(255,255,255,0.8);">
+                                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #2152ff; box-shadow: 0 0 10px rgba(33, 82, 255, 0.4); animation: pulse_radar_final 2s infinite;"></div>
+                                    <span style="font-size: 0.85rem; font-weight: 700; color: #1e293b;">Radar: Escaneando oportunidades</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <style>
+                            @keyframes heartbeat_sync {
+                                0% { transform: scale(1); opacity: 0.8; }
+                                14% { transform: scale(1.3); opacity: 1; }
+                                28% { transform: scale(1); opacity: 0.8; }
+                                42% { transform: scale(1.3); opacity: 1; }
+                                70% { transform: scale(1); opacity: 0.8; }
+                            }
+                            @keyframes pulse_radar_final {
+                                0% { opacity: 1; transform: scale(1); }
+                                50% { opacity: 0.6; transform: scale(1.2); }
+                                100% { opacity: 1; transform: scale(1); }
+                            }
+                        </style>
                     </div>
 
                 </div>

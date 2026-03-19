@@ -86,18 +86,29 @@
     <a href="${BASE_URL}${company.cif || company.nif}" class="btn" style="text-decoration:none;">Ver ficha completa</a>
   </div>
 
-  <!-- Lead Gen Section -->
-  <div class="lead-form-container">
-    <h4 class="lead-form-title">¿Trabajas con empresas?</h4>
-    <p class="lead-form-subtitle">Recibe cada semana las nuevas empresas creadas en tu provincia.</p>
-    <form class="lead-form" onsubmit="handleLeadSubmit(event, this)">
-      <input type="email" name="email" class="input" placeholder="Tu correo electrónico" required>
-      <input type="text" name="province" class="input" placeholder="Provincia" value="${company.province || company.provincia || ''}">
-      <input type="hidden" name="source" value="home_search">
-      <button type="submit" class="btn secondary" style="padding: 12px 24px;">Recibir empresas nuevas</button>
-    </form>
+  <!-- Premium Lead CTA -->
+  <div class="premium-cta-card" style="margin-top:24px; background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); border: 1px solid #e2e8f0; border-radius: 20px; padding: 32px; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(33, 82, 255, 0.05); text-align: left;">
+    <!-- Decorative Glow -->
+    <div style="position: absolute; top: -20px; right: -20px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(33, 82, 255, 0.1) 0%, transparent 70%);"></div>
+    
+    <div style="display: flex; gap: 24px; align-items: center; position: relative; z-index: 1;">
+      <div style="background: #ffffff; color: #2152ff; width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 8px 16px rgba(33, 82, 255, 0.1); border: 1px solid #f1f5f9;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: pulse_radar_final 2s infinite;"><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      </div>
+      <div style="flex: 1;">
+        <h3 style="margin: 0 0 8px; font-size: 1.25rem; font-weight: 800; color: #0f172a; line-height: 1.2;">¿Vendes a otras empresas?</h3>
+        <p style="margin: 0; color: #64748b; font-size: 1rem; line-height: 1.5;">Monitorizamos el BORME cada día para entregarte leads cualificados de <strong>${company.province || company.provincia || 'España'}</strong> antes que nadie.</p>
+      </div>
+    </div>
+    
+    <div style="margin-top: 24px; display: flex; align-items: center; justify-content: center;">
+      <a href="${BASE_URL}leads-empresas-nuevas" class="btn" style="background: linear-gradient(90deg, #2152ff, #12b48a); color: white; border: none !important; font-weight: 700; padding: 16px 36px; border-radius: 14px; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(33, 82, 255, 0.2); text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; display: inline-flex; align-items: center; gap: 10px;"
+         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 28px rgba(33, 82, 255, 0.3)'"
+         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(33, 82, 255, 0.2)'">
+        Descubrir oportunidades en Radar PRO →
+      </a>
+    </div>
   </div>
-  <a href="${BASE_URL}empresas-nuevas" class="secondary-radar-link" style="display: block; text-align: center; margin-top: 15px;">Ver cómo funciona Radar →</a>
 
   <pre class="company-card__json is-hidden"><code>${jsonPretty}</code></pre>
 </article>`;
@@ -125,58 +136,6 @@
             });
         }
 
-        // Lead Submission Handler
-        window.handleLeadSubmit = function(event, form) {
-            event.preventDefault();
-            const btn = form.querySelector('button[type="submit"]');
-            const originalText = btn.innerText;
-            
-            btn.disabled = true;
-            btn.innerText = 'Enviando...';
-
-            const formData = new FormData(form);
-
-            fetch(`${BASE_URL}leads/subscribe`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success' || (data.status >= 200 && data.status < 300)) {
-                    Swal.fire({
-                        title: '¡Registro completado!',
-                        text: data.message || 'Pronto empezarás a recibir las nuevas empresas.',
-                        icon: 'success',
-                        confirmButtonText: 'Genial',
-                        customClass: {
-                            popup: 've-swal',
-                            confirmButton: 'btn ve-swal-confirm'
-                        },
-                        buttonsStyling: false
-                    });
-                    form.reset();
-                } else {
-                    throw new Error(data.messages?.error || 'Error desconocido');
-                }
-            })
-            .catch(error => {
-                console.error('Lead submission error:', error);
-                Swal.fire({
-                    title: 'Error',
-                    text: error.message || 'Hubo un error al procesar tu solicitud.',
-                    icon: 'error',
-                    confirmButtonText: 'Entendido'
-                });
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.innerText = originalText;
-            });
-        };
-
         // Modal triggers
         document.addEventListener('click', (e) => {
             const trigger = e.target.closest('[data-modal-target]');
@@ -188,7 +147,7 @@
                 return;
             }
 
-            const closer = e.target.closest('[data-modal-close]');
+            const closer = e.target.closest('[data-close-modal]');
             if (closer) {
                 e.preventDefault();
                 const modal = closer.closest('.modal-overlay');

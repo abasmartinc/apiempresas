@@ -54,15 +54,25 @@
                         </svg>
                         Activar Radar
                     </a>
-
-                    <a href="#radar-pricing" class="radar-btn radar-btn--ghost">
-                        Ver plan Radar
-                    </a>
                 </div>
 
-                <p class="radar-hero__note">
+                <p class="radar-hero__note" style="margin-top: 12px; margin-bottom: 12px;">
                     Sin permanencia · Cancela cuando quieras · Exportación Excel / CSV incluida
                 </p>
+
+                <div style="font-size: 0.875rem; color: #475569; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 24px;">
+                    <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 8px; height: 8px;">
+                        <span style="position: absolute; width: 100%; height: 100%; border-radius: 50%; background: #10b981; opacity: 0.4; animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;"></span>
+                        <span style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
+                    </div>
+                    <span>Última empresa detectada hace <strong><?= rand(2, 9) ?> min</strong></span>
+                </div>
+                <style>
+                    @keyframes pulse-dot {
+                        0%, 100% { opacity: 1; transform: scale(1); }
+                        50% { opacity: .3; transform: scale(2); }
+                    }
+                </style>
 
                 <div class="radar-hero__feature-panel">
                     <div class="radar-hero__feature-copy">
