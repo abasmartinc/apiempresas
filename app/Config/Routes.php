@@ -4,6 +4,7 @@ use CodeIgniter\Router\RouteCollection;
 
 /** @var RouteCollection $routes */
 $routes->get('/', 'Home::index');
+
 $routes->post('submit-review', 'Home::submitReview');
 $routes->get('billing/export-excel', 'RadarController::exportExcel');
 $routes->get('enter', 'Login::index');
@@ -207,6 +208,10 @@ $routes->get('sitemap-companies-(:num).xml', 'Sitemap::companies/$1');
 
 // --- Webhook CRON SEO ---
 $routes->get('cron/seo-sync/(:any)', 'RadarController::syncStatsWebhook/$1');
+
+// --- Export Routes ---
+$routes->get('checkout/radar-export', 'RadarController::exportExcel');
+$routes->post('checkout/radar-email', 'RadarController::sendExportEmail');
 
 // --- Programmatic SEO Routes ---
 $routes->get('empresas/(:any)', 'RadarController::provinceCatalog/$1');

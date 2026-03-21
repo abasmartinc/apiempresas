@@ -135,10 +135,12 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                                 Descubre los beneficios del Radar PRO
                             </a>
 
-                            <a href="<?= $buildCheckoutUrl ?>" class="ae-radar-page__btn ae-radar-page__btn--soft">
-                                Descargar listado (<?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€
-                            </a>
-                        <?php else: ?>
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <a href="<?= $buildCheckoutUrl ?>" class="ae-radar-page__btn ae-radar-page__btn--primary js-loading-btn">
+                                        Descargar listado (<?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€
+                                    </a>
+                                </div>
+                            <?php else: ?>
                             <a href="#avisarme-seccion" class="ae-radar-page__btn ae-radar-page__btn--soft">
                                 Avisarme de nuevas empresas
                             </a>
@@ -147,14 +149,14 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
 
                     <div class="ae-radar-page__hero-alt-downloads">
                         <span>O prefieres descargar:</span>
-                        <?php if ($period !== 'hoy'): ?>
-                            <a href="<?= site_url('checkout/radar-export?period=hoy') ?>">Nacional Hoy (<?= number_format($stats['hoy'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€</a>
+                        <?php if ($period !== 'hoy' && ($stats['hoy'] ?? 0) > 0): ?>
+                            <a href="<?= site_url('checkout/radar-export?period=hoy') ?>" class="js-loading-btn">Nacional Hoy (<?= number_format($stats['hoy'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['hoy'] ?? 2, 0) ?>€</a>
                         <?php endif; ?>
-                        <?php if ($period !== 'semana'): ?>
-                            <a href="<?= site_url('checkout/radar-export?period=semana') ?>">Nacional Semana (<?= number_format($stats['semana'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€</a>
+                        <?php if ($period !== 'semana' && ($stats['semana'] ?? 0) > 0): ?>
+                            <a href="<?= site_url('checkout/radar-export?period=semana') ?>" class="js-loading-btn">Nacional Semana (<?= number_format($stats['semana'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['semana'] ?? 4, 0) ?>€</a>
                         <?php endif; ?>
-                        <?php if ($period !== 'mes' && $period !== 'general'): ?>
-                            <a href="<?= site_url('checkout/radar-export?period=30days') ?>">Nacional Mes (<?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€</a>
+                        <?php if ($period !== 'mes' && $period !== 'general' && ($stats['30days'] ?? 0) > 0): ?>
+                            <a href="<?= site_url('checkout/radar-export?period=30days') ?>" class="js-loading-btn">Nacional Mes (<?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['mes'] ?? 9, 0) ?>€</a>
                         <?php endif; ?>
                     </div>
 
@@ -446,7 +448,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                                         <a href="<?= site_url('radar') ?>" class="ae-radar-page__premium-btn ae-radar-page__premium-btn--light">
                                             Abrir Radar
                                         </a>
-                                        <a href="<?= $buildCheckoutUrl ?>" class="ae-radar-page__premium-btn ae-radar-page__premium-btn--dark">
+                                        <a href="<?= $buildCheckoutUrl ?>" class="ae-radar-page__premium-btn ae-radar-page__premium-btn--dark js-loading-btn">
                                             Descargar Excel · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€
                                         </a>
                                     </div>
@@ -538,7 +540,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                             <span class="ae-radar-page__paywall-price-tag">79€/mes</span>
                         </a>
 
-                        <a href="<?= $buildCheckoutUrl ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--secondary">
+                        <a href="<?= $buildCheckoutUrl ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--secondary js-loading-btn">
                             <span>Descargar listado completo</span>
                             <span class="ae-radar-page__paywall-secondary-price"><?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€</span>
                         </a>
@@ -677,20 +679,28 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     </p>
 
                     <div class="ae-radar-page__excel-actions">
-                        <a href="<?= site_url('checkout/radar-export?period=' . urlencode(empty($period) || $period === 'general' ? '30days' : $period)) ?>" class="ae-radar-page__excel-btn">
-                            Descargar listado (<?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€
-                        </a>
+                            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 400px;">
+                                <a href="<?= site_url('checkout/radar-export?period=' . urlencode($period) . ($sectorLabel ? '&sector=' . urlencode($sectorLabel) : '')) ?>" class="ae-radar-page__excel-btn js-loading-btn">
+                                    Descargar listado (<?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€
+                                </a>
+                                <button type="button" class="ae-radar-page__excel-btn ae-radar-page__excel-btn--alt ae-email-export-btn" 
+                                        style="background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #ffffff;"
+                                        data-url="<?= site_url('checkout/radar-email') . '?' . http_build_query($_GET) ?>"
+                                        data-total="<?= number_format($total_context_count ?? 0, 0, ',', '.') ?>">
+                                    Enviar por correo
+                                </button>
+                            </div>
 
                         <div class="ae-radar-page__excel-alt-links">
                             <span class="ae-radar-page__excel-alt-label">Otras opciones:</span>
-                            <?php if ($period !== 'hoy'): ?>
-                                <a href="<?= site_url('checkout/radar-export?period=hoy') ?>">Nacional Hoy (<?= number_format($stats['hoy'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€</a>
+                            <?php if ($period !== 'hoy' && ($stats['hoy'] ?? 0) > 0): ?>
+                                <a href="<?= site_url('checkout/radar-export?period=hoy') ?>" class="js-loading-btn">Nacional Hoy (<?= number_format($stats['hoy'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['hoy'] ?? 2, 0) ?>€</a>
                             <?php endif; ?>
-                            <?php if ($period !== 'semana'): ?>
-                                <a href="<?= site_url('checkout/radar-export?period=semana') ?>">Nacional Semana (<?= number_format($stats['semana'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€</a>
+                            <?php if ($period !== 'semana' && ($stats['semana'] ?? 0) > 0): ?>
+                                <a href="<?= site_url('checkout/radar-export?period=semana') ?>" class="js-loading-btn">Nacional Semana (<?= number_format($stats['semana'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['semana'] ?? 4, 0) ?>€</a>
                             <?php endif; ?>
-                            <?php if ($period !== 'mes' && $period !== 'general'): ?>
-                                <a href="<?= site_url('checkout/radar-export?period=30days') ?>">Nacional Mes (<?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€</a>
+                            <?php if ($period !== 'mes' && $period !== 'general' && ($stats['30days'] ?? 0) > 0): ?>
+                                <a href="<?= site_url('checkout/radar-export?period=30days') ?>" class="js-loading-btn">Nacional Mes (<?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['mes'] ?? 9, 0) ?>€</a>
                             <?php endif; ?>
                         </div>
                     </div>

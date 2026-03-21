@@ -134,7 +134,7 @@ $province = 'España';
                 <div class="ae-radar-page__stats">
                     <a href="<?= site_url('empresas-nuevas-hoy') ?>" class="ae-radar-page__stat-card ae-radar-page__stat-card--today" style="text-decoration: none; color: inherit;">
                         <div class="ae-radar-page__stat-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <polyline points="12 6 12 12 16 14"></polyline>
                             </svg>
@@ -147,7 +147,7 @@ $province = 'España';
 
                     <a href="<?= site_url('empresas-nuevas-semana') ?>" class="ae-radar-page__stat-card ae-radar-page__stat-card--week" style="text-decoration: none; color: inherit;">
                         <div class="ae-radar-page__stat-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                                 <rect x="3" y="4" width="18" height="18" rx="2"></rect>
                                 <line x1="16" y1="2" x2="16" y2="6"></line>
                                 <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -162,7 +162,7 @@ $province = 'España';
 
                     <a href="<?= site_url('empresas-nuevas-mes') ?>" class="ae-radar-page__stat-card ae-radar-page__stat-card--month" style="text-decoration: none; color: inherit;">
                         <div class="ae-radar-page__stat-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                                 <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
                                 <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
                             </svg>
@@ -247,14 +247,14 @@ $province = 'España';
 
                             <div class="ae-radar-page__lead-chips">
                                 <div class="ae-radar-page__lead-chip">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"></path>
                                     </svg>
                                     <span><?= esc($co['cnae'] ?? 'Sector no detallado') ?></span>
                                 </div>
 
                                 <div class="ae-radar-page__lead-chip">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     </svg>
@@ -304,9 +304,11 @@ $province = 'España';
                                     <a href="<?= site_url('leads-empresas-nuevas') ?>" class="ae-radar-page__premium-btn ae-radar-page__premium-btn--light">
                                         Impulsar mis ventas con Radar
                                     </a>
-                                    <a href="<?= site_url('billing/single_checkout?period=30days') ?>" class="ae-radar-page__premium-btn ae-radar-page__premium-btn--dark">
-                                        Descargar Nacional · <?= number_format($dynamic_price['base_price'] ?? 19, 0) ?>€
-                                    </a>
+                                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                                        <a href="<?= site_url('billing/single_checkout?period=30days') ?>" class="ae-radar-page__premium-btn ae-radar-page__premium-btn--dark js-loading-btn">
+                                            Descargar Nacional · <?= number_format($dynamic_price['base_price'] ?? 15, 0) ?>€
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -323,7 +325,7 @@ $province = 'España';
                             <div class="ae-radar-page__paywall-body">
                                 <div class="ae-radar-page__paywall-header">
                                     <div class="ae-radar-page__paywall-icon">
-                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                                        <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                                             <rect x="3" y="11" width="18" height="10" rx="2"></rect>
                                             <path d="M7 11V8a5 5 0 0 1 10 0v3"></path>
                                         </svg>
@@ -363,10 +365,12 @@ $province = 'España';
                                         <span class="ae-radar-page__paywall-price-tag">79€/mes</span>
                                     </a>
 
-                                    <a href="<?= site_url('checkout/radar-export?type=single&provincia=España&period=30days') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--secondary">
-                                        <span>Descargar Excel Nacional</span>
-                                        <span class="ae-radar-page__paywall-secondary-price">19€</span>
-                                    </a>
+                                    <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                                        <a href="<?= site_url('checkout/radar-export?type=single&provincia=España&period=30days') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--secondary js-loading-btn">
+                                            <span>Descargar Excel Nacional</span>
+                                            <span class="ae-radar-page__paywall-secondary-price"><?= number_format($dynamic_price['base_price'] ?? 15, 0) ?>€</span>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -482,6 +486,50 @@ $province = 'España';
                 </div>
             </div>
         </section>
+    <?php
+$baseJsonUrl = rtrim(site_url('/'), '/');
+?>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Inicio",
+          "item": "<?= $baseJsonUrl ?>"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Nuevas Empresas",
+          "item": "<?= $baseJsonUrl . '/empresas-nuevas' ?>"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "<?= esc($title ?? 'Radar Comercial') ?>"
+        }
+      ]
+    },
+    {
+      "@type": "Product",
+      "name": "Listado Excel B2B - <?= esc($title ?? 'Directorio') ?>",
+      "description": "Descarga directa del listado B2B formateado en Excel para prospección comercial.",
+      "offers": {
+        "@type": "Offer",
+        "price": "<?= number_format($dynamic_price['base_price'] ?? 9, 2, '.', '') ?>",
+        "priceCurrency": "EUR",
+        "availability": "https://schema.org/InStock",
+        "url": "<?= esc($canonical ?? '') ?>"
+      }
+    }
+  ]
+}
+</script>
     </main>
 
     <?= view('partials/footer') ?>

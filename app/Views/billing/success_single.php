@@ -53,6 +53,35 @@
         }
         .btn-download:hover { transform: translateY(-2px); }
         
+        .btn-email {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 32px;
+            background: #f1f5f9;
+            color: #475569;
+            text-decoration: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-top: 12px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+            cursor: pointer;
+            width: auto;
+            min-width: 250px;
+        }
+        .btn-email:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+            transform: translateY(-1px);
+        }
+        .btn-email:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
         .upsell-card {
             background: linear-gradient(135deg, #334155, #1e293b);
             border-radius: 24px;
@@ -135,6 +164,15 @@
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                         Descargar Listado (.xlsx)
                     </a>
+
+                    <div style="display: flex; justify-content: center;">
+                        <button type="button" class="btn-email ae-email-export-btn" 
+                                data-url="<?= site_url('checkout/radar-email?' . http_build_query($export_params ?? [])) ?>"
+                                data-total="<?= number_format($total_count ?? 0, 0, ',', '.') ?>">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                            Enviar por correo
+                        </button>
+                    </div>
 
                     <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #f1f5f9; color: #94a3b8; font-size: 0.85rem; font-weight: 600;">
                         REF: #<?= esc($order_ref) ?> | Formato: Microsoft Excel / CSV
@@ -235,7 +273,125 @@
             setTimeout(() => {
                 container.innerHTML = '';
             }, 3200);
-        })();
+        })();        document.addEventListener('DOMContentLoaded', function() {
+            const emailBtn = document.querySelector('.ae-email-export-btn');
+            const defaultEmail = <?= json_encode($user_email ?? session('last_export_email') ?? '') ?>;
+
+            if (emailBtn) {
+                emailBtn.addEventListener('click', function() {
+                    const url = this.getAttribute('data-url');
+
+                    Swal.fire({
+                        title: '¿A qué correo lo enviamos?',
+                        text: 'Te mandaremos el listado al correo electrónico que nos digas.',
+                        input: 'email',
+                        inputLabel: 'Tu correo profesional',
+                        inputPlaceholder: 'email@ejemplo.com',
+                        inputValue: defaultEmail,
+                        showCancelButton: true,
+                        confirmButtonText: 'Enviar listado',
+                        cancelButtonText: 'Ahora no',
+                        buttonsStyling: false,
+                        iconHtml: '<svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#133A82" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+                        customClass: {
+                            icon: 'border-0',
+                            confirmButton: 'ae-swal-confirm-btn',
+                            cancelButton: 'ae-swal-cancel-btn'
+                        },
+                        didOpen: () => {
+                            // Inject custom styles for the gradient button if not in CSS
+                            const style = document.createElement('style');
+                            style.innerHTML = `
+                                .ae-swal-confirm-btn {
+                                    background: linear-gradient(90deg, #2152ff, #12b48a) !important;
+                                    color: white !important;
+                                    border: none !important;
+                                    padding: 12px 30px !important;
+                                    border-radius: 12px !important;
+                                    font-weight: 700 !important;
+                                    cursor: pointer !important;
+                                    margin: 0 5px !important;
+                                    box-shadow: 0 6px 18px rgba(33, 82, 255, .25) !important;
+                                    transition: all .2s ease !important;
+                                }
+                                .ae-swal-confirm-btn:hover {
+                                    box-shadow: 0 10px 25px rgba(33, 82, 255, .35) !important;
+                                    transform: translateY(-1px);
+                                }
+                                .ae-swal-cancel-btn {
+                                    background: #6b7280 !important;
+                                    color: white !important;
+                                    border: none !important;
+                                    padding: 12px 30px !important;
+                                    border-radius: 12px !important;
+                                    font-weight: 700 !important;
+                                    cursor: pointer !important;
+                                    margin: 0 5px !important;
+                                }
+                            `;
+                            document.head.appendChild(style);
+                        },
+                        showLoaderOnConfirm: true,
+                        preConfirm: (email) => {
+                            if (!email) {
+                                Swal.showValidationMessage('¡Necesitamos un email!');
+                                return false;
+                            }
+                            if (!email.includes('@')) {
+                                Swal.showValidationMessage('Parece que el email no es válido.');
+                                return false;
+                            }
+
+                            // Start AJAX call
+                            return fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                body: 'email=' + encodeURIComponent(email)
+                            })
+                            .then(response => {
+                                if (!response.ok) throw new Error(response.statusText);
+                                return response.json();
+                            })
+                            .catch(error => {
+                                Swal.showValidationMessage(`Error: ${error}`);
+                            });
+                        },
+                        allowOutsideClick: () => !Swal.isLoading()
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const data = result.value;
+                            if (data.status === 'success') {
+                                Swal.fire({
+                                    title: '¡Listado enviado!',
+                                    text: 'El Excel ha sido enviado correctamente.',
+                                    icon: 'success',
+                                    confirmButtonText: 'Entendido',
+                                    buttonsStyling: false,
+                                    customClass: {
+                                        confirmButton: 'ae-swal-confirm-btn'
+                                    }
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'No se pudo enviar',
+                                    text: data.message,
+                                    icon: 'error',
+                                    confirmButtonText: 'Cerrar',
+                                    buttonsStyling: false,
+                                    customClass: {
+                                        confirmButton: 'ae-swal-cancel-btn'
+                                    }
+                                });
+                            }
+                        }
+                    });
+                });
+            }
+        });
+
     </script>
 </body>
 </html>

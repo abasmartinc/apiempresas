@@ -3,7 +3,7 @@
         'name' => 'codeigniter4/framework',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '51bc769957be6d8f45653a419c0e0b2610dc71fd',
+        'reference' => '7ac7b14004fe8a6cf29bc317713f96ba522c20be',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -49,7 +49,7 @@
         'codeigniter4/framework' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '51bc769957be6d8f45653a419c0e0b2610dc71fd',
+            'reference' => '7ac7b14004fe8a6cf29bc317713f96ba522c20be',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -495,6 +495,15 @@
             'replaced' => array(
                 0 => 'v10.48.25',
             ),
+        ),
+        'jean85/pretty-package-versions' => array(
+            'pretty_version' => '2.1.1',
+            'version' => '2.1.1.0',
+            'reference' => '4d7aa5dab42e2a76d99559706022885de0e18e1a',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../jean85/pretty-package-versions',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'kint-php/kint' => array(
             'pretty_version' => '5.1.1',
@@ -1196,6 +1205,15 @@
             'aliases' => array(),
             'dev_requirement' => true,
         ),
+        'sentry/sentry' => array(
+            'pretty_version' => '4.0.0',
+            'version' => '4.0.0.0',
+            'reference' => '7e10bf3fd0bee2f2eee6981e509522ab0c523d5e',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../sentry/sentry',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'setasign/fpdf' => array(
             'pretty_version' => '1.8.6',
             'version' => '1.8.6.0',
@@ -1344,7 +1362,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/options-resolver',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
         ),
         'symfony/polyfill-ctype' => array(
             'pretty_version' => 'v1.32.0',

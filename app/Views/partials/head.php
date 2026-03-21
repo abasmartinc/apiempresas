@@ -108,7 +108,25 @@ $googlebot = $googlebot ?? ($robots . ',max-snippet:-1,max-image-preview:large,m
 />
 
 <!-- Styles -->
-<link rel="stylesheet" href="<?= base_url('public/css/styles.css?v=' . (file_exists(FCPATH . 'public/css/styles.css') ? filemtime(FCPATH . 'public/css/styles.css') : time())) ?>" />
+<link rel="stylesheet" href="<?= base_url('public/css/styles.css?v=' . (file_exists(FCPATH . 'public/css/styles.css') ? filemtime(FCPATH . 'public/css/styles.css') : time())) ?>" /><!-- Sentry Error Tracking -->
+<script src="<?= base_url('public/js/sentry-8.54.0.min.js') ?>" crossorigin="anonymous"></script>
+<script>
+<?php if (env('SENTRY_DSN')): ?>
+  Sentry.init({
+    dsn: "<?= env('SENTRY_DSN') ?>",
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration(),
+    ],
+    tracesSampleRate: 1.0, 
+    replaysSessionSampleRate: 0.1, 
+    replaysOnErrorSampleRate: 1.0, 
+    environment: "<?= ENVIRONMENT ?>",
+  });
+<?php endif; ?>
+</script>
+
+
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

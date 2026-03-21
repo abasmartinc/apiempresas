@@ -162,6 +162,7 @@ class Home extends BaseController
         ]);
     }
 
+
     public function submitReview()
     {
         if (!$this->request->isAJAX()) {

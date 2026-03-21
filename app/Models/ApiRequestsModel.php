@@ -12,7 +12,7 @@ class ApiRequestsModel extends Model
 
     protected $allowedFields = [
         'user_id','api_key_id','subscription_id','endpoint','http_method',
-        'status_code','request_id','ip_address','user_agent','duration_ms','created_at'
+        'status_code','request_id','ip_address','user_agent','duration_ms','search_term','created_at'
     ];
 
     /**

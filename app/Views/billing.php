@@ -237,7 +237,7 @@
 
                                     <div class="action-buttons">
                                         <a class="btn btn_light" href="<?= site_url() ?>dashboard">Cancelar</a>
-                                        <button class="btn btn_primary" type="submit" id="btnCheckout">Continuar al pago</button>
+                                        <button class="btn btn_primary js-loading-btn" type="submit" id="btnCheckout">Continuar al pago</button>
                                     </div>
                                 </div>
 
@@ -546,10 +546,7 @@
 
             if (form) {
                 form.addEventListener('submit', () => {
-                    if (btnCheckout) {
-                        btnCheckout.disabled = true;
-                        btnCheckout.innerHTML = '<span class="btn-spinner" aria-hidden="true"></span> Redirigiendo...';
-                    }
+                    // Handled globally via .js-loading-btn
                 });
             }
 

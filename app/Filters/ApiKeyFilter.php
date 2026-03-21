@@ -149,6 +149,11 @@ class ApiKeyFilter implements FilterInterface
             // Dejamos pasar (fail open) logueando error.
         }
 
+        // Capture search term (CIF, q, or name)
+        $searchTerm = $request->getGet('cif');
+        if (!$searchTerm) $searchTerm = $request->getGet('q');
+        if (!$searchTerm) $searchTerm = $request->getGet('name');
+
         // Guardamos meta para usarlo en after()
         $request->api_meta = [
             'user_id'         => (int)$row->user_id,
@@ -156,6 +161,7 @@ class ApiKeyFilter implements FilterInterface
             'subscription_id' => $subscriptionId, // puede ser null
             'plan_id'         => (int)$planId,
             'request_id'      => (string)$request->api_request_id,
+            'search_term'     => $searchTerm ? (string)$searchTerm : null,
         ];
 
         // 5) Exponer el user_id al resto de la request  [NO CAMBIADO]
@@ -210,6 +216,7 @@ class ApiKeyFilter implements FilterInterface
                     'ip_address'      => $ip,
                     'user_agent'      => $ua,
                     'duration_ms'     => $durationMs,
+                    'search_term'     => $meta['search_term'] ?? null,
                     'created_at'      => $now,
                 ]);
             }

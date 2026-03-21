@@ -24,6 +24,16 @@ use CodeIgniter\HotReloader\HotReloader;
  */
 
 Events::on('pre_system', static function () {
+    // Sentry Initialization
+    if (class_exists('\Sentry\SentrySdk') && env('SENTRY_DSN')) {
+        \Sentry\init([
+            'dsn'         => env('SENTRY_DSN'),
+            'environment' => ENVIRONMENT,
+            // Desactivamos SSL en local para evitar errores de cURL (60) en Windows/Laragon
+            'http_ssl_verify_peer' => (ENVIRONMENT !== 'development'), 
+        ]);
+    }
+
     if (ENVIRONMENT !== 'testing') {
         if (ini_get('zlib.output_compression')) {
             throw FrameworkException::forEnabledZlibOutputCompression();

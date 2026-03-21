@@ -193,11 +193,12 @@ class Billing extends BaseController
 
             // Guardar contexto para la página de éxito
             session()->set('checkout_context', [
-                'type'      => 'excel',
-                'sector'    => $sect,
-                'cnae'      => $cnae,
-                'provincia' => $prov,
-                'period'    => $per
+                'type'        => 'excel',
+                'sector'      => $sect,
+                'cnae'        => $cnae,
+                'provincia'   => $prov,
+                'period'      => $per,
+                'total_count' => $count
             ]);
             
             $lineItem = [
@@ -419,27 +420,46 @@ class Billing extends BaseController
         $subscription = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
 
         $checkoutData = session('checkout_context') ?? [];
+        $lastInfo = session('last_purchase_info') ?? [];
 
-        // 1. Excel Single Purchase Flow (Check this first to prioritize the immediate transaction)
-        if (($checkoutData['type'] ?? '') === 'excel') {
-            $exportParams = [
-                'sector'    => $checkoutData['sector']   ?? 'General',
-                'provincia' => $checkoutData['provincia'] ?? 'España',
-                'period'    => $checkoutData['period']    ?? '30days',
-            ];
-            // Si viene de combined.php, añadir cnae para exportar sin filtro de fecha
-            if (!empty($checkoutData['cnae'])) {
-                $exportParams['cnae'] = $checkoutData['cnae'];
+        // 1. Excel Single Purchase Flow (Check context or last info)
+        if (($checkoutData['type'] ?? '') === 'excel' || (!empty($lastInfo) && empty($subscription))) {
+            
+            if (($checkoutData['type'] ?? '') === 'excel') {
+                $exportParams = [
+                    'sector'    => $checkoutData['sector']   ?? 'General',
+                    'provincia' => $checkoutData['provincia'] ?? 'España',
+                    'period'    => $checkoutData['period']    ?? '30days',
+                ];
+                $totalCount = $checkoutData['total_count'] ?? 0;
+
+                // Guardamos info de la última compra para persistencia en refresh
+                $lastInfo = [
+                    'total_count'   => $totalCount,
+                    'export_params' => $exportParams,
+                    'cnae'          => $checkoutData['cnae'] ?? ''
+                ];
+                session()->set('last_purchase_info', $lastInfo);
+                
+                // Limpiamos el contexto tras la compra (pero mantenemos last_purchase_info para refresh)
+                session()->remove('checkout_context');
+            }
+
+            $exportParams = $lastInfo['export_params'] ?? [];
+            if (!empty($lastInfo['cnae'])) {
+                $exportParams['cnae'] = $lastInfo['cnae'];
             }
             $downloadUrl = site_url('billing/export-excel?' . http_build_query($exportParams));
+            
+            $user = $this->userModel->find($userId);
 
             $data = [
-                'download_url' => $downloadUrl,
-                'order_ref' => 'EXC-' . date('Ymd') . '-' . rand(1000, 9999),
+                'download_url'  => $downloadUrl,
+                'order_ref'     => 'EXC-' . date('Ymd') . '-' . rand(1000, 9999),
+                'total_count'   => $lastInfo['total_count'] ?? 0,
+                'export_params' => $exportParams,
+                'user_email'    => $user->email ?? session('email') ?? ''
             ];
-
-            // Limpiamos el contexto tras la compra
-            session()->remove('checkout_context');
 
             return view('billing/success_single', $data);
         }

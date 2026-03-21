@@ -264,7 +264,46 @@ class RadarController extends BaseController
         $statKey = ($period === 'general' || $period === 'mes') ? 'mes' : $period;
         $totalCount = $stats[$statKey] ?? $stats['mes'];
         $dynamicPrice = calculate_radar_price($totalCount);
-        $isLowResults = $totalCount < 5;
+        $isLowResults = $totalCount === 0;
+
+        // Multi-period prices for the current context
+        $prices = [
+            'hoy'    => calculate_radar_price($stats['hoy'])['base_price'],
+            'semana' => calculate_radar_price($stats['semana'])['base_price'],
+            'mes'    => calculate_radar_price($stats['mes'])['base_price'],
+            '30days' => calculate_radar_price($stats['30days'])['base_price'],
+        ];
+
+        // National stats and prices for cross-context links (e.g. "Nacional Hoy" on a province page)
+        $nationalStats = $stats; // Default to current if already national
+        $nationalPrices = $prices;
+
+        if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
+            $nationalStatsBuilder = function() use ($db, $sector) {
+                $b = $db->table('companies');
+                if ($sector && !empty($sector['codes'])) {
+                    $b->groupStart();
+                    foreach ($sector['codes'] as $code) $b->orLike('cnae_code', $code, 'after');
+                    $b->groupEnd();
+                }
+                $b->where('fecha_constitucion IS NOT NULL');
+                return $b;
+            };
+
+            $nationalStats = [
+                'hoy'    => $nationalStatsBuilder()->where('fecha_constitucion', $targetDate)->countAllResults(),
+                'semana' => $nationalStatsBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))->countAllResults(),
+                'mes'    => $nationalStatsBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))->countAllResults(),
+                '30days' => $nationalStatsBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))->countAllResults(),
+            ];
+
+            $nationalPrices = [
+                'hoy'    => calculate_radar_price($nationalStats['hoy'])['base_price'],
+                'semana' => calculate_radar_price($nationalStats['semana'])['base_price'],
+                'mes'    => calculate_radar_price($nationalStats['mes'])['base_price'],
+                '30days' => calculate_radar_price($nationalStats['30days'])['base_price'],
+            ];
+        }
 
         // Sectors / Provinces Top
         if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
@@ -289,6 +328,9 @@ class RadarController extends BaseController
             'meta_description' => "Listado de empresas recién constituidas en " . ($province ?: "España") . ". Datos oficiales del BORME.",
             'companies' => $companies,
             'stats' => $stats,
+            'prices' => $prices,
+            'national_stats' => $nationalStats,
+            'national_prices' => $nationalPrices,
             'top_sectors' => $topData, 
             'related_sectors' => $relatedSectors,
             'province' => $province, 
@@ -598,94 +640,138 @@ class RadarController extends BaseController
             return redirect()->to(site_url('enter'))->with('error', 'Debes iniciar sesión para descargar el listado.');
         }
 
-        $sector   = $this->request->getGet('sector')   ?: '';
-        $province = $this->request->getGet('provincia') ?: 'España';
-        $period   = $this->request->getGet('period')   ?: $this->request->getGet('rango') ?: '30days';
-        $cnae     = $this->request->getGet('cnae')     ?: ''; 
-
-        $allowedPeriods = ['7', '30', '90', 'hoy', 'semana', 'mes', '30days', 'general'];
-        if (!in_array($period, $allowedPeriods, true)) {
-            $period = '30days';
-        }
-
-        if ($cnae !== '') {
-            $db      = \Config\Database::connect();
-            $builder = $db->table('companies');
-            $builder->select('id, company_name as name, cif, fecha_constitucion, cnae_label, registro_mercantil, municipality, objeto_social');
-            $builder->where('cnae_code LIKE', $cnae . '%');
-
-            if ($province && strtolower($province) !== 'españa') {
-                if (strtolower($province) === 'alicante') {
-                    $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
-                } else {
-                    $builder->where('registro_mercantil', $province);
-                }
-            }
-            $builder->orderBy('fecha_constitucion', 'DESC');
-            $builder->limit(2000);
-            $companies = $builder->get()->getResultArray();
-            $filename  = "Directorio_" . preg_replace('/[^A-Za-z0-9_]/', '_', $cnae) . "_" . str_replace(' ', '_', $province) . ".csv";
-        } else {
-            // Reutilizamos el motor renderRadar pero pedimos datos crudos si fuera necesario
-            // Por ahora, implementamos la lógica de fetch aquí brevemente para evitar dependencias circulares complejas
-            // o simplemente llamamos a renderRadar internamente si lo adaptamos.
-            // Para simplificar, usamos una versión ligera de la query del Radar:
-            $db = \Config\Database::connect();
-            $builder = $db->table('companies');
-            $builder->select('id, company_name as name, cif, fecha_constitucion, cnae_label, registro_mercantil, municipality, objeto_social');
-            
-            if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
-                if (strtolower($province) === 'alicante') {
-                    $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
-                } else {
-                    $builder->where('registro_mercantil', $province);
-                }
-            }
-
-            if ($sector) {
-                $resolution = $this->resolveCnaeCodes(url_title($sector, '-', true));
-                if ($resolution) {
-                    $codes = $resolution['codes'];
-                    if (count($codes) === 1) $builder->where('cnae_code LIKE', $codes[0] . '%');
-                    else {
-                        $builder->groupStart();
-                        foreach ($codes as $code) $builder->orLike('cnae_code', $code, 'after');
-                        $builder->groupEnd();
-                    }
-                }
-            }
-
-            if ($period === 'hoy') {
-                $lastDateRow = $db->query("SELECT MAX(fecha_constitucion) as last_date FROM companies WHERE fecha_constitucion IS NOT NULL AND fecha_constitucion <= CURDATE()")->getRowArray();
-                $targetDate = $lastDateRow['last_date'] ?? date('Y-m-d');
-                $builder->where('fecha_constitucion', $targetDate);
-            } elseif ($period === 'semana' || $period === '7') {
-                $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')));
-            } elseif ($period === '90') {
-                $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')));
-            } else {
-                // Default covers 'mes', '30days', '30' and 'general'
-                $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')));
-            }
-
-            $builder->orderBy('fecha_constitucion', 'DESC');
-            $builder->limit(5000);
-            $companies = $builder->get()->getResultArray();
-            $filename  = "Listado_Nuevas_Empresas_" . str_replace(' ', '_', $sector) . "_" . str_replace(' ', '_', $province) . ".xls";
-        }
+        $params = $this->request->getGet();
+        $companies = $this->getExportData($params);
+        $filename = $this->getExportFilename($params);
 
         if (ob_get_length()) ob_clean();
 
         header('Content-Type: application/vnd.ms-excel');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         
-        // Estructura HTML compatible con Excel para aplicar estilos (inline para máxima compatibilidad)
+        echo $this->generateExcelHtml($companies);
+        exit();
+    }
+
+    public function sendExportEmail()
+    {
+        if (!session('logged_in')) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Debes iniciar sesión.']);
+        }
+
+        $email = $this->request->getPost('email');
+        if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Email no válido.']);
+        }
+
+        // Guardar email en sesión para futuros usos
+        session()->set('last_export_email', $email);
+
+        $params = $this->request->getGet();
+        $companies = $this->getExportData($params);
+        $html = $this->generateExcelHtml($companies);
+        $filename = $this->getExportFilename($params);
+
+        // Envío de email
+        $emailService = \Config\Services::email();
+        $emailService->setTo($email);
+        $emailService->setSubject('Tu listado de empresas - Radar APIEmpresas');
+        $emailService->setMessage('Adjunto encontrarás el listado de empresas solicitado en formato Excel.');
+        
+        // Adjuntar como archivo temporal
+        $tempFile = tempnam(sys_get_temp_dir(), 'export');
+        file_put_contents($tempFile, $html);
+        $emailService->attach($tempFile, 'attachment', $filename, 'application/vnd.ms-excel');
+
+        if ($emailService->send()) {
+            unlink($tempFile);
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Email enviado correctamente a ' . $email]);
+        } else {
+            unlink($tempFile);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'No se pudo enviar el email.']);
+        }
+    }
+
+    private function getExportData($params): array
+    {
+        $sector   = $params['sector']   ?? '';
+        $province = $params['provincia'] ?? 'España';
+        $period   = $params['period']   ?? $params['rango'] ?? '30days';
+        $cnae     = $params['cnae']     ?? '';
+
+        $allowedPeriods = ['7', '30', '90', 'hoy', 'semana', 'mes', '30days', 'general'];
+        if (!in_array($period, $allowedPeriods, true)) {
+            $period = '30days';
+        }
+
+        $db = \Config\Database::connect();
+        $builder = $db->table('companies');
+        $builder->select('id, company_name as name, cif, fecha_constitucion, cnae_label, registro_mercantil, municipality, objeto_social');
+
+        if ($cnae !== '') {
+            $builder->where('cnae_code LIKE', $cnae . '%');
+        }
+
+        if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
+            if (mb_strtolower($province, 'UTF-8') === 'alicante') {
+                $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+            } else {
+                $builder->where('registro_mercantil', $province);
+            }
+        }
+
+        if ($sector) {
+            $resolution = $this->resolveCnaeCodes(url_title($sector, '-', true));
+            if ($resolution) {
+                $codes = $resolution['codes'];
+                if (count($codes) === 1) $builder->where('cnae_code LIKE', $codes[0] . '%');
+                else {
+                    $builder->groupStart();
+                    foreach ($codes as $code) $builder->orLike('cnae_code', $code, 'after');
+                    $builder->groupEnd();
+                }
+            }
+        }
+
+        if ($period === 'hoy') {
+            $lastDateRow = $db->query("SELECT MAX(fecha_constitucion) as last_date FROM companies WHERE fecha_constitucion IS NOT NULL AND fecha_constitucion <= CURDATE()")->getRowArray();
+            $targetDate = $lastDateRow['last_date'] ?? date('Y-m-d');
+            $builder->where('fecha_constitucion', $targetDate);
+        } elseif ($period === 'semana' || $period === '7') {
+            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')));
+        } elseif ($period === '90') {
+            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')));
+        } else {
+            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')));
+        }
+
+        $builder->orderBy('fecha_constitucion', 'DESC');
+        $builder->limit($cnae !== '' ? 2000 : 5000);
+        
+        return $builder->get()->getResultArray();
+    }
+
+    private function getExportFilename($params): string
+    {
+        $sector   = $params['sector']   ?? '';
+        $province = $params['provincia'] ?? 'España';
+        $cnae     = $params['cnae']     ?? '';
+
+        if ($cnae !== '') {
+            return "Directorio_" . preg_replace('/[^A-Za-z0-9_]/', '_', $cnae) . "_" . str_replace(' ', '_', $province) . ".xls";
+        }
+        return "Listado_Nuevas_Empresas_" . str_replace(' ', '_', $sector) . "_" . str_replace(' ', '_', $province) . ".xls";
+    }
+
+    private function generateExcelHtml(array $companies): string
+    {
+        ob_start();
         echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
         echo '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body>';
         
         $thStyle = 'background-color: #2563eb; color: #ffffff; font-weight: bold; border: 1px solid #000000; padding: 10px; text-align: center;';
         $tdStyle = 'border: 1px solid #cccccc; padding: 8px; vertical-align: top;';
-        $textStyle = $tdStyle . ' mso-number-format:"\@";'; // Forzar formato texto
+        $textStyle = $tdStyle . ' mso-number-format:"\@";'; 
         
         echo '<table border="1">';
         echo '<thead><tr>';
@@ -715,6 +801,6 @@ class RadarController extends BaseController
         }
         
         echo '</tbody></table></body></html>';
-        exit();
+        return ob_get_clean();
     }
 }

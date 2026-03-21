@@ -21,6 +21,7 @@
         "phpmailer/phpmailer": "^6.9",
         "phpoffice/phpword": "^1.4",
         "psr/log": "^3.0",
+        "sentry/sentry": "4.0",
         "setasign/fpdf": "^1.8",
         "stripe/stripe-php": "^19.1",
         "zircote/swagger-php": "^4.11"

@@ -276,30 +276,27 @@ class Register extends BaseController
         $user = $this->userModel->where('email', $email)->first();
 
         if ($user) {
-            // Safety: Admins must ALWAYS use their password
-            if (($user->is_admin ?? 0) == 1) {
-                return redirect()->to(site_url('enter?redirect=billing/checkout'))->with('info', 'Por seguridad, identifícate con tu cuenta de administrador para continuar.')->with('prefill_email', $email);
-            }
+            // Redirigir siempre al login si ya existe el usuario (Opción B)
+            $message = (($user->is_admin ?? 0) == 1) 
+                ? 'Por seguridad, identifícate con tu cuenta de administrador.' 
+                : 'Ya tienes una cuenta con nosotros. Por favor, inicia sesión para continuar.';
 
-            // Auto-Login for regular users to allow "launching to Stripe" immediately
-            session()->regenerate();
-            session()->set([
-                'user_id' => $user->id,
-                'user_email' => $user->email,
-                'user_name' => $user->name ?? '',
-                'is_admin' => 0,
-                'logged_in' => true,
-            ]);
-
-            return redirect()->to(site_url('billing/checkout'));
+            return redirect()->to(site_url('enter?redirect=billing/checkout'))
+                ->with('info', $message)
+                ->with('prefill_email', $email);
         }
 
         // Create new user (Quick)
         $password = bin2hex(random_bytes(8)); // Temporary password
+        $token = bin2hex(random_bytes(32)); // Reset token for setting password
+        $expires = date('Y-m-d H:i:s', strtotime('+48 hours'));
+
         $data = [
             'name' => explode('@', $email)[0], // Use email part as name
             'email' => $email,
             'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+            'reset_token' => $token,
+            'reset_expires' => $expires,
             'is_active' => 1,
             'api_access' => 1,
             'source_app' => 'apiempresas',
@@ -329,6 +326,17 @@ class Register extends BaseController
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
+
+            // Send Set Password Email
+            $emailService = \Config\Services::email();
+            $emailService->setFrom('soporte@apiempresas.es', 'APIEmpresas.es');
+            $emailService->setTo($email);
+            $emailService->setSubject('Establece tu contraseña - APIEmpresas.es');
+            $emailService->setMessage(view('emails/set_password_email', ['token' => $token]));
+
+            if (!$emailService->send()) {
+                log_message('error', 'Set Password Email failed for ' . $email . ': ' . $emailService->printDebugger(['headers']));
+            }
 
             // Auto-Login
             session()->regenerate();

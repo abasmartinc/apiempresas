@@ -166,5 +166,54 @@
                 if (activeModal) activeModal.classList.remove('active');
             }
         });
+
+        // Global Loading Button Handler
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.js-loading-btn');
+            if (!btn) return;
+
+            // If it's a link and it's already loading, prevent default
+            if (btn.tagName === 'A' && btn.classList.contains('btn-loading')) {
+                e.preventDefault();
+                return;
+            }
+
+            // If it's not a submit button (handled below), apply loading state immediately
+            if (btn.tagName === 'A' || (btn.tagName === 'BUTTON' && btn.type !== 'submit')) {
+                showLoadingState(btn);
+            }
+        });
+
+        // Handle form submissions for loading buttons
+        document.addEventListener('submit', (e) => {
+            const btn = e.target.querySelector('.js-loading-btn[type="submit"]');
+            if (btn) {
+                showLoadingState(btn);
+            }
+        });
+
+        function showLoadingState(el) {
+            if (el.classList.contains('btn-loading')) return;
+            
+            el.classList.add('btn-loading');
+            
+            // For buttons, disable them
+            if (el.tagName === 'BUTTON') {
+                el.disabled = true;
+            }
+
+            // Add spinner if not present
+            if (!el.querySelector('.btn-spinner')) {
+                const spinner = document.createElement('span');
+                spinner.className = 'btn-spinner';
+                el.prepend(spinner);
+            }
+
+            // Optional: change text if it's a "Confirmar y Pagar" type
+            if (el.textContent.includes('Pagar') || el.textContent.includes('Descargar')) {
+                // Keep the spinner and just slightly change text or keep it
+                // For now, just adding the spinner is enough as requested.
+            }
+        }
     });
 </script>
