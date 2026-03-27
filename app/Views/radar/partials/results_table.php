@@ -7,8 +7,8 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
         $timestamp = $date->getTimestamp();
         $year = (int)$date->format('Y');
         
-        // Validación de rango de años (ej: 1900 hasta el año actual + 2)
-        if ($year < 1900 || $year > (date('Y') + 2)) {
+        // Validación de rango: mínimo 1900, máximo fecha de hoy (sin fechas futuras)
+        if ($year < 1900 || $timestamp > time()) {
             return 'Reciente';
         }
     } catch (\Exception $e) {

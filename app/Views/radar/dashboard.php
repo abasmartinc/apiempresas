@@ -20,6 +20,8 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
     if (empty($dateStr) || $dateStr === '0000-00-00') return 'Reciente';
     $timestamp = strtotime($dateStr);
     if (!$timestamp) return 'Reciente';
+    // Rechazar fechas futuras
+    if ($timestamp > time()) return 'Reciente';
     $mesesEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     $mesesEs = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
     return str_replace($mesesEn, $mesesEs, date($format, $timestamp));

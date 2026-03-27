@@ -1,4 +1,4 @@
-﻿.ae-radar-page {
+.ae-radar-page {
     --ae-primary: #2f5be8;
     --ae-primary-dark: #1b3f91;
     --ae-primary-soft: #f3f6fb;
@@ -693,6 +693,7 @@
     display: -webkit-box;
     overflow: hidden;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
 }
 
@@ -718,6 +719,7 @@
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     font-size: 0.87rem;
     line-height: 1.58;

@@ -486,9 +486,14 @@ class CompanyModel extends Model
      */
     public function getLatestCompanies(int $limit = 10): array
     {
+        $today = date('Y-m-d');
+
         // Paso 1: Obtener solo los IDs usando el índice de fecha_constitucion
         $idsRaw = $this->db->table($this->table)
             ->select('id')
+            ->where('fecha_constitucion IS NOT NULL')
+            ->where('fecha_constitucion >=', '1900-01-01') // Ignorar fechas inválidas o 0000-00-00
+            ->where('fecha_constitucion <=', $today) // Excluir fechas futuras
             ->orderBy('fecha_constitucion', 'DESC')
             ->orderBy('id', 'DESC')
             ->limit($limit)

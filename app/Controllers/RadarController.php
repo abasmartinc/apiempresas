@@ -156,6 +156,14 @@ class RadarController extends BaseController
 
     public function getRadarData($province, $sectorInput, $period, $limit = 100)
     {
+        $cache    = \Config\Services::cache();
+        $cacheKey = 'radar_' . md5("{$period}_{$province}_{$limit}_" . (is_array($sectorInput) ? implode(',', $sectorInput['codes'] ?? []) : (string) $sectorInput));
+
+        $cached = $cache->get($cacheKey);
+        if ($cached !== null) {
+            return $cached;
+        }
+
         $db = \Config\Database::connect();
         
         if (is_array($sectorInput)) {
@@ -189,9 +197,7 @@ class RadarController extends BaseController
 
         // Period Filter
         if ($period === 'hoy') {
-            $lastDateRow = $db->query("SELECT MAX(fecha_constitucion) as last_date FROM companies WHERE fecha_constitucion IS NOT NULL AND fecha_constitucion <= CURDATE()")->getRowArray();
-            $targetDate = $lastDateRow['last_date'] ?? date('Y-m-d');
-            $builder->where('fecha_constitucion', $targetDate);
+            $builder->where('fecha_constitucion', date('Y-m-d'));
         } elseif ($period === 'semana') {
             $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')));
         } elseif ($period === 'mes' || $period === '30days') {
@@ -202,6 +208,7 @@ class RadarController extends BaseController
         }
 
         $builder->where('fecha_constitucion IS NOT NULL');
+        $builder->where('fecha_constitucion <=', date('Y-m-d')); // Excluir fechas futuras
         $builder->orderBy('fecha_constitucion', 'DESC');
         $companies = $builder->get($limit)->getResultArray();
 
@@ -224,11 +231,8 @@ class RadarController extends BaseController
             return $b;
         };
 
-        $lastDateRow = $db->query("SELECT MAX(fecha_constitucion) as last_date FROM companies WHERE fecha_constitucion IS NOT NULL AND fecha_constitucion <= CURDATE()")->getRowArray();
-        $targetDate = $lastDateRow['last_date'] ?? date('Y-m-d');
-        
         $stats = [
-            'hoy' => $statsBuilder()->where('fecha_constitucion', $targetDate)->countAllResults(),
+            'hoy' => $statsBuilder()->where('fecha_constitucion', date('Y-m-d'))->countAllResults(),
             'semana' => $statsBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))->countAllResults(),
             'mes' => $statsBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))->countAllResults(),
             '30days' => $statsBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))->countAllResults()
@@ -291,7 +295,7 @@ class RadarController extends BaseController
             };
 
             $nationalStats = [
-                'hoy'    => $nationalStatsBuilder()->where('fecha_constitucion', $targetDate)->countAllResults(),
+                'hoy'    => $nationalStatsBuilder()->where('fecha_constitucion', date('Y-m-d'))->countAllResults(),
                 'semana' => $nationalStatsBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))->countAllResults(),
                 'mes'    => $nationalStatsBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))->countAllResults(),
                 '30days' => $nationalStatsBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))->countAllResults(),
@@ -360,7 +364,34 @@ class RadarController extends BaseController
             }
         }
 
+        // Store in cache for 23 hours (data only changes once/day via Python import)
+        $cache->save($cacheKey, $data, 82800);
+
         return $data;
+    }
+
+    /**
+     * Called by the Python importer after each daily import to bust the radar cache.
+     * Usage: GET /cron/radar-cache-clear/{token}
+     */
+    public function clearRadarCache($token)
+    {
+        $secretToken = env('RADAR_CACHE_TOKEN', 'radar_clear_2026');
+
+        if ($token !== $secretToken) {
+            return $this->response->setStatusCode(403)->setJSON(['error' => 'Token inválido']);
+        }
+
+        $cache = \Config\Services::cache();
+        $cache->clean(); // Clears all app cache
+
+        log_message('info', '[RadarController] Cache purgado por importador Python - ' . date('Y-m-d H:i:s'));
+
+        return $this->response->setJSON([
+            'status'    => 'ok',
+            'message'   => 'Cache de Radar eliminado correctamente',
+            'timestamp' => date('Y-m-d H:i:s'),
+        ]);
     }
 
     private function deSlugify($slug)
@@ -481,6 +512,7 @@ class RadarController extends BaseController
                 ->select('id, company_name as name, cif, fecha_constitucion, cnae_label, objeto_social')
                 ->where('registro_mercantil', $province)
                 ->where('fecha_constitucion IS NOT NULL')
+                ->where('fecha_constitucion <=', date('Y-m-d'))
                 ->orderBy('fecha_constitucion', 'DESC')
                 ->limit(100)
                 ->get()->getResultArray();
@@ -490,6 +522,7 @@ class RadarController extends BaseController
                 ->select('id, company_name as name, cif, fecha_constitucion, cnae_label, objeto_social')
                 ->where('registro_mercantil', $province)
                 ->where('fecha_constitucion IS NOT NULL')
+                ->where('fecha_constitucion <=', date('Y-m-d'))
                 ->orderBy('fecha_constitucion', 'DESC')
                 ->limit(100)
                 ->get()->getResultArray();
@@ -734,15 +767,16 @@ class RadarController extends BaseController
         }
 
         if ($period === 'hoy') {
-            $lastDateRow = $db->query("SELECT MAX(fecha_constitucion) as last_date FROM companies WHERE fecha_constitucion IS NOT NULL AND fecha_constitucion <= CURDATE()")->getRowArray();
-            $targetDate = $lastDateRow['last_date'] ?? date('Y-m-d');
-            $builder->where('fecha_constitucion', $targetDate);
+            $builder->where('fecha_constitucion', date('Y-m-d'));
         } elseif ($period === 'semana' || $period === '7') {
             $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')));
+            $builder->where('fecha_constitucion <=', date('Y-m-d')); // Excluir fechas futuras
         } elseif ($period === '90') {
             $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')));
+            $builder->where('fecha_constitucion <=', date('Y-m-d')); // Excluir fechas futuras
         } else {
             $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')));
+            $builder->where('fecha_constitucion <=', date('Y-m-d')); // Excluir fechas futuras
         }
 
         $builder->orderBy('fecha_constitucion', 'DESC');

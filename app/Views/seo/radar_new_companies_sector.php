@@ -4,7 +4,7 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
     $dateStr = str_replace('/', '-', $dateStr);
     $timestamp = strtotime($dateStr);
 
-    if (!$timestamp || $timestamp > strtotime('+1 year') || $timestamp < strtotime('1900-01-01')) {
+    if (!$timestamp || $timestamp > time() || $timestamp < strtotime('1900-01-01')) {
         return 'Reciente';
     }
 

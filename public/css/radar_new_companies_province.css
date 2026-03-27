@@ -662,28 +662,35 @@
 
 .ae-radar-page__lead-top-row {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     gap: 10px;
     margin-bottom: 16px;
 }
 
-.ae-radar-page__lead-badge::before {
-    content: "";
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #6a84d8;
-    box-shadow: none;
+.ae-radar-page__lead-badge {
+    position: absolute;
+    top: -1px;
+    right: 24px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #fff;
+    padding: 4px 10px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: none;
 }
 
 .ae-radar-page__lead-badge::before {
-    content: "";
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #3b82f6;
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.65);
+    display: none;
 }
 
 .ae-radar-page__lead-date {
@@ -2197,4 +2204,4 @@
     }
 }
 
-/* Sectores */
+/* Sectores */

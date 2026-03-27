@@ -55,3 +55,8 @@ Thumbs.db
 writable/
 .vscode
 testdir/
+
+# BORME Pipeline (Python)
+borme_flow/.env
+borme_flow/pipeline_execution.log
+borme_flow/__pycache__/

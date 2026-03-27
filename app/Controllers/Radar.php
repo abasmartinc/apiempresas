@@ -161,13 +161,15 @@ class Radar extends BaseController
         }
 
         // Rango de tiempo
+        $today = date('Y-m-d');
         if ($timeRange === 'hoy') {
-            $dateLimit = date('Y-m-d');
+            $dateLimit = $today;
         } else {
             $days = (int)$timeRange;
             $dateLimit = date('Y-m-d', strtotime("-$days days"));
         }
         $this->companyModel->where('companies.fecha_constitucion >=', $dateLimit);
+        $this->companyModel->where('companies.fecha_constitucion <=', $today); // Excluir fechas futuras
 
         $this->companyModel->orderBy('companies.fecha_constitucion', 'DESC');
         $this->companyModel->orderBy('companies.id', 'DESC');
@@ -434,12 +436,14 @@ class Radar extends BaseController
             $builder->like('objeto_social', $q);
         }
 
+        $today = date('Y-m-d');
         if ($timeRange === 'hoy') {
-            $builder->where('fecha_constitucion >=', date('Y-m-d'));
+            $builder->where('fecha_constitucion >=', $today);
         } else {
             $days = (int)$timeRange;
             $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime("-$days days")));
         }
+        $builder->where('fecha_constitucion <=', $today); // Excluir fechas futuras
 
         $companies = $builder->orderBy('fecha_constitucion', 'DESC')->get()->getResultArray();
 
@@ -540,12 +544,14 @@ class Radar extends BaseController
             $builder->like('objeto_social', $q);
         }
 
+        $today = date('Y-m-d');
         if ($timeRange === 'hoy') {
-            $builder->where('fecha_constitucion >=', date('Y-m-d'));
+            $builder->where('fecha_constitucion >=', $today);
         } else {
             $days = (int)$timeRange;
             $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime("-$days days")));
         }
+        $builder->where('fecha_constitucion <=', $today); // Excluir fechas futuras
 
         $results = $builder->groupBy('registro_mercantil')
                           ->orderBy('total', 'DESC')

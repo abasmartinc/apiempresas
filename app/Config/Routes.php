@@ -208,6 +208,7 @@ $routes->get('sitemap-companies-(:num).xml', 'Sitemap::companies/$1');
 
 // --- Webhook CRON SEO ---
 $routes->get('cron/seo-sync/(:any)', 'RadarController::syncStatsWebhook/$1');
+$routes->get('cron/radar-cache-clear/(:any)', 'RadarController::clearRadarCache/$1');
 
 // --- Export Routes ---
 $routes->get('checkout/radar-export', 'RadarController::exportExcel');
