@@ -3,6 +3,77 @@
 
 <head>
     <?= view('partials/head') ?>
+    <style>
+        /* Responsive Fixes for Enterprise & Radar Sections */
+        @media (max-width: 980px) {
+            #custom-integrations .band, #radar-leads .band {
+                padding: 40px 24px !important;
+                border-radius: 20px !important;
+            }
+            
+            #custom-integrations .grid, #radar-leads .grid {
+                grid-template-columns: 1fr !important;
+                gap: 40px !important;
+            }
+
+            #custom-integrations h2, #radar-leads h2 {
+                font-size: 2rem !important;
+            }
+
+            #radar-leads h2 {
+                font-size: 2.2rem !important;
+            }
+
+            /* Custom Integrations list adjustments */
+            #custom-integrations ul {
+                gap: 24px !important;
+                margin-bottom: 32px !important;
+            }
+
+            /* Radar Leads specific adjustments */
+            #radar-leads .grid > div:first-child {
+                padding-right: 0 !important;
+            }
+
+            #radar-leads .grid > div:first-child > div:nth-of-type(1) {
+                grid-template-columns: 1fr !important;
+                gap: 24px !important;
+            }
+
+            #radar-leads .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* Visual/Image adjustments for mobile */
+            #custom-integrations .grid > div:last-child, 
+            #radar-leads .grid > div:last-child {
+                margin-top: 20px;
+            }
+
+            #radar-leads img {
+                max-width: 100% !important;
+            }
+            
+            #radar-leads div[style*="bottom: -8%"] {
+                bottom: -5% !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #custom-integrations h2, #radar-leads h2 {
+                font-size: 1.7rem !important;
+            }
+            
+            #radar-leads h2 {
+                font-size: 1.8rem !important;
+            }
+            
+            #custom-integrations .band, #radar-leads .band {
+                padding: 32px 16px !important;
+            }
+        }
+    </style>
 </head>
 
 <body><div class="bg-halo" aria-hidden="true"></div><?= view('partials/header', [], ['debug' => false]) ?>
@@ -261,7 +332,7 @@
                     style="position: absolute; bottom: 0; left: 0; width: 300px; height: 300px; background: radial-gradient(circle, rgba(18, 180, 138, 0.05) 0%, transparent 70%); pointer-events: none;">
                 </div>
 
-                <div class="grid"
+                <div class="grid custom-integrations-grid"
                     style="grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; position: relative; z-index: 1;">
 
                     <!-- Content -->
@@ -523,7 +594,7 @@
             <div class="band"
                 style="background: radial-gradient(circle at 100% 100%, #f0f4ff 0%, #ffffff 40%); border-radius: 32px; padding: 80px 60px; color: #0f172a; position: relative; overflow: hidden; border: none;">
                 
-                <div class="grid"
+                <div class="grid radar-leads-grid"
                     style="grid-template-columns: 1.1fr 0.9fr; gap: 80px; align-items: center; position: relative; z-index: 1;">
 
                     <!-- Content -->
