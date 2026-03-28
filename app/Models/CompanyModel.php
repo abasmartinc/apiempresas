@@ -97,7 +97,8 @@ class CompanyModel extends Model
     public function generateSlug(string $name): string
     {
         helper('text');
-        return url_title($name, '-', true);
+        $nameClean = str_replace(['º', 'ª'], ['o', 'a'], $name);
+        return url_title($nameClean, '-', true);
     }
 
     /**

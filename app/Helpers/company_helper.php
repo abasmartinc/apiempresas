@@ -18,7 +18,8 @@ function company_url(array $company): string
     
     // Generar slug del nombre
     helper('text');
-    $slug = url_title($name, '-', true);
+    $nameClean = str_replace(['º', 'ª'], ['o', 'a'], $name);
+    $slug = url_title($nameClean, '-', true);
     
     if ($isValidCif) {
         // CIF válido: usar formato /CIF-slug
