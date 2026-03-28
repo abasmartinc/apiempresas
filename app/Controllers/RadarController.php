@@ -19,16 +19,19 @@ class RadarController extends BaseController
 
     public function index()
     {
+        session_write_close();
         return $this->renderRadar('general');
     }
 
     public function today()
     {
+        session_write_close();
         return $this->renderRadar('hoy');
     }
 
     public function sectorProvince($sectorSlug, $provinceSlug)
     {
+        session_write_close();
         $province = $this->deSlugify($provinceSlug);
         $sector = $this->resolveCnaeCodes($sectorSlug);
         
@@ -83,16 +86,19 @@ class RadarController extends BaseController
 
     public function week()
     {
+        session_write_close();
         return $this->renderRadar('semana');
     }
 
     public function month()
     {
+        session_write_close();
         return $this->renderRadar('mes');
     }
 
     public function sector($sectorSlug)
     {
+        session_write_close();
         $sector = $this->resolveCnaeCodes($sectorSlug);
         if (!$sector) {
             return redirect()->to(site_url('empresas-nuevas'));
@@ -102,6 +108,7 @@ class RadarController extends BaseController
 
     public function newRadarLongTail($sectorSlug, $provinceSlug)
     {
+        session_write_close();
         $sector = $this->resolveCnaeCodes($sectorSlug);
         $province = $this->deSlugify($provinceSlug);
 
@@ -115,6 +122,7 @@ class RadarController extends BaseController
 
     public function provinceCatalog($provinceSlug)
     {
+        session_write_close();
         $province = $this->deSlugify($provinceSlug);
         $data = $this->getRadarData($province, null, 'mes');
 
@@ -135,6 +143,7 @@ class RadarController extends BaseController
 
     public function province($provinceSlug)
     {
+        session_write_close();
         $province = $this->deSlugify($provinceSlug);
         return $this->renderRadar('mes', $province);
     }
