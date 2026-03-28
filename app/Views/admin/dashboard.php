@@ -683,7 +683,7 @@
         </div>
 
         <div class="admin-grid">
-            <a href="#" class="admin-card" id="btn-clear-cache">
+            <a href="#" class="admin-card" id="btn-clear-cache-card">
                 <div class="admin-icon-wrapper icon-sub-blue">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -791,7 +791,7 @@
                 }, 1000);
 
                 // Gestor de Caché
-                const clearCacheBtn = document.getElementById('btn-clear-cache');
+                const clearCacheBtn = document.getElementById('btn-clear-cache-card');
                 if (clearCacheBtn) {
                     clearCacheBtn.addEventListener('click', function (e) {
                         e.preventDefault();
@@ -805,30 +805,28 @@
                             cancelButtonColor: '#64748b',
                             confirmButtonText: 'Sí, limpiar todo',
                             cancelButtonText: 'Cancelar',
-                            background: '#ffffff',
-                            borderRadius: '20px'
+                            background: '#ffffff'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                const icon = this.querySelector('.admin-icon-wrapper');
-                                const originalHtml = icon.innerHTML;
-                                icon.innerHTML = '⌛';
+                                const icon = clearCacheBtn.querySelector('.admin-icon-wrapper');
+                                const originalHtml = icon ? icon.innerHTML : '';
+                                if (icon) icon.innerHTML = '⌛';
 
                                 fetch('<?= site_url('admin/clear-cache') ?>', {
                                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                                 })
                                     .then(response => response.json())
                                     .then(data => {
-                                        icon.innerHTML = originalHtml;
+                                        if (icon) icon.innerHTML = originalHtml;
                                         Swal.fire({
                                             title: data.status === 'success' ? '¡Limpiado!' : 'Error',
                                             text: data.message,
                                             icon: data.status === 'success' ? 'success' : 'error',
-                                            confirmButtonColor: '#2152ff',
-                                            borderRadius: '20px'
+                                            confirmButtonColor: '#2152ff'
                                         });
                                     })
                                     .catch(err => {
-                                        icon.innerHTML = originalHtml;
+                                        if (icon) icon.innerHTML = originalHtml;
                                         Swal.fire('Error', 'No se pudo completar la acción', 'error');
                                     });
                             }
