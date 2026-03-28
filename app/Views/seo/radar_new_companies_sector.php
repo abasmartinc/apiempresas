@@ -86,9 +86,6 @@ $premiumLeads = array_slice($companies, $freeCount);
 
     <link rel="stylesheet" href="<?= base_url('public/css/radar_new_companies_sector.css?v=' . (file_exists(FCPATH . 'public/css/radar_new_companies_sector.css') ? filemtime(FCPATH . 'public/css/radar_new_companies_sector.css') : time())) ?>" />
     
-    <!-- Radar Web Tour -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css" />
-    <link rel="stylesheet" href="<?= base_url('public/css/radar-tour.css?v=' . time()) ?>" />
 </head>
 
 <body>
@@ -163,14 +160,6 @@ $premiumLeads = array_slice($companies, $freeCount);
                     <a href="#leads-sectoriales" class="ae-radar-page__btn ae-radar-page__btn--ghost">
                         Ver muestras
                     </a>
-                    <button class="js-radar-tour-btn js-start-radar-tour">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                        </svg>
-                        Guía rápida
-                    </button>
                 </div>
 
                 <div class="ae-radar-page__hero-alt-downloads">
@@ -711,8 +700,5 @@ $premiumLeads = array_slice($companies, $freeCount);
 
     <?= view('partials/footer') ?>
     
-    <!-- Radar Web Tour -->
-    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
-    <script src="<?= base_url('public/js/radar-tour.js?v=' . time()) ?>"></script>
 </body>
 </html>
