@@ -31,6 +31,11 @@ class Company extends BaseController
         $id = (int)$id;
         $company = $this->companyModel->getById($id);
 
+        if (!$company && !empty($slug)) {
+            // FALLBACK: Si el ID no existe (ej: link antiguo indexado), intentar buscar por slug
+            return $this->handleSlugUrl($slug);
+        }
+
         if (!$company) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
