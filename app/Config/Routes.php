@@ -87,7 +87,7 @@ $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function
 
 // Swagger
 $routes->cli('swagger:generate', 'App\Commands\GenerateSwaggerCommand::run');
-$routes->get('documentation', 'SwaggerController::index');
+$routes->get('documentation', 'Documentation::index');
 
 
 $routes->get('map/companies', 'CompanyMapV2Controller::index');
