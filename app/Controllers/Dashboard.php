@@ -127,7 +127,7 @@ class Dashboard extends BaseController
         $userId = session('user_id');
 
         // ¡CRÍTICO! Liberar el archivo de sesión de Inmediato antes de lanzar queries pesadas
-        session()->writeClose();
+        session_write_close();
 
         $cacheKey = 'kpis_user_' . $userId;
         $kpis = cache($cacheKey);
