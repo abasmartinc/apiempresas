@@ -150,15 +150,6 @@
                 line-height: 1.4 !important;
             }
 
-            /* Footer Links in 2 Columns */
-            .foot-links {
-                display: grid !important;
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 10px 20px !important;
-            }
-            .foot-links li {
-                margin-bottom: 0 !important;
-            }
         }
     </style>
 </head>

@@ -98,6 +98,50 @@ $premiumLeads = array_slice($companies, $freeCount);
                     RADAR SECTORIAL • <?= esc(mb_strtoupper($sectorLabel)) ?>
                 </span>
 
+                <style>
+                    .ae-radar-page__breadcrumbs {
+                        margin-bottom: 24px;
+                        overflow: hidden;
+                    }
+                    .ae-radar-page__breadcrumbs-list {
+                        list-style: none;
+                        padding: 0;
+                        margin: 0;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        font-size: 0.82rem;
+                        color: #64748b;
+                        font-weight: 700;
+                        white-space: nowrap;
+                        overflow-x: auto;
+                        -ms-overflow-style: none;
+                        scrollbar-width: none;
+                        mask-image: linear-gradient(to right, black 85%, transparent 100%);
+                        -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+                    }
+                    .ae-radar-page__breadcrumbs-list::-webkit-scrollbar { display: none; }
+                    .ae-radar-page__breadcrumbs-list li { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+                    .ae-radar-page__breadcrumbs-list a { color: inherit; text-decoration: none; transition: color 0.2s; }
+                    .ae-radar-page__breadcrumbs-list a:hover { color: #111827; }
+                    .ae-radar-page__breadcrumbs-separator { opacity: 0.4; font-weight: 400; font-size: 0.9rem; }
+                    .ae-radar-page__breadcrumbs-current { color: #111827; font-weight: 850; }
+                    @media (max-width: 600px) {
+                        .ae-radar-page__breadcrumbs-list { font-size: 0.76rem; gap: 6px; }
+                        .ae-radar-page__breadcrumbs-list li { gap: 6px; }
+                    }
+                </style>
+
+                <nav class="ae-radar-page__breadcrumbs" aria-label="Breadcrumb">
+                    <ol class="ae-radar-page__breadcrumbs-list">
+                        <li><a href="<?= site_url('/') ?>">Inicio</a></li>
+                        <li class="ae-radar-page__breadcrumbs-separator">/</li>
+                        <li><a href="<?= site_url('empresas-nuevas') ?>">Empresas Nuevas</a></li>
+                        <li class="ae-radar-page__breadcrumbs-separator">/</li>
+                        <li class="ae-radar-page__breadcrumbs-current" aria-current="page"><?= esc($sectorLabel) ?></li>
+                    </ol>
+                </nav>
+
                 <h1 class="ae-radar-page__title">
                     <?= esc($heading_prefix) ?>
                     <span class="ae-radar-page__title-grad"><?= esc($heading_time) ?></span>
@@ -150,7 +194,7 @@ $premiumLeads = array_slice($companies, $freeCount);
                 <div class="ae-radar-page__stats">
                     <a href="<?= site_url('empresas-nuevas-hoy') ?>" class="ae-radar-page__stat-card ae-radar-page__stat-card--today">
                         <div class="ae-radar-page__stat-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <polyline points="12 6 12 12 16 14"></polyline>
                             </svg>
@@ -163,7 +207,7 @@ $premiumLeads = array_slice($companies, $freeCount);
 
                     <a href="<?= site_url('empresas-nuevas-semana') ?>" class="ae-radar-page__stat-card ae-radar-page__stat-card--week">
                         <div class="ae-radar-page__stat-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                                 <rect x="3" y="4" width="18" height="18" rx="2"></rect>
                                 <line x1="16" y1="2" x2="16" y2="6"></line>
                                 <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -178,7 +222,7 @@ $premiumLeads = array_slice($companies, $freeCount);
 
                     <a href="<?= site_url('empresas-nuevas-mes') ?>" class="ae-radar-page__stat-card ae-radar-page__stat-card--month">
                         <div class="ae-radar-page__stat-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                                 <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
                                 <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
                             </svg>
@@ -608,6 +652,49 @@ $premiumLeads = array_slice($companies, $freeCount);
                 </div>
             </div>
         </section>
+
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Inicio",
+                  "item": "<?= site_url('/') ?>"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": "Empresas Nuevas",
+                  "item": "<?= site_url('empresas-nuevas') ?>"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 3,
+                  "name": "<?= esc($sectorLabel) ?>",
+                  "item": "<?= current_url() ?>"
+                }
+              ]
+            },
+            {
+              "@type": "Product",
+              "name": "Listado Excel: <?= esc($title) ?>",
+              "description": "Descarga directa del listado B2B de nuevas empresas en el sector de <?= esc($sectorLabel) ?> en formato Excel para prospección comercial.",
+              "offers": {
+                "@type": "Offer",
+                "price": "<?= number_format($dynamic_price['base_price'] ?? 9, 2, '.', '') ?>",
+                "priceCurrency": "EUR",
+                "availability": "https://schema.org/InStock",
+                "url": "<?= current_url() ?>"
+              }
+            }
+          ]
+        }
+        </script>
     </main>
 
     <?= view('partials/footer') ?>

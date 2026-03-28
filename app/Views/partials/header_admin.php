@@ -57,10 +57,46 @@
             <a class="minor" href="<?=site_url('admin/email-logs') ?>">KPIs Emails</a>
         </nav>
 
-        <div class="desktop-only">
+        <div class="desktop-only flex-gap-10">
+            <button id="btn-clear-cache" class="btn btn_header btn_header--ghost" style="color: #64748b; border-color: currentColor;">
+                <span>Limpiar Caché</span>
+            </button>
             <a class="btn btn_header btn_header--ghost logout" href="<?=site_url('logout') ?>">
                 <span>Salir</span>
             </a>
         </div>
     </div>
 </header>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.getElementById('btn-clear-cache')?.addEventListener('click', function() {
+    Swal.fire({
+        title: '¿Limpiar Caché?',
+        text: 'Esto regenerará los datos del Radar con los precios actuales de la base de datos.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, limpiar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.showLoading();
+            fetch('<?= site_url('admin/clear-cache') ?>', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                Swal.fire({
+                    title: data.status === 'success' ? '¡Hecho!' : 'Error',
+                    text: data.message,
+                    icon: data.status === 'success' ? 'success' : 'error'
+                });
+            })
+            .catch(err => {
+                Swal.fire('Error', 'No se pudo limpiar la caché', 'error');
+            });
+        }
+    });
+});
+</script>

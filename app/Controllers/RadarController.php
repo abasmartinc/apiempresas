@@ -329,7 +329,7 @@ class RadarController extends BaseController
 
         $data = [
             'title' => $title,
-            'meta_description' => "Listado de empresas recién constituidas en " . ($province ?: "España") . ". Datos oficiales del BORME.",
+            'meta_description' => "Descubre las " . number_format($totalCount, 0, ',', '.') . " empresas recién constituidas en " . ($province ?: "España") . " detectadas hoy en el BORME. Listado actualizado para prospección B2B.",
             'companies' => $companies,
             'stats' => $stats,
             'prices' => $prices,
