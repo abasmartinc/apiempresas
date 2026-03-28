@@ -133,16 +133,16 @@ class Company extends BaseController
 
     public function show($segment)
     {
-        // Determinar si es un CIF válido o un slug
-        $isValidCif = preg_match('/^[A-Z][0-9]{7}[A-Z0-9]$/i', substr($segment, 0, 9));
-        
-        if ($isValidCif) {
-            // CASO 1: URL con CIF válido (ej: B12345678-empresa-sl)
+        // 1. Detect format (CIF-based vs Slug-based)
+        // CIFs are usually 9 chars at the beginning (A12345678)
+        $potentialCif = substr($segment, 0, 9);
+        $isCifFormat = preg_match('/^[A-Z][0-9]{7}[A-Z0-9]$/i', $potentialCif);
+
+        if ($isCifFormat) {
             return $this->handleCifUrl($segment);
-        } else {
-            // CASO 2: URL con slug (ej: serviraibe-sl o no-disponible-serviraibe-sl)
-            return $this->handleSlugUrl($segment);
         }
+        
+        return $this->handleSlugUrl($segment);
     }
     
     /**
@@ -151,11 +151,8 @@ class Company extends BaseController
     private function handleCifUrl($segment)
     {
         $cif  = '';
-        $slug = '';
-
         if (preg_match('/^([A-Z][0-9]{7}[A-Z0-9])(?:-(.*))?$/i', $segment, $matches)) {
             $cif  = strtoupper($matches[1]);
-            $slug = $matches[2] ?? '';
         } else {
             $cif = strtoupper(substr($segment, 0, 9));
         }
@@ -163,11 +160,11 @@ class Company extends BaseController
         $company = $this->companyModel->getByCif($cif);
 
         if (!$company) {
-            throw PageNotFoundException::forPageNotFound();
+            return $this->handleSlugUrl($segment);
         }
 
         // Canonical Check
-        $correctSlug = url_title($company['name'], '-', true);
+        $correctSlug = $this->companyModel->generateSlug($company['name'] ?? '');
         $expectedSegment = $cif . ($correctSlug ? ('-' . $correctSlug) : '');
 
         if ($segment !== $expectedSegment) {

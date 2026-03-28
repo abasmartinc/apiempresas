@@ -2,13 +2,13 @@
 
 use CodeIgniter\Router\RouteCollection;
 
+
+
 /** @var RouteCollection $routes */
 $routes->get('/', 'Home::index');
 
 $routes->post('submit-review', 'Home::submitReview');
 $routes->get('billing/export-excel', 'RadarController::exportExcel');
-$routes->get('enter', 'Login::index');
-$routes->get('documentation', 'Documentation::index');
 $routes->get('enter', 'Login::index');          // muestra login
 $routes->get('logout', 'Login::logout');        // cierre de sesión
 $routes->post('login', 'Login::authenticate');        // cierre de sesión
@@ -36,7 +36,7 @@ $routes->get('billing', 'Billing::index');
 $routes->get('billing/purchase_success', 'Billing::purchase_success');
 $routes->get('billing/manage', 'Billing::billing_manage');
 $routes->get('billing', 'Billing::index');
-$routes->match(['get', 'post'], 'billing/checkout', 'Billing::checkout');
+$routes->match(['GET', 'POST'], 'billing/checkout', 'Billing::checkout');
 $routes->get('billing/single_checkout', 'Billing::single_checkout');
 $routes->get('checkout/radar-export', 'Billing::order_summary');
 $routes->get('billing/success', 'Billing::success'); // callback Stripe
@@ -262,9 +262,6 @@ $routes->get('autocompletado-cif-empresas/get', 'CompanySuggestions::getSuggesti
 $routes->addRedirect('company-suggestions', 'autocompletado-cif-empresas');
 $routes->addRedirect('company-suggestions/get', 'autocompletado-cif-empresas/get');
 
-// Company pages: CIF-based URLs (must come before slug fallback)
+// Company pages: CIF-based and Slug-based URLs (must be last)
 $routes->get('([a-zA-Z][0-9]{7}[a-zA-Z0-9].*)', 'Company::show/$1');
-
-// Company pages: Slug-only URLs (fallback for companies without valid CIF)
-// This must be the LAST route to avoid conflicts
 $routes->get('(:segment)', 'Company::show/$1');
