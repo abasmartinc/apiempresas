@@ -169,7 +169,7 @@ class Radar extends BaseController
             $dateLimit = date('Y-m-d', strtotime("-$days days"));
         }
         $this->companyModel->where('companies.fecha_constitucion >=', $dateLimit);
-        $this->companyModel->where('companies.fecha_constitucion <=', $today); // Excluir fechas futuras
+        // Eliminamos la restricción <= $today para incluir "pre-constituciones" detectadas para los próximos días
 
         $this->companyModel->orderBy('companies.fecha_constitucion', 'DESC');
         $this->companyModel->orderBy('companies.id', 'DESC');

@@ -362,87 +362,20 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                         </div>
                     </form>
 
-                    <section class="ae-radar-page__lead-wrap <?= $isFree ? 'is-paywalled' : '' ?>">
-                        <div class="ae-radar-page__lead-top" style="display:flex; justify-content:space-between; align-items:flex-end; padding:24px 26px;">
-                            <!-- Left Side: Title & Info -->
-                            <div class="ae-radar-page__lead-headings">
-                                <h2 class="ae-radar-page__lead-title" style="margin-bottom:4px;">Oportunidades detectadas</h2>
-                                <div class="ae-radar-page__lead-desc">
-                                    <?php if ($isFree): ?>
-                                        Muestra limitada de radar. Desbloquea PRO para ver todas las empresas.
-                                    <?php else: ?>
-                                        Mostrando <strong><?= $pagination['start'] ?>-<?= $pagination['end'] ?></strong> de <strong><?= number_format($pagination['total']) ?></strong> resultados.
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-
-                            <!-- Right Side: Grouped Controls -->
-                            <div class="ae-radar-page__lead-controls" style="display:flex; align-items:center; gap:16px;">
-                                <!-- View Toggle -->
-                                <div class="ae-radar-page__view-toggle" style="display:flex; gap:4px; background:#f1f5f9; padding:4px; border-radius:12px;">
-                                    <button type="button" class="ae-view-btn is-active" data-view="list" onclick="switchView('list')" style="display:flex; align-items:center; gap:6px; border:none; background:white; padding:6px 14px; border-radius:10px; font-weight:700; color:#2563eb; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,0.05); font-size:12px;">
-                                        Listado
-                                    </button>
-                                    <button type="button" class="ae-view-btn" data-view="map" onclick="switchView('map')" style="display:flex; align-items:center; gap:6px; border:none; background:transparent; padding:6px 14px; border-radius:10px; font-weight:700; color:#64748b; cursor:pointer; font-size:12px;">
-                                        Mapa
-                                    </button>
-                                </div>
-
-                                <?php if (!$isFree): ?>
-                                    <!-- Vertical Separator -->
-                                    <div style="width:1px; height:24px; background:#e2e8f0;"></div>
-
-                                    <!-- Controls Group -->
-                                    <div style="display:flex; align-items:center; gap:10px;">
-                                        <!-- Per Page -->
-                                        <div class="ae-radar-page__per-page-wrap" style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700; color:#64748b; background:#f8fafc; padding:4px 12px; border-radius:10px; border:1px solid #e2e8f0;">
-                                            <span>Ver:</span>
-                                            <select onchange="window.location.href = window.location.pathname + '?' + new URLSearchParams({...Object.fromEntries(new URLSearchParams(window.location.search)), per_page: this.value}).toString()" style="border:none; background:transparent; font-weight:800; color:#1e293b; cursor:pointer; outline:none;">
-                                                <option value="20" <?= ($filters['per_page'] == 20) ? 'selected' : '' ?>>20</option>
-                                                <option value="50" <?= ($filters['per_page'] == 50) ? 'selected' : '' ?>>50</option>
-                                                <option value="100" <?= ($filters['per_page'] == 100) ? 'selected' : '' ?>>100</option>
-                                            </select>
-                                        </div>
-
-                                        <!-- Export Options -->
-                                        <div style="display:flex; gap:6px;">
-                                            <a href="<?= site_url('radar/exportar?' . http_build_query(array_merge($filters, ['format' => 'excel']))) ?>" class="ae-radar-page__export-btn" style="background:#2563eb; padding: 10px 14px; border-radius:10px; color:#fff; text-decoration:none; font-size:12px; font-weight:800; display:flex; align-items:center; gap:6px;">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                                Excel
-                                            </a>
-                                            <a href="<?= site_url('radar/exportar?' . http_build_query(array_merge($filters, ['format' => 'csv']))) ?>" class="ae-radar-page__export-btn" style="background:#475569; padding: 10px 14px; border-radius:10px; color:#fff; text-decoration:none; font-size:12px; font-weight:800; display:flex; align-items:center;" title="Exportar CSV (Datos brutos)">
-                                                .CSV
-                                            </a>
-                                        </div>
-                                    </div>
-                                <?php else: ?>
-                                    <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__export-btn" style="background:#0f172a; padding: 11px 18px; border-radius:12px; color:#fff; text-decoration:none; font-size:13px; font-weight:800;">Activar PRO (79€)</a>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-
-                        <!-- Vistas -->
-                        <div id="radar-list-view">
+                        <section class="ae-radar-page__lead-wrap <?= $isFree ? 'is-paywalled' : '' ?>">
                             <div id="radar-results-container">
-                                <?= view('radar/partials/results_table', ['companies' => $visibleCompanies, 'isFree' => $isFree]) ?>
+                                <?= view('radar/partials/results_table', array_merge($filters, [
+                                    'companies' => $visibleCompanies, 
+                                    'isFree' => $isFree,
+                                    'pagination' => $pagination ?? null,
+                                    'pager' => $pager ?? null,
+                                    'filters' => $filters ?? []
+                                ])) ?>
                             </div>
-                        </div>
 
-                        <?php if (!$isFree && isset($pagination)): ?>
-                            <div class="ae-radar-page__table-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:28px; padding:0 26px 30px;">
-                                <div class="ae-radar-page__pagination-info" style="font-size:13px; font-weight:700; color:#64748b; background:#f8fafc; padding:8px 16px; border-radius:12px; border:1px solid #e2e8f0;">
-                                    Mostrando <span style="color:#1e293b;"><?= $pagination['start'] ?> a <?= $pagination['end'] ?></span> de <span style="color:#1e293b;"><?= number_format($pagination['total']) ?></span> empresas
-                                </div>
-                                
-                                <div class="ae-radar-page__pagination">
-                                    <?= $pager->links('default', 'radar_es') ?>
-                                </div>
+                            <div id="radar-map-view" style="display:none;">
+                                <div id="radar-leaflet-map" style="height:600px; width:100%; border-radius:20px; border:1px solid #e2e8f0; background:#f8fafc; z-index:1;"></div>
                             </div>
-                        <?php endif; ?>
-
-                        <div id="radar-map-view" style="display:none;">
-                            <div id="radar-leaflet-map" style="height:600px; width:100%; border-radius:20px; border:1px solid #e2e8f0; background:#f8fafc; z-index:1;"></div>
-                        </div>
 
                         <?php if ($isFree && !empty($lockedCompanies)): ?>
                             <div class="ae-radar-page__locked-zone">
@@ -958,43 +891,60 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
         });
     }
 
+    /**
+     * Actualiza los resultados cambiando solo el per_page (AJAX)
+     */
+    window.updateResultsWithPerPage = function(perPage) {
+        const filterForm = document.querySelector('.ae-radar-page__filters');
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams(formData);
+        params.set('per_page', perPage);
+        
+        const url = filterForm.action + '?' + params.toString();
+        updateResults(url);
+    };
+
+    function updateResults(url) {
+        const container = document.getElementById('radar-results-container');
+        if (!container) return;
+
+        container.style.opacity = '0.5';
+        container.style.pointerEvents = 'none';
+        
+        fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
+            container.innerHTML = html;
+            container.style.opacity = '1';
+            container.style.pointerEvents = 'auto';
+            
+            // Si el mapa estaba cargado, avisarle que los datos podrían haber cambiado
+            if (radarMap) loadMapData();
+        })
+        .catch(err => {
+            console.error('Error loading results:', err);
+            container.style.opacity = '1';
+            container.style.pointerEvents = 'auto';
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('radar-results-container');
         const filterForm = document.querySelector('.ae-radar-page__filters');
 
-        function updateResults(url) {
-            container.style.opacity = '0.5';
-            container.style.pointerEvents = 'none';
-            
-            fetch(url, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(response => response.text())
-            .then(html => {
-                container.innerHTML = html;
-                container.style.opacity = '1';
-                container.style.pointerEvents = 'auto';
-                
-                // Re-vincular eventos
-                bindPagination();
-            })
-            .catch(err => {
-                console.error('Error loading results:', err);
-                container.style.opacity = '1';
-                container.style.pointerEvents = 'auto';
-            });
-        }
-
-        function bindPagination() {
-            const links = container.querySelectorAll('.ae-radar-page__pagination a');
-            links.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    updateResults(this.href);
-                    document.querySelector('.ae-radar-page__lead-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
-            });
-        }
+        // Delegación de eventos para paginación (sobreviene a reemplazos de innerHTML)
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('#radar-results-container .ae-radar-page__pagination a');
+            if (link) {
+                e.preventDefault();
+                updateResults(link.href);
+                // Scroll suave arriba del listado
+                const wrap = document.querySelector('.ae-radar-page__lead-wrap');
+                if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
 
         if (filterForm) {
             filterForm.addEventListener('submit', function(e) {
@@ -1022,8 +972,6 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                 this.classList.add('is-active');
             });
         });
-
-        bindPagination();
     });
 
     function cancelRadarSubscription() {
