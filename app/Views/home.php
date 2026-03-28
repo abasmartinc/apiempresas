@@ -73,6 +73,93 @@
                 padding: 32px 16px !important;
             }
         }
+
+        /* Header & Core Responsive Fixes (Extreme Space + Header Air) */
+        @media (max-width: 640px) {
+            /* Fix Container Padding WITHOUT wiping out vertical air */
+            .container {
+                padding-left: 6px !important;
+                padding-right: 6px !important;
+            }
+
+            /* Header specific spacing - More "air" on sides for logo/hamburger */
+            header .nav {
+                padding: 16px 20px !important; 
+            }
+
+            main {
+                margin-top: 10px; /* Air between header and hero */
+            }
+
+            .band {
+                padding: 24px 6px !important;
+                border-radius: 12px !important;
+            }
+
+            .search-section .search-card {
+                padding: 20px 8px !important;
+                border-radius: 12px !important;
+            }
+
+            .search-section h2 {
+                font-size: 1.4rem !important;
+                line-height: 1.25 !important;
+                margin-bottom: 12px !important;
+            }
+
+            .search-row {
+                flex-direction: column !important;
+                gap: 8px !important;
+            }
+
+            .search-row .input {
+                width: 100% !important;
+                font-size: 15px !important;
+                padding: 12px !important;
+            }
+
+            .search-row .btn {
+                width: 100% !important;
+                padding: 15px !important;
+                justify-content: center !important;
+                font-size: 16px !important;
+                line-height: 1.2 !important;
+                text-align: center;
+                height: auto !important;
+            }
+
+            .search-card .muted {
+                font-size: 0.88rem !important;
+                line-height: 1.4 !important;
+            }
+
+            /* Features Section optimization */
+            .feature-row {
+                grid-template-columns: 44px 1fr !important;
+                gap: 12px !important;
+                padding: 14px 0 !important;
+            }
+
+            .feature-row h3 {
+                font-size: 1.1rem !important;
+                margin-bottom: 4px !important;
+            }
+
+            .feature-row p {
+                font-size: 0.92rem !important;
+                line-height: 1.4 !important;
+            }
+
+            /* Footer Links in 2 Columns */
+            .foot-links {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 10px 20px !important;
+            }
+            .foot-links li {
+                margin-bottom: 0 !important;
+            }
+        }
     </style>
 </head>
 

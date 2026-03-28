@@ -222,48 +222,50 @@
                     </div>
                 </div>
 
-                <table class="radar-table">
-                    <thead>
-                        <tr>
-                            <th>Empresa</th>
-                            <th>Sector</th>
-                            <th>Provincia</th>
-                            <th>Fecha constitución</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td data-label="Empresa"><span class="radar-table__company">ACME TECH SL</span></td>
-                            <td data-label="Sector"><span class="radar-table__tag">Programación informática</span></td>
-                            <td data-label="Provincia"><span class="radar-table__meta">Barcelona</span></td>
-                            <td data-label="Fecha"><span class="radar-table__date">05/03/2026</span></td>
-                        </tr>
-                        <tr>
-                            <td data-label="Empresa"><span class="radar-table__company">DATA CONSULTING SL</span></td>
-                            <td data-label="Sector"><span class="radar-table__tag">Consultoría</span></td>
-                            <td data-label="Provincia"><span class="radar-table__meta">Madrid</span></td>
-                            <td data-label="Fecha"><span class="radar-table__date">04/03/2026</span></td>
-                        </tr>
-                        <tr>
-                            <td data-label="Empresa"><span class="radar-table__company">FOOD GROUP SL</span></td>
-                            <td data-label="Sector"><span class="radar-table__tag">Hostelería</span></td>
-                            <td data-label="Provincia"><span class="radar-table__meta">Valencia</span></td>
-                            <td data-label="Fecha"><span class="radar-table__date">04/03/2026</span></td>
-                        </tr>
-                        <tr>
-                            <td data-label="Empresa"><span class="radar-table__company">DIGITAL GROWTH SL</span></td>
-                            <td data-label="Sector"><span class="radar-table__tag">Marketing digital</span></td>
-                            <td data-label="Provincia"><span class="radar-table__meta">Málaga</span></td>
-                            <td data-label="Fecha"><span class="radar-table__date">03/03/2026</span></td>
-                        </tr>
-                        <tr>
-                            <td data-label="Empresa"><span class="radar-table__company">CONSTRUCCIONES NOVA SL</span></td>
-                            <td data-label="Sector"><span class="radar-table__tag">Construcción</span></td>
-                            <td data-label="Provincia"><span class="radar-table__meta">Sevilla</span></td>
-                            <td data-label="Fecha"><span class="radar-table__date">03/03/2026</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="radar-table-scroll">
+                    <table class="radar-table">
+                        <thead>
+                            <tr>
+                                <th>Empresa</th>
+                                <th>Sector</th>
+                                <th>Provincia</th>
+                                <th>Fecha constitución</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td data-label="Empresa"><span class="radar-table__company">ACME TECH SL</span></td>
+                                <td data-label="Sector"><span class="radar-table__tag">Programación informática</span></td>
+                                <td data-label="Provincia"><span class="radar-table__meta">Barcelona</span></td>
+                                <td data-label="Fecha"><span class="radar-table__date">05/03/2026</span></td>
+                            </tr>
+                            <tr>
+                                <td data-label="Empresa"><span class="radar-table__company">DATA CONSULTING SL</span></td>
+                                <td data-label="Sector"><span class="radar-table__tag">Consultoría</span></td>
+                                <td data-label="Provincia"><span class="radar-table__meta">Madrid</span></td>
+                                <td data-label="Fecha"><span class="radar-table__date">04/03/2026</span></td>
+                            </tr>
+                            <tr>
+                                <td data-label="Empresa"><span class="radar-table__company">FOOD GROUP SL</span></td>
+                                <td data-label="Sector"><span class="radar-table__tag">Hostelería</span></td>
+                                <td data-label="Provincia"><span class="radar-table__meta">Valencia</span></td>
+                                <td data-label="Fecha"><span class="radar-table__date">04/03/2026</span></td>
+                            </tr>
+                            <tr>
+                                <td data-label="Empresa"><span class="radar-table__company">DIGITAL GROWTH SL</span></td>
+                                <td data-label="Sector"><span class="radar-table__tag">Marketing digital</span></td>
+                                <td data-label="Provincia"><span class="radar-table__meta">Málaga</span></td>
+                                <td data-label="Fecha"><span class="radar-table__date">03/03/2026</span></td>
+                            </tr>
+                            <tr>
+                                <td data-label="Empresa"><span class="radar-table__company">CONSTRUCCIONES NOVA SL</span></td>
+                                <td data-label="Sector"><span class="radar-table__tag">Construcción</span></td>
+                                <td data-label="Provincia"><span class="radar-table__meta">Sevilla</span></td>
+                                <td data-label="Fecha"><span class="radar-table__date">03/03/2026</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
                 <div class="radar-preview__cta">
                     <a href="<?= site_url('radar') ?>" class="radar-btn radar-btn--ghost">
@@ -442,69 +444,71 @@
             </div>
 
             <div class="radar-comparison-wrap">
-                <table class="radar-comparison">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th class="radar-comparison__col-radar">
-                                <div class="radar-comparison__badge">Suscripción</div>
-                                Radar mensual
-                            </th>
-                            <th class="radar-comparison__col-excel">Excel puntual</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Actualización</td>
-                            <td class="radar-comparison__col-radar">
-                                <span class="radar-comparison__val-icon">⚡</span>
-                                Diaria automática
-                            </td>
-                            <td class="radar-comparison__col-excel">Descarga única</td>
-                        </tr>
-                        <tr>
-                            <td>Filtros</td>
-                            <td class="radar-comparison__col-radar">
-                                <span class="radar-comparison__val-icon">🔍</span>
-                                Avanzados e ilimitados
-                            </td>
-                            <td class="radar-comparison__col-excel">Sin filtros dinámicos</td>
-                        </tr>
-                        <tr>
-                            <td>Leads nuevos</td>
-                            <td class="radar-comparison__col-radar">
-                                <span class="radar-comparison__val-icon">✨</span>
-                                Cada día (BORME)
-                            </td>
-                            <td class="radar-comparison__col-excel">Datos estáticos</td>
-                        </tr>
-                        <tr>
-                            <td>Exportación</td>
-                            <td class="radar-comparison__col-radar">
-                                <span class="radar-comparison__val-icon">📂</span>
-                                Ilimitada
-                            </td>
-                            <td class="radar-comparison__col-excel">Puntual / Por pago</td>
-                        </tr>
-                        <tr>
-                            <td>IA Analysis</td>
-                            <td class="radar-comparison__col-radar">
-                                <span class="radar-comparison__val-icon">🤖</span>
-                                Incluido (Nichos/Guiones)
-                            </td>
-                            <td class="radar-comparison__col-excel">No incluido</td>
-                        </tr>
-                        <tr>
-                            <td>Precio</td>
-                            <td class="radar-comparison__col-radar">
-                                <div class="radar-comparison__price">79€<span>/mes</span></div>
-                            </td>
-                            <td class="radar-comparison__col-excel">
-                                <div class="radar-comparison__price-alt">Desde 2€<span>/listado</span></div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="radar-comparison-scroll">
+                    <table class="radar-comparison">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th class="radar-comparison__col-radar">
+                                    <div class="radar-comparison__badge">Suscripción</div>
+                                    Radar mensual
+                                </th>
+                                <th class="radar-comparison__col-excel">Excel puntual</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Actualización</td>
+                                <td class="radar-comparison__col-radar">
+                                    <span class="radar-comparison__val-icon">⚡</span>
+                                    Diaria automática
+                                </td>
+                                <td class="radar-comparison__col-excel">Descarga única</td>
+                            </tr>
+                            <tr>
+                                <td>Filtros</td>
+                                <td class="radar-comparison__col-radar">
+                                    <span class="radar-comparison__val-icon">🔍</span>
+                                    Avanzados e ilimitados
+                                </td>
+                                <td class="radar-comparison__col-excel">Sin filtros dinámicos</td>
+                            </tr>
+                            <tr>
+                                <td>Leads nuevos</td>
+                                <td class="radar-comparison__col-radar">
+                                    <span class="radar-comparison__val-icon">✨</span>
+                                    Cada día (BORME)
+                                </td>
+                                <td class="radar-comparison__col-excel">Datos estáticos</td>
+                            </tr>
+                            <tr>
+                                <td>Exportación</td>
+                                <td class="radar-comparison__col-radar">
+                                    <span class="radar-comparison__val-icon">📂</span>
+                                    Ilimitada
+                                </td>
+                                <td class="radar-comparison__col-excel">Puntual / Por pago</td>
+                            </tr>
+                            <tr>
+                                <td>IA Analysis</td>
+                                <td class="radar-comparison__col-radar">
+                                    <span class="radar-comparison__val-icon">🤖</span>
+                                    Incluido (Nichos/Guiones)
+                                </td>
+                                <td class="radar-comparison__col-excel">No incluido</td>
+                            </tr>
+                            <tr>
+                                <td>Precio</td>
+                                <td class="radar-comparison__col-radar">
+                                    <div class="radar-comparison__price">79€<span>/mes</span></div>
+                                </td>
+                                <td class="radar-comparison__col-excel">
+                                    <div class="radar-comparison__price-alt">Desde 2€<span>/listado</span></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
                 <div class="radar-comparison__cta">
                     <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="radar-btn radar-btn--primary">

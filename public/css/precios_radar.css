@@ -55,7 +55,7 @@ body {
 }
 
 .radar-section {
-    padding: 92px 0;
+    padding: 48px 0;
     position: relative;
 }
 
@@ -146,7 +146,7 @@ body {
 }
 
 .radar-btn--primary {
-    background: linear-gradient(135deg, #2b56de 0%, #183b86 82%, #13ac94 100%);
+    background: #0f172a; background: linear-gradient(135deg, #2b56de 0%, #183b86 82%, #13ac94 100%);
     color: #fff;
     box-shadow: 0 24px 50px -28px rgba(43, 86, 222, 0.24);
 }
@@ -203,7 +203,7 @@ body {
 
 .radar-hero__shell {
     position: relative;
-    padding: 42px 38px 34px;
+    padding: 34px 30px 24px;
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, #ffffff 100%);
     border: 1px solid rgba(226, 232, 240, 0.9);
@@ -249,7 +249,7 @@ body {
 
 .radar-hero__title span {
     display: block;
-    background: linear-gradient(90deg, #183b86 0%, #2b56de 55%, #13ac94 100%);
+    background: #0f172a; background: linear-gradient(90deg, #183b86 0%, #2b56de 55%, #13ac94 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -274,7 +274,7 @@ body {
 .radar-hero__proof-item {
     padding: 18px 16px;
     border-radius: 20px;
-    background: linear-gradient(180deg, #fffdfa 0%, #f8fafc 100%);
+    background: #0f172a; background: linear-gradient(180deg, #fffdfa 0%, #f8fafc 100%);
     border: 1px solid #e8e4d8;
 }
 
@@ -325,7 +325,7 @@ body {
 .radar-hero__mini-dashboard {
     border-radius: 24px;
     border: 1px solid #e8e6de;
-    background: linear-gradient(180deg, #fffdfa 0%, #ffffff 100%);
+    background: #0f172a; background: linear-gradient(180deg, #fffdfa 0%, #ffffff 100%);
     box-shadow: var(--shadow-soft);
 }
 
@@ -381,7 +381,7 @@ body {
 .radar-hero__mini-card {
     padding: 18px 16px;
     border-radius: 18px;
-    background: linear-gradient(180deg, #fffef9 0%, #ffffff 100%);
+    background: #0f172a; background: linear-gradient(180deg, #fffef9 0%, #ffffff 100%);
     border: 1px solid #ece6d7;
 }
 
@@ -422,7 +422,7 @@ body {
 .radar-timeline {
     padding: 28px;
     border-radius: 28px;
-    background: linear-gradient(135deg, #fffaf0 0%, #f7f9fc 100%);
+    background: #0f172a; background: linear-gradient(135deg, #fffaf0 0%, #f7f9fc 100%);
     border: 1px solid #ece1bf;
     box-shadow: var(--shadow-soft);
 }
@@ -452,7 +452,7 @@ body {
     align-items: center;
     justify-content: center;
     border-radius: 999px;
-    background: linear-gradient(135deg, #f4b622 0%, #d89a12 100%);
+    background: #0f172a; background: linear-gradient(135deg, #f4b622 0%, #d89a12 100%);
     color: #fff;
     font-size: 0.88rem;
     font-weight: 900;
@@ -489,7 +489,7 @@ body {
     justify-content: space-between;
     gap: 18px;
     padding: 18px 22px;
-    background: linear-gradient(180deg, #f8fafc 0%, #f3f6fb 100%);
+    background: #0f172a; background: linear-gradient(180deg, #f8fafc 0%, #f3f6fb 100%);
     border-bottom: 1px solid #e6ecf3;
 }
 
@@ -595,7 +595,7 @@ body {
 .radar-preview__cta {
     padding: 24px;
     text-align: center;
-    background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+    background: #0f172a; background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
     border-top: 1px solid #e9eef4;
 }
 
@@ -609,7 +609,7 @@ body {
 .radar-step {
     padding: 30px 28px;
     border-radius: 24px;
-    background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+    background: #0f172a; background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
     border: 1px solid #e6ecf3;
     box-shadow: var(--shadow-soft);
     transition: transform 0.22s ease, box-shadow 0.22s ease;
@@ -628,7 +628,7 @@ body {
     justify-content: center;
     margin-bottom: 18px;
     border-radius: 16px;
-    background: linear-gradient(135deg, #223f99 0%, #2b56de 72%, #13ac94 100%);
+    background: #0f172a; background: linear-gradient(135deg, #223f99 0%, #2b56de 72%, #13ac94 100%);
     color: #fff;
     font-size: 1.32rem;
     font-weight: 950;
@@ -686,8 +686,8 @@ body {
 
 /* BAND */
 .radar-band {
-    padding: 86px 0;
-    background: linear-gradient(135deg, #0f172a 0%, #122347 55%, #18438f 100%);
+    padding: 56px 0;
+    background: #0f172a; background: linear-gradient(135deg, #0f172a 0%, #122347 55%, #18438f 100%);
     color: #fff;
     position: relative;
     overflow: hidden;
@@ -783,13 +783,13 @@ body {
 
 .radar-pricing-card__topbar {
     height: 4px;
-    background: linear-gradient(90deg, #183b86 0%, #2b56de 62%, #13ac94 100%);
+    background: #0f172a; background: linear-gradient(90deg, #183b86 0%, #2b56de 62%, #13ac94 100%);
 }
 
 .radar-pricing-card__header {
     padding: 38px 38px 30px;
     text-align: center;
-    background: linear-gradient(135deg, #12357b 0%, #2b56de 84%, #13ac94 100%);
+    background: #0f172a; background: linear-gradient(135deg, #12357b 0%, #2b56de 84%, #13ac94 100%);
     color: #fff;
 }
 
@@ -881,13 +881,13 @@ body {
 .radar-pricing-side__card {
     padding: 26px 24px;
     border-radius: 24px;
-    background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+    background: #0f172a; background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
     border: 1px solid #e5ebf3;
     box-shadow: var(--shadow-soft);
 }
 
 .radar-pricing-side__card--soft {
-    background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+    background: #0f172a; background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
 }
 
 .radar-pricing-side__card h3 {
@@ -992,23 +992,6 @@ body {
     padding-left: 32px;
 }
 
-.radar-comparison tbody td.radar-comparison thead th.radar-comparison__col-radar {
-    background: #183b86;
-    color: #fff;
-}
-
-.radar-comparison__col-radar {
-    background: rgba(33, 82, 255, 0.035);
-    color: var(--primary);
-    font-weight: 800;
-    text-align: center;
-}
-
-.radar-comparison tbody td.radar-comparison__col-excel {
-    text-align: center;
-    opacity: 0.7;
-}
-
 .radar-comparison__val-icon {
     display: block;
     font-size: 1.25rem;
@@ -1086,216 +1069,11 @@ body {
 
 /* FINAL CTA */
 .radar-final {
-    padding: 110px 0 120px;
+    padding: 40px 0;
     background: #ffffff;
     position: relative;
 }
 
-.radar-final::before {
-    content: "";
-    position: absolute;
- top: 0;
- left: 0;
- right: 0;
- height: 1px;
- background: linear-gradient(90deg, transparent, rgba(0,0,0,0.05), transparent);
-}
-
-.radar-final__card {
-    position: relative;
-    z-index: 1;
-    max-width: 940px;
-    margin: 0 auto;
-    text-align: center;
-    background: linear-gradient(135deg, #102244 0%, #15336b 58%, #2b56de 88%, #13ac94 100%);
-    padding: 72px 48px;
-    border-radius: 42px;
-    box-shadow: 0 42px 100px -30px rgba(11, 34, 84, 0.35);
-    color: #fff;
-    overflow: hidden;
-}
-
-.radar-final__card::after {
-    content: "";
-    position: absolute;
- bottom: -140px;
- left: -120px;
- width: 320px;
- height: 320px;
- background: radial-gradient(circle, rgba(244, 182, 34, 0.18) 0%, transparent 72%);
- pointer-events: none;
-}
-
-.radar-final__shell .radar-kicker {
-    margin-bottom: 16px;
-}
-
-.radar-final__shell h2 {
-    margin: 0 0 16px;
-    font-size: clamp(2rem, 4vw, 3.1rem);
-    line-height: 1.06;
-    font-weight: 950;
-    letter-spacing: -0.05em;
-    color: #fff;
-}
-
-.radar-final__shell p {
-    max-width: 640px;
-    margin: 0 auto 30px;
-    font-size: 1.08rem;
-    line-height: 1.7;
-    color: rgba(255, 255, 255, 0.78);
-}
-
-.radar-final__shell small {
-    display: block;
-    margin-top: 16px;
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.56);
-}
-
-/* RESPONSIVE */
-@media (max-width: 1080px) {
-
-    .radar-hero__feature-panel,
-    .radar-pricing-wrap,
-    .radar-split {
-        grid-template-columns: 1fr;
-    }
-
-    .radar-hero__feature-copy,
-    .radar-hero__mini-dashboard,
-    .radar-pricing-side {
-        max-width: 820px;
-        margin: 0 auto;
-    }
-}
-
-@media (max-width: 860px) {
-
-    .radar-steps,
-    .radar-includes,
-    .radar-metrics,
-    .radar-hero__proof {
-        grid-template-columns: 1fr;
-    }
-
-    .radar-preview__toolbar {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .radar-preview__filters {
-        justify-content: flex-start;
-    }
-}
-
-@media (max-width: 680px) {
-
-    .radar-section,
-    .radar-band,
-    .radar-final {
-    padding: 110px 0 120px;
-    background: #ffffff;
-    position: relative;
-}
-
-    .radar-hero {
-        padding: 54px 0 62px;
-    }
-
-    .radar-hero__shell {
-        padding: 28px 18px 22px;
-        border-radius: 22px;
-    }
-
-    .radar-hero__actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .radar-btn {
-        width: 100%;
-    }
-
-    .radar-hero__feature-panel {
-        gap: 16px;
-    }
-
-    .radar-timeline,
-    .radar-step,
-    .radar-pricing-card__body,
-    .radar-pricing-card__header,
-    .radar-pricing-side__card {
-        padding-left: 18px;
-        padding-right: 18px;
-    }
-
-    .radar-table thead {
-        display: none;
-    }
-
-    .radar-table tbody tr {
-        display: block;
-        padding: 14px 16px;
-        border-bottom: 1px solid #e9eef4;
-    }
-
-    .radar-table tbody td {
-        display: block;
-        padding: 6px 0;
-        font-size: 0.92rem;
-    }
-
-    .radar-table tbody td::before {
-        content: attr(data-label) ": ";
-        font-weight: 800;
-        color: var(--slate-500);
-        font-size: 0.78rem;
-    }
-
-    .radar-comparison {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-}
-
-@media (max-width: 480px) {
-    .container {
-        padding: 0 16px;
-    }
-
-    .radar-title,
-    .radar-band__title,
-    .radar-final__shell h2 {
-        font-size: 1.8rem;
-    }
-
-    .radar-subtitle,
-    .radar-text,
-    .radar-final__shell p,
-    .radar-hero__subtitle {
-        font-size: 1rem;
-    }
-
-    .radar-hero__title {
-        font-size: 2.25rem;
-    }
-
-    .radar-preview__filters span,
-    .radar-kicker,
-    .radar-hero__badge {
-        font-size: 0.7rem;
-    }
-}
-
-.radar-comparison__cta a:not(.radar-btn):hover,
-.radar-btn--ghost:hover,
-.radar-preview__cta .radar-btn--ghost:hover {
-    border-color: #e7cf86;
-    background: #fffaf0;
-}
 /* AI Section Styles */
 .radar-section--ai {
     background: #fff;
@@ -1347,7 +1125,7 @@ body {
 .radar-ai-card__tag {
  display: inline-block;
  padding: 6px 12px;
- background: linear-gradient(135deg, #2152ff 0%, #12b48a 100%);
+ background: #0f172a; background: linear-gradient(135deg, #2152ff 0%, #12b48a 100%);
  color: white;
  font-size: 11px;
  font-weight: 900;
@@ -1399,7 +1177,7 @@ body {
 }
 
 .radar-ai-feature li::before {
-    content: "→";
+    content: "\2192";
     position: absolute;
     left: 0;
     color: #2152ff;
@@ -1427,50 +1205,41 @@ body {
  font-size: 10px;
  font-weight: 900;
  text-transform: uppercase;
- color: #64748b;
- margin-bottom: 4px;
- font-style: normal;
 }
 
 .radar-ai-list {
- list-style: none;
- padding: 0;
- margin: 32px 0 0;
- display: grid;
- gap: 20px;
+  list-style: none;
+  padding: 0;
+  margin: 32px 0 0;
+  display: grid;
+  gap: 20px;
 }
 
 .radar-ai-list li {
- position: relative;
- padding-left: 32px;
- font-size: 1.05rem;
- line-height: 1.5;
- color: var(--slate-700);
+  position: relative;
+  padding-left: 32px;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--slate-700);
 }
 
 .radar-ai-list li::before {
-    content: "✨";
-    position: absolute;
-    left: 0;
-    top: 2px;
+  content: "\2728";
+  position: absolute;
+  left: 0;
+  top: 2px;
 }
 
 .radar-ai-list li strong {
- color: var(--slate-900);
- display: block;
- font-weight: 900;
-}
-
-@media (max-width: 991px) {
- .radar-ai-grid {
- grid-template-columns: 1fr;
- gap: 48px;
- }
+  margin-bottom: 4px;
+  color: var(--slate-900);
+  display: block;
+  font-weight: 900;
 }
 
 /* CTA Final: Botón Amarillo y Layout */
 .radar-btn--yellow {
-    background: linear-gradient(135deg, #facc15 0%, #f97316 100%) !important;
+    background: #facc15; background: linear-gradient(135deg, #facc15 0%, #f97316 100%) !important;
     color: #0b1020 !important;
     border: none !important;
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.45) !important;
@@ -1479,41 +1248,271 @@ body {
 }
 
 .radar-btn--yellow:hover {
-    background: linear-gradient(135deg, #eab308 0%, #ea580c 100%) !important;
+    background: #0f172a; background: linear-gradient(135deg, #eab308 0%, #ea580c 100%) !important;
     transform: translateY(-2px);
     box-shadow: 0 14px 32px rgba(15, 23, 42, 0.55) !important;
     color: #050816 !important;
 }
 
 .radar-final__card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    position: relative;
+    z-index: 1;
+    max-width: 940px;
+    margin: 0 auto;
+    text-align: center;
+    background: #0f172a; background: linear-gradient(135deg, #102244 0%, #15336b 58%, #2b56de 88%, #13ac94 100%);
+    padding: 72px 48px;
+    border-radius: 42px;
+    box-shadow: 0 42px 100px -30px rgba(11, 34, 84, 0.35);
+    color: #fff;
+    overflow: hidden;
 }
 
-.radar-final__card h2 {
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+.radar-final__card::after {
+    content: "";
+    position: absolute;
+ bottom: -140px;
+ left: -120px;
+ width: 320px;
+ height: 320px;
+ background: radial-gradient(circle, rgba(244, 182, 34, 0.18) 0%, transparent 72%);
+ pointer-events: none;
 }
 
-.radar-final__card p {
-    max-width: 580px;
-    margin: 16px auto 32px;
+.radar-final__shell .radar-kicker {
+    margin-bottom: 16px;
 }
 
-.radar-final__card small {
+.radar-final__shell h2 {
+    margin: 0 0 16px;
+    font-size: clamp(2rem, 4vw, 3.1rem);
+    line-height: 1.06;
+    font-weight: 950;
+    letter-spacing: -0.05em;
+    color: #fff;
+}
+
+.radar-final__shell p {
+    max-width: 640px;
+    margin: 0 auto 30px;
+    font-size: 1.08rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.radar-final__shell small {
     display: block;
-    margin: 20px auto 0;
-    opacity: 0.8;
+    margin-top: 16px;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.56);
 }
 
+/* RESPONSIVE */
+@media (max-width: 1080px) {
 
+    .radar-hero__feature-panel,
+    .radar-pricing-wrap,
+    .radar-split,
+    .radar-ai-grid {
+        grid-template-columns: 1fr;
+    }
 
+    .radar-hero__feature-copy,
+    .radar-hero__mini-dashboard,
+    .radar-pricing-side {
+        max-width: 820px;
+        margin: 0 auto;
+    }
+}
 
+@media (max-width: 860px) {
 
+    .radar-steps,
+    .radar-includes,
+    .radar-metrics,
+    .radar-hero__proof {
+        grid-template-columns: 1fr;
+    }
 
+    .radar-preview__toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 
+    .radar-preview__filters {
+        justify-content: flex-start;
+    }
+}
 
+@media (max-width: 680px) {
 
+    .radar-section,
+    .radar-final {
+    padding: 40px 0;
+    background: #ffffff;
+    position: relative;
+}
+
+    .radar-hero {
+        padding: 54px 0 62px;
+    }
+
+    .radar-hero__shell {
+        padding: 24px 18px 22px;
+        border-radius: 22px;
+    }
+
+    .radar-hero__proof {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .radar-hero__actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .radar-btn {
+        width: 100%;
+    }
+
+    .radar-hero__feature-panel {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .radar-timeline,
+    .radar-step,
+    .radar-pricing-card__body,
+    .radar-pricing-card__header,
+    .radar-pricing-side__card {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    /* Removed label-based table to use scrollable table instead */
+    .radar-table thead, .radar-table tbody tr, .radar-table tbody td {
+        display: table-cell; /* Reset to table behavior */
+    }
+
+    /* Already handled by .radar-comparison-scroll in HTML */
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 16px;
+    }
+
+    .radar-title,
+    .radar-band__title,
+    .radar-final__shell h2 {
+        font-size: 1.8rem;
+    }
+
+    .radar-subtitle,
+    .radar-text,
+    .radar-final__shell p,
+    .radar-hero__subtitle {
+        font-size: 1rem;
+    }
+
+    .radar-hero__title {
+        font-size: 2.25rem;
+    }
+
+    .radar-preview__filters span,
+    .radar-kicker,
+    .radar-hero__badge {
+        font-size: 0.7rem;
+    }
+}
+
+.radar-comparison__cta a:not(.radar-btn):hover,
+.radar-btn--ghost:hover,
+.radar-preview__cta .radar-btn--ghost:hover {
+    border-color: #e7cf86;
+    background: #fffaf0;
+}
+
+/* Estilos responsivos extra para espaciado móvil */
+@media (max-width: 640px) {
+  .radar-section { padding: 32px 0 !important; }
+  .radar-band { padding: 40px 0 !important; }
+  .radar-hero__shell { padding: 24px 20px 20px !important; }
+  .radar-heading { margin-bottom: 24px !important; }
+  .radar-final { padding-bottom: 40px !important; }
+  .radar-ai-grid { gap: 32px !important; }
+  .radar-ai-card { padding: 20px !important; border-radius: 20px !important; }
+  .radar-ai-card__header h3 { font-size: 1.25rem !important; }
+}
+
+/* Responsividad para la tabla de comparativa */
+.radar-comparison-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 24px;
+  padding-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+  .radar-comparison {
+    min-width: 680px;
+  }
+  .radar-comparison thead th {
+    padding: 24px 16px;
+    font-size: 0.95rem;
+  }
+  .radar-comparison tbody td {
+    padding: 18px 16px;
+    font-size: 0.9rem;
+  }
+  .radar-comparison tbody td:first-child {
+    padding-left: 20px;
+    width: 160px;
+  }
+  .radar-comparison__badge {
+    display: block;
+    margin: 0 auto 8px;
+    width: fit-content;
+  }
+}
+
+/* SUPER OVERRIDE para forzar visibilidad en móvil */
+@media (max-width: 900px) {
+  section.radar-band, .radar-band {
+    background: #0f172a !important;
+    background: linear-gradient(135deg, #0f172a 0%, #122347 55%, #18438f 100%) !important;
+    color: #ffffff !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  .radar-band .radar-band__title, .radar-band .radar-metric strong, .radar-band .radar-metric span {
+    color: #ffffff !important;
+  }
+}
+
+/* Responsividad para la tabla de vista previa (preview) */
+.radar-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .radar-table {
+    min-width: 640px;
+  }
+  .radar-preview__filters {
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+  .radar-preview__filters span {
+    font-size: 13px !important;
+    padding: 6px 12px !important;
+  }
+}
