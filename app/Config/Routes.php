@@ -262,6 +262,16 @@ $routes->get('autocompletado-cif-empresas/get', 'CompanySuggestions::getSuggesti
 $routes->addRedirect('company-suggestions', 'autocompletado-cif-empresas');
 $routes->addRedirect('company-suggestions/get', 'autocompletado-cif-empresas/get');
 
+// Traffic Advice (Chrome prefetching)
+$routes->get('.well-known/traffic-advice', static function () {
+    return service('response')->setJSON([
+        'advice' => [
+            'prefetch' => true,
+            'prerender' => true
+        ]
+    ]);
+});
+
 // Company pages: CIF-based and Slug-based URLs (must be last)
 $routes->get('([a-zA-Z][0-9]{7}[a-zA-Z0-9].*)', 'Company::show/$1');
 $routes->get('(:segment)', 'Company::show/$1');
