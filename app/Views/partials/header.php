@@ -55,7 +55,7 @@
                 <span class="nav-sep">•</span>
                 <a class="minor-nav-link" href="<?=site_url('directorio') ?>">Empresas</a>
                 <span class="nav-sep">•</span>
-                <a class="minor-nav-link" href="<?=site_url('empresas-nuevas/madrid') ?>">Nuevas</a>
+                <a class="minor-nav-link" href="<?=site_url('empresas-nuevas') ?>">Nuevas</a>
                 <span class="nav-sep">•</span>
                 <a class="minor-nav-link" href="<?=site_url('documentation') ?>">Docs</a>
             </nav>
