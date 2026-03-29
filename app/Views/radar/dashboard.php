@@ -199,8 +199,18 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                         <div class="ae-radar-page__hero-glow"></div>
                         <div class="ae-radar-page__hero-grid">
                             <div>
-                                <div class="ae-radar-page__eyebrow">
-                                    Nuevas constituciones · captación B2B
+                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+                                    <div class="ae-radar-page__eyebrow" style="margin-bottom: 0;">
+                                        Nuevas constituciones · captación B2B
+                                    </div>
+                                    <button class="js-radar-tour-btn js-start-radar-tour" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: white; border: 1px solid #e2e8f0; border-radius: 999px; color: #475569; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-transform: uppercase; letter-spacing: 0.5px;">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" style="width: 14px; height: 14px;">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                        </svg>
+                                        Ver guía del radar
+                                    </button>
                                 </div>
 
                                 <h1 class="ae-radar-page__hero-title">
@@ -219,27 +229,9 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                         <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__hero-btn ae-radar-page__hero-btn--primary">
                                             Desbloquear Radar PRO (79€)
                                         </a>
-                                        
-                                        <button class="js-radar-tour-btn js-start-radar-tour">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                                <circle cx="12" cy="12" r="10"></circle>
-                                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                                            </svg>
-                                            Guía rápida
-                                        </button>
                                     </div>
                                 <?php else: ?>
-                                    <div class="ae-radar-page__hero-actions">
-                                        <button class="js-radar-tour-btn js-start-radar-tour">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                                <circle cx="12" cy="12" r="10"></circle>
-                                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                                            </svg>
-                                            Ver Guía del Radar
-                                        </button>
-                                    </div>
+                                    <!-- Guía movida a la cabecera -->
                                 <?php endif; ?>
                             </div>
 
