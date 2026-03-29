@@ -5,7 +5,7 @@
         'title'       => $title ?? 'Mis Favoritos - Radar PRO',
         'excerptText' => 'Gestión de leads y empresas guardadas en el Radar PRO.',
     ]) ?>
-    <link rel="stylesheet" href="<?= base_url('public/css/radar.css?v=5') ?>">
+    <link rel="stylesheet" href="<?= base_url('public/css/radar.css?v=' . (file_exists(FCPATH . 'public/css/radar.css') ? filemtime(FCPATH . 'public/css/radar.css') : time())) ?>">
     <style>
         .ae-favorites-page__header {
             margin-bottom: 32px;

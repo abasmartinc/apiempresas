@@ -5,7 +5,7 @@
         'title'       => $title ?? 'Análisis de Tendencias - Radar PRO',
         'excerptText' => 'Visualiza la evolución de sectores y provincias en tiempo real.',
     ]) ?>
-    <link rel="stylesheet" href="<?= base_url('public/css/radar.css?v=5') ?>">
+    <link rel="stylesheet" href="<?= base_url('public/css/radar.css?v=' . (file_exists(FCPATH . 'public/css/radar.css') ? filemtime(FCPATH . 'public/css/radar.css') : time())) ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
