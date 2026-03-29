@@ -62,7 +62,7 @@ $routes->post('radar/toggle-favorite', 'Radar::toggleFavorite');
 $routes->post('radar/save-note', 'Radar::saveNote');
 $routes->get('radar/map-data', 'Radar::mapData');
 $routes->get('radar/kanban', 'Radar::kanban', ['filter' => 'subscription:radar']);
-$routes->post('radar/updateFavoriteStatus', 'Radar::updateFavoriteStatus', ['filter' => 'subscription:radar']);
+$routes->post('radar/update-favorite-status', 'Radar::updateFavoriteStatus', ['filter' => 'subscription:radar']);
 $routes->get('radar/trends', 'Radar::trends', ['filter' => 'subscription:radar']);
 $routes->get('radar/trend-data', 'Radar::getTrendData', ['filter' => 'subscription:radar']);
 $routes->get('radar/ai-analyze/(:num)', 'Radar::aiAnalyze/$1', ['filter' => 'subscription:radar']);

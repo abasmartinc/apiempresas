@@ -20,13 +20,19 @@ class RadarAnalyzer
         $offers = self::detectFirstOffers($company, $profile);
         
         return [
-            'summary'            => self::buildSummary($company, $profile),
-            'commercial_profile' => $profile['label'],
-            'needs'              => $needs,
-            'first_offers'       => $offers,
-            'sales_approach'     => self::buildSalesApproach($company, $profile, $needs),
-            'first_message'      => self::buildFirstMessage($company, $profile, $needs),
-            'signals'            => self::buildDetectedSignals($company, $profile)
+            'summary'                => self::buildSummary($company, $profile),
+            'commercial_profile'     => $profile['label'],
+            'needs'                  => $needs,
+            'first_offers'           => $offers,
+            'sales_approach'         => self::buildSalesApproach($company, $profile, $needs),
+            'first_message'          => self::buildFirstMessage($company, $profile, $needs),
+            'signals'                => self::buildDetectedSignals($company, $profile),
+            // Nuevos bloques de acción comercial
+            'conversion_probability' => self::detectConversionProbability($company),
+            'contact_window'         => self::detectContactWindow($company),
+            'estimated_ticket'       => self::detectEstimatedTicket($company, $profile),
+            'likely_objection'       => self::detectLikelyObjection($company, $profile),
+            'attack_angle'           => self::detectAttackAngle($company, $profile)
         ];
     }
 
@@ -195,5 +201,116 @@ class RadarAnalyzer
         $signals[] = "Detectada en Radar recientemente";
         
         return $signals;
+    }
+
+    /**
+     * Step 8: Detect Conversion Probability.
+     */
+    private static function detectConversionProbability(array $company): array
+    {
+        $score = $company['score_total'] ?? 0;
+        $priority = $company['priority_level'] ?? 'baja';
+        $actType = $company['main_act_type'] ?? '';
+
+        if ($score >= 75 || $priority === 'muy_alta' || $actType === 'Constitución') {
+            return [
+                'label' => 'Alta',
+                'description' => 'Alta probabilidad de necesitar servicios externos en fase inicial'
+            ];
+        }
+
+        if ($score >= 55) {
+            return [
+                'label' => 'Media',
+                'description' => 'Probabilidad media de contratación según perfil y señales'
+            ];
+        }
+
+        return [
+            'label' => 'Baja',
+            'description' => 'Perfil en fase exploratoria o con señales comerciales débiles'
+        ];
+    }
+
+    /**
+     * Step 9: Detect Contact Window.
+     */
+    private static function detectContactWindow(array $company): array
+    {
+        $score = $company['score_total'] ?? 0;
+        $actType = $company['main_act_type'] ?? '';
+
+        if ($actType === 'Constitución' && $score >= 70) {
+            return [
+                'label' => '0–7 días',
+                'description' => 'Conviene contactar cuanto antes, en fase de arranque'
+            ];
+        }
+
+        if ($score >= 50) {
+            return [
+                'label' => '7–15 días',
+                'description' => 'El mejor momento comercial suele estar en las primeras semanas'
+            ];
+        }
+
+        return [
+            'label' => '15–30 días',
+            'description' => 'Empresa con tiempos de maduración más lentos o señales diferidas'
+        ];
+    }
+
+    /**
+     * Step 10: Detect Estimated Ticket.
+     */
+    private static function detectEstimatedTicket(array $company, array $profile): array
+    {
+        $tickets = [
+            'tech'         => ['label' => '500€ – 3.000€', 'description' => 'Servicios de alto valor añadido'],
+            'consulting'   => ['label' => '500€ – 3.000€', 'description' => 'Servicios recurrentes B2B'],
+            'construction' => ['label' => '300€ – 2.500€', 'description' => 'Instalaciones y operativa técnica'],
+            'health'       => ['label' => '300€ – 1.500€', 'description' => 'Especialidades y gestión local'],
+            'hospitality'  => ['label' => '150€ – 1.200€', 'description' => 'Servicios operativos de proximidad'],
+            'commerce'     => ['label' => '150€ – 1.200€', 'description' => 'Retail y servicios transaccionales'],
+            'general'      => ['label' => '100€ – 900€', 'description' => 'Servicios generales de inicio']
+        ];
+
+        return $tickets[$profile['slug']] ?? $tickets['general'];
+    }
+
+    /**
+     * Step 11: Detect Likely Objection.
+     */
+    private static function detectLikelyObjection(array $company, array $profile): string
+    {
+        if ($profile['slug'] === 'tech' || $profile['slug'] === 'consulting') {
+            return 'Ya tenemos a alguien montando esta parte internamente';
+        }
+        
+        if ($profile['slug'] === 'hospitality' || $profile['slug'] === 'commerce') {
+            return 'Ahora mismo vamos paso a paso, no queremos contratar nada más';
+        }
+
+        if ($profile['slug'] === 'construction') {
+            return 'Primero queremos cerrar la parte operativa y luego veremos servicios';
+        }
+
+        return 'Todavía estamos arrancando, contactad más adelante';
+    }
+
+    /**
+     * Step 12: Detect Attack Angle.
+     */
+    private static function detectAttackAngle(array $company, array $profile): string
+    {
+        if ($profile['slug'] === 'tech') {
+            return 'Enfocar en rapidez de puesta en marcha y escalabilidad técnica';
+        }
+
+        if ($profile['slug'] === 'consulting') {
+            return 'Enfatizar ahorro de tiempo y profesionalización temprana del equipo';
+        }
+
+        return 'Entrar por operativa básica y necesidad inmediata de facturación';
     }
 }

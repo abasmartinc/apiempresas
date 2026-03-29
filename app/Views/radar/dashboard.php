@@ -594,22 +594,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
         </div>
     </div>
 
-    <!-- Modal AI Analysis -->
-    <div id="ae-ai-modal" class="ae-ai-modal" style="display:none;">
-        <div class="ae-ai-modal__backdrop" onclick="closeAIModal()"></div>
-        <div class="ae-ai-modal__container">
-            <div class="ae-ai-modal__header">
-                <div class="ae-ai-modal__title">
-                    <span>✨</span>
-                    Análisis Inteligente Radar
-                </div>
-                <button type="button" class="ae-ai-modal__close" onclick="closeAIModal()">&times;</button>
-            </div>
-            <div id="ae-ai-content" class="ae-ai-modal__body">
-                <!-- Se cargará por AJAX -->
-            </div>
-        </div>
-    </div>
+    <?= view('radar/partials/ai_modal') ?>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -655,154 +640,46 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
     }
 
     /**
-     * Análisis IA bajo demanda
+     * Alternar favorito (Estrella)
      */
-    function analyzeAI(id, btn) {
-        if (!id) return;
-
-        const $modal = document.getElementById('ae-ai-modal');
-        const $content = document.getElementById('ae-ai-content');
+    function toggleFavorite(btn, companyId) {
+        const isActive = btn.classList.contains('is-active');
+        const $svg = btn.querySelector('svg');
         
-        // Bloquear botón y mostrar loading en modal
-        const originalBtnHtml = btn.innerHTML;
-        btn.innerHTML = '⏳...';
-        btn.disabled = true;
+        // Optimistic UI update
+        btn.classList.toggle('is-active');
+        if (!isActive) {
+            $svg.setAttribute('fill', 'currentColor');
+            btn.title = 'Quitar de favoritos';
+        } else {
+            $svg.setAttribute('fill', 'none');
+            btn.title = 'Guardar en favoritos';
+        }
 
-        $content.innerHTML = `
-            <div style="text-align:center; padding: 40px 0;">
-                <div class="ae-spinner"></div>
-                <p style="margin-top:20px; font-weight:700; color:#1e293b; font-size:18px;">
-                    Consultando con la Inteligencia Artificial...
-                </p>
-                <p style="color:#64748b; font-size:14px;">
-                    Analizando objeto social y extrayendo nichos estratégicos.
-                </p>
-            </div>
-        `;
-        $modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+        const formData = new FormData();
+        formData.append('company_id', companyId);
 
-        fetch('<?= site_url('radar/ai-analyze/') ?>' + id, {
+        fetch('<?= site_url('radar/toggle-favorite') ?>', {
+            method: 'POST',
+            body: formData,
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(response => response.json())
         .then(data => {
-            btn.innerHTML = originalBtnHtml;
-            btn.disabled = false;
-
-            if (data.status === 'success') {
-                $content.innerHTML = `
-                    <div class="ae-ai-result">
-                        <!-- 1. Resumen Comercial -->
-                        <div class="ae-ai-card ae-ai-card--summary" style="margin-bottom: 24px; padding: 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
-                            <span class="ae-ai-result__label" style="display: block; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">Análisis Comercial</span>
-                            <div style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 8px;">${data.commercial_profile}</div>
-                            <p style="font-size: 15px; line-height: 1.6; color: #475569; margin: 0;">${data.summary}</p>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
-                            <!-- 2. Necesidades Probables -->
-                            <div class="ae-ai-card" style="padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px;">
-                                <span class="ae-ai-result__label" style="display: block; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 12px;">Necesidades probables</span>
-                                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
-                                    ${data.needs.map(n => `<li style="font-size: 13px; color: #334155; display: flex; align-items: center; gap: 8px;"><span style="color:#2563eb">✔</span> ${n}</li>`).join('')}
-                                </ul>
-                            </div>
-
-                            <!-- 3. Qué venderle primero -->
-                            <div class="ae-ai-card" style="padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f0f7ff;">
-                                <span class="ae-ai-result__label" style="display: block; font-size: 11px; font-weight: 800; color: #1e40af; text-transform: uppercase; margin-bottom: 12px;">Qué venderle primero</span>
-                                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
-                                    ${data.first_offers.map(o => `<li style="font-size: 13px; color: #1e3a8a; font-weight: 700; display: flex; align-items: center; gap: 8px;"><span>🚀</span> ${o}</li>`).join('')}
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- 4. Enfoque de venta y 5. Mensaje sugerido -->
-                        <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 24px;">
-                            <div style="padding: 16px; background: #fffbeb; border: 1px solid #fef3c7; border-radius: 12px;">
-                                <span class="ae-ai-result__label" style="display: block; font-size: 11px; font-weight: 800; color: #92400e; text-transform: uppercase; margin-bottom: 8px;">Enfoque de venta recomendado</span>
-                                <p style="font-size: 14px; color: #854d0e; margin: 0; line-height: 1.5;">${data.sales_approach}</p>
-                            </div>
-
-                            <div style="padding: 20px; background: #f1f5f9; border-radius: 12px; border: 1px dashed #cbd5e1; position: relative;">
-                                <span class="ae-ai-result__label" style="display: block; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 12px;">Mensaje inicial sugerido (Copiar y pegar)</span>
-                                <p id="ae-ai-message" style="font-size: 14px; line-height: 1.6; color: #1e293b; margin: 0; font-style: italic;">"${data.first_message}"</p>
-                                <button type="button" 
-                                        onclick="copyToClipboard('ae-ai-message', this)"
-                                        style="margin-top: 16px; width: 100%; padding: 10px; background: white; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 700; color: #475569; cursor: pointer; transition: all 0.2s;">
-                                    📋 Copiar mensaje para LinkedIn / Email
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- 6. Señales detectadas -->
-                        <div style="padding-top: 16px; border-top: 1px solid #f1f5f9;">
-                            <span class="ae-ai-result__label" style="display: block; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px;">Señales comerciales utilizadas</span>
-                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                                ${data.signals.map(s => `<span style="font-size: 10px; background: #f8fafc; color: #64748b; padding: 4px 10px; border-radius: 20px; border: 1px solid #e2e8f0;">${s}</span>`).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                $content.innerHTML = `
-                    <div style="text-align:center; padding: 40px;">
-                        <span style="font-size: 40px;">❌</span>
-                        <p style="margin-top:20px; color:#b91c1c; font-weight:bold;">${data.message}</p>
-                        <button onclick="closeAIModal()" style="margin-top:20px; padding: 10px 20px; background: #f1f5f9; border:none; border-radius:8px; cursor:pointer;">Cerrar</button>
-                    </div>
-                `;
+            if (data.status !== 'success') {
+                // Rollback if error
+                btn.classList.toggle('is-active');
+                if (isActive) {
+                    $svg.setAttribute('fill', 'currentColor');
+                } else {
+                    $svg.setAttribute('fill', 'none');
+                }
+                alert('No se pudo guardar en favoritos. Inténtalo de nuevo.');
             }
         })
         .catch(err => {
-            btn.innerHTML = originalBtnHtml;
-            btn.disabled = false;
-            $content.innerHTML = `
-                <div style="text-align:center; padding: 40px 0; color:#ef4444;">
-                    <p style="font-size:32px;">⚠️</p>
-                    <p style="font-weight:700; margin-top:16px;">Error en el análisis</p>
-                    <p style="color:#64748b;">${err.message}</p>
-                    <button type="button" class="ae-radar-page__hero-btn ae-radar-page__hero-btn--secondary" 
-                            onclick="closeAIModal()" style="margin-top:24px; min-height:40px;">
-                        Cerrar
-                    </button>
-                </div>
-            `;
-        });
-    }
-
-    function closeAIModal() {
-        document.getElementById('ae-ai-modal').style.display = 'none';
-        document.body.style.overflow = '';
-    }
-
-    function copyToClipboard(elementId, btn) {
-        const text = document.getElementById(elementId).innerText.replace(/^"|"$/g, '');
-        navigator.clipboard.writeText(text).then(() => {
-            const original = btn.innerHTML;
-            btn.innerHTML = '✅ Copiado';
-            btn.classList.add('is-copied');
-            setTimeout(() => {
-                btn.innerHTML = original;
-                btn.classList.remove('is-copied');
-            }, 2000);
-        });
-    }
-
-    function copyEmailHook(btn) {
-        const subject = document.getElementById('ae-email-subject').innerText;
-        const opening = document.getElementById('ae-email-opening').innerText.replace(/^"|"$/g, '');
-        const fullText = `Asunto: ${subject}\n\n${opening}`;
-        
-        navigator.clipboard.writeText(fullText).then(() => {
-            const original = btn.innerHTML;
-            btn.innerHTML = '✅ Copiado';
-            btn.classList.add('is-copied');
-            setTimeout(() => {
-                btn.innerHTML = original;
-                btn.classList.remove('is-copied');
-            }, 2000);
+            console.error('Error toggling favorite:', err);
+            alert('Error de conexión.');
         });
     }
 

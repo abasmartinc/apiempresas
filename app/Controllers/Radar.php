@@ -313,15 +313,20 @@ class Radar extends BaseController
         if ($existing) {
             $this->favoriteModel->delete($existing['id']);
             $status = 'removed';
+            $id = null;
         } else {
-            $this->favoriteModel->insert([
+            $id = $this->favoriteModel->insert([
                 'user_id' => $userId,
                 'company_id' => $companyId,
             ]);
             $status = 'added';
         }
 
-        return $this->response->setJSON(['status' => 'success', 'favorite_status' => $status]);
+        return $this->response->setJSON([
+            'status' => 'success', 
+            'favorite_status' => $status,
+            'id' => $id
+        ]);
     }
 
     /**
@@ -358,20 +363,52 @@ class Radar extends BaseController
         }
 
         $userId = session('user_id');
-        $favorites = $this->favoriteModel->getFavoritesWithCompanyData($userId);
+        
+        // Parámetros de filtrado y paginación
+        $search = $this->request->getGet('search') ?? '';
+        $status = $this->request->getGet('status') ?? 'all';
+        $page = (int) ($this->request->getGet('page') ?? 1);
+        
+        // Si no está en GET (carga inicial), probar en POST (fallback)
+        if (!$search) $search = $this->request->getPost('search') ?? '';
+        if ($status === 'all') $status = $this->request->getPost('status') ?? 'all';
 
-        // Inyectar Score de calidad a cada favorito
+        $limit = 12;
+        $offset = ($page - 1) * $limit;
+
+        $params = [
+            'search' => $search,
+            'status' => $status,
+            'limit' => $limit,
+            'offset' => $offset
+        ];
+
+        $favorites = $this->favoriteModel->getFavoritesWithCompanyData($userId, $params);
+        $totalItems = $this->favoriteModel->countFilteredFavorites($userId, $params);
+        $totalPages = ceil($totalItems / $limit);
+
+        // Añadir lead_score a cada favorito
         foreach ($favorites as &$f) {
             $f['lead_score'] = $this->getLeadScore($f);
         }
 
         $data = [
             'favorites' => $favorites,
-            'title' => 'Mis Favoritos - Radar PRO'
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'totalItems' => $totalItems,
+            'currentStatus' => $status,
+            'currentSearch' => $search,
+            'title' => 'Mis Favoritos - Radar'
         ];
+
+        if ($this->request->isAJAX()) {
+            return view('radar/partials/favorites_list', $data);
+        }
 
         return view('radar/favorites', $data);
     }
+
 
     /**
      * Vista de Embudo de Ventas (Kanban)
@@ -420,24 +457,62 @@ class Radar extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
         }
 
-        $userId = session('user_id');
-        $favoriteId = $this->request->getPost('favorite_id');
-        $status = $this->request->getPost('status');
+        try {
+            $userId = (int) session('user_id');
+            $favoriteId = $this->request->getPost('favorite_id');
+            $companyId = $this->request->getPost('company_id');
+            $status = $this->request->getPost('status');
 
-        $allowedStatuses = ['nuevo', 'contactado', 'negociacion', 'ganado'];
-        if (!in_array($status, $allowedStatuses)) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid status']);
+            $allowedStatuses = ['nuevo', 'contactado', 'negociacion', 'ganado'];
+            if (!in_array($status, $allowedStatuses)) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid status: ' . $status]);
+            }
+
+            if ($favoriteId) {
+                $favorite = $this->favoriteModel->where(['id' => (int)$favoriteId, 'user_id' => $userId])->first();
+            } elseif ($companyId) {
+                $favorite = $this->favoriteModel->where(['company_id' => (int)$companyId, 'user_id' => $userId])->first();
+            } else {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Missing both favorite_id and company_id']);
+            }
+
+            if (!$favorite) {
+                if ($companyId) {
+                    $insertId = $this->favoriteModel->insert([
+                        'user_id' => $userId,
+                        'company_id' => (int)$companyId,
+                        'status' => $status,
+                        'notes' => ''
+                    ]);
+                    
+                    if (!$insertId) {
+                        $error = $this->favoriteModel->errors();
+                        log_message('error', '[Radar::updateFavoriteStatus] Insert failed: ' . json_encode($error));
+                        return $this->response->setJSON(['status' => 'error', 'message' => 'Could not create favorite', 'details' => $error]);
+                    }
+                    
+                    return $this->response->setJSON(['status' => 'success', 'id' => $insertId, 'action' => 'created']);
+                }
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Record not found and no company_id provided']);
+            }
+
+            $ok = $this->favoriteModel->update($favorite['id'], ['status' => $status]);
+            if (!$ok) {
+                $error = $this->favoriteModel->errors();
+                log_message('error', '[Radar::updateFavoriteStatus] Update failed: ' . json_encode($error));
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Could not update status', 'details' => $error]);
+            }
+
+            return $this->response->setJSON(['status' => 'success', 'action' => 'updated']);
+
+        } catch (\Throwable $e) {
+            log_message('error', '[Radar::updateFavoriteStatus] Exception: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error', 
+                'message' => 'Server error', 
+                'debug' => $e->getMessage()
+            ]);
         }
-
-        $favorite = $this->favoriteModel->where(['id' => $favoriteId, 'user_id' => $userId])->first();
-
-        if (!$favorite) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Favorite not found']);
-        }
-
-        $this->favoriteModel->update($favoriteId, ['status' => $status]);
-
-        return $this->response->setJSON(['status' => 'success']);
     }
 
     /**
