@@ -184,7 +184,14 @@ class CompanyModel extends Model
     private function fallbackBestByLike(string $qClean): ?array
     {
         $tokens = array_values(array_filter(explode(' ', $qClean)));
-        $tokens = array_slice($tokens, 0, 4);
+        
+        // Filtrar primero por longitud mínima (3 caracteres) para evitar grupos vacíos ()
+        $validTokens = array_filter($tokens, fn($t) => mb_strlen($t, 'UTF-8') >= 3);
+        $validTokens = array_values(array_slice($validTokens, 0, 4));
+
+        if (empty($validTokens)) {
+            return null;
+        }
 
         $builder = $this->builder();
         $builder->select(implode(', ', $this->selectFields));
@@ -193,10 +200,7 @@ class CompanyModel extends Model
 
         // Filtro barato inicial (OR por tokens)
         $builder->groupStart();
-        foreach ($tokens as $i => $t) {
-            if (mb_strlen($t, 'UTF-8') < 3)
-                continue;
-
+        foreach ($validTokens as $i => $t) {
             if ($i === 0) {
                 $builder->like('companies.company_name', $t, 'both');
             } else {
