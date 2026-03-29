@@ -228,9 +228,11 @@ class Radar extends BaseController
 
         // Inyectar Score de calidad y estado de favorito a cada empresa
         $favoriteIds = $this->favoriteModel->getFavoriteIds($userId);
+        $followingIds = array_column((new \App\Models\LeadFollowupModel())->where('user_id', $userId)->findAll(), 'company_id');
         foreach ($companies as &$co) {
             $co['lead_score'] = $this->getLeadScore($co);
             $co['is_favorite'] = in_array($co['id'], $favoriteIds);
+            $co['is_following'] = in_array($co['id'], $followingIds);
         }
 
         // 3. Datos para Filtros
@@ -427,7 +429,8 @@ class Radar extends BaseController
             'nuevo' => [],
             'contactado' => [],
             'negociacion' => [],
-            'ganado' => []
+            'ganado' => [],
+            'seguimiento' => []
         ];
 
         foreach ($favorites as &$f) {
@@ -463,7 +466,7 @@ class Radar extends BaseController
             $companyId = $this->request->getPost('company_id');
             $status = $this->request->getPost('status');
 
-            $allowedStatuses = ['nuevo', 'contactado', 'negociacion', 'ganado'];
+            $allowedStatuses = ['nuevo', 'contactado', 'negociacion', 'ganado', 'seguimiento'];
             if (!in_array($status, $allowedStatuses)) {
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid status: ' . $status]);
             }
@@ -885,5 +888,77 @@ class Radar extends BaseController
         } catch (\Exception $e) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Error al analizar: ' . $e->getMessage()]);
         }
+    }
+
+    /**
+     * Prepara un lead para contacto posterior (seguimiento)
+     */
+    public function prepareContact($companyId)
+    {
+        if (!session('logged_in')) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'No autorizado']);
+        }
+
+        $userId = session('user_id');
+        $messageBody = $this->request->getPost('message');
+        $notes = $this->request->getPost('notes') ?? 'Lead preparado desde Modal IA';
+
+        $fModel = new \App\Models\LeadFollowupModel();
+        $mModel = new \App\Models\LeadPreparedMessageModel();
+
+        // 1. Upsert Followup
+        $followup = $fModel->getFollowup($userId, $companyId);
+        $followupData = [
+            'user_id'             => $userId,
+            'company_id'          => $companyId,
+            'status'              => 'seguimiento',
+            'notify_when_contact' => 1,
+            'prepared_at'         => date('Y-m-d H:i:s'),
+            'notes'               => $notes
+        ];
+
+        if ($followup) {
+            $fModel->update($followup['id'], $followupData);
+        } else {
+            $fModel->insert($followupData);
+            
+            // 1.1 Unificar con Favoritos (como sugirió el usuario)
+            $favModel = new \App\Models\UserFavoriteModel();
+            $existingFav = $favModel->where(['user_id' => $userId, 'company_id' => $companyId])->first();
+            if (!$existingFav) {
+                $favModel->insert([
+                    'user_id'    => $userId,
+                    'company_id' => $companyId,
+                    'status'     => 'seguimiento',
+                    'notes'      => 'Lead preparado para seguimiento (vía IA Modal)'
+                ]);
+            }
+        }
+
+        // 2. Upsert Message
+        if ($messageBody) {
+            $msg = $mModel->getMessage($userId, $companyId);
+            $msgData = [
+                'user_id'      => $userId,
+                'company_id'   => $companyId,
+                'message_type' => 'initial_contact',
+                'message_body' => $messageBody,
+                'source'       => 'ia_modal'
+            ];
+
+            if ($msg) {
+                $mModel->update($msg['id'], $msgData);
+            } else {
+                $mModel->insert($msgData);
+            }
+        }
+
+        return $this->response->setJSON([
+            'status'              => 'success',
+            'followup_status'     => 'seguimiento',
+            'message_saved'       => true,
+            'notify_when_contact' => true,
+            'next_step'           => 'Contactar en cuanto aparezca web o teléfono'
+        ]);
     }
 }

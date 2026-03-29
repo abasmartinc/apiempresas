@@ -9,9 +9,25 @@
         <?php foreach ($favorites as $f): ?>
             <div class="ae-fav-card" id="fav-card-<?= $f['company_id'] ?>" data-status="<?= esc($f['status'] ?? 'nuevo') ?>">
                 <div class="ae-fav-card__badge-row">
-                    <span class="ae-fav-card__status ae-fav-card__status--<?= esc($f['status'] ?? 'nuevo') ?>">
-                        <?= ucfirst(esc($f['status'] ?? 'Nuevo')) ?>
-                    </span>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span class="ae-fav-card__status ae-fav-card__status--<?= esc($f['status'] ?? 'nuevo') ?>">
+                            <?php 
+                                $statusLabels = [
+                                    'nuevo' => 'Nuevo', 
+                                    'contactado' => 'Contactado', 
+                                    'negociacion' => 'Negociación', 
+                                    'ganado' => 'Ganado', 
+                                    'seguimiento' => 'Seguimiento'
+                                ];
+                                echo esc($statusLabels[$f['status']] ?? ucfirst($f['status'] ?? 'Nuevo'));
+                            ?>
+                        </span>
+                        <?php if ($f['is_following'] ?? false): ?>
+                            <span class="ae-status-pill ae-status-pill--following" style="background:#eff6ff; color:#2563eb; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:800; text-transform:uppercase;" title="Lead preparado con IA">
+                                🔵 IA
+                            </span>
+                        <?php endif; ?>
+                    </div>
                     <span class="ae-radar-page__score ae-radar-page__score--<?= strtolower(str_replace('+', 'plus', $f['lead_score'])) ?>" title="Score de calidad: <?= $f['lead_score'] ?>">
                         <?= $f['lead_score'] ?>
                     </span>
@@ -55,6 +71,7 @@
                             <option value="contactado" <?= ($f['status'] == 'contactado') ? 'selected' : '' ?>>Contactado</option>
                             <option value="negociacion" <?= ($f['status'] == 'negociacion') ? 'selected' : '' ?>>Negociación</option>
                             <option value="ganado" <?= ($f['status'] == 'ganado') ? 'selected' : '' ?>>Ganado</option>
+                            <option value="seguimiento" <?= ($f['status'] == 'seguimiento') ? 'selected' : '' ?>>Mover a: Seguimiento (IA)</option>
                         </select>
                     </div>
                     <div style="display: flex; gap: 8px;">

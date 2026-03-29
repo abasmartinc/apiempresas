@@ -139,10 +139,15 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
                         <tr class="ae-radar-page__row-visible">
                             <td class="ae-radar-page__td-company">
                                 <div class="ae-radar-page__company">
-                                    <div class="ae-radar-page__company-header" style="margin-bottom: 8px;">
+                                    <div class="ae-radar-page__company-header" style="margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
                                         <a href="<?= $isFree ? site_url('leads-empresas-nuevas') : company_url(['cif' => $co['cif'], 'name' => $co['company_name']]) ?>" class="ae-radar-page__company-link">
                                             <span class="ae-radar-page__company-name" style="font-size: 16px; font-weight: 800; color: #2563eb;"><?= esc($co['company_name']) ?></span>
                                         </a>
+                                        <?php if ($co['is_following'] ?? false): ?>
+                                            <span class="ae-status-pill ae-status-pill--following" style="background:#eff6ff; color:#2563eb; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:800; text-transform:uppercase;">
+                                                🔵 Seguimiento
+                                            </span>
+                                        <?php endif; ?>
                                     </div>
                                     
                                     <!-- Line 2: Horizontal Badge Row (Compact) -->

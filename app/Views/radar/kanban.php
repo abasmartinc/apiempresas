@@ -90,7 +90,8 @@
                                 'nuevo' => ['label' => 'Nuevo', 'icon' => 'fa-plus-circle', 'color' => '#3b82f6'],
                                 'contactado' => ['label' => 'Contactado', 'icon' => 'fa-paper-plane', 'color' => '#8b5cf6'],
                                 'negociacion' => ['label' => 'En Negociación', 'icon' => 'fa-comments', 'color' => '#f59e0b'],
-                                'ganado' => ['label' => 'Ganado', 'icon' => 'fa-check-circle', 'color' => '#10b981']
+                                'ganado' => ['label' => 'Ganado', 'icon' => 'fa-check-circle', 'color' => '#10b981'],
+                                'seguimiento' => ['label' => 'Seguimiento (IA)', 'icon' => 'fa-robot', 'color' => '#2563eb']
                             ];
                             
                             foreach ($columnConfig as $id => $config): ?>
@@ -110,10 +111,15 @@
                                                  ondragstart="drag(event)" 
                                                  data-id="<?= $fav['id'] ?>"
                                                  onclick="openQuickView(<?= $fav['company_id'] ?>)">
-                                                <div class="kanban-card__score">
+                                                <div class="kanban-card__score" style="display: flex; justify-content: space-between; align-items: center;">
                                                     <span class="ae-radar-page__score ae-radar-page__score--<?= strtolower(substr($fav['lead_score'], 0, 1)) ?>">
                                                         <?= $fav['lead_score'] ?>
                                                     </span>
+                                                    <?php if ($fav['is_following'] ?? false): ?>
+                                                        <span class="ae-status-pill ae-status-pill--following" style="background:#eff6ff; color:#2563eb; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:800; text-transform:uppercase;">
+                                                            🔵 IA
+                                                        </span>
+                                                    <?php endif; ?>
                                                 </div>
                                                 <h4 class="kanban-card__name"><?= esc($fav['company_name']) ?></h4>
                                                 <div class="kanban-card__meta">
@@ -199,7 +205,7 @@ function updateStatus(favoriteId, status) {
     formData.append('favorite_id', favoriteId);
     formData.append('status', status);
     
-    fetch('<?= site_url('radar/updateFavoriteStatus') ?>', {
+    fetch('<?= site_url('radar/update-favorite-status') ?>', {
         method: 'POST',
         body: formData,
         headers: {

@@ -8,7 +8,9 @@ class RenameEmpresiaCompanyDetails extends Migration
 {
     public function up()
     {
-        $this->forge->renameTable('empresia_company_details', 'companies');
+        if ($this->db->tableExists('empresia_company_details') && !$this->db->tableExists('companies')) {
+            $this->forge->renameTable('empresia_company_details', 'companies');
+        }
     }
 
     public function down()

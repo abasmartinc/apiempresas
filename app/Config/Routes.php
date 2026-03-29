@@ -66,6 +66,7 @@ $routes->post('radar/update-favorite-status', 'Radar::updateFavoriteStatus', ['f
 $routes->get('radar/trends', 'Radar::trends', ['filter' => 'subscription:radar']);
 $routes->get('radar/trend-data', 'Radar::getTrendData', ['filter' => 'subscription:radar']);
 $routes->get('radar/ai-analyze/(:num)', 'Radar::aiAnalyze/$1', ['filter' => 'subscription:radar']);
+$routes->post('radar/prepare-contact/(:num)', 'Radar::prepareContact/$1', ['filter' => 'subscription:radar']);
 $routes->get('contact', 'Contact::index');
 $routes->get('blog', 'Blog::index');
 $routes->get('blog/post', 'Blog::post');

@@ -8,19 +8,21 @@ class AddSlugToCompanies extends Migration
 {
     public function up()
     {
-        $fields = [
-            'slug' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 255,
-                'null'       => true,
-                'after'      => 'company_name'
-            ],
-        ];
-        
-        $this->forge->addColumn('companies', $fields);
-        
-        // Agregar índice único para búsquedas rápidas
-        $this->forge->addKey('slug', false, true); // unique index
+        if (!$this->db->fieldExists('slug', 'companies')) {
+            $fields = [
+                'slug' => [
+                    'type'       => 'VARCHAR',
+                    'constraint' => 255,
+                    'null'       => true,
+                    'after'      => 'company_name'
+                ],
+            ];
+            
+            $this->forge->addColumn('companies', $fields);
+            
+            // Agregar índice único para búsquedas rápidas
+            $this->forge->addKey('slug', false, true); // unique index
+        }
     }
 
     public function down()

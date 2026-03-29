@@ -58,6 +58,7 @@
         .ae-fav-card__status--contactado { background: #fff7ed; color: #ea580c; }
         .ae-fav-card__status--negociacion { background: #faf5ff; color: #9333ea; }
         .ae-fav-card__status--ganado { background: #f0fdf4; color: #16a34a; }
+        .ae-fav-card__status--seguimiento { background: #eff6ff; color: #2563eb; }
 
         .ae-fav-card__company-name {
             font-size: 20px;
@@ -431,6 +432,7 @@
                                     <option value="contactado" <?= ($currentStatus == 'contactado') ? 'selected' : '' ?>>Contactado</option>
                                     <option value="negociacion" <?= ($currentStatus == 'negociacion') ? 'selected' : '' ?>>Negociación</option>
                                     <option value="ganado" <?= ($currentStatus == 'ganado') ? 'selected' : '' ?>>Ganado</option>
+                                    <option value="seguimiento" <?= ($currentStatus == 'seguimiento') ? 'selected' : '' ?>>En Seguimiento (IA)</option>
                                 </select>
                             </div>
                         </div>

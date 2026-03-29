@@ -64,8 +64,29 @@
             btn.disabled = false;
 
             if (data.status === 'success') {
+                const contact = data.contact_status;
+                const isContactMissing = !contact.has_any_contact;
+
                 $content.innerHTML = `
                     <div class="ae-ai-result">
+                        
+                        <!-- 0. Estado de Contacto -->
+                        <div class="ai-contact-status ${isContactMissing ? 'ai-contact-status--missing' : 'ai-contact-status--ok'}">
+                            <span class="ai-contact-status__dot"></span>
+                            <div>
+                                <strong style="display: block;">${contact.status_title}</strong>
+                                <span style="font-size: 11px; opacity: 0.9;">${contact.status_message}</span>
+                            </div>
+                        </div>
+
+                        <!-- 0.1 Oportunidad Temprana (Condicional) -->
+                        ${data.early_opportunity_message ? `
+                            <div class="ai-early-opportunity-box">
+                                <span class="ai-early-opportunity-box__icon">💎</span>
+                                <p class="ai-early-opportunity-box__text">${data.early_opportunity_message}</p>
+                            </div>
+                        ` : ''}
+
                         <!-- 1. Resumen Comercial -->
                         <div class="ae-ai-card ae-ai-card--summary" style="margin-bottom: 20px; padding: 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
                             <span class="ae-ai-result__label" style="display: block; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">Análisis Comercial</span>
@@ -73,7 +94,7 @@
                             <p style="font-size: 15px; line-height: 1.6; color: #475569; margin: 0;">${data.summary}</p>
                         </div>
 
-                        <!-- NUEVOS BLOQUES: KPIs Comerciales -->
+                        <!-- 2. KPIs Comerciales -->
                         <div class="ai-kpis-grid">
                             <div class="ai-kpi-card ai-kpi-card--prob-${data.conversion_probability.label.toLowerCase()}">
                                 <span class="ai-kpi-label">Probabilidad</span>
@@ -93,7 +114,7 @@
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                            <!-- 2. Necesidades Probables -->
+                            <!-- 3. Necesidades Probables -->
                             <div class="ae-ai-card" style="padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px;">
                                 <span class="ae-ai-result__label" style="display: block; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 12px;">Necesidades probables</span>
                                 <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
@@ -101,7 +122,7 @@
                                 </ul>
                             </div>
 
-                            <!-- 3. Qué venderle primero -->
+                            <!-- 4. Qué venderle primero -->
                             <div class="ae-ai-card" style="padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f0f7ff;">
                                 <span class="ae-ai-result__label" style="display: block; font-size: 11px; font-weight: 800; color: #1e40af; text-transform: uppercase; margin-bottom: 12px;">Qué venderle primero</span>
                                 <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
@@ -110,7 +131,7 @@
                             </div>
                         </div>
 
-                        <!-- NUEVOS BLOQUES: Objeción y Ángulo -->
+                        <!-- 5. Objeción y Ángulo -->
                         <div class="ai-objection-box">
                             <div class="ai-box-icon">⚠️</div>
                             <div class="ai-box-content">
@@ -127,7 +148,18 @@
                             </div>
                         </div>
 
-                        <!-- 4. Enfoque de venta y 5. Mensaje sugerido -->
+                        <!-- 6. Recomendación Operativa -->
+                        <div class="ai-operational-box">
+                            <span class="ai-operational-box__label">Estrategia sugerida</span>
+                            <p class="ai-operational-box__text">${data.operational_recommendation}</p>
+                        </div>
+
+                        <!-- 6.1 Plan de Acción (NUEVO) -->
+                        <div id="ai-action-plan-container">
+                            ${(data.followup && data.followup.exists) ? renderActionPlan(data.followup) : ''}
+                        </div>
+
+                        <!-- 7. Enfoque de venta y Mensaje sugerido -->
                         <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 24px;">
                             <div style="padding: 16px; background: #fffbeb; border: 1px solid #fef3c7; border-radius: 12px;">
                                 <span class="ae-ai-result__label" style="display: block; font-size: 11px; font-weight: 800; color: #92400e; text-transform: uppercase; margin-bottom: 8px;">Enfoque de venta recomendado</span>
@@ -140,19 +172,41 @@
                             </div>
                         </div>
 
-                        <!-- 6. Acciones Finales -->
+                        <!-- 8. CTA Principal Dinámico -->
+                        <div class="ai-primary-action-wrap">
+                            <button type="button" id="ai-main-cta" 
+                                    class="ai-primary-action ${isContactMissing ? 'ai-primary-action--prepare' : ''} ${(data.followup && data.followup.exists) ? 'ai-primary-action--active' : ''}" 
+                                    onclick="${(data.followup && data.followup.exists) ? '' : (isContactMissing ? 'prepareLeadForContact(' + id + ', this)' : 'handleDirectContact(' + id + ')')}"
+                                    ${(data.followup && data.followup.exists) ? 'disabled' : ''}>
+                                ${ (data.followup && data.followup.exists) 
+                                    ? '⏳ En seguimiento' 
+                                    : (isContactMissing ? '⚡ Preparar contacto' : '📞 ' + data.primary_action.label) 
+                                }
+                            </button>
+                        </div>
+
+                        <!-- 9. Acciones Finales Dinámicas -->
                         <div class="ai-action-buttons">
                             <button type="button" class="ai-action-btn ai-action-btn--copy" onclick="copyToClipboard('ae-ai-message', this)">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                                 Copiar mensaje
                             </button>
+
+                            ${isContactMissing ? `
+                                <button type="button" class="ai-action-btn ai-action-btn--alert" onclick="alertWhenContactAvailable(${id}, this)">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                                    Avisarme contacto
+                                </button>
+                            ` : `
+                                <button type="button" class="ai-action-btn ai-action-btn--contact" onclick="markAsContactedFromAI(${id}, this)">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    Marcar contactado
+                                </button>
+                            `}
+
                             <button type="button" class="ai-action-btn ai-action-btn--list" onclick="addToListFromAI(${id}, this)">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
                                 Añadir a lista
-                            </button>
-                            <button type="button" class="ai-action-btn ai-action-btn--contact" onclick="markAsContactedFromAI(${id}, this)">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                Marcar contactado
                             </button>
                         </div>
 
@@ -259,5 +313,119 @@
             btn.innerHTML = '❌ Error';
             btn.disabled = false;
         });
+    }
+
+    /**
+     * Gestión de contacto directo
+     * TODO: Integrar con sistema de telefonía o apertura de mailto
+     */
+    function handleDirectContact(companyId) {
+        // Por ahora, como fallback, marcamos como contactado y abrimos una alerta de éxito
+        alert("Iniciando contacto directo... (Funcionalidad en desarrollo: se integrará con CRM/Voz)");
+        // Opcionalmente podrías activar el marcado automático:
+        // markAsContactedFromAI(companyId, document.querySelector('.ai-primary-action'));
+    }
+
+    /**
+     * Alerta de disponibilidad de contacto
+     * TODO: Crear endpoint en backend para suscribirse a notificaciones de este lead
+     */
+    function alertWhenContactAvailable(companyId, btn) {
+        const original = btn.innerHTML;
+        btn.innerHTML = '⏳...';
+        btn.disabled = true;
+
+        // Simulamos una suscripción exitosa
+        setTimeout(() => {
+            btn.innerHTML = '✅ Te avisaremos';
+            btn.style.background = '#059669';
+            btn.style.color = '#fff';
+            btn.style.borderColor = '#059669';
+            
+            // Nota: Aquí iría la llamada fetch al backend para registrar la alerta
+            console.log("Suscripción de contacto para ID: " + companyId);
+        }, 800);
+    }
+
+    /**
+     * Flujo Real: Preparar Lead para Contacto
+     */
+    function prepareLeadForContact(companyId, btn) {
+        const message = document.getElementById('ae-ai-message')?.innerText?.replace(/^"|"$/g, '') || '';
+        const originalHtml = btn.innerHTML;
+        
+        btn.innerHTML = '<span class="ae-spinner ae-spinner--small"></span> Guardando...';
+        btn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('message', message);
+        formData.append('notes', 'Lead preparado desde Modal IA - Plan de acción activado.');
+
+        fetch('<?= site_url('radar/prepare-contact/') ?>' + companyId, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                btn.innerHTML = '⏳ En seguimiento';
+                btn.classList.add('ai-primary-action--active');
+                
+                // Renderizar plan de acción suavemente
+                const planContainer = document.getElementById('ai-action-plan-container');
+                planContainer.innerHTML = renderActionPlan({
+                    exists: true,
+                    status: 'seguimiento',
+                    notify_when_contact: true,
+                    message_saved: true
+                });
+                planContainer.style.opacity = 0;
+                setTimeout(() => { planContainer.style.opacity = 1; planContainer.style.transition = 'opacity 0.5s'; }, 10);
+
+                // Actualizar UI de la tabla/lista si es posible
+                if (typeof toggleFavorite === 'function') {
+                    const favBtn = document.querySelector(`.ae-radar_fav_btn[data-id="${companyId}"]`);
+                    if (favBtn) favBtn.classList.add('is-active');
+                }
+            } else {
+                alert('Error al preparar contacto: ' + (data.message || 'Desconocido'));
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        });
+    }
+
+    function renderActionPlan(followup) {
+        return `
+            <div class="ai-action-plan">
+                <div class="ai-action-plan__header">
+                    <span class="ai-action-plan__icon">📋</span>
+                    <strong class="ai-action-plan__title">Plan de acción activado</strong>
+                </div>
+                <div class="ai-action-plan__content">
+                    <div class="ai-action-plan__item">
+                        <span class="ai-action-plan__check">✔</span>
+                        <span>Lead guardado en <strong>seguimiento</strong></span>
+                    </div>
+                    <div class="ai-action-plan__item">
+                        <span class="ai-action-plan__check">✔</span>
+                        <span>Mensaje preparado y guardado</span>
+                    </div>
+                    <div class="ai-action-plan__item">
+                        <span class="ai-action-plan__check">✔</span>
+                        <span>Aviso automático activado (cuanto haya contacto)</span>
+                    </div>
+                    <div class="ai-action-plan__footer">
+                        <strong>Próximo paso:</strong> Esperar detección automática de teléfono/web para iniciar contacto directo.
+                    </div>
+                </div>
+            </div>
+        `;
     }
 </script>

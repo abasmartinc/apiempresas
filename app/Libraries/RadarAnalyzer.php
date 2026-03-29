@@ -13,13 +13,40 @@ class RadarAnalyzer
     /**
      * Entry point: Analyzes a company and returns a structured commercial profile.
      */
-    public static function analyze(array $company): array
+    public static function analyze(array $company, int $userId = 0): array
     {
         $profile = self::detectCommercialProfile($company);
         $needs = self::detectProbableNeeds($company, $profile);
         $offers = self::detectFirstOffers($company, $profile);
+        $contactStatus = self::detectContactStatus($company);
+
+        // 0. Obtener estado de seguimiento si existe
+        $followupInfo = [
+            'exists'              => false,
+            'status'              => null,
+            'notify_when_contact' => false,
+            'prepared_at'         => null,
+            'message_saved'       => false
+        ];
+
+        if ($userId > 0) {
+            $fModel = new \App\Models\LeadFollowupModel();
+            $mModel = new \App\Models\LeadPreparedMessageModel();
+            
+            $followupData = $fModel->getFollowup($userId, $company['id']);
+            if ($followupData) {
+                $followupInfo['exists']              = true;
+                $followupInfo['status']              = $followupData['status'];
+                $followupInfo['notify_when_contact'] = (bool)$followupData['notify_when_contact'];
+                $followupInfo['prepared_at']         = $followupData['prepared_at'];
+                
+                // Verificar si tiene mensaje guardado
+                $msg = $mModel->getMessage($userId, $company['id']);
+                $followupInfo['message_saved'] = !empty($msg);
+            }
+        }
         
-        return [
+        $analysis = [
             'summary'                => self::buildSummary($company, $profile),
             'commercial_profile'     => $profile['label'],
             'needs'                  => $needs,
@@ -27,13 +54,22 @@ class RadarAnalyzer
             'sales_approach'         => self::buildSalesApproach($company, $profile, $needs),
             'first_message'          => self::buildFirstMessage($company, $profile, $needs),
             'signals'                => self::buildDetectedSignals($company, $profile),
-            // Nuevos bloques de acción comercial
+            // Bloques de acción comercial
             'conversion_probability' => self::detectConversionProbability($company),
             'contact_window'         => self::detectContactWindow($company),
             'estimated_ticket'       => self::detectEstimatedTicket($company, $profile),
             'likely_objection'       => self::detectLikelyObjection($company, $profile),
             'attack_angle'           => self::detectAttackAngle($company, $profile)
         ];
+
+        // Nuevos campos de contacto y oportunidad temprana
+        return array_merge($analysis, [
+            'contact_status'             => $contactStatus,
+            'primary_action'             => self::buildPrimaryAction($analysis, $contactStatus),
+            'operational_recommendation' => self::buildOperationalRecommendation($contactStatus),
+            'early_opportunity_message'  => self::buildEarlyOpportunityMessage($company, $contactStatus),
+            'followup'                   => $followupInfo
+        ]);
     }
 
     /**
@@ -312,5 +348,84 @@ class RadarAnalyzer
         }
 
         return 'Entrar por operativa básica y necesidad inmediata de facturación';
+    }
+
+    /**
+     * Step 13: Detect Contact Status.
+     */
+    private static function detectContactStatus(array $company): array
+    {
+        $hasPhone = !empty($company['phone']) || !empty($company['phone_mobile']);
+        // Se asume que company_url_id o url indican presencia de web
+        $hasWeb = !empty($company['company_url_id']) || !empty($company['url']);
+        $hasEmail = false; // El esquema actual no parece tener email directo aún
+        
+        $hasAnyContact = $hasPhone || $hasWeb || $hasEmail;
+
+        if ($hasAnyContact) {
+            return [
+                'has_email'       => $hasEmail,
+                'has_phone'       => $hasPhone,
+                'has_web'         => $hasWeb,
+                'has_any_contact' => true,
+                'status_label'    => 'contacto_disponible',
+                'status_title'    => 'Contacto disponible',
+                'status_message'  => 'Se ha detectado al menos una vía de contacto directa para esta empresa.'
+            ];
+        }
+
+        return [
+            'has_email'       => false,
+            'has_phone'       => false,
+            'has_web'         => false,
+            'has_any_contact' => false,
+            'status_label'    => 'sin_contacto',
+            'status_title'    => 'Sin contacto detectado todavía',
+            'status_message'  => 'No se ha detectado email, teléfono ni web por el momento, pero sigue siendo una oportunidad temprana valiosa.'
+        ];
+    }
+
+    /**
+     * Step 14: Build Primary Action CTA.
+     */
+    private static function buildPrimaryAction(array $analysis, array $contactStatus): array
+    {
+        if ($contactStatus['has_any_contact']) {
+            return [
+                'label' => 'Contactar ahora',
+                'mode'  => 'direct_contact'
+            ];
+        }
+
+        return [
+            'label' => 'Preparar contacto',
+            'mode'  => 'prepare_contact'
+        ];
+    }
+
+    /**
+     * Step 15: Build Operational Recommendation.
+     */
+    private static function buildOperationalRecommendation(array $contactStatus): string
+    {
+        if ($contactStatus['has_any_contact']) {
+            return "Acción recomendada: realizar primer contacto en la ventana óptima detectada utilizando el mensaje sugerido.";
+        }
+
+        return "Acción recomendada: guardar este lead, preparar el mensaje y activar seguimiento para contactar en cuanto aparezca una vía directa.";
+    }
+
+    /**
+     * Step 16: Build Early Opportunity Message.
+     */
+    private static function buildEarlyOpportunityMessage(array $company, array $contactStatus): ?string
+    {
+        $score = $company['score_total'] ?? 0;
+        
+        if (!$contactStatus['has_any_contact'] && $score >= 50) {
+            return "Lead temprano: aunque todavía no hay contacto visible, es precisamente en esta fase cuando se pueden detectar oportunidades antes que la competencia.";
+        }
+
+        return null;
     }
 }

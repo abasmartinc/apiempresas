@@ -2814,3 +2814,210 @@
     width: 16px;
     height: 16px;
 }
+
+/* Contact-Aware AI Modal Enhancements */
+.ai-contact-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.ai-contact-status--ok {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #d1fae5;
+}
+
+.ai-contact-status--missing {
+    background: #fefce8;
+    color: #854d0e;
+    border: 1px solid #fef3c7;
+}
+
+.ai-contact-status__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.ai-contact-status--ok .ai-contact-status__dot {
+    background: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+}
+
+.ai-contact-status--missing .ai-contact-status__dot {
+    background: #eab308;
+    box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.2);
+}
+
+.ai-operational-box {
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.ai-operational-box__label {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.ai-operational-box__text {
+    font-size: 14px;
+    color: #334155;
+    margin: 0;
+    line-height: 1.5;
+    font-weight: 600;
+}
+
+.ai-early-opportunity-box {
+    padding: 16px;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.ai-early-opportunity-box__icon {
+    font-size: 20px;
+}
+
+.ai-early-opportunity-box__text {
+    font-size: 13px;
+    color: #1e40af;
+    margin: 0;
+    line-height: 1.5;
+    font-weight: 700;
+}
+
+.ai-primary-action-wrap {
+    margin-top: 10px;
+    margin-bottom: 24px;
+}
+
+.ai-primary-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+}
+
+.ai-primary-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.25);
+}
+
+.ai-primary-action--prepare {
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
+    box-shadow: 0 10px 20px rgba(71, 85, 105, 0.2);
+}
+
+.ai-primary-action--prepare:hover {
+    box-shadow: 0 14px 28px rgba(71, 85, 105, 0.25);
+}
+
+/* Plan de Acción Styling */
+.ai-action-plan {
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    animation: fadeInSlideUp 0.4s ease-out;
+}
+
+.ai-action-plan__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.ai-action-plan__icon {
+    font-size: 20px;
+}
+
+.ai-action-plan__title {
+    font-size: 15px;
+    color: #1e293b;
+    font-weight: 800;
+}
+
+.ai-action-plan__content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ai-action-plan__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #475569;
+}
+
+.ai-action-plan__check {
+    color: #10b981;
+    font-weight: bold;
+}
+
+.ai-action-plan__footer {
+    margin-top: 12px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1e40af;
+    line-height: 1.4;
+    border-left: 4px solid #3b82f6;
+}
+
+.ai-primary-action--active {
+    background: #10b981 !important;
+    cursor: default !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.ai-primary-action--active:hover {
+    transform: none !important;
+}
+
+@keyframes fadeInSlideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.ae-spinner--small {
+    width: 16px;
+    height: 16px;
+    border-width: 2px;
+}
