@@ -2,12 +2,15 @@
 <div id="ae-ai-modal" class="ae-ai-modal" style="display:none;">
     <div class="ae-ai-modal__backdrop" onclick="closeAIModal()"></div>
     <div class="ae-ai-modal__container">
-        <header class="ae-ai-modal__header">
-            <div class="ae-ai-modal__header-left">
-                <span class="ae-ai-modal__badge">IA B2B</span>
-                <h2 class="ae-ai-modal__title">Análisis Estratégico AI</h2>
+        <header class="ae-ai-modal__header" style="flex-direction: column; align-items: flex-start; gap: 4px; padding: 16px 24px;">
+            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                <div class="ae-ai-modal__header-left">
+                    <span class="ae-ai-modal__badge">IA B2B</span>
+                    <h2 class="ae-ai-modal__title" style="margin: 0;">Análisis Estratégico AI</h2>
+                </div>
+                <button type="button" class="ae-ai-modal__close" onclick="closeAIModal()" style="position: static; font-size: 28px;">×</button>
             </div>
-            <button type="button" class="ae-ai-modal__close" onclick="closeAIModal()">×</button>
+            <div id="ae-ai-modal-company" style="font-size: 14px; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 4px 12px; border-radius: 8px; margin-top: 4px; display: none;"></div>
         </header>
         <div id="ae-ai-content" class="ae-ai-modal__body">
             <!-- Se cargará por AJAX -->
@@ -19,11 +22,19 @@
     /**
      * Análisis IA bajo demanda
      */
-    function analyzeAI(id, btn) {
+    function analyzeAI(id, btn, companyName = '') {
         if (!id) return;
 
         const $modal = document.getElementById('ae-ai-modal');
         const $content = document.getElementById('ae-ai-content');
+        const $companyName = document.getElementById('ae-ai-modal-company');
+
+        if (companyName) {
+            $companyName.innerText = companyName;
+            $companyName.style.display = 'inline-block';
+        } else {
+            $companyName.style.display = 'none';
+        }
         
         // Bloquear botón y mostrar loading en modal
         const originalBtnHtml = btn.innerHTML;
@@ -183,6 +194,8 @@
 
     function closeAIModal() {
         document.getElementById('ae-ai-modal').style.display = 'none';
+        document.getElementById('ae-ai-modal-company').innerText = '';
+        document.getElementById('ae-ai-modal-company').style.display = 'none';
         document.body.style.overflow = '';
     }
 

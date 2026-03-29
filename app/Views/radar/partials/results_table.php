@@ -198,7 +198,7 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                         </button>
                                         <button type="button" class="ae-radar-page__btn-ai" 
-                                                onclick="analyzeAI('<?= $co['id'] ?>', this)" 
+                                                onclick="analyzeAI('<?= $co['id'] ?>', this, '<?= esc($co['company_name']) ?>')" 
                                                 title="Analizar con Inteligencia Artificial">
                                             ✨ IA
                                         </button>
