@@ -385,6 +385,55 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                             </div>
                         </div>
                     </form>
+                    
+                    <!-- Quick Score Filters -->
+                    <div class="ae-radar-page__quick-filters" style="margin-bottom: 24px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a href="<?= site_url('radar') ?>" class="ae-radar-page__filter-chip <?= !isset($filters['priority_level']) && !isset($filters['main_act_type']) ? 'is-active' : '' ?>">
+                            Todas
+                        </a>
+                        <a href="<?= site_url('radar?' . http_build_query(array_merge($filters, ['priority_level' => 'muy_alta']))) ?>" class="ae-radar-page__filter-chip <?= ($filters['priority_level'] ?? '') === 'muy_alta' ? 'is-active' : '' ?>">
+                            🔥 Muy alta
+                        </a>
+                        <a href="<?= site_url('radar?' . http_build_query(array_merge($filters, ['priority_level' => 'alta']))) ?>" class="ae-radar-page__filter-chip <?= ($filters['priority_level'] ?? '') === 'alta' ? 'is-active' : '' ?>">
+                            ⚡ Alta
+                        </a>
+                        <a href="<?= site_url('radar?' . http_build_query(array_merge($filters, ['priority_level' => 'media']))) ?>" class="ae-radar-page__filter-chip <?= ($filters['priority_level'] ?? '') === 'media' ? 'is-active' : '' ?>">
+                            🟡 Media
+                        </a>
+                        <a href="<?= site_url('radar?' . http_build_query(array_merge($filters, ['main_act_type' => 'Constitución']))) ?>" class="ae-radar-page__filter-chip <?= ($filters['main_act_type'] ?? '') === 'Constitución' ? 'is-active' : '' ?>">
+                            🏢 Constitución
+                        </a>
+                        
+                        <?php if (isset($filters['priority_level']) || isset($filters['main_act_type']) || !empty($filters['search']) || !empty($filters['province'])): ?>
+                            <a href="<?= site_url('radar') ?>" class="ae-radar-page__filter-chip" style="background: #fee2e2; color: #b91c1c; border-color: #fecdd3;">
+                                ✕ Limpiar filtros
+                            </a>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Dynamic Results Title -->
+                    <div class="ae-radar-page__results-info" style="margin-top: 32px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
+                        <h3 style="font-size: 20px; font-weight: 800; color: #1e293b; margin: 0; font-family: 'Outfit', sans-serif;">
+                            <?php 
+                                $totalItems = $pagination['total'] ?? 0;
+                                $filterText = "oportunidades encontradas";
+                                if (isset($filters['priority_level'])) {
+                                    $pMap = [
+                                        'muy_alta' => '<span style="color:#e11d48">🔥 Muy Alta</span>', 
+                                        'alta' => '<span style="color:#ef4444">⚡ Alta</span>', 
+                                        'media' => '<span style="color:#d97706">🟡 Media</span>'
+                                    ];
+                                    $filterText = "oportunidades " . ($pMap[$filters['priority_level']] ?? "priorizadas");
+                                } elseif (isset($filters['main_act_type'])) {
+                                    $filterText = "en fase de <span style='color:#2563eb;'>" . esc($filters['main_act_type']) . "</span>";
+                                }
+                                echo "Mostrando <strong>" . number_format($totalItems, 0, ',', '.') . "</strong> " . $filterText;
+                            ?>
+                        </h3>
+                        <div style="font-size: 13px; font-weight: 700; color: #64748b; background: #f8fafc; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            Ordenado por: <span style="color: #2563eb;">Score Total ↓</span>
+                        </div>
+                    </div>
 
                         <section class="ae-radar-page__lead-wrap <?= $isFree ? 'is-paywalled' : '' ?>">
                             <div id="radar-results-container">
@@ -644,59 +693,66 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
             if (data.status === 'success') {
                 $content.innerHTML = `
                     <div class="ae-ai-result">
-                        <div class="ae-ai-result__header-row">
-                            <div class="ae-ai-result__main-info">
-                                <span class="ae-ai-result__label">Nicho estratégico</span>
-                                <div class="ae-ai-result__niche">${data.niche}</div>
-                                <p class="ae-ai-result__summary">${data.summary}</p>
-                            </div>
-                            <div class="ae-ai-result__target">
-                                <span class="ae-ai-result__label">Interlocutor ideal</span>
-                                <div class="ae-ai-result__persona-badge">
-                                    <span>👤</span> ${data.target_persona}
-                                </div>
-                            </div>
+                        <!-- 1. Resumen Comercial -->
+                        <div class="ae-ai-card ae-ai-card--summary" style="margin-bottom: 24px; padding: 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+                            <span class="ae-ai-result__label" style="display: block; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">Análisis Comercial</span>
+                            <div style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 8px;">${data.commercial_profile}</div>
+                            <p style="font-size: 15px; line-height: 1.6; color: #475569; margin: 0;">${data.summary}</p>
                         </div>
 
-                        <div class="ae-ai-result__grid">
-                            <div class="ae-ai-result__section">
-                                <span class="ae-ai-result__label">Puntos de dolor (Pain Points)</span>
-                                <ul class="ae-ai-result__list">
-                                    ${data.pain_points.map(p => `<li>${p}</li>`).join('')}
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+                            <!-- 2. Necesidades Probables -->
+                            <div class="ae-ai-card" style="padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px;">
+                                <span class="ae-ai-result__label" style="display: block; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 12px;">Necesidades probables</span>
+                                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
+                                    ${data.needs.map(n => `<li style="font-size: 13px; color: #334155; display: flex; align-items: center; gap: 8px;"><span style="color:#2563eb">✔</span> ${n}</li>`).join('')}
+                                </ul>
+                            </div>
+
+                            <!-- 3. Qué venderle primero -->
+                            <div class="ae-ai-card" style="padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f0f7ff;">
+                                <span class="ae-ai-result__label" style="display: block; font-size: 11px; font-weight: 800; color: #1e40af; text-transform: uppercase; margin-bottom: 12px;">Qué venderle primero</span>
+                                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
+                                    ${data.first_offers.map(o => `<li style="font-size: 13px; color: #1e3a8a; font-weight: 700; display: flex; align-items: center; gap: 8px;"><span>🚀</span> ${o}</li>`).join('')}
                                 </ul>
                             </div>
                         </div>
-                        
-                        <div class="ae-ai-result__scripts">
-                            <div class="ae-ai-result__section">
-                                <span class="ae-ai-result__label">Script de llamada (Apertura)</span>
-                                <div class="ae-ai-result__script-box">
-                                    <p id="ae-script-call" class="ae-ai-result__script-text">"${data.cold_call}"</p>
-                                    <button type="button" class="ae-ai-result__copy-btn" onclick="copyToClipboard('ae-script-call', this)">
-                                        <span>📋</span> Copiar script
-                                    </button>
-                                </div>
+
+                        <!-- 4. Enfoque de venta y 5. Mensaje sugerido -->
+                        <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 24px;">
+                            <div style="padding: 16px; background: #fffbeb; border: 1px solid #fef3c7; border-radius: 12px;">
+                                <span class="ae-ai-result__label" style="display: block; font-size: 11px; font-weight: 800; color: #92400e; text-transform: uppercase; margin-bottom: 8px;">Enfoque de venta recomendado</span>
+                                <p style="font-size: 14px; color: #854d0e; margin: 0; line-height: 1.5;">${data.sales_approach}</p>
                             </div>
 
-                            <div class="ae-ai-result__section">
-                                <span class="ae-ai-result__label">Email Gancho</span>
-                                <div class="ae-ai-result__script-box ae-ai-result__script-box--email">
-                                    <div class="ae-ai-result__email-field">
-                                        <strong>Asunto:</strong> <span id="ae-email-subject">${data.email_hook.subject}</span>
-                                    </div>
-                                    <div class="ae-ai-result__email-field">
-                                        <strong>Cuerpo:</strong> <span id="ae-email-opening">"${data.email_hook.opening}"</span>
-                                    </div>
-                                    <button type="button" class="ae-ai-result__copy-btn" onclick="copyEmailHook(this)">
-                                        <span>✉️</span> Copiar asunto y cuerpo
-                                    </button>
-                                </div>
+                            <div style="padding: 20px; background: #f1f5f9; border-radius: 12px; border: 1px dashed #cbd5e1; position: relative;">
+                                <span class="ae-ai-result__label" style="display: block; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 12px;">Mensaje inicial sugerido (Copiar y pegar)</span>
+                                <p id="ae-ai-message" style="font-size: 14px; line-height: 1.6; color: #1e293b; margin: 0; font-style: italic;">"${data.first_message}"</p>
+                                <button type="button" 
+                                        onclick="copyToClipboard('ae-ai-message', this)"
+                                        style="margin-top: 16px; width: 100%; padding: 10px; background: white; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 700; color: #475569; cursor: pointer; transition: all 0.2s;">
+                                    📋 Copiar mensaje para LinkedIn / Email
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 6. Señales detectadas -->
+                        <div style="padding-top: 16px; border-top: 1px solid #f1f5f9;">
+                            <span class="ae-ai-result__label" style="display: block; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px;">Señales comerciales utilizadas</span>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                ${data.signals.map(s => `<span style="font-size: 10px; background: #f8fafc; color: #64748b; padding: 4px 10px; border-radius: 20px; border: 1px solid #e2e8f0;">${s}</span>`).join('')}
                             </div>
                         </div>
                     </div>
                 `;
             } else {
-                throw new Error(data.message || 'Error en el análisis');
+                $content.innerHTML = `
+                    <div style="text-align:center; padding: 40px;">
+                        <span style="font-size: 40px;">❌</span>
+                        <p style="margin-top:20px; color:#b91c1c; font-weight:bold;">${data.message}</p>
+                        <button onclick="closeAIModal()" style="margin-top:20px; padding: 10px 20px; background: #f1f5f9; border:none; border-radius:8px; cursor:pointer;">Cerrar</button>
+                    </div>
+                `;
             }
         })
         .catch(err => {

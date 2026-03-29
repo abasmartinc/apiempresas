@@ -1,0 +1,199 @@
+<?php
+
+namespace App\Libraries;
+
+/**
+ * RadarAnalyzer
+ * 
+ * Provides heuristic-based commercial analysis for B2B leads in the Spanish market.
+ * Designed to work with partial data using a multi-layered fallback strategy.
+ */
+class RadarAnalyzer
+{
+    /**
+     * Entry point: Analyzes a company and returns a structured commercial profile.
+     */
+    public static function analyze(array $company): array
+    {
+        $profile = self::detectCommercialProfile($company);
+        $needs = self::detectProbableNeeds($company, $profile);
+        $offers = self::detectFirstOffers($company, $profile);
+        
+        return [
+            'summary'            => self::buildSummary($company, $profile),
+            'commercial_profile' => $profile['label'],
+            'needs'              => $needs,
+            'first_offers'       => $offers,
+            'sales_approach'     => self::buildSalesApproach($company, $profile, $needs),
+            'first_message'      => self::buildFirstMessage($company, $profile, $needs),
+            'signals'            => self::buildDetectedSignals($company, $profile)
+        ];
+    }
+
+    /**
+     * Step 1: Detect Commercial Profile using CNAE, Social Object, or Company Name.
+     */
+    private static function detectCommercialProfile(array $company): array
+    {
+        $text = mb_strtolower(
+            ($company['cnae_label'] ?? '') . ' ' . 
+            ($company['objeto_social'] ?? '') . ' ' . 
+            ($company['company_name'] ?? '')
+        );
+
+        $mappings = [
+            'tech' => [
+                'label' => 'Tecnología / Software / Digital',
+                'keywords' => ['software', 'tecnologia', 'digital', 'informatica', 'programacion', 'apps', 'saas', 'sistemas', 'computacion', 'it', 'web', 'data']
+            ],
+            'consulting' => [
+                'label' => 'Consultoría / Servicios B2B',
+                'keywords' => ['consultoria', 'asesoramiento', 'expertos', 'servicios profesionales', 'b2b', 'management', 'estrategia', 'marketing', 'publicidad']
+            ],
+            'construction' => [
+                'label' => 'Construcción / Reformas / Instalaciones',
+                'keywords' => ['construccion', 'reformas', 'rehabilitacion', 'instalaciones', 'fontaneria', 'electricidad', 'pintor', 'albañil', 'climatizacion', 'obras']
+            ],
+            'real_estate' => [
+                'label' => 'Inmobiliario / PropTech',
+                'keywords' => ['inmobiliaria', 'fincas', 'alquiler', 'inmuebles', 'viviendas', 'promocion inmobiliaria', 'real estate']
+            ],
+            'health' => [
+                'label' => 'Salud / Clínica / Estética',
+                'keywords' => ['salud', 'clinica', 'odontologia', 'dental', 'fisioterapia', 'estetico', 'gimnasio', 'fitness', 'medico', 'wellness']
+            ],
+            'hospitality' => [
+                'label' => 'Hostelería / Restauración',
+                'keywords' => ['hosteleria', 'restaurante', 'cafeteria', 'bar', 'hotel', 'alojamiento', 'gourmet', 'catering', 'comidas']
+            ],
+            'commerce' => [
+                'label' => 'Comercio / Retail',
+                'keywords' => ['comercio', 'retail', 'tienda', 'venta menor', 'boutique', 'mercado', 'tienda online', 'ecommerce']
+            ],
+            'logistics' => [
+                'label' => 'Transporte / Logística',
+                'keywords' => ['transporte', 'logistica', 'mensajeria', 'mudanzas', 'almacen', 'envios', 'distribucion', 'carga']
+            ],
+            'legal' => [
+                'label' => 'Legal / Fiscal / Laboral',
+                'keywords' => ['abogado', 'legal', 'fiscal', 'laboral', 'juridico', 'gestoria', 'despacho', 'leyes']
+            ],
+        ];
+
+        foreach ($mappings as $key => $data) {
+            foreach ($data['keywords'] as $word) {
+                if (mb_stripos($text, $word) !== false) {
+                    return array_merge($data, ['slug' => $key]);
+                }
+            }
+        }
+
+        // Final Fallback
+        return [
+            'slug' => 'general',
+            'label' => 'Sociedad de reciente creación / Actividad general',
+            'keywords' => []
+        ];
+    }
+
+    /**
+     * Step 2: Detect Probable Needs based on Profile and Signal context.
+     */
+    private static function detectProbableNeeds(array $company, array $profile): array
+    {
+        $baseNeeds = ['Gestoría / Fiscal / Laboral', 'Software de facturación', 'Seguros de actividad'];
+        
+        $profileNeeds = [
+            'tech' => ['Presencia web premium', 'CRM comercial', 'Captación de talento', 'Infraestructura cloud'],
+            'consulting' => ['Branding corporativo', 'Herramientas de productividad', 'Marketing LinkedIn', 'Web profesional'],
+            'construction' => ['Marketing local', 'Prevención de riesgos (PRL)', 'Gestión de cobros', 'Web básica'],
+            'real_estate' => ['CRM inmobiliario', 'Posicionamiento SEO local', 'Firma digital', 'Fotografía / Video'],
+            'health' => ['Software de citas', 'Protección de datos (RGPD)', 'Marketing local', 'Web de servicios'],
+            'hospitality' => ['TPV / Sistema de gestión', 'Marketing en redes sociales', 'Reservas online', 'Presencia en Google Maps'],
+            'commerce' => ['Ecommerce o Web catálogo', 'TPV / Pagos', 'Branding', 'Control de stock'],
+            'logistics' => ['Gestión de flotas', 'Software de rutas', 'Seguros de carga', 'Web informativa'],
+            'legal' => ['Software de gestión de expedientes', 'Ciberseguridad', 'Firma electrónica', 'Web de servicios'],
+            'general' => ['Página web inicial', 'Email corporativo', 'Asesoramiento legal inicial', 'Imagen de marca básica']
+        ];
+
+        $needs = array_merge($profileNeeds[$profile['slug']] ?? $profileNeeds['general'], $baseNeeds);
+        return array_slice($needs, 0, 5);
+    }
+
+    /**
+     * Step 3: Detect First Offers (Prioritized).
+     */
+    private static function detectFirstOffers(array $company, array $profile): array
+    {
+        $offers = [
+            'tech' => ['Web Corporativa + Email Pro', 'Implementación de CRM', 'Pack de Ciberseguridad'],
+            'consulting' => ['Identidad Visual + Web', 'Estrategia de Captación B2B', 'Software de Gestión'],
+            'construction' => ['Pack Web + SEO Local', 'Seguros para Autónomos/Pymes', 'Gestión de Nóminas/PRL'],
+            'real_estate' => ['Web Inmobiliaria + CRM', 'Gestión de Leads Digitales', 'Tour Virtual / Foto Pro'],
+            'health' => ['Web Médica + Reservas', 'Auditoría RGPD', 'Marketing en Buscadores'],
+            'hospitality' => ['Página de Reservas + TPV', 'Gestión de Reseñas / Google', 'Pack de Identidad Visual'],
+            'commerce' => ['Tienda Online (Prestashop/Shopify)', 'Sistema de Fidelización', 'Branding'],
+            'logistics' => ['Web de Seguimiento', 'Asesoría en Seguros', 'Optimización de Rutas'],
+            'legal' => ['Digitalización de Despacho', 'Certificados Digitales', 'Web de Servicios Legales'],
+            'general' => ['Pack "Puesta en Marcha" (Web+Email+Logo)', 'Gestoría Integral', 'Software de Facturación Cloud']
+        ];
+
+        return array_slice($offers[$profile['slug']] ?? $offers['general'], 0, 3);
+    }
+
+    /**
+     * Step 4: Build Summary based on Profile.
+     */
+    private static function buildSummary(array $company, array $profile): string
+    {
+        if ($profile['slug'] !== 'general') {
+            return "Empresa identificada en el sector de " . $profile['label'] . " con perfil comercial probable y necesidad de estructura operativa inicial.";
+        }
+
+        // Fallback for general
+        if (!empty($company['main_act_type'])) {
+            return "Sociedad con señales de " . $company['main_act_type'] . " reciente, orientada probablemente a servicios locales u operativos.";
+        }
+
+        return "Empresa de reciente creación con actividad aún por definir, pero con perfil activo para soluciones de puesta en marcha.";
+    }
+
+    /**
+     * Step 5: Build Sales Approach.
+     */
+    private static function buildSalesApproach(array $company, array $profile, array $needs): string
+    {
+        $focus = "rapidez de puesta en marcha, imagen profesional y herramientas básicas de gestión";
+        if (in_array('CRM comercial', $needs)) $focus = "captación de clientes y automatización comercial";
+        if (in_array('Marketing local', $needs)) $focus = "visibilidad en la zona y captación de clientes locales";
+
+        return "Enfocar el primer contacto en " . $focus . ". Evitar tecnicismos innecesarios y priorizar el ahorro de tiempo en esta fase de inicio.";
+    }
+
+    /**
+     * Step 6: Build First Message.
+     */
+    private static function buildFirstMessage(array $company, array $profile, array $needs): string
+    {
+        $name = $company['company_name'] ?? 'vuestra empresa';
+        return "Hola, hemos visto que acabáis de constituir " . $name . ". En esta fase inicial, muchas empresas como la vuestra necesitan resolver rápido temas de presencia web, gestión fiscal y captación de clientes. Te escribo porque ayudamos a negocios de " . $profile['label'] . " a arrancar con todo esto de forma muy práctica. ¿Te encajaría comentarlo brevemente?";
+    }
+
+    /**
+     * Step 7: Build Detected Signals.
+     */
+    private static function buildDetectedSignals(array $company, array $profile): array
+    {
+        $signals = [];
+        if (!empty($company['main_act_type'])) $signals[] = "Acto: " . $company['main_act_type'];
+        if (($company['score_total'] ?? 0) >= 80) $signals[] = "Score de Oportunidad Alto";
+        if (!empty($company['priority_level']) && $company['priority_level'] !== 'baja') $signals[] = "Prioridad: " . ucfirst($company['priority_level']);
+        if (!empty($company['capital_social_raw'])) $signals[] = "Capital detectado: " . $company['capital_social_raw'];
+        if ($profile['slug'] !== 'general') $signals[] = "Perfil detectado: " . $profile['slug'];
+        if (!empty($company['municipality'])) $signals[] = "Ubicación: " . $company['municipality'];
+        
+        $signals[] = "Detectada en Radar recientemente";
+        
+        return $signals;
+    }
+}

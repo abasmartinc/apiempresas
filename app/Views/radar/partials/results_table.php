@@ -23,6 +23,33 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
     return str_replace($mesesEn, $mesesEs, date($format, $timestamp));
 };
 
+$getPriorityBadge = function($level) {
+    $map = [
+        'muy_alta' => ['label' => 'Muy alta', 'icon' => '🔥', 'class' => 'muy-alta'],
+        'alta' => ['label' => 'Alta', 'icon' => '⚡', 'class' => 'alta'],
+        'media' => ['label' => 'Media', 'icon' => '🟡', 'class' => 'media'],
+        'baja' => ['label' => 'Baja', 'icon' => '⚪', 'class' => 'baja'],
+        'muy_baja' => ['label' => 'Muy baja', 'icon' => '⛔', 'class' => 'muy-baja'],
+    ];
+    return $map[$level] ?? ['label' => 'Sin clasificar', 'icon' => '', 'class' => 'none'];
+};
+
+$getScoreClass = function($score) {
+    if (!$score) return 'none';
+    if ($score >= 90) return 'premium';
+    if ($score >= 75) return 'strong';
+    if ($score >= 55) return 'medium';
+    if ($score >= 35) return 'low';
+    return 'minimal';
+};
+
+$formatCapital = function($val) {
+    if (empty($val)) return null;
+    $clean = preg_replace('/[^0-9,\.]/', '', $val);
+    if (!$clean) return null;
+    return $val; // Return raw if it already looks like "3.000,00 Euros"
+};
+
 $filters = $filters ?? [];
 $allCompanies = $companies ?? [];
 $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
@@ -112,38 +139,84 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
                         <tr class="ae-radar-page__row-visible">
                             <td class="ae-radar-page__td-company">
                                 <div class="ae-radar-page__company">
-                                    <div class="ae-radar-page__company-header">
-                                        <span class="ae-radar-page__score ae-radar-page__score--<?= strtolower(str_replace('+', 'plus', $co['lead_score'])) ?>" title="Score de calidad: <?= $co['lead_score'] ?>">
-                                            <?= $co['lead_score'] ?>
-                                        </span>
+                                    <div class="ae-radar-page__company-header" style="margin-bottom: 8px;">
                                         <a href="<?= $isFree ? site_url('leads-empresas-nuevas') : company_url(['cif' => $co['cif'], 'name' => $co['company_name']]) ?>" class="ae-radar-page__company-link">
-                                            <span class="ae-radar-page__company-name"><?= esc($co['company_name']) ?></span>
+                                            <span class="ae-radar-page__company-name" style="font-size: 16px; font-weight: 800; color: #2563eb;"><?= esc($co['company_name']) ?></span>
                                         </a>
                                     </div>
-                                    <span class="ae-radar-page__company-cif"><?= esc($co['cif']) ?></span>
-                                </div>
-                                <div class="ae-radar-page__company-actions">
-                                    <button type="button" class="ae-radar-page__btn-qv" onclick="openQuickView('<?= $co['id'] ?>')" title="Vista rápida">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                    </button>
-                                    <button type="button" class="ae-radar-page__btn-ai" 
-                                            onclick="analyzeAI('<?= $co['id'] ?>', this)" 
-                                            title="Analizar con Inteligencia Artificial">
-                                        ✨ IA
-                                    </button>
-                                    <button type="button" 
-                                            class="ae-radar-page__btn-fav <?= ($co['is_favorite'] ?? false) ? 'is-active' : '' ?>" 
-                                            onclick="toggleFavorite(this, '<?= $co['id'] ?>')"
-                                            title="<?= ($co['is_favorite'] ?? false) ? 'Quitar de favoritos' : 'Guardar en favoritos' ?>">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="<?= ($co['is_favorite'] ?? false) ? 'currentColor' : 'none' ?>" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                    </button>
-                                </div>
-                                <div class="ae-radar-page__company-purpose" title="<?= esc($co['objeto_social'] ?? '') ?>">
-                                    <?= esc(mb_strimwidth($co['objeto_social'] ?? 'Sin objeto social definido.', 0, 100, '...')) ?>
+                                    
+                                    <!-- Line 2: Horizontal Badge Row (Compact) -->
+                                    <div class="ae-radar-page__badges-row" style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center;">
+                                        <?php if (isset($co['score_total'])): ?>
+                                            <?php $scoreClass = $getScoreClass($co['score_total']); ?>
+                                            <?php $pb = $getPriorityBadge($co['priority_level']); ?>
+                                            
+                                            <!-- Score Badge -->
+                                            <span class="ae-score-pill ae-score-pill--<?= $scoreClass ?>" title="Score: <?= $co['score_total'] ?>">
+                                                <?= $pb['icon'] ?> <?= $co['score_total'] ?>
+                                            </span>
+                                            
+                                            <!-- Priority Badge -->
+                                            <span class="ae-priority-pill ae-priority-pill--<?= $pb['class'] ?>">
+                                                <?= $pb['label'] ?>
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="ae-priority-pill ae-priority-pill--none">
+                                                Sin clasificar
+                                            </span>
+                                        <?php endif; ?>
+
+                                        <?php if (!empty($co['main_act_type'])): ?>
+                                            <span class="ae-act-pill"><?= esc($co['main_act_type']) ?></span>
+                                        <?php endif; ?>
+
+                                        <?php if (!empty($co['capital_social_raw'])): ?>
+                                            <span class="ae-capital-pill" style="height: 26px; padding: 3px 10px; display: inline-flex; align-items: center; border-radius: 8px; font-size: 11px;"><?= esc($co['capital_social_raw']) ?></span>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <!-- Line 3: Score Reasons -->
+                                    <?php if (!empty($co['score_reasons'])): ?>
+                                        <div class="ae-radar-page__score-reasons" style="font-size: 11px; color: #64748b; margin-bottom: 6px; font-weight: 500;">
+                                            <?= esc($co['score_reasons']) ?>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <!-- Line 4: Friendly Activity -->
+                                    <div class="ae-radar-page__friendly-activity" style="font-size: 12px; font-weight: 700; color: #374151;">
+                                        <?php 
+                                            $activity = $co['cnae_label'];
+                                            if (empty($activity) || $activity == 'N/D') {
+                                                $activity = mb_strimwidth($co['objeto_social'] ?? '', 0, 80, '...');
+                                            }
+                                            echo !empty($activity) ? esc($activity) : 'Actividad no clasificada';
+                                        ?>
+                                    </div>
+
+                                    <div class="ae-radar-page__company-actions">
+                                        <button type="button" class="ae-radar-page__btn-qv" onclick="openQuickView('<?= $co['id'] ?>')" title="Vista rápida">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                        </button>
+                                        <button type="button" class="ae-radar-page__btn-ai" 
+                                                onclick="analyzeAI('<?= $co['id'] ?>', this)" 
+                                                title="Analizar con Inteligencia Artificial">
+                                            ✨ IA
+                                        </button>
+                                        <button type="button" 
+                                                class="ae-radar-page__btn-fav <?= ($co['is_favorite'] ?? false) ? 'is-active' : '' ?>" 
+                                                onclick="toggleFavorite(this, '<?= $co['id'] ?>')"
+                                                title="<?= ($co['is_favorite'] ?? false) ? 'Quitar de favoritos' : 'Guardar en favoritos' ?>">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="<?= ($co['is_favorite'] ?? false) ? 'currentColor' : 'none' ?>" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                        </button>
+                                        <span class="ae-radar-page__company-cif" style="margin-left: 8px; font-size: 11px;"><?= esc($co['cif']) ?></span>
+                                    </div>
                                 </div>
                             </td>
                             <td class="ae-radar-page__td-date">
-                                <span class="ae-radar-page__date"><?= $formatEsDate($co['fecha_constitucion']) ?></span>
+                                <span class="ae-radar-page__date" style="display: block; font-weight: 800; color: #1e293b;"><?= $formatEsDate($co['last_borme_date'] ?? $co['fecha_constitucion']) ?></span>
+                                <?php if (!empty($co['last_borme_date']) && (strtotime($co['last_borme_date']) >= strtotime('-7 days'))): ?>
+                                    <span style="font-size: 10px; background: #ecfdf5; color: #059669; padding: 2px 6px; border-radius: 6px; font-weight: 800; text-transform: uppercase;">Reciente</span>
+                                <?php endif; ?>
                             </td>
                             <td class="ae-radar-page__td-location">
                                 <div class="ae-radar-page__location">
@@ -153,7 +226,7 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
                             </td>
                             <td class="ae-radar-page__td-activity">
                                 <div class="ae-radar-page__activity">
-                                    <span class="ae-radar-page__badge ae-radar-page__badge--sector">
+                                    <span class="ae-radar-page__badge ae-radar-page__badge--sector" style="display: block;">
                                         <?= esc(mb_strimwidth($co['cnae_label'] ?? 'N/D', 0, 48, '...')) ?>
                                     </span>
                                 </div>

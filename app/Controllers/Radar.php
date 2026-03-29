@@ -134,7 +134,24 @@ class Radar extends BaseController
         ];
 
         // 2. Query Principal del Listado con Paginación
-        $this->companyModel->select('companies.id, companies.company_name, companies.cif, companies.fecha_constitucion, companies.cnae_label, companies.registro_mercantil, companies.municipality, companies.objeto_social, companies.phone');
+        $this->companyModel->select('
+            companies.id, 
+            companies.company_name, 
+            companies.cif, 
+            companies.fecha_constitucion, 
+            companies.cnae_label, 
+            companies.registro_mercantil, 
+            companies.municipality, 
+            companies.objeto_social, 
+            companies.phone,
+            companies.capital_social_raw,
+            crs.score_total,
+            crs.priority_level,
+            crs.score_reasons,
+            crs.main_act_type,
+            crs.last_borme_date
+        ');
+        $this->companyModel->join('company_radar_scores crs', 'crs.company_id = companies.id', 'left');
         $this->companyModel->where('companies.fecha_constitucion IS NOT NULL');
 
         if ($province) {
@@ -157,7 +174,26 @@ class Radar extends BaseController
         // 2.2 Filtro por Palabras Clave (Nicho) en Objeto Social
         $q = $this->request->getGet('q');
         if ($q) {
-            $this->companyModel->like('companies.objeto_social', $q);
+            $this->companyModel->groupStart()
+                ->like('companies.objeto_social', $q)
+                ->orLike('companies.company_name', $q)
+                ->groupEnd();
+        }
+
+        // 2.3 Nuevos Filtros Radar Scoring
+        $priority = $this->request->getGet('priority_level');
+        if ($priority) {
+            $this->companyModel->where('crs.priority_level', $priority);
+        }
+
+        $actType = $this->request->getGet('main_act_type');
+        if ($actType) {
+            $this->companyModel->where('crs.main_act_type', $actType);
+        }
+        
+        $minScore = $this->request->getGet('min_score');
+        if ($minScore) {
+            $this->companyModel->where('crs.score_total >=', (int)$minScore);
         }
 
         // Rango de tiempo
@@ -171,6 +207,9 @@ class Radar extends BaseController
         $this->companyModel->where('companies.fecha_constitucion >=', $dateLimit);
         // Eliminamos la restricción <= $today para incluir "pre-constituciones" detectadas para los próximos días
 
+        // Orden por defecto: Score Total y luego fecha
+        $this->companyModel->orderBy('crs.score_total', 'DESC');
+        $this->companyModel->orderBy('crs.last_borme_date', 'DESC');
         $this->companyModel->orderBy('companies.fecha_constitucion', 'DESC');
         $this->companyModel->orderBy('companies.id', 'DESC');
 
@@ -207,7 +246,10 @@ class Radar extends BaseController
                 'cnae' => $cnae,
                 'rango' => $timeRange,
                 'q' => $q,
-                'per_page' => $perPage
+                'per_page' => $perPage,
+                'priority_level' => $priority,
+                'main_act_type' => $actType,
+                'min_score' => $minScore
             ],
             'pagination' => [
                 'total' => $totalCount,
@@ -426,26 +468,57 @@ class Radar extends BaseController
         $q = $this->request->getGet('q');
 
         $builder = $this->companyModel->builder();
-        $builder->select('company_name, cif, fecha_constitucion, cnae_label, municipality, phone');
-        $builder->where('fecha_constitucion IS NOT NULL');
+        $builder->select('
+            companies.company_name, 
+            companies.cif, 
+            companies.fecha_constitucion, 
+            companies.cnae_label, 
+            companies.municipality, 
+            companies.phone,
+            crs.score_total,
+            crs.priority_level,
+            crs.score_reasons,
+            crs.main_act_type,
+            crs.last_borme_date
+        ');
+        $builder->join('company_radar_scores crs', 'crs.company_id = companies.id', 'left');
+        $builder->where('companies.fecha_constitucion IS NOT NULL');
 
         if ($province) {
-            $builder->where('registro_mercantil', strtoupper(str_replace('-', ' ', $province)));
+            $builder->where('companies.registro_mercantil', strtoupper(str_replace('-', ' ', $province)));
         }
         if ($q) {
-            $builder->like('objeto_social', $q);
+            $builder->groupStart()
+                ->like('companies.objeto_social', $q)
+                ->orLike('companies.company_name', $q)
+                ->groupEnd();
+        }
+
+        // Nuevos Filtros Radar Scoring en Exportación
+        $priority = $this->request->getGet('priority_level');
+        if ($priority) {
+            $builder->where('crs.priority_level', $priority);
+        }
+
+        $actType = $this->request->getGet('main_act_type');
+        if ($actType) {
+            $builder->where('crs.main_act_type', $actType);
         }
 
         $today = date('Y-m-d');
         if ($timeRange === 'hoy') {
-            $builder->where('fecha_constitucion >=', $today);
+            $builder->where('companies.fecha_constitucion >=', $today);
         } else {
             $days = (int)$timeRange;
-            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime("-$days days")));
+            $builder->where('companies.fecha_constitucion >=', date('Y-m-d', strtotime("-$days days")));
         }
-        $builder->where('fecha_constitucion <=', $today); // Excluir fechas futuras
-
-        $companies = $builder->orderBy('fecha_constitucion', 'DESC')->get()->getResultArray();
+        // Eliminamos restricción <= $today para coherencia con la vista
+        
+        $companies = $builder->orderBy('crs.score_total', 'DESC')
+                            ->orderBy('crs.last_borme_date', 'DESC')
+                            ->orderBy('companies.fecha_constitucion', 'DESC')
+                            ->get()
+                            ->getResultArray();
 
         if ($format === 'excel') {
             return $this->generateExcel($companies);
@@ -464,10 +537,23 @@ class Radar extends BaseController
         $output = fopen('php://output', 'w');
         fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF)); // BOM
 
-        fputcsv($output, ['EMPRESA', 'CIF', 'CONSTITUCION', 'SECTOR', 'MUNICIPIO', 'TELEFONO']);
+        fputcsv($output, ['EMPRESA', 'CIF', 'CONSTITUCION', 'SCORE_TOTAL', 'PRIORIDAD', 'MOTIVOS', 'TIPO_ACTO', 'ULTIMO_BORME', 'SECTOR', 'MUNICIPIO', 'TELEFONO']);
 
         foreach ($companies as $co) {
-            fputcsv($output, $co);
+            $row = [
+                $co['company_name'],
+                $co['cif'],
+                $co['fecha_constitucion'],
+                $co['score_total'] ?? '-',
+                $co['priority_level'] ?? 'sin_clasificar',
+                $co['score_reasons'] ?? '-',
+                $co['main_act_type'] ?? '-',
+                $co['last_borme_date'] ?? '-',
+                $co['cnae_label'],
+                $co['municipality'],
+                $co['phone']
+            ];
+            fputcsv($output, $row);
         }
 
         fclose($output);
@@ -490,6 +576,11 @@ class Radar extends BaseController
         echo '<th>EMPRESA</th>';
         echo '<th>CIF</th>';
         echo '<th>CONSTITUCION</th>';
+        echo '<th>SCORE</th>';
+        echo '<th>PRIORIDAD</th>';
+        echo '<th>MOTIVOS</th>';
+        echo '<th>TIPO ACTO</th>';
+        echo '<th>ULT. BORME</th>';
         echo '<th>SECTOR</th>';
         echo '<th>MUNICIPIO</th>';
         echo '<th>TELEFONO</th>';
@@ -502,6 +593,11 @@ class Radar extends BaseController
             echo '<td>' . htmlspecialchars($co['company_name']) . '</td>';
             echo '<td>' . htmlspecialchars($co['cif']) . '</td>';
             echo '<td>' . htmlspecialchars($co['fecha_constitucion']) . '</td>';
+            echo '<td>' . ($co['score_total'] ?? '-') . '</td>';
+            echo '<td>' . ($co['priority_level'] ?? 'sin_clasificar') . '</td>';
+            echo '<td>' . htmlspecialchars($co['score_reasons'] ?? '-') . '</td>';
+            echo '<td>' . htmlspecialchars($co['main_act_type'] ?? '-') . '</td>';
+            echo '<td>' . ($co['last_borme_date'] ?? '-') . '</td>';
             echo '<td>' . htmlspecialchars($co['cnae_label']) . '</td>';
             echo '<td>' . htmlspecialchars($co['municipality']) . '</td>';
             echo '<td>="' . htmlspecialchars($co['phone']) . '"</td>'; // Force string for phone numbers
@@ -691,7 +787,7 @@ class Radar extends BaseController
     }
 
     /**
-     * Análisis IA bajo demanda del objeto social (Gemini 1.5 Flash)
+     * Análisis IA bajo demanda del objeto social
      */
     public function aiAnalyze($id)
     {
@@ -699,98 +795,20 @@ class Radar extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'No autorizado']);
         }
 
-        $company = $this->companyModel->find($id);
+        $company = $this->companyModel
+            ->select('companies.*, company_radar_scores.score_total, company_radar_scores.priority_level, company_radar_scores.score_reasons, company_radar_scores.main_act_type, company_radar_scores.last_borme_date')
+            ->join('company_radar_scores', 'companies.id = company_radar_scores.company_id', 'left')
+            ->find($id);
+
         if (!$company) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Empresa no encontrada']);
         }
 
-        $purpose = $company['objeto_social'] ?? '';
-        if (empty($purpose)) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'La empresa no tiene objeto social definido para analizar']);
+        try {
+            $analysis = \App\Libraries\RadarAnalyzer::analyze($company);
+            return $this->response->setJSON(['status' => 'success'] + $analysis);
+        } catch (\Exception $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Error al analizar: ' . $e->getMessage()]);
         }
-
-        $apiKey = trim(env('OPENAI_API_KEY'));
-        if (empty($apiKey)) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'IA no configurada. Por favor, añade OPENAI_API_KEY al archivo .env']);
-        }
-
-        $companyName = $company['company_name'] ?? 'Empresa';
-        $location = $company['municipality'] ?? ($company['registro_mercantil'] ?? 'España');
-        $sector = $company['cnae_label'] ?? 'Sector no especificado';
-
-        $prompt = "Analiza el siguiente objeto social de una empresa española recién creada:
-        - Nombre: $companyName
-        - Ubicación: $location
-        - Sector (CNAE): $sector
-        - Objeto Social: \"$purpose\"
-
-        Extrae y devuelve ÚNICAMENTE un objeto JSON con las siguientes claves:
-        1. 'niche': El nicho comercial real en 2 o 3 palabras (ej: 'Paneles Solares', 'Consultoría IA').
-        2. 'summary': Un resumen ejecutivo de 15 palabras máximo que explique qué hace la empresa de forma clara.
-        3. 'target_persona': El cargo o perfil ideal de la persona con la que un vendedor debería contactar (ej: 'Gerente de Mantenimiento', 'Director de Operaciones').
-        4. 'pain_points': Una lista de 3 puntos de dolor (retos o necesidades) que probablemente tenga esta empresa según su actividad (un array de strings).
-        5. 'cold_call': Un script de apertura para llamada en frío de máx 25 palabras para captar su atención.
-        6. 'email_hook': Un objeto con 'subject' (asunto potente) y 'opening' (primera frase gancho) para un email de prospección.";
-
-        $url = "https://api.openai.com/v1/chat/completions";
-
-        $data = [
-            "model" => "gpt-4o-mini",
-            "messages" => [
-                [
-                    "role" => "system",
-                    "content" => "Eres un experto en análisis de datos empresariales y prospección B2B. Responde siempre en formato JSON puro."
-                ],
-                [
-                    "role" => "user",
-                    "content" => $prompt
-                ]
-            ],
-            "response_format" => ["type" => "json_object"],
-            "temperature" => 0.4
-        ];
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $apiKey
-        ]);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($httpCode !== 200) {
-            $errorDetail = json_decode($response, true);
-            $msg = $errorDetail['error']['message'] ?? 'Error desconocido';
-            return $this->response->setJSON(['status' => 'error', 'message' => "IA Error ($httpCode): $msg"]);
-        }
-
-        $result = json_decode($response, true);
-        $rawText = $result['choices'][0]['message']['content'] ?? null;
-
-        if (!$rawText) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'La IA no devolvió contenido']);
-        }
-
-        $cleanJson = json_decode($rawText, true);
-
-        if (!$cleanJson) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Error al procesar el formato de la IA']);
-        }
-
-        return $this->response->setJSON([
-            'status' => 'success',
-            'niche' => $cleanJson['niche'] ?? 'N/D',
-            'summary' => $cleanJson['summary'] ?? 'No disponible',
-            'target_persona' => $cleanJson['target_persona'] ?? 'Gerente',
-            'pain_points' => $cleanJson['pain_points'] ?? [],
-            'cold_call' => $cleanJson['cold_call'] ?? 'No disponible',
-            'email_hook' => $cleanJson['email_hook'] ?? ['subject' => 'Consulta', 'opening' => 'Hola']
-        ]);
     }
 }
