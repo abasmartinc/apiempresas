@@ -301,171 +301,7 @@
                 tienes el resumen de hoy.</p>
         </div>
 
-        <!-- KPIs Section -->
-        <div class="kpi-grid">
-
-
-            <!-- Usuarios -->
-            <div class="kpi-card" style="color: #10b981;">
-                <div>
-                    <div class="kpi-label">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                            stroke="currentColor" style="width: 16px;">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                        </svg>
-                        Usuarios
-                    </div>
-                    <div class="kpi-value kpi-async-value" data-type="users_total"><?= $kpi_users_total ?? '...' ?></div>
-                </div>
-                <div class="kpi-footer">
-                    <span style="color: #16a34a; font-weight: 700;"><span class="kpi-async-value"
-                            data-type="users_active"><?= $kpi_users_active ?? '...' ?></span>
-                        Activos</span>
-                    <span style="color: #cbd5e1;">•</span>
-                    <span style="color: #6366f1; font-weight: 700;"><span class="kpi-async-value"
-                            data-type="subs_active"><?= $kpi_subs_active ?? '...' ?></span>
-                        Suscripciones</span>
-                </div>
-            </div>
-
-            <!-- API Hoy -->
-            <div class="kpi-card" style="color: #f59e0b;">
-                <div>
-                    <div class="kpi-label">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                            stroke="currentColor" style="width: 16px;">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                        </svg>
-                        Peticiones Hoy
-                    </div>
-                    <div class="kpi-value kpi-async-value" data-type="api_today"><?= $kpi_api_today ?? '...' ?></div>
-                </div>
-                <div class="kpi-footer">
-                    <span style="color: #64748b;">Tráfico en tiempo real</span>
-                </div>
-            </div>
-
-            <!-- API Mes -->
-            <div class="kpi-card" style="color: #8b5cf6;">
-                <div>
-                    <div class="kpi-label">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                            stroke="currentColor" style="width: 16px;">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M2.25 18L9 11.25l4.5 4.5L21.75 7.5" />
-                        </svg>
-                        Peticiones Mes
-                    </div>
-                    <div class="kpi-value kpi-async-value" data-type="api_month"><?= $kpi_api_month ?? '...' ?></div>
-                </div>
-                <div class="kpi-footer">
-                    <span style="color: #64748b;">Acumulado mensual</span>
-                </div>
-            </div>
-
-            <!-- Ingresos Mes -->
-            <div class="kpi-card" style="color: #059669;">
-                <div>
-                    <div class="kpi-label">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                            stroke="currentColor" style="width: 16px;">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                        </svg>
-                        Ingresos Mes
-                    </div>
-                    <div class="kpi-value kpi-async-value" data-type="revenue_month"><?= $kpi_revenue_month ?? '...' ?></div>
-                </div>
-                <div class="kpi-footer">
-                    <span style="color: #64748b;">Facturación total (Pagado)</span>
-                </div>
-            </div>
-
-            <!-- Tasa de Error -->
-            <div class="kpi-card" style="color: #dc2626;">
-                <div>
-                    <div class="kpi-label">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                            stroke="currentColor" style="width: 16px;">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-                        </svg>
-                        Tasa de Error
-                    </div>
-                    <div class="kpi-value kpi-async-value" data-type="api_error_rate"><?= $kpi_api_error_rate ?? '...' ?></div>
-                </div>
-                <div class="kpi-footer">
-                    <span style="color: #64748b;">Peticiones con error (4xx/5xx)</span>
-                </div>
-            </div>
-
-            <!-- Latencia Media -->
-            <div class="kpi-card" style="color: #2563eb;">
-                <div>
-                    <div class="kpi-label">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                            stroke="currentColor" style="width: 16px;">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                        </svg>
-                        Latencia Media
-                    </div>
-                    <div class="kpi-value kpi-async-value" data-type="api_latency_avg"><?= $kpi_api_latency_avg ?? '...' ?></div>
-                </div>
-                <div class="kpi-footer">
-                    <span style="color: #64748b;">Tiempo de respuesta medio</span>
-                </div>
-            </div>
-
-            <!-- IPs Bloqueadas -->
-            <div class="kpi-card" style="color: #4b5563;">
-                <div>
-                    <div class="kpi-label">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                            stroke="currentColor" style="width: 16px;">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                        </svg>
-                        IPs Bloqueadas
-                    </div>
-                    <div class="kpi-value kpi-async-value" data-type="blocked_ips_count"><?= $kpi_blocked_ips_count ?? '...' ?></div>
-                </div>
-                <div class="kpi-footer">
-                    <span style="color: #64748b;">Acceso denegado actualmente</span>
-                </div>
-            </div>
-
-
-            <!-- Usuarios Online -->
-            <div class="kpi-card"
-                style="color: #16a34a; border: 2px solid rgba(16, 185, 129, 0.2); background: rgba(240, 253, 244, 0.5);">
-                <div>
-                    <div class="kpi-label">
-                        <span
-                            style="display: inline-block; width: 10px; height: 10px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; animation: pulse 2s infinite;"></span>
-                        Online ahora
-                        <span id="refresh-timer"
-                            style="margin-left: auto; font-size: 0.7rem; background: rgba(16, 185, 129, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 600; font-variant-numeric: tabular-nums;">60s</span>
-                    </div>
-                    <div class="kpi-value" id="kpi-total-online"><?= $total_online ?? 0 ?></div>
-                </div>
-                <div class="kpi-footer">
-                    <span style="color: #64748b;">Usuarios activos (últimos 5 min)</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Usuarios Online Detalle (siempre presente para AJAX, pero condicional en render inicial) -->
-        <div id="online-users-wrapper" style="<?= ($total_online ?? 0) > 0 ? '' : 'display:none;' ?>">
-            <div class="section-header" style="margin-top: -20px; margin-bottom: 20px;">
-                <h2 class="section-title" style="font-size: 1rem; color: #16a34a;">Actividad Reciente</h2>
-            </div>
-            <div id="online-users-list" style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 40px;">
-                <?= $online_users_html ?? '' ?>
-            </div>
-        </div>
+        <!-- KPIs Section Removed for Performance -->
 
         <!-- Listados y Gestión Section -->
         <div class="section-header">
@@ -697,77 +533,17 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                function loadKpis() {
-                    const kpiElements = document.querySelectorAll('.kpi-async-value');
+                // KPIs removed for performance as requested.
 
-                    // Timeout de 30 segundos
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 30000);
-
-                    fetch('<?= site_url('admin/kpis-all') ?>', {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        signal: controller.signal
-                    })
-                        .then(response => {
-                            clearTimeout(timeoutId);
-                            if (!response.ok) {
-                                throw new Error('HTTP error ' + response.status);
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            kpiElements.forEach(el => {
-                                const type = el.getAttribute('data-type');
-                                if (data[type] !== undefined) {
-                                    el.innerHTML = data[type];
-                                }
-                            });
-
-                            // Online Users
-                            if (data.total_online !== undefined) {
-                                const totalOnlineEl = document.getElementById('kpi-total-online');
-                                if (totalOnlineEl) totalOnlineEl.innerHTML = data.total_online;
-                            }
-
-                            if (data.online_users_html !== undefined) {
-                                const listEl = document.getElementById('online-users-list');
-                                if (listEl) listEl.innerHTML = data.online_users_html;
-                            }
-
-                            // Mostrar última actualización si está disponible
-                            if (data.stats_updated_at) {
-                                console.log('KPIs pesados actualizados:', data.stats_updated_at);
-                            }
-                        })
-                        .catch(err => {
-                            clearTimeout(timeoutId);
-                            console.error('Error loading KPIs', err);
-
-                            const errorMsg = err.name === 'AbortError'
-                                ? '<span style="color: #f59e0b; font-size: 0.9rem;">Timeout</span>'
-                                : '<span style="color: #dc2626; font-size: 0.9rem;">Error</span>';
-
-                            kpiElements.forEach(el => {
-                                el.innerHTML = errorMsg;
-                            });
-
-
-                        });
-                }
-
-                // En el dashboard del admin ya no cargamos inicialmente por AJAX
-                // loadKpis();
-
-                // Lógica de cuenta atrás para el refresco
+                // Lógica de cuenta atrás para el refresco (Opcional: podrías querer quitarla si solo refrescaba KPIs)
                 let timeLeft = 60;
                 const timerEl = document.getElementById('refresh-timer');
 
                 setInterval(function () {
                     timeLeft--;
                     if (timeLeft <= 0) {
-                        loadKpis();
+                        // loadKpis(); // Removed
+                        location.reload(); // Recargar página completa si se desea mantener algún tipo de refresco, o simplemente refrescar nada
                         timeLeft = 60;
                     }
                     if (timerEl) {
