@@ -1451,22 +1451,63 @@ class Dashboard extends BaseController
     {
         $db = \Config\Database::connect();
         
+        $daysInactive   = (int) $this->request->getGet('days_inactive');
+        $minSearches    = (int) $this->request->getGet('min_searches');
+        $minApiRequests = (int) $this->request->getGet('min_api');
+        $emailStatus    = $this->request->getGet('email_status') ?: 'all';
+        
+        $sortBy  = $this->request->getGet('sort_by') ?: 'score';
+        $sortDir = strtoupper($this->request->getGet('sort_dir') ?: 'DESC');
+        if (!in_array($sortDir, ['ASC', 'DESC'])) $sortDir = 'DESC';
+
+        $whereSql = "";
+        if ($daysInactive > 0) {
+            $cutoffDate = date('Y-m-d H:i:s', strtotime("-$daysInactive days"));
+            $whereSql .= " AND (u.last_login_at <= '$cutoffDate' OR u.last_login_at IS NULL)";
+        }
+
+        // Determine SQL sorting
+        $sqlOrderBy = "created_at DESC"; // Default for 'score' sorting fallback
+        $validSqlSortFields = [
+            'created_at'         => 'created_at',
+            'last_login_at'      => 'last_login_at',
+            'total_searches'     => 'total_searches',
+            'total_api_requests' => 'total_api_requests'
+        ];
+
+        if (isset($validSqlSortFields[$sortBy])) {
+            $sqlOrderBy = $validSqlSortFields[$sortBy] . " " . $sortDir;
+        }
+        
+        $emailWhere = "";
+        if ($emailStatus === 'never') {
+            $emailWhere = " AND total_emails_sent = 0";
+        } elseif ($emailStatus === 'at_least_one') {
+            $emailWhere = " AND total_emails_sent > 0";
+        }
+
         $sql = "
-            SELECT 
-                u.id, u.name, u.email, u.created_at, u.last_login_at,
-                (SELECT COUNT(id) FROM company_search_logs sl WHERE sl.user_id = u.id) as total_searches,
-                IFNULL((SELECT SUM(requests_count) FROM api_usage_daily aud WHERE aud.user_id = u.id), 0) as total_api_requests,
-                (SELECT COUNT(id) FROM user_activity_logs al WHERE al.user_id = u.id) as total_activity,
-                IFNULL((SELECT status FROM user_subscriptions sub WHERE sub.user_id = u.id AND sub.status = 'active' LIMIT 1), 'inactive') as sub_status,
-                (SELECT plan_id FROM user_subscriptions sub WHERE sub.user_id = u.id AND sub.status = 'active' LIMIT 1) as plan_id,
-                (SELECT created_at FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_at,
-                (SELECT status FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_status,
-                (SELECT opened_at FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_opened,
-                (SELECT clicked_at FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_clicked,
-                (SELECT COUNT(id) FROM email_logs el WHERE el.user_id = u.id) as total_emails_sent
-            FROM users u
-            ORDER BY u.created_at DESC
-            LIMIT 100
+            SELECT * FROM (
+                SELECT 
+                    u.id, u.name, u.email, u.created_at, u.last_login_at,
+                    (SELECT COUNT(id) FROM company_search_logs sl WHERE sl.user_id = u.id) as total_searches,
+                    IFNULL((SELECT SUM(requests_count) FROM api_usage_daily aud WHERE aud.user_id = u.id), 0) as total_api_requests,
+                    (SELECT COUNT(id) FROM user_activity_logs al WHERE al.user_id = u.id) as total_activity,
+                    IFNULL((SELECT status FROM user_subscriptions sub WHERE sub.user_id = u.id AND sub.status = 'active' LIMIT 1), 'inactive') as sub_status,
+                    (SELECT plan_id FROM user_subscriptions sub WHERE sub.user_id = u.id AND sub.status = 'active' LIMIT 1) as plan_id,
+                    (SELECT created_at FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_at,
+                    (SELECT status FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_status,
+                    (SELECT opened_at FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_opened,
+                    (SELECT clicked_at FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_clicked,
+                    (SELECT COUNT(id) FROM email_logs el WHERE el.user_id = u.id) as total_emails_sent
+                FROM users u
+                WHERE 1=1 $whereSql
+            ) AS lead_data
+            WHERE total_searches >= $minSearches
+              AND total_api_requests >= $minApiRequests
+              $emailWhere
+            ORDER BY $sqlOrderBy
+            LIMIT 200
         ";
         
         $usersResult = $db->query($sql)->getResult();
@@ -1524,14 +1565,28 @@ class Dashboard extends BaseController
             }
         }
         
-        // Ordenar mayor a menor score
-        usort($leads, function($a, $b) {
-            return $b->score <=> $a->score;
-        });
+        // Ordenar por score si es el campo seleccionado (PHP sort)
+        if ($sortBy === 'score') {
+            usort($leads, function($a, $b) use ($sortDir) {
+                if ($sortDir === 'DESC') {
+                    return $b->score <=> $a->score;
+                } else {
+                    return $a->score <=> $b->score;
+                }
+            });
+        }
 
         $data = [
             'title' => 'IA Marketing: Lead Scoring | APIEmpresas',
             'leads' => $leads,
+            'filters' => [
+                'days_inactive' => $daysInactive ?: '',
+                'min_searches'  => $minSearches ?: '',
+                'min_api'       => $minApiRequests ?: '',
+                'email_status'  => $emailStatus,
+                'sort_by'       => $sortBy,
+                'sort_dir'      => $sortDir,
+            ],
             'stats' => [
                 'total_leads' => count($leads),
                 'total_hot_leads' => $totalHotLeads,

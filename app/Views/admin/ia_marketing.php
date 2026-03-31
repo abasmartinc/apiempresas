@@ -56,14 +56,62 @@
         </div>
     </div>
 
-    <!-- Filtro visual (Javascript local) para agilizar -->
-    <div class="card" style="margin-bottom: 2rem; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;">
-        <div>
-            <input type="text" id="liveSearch" class="input" placeholder="Buscar usuario o email..." style="min-width: 300px;">
-        </div>
-        <div style="display: flex; gap: 15px; align-items: center;">
-            <span style="font-size: 0.85rem; color: #64748b; background: #f1f5f9; padding: 4px 10px; border-radius: 6px;">Excluyendo planes de pago activos</span>
-        </div>
+    <!-- Filtros de Lead Scoring -->
+    <div class="card" style="margin-bottom: 2rem; padding: 1.5rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;">
+        <form action="<?= site_url('admin/ia-marketing') ?>" method="GET" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+            <div style="flex: 3; min-width: 250px;">
+                <label for="liveSearch" style="display: block; font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 6px;">Búsqueda Instantánea</label>
+                <input type="text" id="liveSearch" class="input" placeholder="Nombre o email..." style="width: 100%;">
+            </div>
+            
+            <div style="flex: 1; min-width: 110px;">
+                <label for="days_inactive" style="display: block; font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 6px;">Días Inactivo</label>
+                <input type="number" name="days_inactive" id="days_inactive" class="input" value="<?= $filters['days_inactive'] ?>" placeholder="0" min="0" style="width: 100%;">
+            </div>
+
+            <div style="flex: 1; min-width: 110px;">
+                <label for="min_searches" style="display: block; font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 6px;">Mín. Búsquedas</label>
+                <input type="number" name="min_searches" id="min_searches" class="input" value="<?= $filters['min_searches'] ?>" placeholder="0" min="0" style="width: 100%;">
+            </div>
+
+            <div style="flex: 1; min-width: 100px;">
+                <label for="min_api" style="display: block; font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 6px;">Min. API</label>
+                <input type="number" name="min_api" id="min_api" class="input" value="<?= $filters['min_api'] ?>" placeholder="0" min="0" style="width: 100%;">
+            </div>
+
+            <div style="flex: 1; min-width: 130px;">
+                <label for="email_status" style="display: block; font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 6px;">Email</label>
+                <select name="email_status" id="email_status" class="input" style="width: 100%; height: 42px; padding: 0 10px;">
+                    <option value="all" <?= $filters['email_status'] == 'all' ? 'selected' : '' ?>>Todos</option>
+                    <option value="never" <?= $filters['email_status'] == 'never' ? 'selected' : '' ?>>Nunca enviado</option>
+                    <option value="at_least_one" <?= $filters['email_status'] == 'at_least_one' ? 'selected' : '' ?>>Al menos uno</option>
+                </select>
+            </div>
+
+            <div style="flex: 1; min-width: 150px;">
+                <label for="sort_by" style="display: block; font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 6px;">Ordenar por</label>
+                <select name="sort_by" id="sort_by" class="input" style="width: 100%; height: 42px; padding: 0 10px;">
+                    <option value="score" <?= $filters['sort_by'] == 'score' ? 'selected' : '' ?>>Lead Score (Recomendado)</option>
+                    <option value="created_at" <?= $filters['sort_by'] == 'created_at' ? 'selected' : '' ?>>Fecha Registro</option>
+                    <option value="last_login_at" <?= $filters['sort_by'] == 'last_login_at' ? 'selected' : '' ?>>Último Login</option>
+                    <option value="total_searches" <?= $filters['sort_by'] == 'total_searches' ? 'selected' : '' ?>>Más Búsquedas</option>
+                    <option value="total_api_requests" <?= $filters['sort_by'] == 'total_api_requests' ? 'selected' : '' ?>>Más API</option>
+                </select>
+            </div>
+
+            <div style="width: 100px;">
+                <label for="sort_dir" style="display: block; font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 6px;">Orden</label>
+                <select name="sort_dir" id="sort_dir" class="input" style="width: 100%; height: 42px; padding: 0 10px;">
+                    <option value="DESC" <?= $filters['sort_dir'] == 'DESC' ? 'selected' : '' ?>>DESC</option>
+                    <option value="ASC" <?= $filters['sort_dir'] == 'ASC' ? 'selected' : '' ?>>ASC</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-shrink: 0; padding-bottom: 2px;">
+                <button type="submit" class="btn" style="background: #10b981; border: none; min-width: 100px;">Filtrar</button>
+                <a href="<?= site_url('admin/ia-marketing') ?>" class="btn ghost" style="padding: 10px 15px; border: 1px solid #e2e8f0; min-width: 100px; text-align: center;">Limpiar</a>
+            </div>
+        </form>
     </div>
 
     <div class="card" style="overflow-x: auto;">
