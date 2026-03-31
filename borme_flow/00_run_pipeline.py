@@ -35,6 +35,7 @@ PIPELINE = [
     "04_insert_new_companies.py",
     "05_associate_companies.py",
     "06_extract_from_borme_text.py",  # Extrae administradores y fecha de constitución
+    "fill_radar_scores.py --all",
 ]
 
 LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pipeline_execution.log")
@@ -46,31 +47,36 @@ def log(message):
     with open(LOG_FILE, "a", encoding="utf-8") as f:
         f.write(entry + "\n")
 
-def run_script(script_name):
-    log(f"--- Ejecutando: {script_name} ---")
+def run_script(script_cmd):
+    log(f"--- Ejecutando: {script_cmd} ---")
+    
+    parts = script_cmd.split()
+    script_name = parts[0]
+    args = parts[1:]
+    
     script_path = os.path.join(os.path.dirname(__file__), script_name)
     
     # Usamos el mismo intérprete de python que está ejecutando este script
     # Esto es crucial en hostings con Virtualenv
     try:
         result = subprocess.run(
-            [sys.executable, script_path],
+            [sys.executable, script_path] + args,
             capture_output=True,
             text=True,
             encoding="utf-8",
             errors="replace",
             check=True
         )
-        log(f"Finalizado con éxito: {script_name}")
+        log(f"Finalizado con éxito: {script_cmd}")
         return True
     except subprocess.CalledProcessError as e:
-        err_msg = f"ERROR en {script_name}\nSalida de Error: {e.stderr}"
+        err_msg = f"ERROR en {script_cmd}\nSalida de Error: {e.stderr}"
         log(err_msg)
         if sentry_sdk and sentry_dsn:
             sentry_sdk.capture_message(err_msg, level="error")
         return False
     except Exception as e:
-        err_msg = f"Excepción inesperada en {script_name}: {str(e)}"
+        err_msg = f"Excepción inesperada en {script_cmd}: {str(e)}"
         log(err_msg)
         if sentry_sdk and sentry_dsn:
             sentry_sdk.capture_exception(e)

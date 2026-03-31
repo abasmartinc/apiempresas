@@ -819,85 +819,66 @@ class Dashboard extends BaseController
             return $this->response->setStatusCode(403)->setBody('Acceso no permitido');
         }
 
-        $cacheName = 'admin_dashboard_kpis_consolidated';
-        $data = cache($cacheName);
+        $ym = date('Y-m');
+        $today = date('Y-m-d');
+        $midnight = $today . ' 00:00:00';
 
-        if (!$data) {
-            $ym = date('Y-m');
-            $today = date('Y-m-d');
-            $midnight = $today . ' 00:00:00';
+        // Inicializar con valores por defecto
+        $data = [
+            // KPIs de Dashboard (Dashboard.php)
+            'users_total' => '...',
+            'users_active' => '...',
+            'subs_active' => '...',
+            'api_today' => '...',
+            'api_month' => '...',
+            'api_error_rate' => '...',
+            'api_latency_avg' => '...',
+            'revenue_month' => '...',
+            'blocked_ips_count' => '...',
+            'searches_zero_results' => '...',
+            'searches_resolved_count' => '...',
+            
+            // KPIs de Empresas (Companies.php)
+            'total' => '...',
+            'added_today' => '...',
+            'sin_cif' => '...',
+            'sin_direccion' => '...',
+            'sin_estado' => '...',
+            'sin_cnae' => '...',
+            'sin_registro_mercantil' => '...',
+            
+            'stats_updated_at' => date('Y-m-d H:i:s')
+        ];
 
-            // Inicializar con valores por defecto
-            $data = [
-                // KPIs de Dashboard (Dashboard.php)
-                'users_total' => '...',
-                'users_active' => '...',
-                'subs_active' => '...',
-                'api_today' => '...',
-                'api_month' => '...',
-                'api_error_rate' => '...',
-                'api_latency_avg' => '...',
-                'revenue_month' => '...',
-                'blocked_ips_count' => '...',
-                'searches_zero_results' => '...',
-                'searches_resolved_count' => '...',
-                
-                // KPIs de Empresas (Companies.php)
-                'total' => '...',
-                'added_today' => '...',
-                'sin_cif' => '...',
-                'sin_direccion' => '...',
-                'sin_estado' => '...',
-                'sin_cnae' => '...',
-                'sin_registro_mercantil' => '...',
-                
-                'stats_updated_at' => null
-            ];
+        try {
+            // KPIs Rápidos (Dashboard)
+            $data['users_total'] = number_format($this->userModel->countAllResults(), 0, ',', '.');
+            $data['users_active'] = number_format($this->userModel->where('is_active', 1)->countAllResults(), 0, ',', '.');
+            $data['subs_active'] = number_format($this->subscriptionModel->where('status', 'active')->countAllResults(), 0, ',', '.');
+            
+            $data['api_today'] = number_format($this->apiRequestsModel->where('created_at >=', $midnight)->countAllResults(), 0, ',', '.');
+            $data['api_month'] = number_format($this->apiRequestsModel->countRequestsForMonth($ym), 0, ',', '.');
+            $data['api_error_rate'] = $this->apiRequestsModel->getErrorRate() . '%';
+            $data['api_latency_avg'] = $this->apiRequestsModel->getAverageLatency() . 'ms';
+            
+            $data['revenue_month'] = number_format($this->invoiceModel->getMonthlyRevenue($ym)->total ?? 0, 2, ',', '.') . ' €';
+            $data['blocked_ips_count'] = number_format($this->blockedIpModel->countAllResults(), 0, ',', '.');
+            $data['searches_zero_results'] = number_format($this->searchLogModel->countZeroResults($ym), 0, ',', '.');
+            $data['searches_resolved_count'] = number_format($this->searchLogModel->countResolvedGaps(), 0, ',', '.');
+            
+            // KPIs de Empresas (Empresas) - Cargados directamente de la BD (sin caché)
+            $data['total'] = number_format($this->companyModel->countAllResults(), 0, ',', '.');
+            $data['added_today'] = number_format($this->companyModel->where('created_at >=', $midnight)->countAllResults(), 0, ',', '.');
+            $data['sin_cif'] = number_format($this->companyModel->groupStart()->where('cif', '')->orWhere('cif', null)->groupEnd()->countAllResults(), 0, ',', '.');
+            $data['sin_direccion'] = number_format($this->companyModel->groupStart()->where('address', '')->orWhere('address', null)->groupEnd()->countAllResults(), 0, ',', '.');
+            $data['sin_estado'] = number_format($this->companyModel->groupStart()->where('estado', '')->orWhere('estado', null)->groupEnd()->countAllResults(), 0, ',', '.');
+            $data['sin_cnae'] = number_format($this->companyModel->groupStart()->where('cnae_code', '')->orWhere('cnae_code', null)->groupEnd()->countAllResults(), 0, ',', '.');
+            $data['sin_registro_mercantil'] = number_format($this->companyModel->groupStart()->where('registro_mercantil', '')->orWhere('registro_mercantil', null)->groupEnd()->countAllResults(), 0, ',', '.');
 
-            try {
-                // KPIs Rápidos (Dashboard)
-                $data['users_total'] = number_format($this->userModel->countAllResults(), 0, ',', '.');
-                $data['users_active'] = number_format($this->userModel->where('is_active', 1)->countAllResults(), 0, ',', '.');
-                $data['subs_active'] = number_format($this->subscriptionModel->where('status', 'active')->countAllResults(), 0, ',', '.');
-                
-                $data['api_today'] = number_format($this->apiRequestsModel->where('created_at >=', $midnight)->countAllResults(), 0, ',', '.');
-                $data['api_month'] = number_format($this->apiRequestsModel->countRequestsForMonth($ym), 0, ',', '.');
-                $data['api_error_rate'] = $this->apiRequestsModel->getErrorRate() . '%';
-                $data['api_latency_avg'] = $this->apiRequestsModel->getAverageLatency() . 'ms';
-                
-                $data['revenue_month'] = number_format($this->invoiceModel->getMonthlyRevenue($ym)->total ?? 0, 2, ',', '.') . ' €';
-                $data['blocked_ips_count'] = number_format($this->blockedIpModel->countAllResults(), 0, ',', '.');
-                $data['searches_zero_results'] = number_format($this->searchLogModel->countZeroResults($ym), 0, ',', '.');
-                $data['searches_resolved_count'] = number_format($this->searchLogModel->countResolvedGaps(), 0, ',', '.');
-                
-                // KPIs Rápidos (Empresas)
-                $data['added_today'] = number_format($this->companyModel->where('created_at >=', $midnight)->countAllResults(), 0, ',', '.');
-            } catch (\Exception $e) {
-                log_message('error', 'Error loading fast KPIs: ' . $e->getMessage());
-            }
-
-            // KPIs Pesados (Persistentes desde system_stats)
-            try {
-                $heavyStats = $this->systemStatsModel->getStat('heavy_kpis');
-                if ($heavyStats) {
-                    $heavyData = json_decode($heavyStats->stat_value, true);
-                    if ($heavyData && is_array($heavyData)) {
-                        $data = array_merge($data, $heavyData);
-                        $data['stats_updated_at'] = $heavyStats->updated_at;
-                    }
-                }
-                
-                // Si faltan datos críticos tras el merge, intentamos cargarlos (fuerza bruta si no hay caché)
-                if ($data['total'] === '...') {
-                    $data['total'] = number_format($this->companyModel->countAllResults(), 0, ',', '.');
-                }
-            } catch (\Exception $e) {
-                log_message('error', 'Error loading heavy KPIs from system_stats: ' . $e->getMessage());
-            }
-
-            // Guardar en caché por 24 horas (86400 segundos)
-            cache()->save($cacheName, $data, 86400);
+        } catch (\Exception $e) {
+            log_message('error', 'Error loading KPIs directly from DB: ' . $e->getMessage());
         }
+
 
         // --- REAL TIME STATS (Calculated every time) ---
         $fiveMinutesAgo = date('Y-m-d H:i:s', strtotime('-5 minutes'));
@@ -946,12 +927,9 @@ class Dashboard extends BaseController
             'sin_registro_mercantil' => number_format($this->companyModel->groupStart()->where('registro_mercantil', '')->orWhere('registro_mercantil', null)->groupEnd()->countAllResults(), 0, ',', '.'),
         ];
 
-        // Guardar en persistencia para que all_kpis_ajax los use
+        // Guardar en persistencia (opcional, por si otros procesos lo usan)
         $this->systemStatsModel->setStat('heavy_kpis', $heavyData);
         
-        // Limpiar caché consolidada para forzar recarga con los nuevos datos pesados
-        cache()->delete('admin_dashboard_kpis_consolidated');
-
         return $this->response->setJSON(['status' => 'success', 'updated_at' => date('Y-m-d H:i:s')]);
     }
 
