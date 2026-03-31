@@ -316,15 +316,15 @@
                         </svg>
                         Usuarios
                     </div>
-                    <div class="kpi-value kpi-async-value" data-type="users_total"><span class="skeleton"></span></div>
+                    <div class="kpi-value kpi-async-value" data-type="users_total"><?= $kpi_users_total ?? '...' ?></div>
                 </div>
                 <div class="kpi-footer">
                     <span style="color: #16a34a; font-weight: 700;"><span class="kpi-async-value"
-                            data-type="users_active"><span class="skeleton" style="width: 40px;"></span></span>
+                            data-type="users_active"><?= $kpi_users_active ?? '...' ?></span>
                         Activos</span>
                     <span style="color: #cbd5e1;">•</span>
                     <span style="color: #6366f1; font-weight: 700;"><span class="kpi-async-value"
-                            data-type="subs_active"><span class="skeleton" style="width: 40px;"></span></span>
+                            data-type="subs_active"><?= $kpi_subs_active ?? '...' ?></span>
                         Suscripciones</span>
                 </div>
             </div>
@@ -340,7 +340,7 @@
                         </svg>
                         Peticiones Hoy
                     </div>
-                    <div class="kpi-value kpi-async-value" data-type="api_today"><span class="skeleton"></span></div>
+                    <div class="kpi-value kpi-async-value" data-type="api_today"><?= $kpi_api_today ?? '...' ?></div>
                 </div>
                 <div class="kpi-footer">
                     <span style="color: #64748b;">Tráfico en tiempo real</span>
@@ -358,7 +358,7 @@
                         </svg>
                         Peticiones Mes
                     </div>
-                    <div class="kpi-value kpi-async-value" data-type="api_month"><span class="skeleton"></span></div>
+                    <div class="kpi-value kpi-async-value" data-type="api_month"><?= $kpi_api_month ?? '...' ?></div>
                 </div>
                 <div class="kpi-footer">
                     <span style="color: #64748b;">Acumulado mensual</span>
@@ -376,8 +376,7 @@
                         </svg>
                         Ingresos Mes
                     </div>
-                    <div class="kpi-value kpi-async-value" data-type="revenue_month"><span class="skeleton"></span>
-                    </div>
+                    <div class="kpi-value kpi-async-value" data-type="revenue_month"><?= $kpi_revenue_month ?? '...' ?></div>
                 </div>
                 <div class="kpi-footer">
                     <span style="color: #64748b;">Facturación total (Pagado)</span>
@@ -395,8 +394,7 @@
                         </svg>
                         Tasa de Error
                     </div>
-                    <div class="kpi-value kpi-async-value" data-type="api_error_rate"><span class="skeleton"></span>
-                    </div>
+                    <div class="kpi-value kpi-async-value" data-type="api_error_rate"><?= $kpi_api_error_rate ?? '...' ?></div>
                 </div>
                 <div class="kpi-footer">
                     <span style="color: #64748b;">Peticiones con error (4xx/5xx)</span>
@@ -414,8 +412,7 @@
                         </svg>
                         Latencia Media
                     </div>
-                    <div class="kpi-value kpi-async-value" data-type="api_latency_avg"><span class="skeleton"></span>
-                    </div>
+                    <div class="kpi-value kpi-async-value" data-type="api_latency_avg"><?= $kpi_api_latency_avg ?? '...' ?></div>
                 </div>
                 <div class="kpi-footer">
                     <span style="color: #64748b;">Tiempo de respuesta medio</span>
@@ -433,8 +430,7 @@
                         </svg>
                         IPs Bloqueadas
                     </div>
-                    <div class="kpi-value kpi-async-value" data-type="blocked_ips_count"><span class="skeleton"></span>
-                    </div>
+                    <div class="kpi-value kpi-async-value" data-type="blocked_ips_count"><?= $kpi_blocked_ips_count ?? '...' ?></div>
                 </div>
                 <div class="kpi-footer">
                     <span style="color: #64748b;">Acceso denegado actualmente</span>
@@ -761,8 +757,8 @@
                         });
                 }
 
-                // Iniciar carga de KPIs
-                loadKpis();
+                // En el dashboard del admin ya no cargamos inicialmente por AJAX
+                // loadKpis();
 
                 // Lógica de cuenta atrás para el refresco
                 let timeLeft = 60;

@@ -5,6 +5,10 @@ use App\Models\ApikeysModel;
 use App\Models\ApiRequestsModel;
 use App\Models\UserModel;
 use App\Models\UsersuscriptionsModel;
+use App\Models\SubscriptionModel;
+use App\Models\SearchLogModel;
+use App\Models\InvoiceModel;
+use App\Models\BlockedIpModel;
 
 
 class Dashboard extends BaseController
@@ -64,6 +68,36 @@ class Dashboard extends BaseController
             }
             $data['online_users_html'] = $html;
             // --------------------------
+
+            // --- Full KPIs for Admin (Moved from AJAX to Controller) ---
+            $ym = date('Y-m');
+            $today = date('Y-m-d');
+            $midnight = $today . ' 00:00:00';
+
+            $subscriptionModel = new SubscriptionModel();
+            $invoiceModel      = new InvoiceModel();
+            $blockedIpModel    = new BlockedIpModel();
+            $searchLogModel    = new SearchLogModel();
+
+            try {
+                $data['kpi_users_total']  = number_format($this->userModel->countAllResults(), 0, ',', '.');
+                $data['kpi_users_active'] = number_format($this->userModel->where('is_active', 1)->countAllResults(), 0, ',', '.');
+                $data['kpi_subs_active']  = number_format($subscriptionModel->where('status', 'active')->countAllResults(), 0, ',', '.');
+
+                $data['kpi_api_today']      = number_format($this->ApiRequestsModel->where('created_at >=', $midnight)->countAllResults(), 0, ',', '.');
+                $data['kpi_api_month']      = number_format($this->ApiRequestsModel->countRequestsForMonth($ym), 0, ',', '.');
+                $data['kpi_api_error_rate'] = $this->ApiRequestsModel->getErrorRate() . '%';
+                $data['kpi_api_latency_avg'] = $this->ApiRequestsModel->getAverageLatency() . 'ms';
+
+                $data['kpi_revenue_month']     = number_format($invoiceModel->getMonthlyRevenue($ym)->total ?? 0, 2, ',', '.') . ' €';
+                $data['kpi_blocked_ips_count'] = number_format($blockedIpModel->countAllResults(), 0, ',', '.');
+                
+                // Estos campos no se usan en la vista actual pero estaban en el AJAX, los pasamos por si acaso
+                $data['kpi_searches_zero_results']   = number_format($searchLogModel->countZeroResults($ym), 0, ',', '.');
+                $data['kpi_searches_resolved_count'] = number_format($searchLogModel->countResolvedGaps(), 0, ',', '.');
+            } catch (\Exception $e) {
+                log_message('error', 'Error loading Dashboard KPIs in Controller: ' . $e->getMessage());
+            }
 
             return view('admin/dashboard', $data);
         }
