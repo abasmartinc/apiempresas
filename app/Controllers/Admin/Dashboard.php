@@ -838,15 +838,6 @@ class Dashboard extends BaseController
             'searches_zero_results' => '...',
             'searches_resolved_count' => '...',
             
-            // KPIs de Empresas (Companies.php)
-            'total' => '...',
-            'added_today' => '...',
-            'sin_cif' => '...',
-            'sin_direccion' => '...',
-            'sin_estado' => '...',
-            'sin_cnae' => '...',
-            'sin_registro_mercantil' => '...',
-            
             'stats_updated_at' => date('Y-m-d H:i:s')
         ];
 
@@ -865,19 +856,11 @@ class Dashboard extends BaseController
             $data['blocked_ips_count'] = number_format($this->blockedIpModel->countAllResults(), 0, ',', '.');
             $data['searches_zero_results'] = number_format($this->searchLogModel->countZeroResults($ym), 0, ',', '.');
             $data['searches_resolved_count'] = number_format($this->searchLogModel->countResolvedGaps(), 0, ',', '.');
-            
-            // KPIs de Empresas (Empresas) - Cargados directamente de la BD (sin caché)
-            $data['total'] = number_format($this->companyModel->countAllResults(), 0, ',', '.');
-            $data['added_today'] = number_format($this->companyModel->where('created_at >=', $midnight)->countAllResults(), 0, ',', '.');
-            $data['sin_cif'] = number_format($this->companyModel->groupStart()->where('cif', '')->orWhere('cif', null)->groupEnd()->countAllResults(), 0, ',', '.');
-            $data['sin_direccion'] = number_format($this->companyModel->groupStart()->where('address', '')->orWhere('address', null)->groupEnd()->countAllResults(), 0, ',', '.');
-            $data['sin_estado'] = number_format($this->companyModel->groupStart()->where('estado', '')->orWhere('estado', null)->groupEnd()->countAllResults(), 0, ',', '.');
-            $data['sin_cnae'] = number_format($this->companyModel->groupStart()->where('cnae_code', '')->orWhere('cnae_code', null)->groupEnd()->countAllResults(), 0, ',', '.');
-            $data['sin_registro_mercantil'] = number_format($this->companyModel->groupStart()->where('registro_mercantil', '')->orWhere('registro_mercantil', null)->groupEnd()->countAllResults(), 0, ',', '.');
 
         } catch (\Exception $e) {
-            log_message('error', 'Error loading KPIs directly from DB: ' . $e->getMessage());
+            log_message('error', 'Error loading fast KPIs: ' . $e->getMessage());
         }
+
 
 
         // --- REAL TIME STATS (Calculated every time) ---
@@ -908,117 +891,9 @@ class Dashboard extends BaseController
         return $this->response->setJSON($data);
     }
 
-    /**
-     * Fuerza el refresco de los KPIs pesados (AJAX)
-     */
-    public function refresh_kpis_ajax()
-    {
-        if (!$this->request->isAJAX()) {
-            return $this->response->setStatusCode(403)->setBody('Acceso no permitido');
-        }
 
-        // Calcular KPIs pesados de empresas
-        $heavyData = [
-            'total' => number_format($this->companyModel->countAllResults(), 0, ',', '.'),
-            'sin_cif' => number_format($this->companyModel->groupStart()->where('cif', '')->orWhere('cif', null)->groupEnd()->countAllResults(), 0, ',', '.'),
-            'sin_direccion' => number_format($this->companyModel->groupStart()->where('address', '')->orWhere('address', null)->groupEnd()->countAllResults(), 0, ',', '.'),
-            'sin_estado' => number_format($this->companyModel->groupStart()->where('estado', '')->orWhere('estado', null)->groupEnd()->countAllResults(), 0, ',', '.'),
-            'sin_cnae' => number_format($this->companyModel->groupStart()->where('cnae_code', '')->orWhere('cnae_code', null)->groupEnd()->countAllResults(), 0, ',', '.'),
-            'sin_registro_mercantil' => number_format($this->companyModel->groupStart()->where('registro_mercantil', '')->orWhere('registro_mercantil', null)->groupEnd()->countAllResults(), 0, ',', '.'),
-        ];
 
-        // Guardar en persistencia (opcional, por si otros procesos lo usan)
-        $this->systemStatsModel->setStat('heavy_kpis', $heavyData);
-        
-        return $this->response->setJSON(['status' => 'success', 'updated_at' => date('Y-m-d H:i:s')]);
-    }
 
-    /**
-     * Obtiene un KPI específico mediante AJAX (Legacy / Fallback)
-     */
-    public function company_kpi_ajax($type)
-    {
-        if (!$this->request->isAJAX()) {
-            return $this->response->setStatusCode(403)->setBody('Acceso no permitido');
-        }
-
-        $value = 0;
-        switch ($type) {
-            case 'total':
-                $value = $this->companyModel->countAllResults();
-                break;
-            case 'companies_active':
-                $value = $this->companyModel->where('estado', 'ACTIVA')->countAllResults();
-                break;
-            case 'sin_cif':
-                $value = $this->companyModel->groupStart()->where('cif', '')->orWhere('cif', null)->groupEnd()->countAllResults();
-                break;
-            case 'sin_direccion':
-                $value = $this->companyModel->groupStart()->where('address', '')->orWhere('address', null)->groupEnd()->countAllResults();
-                break;
-            case 'sin_estado':
-                $value = $this->companyModel->groupStart()->where('estado', '')->orWhere('estado', null)->groupEnd()->countAllResults();
-                break;
-            case 'sin_cnae':
-                $value = $this->companyModel->groupStart()->where('cnae_code', '')->orWhere('cnae_code', null)->groupEnd()->countAllResults();
-                break;
-            case 'sin_registro_mercantil':
-                $value = $this->companyModel->groupStart()->where('registro_mercantil', '')->orWhere('registro_mercantil', null)->groupEnd()->countAllResults();
-                break;
-            case 'added_today':
-                $midnight = date('Y-m-d') . ' 00:00:00';
-                $value = $this->companyModel->where('created_at >=', $midnight)->countAllResults();
-                break;
-            case 'users_total':
-                $value = $this->userModel->countAllResults();
-                break;
-            case 'users_active':
-                $value = $this->userModel->where('is_active', 1)->countAllResults();
-                break;
-            case 'subs_active':
-                $value = $this->subscriptionModel->where('status', 'active')->countAllResults();
-                break;
-            case 'api_today':
-                $midnight = date('Y-m-d') . ' 00:00:00';
-                $value = $this->apiRequestsModel->where('created_at >=', $midnight)->countAllResults();
-                break;
-            case 'api_month':
-                $value = $this->apiRequestsModel->countRequestsForMonth(date('Y-m'));
-                break;
-            case 'revenue_month':
-                $res = $this->invoiceModel->getMonthlyRevenue(date('Y-m'));
-                $value = $res->total ?? 0;
-                return $this->response->setJSON([
-                    'value' => number_format($value, 2, ',', '.') . ' €'
-                ]);
-            case 'api_error_rate':
-                $value = $this->apiRequestsModel->getErrorRate();
-                return $this->response->setJSON([
-                    'value' => $value . '%'
-                ]);
-            case 'api_latency_avg':
-                $value = $this->apiRequestsModel->getAverageLatency();
-                return $this->response->setJSON([
-                    'value' => $value . 'ms'
-                ]);
-            case 'blocked_ips_count':
-                $value = $this->blockedIpModel->countAllResults();
-                break;
-            case 'searches_zero_results':
-                $value = $this->searchLogModel->countZeroResults(date('Y-m'));
-                break;
-            case 'searches_resolved_count':
-                $value = $this->searchLogModel->countResolvedGaps();
-                break;
-            default:
-                $value = 0;
-                break;
-        }
-
-        return $this->response->setJSON([
-            'value' => number_format($value, 0, ',', '.')
-        ]);
-    }
 
 
     /**

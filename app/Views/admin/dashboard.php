@@ -757,18 +757,7 @@
                                 el.innerHTML = errorMsg;
                             });
 
-                            // Mostrar mensaje de ayuda si hay timeout
-                            if (err.name === 'AbortError') {
-                                Swal.fire({
-                                    title: 'Carga lenta de KPIs',
-                                    html: 'Los KPIs están tardando más de lo esperado.<br><br>' +
-                                        '<strong>Solución:</strong> Ejecuta el script de inicialización:<br>' +
-                                        '<code style="background: #f1f5f9; padding: 8px; border-radius: 4px; display: inline-block; margin-top: 8px;">php init_kpis.php</code>',
-                                    icon: 'warning',
-                                    confirmButtonColor: '#2152ff',
-                                    confirmButtonText: 'Entendido'
-                                });
-                            }
+
                         });
                 }
 
@@ -834,54 +823,7 @@
                     });
                 }
 
-                // Actualizar KPIs manualmente
-                const refreshKpisBtn = document.getElementById('btn-refresh-kpis');
-                if (refreshKpisBtn) {
-                    refreshKpisBtn.addEventListener('click', function (e) {
-                        e.preventDefault();
 
-                        Swal.fire({
-                            title: '¿Actualizar KPIs?',
-                            text: "Esto recalculará todas las estadísticas de empresas. Puede tardar 10-30 segundos.",
-                            icon: 'question',
-                            showCancelButton: true,
-                            confirmButtonColor: '#2152ff',
-                            cancelButtonColor: '#64748b',
-                            confirmButtonText: 'Sí, actualizar',
-                            cancelButtonText: 'Cancelar'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                Swal.fire({
-                                    title: 'Actualizando KPIs...',
-                                    html: 'Por favor espera, esto puede tardar hasta 30 segundos.',
-                                    allowOutsideClick: false,
-                                    didOpen: () => { Swal.showLoading(); }
-                                });
-
-                                fetch('<?= site_url('admin/kpis-refresh') ?>', {
-                                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                                })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        Swal.fire({
-                                            title: data.status === 'success' ? '¡Actualizado!' : 'Error',
-                                            html: data.status === 'success'
-                                                ? 'KPIs actualizados correctamente.<br><small>Última actualización: ' + data.updated_at + '</small>'
-                                                : 'No se pudieron actualizar los KPIs.',
-                                            icon: data.status === 'success' ? 'success' : 'error',
-                                            confirmButtonColor: '#2152ff'
-                                        }).then(() => {
-                                            if (data.status === 'success') { loadKpis(); }
-                                        });
-                                    })
-                                    .catch(err => {
-                                        Swal.fire('Error', 'No se pudo completar la actualización.', 'error');
-                                        console.error('Error refreshing KPIs:', err);
-                                    });
-                            }
-                        });
-                    });
-                }
             });
         </script>
     </main>
