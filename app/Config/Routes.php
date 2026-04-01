@@ -83,6 +83,10 @@ $routes->get('e/c/(:any)', 'EmailTracking::click/$1');
 $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function ($routes) {
     $routes->get('api/v1/companies', 'Api\V1\CompaniesByCif::index');
     $routes->get('api/v1/companies/search', 'Api\V1\CompaniesSearch::index');
+
+    // Dedicated Professional Plan routes
+    $routes->get('api/v1/professional/search', 'Api\V1\Professional::search');
+    $routes->get('api/v1/professional/details', 'Api\V1\Professional::details');
 });
 // ----------- API ----------- //
 

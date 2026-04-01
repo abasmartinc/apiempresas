@@ -129,7 +129,8 @@ class ApiKeyFilter implements FilterInterface
             $currentUsage = $usageRow ? (int)$usageRow->requests_count : 0;
 
             // Bloquear si excede
-            if ($currentUsage >= $monthlyQuota) {
+            // EXCEPCIÓN: El Plan Professional (ID 7) admite excedentes (overage)
+            if ($currentUsage >= $monthlyQuota && (int)$planId !== 7) {
                 return service('response')
                     ->setStatusCode(429) // Too Many Requests
                     ->setJSON([
@@ -139,6 +140,11 @@ class ApiKeyFilter implements FilterInterface
                         'current_usage' => $currentUsage,
                         'upgrade_url' => site_url('billing/manage') // O link directo a upgrade
                     ]);
+            }
+
+            // --- Notificación de Umbral (42.500 en últimos 30 días) para Plan Professional ---
+            if ((int)$planId === 7) {
+                $this->checkThresholdNotification($db, (int)$row->user_id);
             }
 
         } catch (\Throwable $e) {
@@ -222,7 +228,12 @@ class ApiKeyFilter implements FilterInterface
             }
 
             // 2) Upsert contador diario (si existe la tabla)
-            if ($db->tableExists('api_usage_daily')) {
+            $skipBilling = $request->api_skip_billing ?? false;
+            if (!$skipBilling && (strpos($endpoint, 'api/v1/professional/search') !== false)) {
+                $skipBilling = true;
+            }
+
+            if ($db->tableExists('api_usage_daily') && !$skipBilling) {
                 $planId = (int)($meta['plan_id'] ?? 1);
 
                 // MySQL upsert por UNIQUE(user_id, plan_id, date)
@@ -245,7 +256,58 @@ class ApiKeyFilter implements FilterInterface
             // (Opcional) header útil para soporte / trazabilidad (no cambia body)
             $response->setHeader('X-Request-Id', (string)$meta['request_id']);
         } catch (\Throwable $e) {
-            log_message('error', '[ApiKeyFilter::after:usage_log] ' . $e->getMessage());
+            log_message('error', '[ApiKeyFilter::after] ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Verifica si se ha alcanzado el umbral de 42.500 peticiones en los últimos 30 días
+     * y envía un correo de notificación.
+     */
+    protected function checkThresholdNotification($db, int $userId)
+    {
+        try {
+            // 1. Calcular consumo últimos 30 días
+            $thirtyDaysAgo = date('Y-m-d', strtotime('-30 days'));
+            $usage = $db->table('api_usage_daily')
+                ->selectSum('requests_count')
+                ->where('user_id', $userId)
+                ->where('date >=', $thirtyDaysAgo)
+                ->get()
+                ->getRow();
+
+            $total = $usage ? (int)$usage->requests_count : 0;
+
+            if ($total >= 42500) {
+                // 2. Evitar spam (usamos caché simple por 24h)
+                $cacheKey = "threshold_notif_sent_{$userId}";
+                if (cache()->get($cacheKey)) {
+                    return;
+                }
+
+                // 3. Enviar correo
+                $email = \Config\Services::email();
+                $email->setFrom('soporte@apiempresas.es', 'APIEmpresas Support');
+                $email->setTo('papelo.amh@gmail.com');
+                $email->setSubject('ALERTA: Umbral de consumo alcanzado (Plan Professional)');
+                
+                $message = "Hola,\n\n"
+                         . "El cliente del Plan Professional (ID Usuario: {$userId}) ha alcanzado el umbral de 42.500 peticiones en los últimos 30 días.\n\n"
+                         . "Consumo detectado: " . number_format($total, 0, ',', '.') . " peticiones.\n"
+                         . "Fecha/Hora: " . date('Y-m-d H:i:s') . "\n\n"
+                         . "Este es un aviso automático para control de facturación de excedentes.";
+
+                $email->setMessage($message);
+                
+                if ($email->send()) {
+                    // Marcar como enviado por 24 horas para no repetir en cada request
+                    cache()->save($cacheKey, true, 86400);
+                } else {
+                    log_message('error', '[ApiKeyFilter::checkThresholdNotification] Error al enviar email: ' . $email->printDebugger(['headers']));
+                }
+            }
+        } catch (\Throwable $e) {
+            log_message('error', '[ApiKeyFilter::checkThresholdNotification] ' . $e->getMessage());
         }
     }
 }
