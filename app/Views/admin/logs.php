@@ -2,6 +2,69 @@
 <html lang="es">
 <head>
     <?= view('partials/head', ['title' => $title]) ?>
+    <style>
+        :root {
+            --kpi-blue: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+            --kpi-green: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --kpi-orange: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --kpi-purple: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            --kpi-rose: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+        }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+        .kpi-card { 
+            position: relative;
+            overflow: hidden;
+            background: white; 
+            border-radius: 24px; 
+            padding: 2rem; 
+            border: 1px solid rgba(255, 255, 255, 0.7); 
+            display: flex; 
+            flex-direction: column; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); 
+        }
+        .kpi-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1); 
+        }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 100px; height: 100px;
+            background: var(--kpi-color);
+            opacity: 0.05;
+            border-radius: 0 0 0 100%;
+            pointer-events: none;
+        }
+        .kpi-icon-wrapper {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            background: var(--kpi-color);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 1.5rem;
+            color: white;
+            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+        }
+        .kpi-label { font-size: 0.85rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        .kpi-value { font-size: 2.5rem; font-weight: 900; color: #1e293b; letter-spacing: -0.02em; margin-bottom: 0.5rem; line-height: 1; }
+        .kpi-sub { font-size: 0.85rem; color: #94a3b8; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: #f1f5f9;
+            border-radius: 100px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--kpi-color);
+            border-radius: 100px;
+            transition: width 1s ease-out;
+        }
+        .pill { padding: 2px 8px; border-radius: 6px; font-weight: 600; }
+    </style>
 </head>
 <body class="admin-body">
 <div class="bg-halo" aria-hidden="true"></div>
@@ -13,6 +76,48 @@
         <h1 class="title">Logs de Búsqueda</h1>
         <div style="display: flex; gap: 10px;">
             <a href="<?= site_url('dashboard') ?>" class="btn ghost">Volver al Dashboard</a>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+        <div class="kpi-card" style="--kpi-color: var(--kpi-blue);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+            <span class="kpi-label">Búsquedas Totales</span>
+            <span class="kpi-value"><?= number_format($stats['total_searches'], 0, ',', '.') ?></span>
+            <span class="kpi-sub">Histórico total acumulado</span>
+        </div>
+
+        <div class="kpi-card" style="--kpi-color: var(--kpi-orange);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline><line x1="9" y1="13" x2="15" y2="13"></line><line x1="9" y1="17" x2="15" y2="17"></line><line x1="9" y1="9" x2="10" y2="9"></line></svg>
+            </div>
+            <span class="kpi-label">Sin Resultados</span>
+            <span class="kpi-value"><?= number_format($stats['no_results'], 0, ',', '.') ?></span>
+            <span class="kpi-sub">CIFs no encontrados en DB</span>
+        </div>
+
+        <div class="kpi-card" style="--kpi-color: var(--kpi-green);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <span class="kpi-label">Tasa de Éxito</span>
+            <span class="kpi-value"><?= number_format($stats['success_rate'], 1, ',', '.') ?>%</span>
+            <span class="kpi-sub">Cifras de efectividad de búsqueda</span>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: <?= $stats['success_rate'] ?>%;"></div>
+            </div>
+        </div>
+
+        <div class="kpi-card" style="--kpi-color: var(--kpi-purple);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <span class="kpi-label">Búsquedas Hoy</span>
+            <span class="kpi-value"><?= number_format($stats['searches_today'], 0, ',', '.') ?></span>
+            <span class="kpi-sub">Actividad en las últimas 24h</span>
         </div>
     </div>
 

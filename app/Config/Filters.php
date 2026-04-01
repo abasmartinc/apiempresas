@@ -78,14 +78,14 @@ class Filters extends BaseFilters
     public array $globals = [
         'before' => [
              'botprotection', // Check blocked IPs first
-             'honeypot',
+             'honeypot' => ['except' => ['admin/*']],
              'user_activity',
             // 'csrf',
             // 'invalidchars',
         ],
         'after' => [
             'activity_logger',
-             'honeypot',
+             'honeypot' => ['except' => ['admin/*']],
             // 'secureheaders',
         ],
     ];

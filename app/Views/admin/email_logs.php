@@ -5,8 +5,14 @@
     <!-- Select2 -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
+        :root {
+            --kpi-blue: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+            --kpi-green: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --kpi-orange: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --kpi-purple: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            --kpi-pink: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+        }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        /* Sync with Select2 styles */
         .select2-container--default .select2-selection--single {
             height: 42px !important;
             padding: 6px 12px !important;
@@ -27,19 +33,66 @@
             border-radius: 10px !important;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
         }
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .kpi-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-        .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #cbd5e1; }
-        .kpi-label { font-size: 0.875rem; color: #64748b; font-weight: 500; }
-        .kpi-value { font-size: 1.75rem; font-weight: 700; color: #0f172a; }
-        .kpi-sub { font-size: 0.75rem; color: #94a3b8; }
-        .status-badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
-        .status-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-        .status-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-        .tracking-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        .dot-placeholder { background: #e2e8f0; border: 1px solid #cbd5e1; }
-        .dot-active { background: #22c55e; box-shadow: 0 0 8px rgba(34, 197, 94, 0.4); border: 1px solid #16a34a; }
-        .admin-table-wrapper { background: #fff; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+        .kpi-card { 
+            position: relative;
+            overflow: hidden;
+            background: white; 
+            border-radius: 24px; 
+            padding: 2rem; 
+            border: 1px solid rgba(255, 255, 255, 0.7); 
+            display: flex; 
+            flex-direction: column; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); 
+        }
+        .kpi-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1); 
+        }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 100px; height: 100px;
+            background: var(--kpi-color);
+            opacity: 0.05;
+            border-radius: 0 0 0 100%;
+            pointer-events: none;
+        }
+        .kpi-icon-wrapper {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            background: var(--kpi-color);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 1.5rem;
+            color: white;
+            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+        }
+        .kpi-label { font-size: 0.85rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        .kpi-value { font-size: 2.5rem; font-weight: 900; color: #1e293b; letter-spacing: -0.02em; margin-bottom: 0.5rem; line-height: 1; }
+        .kpi-sub { font-size: 0.85rem; color: #94a3b8; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: #f1f5f9;
+            border-radius: 100px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--kpi-color);
+            border-radius: 100px;
+            transition: width 1s ease-out;
+        }
+        .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .status-success { background: #ecfdf5; color: #065f46; border: 1px solid #d1fae5; }
+        .status-error { background: #fef2f2; color: #991b1b; border: 1px solid #fee2e2; }
+        .tracking-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .dot-placeholder { background: #f1f5f9; border: 2px solid #e2e8f0; }
+        .dot-active { background: #10b981; box-shadow: 0 0 12px rgba(16, 185, 129, 0.5); border: 2px solid #fff; }
+        .admin-table-wrapper { background: #fff; border-radius: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05); overflow: hidden; }
     </style>
 </head>
 <body class="admin-body">
@@ -61,25 +114,52 @@
 
     <!-- KPIs Cards -->
     <div class="kpi-grid">
-        <div class="kpi-card">
+        <div class="kpi-card" style="--kpi-color: var(--kpi-blue);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
+            </div>
             <span class="kpi-label">Total Enviados</span>
-            <span class="kpi-value"><?= number_format($stats['total_sent']) ?></span>
-            <span class="kpi-sub">Emails entregados con éxito</span>
+            <span class="kpi-value"><?= number_format($stats['total_sent'], 0, ',', '.') ?></span>
+            <span class="kpi-sub">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                Confirmados
+            </span>
         </div>
-        <div class="kpi-card">
+
+        <div class="kpi-card" style="--kpi-color: var(--kpi-purple);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+            </div>
             <span class="kpi-label">Tasa de Apertura</span>
-            <span class="kpi-value" style="color: #2152FF;"><?= $stats['open_rate'] ?>%</span>
-            <span class="kpi-sub"><?= $stats['total_opened'] ?> aperturas únicas</span>
+            <span class="kpi-value"><?= $stats['open_rate'] ?>%</span>
+            <span class="kpi-sub"><?= number_format($stats['total_opened'], 0, ',', '.') ?> aperturas únicas</span>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: <?= $stats['open_rate'] ?>%;"></div>
+            </div>
         </div>
-        <div class="kpi-card">
-            <span class="kpi-label">Click-Through Rate (CTR)</span>
-            <span class="kpi-value" style="color: #12b48a;"><?= $stats['click_rate'] ?>%</span>
-            <span class="kpi-sub"><?= $stats['total_clicked'] ?> clics detectados</span>
+
+        <div class="kpi-card" style="--kpi-color: var(--kpi-green);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+            </div>
+            <span class="kpi-label">CTR (Clicks)</span>
+            <span class="kpi-value"><?= $stats['click_rate'] ?>%</span>
+            <span class="kpi-sub"><?= number_format($stats['total_clicked'], 0, ',', '.') ?> clics detectados</span>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: <?= $stats['click_rate'] ?>%;"></div>
+            </div>
         </div>
-        <div class="kpi-card">
-            <span class="kpi-label">Conversión (Logs)</span>
-            <span class="kpi-value" style="color: #f59e0b;"><?= $stats['conversion_rate'] ?>%</span>
-            <span class="kpi-sub"><?= $stats['total_logged'] ?> logins desde email</span>
+
+        <div class="kpi-card" style="--kpi-color: var(--kpi-orange);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <span class="kpi-label">Conversión</span>
+            <span class="kpi-value"><?= $stats['conversion_rate'] ?>%</span>
+            <span class="kpi-sub"><?= number_format($stats['total_logged'], 0, ',', '.') ?> logins registrados</span>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: <?= $stats['conversion_rate'] ?>%;"></div>
+            </div>
         </div>
     </div>
 

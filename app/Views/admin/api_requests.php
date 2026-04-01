@@ -2,6 +2,69 @@
 <html lang="es">
 <head>
     <?= view('partials/head', ['title' => $title]) ?>
+    <style>
+        :root {
+            --kpi-blue: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+            --kpi-green: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --kpi-orange: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --kpi-purple: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            --kpi-rose: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+        }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+        .kpi-card { 
+            position: relative;
+            overflow: hidden;
+            background: white; 
+            border-radius: 24px; 
+            padding: 2rem; 
+            border: 1px solid rgba(255, 255, 255, 0.7); 
+            display: flex; 
+            flex-direction: column; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); 
+        }
+        .kpi-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1); 
+        }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 100px; height: 100px;
+            background: var(--kpi-color);
+            opacity: 0.05;
+            border-radius: 0 0 0 100%;
+            pointer-events: none;
+        }
+        .kpi-icon-wrapper {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            background: var(--kpi-color);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 1.5rem;
+            color: white;
+            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+        }
+        .kpi-label { font-size: 0.85rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        .kpi-value { font-size: 2.3rem; font-weight: 900; color: #1e293b; letter-spacing: -0.02em; margin-bottom: 0.5rem; line-height: 1; }
+        .kpi-sub { font-size: 0.85rem; color: #94a3b8; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: #f1f5f9;
+            border-radius: 100px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--kpi-color);
+            border-radius: 100px;
+            transition: width 1s ease-out;
+        }
+        .pill { padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; text-align: center; }
+    </style>
 </head>
 <body class="admin-body">
 <div class="bg-halo" aria-hidden="true"></div>
@@ -12,6 +75,48 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h1 class="title">Peticiones API</h1>
         <a href="<?= site_url('dashboard') ?>" class="btn ghost">Volver al Dashboard</a>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+        <div class="kpi-card" style="--kpi-color: var(--kpi-blue);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+            </div>
+            <span class="kpi-label">Peticiones (24h)</span>
+            <span class="kpi-value"><?= number_format($stats['requests_24h'], 0, ',', '.') ?></span>
+            <span class="kpi-sub">Volumen total de llamadas</span>
+        </div>
+
+        <div class="kpi-card" style="--kpi-color: var(--kpi-orange);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <span class="kpi-label">Latencia Media</span>
+            <span class="kpi-value"><?= number_format($stats['avg_latency'], 0, ',', '.') ?> <small style="font-size: 1rem; font-weight: 600;">ms</small></span>
+            <span class="kpi-sub">Tiempo de respuesta promedio</span>
+        </div>
+
+        <div class="kpi-card" style="--kpi-color: var(--kpi-rose);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
+            <span class="kpi-label">Tasa de Error</span>
+            <span class="kpi-value"><?= number_format($stats['error_rate'], 1, ',', '.') ?>%</span>
+            <span class="kpi-sub">Peticiones con error (4xx/5xx)</span>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: <?= $stats['error_rate'] ?>%;"></div>
+            </div>
+        </div>
+
+        <div class="kpi-card" style="--kpi-color: var(--kpi-purple);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <span class="kpi-label">Clientes Activos</span>
+            <span class="kpi-value"><?= number_format($stats['active_users'], 0, ',', '.') ?></span>
+            <span class="kpi-sub">Usuarios únicos hoy</span>
+        </div>
     </div>
 
     <div class="card" style="margin-bottom: 2rem; padding: 1.5rem;">

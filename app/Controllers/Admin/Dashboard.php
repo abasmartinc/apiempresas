@@ -80,7 +80,13 @@ class Dashboard extends BaseController
             'pager' => $this->userModel->pager,
             'q' => $q,
             'is_active' => $active,
-            'is_admin' => $admin
+            'is_admin' => $admin,
+            'stats' => [
+                'total_users' => $this->userModel->countAllResults(),
+                'new_users_month' => $this->userModel->where('created_at >=', date('Y-m-01 00:00:00'))->countAllResults(),
+                'active_users_30d' => $this->userModel->where('last_login_at >=', date('Y-m-d H:i:s', strtotime('-30 days')))->countAllResults(),
+                'admin_users' => $this->userModel->where('is_admin', 1)->countAllResults(),
+            ]
         ];
 
         return view('admin/users', $data);
@@ -140,7 +146,17 @@ class Dashboard extends BaseController
             'from_date' => $fromDate,
             'to_date' => $toDate,
             'channel' => $channel,
+            'stats' => [
+                'total_searches' => $this->searchLogModel->countAllResults(),
+                'no_results' => $this->searchLogModel->where('result_count', 0)->countAllResults(),
+                'searches_today' => $this->searchLogModel->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
+            ]
         ];
+
+        // Calcular tasa de éxito
+        $total = $data['stats']['total_searches'];
+        $fail = $data['stats']['no_results'];
+        $data['stats']['success_rate'] = $total > 0 ? round((($total - $fail) / $total) * 100, 1) : 0;
 
         // Determinar qué logs de tipo CIF que fueron 0 ahora existen
         $cifsToCheck = [];
@@ -235,7 +251,13 @@ class Dashboard extends BaseController
             'q' => $q,
             'user_id' => $userId,
             'status_code' => $statusCode,
-            'date' => $date
+            'date' => $date,
+            'stats' => [
+                'requests_24h' => $this->apiRequestsModel->where('created_at >=', date('Y-m-d H:i:s', strtotime('-24 hours')))->countAllResults(),
+                'avg_latency' => $this->apiRequestsModel->getAverageLatency(['created_at >=' => date('Y-m-d H:i:s', strtotime('-24 hours'))]),
+                'error_rate' => $this->apiRequestsModel->getErrorRate(['created_at >=' => date('Y-m-d H:i:s', strtotime('-24 hours'))]),
+                'active_users' => $this->apiRequestsModel->where('created_at >=', date('Y-m-d H:i:s', strtotime('-24 hours')))->select('user_id')->groupBy('user_id')->countAllResults(),
+            ]
         ];
 
         return view('admin/api_requests', $data);
@@ -273,7 +295,13 @@ class Dashboard extends BaseController
             'users' => $this->userModel->orderBy('name', 'ASC')->findAll(),
             'user_id' => $userId,
             'start_date' => $startDate,
-            'end_date' => $endDate
+            'end_date' => $endDate,
+            'stats' => [
+                'total_30d' => $this->apiUsageDailyModel->where('date >=', date('Y-m-d', strtotime('-30 days')))->selectSum('requests_count')->get()->getRowArray()['requests_count'] ?? 0,
+                'avg_daily' => round($this->apiUsageDailyModel->where('date >=', date('Y-m-d', strtotime('-30 days')))->selectAvg('requests_count')->get()->getRowArray()['requests_count'] ?? 0, 1),
+                'peak_daily' => $this->apiUsageDailyModel->where('date >=', date('Y-m-d', strtotime('-30 days')))->selectMax('requests_count')->get()->getRowArray()['requests_count'] ?? 0,
+                'current_month' => $this->apiUsageDailyModel->where('date >=', date('Y-m-01'))->selectSum('requests_count')->get()->getRowArray()['requests_count'] ?? 0,
+            ]
         ];
 
         return view('admin/usage_daily', $data);
@@ -527,7 +555,13 @@ class Dashboard extends BaseController
             'title' => 'Gestión de Facturas',
             'invoices' => $invoiceModel->orderBy('created_at', 'DESC')->paginate(20),
             'pager' => $invoiceModel->pager,
-            'search' => $search
+            'search' => $search,
+            'stats' => [
+                'revenue_month' => $invoiceModel->where('status', 'paid')->where('created_at >=', date('Y-m-01'))->selectSum('total_amount')->get()->getRowArray()['total_amount'] ?? 0,
+                'count_month' => $invoiceModel->where('created_at >=', date('Y-m-01'))->countAllResults(),
+                'avg_ticket' => round($invoiceModel->where('status', 'paid')->where('created_at >=', date('Y-m-01'))->selectAvg('total_amount')->get()->getRowArray()['total_amount'] ?? 0, 2),
+                'pending_count' => $invoiceModel->where('status !=', 'paid')->countAllResults(),
+            ]
         ];
 
         return view('admin/invoices', $data);

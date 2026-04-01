@@ -2,6 +2,68 @@
 <html lang="es">
 <head>
     <?= view('partials/head', ['title' => $title]) ?>
+    <style>
+        :root {
+            --kpi-blue: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+            --kpi-green: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --kpi-orange: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --kpi-purple: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            --kpi-rose: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+        }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+        .kpi-card { 
+            position: relative;
+            overflow: hidden;
+            background: white; 
+            border-radius: 24px; 
+            padding: 2rem; 
+            border: 1px solid rgba(255, 255, 255, 0.7); 
+            display: flex; 
+            flex-direction: column; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); 
+        }
+        .kpi-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1); 
+        }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 100px; height: 100px;
+            background: var(--kpi-color);
+            opacity: 0.05;
+            border-radius: 0 0 0 100%;
+            pointer-events: none;
+        }
+        .kpi-icon-wrapper {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            background: var(--kpi-color);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 1.5rem;
+            color: white;
+            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+        }
+        .kpi-label { font-size: 0.85rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        .kpi-value { font-size: 2.5rem; font-weight: 900; color: #1e293b; letter-spacing: -0.02em; margin-bottom: 0.5rem; line-height: 1; }
+        .kpi-sub { font-size: 0.85rem; color: #94a3b8; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: #f1f5f9;
+            border-radius: 100px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--kpi-color);
+            border-radius: 100px;
+            transition: width 1s ease-out;
+        }
+    </style>
 </head>
 <body class="admin-body">
 <div class="bg-halo" aria-hidden="true"></div>
@@ -14,6 +76,45 @@
         <div class="flex-gap-10">
             <a href="<?= site_url('admin/users/create') ?>" class="btn">Nuevo Usuario</a>
             <a href="<?= site_url('dashboard') ?>" class="btn ghost">Volver al Dashboard</a>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+        <div class="kpi-card" style="--kpi-color: var(--kpi-blue);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <span class="kpi-label">Total Usuarios</span>
+            <span class="kpi-value"><?= number_format($stats['total_users'], 0, ',', '.') ?></span>
+            <span class="kpi-sub">Usuarios registrados en la plataforma</span>
+        </div>
+
+        <div class="kpi-card" style="--kpi-color: var(--kpi-green);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="16" y1="11" x2="22" y2="11"></line></svg>
+            </div>
+            <span class="kpi-label">Nuevos (Este Mes)</span>
+            <span class="kpi-value">+<?= number_format($stats['new_users_month'], 0, ',', '.') ?></span>
+            <span class="kpi-sub">Altas registradas desde el día 1</span>
+        </div>
+
+        <div class="kpi-card" style="--kpi-color: var(--kpi-purple);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            </div>
+            <span class="kpi-label">Activos (30d)</span>
+            <span class="kpi-value"><?= number_format($stats['active_users_30d'], 0, ',', '.') ?></span>
+            <span class="kpi-sub">Usuarios con login reciente</span>
+        </div>
+
+        <div class="kpi-card" style="--kpi-color: var(--kpi-rose);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+            <span class="kpi-label">Administradores</span>
+            <span class="kpi-value"><?= number_format($stats['admin_users'], 0, ',', '.') ?></span>
+            <span class="kpi-sub">Cuentas con acceso total</span>
         </div>
     </div>
 

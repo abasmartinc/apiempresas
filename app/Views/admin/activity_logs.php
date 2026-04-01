@@ -27,6 +27,40 @@
         
         .user-info strong { color: #0f172a; font-weight: 600; }
         .user-info small { color: #64748b; display: block; line-height: 1.3; }
+
+        /* KPI Premium Styles */
+        :root {
+            --kpi-indigo: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+            --kpi-emerald: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --kpi-amber: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --kpi-violet: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+        .kpi-card { 
+            position: relative;
+            overflow: hidden;
+            background: white; 
+            border-radius: 24px; 
+            padding: 2rem; 
+            border: 1px solid rgba(255, 255, 255, 0.7); 
+            display: flex; 
+            flex-direction: column; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); 
+        }
+        .kpi-card:hover { transform: translateY(-8px); box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1); }
+        .kpi-card::before {
+            content: ''; position: absolute; top: 0; right: 0; width: 100px; height: 100px;
+            background: var(--kpi-color); opacity: 0.05; border-radius: 0 0 0 100%; pointer-events: none;
+        }
+        .kpi-icon-wrapper {
+            width: 48px; height: 48px; border-radius: 14px; background: var(--kpi-color);
+            display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;
+            color: white; box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+        }
+        .kpi-label { font-size: 0.85rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        .kpi-value { font-size: 2.5rem; font-weight: 900; color: #1e293b; letter-spacing: -0.02em; margin-bottom: 0.5rem; line-height: 1; }
+        .kpi-sub { font-size: 0.85rem; color: #94a3b8; font-weight: 500; display: flex; align-items: center; gap: 6px; }
     </style>
 </head>
 <body class="admin-body">
@@ -46,6 +80,45 @@
                     <span>Export CSV</span>
                 </a>
                 <a href="<?= site_url('dashboard') ?>" class="btn ghost">Back to Dashboard</a>
+            </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid">
+            <div class="kpi-card" style="--kpi-color: var(--kpi-indigo);">
+                <div class="kpi-icon-wrapper">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                </div>
+                <span class="kpi-label">Eventos (24h)</span>
+                <span class="kpi-value"><?= number_format($stats['total_24h'], 0, ',', '.') ?></span>
+                <span class="kpi-sub">Total de acciones registradas</span>
+            </div>
+
+            <div class="kpi-card" style="--kpi-color: var(--kpi-emerald);">
+                <div class="kpi-icon-wrapper">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </div>
+                <span class="kpi-label">Logins (24h)</span>
+                <span class="kpi-value"><?= number_format($stats['logins_24h'], 0, ',', '.') ?></span>
+                <span class="kpi-sub">Inicios de sesión exitosos</span>
+            </div>
+
+            <div class="kpi-card" style="--kpi-color: var(--kpi-violet);">
+                <div class="kpi-icon-wrapper">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </div>
+                <span class="kpi-label">Usuarios Activos</span>
+                <span class="kpi-value"><?= number_format($stats['active_users'], 0, ',', '.') ?></span>
+                <span class="kpi-sub">Usuarios con actividad hoy</span>
+            </div>
+
+            <div class="kpi-card" style="--kpi-color: var(--kpi-amber);">
+                <div class="kpi-icon-wrapper">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                </div>
+                <span class="kpi-label">Acción Top</span>
+                <span class="kpi-value" style="font-size: 1.8rem; height: 1em; overflow: hidden; display: flex; align-items: center;"><?= esc(ucfirst($stats['top_action'])) ?></span>
+                <span class="kpi-sub">Evento más frecuente</span>
             </div>
         </div>
 

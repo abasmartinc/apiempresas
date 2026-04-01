@@ -2,6 +2,69 @@
 <html lang="es">
 <head>
     <?= view('partials/head', ['title' => $title]) ?>
+    <style>
+        :root {
+            --kpi-blue: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+            --kpi-green: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --kpi-orange: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --kpi-purple: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            --kpi-rose: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+        }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+        .kpi-card { 
+            position: relative;
+            overflow: hidden;
+            background: white; 
+            border-radius: 24px; 
+            padding: 2rem; 
+            border: 1px solid rgba(255, 255, 255, 0.7); 
+            display: flex; 
+            flex-direction: column; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); 
+        }
+        .kpi-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1); 
+        }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 100px; height: 100px;
+            background: var(--kpi-color);
+            opacity: 0.05;
+            border-radius: 0 0 0 100%;
+            pointer-events: none;
+        }
+        .kpi-icon-wrapper {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            background: var(--kpi-color);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 1.5rem;
+            color: white;
+            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+        }
+        .kpi-label { font-size: 0.85rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        .kpi-value { font-size: 2.5rem; font-weight: 900; color: #1e293b; letter-spacing: -0.02em; margin-bottom: 0.5rem; line-height: 1; }
+        .kpi-sub { font-size: 0.85rem; color: #94a3b8; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: #f1f5f9;
+            border-radius: 100px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--kpi-color);
+            border-radius: 100px;
+            transition: width 1s ease-out;
+        }
+        .pill { padding: 2px 8px; border-radius: 6px; font-weight: 600; }
+    </style>
 </head>
 <body class="admin-body">
 <div class="bg-halo" aria-hidden="true"></div>
@@ -24,34 +87,34 @@
     </div>
 
     <!-- KPIs -->
-    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-        <div class="card" style="padding: 1.5rem; display: flex; align-items: center; gap: 1rem; border-left: 4px solid #3b82f6;">
-            <div style="background: #eff6ff; padding: 12px; border-radius: 12px; color: #3b82f6;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" /></svg>
+    <div class="kpi-grid">
+        <div class="kpi-card" style="--kpi-color: var(--kpi-blue);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
             </div>
-            <div>
-                <p style="color: #64748b; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Leads Analizados</p>
-                <p style="font-size: 1.5rem; font-weight: 700; color: #0f172a;"><?= number_format($stats['total_leads']) ?></p>
-            </div>
+            <span class="kpi-label">Leads Analizados</span>
+            <span class="kpi-value"><?= number_format($stats['total_leads'], 0, ',', '.') ?></span>
+            <span class="kpi-sub">Usuarios gratuitos activos</span>
         </div>
 
-        <div class="card" style="padding: 1.5rem; display: flex; align-items: center; gap: 1rem; border-left: 4px solid #f59e0b;">
-            <div style="background: #fef3c7; padding: 12px; border-radius: 12px; color: #d97706;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.866 8.21 8.21 0 0 0 3 2.48Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z" /></svg>
+        <div class="kpi-card" style="--kpi-color: var(--kpi-rose);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c0 1.8-1.4 3.5-3 5.3-2.1 2.4-3 4.6-3 6.7 0 4.4 3.4 8 8 8s8-3.6 8-8c0-2.1-.9-4.3-3-6.7-1.6-1.8-3-3.5-3-5.3z"></path></svg>
             </div>
-            <div>
-                <p style="color: #64748b; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Hot Leads (Sin Subscripción)</p>
-                <p style="font-size: 1.5rem; font-weight: 700; color: #0f172a;"><?= number_format($stats['total_hot_leads']) ?></p>
-            </div>
+            <span class="kpi-label">Hot Leads</span>
+            <span class="kpi-value"><?= number_format($stats['total_hot_leads'], 0, ',', '.') ?></span>
+            <span class="kpi-sub">Alta probabilidad de conversión</span>
         </div>
 
-        <div class="card" style="padding: 1.5rem; display: flex; align-items: center; gap: 1rem; border-left: 4px solid #10b981;">
-            <div style="background: #d1fae5; padding: 12px; border-radius: 12px; color: #059669;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" /></svg>
+        <div class="kpi-card" style="--kpi-color: var(--kpi-green);">
+            <div class="kpi-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20v-4"></path></svg>
             </div>
-            <div>
-                <p style="color: #64748b; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Score Promedio</p>
-                <p style="font-size: 1.5rem; font-weight: 700; color: #0f172a;"><?= number_format($stats['average_score']) ?>%</p>
+            <span class="kpi-label">Score Promedio</span>
+            <span class="kpi-value"><?= number_format($stats['average_score'], 0, ',', '.') ?>%</span>
+            <span class="kpi-sub">Calidad media de la audiencia</span>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: <?= $stats['average_score'] ?>%;"></div>
             </div>
         </div>
     </div>
