@@ -10,7 +10,7 @@
 
 <main class="container-admin" style="padding: 40px 0;">
     <div style="max-width: 700px; margin: 0 auto;">
-        <a href="<?= site_url('admin/users') ?>" class="minor" style="display: inline-block; margin-bottom: 1rem;">← Volver al listado</a>
+        <a href="javascript:history.back()" class="minor" style="display: inline-block; margin-bottom: 1rem;">← Volver</a>
         
         <div class="card">
             <h1 class="title" style="font-size: 1.8rem;">Enviar Email Masivo</h1>
@@ -44,7 +44,7 @@
 
                 <div style="display: flex; gap: 1rem; align-items: center;">
                     <button type="submit" class="btn" onclick="return confirm('¿Estás seguro de enviar este correo a <?= $count ?> usuarios?');">Enviar a <?= $count ?> usuarios</button>
-                    <a href="<?= site_url('admin/users') ?>" class="btn ghost">Cancelar</a>
+                    <a href="javascript:history.back()" class="btn ghost">Cancelar</a>
                 </div>
             </form>
         </div>

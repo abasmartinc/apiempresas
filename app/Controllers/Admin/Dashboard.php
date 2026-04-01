@@ -623,6 +623,7 @@ class Dashboard extends BaseController
         $filter_active = $this->request->getVar('is_active');
         $filter_admin = $this->request->getVar('is_admin');
         $selectAll = $this->request->getVar('select_all_filtered');
+        $returnTo = $this->request->getVar('return_to') ?: 'admin/users';
 
         $count = 0;
         $usersPreview = [];
@@ -653,7 +654,7 @@ class Dashboard extends BaseController
             $count = count($ids);
             $targetDescription = "$count usuarios seleccionados";
         } else {
-            return redirect()->to(site_url('admin/users'))->with('error', 'No has seleccionado ningún usuario.');
+            return redirect()->back()->with('error', 'No has seleccionado ningún usuario.');
         }
 
         $data = [
@@ -666,7 +667,8 @@ class Dashboard extends BaseController
                 'q' => $filter_q,
                 'is_active' => $filter_active,
                 'is_admin' => $filter_admin,
-                'select_all_filtered' => $selectAll
+                'select_all_filtered' => $selectAll,
+                'return_to' => $returnTo
             ]
         ];
 
@@ -763,7 +765,8 @@ class Dashboard extends BaseController
             session()->setFlashdata('error', "Hubo algunos errores al enviar.");
         }
 
-        return redirect()->to(site_url('admin/users'))->with('message', $msg);
+        $returnTo = $this->request->getPost('return_to') ?: 'admin/users';
+        return redirect()->to(site_url($returnTo))->with('message', $msg);
     }
 
     /**

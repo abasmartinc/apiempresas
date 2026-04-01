@@ -114,11 +114,15 @@
         </form>
     </div>
 
-    <div class="card" style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; min-width: 1100px;" id="leadsTable">
-            <thead>
-                <tr style="border-bottom: 2px solid #f1f5f9; text-align: left;">
-                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem; width: 5%;">Score</th>
+    <div class="card" style="overflow-x: auto; position: relative;">
+        <form id="bulk-action-form" action="<?= site_url('admin/users/email/bulk') ?>" method="post">
+            <?= csrf_field() ?>
+            <input type="hidden" name="return_to" value="admin/ia-marketing">
+            <table style="width: 100%; border-collapse: collapse; min-width: 1100px;" id="leadsTable">
+                <thead>
+                    <tr style="border-bottom: 2px solid #f1f5f9; text-align: left;">
+                        <th style="padding: 12px; width: 40px;"><input type="checkbox" id="select-all-leads"></th>
+                        <th style="padding: 12px; color: #64748b; font-size: 0.85rem; width: 5%;">Score</th>
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem; width: 20%;">Lead</th>
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem; text-align: center;">Días Inactivo</th>
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem; text-align: center;">Búsquedas Web</th>
@@ -146,6 +150,9 @@
                     }
                 ?>
                 <tr class="lead-row" data-name="<?= esc(strtolower($l->name)) ?>" data-email="<?= esc(strtolower($l->email)) ?>" data-status="<?= $l->sub_status ?>" data-plan="<?= $l->plan_id ?>" style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;">
+                    <td style="padding: 12px; text-align: center;">
+                        <input type="checkbox" name="user_ids[]" value="<?= $l->id ?>" class="lead-checkbox">
+                    </td>
                     <td style="padding: 12px;">
                         <div style="background: <?= $scoreBg ?>; color: <?= $scoreColor ?>; font-weight: 800; text-align: center; border-radius: 8px; padding: 8px; font-size: 1.1rem; border: 1px solid <?= $scoreColor ?>33;">
                             <?= $l->score ?>%
@@ -226,6 +233,7 @@
                 <?php endif; ?>
             </tbody>
         </table>
+        </form>
     </div>
 
 </main>
@@ -260,11 +268,93 @@
                 }
 
                 row.style.display = show ? '' : 'none';
+                
+                if (!show) {
+                    const cb = row.querySelector('.lead-checkbox');
+                    if (cb) cb.checked = false;
+                }
             });
+            updateState();
         }
 
         liveSearchVal.addEventListener('input', filterRows);
+
+        // Bulk Selection Logic
+        const selectAll = document.getElementById('select-all-leads');
+        const checkboxes = document.querySelectorAll('.lead-checkbox');
+        const bulkForm = document.getElementById('bulk-action-form');
+        
+        // Create floating action bar (similar to users.php)
+        const actionContainer = document.createElement('div');
+        actionContainer.className = 'bulk-floating-bar';
+        actionContainer.style.cssText = `
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid #e2e8f0;
+            animation: slideUp 0.3s ease-out;
+        `;
+        actionContainer.innerHTML = `
+            <span style="font-weight: 700; color: #0f172a;"><span id="selected-count">0</span> seleccionados</span>
+            <button type="button" class="btn" id="btn-bulk-email" style="background: #2152ff; border: none; padding: 10px 20px;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px; margin-right: 8px; display: inline-block; vertical-align: middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg>
+                Enviar Email a seleccionados
+            </button>
+        `;
+        document.body.appendChild(actionContainer);
+
+        function updateState() {
+            const selected = document.querySelectorAll('.lead-checkbox:checked').length;
+            document.getElementById('selected-count').innerText = selected;
+            if (selected > 0) {
+                actionContainer.style.display = 'flex';
+            } else {
+                actionContainer.style.display = 'none';
+            }
+        }
+
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                checkboxes.forEach(cb => {
+                    // Only check visible rows
+                    if (cb.closest('.lead-row').style.display !== 'none') {
+                        cb.checked = this.checked;
+                    }
+                });
+                updateState();
+            });
+        }
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateState);
+        });
+
+        const btnBulk = document.getElementById('btn-bulk-email');
+        if(btnBulk){
+             btnBulk.addEventListener('click', function() {
+                bulkForm.submit();
+            });
+        }
     });
+
+    // Add keyframes for the floating bar
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = `
+        @keyframes slideUp {
+            from { transform: translate(-50%, 100px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(styleSheet);
 
     function showEmailHistory(userId, userName) {
         const modal = document.getElementById('emailHistoryModal');
