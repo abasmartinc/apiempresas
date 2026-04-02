@@ -180,7 +180,7 @@
                     </p>
 
                     <div class="cta-row">
-                        <a class="btn btn_start" href="<?= site_url('register/quick') ?>">Crear cuenta y obtener API Key
+                        <a class="btn btn_start" href="<?= site_url('register') ?>">Crear cuenta y obtener API Key
                             (gratis)</a>
                         <a class="btn ghost" href="<?= site_url() ?>documentation">Ver documentación
                             (OpenAPI/Swagger)</a>
@@ -262,7 +262,7 @@
 
                 <p class="muted">
                     ¿Vas a automatizarlo en tu producto?
-                    <a href="<?= site_url('register/quick') ?>">Crea tu cuenta y copia tu API Key</a> para integrar la validación
+                    <a href="<?= site_url('register') ?>">Crea tu cuenta y copia tu API Key</a> para integrar la validación
                     en minutos.
                 </p>
             </div>
@@ -590,7 +590,7 @@
                         Pensado para desarrollo y validación. No recomendado para uso en producción.
                     </p>
 
-                    <a class="btn secondary" href="<?= site_url('register/quick?plan=free') ?>">Empezar gratis</a>
+                    <a class="btn secondary" href="<?= site_url('register?plan=free') ?>">Empezar gratis</a>
                 </div>
 
                 <!-- PLAN PRO -->

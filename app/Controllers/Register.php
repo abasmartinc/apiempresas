@@ -17,11 +17,15 @@ class Register extends BaseController
     /** @var UsersuscriptionsModel */
     protected $UsersuscriptionsModel;
 
+    /** @var \App\Services\EmailService */
+    protected $emailService;
+
     public function __construct()
     {
         $this->userModel = new UserModel();
         $this->ApikeysModel = new ApikeysModel();
         $this->UsersuscriptionsModel = new UsersuscriptionsModel();
+        $this->emailService = new \App\Services\EmailService();
     }
 
     /**
@@ -156,52 +160,19 @@ class Register extends BaseController
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
-            // 4) Enviar correo (con FROM + BODY + DEBUG)
-            $emailService = \Config\Services::email();
-
-            // Forzar FROM válido (del mismo dominio del SMTP)
-            $emailService->setFrom('soporte@apiempresas.es', 'APIEmpresas.es');
-
-            // Destino (tu correo de notificación)
-            $emailService->setTo('papelo.amh@gmail.com');
-
-            // Opcional: responder al email del usuario registrado
-            $emailService->setReplyTo($email, $data['name']);
-
-            $emailService->setSubject('Nuevo registro de usuario');
-
-            $emailBody = view('emails/admin_notification', [
-                'name' => $data['name'],
+            // 4) Enviar notificaciones
+            $userData = [
+                'user_id' => $user_id,
+                'name'    => $data['name'],
                 'company' => $data['company'],
-                'email' => $data['email'],
-                'user_id' => $user_id
-            ]);
+                'email'   => $data['email']
+            ];
 
-            $emailService->setMessage($emailBody);
+            // Notificación al Admin (papelo.amh@gmail.com)
+            $this->emailService->sendRegistrationAdminNotification($userData);
 
-            $sent = $emailService->send();
-
-            if (!$sent) {
-                // Log detallado para diagnosticar SMTP/TLS/auth/headers
-                log_message('error', 'Email send failed: ' . $emailService->printDebugger(['headers', 'subject', 'body']));
-            } else {
-                log_message('info', 'Email sent OK to papelo.amh@gmail.com');
-            }
-
-            // 5) Enviar correo de BIENVENIDA al usuario
-            $welcomeEmail = \Config\Services::email();
-            $welcomeEmail->setFrom('soporte@apiempresas.es', 'APIEmpresas.es');
-            $welcomeEmail->setTo($email);
-            $welcomeEmail->setSubject('¡Bienvenido a APIEmpresas.es!');
-
-            $emailBody = view('emails/welcome', ['name' => $data['name']]);
-            $welcomeEmail->setMessage($emailBody);
-
-            if (!$welcomeEmail->send()) {
-                log_message('error', 'Welcome Email failed for ' . $email . ': ' . $welcomeEmail->printDebugger(['headers']));
-            } else {
-                log_message('info', 'Welcome Email sent OK to ' . $email);
-            }
+            // Correo de Bienvenida al usuario
+            $this->emailService->sendWelcomeEmail($userData);
 
             // 6) Auto-Login al usuario
             $this->userModel->update($user_id, [
@@ -327,16 +298,15 @@ class Register extends BaseController
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
-            // Send Set Password Email
-            $emailService = \Config\Services::email();
-            $emailService->setFrom('soporte@apiempresas.es', 'APIEmpresas.es');
-            $emailService->setTo($email);
-            $emailService->setSubject('Establece tu contraseña - APIEmpresas.es');
-            $emailService->setMessage(view('emails/set_password_email', ['token' => $token]));
+            // Enviar Notificaciones (Admin + Usuario)
+            $this->emailService->sendRegistrationAdminNotification([
+                'user_id' => $user_id,
+                'name'    => $data['name'],
+                'email'   => $email,
+                'company' => 'N/A (Quick Register)'
+            ]);
 
-            if (!$emailService->send()) {
-                log_message('error', 'Set Password Email failed for ' . $email . ': ' . $emailService->printDebugger(['headers']));
-            }
+            $this->emailService->sendSetPasswordEmail($email, $token);
 
             // Auto-Login
             session()->regenerate();

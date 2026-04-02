@@ -104,4 +104,99 @@ class EmailService
             return false;
         }
     }
+
+    /**
+     * Send a notification email to the admin for a new user registration.
+     */
+    public function sendRegistrationAdminNotification(array $userData)
+    {
+        $email = Services::email();
+        $email->clear(true);
+
+        $fromEmail = env('email.fromEmail', 'soporte@apiempresas.es');
+        $fromName  = env('email.fromName', 'APIEmpresas.es');
+        $email->setFrom($fromEmail, $fromName);
+
+        $adminEmail = 'papelo.amh@gmail.com';
+        $subject = "🆕 Nuevo registro de usuario: " . ($userData['name'] ?? 'Usuario');
+
+        $email->setTo($adminEmail);
+        $email->setSubject($subject);
+
+        $body = view('emails/admin_notification', [
+            'name'     => $userData['name'] ?? 'N/A',
+            'company'  => $userData['company'] ?? 'No especificada',
+            'email'    => $userData['email'] ?? 'N/A',
+            'user_id'  => $userData['user_id'] ?? '?'
+        ]);
+
+        $email->setMessage($body);
+
+        if ($email->send()) {
+            log_message('info', "[EmailService] Notificación de registro ENVIADA a admin ({$adminEmail})");
+            return true;
+        } else {
+            log_message('error', "[EmailService] Error al enviar notificación de registro a admin: " . $email->printDebugger(['headers']));
+            return false;
+        }
+    }
+
+    /**
+     * Send a welcome email to the new user.
+     */
+    public function sendWelcomeEmail(array $userData)
+    {
+        $email = Services::email();
+        $email->clear(true);
+
+        $fromEmail = env('email.fromEmail', 'soporte@apiempresas.es');
+        $fromName  = env('email.fromName', 'APIEmpresas.es');
+        $email->setFrom($fromEmail, $fromName);
+
+        $userEmail = $userData['email'];
+        $subject = "¡Bienvenido a APIEmpresas.es!";
+
+        $email->setTo($userEmail);
+        $email->setSubject($subject);
+
+        $body = view('emails/welcome', ['name' => $userData['name'] ?? 'Usuario']);
+        $email->setMessage($body);
+
+        if ($email->send()) {
+            log_message('info', "[EmailService] Bienvenido ENVIADO a {$userEmail}");
+            return true;
+        } else {
+            log_message('error', "[EmailService] Error al enviar bienvenido a {$userEmail}: " . $email->printDebugger(['headers']));
+            return false;
+        }
+    }
+
+    /**
+     * Send a password setup email for quick registrations.
+     */
+    public function sendSetPasswordEmail(string $userEmail, string $token)
+    {
+        $email = Services::email();
+        $email->clear(true);
+
+        $fromEmail = env('email.fromEmail', 'soporte@apiempresas.es');
+        $fromName  = env('email.fromName', 'APIEmpresas.es');
+        $email->setFrom($fromEmail, $fromName);
+
+        $subject = "Establece tu contraseña - APIEmpresas.es";
+
+        $email->setTo($userEmail);
+        $email->setSubject($subject);
+
+        $body = view('emails/set_password_email', ['token' => $token]);
+        $email->setMessage($body);
+
+        if ($email->send()) {
+            log_message('info', "[EmailService] Establecer contraseña ENVIADO a {$userEmail}");
+            return true;
+        } else {
+            log_message('error', "[EmailService] Error al enviar establecer contraseña a {$userEmail}: " . $email->printDebugger(['headers']));
+            return false;
+        }
+    }
 }
