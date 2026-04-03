@@ -5,6 +5,9 @@ use CodeIgniter\Router\RouteCollection;
 
 
 /** @var RouteCollection $routes */
+// --- MÁXIMA PRIORIDAD PARA DEPURACIÓN ---
+$routes->get('informes/(:any)', 'SeoReportController::handleReport/$1');
+
 $routes->get('/', 'Home::index');
 
 $routes->post('submit-review', 'Home::submitReview');
@@ -199,6 +202,8 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     // Google Search Console
     $routes->get('search-console', 'Admin\Dashboard::search_console');
     $routes->get('search-console/kpis', 'Admin\Dashboard::search_console_kpis');
+    $routes->get('search-console/sitemaps', 'Admin\Dashboard::search_console_sitemaps');
+    $routes->post('search-console/inspect', 'Admin\Dashboard::search_console_inspect');
 });
 
 // Webhooks
@@ -209,6 +214,9 @@ $routes->get('sitemap.xml', 'Sitemap::index');
 $routes->get('sitemap-static.xml', 'Sitemap::static');
 $routes->get('sitemap-blog.xml', 'Sitemap::blog');
 $routes->get('sitemap-directories.xml', 'Sitemap::directories');
+$routes->get('sitemap-informes-provincias.xml', 'Sitemap::informesProvincias');
+$routes->get('sitemap-informes-sectores.xml', 'Sitemap::informesSectores');
+$routes->get('sitemap-informes-wp.xml', 'Sitemap::informesWp');
 $routes->get('sitemap-companies-(:num).xml', 'Sitemap::companies/$1');
 
 // --- Webhook CRON SEO ---
@@ -266,6 +274,7 @@ $routes->get('autocompletado-cif-empresas', 'CompanySuggestions::index');
 $routes->get('autocompletado-cif-empresas/get', 'CompanySuggestions::getSuggestions');
 $routes->addRedirect('company-suggestions', 'autocompletado-cif-empresas');
 $routes->addRedirect('company-suggestions/get', 'autocompletado-cif-empresas/get');
+
 
 // Traffic Advice (Chrome prefetching)
 $routes->get('.well-known/traffic-advice', static function () {

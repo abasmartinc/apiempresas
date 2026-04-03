@@ -187,6 +187,51 @@
         #gscChart {
             max-height: 280px;
         }
+
+        /* URL Inspector Styles */
+        .inspect-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+        }
+        .inspect-input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .inspect-input {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+        }
+        .inspect-result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        .inspect-item {
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        .inspect-item-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .inspect-item-value {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 0.9rem;
+        }
+        .verdict-success { color: #16a34a; }
+        .verdict-neutral { color: #f59e0b; }
+        .verdict-danger { color: #dc2626; }
     </style>
 </head>
 <body class="admin-body">
@@ -388,6 +433,72 @@
                             </tr>
                         </thead>
                         <tbody id="gscDevicesBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- URL Inspection & Sitemaps Section -->
+        <div class="data-grid" style="margin-top: 24px;">
+            <!-- URL Inspection Tool -->
+            <div class="data-card inspect-card">
+                <div class="data-header" style="background: transparent;">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #e0f2fe; color: #0369a1; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                    <h3>Inspector de URL</h3>
+                </div>
+                <div style="padding: 24px;">
+                    <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 16px;">Comprueba el estado de indexación de cualquier URL de <strong>apiempresas.es</strong> en tiempo real.</p>
+                    <div class="inspect-input-group">
+                        <input type="text" id="inspectUrlInput" class="inspect-input" placeholder="https://apiempresas.es/empresa/g28015865-..." value="https://apiempresas.es/">
+                        <button id="inspectUrlBtn" class="btn" style="background: #0369a1; color: white; border: none; align-self: center;">Inspeccionar</button>
+                    </div>
+                    
+                    <div id="inspectResult" style="display: none;">
+                        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+                        <div class="inspect-result-grid">
+                            <div class="inspect-item">
+                                <div class="inspect-item-label">Veredicto</div>
+                                <div class="inspect-item-value" id="inspectVerdict">-</div>
+                            </div>
+                            <div class="inspect-item">
+                                <div class="inspect-item-label">Estado de cobertura</div>
+                                <div class="inspect-item-value" style="font-size: 0.8rem;" id="inspectCoverage">-</div>
+                            </div>
+                            <div class="inspect-item">
+                                <div class="inspect-item-label">Último rastreo</div>
+                                <div class="inspect-item-value" id="inspectLastCrawl">-</div>
+                            </div>
+                            <div class="inspect-item">
+                                <div class="inspect-item-label">Amigabilidad móvil</div>
+                                <div class="inspect-item-value" id="inspectMobile">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sitemaps List -->
+            <div class="data-card">
+                <div class="data-header">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #fff7ed; color: #c2410c; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-sitemap"></i>
+                    </div>
+                    <h3>Sitemaps</h3>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="gsc-table">
+                        <thead>
+                            <tr>
+                                <th>Ruta</th>
+                                <th>Descarga</th>
+                                <th class="text-right">Errores</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gscSitemapsBody">
+                            <tr><td colspan="3" class="text-center text-muted">Cargando sitemaps...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -623,6 +734,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             } else { devicesHtml = '<tr><td colspan="3" class="text-center text-muted">Sin datos</td></tr>'; }
             document.getElementById('gscDevicesBody').innerHTML = devicesHtml;
+            
+            // Cargar Sitemaps al terminar KPIs
+            loadSitemaps();
         })
         .catch(error => {
             btn.disabled = false;
@@ -633,8 +747,108 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    function loadSitemaps() {
+        const body = document.getElementById('gscSitemapsBody');
+        
+        fetch('<?= site_url('admin/search-console/sitemaps') ?>', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'error') {
+                body.innerHTML = `<tr><td colspan="3" class="text-center text-danger">${data.message}</td></tr>`;
+                return;
+            }
+            
+            let html = '';
+            if (data.sitemaps && data.sitemaps.length > 0) {
+                data.sitemaps.forEach(s => {
+                    const date = s.lastDownloaded ? new Date(s.lastDownloaded).toLocaleDateString('es-ES') : 'Nunca';
+                    const errorColor = s.errors > 0 ? '#dc2626' : '#16a34a';
+                    html += `<tr>
+                        <td><span class="gsc-url" style="font-size: 0.8rem;">${s.path}</span></td>
+                        <td style="font-size: 0.8rem; color: #64748b;">${date}</td>
+                        <td class="text-right"><span style="color: ${errorColor}; font-weight: 700;">${s.errors}</span></td>
+                    </tr>`;
+                });
+            } else { html = '<tr><td colspan="3" class="text-center text-muted">No se encontraron sitemaps</td></tr>'; }
+            body.innerHTML = html;
+        })
+        .catch(err => {
+            body.innerHTML = `<tr><td colspan="3" class="text-center text-danger">Error al cargar sitemaps</td></tr>`;
+        });
+    }
+
+    function inspectUrl() {
+        const url = document.getElementById('inspectUrlInput').value.trim();
+        const btn = document.getElementById('inspectUrlBtn');
+        const resultContainer = document.getElementById('inspectResult');
+        
+        if (!url) return;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Inspeccionando...';
+        
+        const formData = new FormData();
+        formData.append('url', url);
+        
+        fetch('<?= site_url('admin/search-console/inspect') ?>', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = 'Inspeccionar';
+            
+            if (data.status === 'error') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de inspección',
+                    text: data.message,
+                    confirmButtonColor: '#0369a1'
+                });
+                return;
+            }
+            
+            resultContainer.style.display = 'block';
+            
+            const r = data.result;
+            const verdictEl = document.getElementById('inspectVerdict');
+            verdictEl.innerText = r.verdict;
+            
+            // Color según veredicto
+            verdictEl.className = 'inspect-item-value';
+            if (r.verdict.includes('PASS') || r.verdict.includes('neutral') || r.verdict.includes('indexed')) {
+                verdictEl.classList.add('verdict-success');
+            } else if (r.verdict.includes('FAIL')) {
+                verdictEl.classList.add('verdict-danger');
+            }
+            
+            document.getElementById('inspectCoverage').innerText = r.coverage || 'Desconocido';
+            document.getElementById('inspectLastCrawl').innerText = r.lastCrawl ? new Date(r.lastCrawl).toLocaleString('es-ES') : 'N/A';
+            
+            const mobileEl = document.getElementById('inspectMobile');
+            mobileEl.innerText = r.mobile;
+            mobileEl.className = 'inspect-item-value';
+            if (r.mobile === 'PASS') mobileEl.classList.add('verdict-success');
+            else if (r.mobile === 'FAIL') mobileEl.classList.add('verdict-danger');
+            
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = 'Inspeccionar';
+            Swal.fire('Error', 'Fallo de conexión', 'error');
+        });
+    }
+
     loadGscData();
     document.getElementById('refreshGscBtn').addEventListener('click', loadGscData);
+    document.getElementById('inspectUrlBtn').addEventListener('click', inspectUrl);
+    document.getElementById('inspectUrlInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') inspectUrl();
+    });
 });
 </script>
 

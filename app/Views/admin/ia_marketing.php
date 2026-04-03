@@ -428,12 +428,31 @@
         title.innerText = 'Historial: ' + userName;
         content.innerHTML = '<p style="text-align: center; color: #64748b; padding: 20px;">Cargando historial...</p>';
 
-        fetch('<?= site_url('admin/email-history/') ?>' + userId, {
+        let fetchUrl = '<?= site_url('admin/email-history/') ?>';
+        // Si es una URL absoluta, convertirla a relativa para evitar problemas de CORS/protocolo
+        if (fetchUrl.startsWith('http')) {
+            try {
+                const urlObj = new URL(fetchUrl);
+                fetchUrl = urlObj.pathname + (urlObj.search || '');
+            } catch (e) {
+                console.warn('Error parsing site_url, using as is:', e);
+            }
+        }
+        
+        const finalUrl = fetchUrl + userId;
+        console.log('Fetching email history from:', finalUrl);
+
+        fetch(finalUrl, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response Status:', response.status);
+            if (!response.ok) throw new Error('Error en la respuesta del servidor: ' + response.status);
+            return response.json();
+        })
         .then(logs => {
-            if (logs.length === 0) {
+            console.log('Logs received:', logs);
+            if (!Array.isArray(logs) || logs.length === 0) {
                 content.innerHTML = '<p style="text-align: center; color: #64748b; padding: 20px;">No hay historial de correos.</p>';
                 return;
             }
@@ -444,15 +463,17 @@
                 if (log.clicked_at) statusBadge = '<span style="font-size: 0.7rem; color: #059669; font-weight: 700;">Clicado</span>';
                 else if (log.opened_at) statusBadge = '<span style="font-size: 0.7rem; color: #2563eb; font-weight: 700;">Leído</span>';
                 
+                const cleanMessage = (log.message || "").replace(/<[^>]*>?/gm, '');
+
                 html += `
                     <div style="padding: 15px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                            <span style="font-size: 0.75rem; color: #94a3b8;">${log.created_at}</span>
+                            <span style="font-size: 0.75rem; color: #94a3b8;">${log.created_at || ''}</span>
                             ${statusBadge}
                         </div>
-                        <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a; margin-bottom: 5px;">${log.subject}</div>
+                        <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a; margin-bottom: 5px;">${log.subject || '(Sin asunto)'}</div>
                         <div style="font-size: 0.8rem; color: #64748b; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                            ${log.message.replace(/<[^>]*>?/gm, '')}
+                            ${cleanMessage}
                         </div>
                     </div>
                 `;
@@ -461,7 +482,8 @@
             content.innerHTML = html;
         })
         .catch(err => {
-            content.innerHTML = '<p style="text-align: center; color: #ef4444; padding: 20px;">Error al cargar el historial.</p>';
+            console.error('Email History Error:', err);
+            content.innerHTML = `<p style="text-align: center; color: #ef4444; padding: 20px;">Error al cargar el historial: ${err.message}. Mira la consola para más detalles.</p>`;
         });
     }
 

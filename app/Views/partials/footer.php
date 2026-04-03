@@ -26,7 +26,6 @@
                     <li><a href="<?=site_url('directorio') ?>">Ver todas las provincias</a></li>
                 </ul>
             </div>
-
             <!-- Radar by Sector -->
             <div>
                 <h4 class="foot-title">Radar por Sector</h4>
@@ -36,7 +35,6 @@
                     <li><a href="<?=site_url('empresas-nuevas-sector/programacion-informatica') ?>">Tecnología y Software</a></li>
                     <li><a href="<?=site_url('empresas-nuevas-sector/marketing') ?>">Marketing y Publicidad</a></li>
                     <li><a href="<?=site_url('empresas-nuevas-sector/transporte') ?>">Logística y Transporte</a></li>
-                    <li><a href="<?=site_url('blog') ?>">Más sectores e informes</a></li>
                 </ul>
             </div>
 
@@ -51,6 +49,70 @@
                     <li><a href="<?=site_url('contact') ?>">Atención al Cliente</a></li>
                 </ul>
             </div>
+        </div>
+
+        <!-- SECOND ROW: Informes de Mercado 4 Columns -->
+        <h3 class="foot-title" style="margin: 40px 0 20px; font-size: 0.9rem; letter-spacing: 0.1em; opacity: 0.8;">INFORMES DE MERCADO</h3>
+        <div class="foot-top-grid" style="padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05);">
+            <?php
+            $wpService = new \App\Services\WordPressService();
+            $seoService = new \App\Services\SeoTemplateService();
+            $templates = $wpService->getTemplatesByCategory(20);
+            $blacklist = ['listado', 'actualizado', 'hoy', 'semana', 'analisis'];
+            
+            // Filtro inicial limpio
+            $cleanTpls = array_filter($templates, function($t) use ($blacklist) {
+                $title = $t['title']['rendered'] ?? '';
+                foreach ($blacklist as $word) if (stripos($title, $word) !== false) return false;
+                return true;
+            });
+
+            // Encontrar la plantilla más corta que tenga los dos placeholders
+            $bestTpl = null;
+            foreach ($cleanTpls as $t) {
+                $title = html_entity_decode($t['title']['rendered'], ENT_QUOTES, 'UTF-8');
+                if (strpos($title, '{{provincia}}') !== false && strpos($title, '{{sector}}') !== false) {
+                    if (!$bestTpl || strlen($title) < strlen($bestTpl)) $bestTpl = $title;
+                }
+            }
+            $bestTpl = $bestTpl ?? 'Empresas nuevas de {{sector}} en {{provincia}}';
+
+            // Col 1: Madrid
+            echo '<div><h4 class="foot-title" style="color: #5C7CFF">Madrid</h4><ul class="foot-links">';
+            foreach (['Hostelería', 'Construcción', 'Tecnología', 'Comercio'] as $s) {
+                $lt = str_replace(['{{provincia}}', '{{sector}}'], ['Madrid', $s], $bestTpl);
+                $fs = str_replace(['{{provincia}}', '{{sector}}'], ['madrid', $seoService->slugifyWithPlaceholders($s)], $seoService->slugifyWithPlaceholders($bestTpl));
+                echo '<li><a href="' . site_url('informes/' . $fs) . '">' . esc($lt) . '</a></li>';
+            }
+            echo '</ul></div>';
+
+            // Col 2: Barcelona
+            echo '<div><h4 class="foot-title" style="color: #5C7CFF">Barcelona</h4><ul class="foot-links">';
+            foreach (['Restauración', 'Inmobiliaria', 'Software', 'Servicios'] as $s) {
+                $lt = str_replace(['{{provincia}}', '{{sector}}'], ['Barcelona', $s], $bestTpl);
+                $fs = str_replace(['{{provincia}}', '{{sector}}'], ['barcelona', $seoService->slugifyWithPlaceholders($s)], $seoService->slugifyWithPlaceholders($bestTpl));
+                echo '<li><a href="' . site_url('informes/' . $fs) . '">' . esc($lt) . '</a></li>';
+            }
+            echo '</ul></div>';
+
+            // Col 3: Nacional
+            echo '<div><h4 class="foot-title" style="color: #5C7CFF">Nacional</h4><ul class="foot-links">';
+            foreach (['Hostelería', 'Construcción', 'Informatica', 'Marketing'] as $s) {
+                $lt = str_replace(['{{provincia}}', '{{sector}}'], ['España', $s], $bestTpl);
+                $fs = str_replace(['{{provincia}}', '{{sector}}'], ['espana', $seoService->slugifyWithPlaceholders($s)], $seoService->slugifyWithPlaceholders($bestTpl));
+                echo '<li><a href="' . site_url('informes/' . $fs) . '">' . esc($lt) . '</a></li>';
+            }
+            echo '</ul></div>';
+
+            // Col 4: Provincias
+            echo '<div><h4 class="foot-title" style="color: #5C7CFF">Otras Provincias</h4><ul class="foot-links">';
+            foreach (['Valencia', 'Sevilla', 'Málaga', 'Alicante'] as $p) {
+                $lt = str_replace(['{{provincia}}', '{{sector}}'], [$p, 'General'], $bestTpl);
+                $fs = str_replace(['{{provincia}}', '{{sector}}'], [$seoService->slugifyWithPlaceholders($p), 'general'], $seoService->slugifyWithPlaceholders($bestTpl));
+                echo '<li><a href="' . site_url('informes/' . $fs) . '">Nuevas en ' . esc($p) . '</a></li>';
+            }
+            echo '</ul></div>';
+            ?>
         </div>
 
         <!-- BOTTOM ROW: Brand Info & Trust -->

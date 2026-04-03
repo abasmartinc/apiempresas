@@ -1666,13 +1666,59 @@ class Dashboard extends BaseController
     }
 
     /**
+     * AJAX endpoint para obtener los sitemaps de Google Search Console
+     */
+    public function search_console_sitemaps()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'Invalid request']);
+        }
+
+        $gscService = new \App\Services\GoogleSearchConsoleService();
+        $result = $gscService->getSitemaps();
+
+        if ($result['status'] === 'error') {
+            return $this->response->setStatusCode(500)->setJSON($result);
+        }
+
+        return $this->response->setJSON($result);
+    }
+
+    /**
+     * AJAX endpoint para inspeccionar una URL en Google Search Console
+     */
+    public function search_console_inspect()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'Invalid request']);
+        }
+
+        $url = $this->request->getPost('url');
+        if (!$url) {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'URL no proporcionada']);
+        }
+
+        // Validar que la URL sea del dominio permitido
+        if (strpos($url, 'https://apiempresas.es') !== 0) {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'La URL debe empezar por https://apiempresas.es']);
+        }
+
+        $gscService = new \App\Services\GoogleSearchConsoleService();
+        $result = $gscService->inspectUrl($url);
+
+        if ($result['status'] === 'error') {
+            return $this->response->setStatusCode(500)->setJSON($result);
+        }
+
+        return $this->response->setJSON($result);
+    }
+
+    /**
      * Obtener el historial de emails de un usuario por AJAX
      */
     public function email_history_ajax($userId)
     {
-        if (!$this->request->isAJAX()) {
-            return $this->response->setStatusCode(403)->setBody('Forbidden');
-        }
+        // Removed isAJAX check to facilitate debugging and some environment compatibility
 
         $logs = $this->emailLogModel->where('user_id', $userId)
                                     ->orderBy('created_at', 'DESC')

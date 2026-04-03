@@ -158,10 +158,11 @@ class RadarController extends BaseController
         } elseif ($sector) {
             $viewFile = 'seo/radar_new_companies_sector';
         } else {
-            $viewFile = ($period === 'general') ? 'seo/radar_new_companies' : 'seo/radar_new_companies_period';
+            $viewFile = ($period === 'general' || $period === 'mes') ? 'seo/radar_new_companies' : 'seo/radar_new_companies_period';
         }
         return view($viewFile, $data);
     }
+
 
     public function getRadarData($province, $sectorInput, $period, $limit = 100)
     {

@@ -200,4 +200,82 @@ class GoogleSearchConsoleService
             ];
         }
     }
+
+    /**
+     * Obtiene la lista de sitemaps registrados en la propiedad.
+     */
+    public function getSitemaps(): array
+    {
+        $client = $this->getClient();
+        $service = new SearchConsole($client);
+
+        try {
+            $response = $service->sitemaps->listSitemaps($this->siteUrl);
+            $sitemaps = $response->getSitemap();
+            
+            $results = [];
+            if ($sitemaps) {
+                foreach ($sitemaps as $sitemap) {
+                    $results[] = [
+                        'path'            => $sitemap->getPath(),
+                        'lastDownloaded'  => $sitemap->getLastDownloaded(),
+                        'lastSubmitted'   => $sitemap->getLastSubmitted(),
+                        'errors'          => $sitemap->getErrors(),
+                        'warnings'        => $sitemap->getWarnings(),
+                        'type'            => $sitemap->getType()
+                    ];
+                }
+            }
+            
+            return [
+                'status'   => 'success',
+                'sitemaps' => $results
+            ];
+        } catch (\Exception $e) {
+            return [
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Inspecciona una URL específica para ver su estado de indexación.
+     */
+    public function inspectUrl(string $url): array
+    {
+        $client = $this->getClient();
+        $service = new SearchConsole($client);
+
+        $request = new \Google\Service\SearchConsole\InspectUrlIndexRequest();
+        $request->setSiteUrl($this->siteUrl);
+        $request->setInspectionUrl($url);
+        $request->setLanguageCode('es');
+
+        try {
+            $inspection = $service->urlInspection_index->inspect($request);
+            $result = $inspection->getInspectionResult();
+            
+            $indexStatus = $result->getIndexStatusResult();
+            $mobileResult = $result->getMobileUsabilityResult();
+            
+            return [
+                'status' => 'success',
+                'result' => [
+                    'verdict'   => $indexStatus->getVerdict(),
+                    'coverage'  => $indexStatus->getCoverageState(),
+                    'robots'    => $indexStatus->getRobotsTxtState(),
+                    'indexing'  => $indexStatus->getIndexingState(),
+                    'lastCrawl' => $indexStatus->getLastCrawlTime(),
+                    'crawledAs' => $indexStatus->getCrawledAs(),
+                    'mobile'    => $mobileResult ? $mobileResult->getVerdict() : 'N/A'
+                ]
+            ];
+        } catch (\Exception $e) {
+            return [
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ];
+        }
+    }
 }

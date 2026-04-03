@@ -31,7 +31,12 @@ class Sitemap extends Controller
         // 3. Sitemap de Directorios (Provincias y CNAE)
         $xml .= '<sitemap><loc>' . site_url("sitemap-directories.xml") . '</loc></sitemap>';
 
-        // 4. Páginas de empresas
+        // 4. Sitemap de Informes SEO (Legacy + WordPress Dinámico)
+        $xml .= '<sitemap><loc>' . site_url("sitemap-informes-provincias.xml") . '</loc></sitemap>';
+        $xml .= '<sitemap><loc>' . site_url("sitemap-informes-sectores.xml") . '</loc></sitemap>';
+        $xml .= '<sitemap><loc>' . site_url("sitemap-informes-wp.xml") . '</loc></sitemap>';
+
+        // 5. Páginas de empresas
         for ($i = 1; $i <= $pages; $i++) {
             $xml .= '<sitemap>';
             $xml .= '<loc>' . site_url("sitemap-companies-{$i}.xml") . '</loc>';
@@ -198,6 +203,114 @@ class Sitemap extends Controller
             $xml .= '<loc>' . site_url('directorio/cnae/' . $c['code']) . '</loc>';
             $xml .= '<changefreq>weekly</changefreq><priority>0.8</priority>';
             $xml .= '</url>';
+        }
+
+        $xml .= '</urlset>';
+        return $this->response->setContentType('application/xml')->setBody($xml);
+    }
+
+    /**
+     * Sitemap de Informes por Provincias (Legacy)
+     */
+    public function informesProvincias()
+    {
+        $provinces = [
+            'madrid', 'barcelona', 'valencia', 'sevilla', 'alicante', 'malaga', 'murcia', 'cadiz',
+            'vizcaya', 'coruna', 'asturias', 'zaragoza', 'pontevedra', 'granada', 'tarragona',
+            'cordoba', 'girona', 'almeria', 'toledo', 'badajoz', 'navarra', 'jaen', 'cantabria',
+            'castellon', 'huelva', 'valladolid', 'ciudad-real', 'leon', 'lleida', 'caceres',
+            'alava', 'lugo', 'salamanca', 'burgos', 'albacete', 'orense', 'rioja', 'guipuzcoa',
+            'huesca', 'cuenca', 'zamora', 'palencia', 'avila', 'segovia', 'teruel', 'guadalajara',
+            'soria', 'baleares', 'las-palmas', 'tenerife'
+        ];
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+
+        foreach ($provinces as $p) {
+            $xml .= '<url>';
+            $xml .= '<loc>' . site_url('informes/nuevas-empresas-en-' . $p) . '</loc>';
+            $xml .= '<lastmod>' . date('Y-m-d') . '</lastmod>';
+            $xml .= '<changefreq>weekly</changefreq>';
+            $xml .= '<priority>0.8</priority>';
+            $xml .= '</url>';
+        }
+
+        $xml .= '</urlset>';
+        return $this->response->setContentType('application/xml')->setBody($xml);
+    }
+
+    /**
+     * Sitemap de Informes por Sectores (Legacy)
+     */
+    public function informesSectores()
+    {
+        $sectors = [
+            'hosteleria', 'programacion', 'marketing', 'construccion', 'transporte', 'transporte-mercancias',
+            'inmobiliaria', 'sanidad', 'tecnologia', 'comercio', 'educacion', 'turismo'
+        ];
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+
+        foreach ($sectors as $s) {
+            $xml .= '<url>';
+            $xml .= '<loc>' . site_url('informes/nuevas-empresas-sector-' . $s) . '</loc>';
+            $xml .= '<lastmod>' . date('Y-m-d') . '</lastmod>';
+            $xml .= '<changefreq>weekly</changefreq>';
+            $xml .= '<priority>0.8</priority>';
+            $xml .= '</url>';
+        }
+
+        $xml .= '</urlset>';
+        return $this->response->setContentType('application/xml')->setBody($xml);
+    }
+
+    /**
+     * Sitemap de Informes Dinámicos (WordPress Cat 20)
+     */
+    public function informesWp()
+    {
+        $wpService = new \App\Services\WordPressService();
+        $seoService = new \App\Services\SeoTemplateService();
+        $templates = $wpService->getTemplatesByCategory(20);
+        $blacklist = ['listado', 'actualizado', 'hoy', 'semana', 'analisis'];
+
+        $provinces = ['madrid', 'barcelona', 'valencia', 'sevilla', 'malaga']; // Top
+        $sectors   = ['hosteleria', 'construccion', 'tecnologia', 'comercio']; // Top
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+
+        foreach ($templates as $t) {
+            $tplTitle = html_entity_decode($t['title']['rendered'] ?? '', ENT_QUOTES, 'UTF-8');
+            
+            // FILTRO SANEADO (sin listado-actualizado)
+            $hasBlacklist = false;
+            foreach ($blacklist as $word) if (stripos($tplTitle, $word) !== false) { $hasBlacklist = true; break; }
+            if ($hasBlacklist) continue;
+
+            $tplSlug = $seoService->slugifyWithPlaceholders($tplTitle);
+            
+            // 1. España (Nacional)
+            $finalSlug = str_replace(['{{provincia}}', '{{sector}}'], ['espana', 'general'], $tplSlug);
+            $xml .= '<url><loc>' . site_url('informes/' . $finalSlug) . '</loc><lastmod>' . date('c') . '</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>';
+
+            // 2. Por Provincia (Top 5)
+            if (strpos($tplTitle, '{{provincia}}') !== false) {
+                foreach ($provinces as $p) {
+                    $fs = str_replace(['{{provincia}}', '{{sector}}'], [$p, 'general'], $tplSlug);
+                    $xml .= '<url><loc>' . site_url('informes/' . $fs) . '</loc><lastmod>' . date('c') . '</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>';
+                }
+            }
+
+            // 3. Por Sector (Top 4)
+            if (strpos($tplTitle, '{{sector}}') !== false) {
+                foreach ($sectors as $s) {
+                    $fs = str_replace(['{{provincia}}', '{{sector}}'], ['espana', $s], $tplSlug);
+                    $xml .= '<url><loc>' . site_url('informes/' . $fs) . '</loc><lastmod>' . date('c') . '</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>';
+                }
+            }
         }
 
         $xml .= '</urlset>';
