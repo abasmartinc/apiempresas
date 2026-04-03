@@ -206,8 +206,10 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->post('search-console/inspect', 'Admin\Dashboard::search_console_inspect');
 });
 
-// Webhooks
+// Webhooks & AI API
 $routes->post('webhook/stripe', 'Webhook::stripe');
+$routes->post('api/chat', 'AiChat::sendMessage');
+$routes->post('api/chat/reset', 'AiChat::resetChat');
 
 // Sitemap
 $routes->get('sitemap.xml', 'Sitemap::index');

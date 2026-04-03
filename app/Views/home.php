@@ -1078,7 +1078,7 @@
 
                         <ul class="cta-benefits">
                             <li><strong>Sin tarjeta</strong> ni permanencias: cancela cuando quieras.</li>
-                            <li><strong>200 consultas/mes</strong> incluidas en el plan Sandbox.</li>
+                            <li><strong>100 consultas/mes</strong> incluidas en el plan Sandbox.</li>
                             <li><strong>Acceso al buscador web</strong> y a la documentación completa.</li>
                         </ul>
                     </div>

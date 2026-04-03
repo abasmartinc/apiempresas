@@ -195,6 +195,10 @@
         </div>
     </div>
 </footer>
+
+<!-- AI CHAT BUBBLE -->
+<?= view('partials/ai_chat_bubble') ?>
+
 <!-- =========================
      MODAL · POLÍTICA PRIVACIDAD
      ========================= -->

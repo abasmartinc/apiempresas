@@ -85,8 +85,8 @@ class WordPressService
             CURLOPT_HTTPHEADER     => [
                 'Accept: application/json',
             ],
-            // Descomentar si hay problemas de SSL en dev
-            // CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYPEER => false, // Desactivado para evitar errores 60 locales
+            CURLOPT_SSL_VERIFYHOST => false,
         ]);
 
         $response = curl_exec($ch);
@@ -106,5 +106,19 @@ class WordPressService
         }
 
         return json_decode($response, true);
+    }
+
+    /**
+     * Obtiene posts filtrados por búsqueda o límite.
+     */
+    public function getPosts(int $limit = 5, string $search = ''): array
+    {
+        $endpoint = "/index.php?rest_route=/wp/v2/posts&per_page={$limit}&_embed=1";
+        if (!empty($search)) {
+            $endpoint .= "&search=" . urlencode($search);
+        }
+
+        $response = $this->makeRequest($endpoint);
+        return $response ?: [];
     }
 }
