@@ -266,8 +266,8 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
             </div>
         </section>
 
-        <section id="leads-b2b-recientes" class="ae-radar-page__section ae-radar-page__section--leads container">
-            <div class="ae-radar-page__leads-shell">
+        <section id="leads-b2b-recientes" class="ae-radar-page__section ae-radar-page__section--leads">
+            <div class="ae-radar-page__leads-shell container">
                 <?php if (!($is_low_results ?? false)): ?>
                     <div class="ae-radar-page__leads-header">
                         <div>

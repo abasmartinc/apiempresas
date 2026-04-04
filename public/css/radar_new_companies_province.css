@@ -1433,13 +1433,20 @@
     }
 }
 
-#container_radar_header,
 #leads-b2b-recientes {
-    padding: 0px !important;
-    padding-block: 0 !important;
-    padding-inline: 0 !important;
-    background-color: transparent !important;
-    margin-bottom: 10px;
+    margin-top: 40px;
+    margin-bottom: 60px;
+}
+
+.ae-radar-page__section--leads {
+    position: relative;
+    padding: 60px 0;
+    background: 
+        radial-gradient(circle at 10% 0%, rgba(37, 99, 235, 0.03), transparent 35%),
+        radial-gradient(circle at 90% 100%, rgba(16, 185, 129, 0.02), transparent 35%),
+        #f8fafc;
+    border-top: 1px solid #eef2f8;
+    border-bottom: 1px solid #eef2f8;
 }
 
 /* Paywall */
