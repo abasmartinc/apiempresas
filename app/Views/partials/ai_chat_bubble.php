@@ -1,4 +1,5 @@
 <!-- AI CHAT BUBBLE -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <div id="ai-chat-container" class="ai-chat-minimized">
     <!-- Chat Window -->
     <div id="ai-chat-window" class="glass-morph">
@@ -153,6 +154,12 @@
     color: #333;
     border-bottom-left-radius: 4px;
 }
+
+.ai-msg p { margin-bottom: 8px; }
+.ai-msg p:last-child { margin-bottom: 0; }
+.ai-msg ul, .ai-msg ol { padding-left: 20px; margin: 8px 0; }
+.ai-msg li { margin-bottom: 4px; }
+.ai-msg strong { color: #133A82; font-weight: 700; }
 
 .user-msg {
     align-self: flex-end;
@@ -350,7 +357,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function addMessage(text, type) {
         const div = document.createElement('div');
         div.className = `msg ${type}-msg`;
-        div.innerText = text;
+        
+        if (type.includes('ai')) {
+            // Renderizar Markdown para el AI
+            div.innerHTML = marked.parse(text);
+        } else {
+            // Usuario sigue siendo texto plano por seguridad/simplicidad
+            div.innerText = text;
+        }
+        
         chatMessages.appendChild(div);
         return div;
     }

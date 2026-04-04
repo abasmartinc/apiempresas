@@ -25,7 +25,7 @@ class AiContextService
                 'type' => 'function',
                 'function' => [
                     'name' => 'get_company_info',
-                    'description' => 'Obtiene información básica de una empresa por nombre o CIF (Capital, Estado, Administradores).',
+                    'description' => 'Obtiene información detallada de una empresa (Estado, Capital, Administradores, Objeto Social, Dirección, Teléfono, etc).',
                     'parameters' => [
                         'type' => 'object',
                         'properties' => [
@@ -115,14 +115,15 @@ class AiContextService
         // Detectamos si es un CIF (Patrón: 1 letra + 8 dígitos)
         $isCif = preg_match('/^[A-Z][0-9]{8}$/i', $query);
 
-        $builder = $this->companyModel->builder();
+        $db = \Config\Database::connect();
+        $builder = $db->table('companies');
         
+        // Seleccionamos campos enriquecidos de companies
+        $builder->select('id, company_name, cif, estado as status, capital_social_raw, objeto_social, address, municipality, registro_mercantil, cnae_label, phone, phone_mobile, fecha_constitucion');
+
         if ($isCif) {
-            // Búsqueda DIRECTA por índice CIF (Ultra rápida)
             $builder->where('cif', $query);
         } else {
-            // Búsqueda por nombre (Solo si no es CIF)
-            // Limitamos a coincidencia parcial inicial 'X%' para usar índice if exists
             $builder->like('company_name', $query, 'after');
         }
 
@@ -130,14 +131,62 @@ class AiContextService
 
         if (!$company) return "No se encontró ninguna empresa con el nombre o CIF: " . $query;
 
-        $cName = mb_convert_encoding($company['company_name'], 'UTF-8', 'UTF-8, ISO-8859-1, Windows-1252');
-        $cAdmin = mb_convert_encoding($company['nombre_administrador'] ?? 'No identificado', 'UTF-8', 'UTF-8, ISO-8859-1, Windows-1252');
+        // 1. Obtener Administradores desde la tabla específica
+        $adminBuilder = $db->table('company_administrators');
+        $admins = $adminBuilder->where('company_id', $company['id'])
+                             ->get()
+                             ->getResultArray();
+
+        // Filtrar registros que no son personas (metadatos de Sociedades Civiles, etc) - Heurística de Radar.php
+        $excludeKeywords = ['CAPITAL', 'DOMICILIO', 'OBJETO SOCIAL', 'OTROS CONCEPTOS', 'COMIENZO DE OPERACIONES', 'INSCRIPCION', 'RESULTANTE', 'SUSCRITO', 'EURO'];
+        $filteredAdmins = [];
+        $seenAdmins = [];
+
+        foreach ($admins as $admin) {
+            $nameStr = strtoupper($admin['name'] ?? '');
+            $posStr = strtoupper($admin['position'] ?? '');
+            $combinedText = $nameStr . ' ' . $posStr;
+
+            $exclude = false;
+            foreach ($excludeKeywords as $kw) {
+                if (strpos($combinedText, $kw) !== false) {
+                    $exclude = true;
+                    break;
+                }
+            }
+            if ($exclude || preg_match('/[0-9]+/', $nameStr)) continue;
+
+            $uniqueKey = md5($nameStr . '|' . $posStr);
+            if (isset($seenAdmins[$uniqueKey])) continue;
+
+            $seenAdmins[$uniqueKey] = true;
+            $filteredAdmins[] = $this->sanitizeUtf8($admin['name']) . " (" . $this->sanitizeUtf8($admin['position']) . ")";
+        }
+
+        // 2. Formatear datos de la empresa
+        $cName = $this->sanitizeUtf8($company['company_name']);
+        $cAddress = $this->sanitizeUtf8($company['address'] ?? 'No disponible');
+        $cMuni = $this->sanitizeUtf8($company['municipality'] ?? 'No disponible');
+        $cProv = $this->sanitizeUtf8($company['registro_mercantil'] ?? 'No disponible');
+        $cObj = $this->sanitizeUtf8($company['objeto_social'] ?? 'No disponible');
+        $cCapital = $this->sanitizeUtf8($company['capital_social_raw'] ?? 'No disponible');
+        $cPhone = $this->sanitizeUtf8($company['phone'] ?: ($company['phone_mobile'] ?: 'No disponible'));
 
         $info = "Empresa: " . $cName . "\n";
         $info .= "CIF: " . $company['cif'] . "\n";
         $info .= "Estado: " . ($company['status'] ?? 'Activa') . "\n";
-        $info .= "Capital Social: " . ($company['capital_social'] ?? 'No disponible') . "€\n";
-        $info .= "Administrador: " . $cAdmin;
+        $info .= "Fecha Constitución: " . ($company['fecha_constitucion'] ?? 'No disponible') . "\n";
+        $info .= "Capital Social: " . $cCapital . "\n";
+        $info .= "Sector (CNAE): " . $this->sanitizeUtf8($company['cnae_label'] ?? 'No disponible') . "\n";
+        $info .= "Dirección: " . $cAddress . ", " . $cMuni . " (" . $cProv . ")\n";
+        $info .= "Teléfono: " . $cPhone . "\n";
+        $info .= "Objeto Social: " . (strlen($cObj) > 300 ? substr($cObj, 0, 300) . "..." : $cObj) . "\n";
+        
+        if (!empty($filteredAdmins)) {
+            $info .= "Administradores:\n- " . implode("\n- ", $filteredAdmins);
+        } else {
+            $info .= "Administradores: No se han identificado administradores actuales en el registro.";
+        }
 
         return "Datos encontrados en la base de datos oficial:\n" . $info;
     }

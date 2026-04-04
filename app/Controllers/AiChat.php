@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Services\OpenAiService;
 use App\Services\AiContextService;
+use App\Models\ChatbotLogModel;
 use CodeIgniter\Controller;
 use OpenAI;
 
@@ -11,11 +12,13 @@ class AiChat extends Controller
 {
     protected $aiService;
     protected $contextService;
+    protected $logModel;
 
     public function __construct()
     {
         $this->aiService = new OpenAiService();
         $this->contextService = new AiContextService();
+        $this->logModel = new ChatbotLogModel();
     }
 
     /**
@@ -54,14 +57,24 @@ class AiChat extends Controller
             log_message('info', "Chat Response Time: {$duration}s | Message: {$message}");
 
             // 4. Actualizar historial en sesión
+            // Re-abrimos la sesión para escritura (se cerró en runChatOrchestration)
+            if (session_status() === PHP_SESSION_NONE) session_start();
+            
             $history[] = ['role' => 'user', 'content' => $message];
             $history[] = ['role' => 'assistant', 'content' => $finalResponse];
             
             // Mantener solo los últimos 10
             if (count($history) > 10) array_splice($history, 0, 2);
+
+            $session->set('chat_history', $history);
             
             // Asegurar que la respuesta es UTF-8 válida antes de setJSON para evitar errores de Malformed UTF-8
             $finalResponseClean = iconv('UTF-8', 'UTF-8//IGNORE', $finalResponse);
+
+            // 5. Registrar en base de datos
+            $userId = session('user_id');
+            $sessionId = session_id();
+            $this->logModel->logChat($userId, $sessionId, $message, $finalResponseClean);
 
             return $this->response->setJSON([
                 'status' => 'success',
