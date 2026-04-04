@@ -55,6 +55,7 @@
     right: 30px;
     z-index: 9999;
     font-family: 'Inter', system-ui, sans-serif;
+    pointer-events: none; /* No bloquear clics debajo */
 }
 
 #ai-chat-window {
@@ -71,6 +72,7 @@
     transform-origin: bottom right;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     margin-bottom: 20px;
+    pointer-events: auto; /* Permitir clics cuando está abierto */
 }
 
 .ai-chat-minimized #ai-chat-window {
@@ -229,6 +231,7 @@
     align-items: center;
     justify-content: center;
     transition: 0.3s;
+    pointer-events: auto; /* Permitir clics siempre */
 }
 
 #chat-toggle:hover {
