@@ -14,16 +14,16 @@
     <section class="container blog-hero">
         <div class="blog-hero__grid">
             <div class="blog-hero__content">
-                <span class="blog-hero__eyebrow">Centro de recursos</span>
+                <span class="blog-hero__eyebrow">Blog de APIEmpresas</span>
 
                 <h1 class="blog-hero__title">
-                    Guías técnicas para
-                    <span class="blog-hero__title-grad">desarrolladores y equipos de riesgo</span>
+                    Información y análisis sobre el
+                    <span class="blog-hero__title-grad">tejido empresarial español</span>
                 </h1>
 
                 <p class="blog-hero__subtitle">
-                    Artículos sobre integraciones, scoring, compliance y uso avanzado de datos mercantiles
-                    para llevar al siguiente nivel tus flujos de onboarding, riesgos y facturación.
+                    Artículos sobre actualidad empresarial, análisis de sectores, finanzas y soluciones 
+                    para optimizar la gestión de datos en tu negocio.
                 </p>
 
                 <div class="blog-hero__meta-row">
@@ -40,17 +40,17 @@
                     <div class="blog-summary__badge">Qué encontrarás aquí</div>
 
                     <ul class="blog-summary__list">
-                        <li>Playbooks para integrar datos mercantiles en tus sistemas.</li>
-                        <li>Casos reales de scoring, fraude y KYC/KYB.</li>
-                        <li>Buenas prácticas de compliance y documentación.</li>
-                        <li>Novedades de producto y roadmap de la API.</li>
+                        <li>Análisis detallados de sectores y tendencias de mercado.</li>
+                        <li>Guías sobre finanzas corporativas y gestión de riesgos.</li>
+                        <li>Novedades sobre normativas y cumplimiento legal (KYC/KYB).</li>
+                        <li>Cómo potenciar tu empresa con datos mercantiles precisos.</li>
                     </ul>
 
                     <div class="blog-summary__footer">
-                        <p class="blog-summary__hint-title">No sabes por dónde empezar</p>
+                        <p class="blog-summary__hint-title">¿Buscas algo específico?</p>
                         <p class="blog-summary__hint-text">
-                            Empieza por los artículos marcados como <strong>“Caso de uso”</strong> para ver
-                            implementaciones end-to-end en entornos reales.
+                            Explora nuestras categorías para encontrar análisis sobre <strong>autónomos</strong>, 
+                            <strong>PYMES</strong> o grandes <strong>corporaciones</strong> españolas.
                         </p>
                     </div>
                 </div>

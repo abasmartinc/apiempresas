@@ -57,6 +57,8 @@
                 <span class="nav-sep">•</span>
                 <a class="minor-nav-link" href="<?=site_url('empresas-nuevas') ?>">Nuevas</a>
                 <span class="nav-sep">•</span>
+                <a class="minor-nav-link" href="<?=site_url('blog') ?>">Blog</a>
+                <span class="nav-sep">•</span>
                 <a class="minor-nav-link" href="<?=site_url('documentation') ?>">Docs</a>
             </nav>
 
@@ -91,6 +93,7 @@
                     <a href="<?=site_url('empresas-nuevas/madrid') ?>" class="mobile-nav-link" style="color: var(--primary);">Empresas Nuevas</a>
                     <a href="<?=site_url() ?>#precios" class="mobile-nav-link">Precios</a>
                     <a href="<?=site_url() ?>documentation" class="mobile-nav-link">Documentación</a>
+                    <a href="<?=site_url('blog') ?>" class="mobile-nav-link">Blog de Actualidad</a>
                     <div class="mobile-auth">
                         <a href="<?=site_url() ?>enter" class="btn btn-full ghost">Iniciar sesión</a>
                         <a href="<?=site_url() ?>register" class="btn btn-full primary">Crear cuenta gratis</a>

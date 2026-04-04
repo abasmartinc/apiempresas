@@ -46,6 +46,7 @@
                     <li><a href="<?=site_url('search_company') ?>">Buscador de Empresas</a></li>
                     <li><a href="<?=site_url('autocompletado-cif-empresas') ?>">Autocompletado Pro</a></li>
                     <li><a href="<?=site_url('documentation') ?>">Documentación API</a></li>
+                    <li><a href="<?=site_url('blog') ?>">Blog de Actualidad</a></li>
                     <li><a href="<?=site_url('contact') ?>">Atención al Cliente</a></li>
                 </ul>
             </div>
