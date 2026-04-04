@@ -117,9 +117,10 @@ class SeoTemplateService
         );
 
         // Flexibilidad: Permitimos variaciones comunes como "este-mes-de" incluso si no están en el título de WP
+        // RESTRICCIÓN: Solo permitimos palabras de tiempo específicas, no cualquier secuencia de palabras.
         $pattern = str_replace(
             ['\-de\-', '\-en\-'],
-            ['\-(?:[a-z0-9-]+\-)?de\-', '\-(?:[a-z0-9-]+\-)?en\-'],
+            ['\-(?:(?:este\-mes|esta\-semana|hoy)\-)?de\-', '\-(?:(?:este\-mes|esta\-semana|hoy)\-)?en\-'],
             $pattern
         );
         

@@ -27,6 +27,15 @@ class SeoReportController extends BaseController
     {
         $templates = $this->wpService->getTemplatesByCategory(20);
 
+        // Ordenamos las plantillas por especificidad (número de placeholders descendente)
+        usort($templates, function($a, $b) {
+            $titleA = $a['title']['rendered'] ?? '';
+            $titleB = $b['title']['rendered'] ?? '';
+            $countA = substr_count($titleA, '{{');
+            $countB = substr_count($titleB, '{{');
+            return $countB <=> $countA;
+        });
+
         foreach ($templates as $template) {
             $title = html_entity_decode($template['title']['rendered'] ?? '', ENT_QUOTES, 'UTF-8');
             

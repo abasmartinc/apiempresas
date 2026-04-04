@@ -494,6 +494,7 @@ class RadarController extends BaseController
             'finanzas' => ['codes' => ['64', '65', '66'], 'label' => 'Seguros y Finanzas'],
             'inmobiliaria' => ['codes' => ['68'], 'label' => 'Actividades Inmobiliarias'],
             'sanidad' => ['codes' => ['86'], 'label' => 'Actividades Sanitarias'],
+            'restauracion' => ['codes' => ['56'], 'label' => 'Hostelería y Restauración'],
         ];
 
         $clean = strtr(mb_strtolower($slug), ['á'=>'a','é'=>'e','í'=>'i','ó'=>'o','ú'=>'u','ñ'=>'n']);
@@ -503,7 +504,17 @@ class RadarController extends BaseController
         $row = $db->query("SELECT cnae_2009 as code, label_2009 as label FROM cnae_2009_2025 WHERE label_2009 LIKE ? LIMIT 1", ["%$searchTerm%"])->getRowArray();
         if ($row) return ['codes' => [$row['code']], 'label' => $this->normalizeLabel($row['label'])];
 
-        $statRow = $db->query("SELECT cnae_code, cnae_label FROM seo_stats_cnae WHERE cnae_label LIKE ? LIMIT 1", ["%$searchTerm%"])->getRowArray();
+        $statRow = $db->query("
+            SELECT cnae_code, cnae_label 
+            FROM seo_stats_cnae 
+            WHERE cnae_label LIKE ? 
+            AND cnae_label NOT LIKE '% S.L.%' 
+            AND cnae_label NOT LIKE '% SL%'
+            AND cnae_label NOT LIKE '% S.A.%' 
+            AND cnae_label NOT LIKE '% SA%'
+            LIMIT 1
+        ", ["%$searchTerm%"])->getRowArray();
+        
         if ($statRow) return ['codes' => [$statRow['cnae_code']], 'label' => $this->normalizeLabel($statRow['cnae_label'])];
 
         return null;
