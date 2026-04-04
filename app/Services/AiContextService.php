@@ -205,7 +205,7 @@ class AiContextService
 
         $results = "He encontrado los siguientes artículos relevantes en el blog:\n";
         foreach ($posts as $post) {
-            $results .= "- " . ($post['title']['rendered'] ?? 'Sin título') . " (https://blog.apiempresas.es/" . ($post['slug'] ?? '') . ")\n";
+            $results .= "- " . ($post['title']['rendered'] ?? 'Sin título') . " (https://apiempresas.es/blog/" . ($post['slug'] ?? '') . ")\n";
         }
         
         return $results;
@@ -295,6 +295,7 @@ class AiContextService
         3. Mantén un tono profesional, amable y corporativo.
         4. Si no sabes algo, utiliza tus herramientas de búsqueda en el blog o sugiere contactar a soporte@apiempresas.es.
         5. Habla siempre en español.
+        6. IMPORTANTE: Todas las URLs que proporciones deben pertenecer exclusivamente al dominio principal 'apiempresas.es'. No utilices subdominios como 'blog.apiempresas.es' ni enlaces externos.
         
         FECHA ACTUAL: " . date('d/m/Y');
     }
