@@ -119,7 +119,7 @@ class Blog extends BaseController
     public function get_posts()
     {
         $siteUrl    = 'https://blog.apiempresas.es';
-        $endpoint   = '/index.php?rest_route=/wp/v2/posts&per_page=6';
+        $endpoint   = '/index.php?rest_route=/wp/v2/posts&per_page=6&categories=1&categories_exclude=20';
         $requestUrl = $siteUrl . $endpoint;
 
         $ch = curl_init($requestUrl);
@@ -214,7 +214,7 @@ class Blog extends BaseController
     public function get_posts_grid()
     {
         $siteUrl    = 'https://blog.apiempresas.es';
-        $endpoint   = '/index.php?rest_route=/wp/v2/posts&per_page=6';
+        $endpoint   = '/index.php?rest_route=/wp/v2/posts&per_page=6&categories=1&categories_exclude=20';
         $requestUrl = $siteUrl . $endpoint;
 
         $ch = curl_init($requestUrl);

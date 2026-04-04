@@ -113,7 +113,7 @@ class WordPressService
      */
     public function getPosts(int $limit = 5, string $search = ''): array
     {
-        $endpoint = "/index.php?rest_route=/wp/v2/posts&per_page={$limit}&categories=1&_embed=1";
+        $endpoint = "/index.php?rest_route=/wp/v2/posts&per_page={$limit}&categories=1&categories_exclude=20&_embed=1";
         if (!empty($search)) {
             $endpoint .= "&search=" . urlencode($search);
         }
