@@ -169,8 +169,14 @@ class RadarController extends BaseController
         $cache    = \Config\Services::cache();
         $cacheKey = 'radar_' . md5("{$period}_{$province}_{$limit}_" . (is_array($sectorInput) ? implode(',', $sectorInput['codes'] ?? []) : (string) $sectorInput));
 
+        // Permitimos forzar la limpieza del caché vía URL
+        $forceNoCache = service('request')->getGet('nocache') === '1';
+        if ($forceNoCache) {
+            $cache->delete($cacheKey);
+        }
+
         $cached = $cache->get($cacheKey);
-        if ($cached !== null) {
+        if ($cached !== null && !$forceNoCache) {
             return $cached;
         }
 
