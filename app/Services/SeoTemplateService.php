@@ -23,7 +23,7 @@ class SeoTemplateService
     /**
      * Resuelve todas las variables dinámicas necesarias para el SEO.
      */
-    public function resolveVariables(array $data): array
+    public function resolveVariables(array $data, array $context = []): array
     {
         $province = $data['province'] ?? 'España';
         if (strtoupper($province) === 'ESPANA' || strtoupper($province) === 'ESPAÑA') {
@@ -33,6 +33,18 @@ class SeoTemplateService
         $total = $data['total_context_count'] ?? 0;
         $period = $data['period'] ?? 'mes';
         
+        $provinceSlug = $context['province_slug'] ?? null;
+        $sectorSlug = $context['sector_slug'] ?? null;
+        
+        $urlRadar = site_url('empresas-nuevas');
+        if ($provinceSlug && $sectorSlug) {
+            $urlRadar = site_url("empresas-nuevas/{$sectorSlug}-en-{$provinceSlug}");
+        } elseif ($provinceSlug) {
+            $urlRadar = site_url("empresas-nuevas/{$provinceSlug}");
+        } elseif ($sectorSlug) {
+             $urlRadar = site_url("empresas-nuevas-sector/{$sectorSlug}");
+        }
+
         $vars = [
             'provincia'          => $province,
             'sector'             => $sector,
@@ -41,8 +53,9 @@ class SeoTemplateService
             'periodo'            => $period,
             'periodo_texto'      => $this->getPeriodText($period),
             'url_destino'        => $data['canonical'] ?? '',
+            'url_radar'          => $urlRadar,
             'keyword_principal'  => $this->generateKeyword($province, $sector, $period),
-            'cta_radar'          => '<a href="' . site_url('register') . '" class="btn btn-primary">Ver todas las nuevas empresas de ' . $province . '</a>',
+            'cta_radar'          => '<a href="' . $urlRadar . '" class="btn btn-primary">Ver todas las nuevas empresas de ' . $province . '</a>',
         ];
 
         // Top 3 sectores (si es página de provincia)

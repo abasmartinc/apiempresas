@@ -54,7 +54,11 @@ class SeoReportController extends BaseController
                 // Renderizamos SIEMPRE que el patrón coincida, incluso si no hay datos.
                 // La vista se encargará de mostrar el bloque de fallback.
                 $type = ($sectorName && $provinceName) ? 'combined' : ($sectorName ? 'sector' : 'province');
-                return $this->renderReport($template, $radarData ?? [], $type);
+                $context = [
+                    'province_slug' => $provinceSlug,
+                    'sector_slug'   => $sectorSlug
+                ];
+                return $this->renderReport($template, $radarData ?? [], $type, $context);
             }
         }
 
@@ -93,11 +97,23 @@ class SeoReportController extends BaseController
     /**
      * Renderiza el informe combinando WP y Datos.
      */
-    private function renderReport(array $template, array $radarData, string $type)
+    private function renderReport(array $template, array $radarData, string $type, array $context = [])
     {
         $rawContent = $template['content']['rendered'] ?? '';
-        $variables = $this->seoService->resolveVariables($radarData);
+        $variables = $this->seoService->resolveVariables($radarData, $context);
         $injectedContent = $this->seoService->replacePlaceholders($rawContent, $variables);
+
+        // Parche Proactivo: Si hay enlaces apuntando a la URL actual del informe,
+        // los redirigimos a la URL del Radar correspondiente.
+        $currentUrl = current_url();
+        $radarUrl = $variables['url_radar'] ?? '';
+        if ($radarUrl && $radarUrl !== $currentUrl) {
+            $injectedContent = str_replace(
+                'href="' . $currentUrl . '"',
+                'href="' . $radarUrl . '"',
+                $injectedContent
+            );
+        }
 
         // Datos para el sidebar
         $sidebarData = [
