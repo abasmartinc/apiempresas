@@ -254,7 +254,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                 </h1>
 
                                 <p class="ae-radar-page__hero-text" style="font-size: 15px; margin-bottom: 20px; max-width: 600px; color: #334155; font-weight: 500; line-height: 1.5;">
-                                    Identifica empresas recién creadas con alta probabilidad de compra y contacta en el momento óptimo.
+                                    Detecta empresas en fase inicial con alta probabilidad de contratar servicios en los próximos días.
                                 </p>
 
                                 <?php if ($isFree): ?>
@@ -276,7 +276,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
                                     <div style="display: flex; align-items: center; gap: 10px;">
                                         <span style="font-size: 18px;">✨</span>
-                                        <span style="font-size: 13px; font-weight: 700; color: #475569;">Registradas hoy</span>
+                                        <span style="font-size: 13px; font-weight: 700; color: #475569;">nuevos clientes potenciales hoy</span>
                                     </div>
                                     <div style="font-size: 20px; font-weight: 800; color: #0f172a;"><?= number_format($stats['hoy']) ?></div>
                                 </div>
@@ -284,7 +284,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
                                     <div style="display: flex; align-items: center; gap: 10px;">
                                         <span style="font-size: 18px;">📅</span>
-                                        <span style="font-size: 13px; font-weight: 700; color: #475569;">Últimos 7 días</span>
+                                        <span style="font-size: 13px; font-weight: 700; color: #475569;">oportunidades esta semana</span>
                                     </div>
                                     <div style="font-size: 20px; font-weight: 800; color: #0f172a;"><?= number_format($stats['semana']) ?></div>
                                 </div>
@@ -292,7 +292,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
                                     <div style="display: flex; align-items: center; gap: 10px;">
                                         <span style="font-size: 18px;">📈</span>
-                                        <span style="font-size: 13px; font-weight: 700; color: #475569;">Potenciales este mes</span>
+                                        <span style="font-size: 13px; font-weight: 700; color: #475569;">en fase activa de compra</span>
                                     </div>
                                     <div style="font-size: 20px; font-weight: 800; color: #0f172a;"><?= number_format($stats['mes']) ?></div>
                                 </div>
@@ -304,33 +304,44 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                     <div class="ae-radar-page__crm-progress" style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 24px; border-radius: 20px; color: white; margin-bottom: 24px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2); position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1);">
                         <div style="position: absolute; right: -40px; top: -40px; width: 150px; height: 150px; background: rgba(37, 99, 235, 0.1); border-radius: 50%; opacity: 0.2; filter: blur(40px);"></div>
                         
-                        <div style="display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 2;">
-                            <div style="flex: 1;">
-                                <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 10px;">
-                                    <span>📊</span> Tu progreso con los leads de hoy
-                                </h3>
-                                <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 500;">
-                                    Mide tu actividad y asegúrate de no perder ninguna oportunidad crítica.
-                                </p>
+                        <div style="display: flex; flex-direction: column; gap: 20px; position: relative; z-index: 2;">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div style="flex: 1;">
+                                    <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                                        <span>📊</span> Estás trabajando sobre clientes detectados hoy
+                                    </h3>
+                                    <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 500;">
+                                        Gestiona tu embudo de ventas y asegura el cierre de cada oportunidad.
+                                    </p>
+                                </div>
+                                
+                                <div style="display: flex; gap: 16px; align-items: center;">
+                                    <!-- Contactados -->
+                                    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 12px 20px; border-radius: 14px; text-align: center; min-width: 140px;">
+                                        <div style="font-size: 24px; font-weight: 900; color: #10b981; line-height: 1;"><?= number_format($crmStats['contactado'] ?? 0) ?></div>
+                                        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; color: rgba(16, 185, 129, 0.8);">clientes contactados</div>
+                                    </div>
+                                    
+                                    <!-- Seguimiento -->
+                                    <div style="background: rgba(37, 99, 235, 0.15); border: 1px solid rgba(37, 99, 235, 0.3); padding: 12px 20px; border-radius: 14px; text-align: center; min-width: 140px;">
+                                        <div style="font-size: 24px; font-weight: 900; color: #3b82f6; line-height: 1;"><?= number_format($crmStats['seguimiento'] ?? 0) ?></div>
+                                        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; color: rgba(37, 99, 235, 0.8);">en seguimiento</div>
+                                    </div>
+                                    
+                                    <!-- Oportunidades Pendientes -->
+                                    <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 20px; border-radius: 14px; text-align: center; min-width: 140px;">
+                                        <div style="font-size: 24px; font-weight: 900; color: rgba(255,255,255,0.9); line-height: 1;"><?= number_format($crmStats['nuevo'] ?? 0) ?></div>
+                                        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; color: rgba(255,255,255,0.4);">oportunidades disponibles</div>
+                                    </div>
+                                </div>
                             </div>
                             
-                            <div style="display: flex; gap: 16px; align-items: center;">
-                                <!-- Contactados -->
-                                <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 12px 20px; border-radius: 14px; text-align: center; min-width: 140px;">
-                                    <div style="font-size: 24px; font-weight: 900; color: #10b981; line-height: 1;"><?= number_format($crmStats['contactado'] ?? 0) ?></div>
-                                    <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; color: rgba(16, 185, 129, 0.8);">Contactados</div>
+                            <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.05); pt-4; padding-top: 12px;">
+                                <div style="font-size: 13px; font-weight: 700; color: #3b82f6;">
+                                    👉 Sigue con las oportunidades recomendadas para avanzar hoy
                                 </div>
-                                
-                                <!-- Seguimiento -->
-                                <div style="background: rgba(37, 99, 235, 0.15); border: 1px solid rgba(37, 99, 235, 0.3); padding: 12px 20px; border-radius: 14px; text-align: center; min-width: 140px;">
-                                    <div style="font-size: 24px; font-weight: 900; color: #3b82f6; line-height: 1;"><?= number_format($crmStats['seguimiento'] ?? 0) ?></div>
-                                    <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; color: rgba(37, 99, 235, 0.8);">En seguimiento</div>
-                                </div>
-                                
-                                <!-- Oportunidades Pendientes -->
-                                <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 20px; border-radius: 14px; text-align: center; min-width: 140px;">
-                                    <div style="font-size: 24px; font-weight: 900; color: rgba(255,255,255,0.9); line-height: 1;"><?= number_format($crmStats['nuevo'] ?? 0) ?></div>
-                                    <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; color: rgba(255,255,255,0.4);">oportunidades pendientes</div>
+                                <div style="font-size: 12px; font-weight: 800; color: #10b981;">
+                                    🔥 Hoy tienes nuevas oportunidades listas para contactar
                                 </div>
                             </div>
                         </div>
@@ -342,27 +353,27 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                             <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;">
                                 <div style="flex: 1;">
                                     <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 10px; color: #0f172a;">
-                                        <span>🧠</span> Oportunidades detectadas hoy
+                                        <span>🧠</span> Oportunidades listas para contactar hoy
                                     </h3>
                                     <p style="margin: 0; font-size: 14px; color: #64748b; font-weight: 500; max-width: 700px;">
-                                        Hemos identificado empresas recién creadas con mayor probabilidad de compra y mejor momento de contacto en tu sector.
+                                        Empresas recién creadas con mayor probabilidad de contratar servicios en sus primeros días.
                                     </p>
                                 </div>
                                 <a href="<?= site_url('radar?' . http_build_query(array_merge($filters, ['priority_level' => 'muy_alta', 'rango' => '7', 'intel' => 'active']))) ?>#radar-results-container" 
                                    class="ae-radar-page__hero-btn ae-radar-page__hero-btn--primary" 
                                    style="height: 44px; padding: 0 24px; font-size: 13px; margin: 0; display: flex; align-items: center; justify-content: center; text-decoration: none;">
-                                    🎯 Ver mejores oportunidades
+                                    🎯 Ver oportunidades prioritarias
                                 </a>
                             </div>
 
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
                                 <div style="background: #f8fafc; padding: 12px 16px; border-radius: 10px; border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 10px;">
                                     <span style="font-size: 18px;">🔥</span>
-                                    <span style="font-size: 13px; font-weight: 700; color: #475569;"><?= round(($freshness['todayCount'] ?? 250) * 0.15) ?> empresas con alta probabilidad</span>
+                                    <span style="font-size: 13px; font-weight: 700; color: #475569;"><?= round(($freshness['todayCount'] ?? 250) * 0.15) ?> empresas con alta probabilidad de compra</span>
                                 </div>
                                 <div style="background: #fffbeb; padding: 12px 16px; border-radius: 10px; border: 1px solid #fef3c7; display: flex; align-items: center; gap: 10px;">
                                     <span style="font-size: 18px;">⏱</span>
-                                    <span style="font-size: 13px; font-weight: 700; color: #475569;"><?= round(($freshness['todayCount'] ?? 250) * 0.28) ?> en ventana óptima de contacto</span>
+                                    <span style="font-size: 13px; font-weight: 700; color: #475569;"><?= round(($freshness['todayCount'] ?? 250) * 0.28) ?> en su mejor momento de contacto</span>
                                 </div>
                                 <div style="background: #eff6ff; padding: 12px 16px; border-radius: 10px; border: 1px solid #dbeafe; display: flex; align-items: center; gap: 10px;">
                                     <span style="font-size: 18px;">💰</span>
@@ -371,8 +382,8 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                             </div>
 
                             <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px dashed #e2e8f0;">
-                                <p style="margin: 0; font-size: 13px; font-weight: 600; color: #64748b;">
-                                    Esto no es un listado. Es un pipeline de ventas listo para usar.
+                                <p style="margin: 0; font-size: 13px; font-weight: 700; color: #2563eb;">
+                                    💡 Empieza por las empresas con mayor score para maximizar probabilidad de cierre.
                                 </p>
                                 <?php if (isset($_GET['intel']) && $_GET['intel'] === 'active'): ?>
                                     <div style="background: #2563eb; color: white; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 999px; display: flex; align-items: center; gap: 6px;">
@@ -385,10 +396,13 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
 
                     <!-- BLOQUE: TOP OPORTUNIDADES -->
                     <?php if (!empty($visibleCompanies)): ?>
-                        <div class="ae-radar-page__top-picks" style="margin-bottom: 32px;">
-                            <h4 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                                <span>🔥</span> Top oportunidades de hoy
+                        <div class="ae-radar-page__top-picks" style="margin-top: 40px; margin-bottom: 32px;">
+                            <h4 style="margin: 0 0 8px 0; font-size: 15px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                                <span>🎯</span> Empieza por estas empresas hoy
                             </h4>
+                            <p style="margin: 0 0 24px 0; font-size: 13px; color: #64748b; font-weight: 500;">
+                                Seleccionadas automáticamente por mayor score y mejor momento de contacto.
+                            </p>
                             
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
                                 <?php 
@@ -415,10 +429,31 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                             $scoreColor = '#f59e0b'; $scoreBg = 'rgba(245, 158, 11, 0.1)'; $scoreProb = 'Interés medio'; $scoreIcon = '🟡';
                                         }
 
-                                        $days = rand(1, 10);
-                                        $timingText = ($days <= 3) ? '⏱ Contactar ahora' : "⏱ Contactar en $days días";
+                                        $isFirst = ($index === 0);
+                                        
+                                        // Timing vinculado al score (Sincronizado con tabla)
+                                        if ($scoreTotal >= 60) {
+                                            $days = rand(1, 2);
+                                        } elseif ($scoreTotal >= 30) {
+                                            $days = rand(3, 7);
+                                        } else {
+                                            $days = rand(8, 15);
+                                        }
+
+                                        $timingText = ($days <= 2) ? '🚀 Contactar de inmediato' : "⏱ Contactar en $days días";
+                                        $btnText = "🚀 Contactar ahora";
+                                        
+                                        $containerStyle = $isFirst 
+                                            ? "background: #ffffff; border: 2px solid #2563eb; border-radius: 16px; padding: 20px; transition: all 0.2s; position: relative; box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.15); display: flex; flex-direction: column; height: 100%; transform: scale(1.02); z-index: 5;"
+                                            : "background: rgba(255, 255, 255, 0.6); border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; transition: all 0.2s; position: relative; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; height: 100%;";
                                 ?>
-                                    <div style="background: #ffffff; border: 1px solid <?= ($scoreTotal >= 60) ? '#10b981' : '#e2e8f0' ?>; border-radius: 16px; padding: 20px; transition: all 0.2s; position: relative; box-shadow: 0 4px 12px rgba(0, 0, 0, <?= ($scoreTotal >= 60) ? '0.08' : '0.03' ?>); display: flex; flex-direction: column; height: 100%;">
+                                    <div style="<?= $containerStyle ?>">
+                                        <?php if ($isFirst): ?>
+                                            <div style="position: absolute; top: -14px; left: 20px; background: #2563eb; color: white; padding: 4px 12px; border-radius: 999px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);">
+                                                🔥 Mejor oportunidad del día
+                                            </div>
+                                        <?php endif; ?>
+
                                         <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
                                             <span style="width: 6px; height: 6px; background: <?= $scoreColor ?>; border-radius: 50%; display: block;"></span>
                                             Sugerencia #<?= $index + 1 ?>
@@ -446,15 +481,14 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                         
                                         <button type="button" 
                                                 onclick="analyzeAI('<?= $co['id'] ?>', this, '<?= esc($co['company_name']) ?>')"
-                                                style="width: 100%; background: #2563eb; border: none; border-radius: 8px; padding: 10px; font-size: 11px; font-weight: 800; color: white; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.15);">
-                                            🎯 Ver análisis completo
+                                                style="width: 100%; background: #2563eb; border: none; border-radius: 10px; padding: 12px; font-size: 11px; font-weight: 900; color: white; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); letter-spacing: 0.02em;">
+                                            <?= $btnText ?>
                                         </button>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
                         </div>
-
-                    <?php endif; ?>
+<?php endif; ?>
 
                     <form action="<?= site_url('radar') ?>" method="GET" class="ae-radar-page__filters <?= $isFree ? 'is-locked' : '' ?>" style="padding: 16px 24px; margin-bottom: 20px;">
                         <div class="ae-radar-page__filters-grid" style="grid-template-columns: 1fr 1fr 1fr auto; gap: 20px; align-items: flex-end;">
@@ -497,7 +531,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                     </a>
                                 <?php else: ?>
                                     <button type="submit" class="ae-radar-page__filters-cta" style="height: 38px; font-size: 13px; padding: 0 16px;">
-                                        Aplicar filtros
+                                        Ver oportunidades
                                     </button>
                                 <?php endif; ?>
                             </div>
@@ -512,36 +546,40 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                             
                             if (isset($_GET['intel']) && $_GET['intel'] === 'active') {
                                 $activeFilter = 'mejores';
-                                $filterLabel = '🔥 Mejores oportunidades con mayor cierre estimado';
+                                $filterLabel = '🔥 Mostrando oportunidades prioritarias (Score > 80)';
+                            } elseif (isset($_GET['status']) && $_GET['status'] === 'nuevo') {
+                                $activeFilter = 'sin_ver';
+                                $filterLabel = '🆕 Mostrando clientes potenciales sin contactar';
                             } elseif (($filters['priority_level'] ?? '') === 'muy_alta') {
                                 $activeFilter = 'alta';
-                                $filterLabel = '🟢 Empresas con alta probabilidad de compra inmediata';
+                                $filterLabel = '🟢 Mostrando empresas con alta probabilidad de cierre';
                             } elseif (($filters['rango'] ?? '') === '7') {
                                 $activeFilter = 'ventana';
-                                $filterLabel = '⏱ Leads en ventana óptima de contacto (7 días)';
-                            } elseif (isset($_GET['ticket']) && $_GET['ticket'] === 'alto') {
-                                $activeFilter = 'ticket';
-                                $filterLabel = '💰 Oportunidades con ticket estimado alto';
+                                $filterLabel = '⏱ Mostrando leads en momento óptimo de contacto';
                             } elseif (isset($_GET['ai']) && $_GET['ai'] === 'active') {
                                 $activeFilter = 'ai';
-                                $filterLabel = '🎯 Recomendaciones estratégicas de inteligencia artificial';
+                                $filterLabel = '🎯 Mostrando recomendaciones inteligentes del sistema';
                             }
                         ?>
 
-                        <div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                            <span style="width: 12px; height: 1.5px; background: #cbd5e1;"></span>
+                        <div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            Filtrar por tipo de oportunidad
+                        </div>
+
+                        <div style="font-size: 12px; font-weight: 800; color: #2563eb; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; background: #eff6ff; padding: 8px 16px; border-radius: 8px; width: fit-content;">
+                            <span style="font-size: 14px;">🔎</span>
                             <?= $filterLabel ?>
                         </div>
 
                         <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
                             <?php
                             $chips = [
-                                'todas' => ['label' => 'Todas', 'icon' => '📊', 'url' => site_url('radar')],
-                                'mejores' => ['label' => 'Mejores oportunidades', 'icon' => '🔥', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['intel' => 'active', 'priority_level' => 'muy_alta', 'rango' => '7', 'ticket' => null, 'ai' => null])))],
-                                'alta' => ['label' => 'Alta probabilidad', 'icon' => '🟢', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['priority_level' => 'muy_alta', 'intel' => null, 'rango' => null, 'ticket' => null, 'ai' => null])))],
-                                'ventana' => ['label' => 'Ventana activa', 'icon' => '⏱', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['rango' => '7', 'intel' => null, 'priority_level' => null, 'ticket' => null, 'ai' => null])))],
-                                'ticket' => ['label' => 'Ticket alto', 'icon' => '💰', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['ticket' => 'alto', 'priority_level' => 'muy_alta', 'intel' => null, 'rango' => null, 'ai' => null])))],
-                                'ai' => ['label' => 'Recomendadas por IA', 'icon' => '🎯', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['ai' => 'active', 'intel' => 'active', 'priority_level' => null, 'rango' => null, 'ticket' => null])))]
+                                'todas' => ['label' => 'Todas las oportunidades', 'icon' => '📊', 'url' => site_url('radar')],
+                                'sin_ver' => ['label' => 'Sin contactar', 'icon' => '🆕', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['status' => 'nuevo', 'intel' => null, 'priority_level' => null, 'rango' => null, 'ticket' => null, 'ai' => null])))],
+                                'alta' => ['label' => 'Alta probabilidad de cierre', 'icon' => '🟢', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['priority_level' => 'muy_alta', 'intel' => null, 'rango' => null, 'ticket' => null, 'ai' => null, 'status' => null])))],
+                                'ventana' => ['label' => 'Momento óptimo de contacto', 'icon' => '⏱', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['rango' => '7', 'intel' => null, 'priority_level' => null, 'ticket' => null, 'ai' => null, 'status' => null])))],
+                                'mejores' => ['label' => 'Score alto (>80)', 'icon' => '🔥', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['intel' => 'active', 'priority_level' => 'muy_alta', 'rango' => '7', 'ticket' => null, 'ai' => null, 'status' => null])))],
+                                'ai' => ['label' => 'Recomendadas por el sistema', 'icon' => '🎯', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['ai' => 'active', 'intel' => 'active', 'priority_level' => null, 'rango' => null, 'ticket' => null, 'status' => null])))]
                             ];
 
                             foreach ($chips as $key => $chip):
