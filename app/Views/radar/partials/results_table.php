@@ -55,6 +55,68 @@ $allCompanies = $companies ?? [];
 $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
 ?>
 
+<style>
+    /* Estilos dinámicos del Radar B2B (Optimización UI v2.5) */
+    .ae-radar-row {
+        opacity: 1; /* Visibilidad base garantizada */
+        transition: background-color 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .ae-row-entrance {
+        /* Usamos 'backwards' para que mantenga la opacidad 0 solo durante el delay */
+        animation: ae-fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    }
+
+    @keyframes ae-fade-in-up {
+        0% { opacity: 0; transform: translateY(10px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .ae-radar-row:hover {
+        background-color: rgba(248, 250, 252, 0.8) !important;
+        box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+        z-index: 10;
+        position: relative;
+    }
+
+    /* Flash de fondo sin tocar la opacidad */
+    .ae-row-flash {
+        animation: ae-row-flash 1s ease-out;
+    }
+
+    @keyframes ae-row-flash {
+        0% { background-color: rgba(254, 240, 138, 0.4); }
+        100% { background-color: transparent; }
+    }
+
+    /* Asegurar alineación de botones de acción */
+    .ae-radar-page__company-actions > *,
+    .ae-radar-page__company-actions div > * {
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        vertical-align: middle;
+    }
+
+    .ae-btn-hover:hover {
+        filter: brightness(1.05);
+        box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
+    }
+
+    .ae-recommended-row:hover {
+        border-left: 4px solid #059669 !important; /* Mismo grosor para evitar movimiento */
+        box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.15);
+    }
+
+    .ae-score-badge {
+        cursor: help;
+        transition: opacity 0.2s;
+    }
+
+    .ae-score-badge:hover {
+        opacity: 0.85;
+    }
+</style>
+
 <div id="radar-list-view">
     <div class="ae-radar-page__lead-top" style="display:flex; justify-content:space-between; align-items:flex-end; padding:24px 26px;">
         <!-- Left Side: Title & Info -->
@@ -221,115 +283,85 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
                             $curStatus = $co['status'] ?? 'nuevo';
                             $st = $statusStyleMap[$curStatus] ?? $statusStyleMap['nuevo'];
                         ?>
-                        <tr class="ae-radar-page__row-visible" style="<?= $rowStyle ?>">
+                        <tr class="ae-radar-row ae-row-entrance <?= $isFirst ? 'ae-recommended-row' : '' ?>" style="<?= $rowStyle ?> animation-delay: <?= $index * 0.03 ?>s;">
                             <td class="ae-radar-page__td-company">
                                 <div class="ae-radar-page__company">
-                                    <div class="ae-radar-page__company-header" style="margin-bottom: 8px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                    <!-- BLOQUE 1: Identificación y Score (Pilar de Decisión) -->
+                                    <div class="ae-radar-page__company-header" style="margin-bottom: 4px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                                         <a href="<?= $isFree ? site_url('leads-empresas-nuevas') : company_url(['cif' => $co['cif'], 'name' => $co['company_name']]) ?>" 
                                            class="ae-radar-page__company-link" 
-                                           style="display: inline-flex; align-items: center; gap: 12px; text-decoration: none;">
-                                            <span class="ae-radar-page__company-name" style="font-size: 17px; font-weight: 800; color: #2563eb; line-height: 1;"><?= esc($co['company_name']) ?></span>
+                                               style="display: inline-flex; align-items: center; gap: 12px; text-decoration: none;">
+                                            <span class="ae-radar-page__company-name" style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; letter-spacing: -0.01em;"><?= esc($co['company_name']) ?></span>
                                             
-                                            <!-- SCORE DOMINANTE (Única Señal Fuerte) -->
-                                            <div style="background: <?= $scoreBg ?>; border: 1px solid <?= $scoreColor ?>; padding: 4px 14px; border-radius: 10px; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;">
-                                                <span style="font-weight: 900; font-size: 14px; color: <?= $scoreColor ?>; letter-spacing: -0.5px;">
-                                                    <?= $scoreIcon ?> <?= $scoreTotal ?>/100
-                                                </span>
-                                                <span style="font-size: 11px; font-weight: 800; color: <?= $scoreColor ?>; text-transform: uppercase; letter-spacing: 0.5px;">
-                                                    — <?= $scoreProb ?>
-                                                </span>
+                                            <div style="display: inline-flex; align-items: center; gap: 8px;">
+                                                <div class="ae-score-badge" 
+                                                     title="Probabilidad de cierre basada en comportamiento típico de empresas similares"
+                                                     style="background: <?= $scoreBg ?>; border: 1.5px solid <?= $scoreColor ?>; padding: 3px 12px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+                                                    <span style="font-weight: 900; font-size: 13px; color: <?= ($scoreTotal >= 60) ? '#059669' : ($scoreTotal >= 30 ? '#d97706' : '#64748b') ?>;"><?= $scoreIcon ?> <?= $scoreTotal ?>/100</span>
+                                                </div>
+                                                
+                                                <?php if ($isFirst): ?>
+                                                    <span style="background: #ef4444; color: white; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);"><?= $isHighPriority ? '🔥' : '⭐' ?> RECOMENDADO PARA HOY</span>
+                                                <?php endif; ?>
                                             </div>
                                         </a>
-
-                                        <?php if ($isFirst): ?>
-                                            <span style="background: #2563eb; color: white; padding: 3px 10px; border-radius: 6px; font-size: 10px; font-weight: 900; text-transform: uppercase;">🔥 Recomendado para hoy</span>
-                                        <?php endif; ?>
-
-                                        <?php if ($co['is_following'] ?? false): ?>
-                                            <span class="ae-status-pill ae-status-pill--following" style="background:#eff6ff; color:#2563eb; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:800; text-transform:uppercase;">🔵 Seguimiento</span>
-                                        <?php endif; ?>
-
-                                        <?php if ($isNew): ?>
-                                            <span class="ae-status-pill" style="background:#e0e7ff; color:#4338ca; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:800; text-transform:uppercase; border: 1px solid #c7d2fe;">🆕 Sin contactar aún</span>
-                                        <?php endif; ?>
                                     </div>
                                     
-                                    <!-- INTELIGENCIA DE CONTACTO (Timing + Necesidad Agrupado) -->
-                                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 14px; font-size: 13px; background: #f8fafc; padding: 6px 12px; border-radius: 8px; width: fit-content; border: 1px solid #f1f5f9;">
-                                        <span style="font-weight: 800; color: <?= $timingColor ?>;"><?= $timingText ?></span>
-                                        <span style="color: #cbd5e1; font-weight: 300;">|</span>
-                                        <span style="color: #64748b; font-weight: 600;">
-                                            💡 Necesita: <span style="color: #0f172a; font-weight: 800;"><?= $needText ?></span>
-                                        </span>
-                                    </div>
-                                    
-                                    <!-- Line 2: Horizontal Badge Row (Compact) -->
-                                    <div class="ae-radar-page__badges-row" style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center;">
-                                        <?php if (!empty($co['main_act_type'])): ?>
-                                            <span class="ae-act-pill"><?= esc($co['main_act_type']) ?></span>
+                                    <!-- BLOQUE 2: Acción Estratégica (Urgencia + Necesidad) -->
+                                    <div style="margin-bottom: 12px; font-size: 13px; color: #475569; display: flex; align-items: center; gap: 8px; font-weight: 600;">
+                                        <?php if ($curStatus === 'nuevo'): ?>
+                                            <span style="color: <?= ($days <= 3) ? '#dc2626' : '#2563eb' ?>; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; font-size: 12px;">
+                                                <?= ($days <= 2) ? '🔴 CONTACTAR AHORA' : mb_strtoupper($timingText) ?>
+                                            </span>
+                                            <span style="color: #e2e8f0; font-weight: 300;">·</span>
                                         <?php endif; ?>
-
-                                        <?php if (!empty($co['capital_social_raw'])): ?>
-                                            <span class="ae-capital-pill" style="height: 26px; padding: 3px 10px; display: inline-flex; align-items: center; border-radius: 8px; font-size: 11px;"><?= esc($co['capital_social_raw']) ?></span>
-                                        <?php endif; ?>
+                                        <span style="color: #64748b;">💡 Necesita: <span style="color: #334155; font-weight: 800;"><?= $needText ?></span></span>
                                     </div>
 
-                                    <!-- Line 3: Score Reasons -->
-                                    <?php if (!empty($co['score_reasons'])): ?>
-                                        <div class="ae-radar-page__score-reasons" style="font-size: 11px; color: #64748b; margin-bottom: 6px; font-weight: 500;">
-                                            <?= esc($co['score_reasons']) ?>
-                                        </div>
-                                    <?php endif; ?>
-
-                                    <!-- Line 4: Friendly Activity -->
-                                    <div class="ae-radar-page__friendly-activity" style="font-size: 12px; font-weight: 700; color: #374151;">
-                                        <?php 
-                                            $activity = $co['cnae_label'];
-                                            if (empty($activity) || $activity == 'N/D') {
-                                                $activity = mb_strimwidth($co['objeto_social'] ?? '', 0, 80, '...');
-                                            }
-                                            echo !empty($activity) ? esc($activity) : 'Actividad no clasificada';
-                                        ?>
-                                    <div class="ae-radar-page__company-actions" style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
-                                        <button type="button" class="ae-radar-page__btn-qv" onclick="openQuickView('<?= $co['id'] ?>')" title="Ver oportunidad"
-                                                style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; padding: 0; margin: 0; border-radius: 12px; background: white; border: 1px solid #e2e8f0; color: #64748b; cursor: pointer; transition: all 0.2s;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                        </button>
-                                        
-                                        <button type="button" 
-                                                onclick="analyzeAI('<?= $co['id'] ?>', this, '<?= esc($co['company_name']) ?>', 'action')" 
-                                                title="Preparar contacto"
-                                                style="background: #2563eb; color: white; padding: 0 24px; height: 40px; border-radius: 12px; font-weight: 900; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px 0 rgba(37, 99, 235, 0.4); transition: all 0.2s;">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width: 14px; height: 14px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                                            PREPARAR CONTACTO
-                                        </button>
+                                    <!-- BLOQUE 3: Acciones y Gestión de Estado -->
+                                    <div class="ae-radar-page__company-actions" style="display: flex; align-items: center; gap: 10px;">
+                                        <?php if ($curStatus === 'nuevo'): ?>
+                                            <button type="button" 
+                                                    class="ae-btn-hover ae-btn-contact-main"
+                                                    onclick="handleContactClick(this, '<?= $co['id'] ?>', '<?= esc($co['company_name']) ?>')" 
+                                                    style="background: #2563eb; color: white; padding: 0 18px; height: 38px; border-radius: 10px; font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); transition: all 0.2s;">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width: 13px; height: 13px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                                <span class="btn-text">Contactar</span>
+                                            </button>
+                                        <?php endif; ?>
 
                                         <button type="button" 
+                                                class="ae-btn-hover"
                                                 onclick="analyzeAI('<?= $co['id'] ?>', this, '<?= esc($co['company_name']) ?>', 'analyze')" 
-                                                title="Ver cómo venderle"
-                                                style="background: white; color: #2563eb; padding: 0 16px; height: 38px; border-radius: 12px; font-weight: 800; font-size: 10px; text-transform: uppercase; letter-spacing: 0.02em; border: 2px solid #e2e8f0; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;">
-                                            <span style="font-size: 14px;">🎯</span> VER CÓMO VENDERLE
+                                                style="background: white; color: #475569; padding: 0 14px; height: 38px; border-radius: 10px; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.02em; border: 1.5px solid #e2e8f0; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                                            <span style="font-size: 13px;">🎯</span> Estrategia
                                         </button>
 
-                                        <button type="button" 
-                                                class="ae-radar-page__btn-fav <?= ($co['is_favorite'] ?? false) ? 'is-active' : '' ?>" 
-                                                onclick="toggleFavorite(this, '<?= $co['id'] ?>')"
-                                                title="<?= ($co['is_favorite'] ?? false) ? 'Quitar de favoritos' : 'Guardar en favoritos' ?>"
-                                                style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; padding: 0; margin: 0; border-radius: 12px; background: white; border: 1px solid #e2e8f0; cursor: pointer;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="<?= ($co['is_favorite'] ?? false) ? '#ffb800' : 'none' ?>" stroke="<?= ($co['is_favorite'] ?? false) ? '#ffb800' : 'currentColor' ?>" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                        </button>
+                                        <div style="flex-grow: 1;"></div>
 
-                                        <!-- Mini CRM: Selector de Estado -->
-                                        <select onchange="updateLeadStatus(this, '<?= $co['id'] ?>')" 
-                                                style="height: 38px; padding: 0 10px; border-radius: 10px; font-size: 10px; font-weight: 900; text-transform: uppercase; cursor: pointer; outline: none; margin-left: 4px; transition: all 0.2s; background: <?= $st['bg'] ?>; color: <?= $st['color'] ?>; border: 1px solid <?= $st['border'] ?>;">
-                                            <option value="nuevo" <?= ($curStatus === 'nuevo') ? 'selected' : '' ?>>Nuevo</option>
-                                            <option value="contactado" <?= ($curStatus === 'contactado') ? 'selected' : '' ?>>Contactado</option>
-                                            <option value="seguimiento" <?= ($curStatus === 'seguimiento') ? 'selected' : '' ?>>Seguimiento</option>
-                                            <option value="negociacion" <?= ($curStatus === 'negociacion') ? 'selected' : '' ?>>Negociación</option>
-                                            <option value="ganado" <?= ($curStatus === 'ganado') ? 'selected' : '' ?>>Ganado</option>
-                                        </select>
-                                        <span class="ae-radar-page__company-cif" style="margin-left: 8px; font-size: 11px; font-weight: 600; color: #94a3b8;"><?= esc($co['cif']) ?></span>
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <?php if ($isNew): ?>
+                                                <span style="color: #6366f1; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; background: #f5f3ff; padding: 3px 10px; border-radius: 6px; border: 1px solid #e0e7ff;" title="Este cliente aún no ha sido trabajado">🆕 SIN CONTACTAR</span>
+                                            <?php endif; ?>
+
+                                            <select onchange="updateLeadStatusAndNotify(this, '<?= $co['id'] ?>')" 
+                                                    style="height: 38px; padding: 0 12px; border-radius: 10px; font-size: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; outline: none; background: <?= $st['bg'] ?>; color: <?= $st['color'] ?>; border: 1.5px solid <?= $st['border'] ?>; transition: all 0.2s;">
+                                                <option value="nuevo" <?= ($curStatus === 'nuevo') ? 'selected' : '' ?>>NUEVO</option>
+                                                <option value="contactado" <?= ($curStatus === 'contactado') ? 'selected' : '' ?>>CONTACTADO</option>
+                                                <option value="seguimiento" <?= ($curStatus === 'seguimiento') ? 'selected' : '' ?>>SEGUIMIENTO</option>
+                                                <option value="negociacion" <?= ($curStatus === 'negociacion') ? 'selected' : '' ?>>NEGOCIACIÓN</option>
+                                                <option value="ganado" <?= ($curStatus === 'ganado') ? 'selected' : '' ?>>GANADO</option>
+                                            </select>
+
+                                            <button type="button" 
+                                                    class="ae-radar-page__btn-fav <?= ($co['is_favorite'] ?? false) ? 'is-active' : '' ?>" 
+                                                    onclick="toggleFavorite(this, '<?= $co['id'] ?>')"
+                                                    style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: white; border: 1.5px solid #f1f5f9; cursor: pointer; transition: all 0.2s;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="<?= ($co['is_favorite'] ?? false) ? '#ffb800' : 'none' ?>" stroke="<?= ($co['is_favorite'] ?? false) ? '#ffb800' : 'currentColor' ?>" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                            </button>
+                                        </div>
                                     </div>
+                                </div>
 
 <div class="ae-radar-page__sales-intel-legacy" style="display:none;"></div>
                                 </div>
@@ -394,3 +426,50 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
         </div>
     <?php endif; ?>
 </div>
+
+<script>
+    /**
+     * Feedback visual para el botón de contacto
+     */
+    function handleContactClick(btn, id, name) {
+        const btnText = btn.querySelector('.btn-text');
+        const originalText = btnText.textContent;
+        
+        // Estado de carga visual
+        btn.style.opacity = '0.7';
+        btn.style.pointerEvents = 'none';
+        btnText.textContent = 'Preparando mensaje...';
+        
+        // Llamada a la lógica original (analyzeAI debe estar definida en el padre)
+        if (typeof analyzeAI === 'function') {
+            analyzeAI(id, btn, name, 'action');
+        } else {
+            console.error('analyzeAI no está definida');
+            // Revertir si falla la detección de la función
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = 'auto';
+            btnText.textContent = originalText;
+        }
+    }
+
+    /**
+     * Feedback visual para cambio de estado CRM (Flash)
+     */
+    function updateLeadStatusAndNotify(select, id) {
+        const row = select.closest('.ae-radar-row');
+        
+        // Disparar flash visual
+        if (row) {
+            row.classList.remove('ae-row-flash');
+            void row.offsetWidth; // Force reflow
+            row.classList.add('ae-row-flash');
+        }
+        
+        // Llamada a la lógica original
+        if (typeof updateLeadStatus === 'function') {
+            updateLeadStatus(select, id);
+        } else {
+            console.error('updateLeadStatus no está definida');
+        }
+    }
+</script>
