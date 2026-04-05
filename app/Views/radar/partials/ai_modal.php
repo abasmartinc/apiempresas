@@ -6,11 +6,15 @@
             <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
                 <div class="ae-ai-modal__header-left">
                     <span class="ae-ai-modal__badge">IA B2B</span>
-                    <h2 class="ae-ai-modal__title" style="margin: 0;">Análisis Estratégico AI</h2>
+                    <h2 class="ae-ai-modal__title" style="margin: 0;">🎯 Oportunidad detectada</h2>
+                    <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: 600;">Alta probabilidad de cierre si contactas en el momento adecuado</p>
                 </div>
                 <button type="button" class="ae-ai-modal__close" onclick="closeAIModal()" style="position: static; font-size: 28px;">×</button>
             </div>
-            <div id="ae-ai-modal-company" style="font-size: 14px; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 4px 12px; border-radius: 8px; margin-top: 4px; display: none;"></div>
+            <div id="ae-ai-modal-company" style="font-size: 14px; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 4px 12px; border-radius: 8px; margin-top: 8px; display: none;"></div>
+            <div class="ae-ai-modal__urgency-warning" style="background: #fef2f2; color: #dc2626; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 800; margin-top: 8px; border: 1px solid #fee2e2; display: flex; align-items: center; gap: 6px;">
+                <span>⚠️</span> Otros proveedores pueden contactar antes
+            </div>
         </header>
         <div id="ae-ai-content" class="ae-ai-modal__body">
             <!-- Se cargará por AJAX -->
@@ -21,8 +25,9 @@
 <script>
     /**
      * Análisis IA bajo demanda
+     * @param {string} intent - 'analyze' o 'action'
      */
-    function analyzeAI(id, btn, companyName = '') {
+    function analyzeAI(id, btn, companyName = '', intent = 'analyze') {
         if (!id) return;
 
         const $modal = document.getElementById('ae-ai-modal');
@@ -53,7 +58,6 @@
             </div>
         `;
         $modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
 
         fetch('<?= site_url('radar/ai-analyze/') ?>' + id, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -166,9 +170,21 @@
                                 <p style="font-size: 14px; color: #854d0e; margin: 0; line-height: 1.5;">${data.sales_approach}</p>
                             </div>
 
-                            <div style="padding: 20px; background: #f1f5f9; border-radius: 12px; border: 1px dashed #cbd5e1; position: relative;">
-                                <span class="ae-ai-result__label" style="display: block; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 12px;">Mensaje inicial sugerido</span>
-                                <p id="ae-ai-message" style="font-size: 14px; line-height: 1.6; color: #1e293b; margin: 0; font-style: italic;">"${data.first_message}"</p>
+                            <div id="ae-ai-message-section" style="padding: 20px; background: #f1f5f9; border-radius: 12px; border: 2px dashed #2563eb; position: relative; transition: all 0.5s;">
+                                <span class="ae-ai-result__label" style="display: block; font-size: 11px; font-weight: 800; color: #2563eb; text-transform: uppercase; margin-bottom: 12px;">Mensaje inicial sugerido</span>
+                                <p id="ae-ai-message" style="font-size: 15px; line-height: 1.6; color: #1e293b; margin: 0 0 16px 0; font-style: italic; font-weight: 500;">"${data.first_message}"</p>
+                                
+                                <!-- Botones de acción inmediata sobre el mensaje -->
+                                <div style="display: flex; gap: 10px;">
+                                    <button type="button" class="ai-action-btn ai-action-btn--copy" style="background: #2563eb; color: white; border: none; height: 38px; display: flex; align-items: center; justify-content: center; font-weight: 700; width: 50%;" onclick="copyToClipboard('ae-ai-message', this)">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px; margin-right: 6px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                        📋 Copiar mensaje
+                                    </button>
+                                    <button type="button" class="ai-action-btn" style="background: white; color: #2563eb; border: 2px solid #2563eb; height: 38px; display: flex; align-items: center; justify-content: center; font-weight: 700; width: 50%;" onclick="handleDirectContact(${id})">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px; margin-right: 6px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                        📧 Usar para contactar
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -219,6 +235,18 @@
                         </div>
                     </div>
                 `;
+
+                // Si la intención es 'action', hacemos scroll automático al mensaje
+                if (intent === 'action') {
+                    setTimeout(() => {
+                        const $msgSection = document.getElementById('ae-ai-message-section');
+                        if ($msgSection) {
+                            $msgSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            $msgSection.style.background = '#eff6ff';
+                            $msgSection.style.boxShadow = '0 0 20px rgba(37, 99, 235, 0.2)';
+                        }
+                    }, 200);
+                }
             } else {
                 $content.innerHTML = `
                     <div style="text-align:center; padding: 40px;">
@@ -250,7 +278,6 @@
         document.getElementById('ae-ai-modal').style.display = 'none';
         document.getElementById('ae-ai-modal-company').innerText = '';
         document.getElementById('ae-ai-modal-company').style.display = 'none';
-        document.body.style.overflow = '';
     }
 
     function copyToClipboard(elementId, btn) {

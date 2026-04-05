@@ -37,6 +37,22 @@ class UserFavoriteModel extends Model
     }
 
     /**
+     * Obtiene un mapa de [company_id => status] para un usuario
+     */
+    public function getFavoriteMap($userId)
+    {
+        $favorites = $this->where('user_id', $userId)
+                          ->select('company_id, status')
+                          ->findAll();
+        
+        $map = [];
+        foreach ($favorites as $f) {
+            $map[$f['company_id']] = $f['status'] ?: 'nuevo';
+        }
+        return $map;
+    }
+
+    /**
      * Obtiene el listado de empresas favoritas con datos de la empresa, filtros y paginación
      */
     public function getFavoritesWithCompanyData($userId, $params = [])

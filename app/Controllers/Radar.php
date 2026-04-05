@@ -226,20 +226,51 @@ class Radar extends BaseController
         $startRecord = ($currentPage - 1) * $perPage + 1;
         $endRecord = min($currentPage * $perPage, $totalCount);
 
+        // 3. Estadísticas de progreso CRM (Ajuste 1)
+        $crmStats = ['contactado' => 0, 'seguimiento' => 0, 'nuevo' => 0];
+        $statusCounts = $db->table('user_favorites uf')
+            ->select('uf.status, COUNT(*) as total')
+            ->join('companies c', 'c.id = uf.company_id')
+            ->where('uf.user_id', $userId)
+            ->where('c.fecha_constitucion >=', $dateLimit);
+        
+        if ($province) {
+            $statusCounts->where('c.registro_mercantil', strtoupper(str_replace('-', ' ', $province)));
+        }
+        if ($q) {
+            $statusCounts->groupStart()
+                ->like('c.objeto_social', $q)
+                ->orLike('c.company_name', $q)
+                ->groupEnd();
+        }
+        
+        $statResults = $statusCounts->groupBy('uf.status')->get()->getResultArray();
+        $totalManaged = 0;
+        foreach ($statResults as $r) {
+            $st = $r['status'] ?: 'nuevo';
+            if (array_key_exists($st, $crmStats)) {
+                $crmStats[$st] = (int)$r['total'];
+            }
+            $totalManaged += (int)$r['total'];
+        }
+        $crmStats['nuevo'] = max(0, $totalCount - $totalManaged);
+
         // Inyectar Score de calidad y estado de favorito a cada empresa
-        $favoriteIds = $this->favoriteModel->getFavoriteIds($userId);
+        $favoriteMap = $this->favoriteModel->getFavoriteMap($userId);
         $followingIds = array_column((new \App\Models\LeadFollowupModel())->where('user_id', $userId)->findAll(), 'company_id');
         foreach ($companies as &$co) {
             $co['lead_score'] = $this->getLeadScore($co);
-            $co['is_favorite'] = in_array($co['id'], $favoriteIds);
+            $co['status'] = $favoriteMap[$co['id']] ?? 'nuevo';
+            $co['is_favorite'] = isset($favoriteMap[$co['id']]);
             $co['is_following'] = in_array($co['id'], $followingIds);
         }
 
-        // 3. Datos para Filtros
+        // 4. Datos para Filtros
         $provinces = $db->query("SELECT province as name FROM seo_stats ORDER BY total_companies DESC LIMIT 52")->getResultArray();
         
         $data = [
             'stats' => $stats,
+            'crmStats' => $crmStats,
             'companies' => $companies,
             'pager' => $pager,
             'provinces' => $provinces,
