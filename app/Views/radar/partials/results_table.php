@@ -185,14 +185,14 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
                     <th>Provincia / Municipio</th>
                     <th>Actividad principal</th>
                     <th>Contacto</th>
-                    <th style="text-align:right;">Ranking / Inteligencia</th>
+                    <th style="text-align:right;">Acciones</th>
                 </tr>
             </thead>
 
             <tbody>
                 <?php if (empty($visibleCompanies)): ?>
                     <tr>
-                        <td colspan="5" style="text-align:center; padding: 40px; color: #6b7280;">
+                        <td colspan="6" style="text-align:center; padding: 40px; color: #6b7280;">
                             No se han encontrado empresas con los filtros seleccionados.
                         </td>
                     </tr>
@@ -290,21 +290,23 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
                                     <div class="ae-radar-page__company-header" style="margin-bottom: 4px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                                         <a href="<?= $isFree ? site_url('leads-empresas-nuevas') : company_url(['cif' => $co['cif'], 'name' => $co['company_name']]) ?>" 
                                            class="ae-radar-page__company-link" 
-                                               style="display: inline-flex; align-items: center; gap: 12px; text-decoration: none;">
-                                            <span class="ae-radar-page__company-name" style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; letter-spacing: -0.01em;"><?= esc($co['company_name']) ?></span>
-                                            
-                                            <div style="display: inline-flex; align-items: center; gap: 8px;">
-                                                <div class="ae-score-badge" 
-                                                     title="Probabilidad de cierre basada en comportamiento típico de empresas similares"
-                                                     style="background: <?= $scoreBg ?>; border: 1.5px solid <?= $scoreColor ?>; padding: 3px 12px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
-                                                    <span style="font-weight: 900; font-size: 13px; color: <?= ($scoreTotal >= 60) ? '#059669' : ($scoreTotal >= 30 ? '#d97706' : '#64748b') ?>;"><?= $scoreIcon ?> <?= $scoreTotal ?>/100</span>
-                                                </div>
-                                                
-                                                <?php if ($isFirst): ?>
-                                                    <span style="background: #ef4444; color: white; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);"><?= $isHighPriority ? '🔥' : '⭐' ?> RECOMENDADO PARA HOY</span>
-                                                <?php endif; ?>
-                                            </div>
+                                               style="display: block; text-decoration: none; margin-bottom: 6px;">
+                                            <span class="ae-radar-page__company-name" style="font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.2; letter-spacing: -0.01em;"><?= esc($co['company_name']) ?></span>
                                         </a>
+
+                                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                            <div class="ae-score-badge" 
+                                                 title="Probabilidad de cierre basada en comportamiento típico de empresas similares"
+                                                 style="background: <?= $scoreBg ?>; border: 1px solid <?= $scoreColor ?>; padding: 2px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                                                <span style="font-weight: 900; font-size: 11px; color: <?= ($scoreTotal >= 60) ? '#059669' : ($scoreTotal >= 30 ? '#d97706' : '#64748b') ?>;"><?= $scoreIcon ?> <?= $scoreTotal ?>/100</span>
+                                            </div>
+                                            
+                                            <?php if ($isFirst): ?>
+                                                <span style="display: inline-flex; align-items: center; gap: 4px; background: #fff1f2; color: #e11d48; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; border: 1px solid #ffe4e6;">
+                                                    <span style="font-size: 12px;">🔥</span> RECOMENDADO PARA HOY
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
                                     
                                     <!-- BLOQUE 2: Acción Estratégica (Urgencia + Necesidad) -->
@@ -318,49 +320,6 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
                                         <span style="color: #64748b;">💡 Necesita: <span style="color: #334155; font-weight: 800;"><?= $needText ?></span></span>
                                     </div>
 
-                                    <!-- BLOQUE 3: Acciones y Gestión de Estado -->
-                                    <div class="ae-radar-page__company-actions" style="display: flex; align-items: center; gap: 10px;">
-                                        <?php if ($curStatus === 'nuevo'): ?>
-                                            <button type="button" 
-                                                    class="ae-btn-hover ae-btn-contact-main"
-                                                    onclick="handleContactClick(this, '<?= $co['id'] ?>', '<?= esc($co['company_name']) ?>')" 
-                                                    style="background: #2563eb; color: white; padding: 0 18px; height: 38px; border-radius: 10px; font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); transition: all 0.2s;">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width: 13px; height: 13px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                                                <span class="btn-text">Contactar</span>
-                                            </button>
-                                        <?php endif; ?>
-
-                                        <button type="button" 
-                                                class="ae-btn-hover"
-                                                onclick="analyzeAI('<?= $co['id'] ?>', this, '<?= esc($co['company_name']) ?>', 'analyze')" 
-                                                style="background: white; color: #475569; padding: 0 14px; height: 38px; border-radius: 10px; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.02em; border: 1.5px solid #e2e8f0; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
-                                            <span style="font-size: 13px;">🎯</span> Estrategia
-                                        </button>
-
-                                        <div style="flex-grow: 1;"></div>
-
-                                        <div style="display: flex; align-items: center; gap: 10px;">
-                                            <?php if ($isNew): ?>
-                                                <span style="color: #6366f1; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; background: #f5f3ff; padding: 3px 10px; border-radius: 6px; border: 1px solid #e0e7ff;" title="Este cliente aún no ha sido trabajado">🆕 SIN CONTACTAR</span>
-                                            <?php endif; ?>
-
-                                            <select onchange="updateLeadStatusAndNotify(this, '<?= $co['id'] ?>')" 
-                                                    style="height: 38px; padding: 0 12px; border-radius: 10px; font-size: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; outline: none; background: <?= $st['bg'] ?>; color: <?= $st['color'] ?>; border: 1.5px solid <?= $st['border'] ?>; transition: all 0.2s;">
-                                                <option value="nuevo" <?= ($curStatus === 'nuevo') ? 'selected' : '' ?>>NUEVO</option>
-                                                <option value="contactado" <?= ($curStatus === 'contactado') ? 'selected' : '' ?>>CONTACTADO</option>
-                                                <option value="seguimiento" <?= ($curStatus === 'seguimiento') ? 'selected' : '' ?>>SEGUIMIENTO</option>
-                                                <option value="negociacion" <?= ($curStatus === 'negociacion') ? 'selected' : '' ?>>NEGOCIACIÓN</option>
-                                                <option value="ganado" <?= ($curStatus === 'ganado') ? 'selected' : '' ?>>GANADO</option>
-                                            </select>
-
-                                            <button type="button" 
-                                                    class="ae-radar-page__btn-fav <?= ($co['is_favorite'] ?? false) ? 'is-active' : '' ?>" 
-                                                    onclick="toggleFavorite(this, '<?= $co['id'] ?>')"
-                                                    style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: white; border: 1.5px solid #f1f5f9; cursor: pointer; transition: all 0.2s;">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="<?= ($co['is_favorite'] ?? false) ? '#ffb800' : 'none' ?>" stroke="<?= ($co['is_favorite'] ?? false) ? '#ffb800' : 'currentColor' ?>" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                            </button>
-                                        </div>
-                                    </div>
                                 </div>
 
 <div class="ae-radar-page__sales-intel-legacy" style="display:none;"></div>
@@ -391,7 +350,7 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
                                         <span class="ae-radar-page__locked-phone">🔒 Bloqueado</span>
                                     <?php elseif (!empty($co['phone'])): ?>
                                         <div class="ae-radar-page__phone-group">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.21-2.21a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79(19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.21-2.21a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                                             <span class="ae-radar-page__phone-number"><?= esc($co['phone']) ?></span>
                                         </div>
                                     <?php else: ?>
@@ -399,13 +358,41 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
                                     <?php endif; ?>
                                 </div>
                             </td>
-                            <td class="ae-radar-page__td-action" style="text-align:right;">
-                                <!-- Botón 'Ver ficha' eliminado por solicitud del usuario para enfocar en venta directa -->
-                                <?php if ($isFree): ?>
-                                    <a href="<?= site_url('leads-empresas-nuevas') ?>" class="ae-radar-page__btn-action ae-radar-page__btn-action--free" style="padding: 10px 16px; font-size: 12px;">
-                                        Desbloquear PRO
-                                    </a>
-                                <?php endif; ?>
+                            <td class="ae-radar-page__td-actions" style="text-align:right; vertical-align: middle;">
+                                <div class="ae-radar-page__company-actions" style="display: flex; align-items: center; gap: 8px; justify-content: flex-end;">
+                                    <?php if ($curStatus === 'nuevo'): ?>
+                                        <button type="button" 
+                                                class="ae-btn-hover ae-btn-contact-main"
+                                                onclick="handleContactClick(this, '<?= $co['id'] ?>', '<?= esc($co['company_name']) ?>')" 
+                                                style="background: #2563eb; color: white; padding: 0 14px; height: 36px; border-radius: 8px; font-weight: 800; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); transition: all 0.2s;">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width: 12px; height: 12px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                            <span class="btn-text">Contactar</span>
+                                        </button>
+                                    <?php endif; ?>
+
+                                    <button type="button" 
+                                            class="ae-btn-hover"
+                                            onclick="analyzeAI('<?= $co['id'] ?>', this, '<?= esc($co['company_name']) ?>', 'analyze')" 
+                                            style="background: white; color: #475569; padding: 0 10px; height: 36px; border-radius: 8px; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.02em; border: 1px solid #e2e8f0; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">
+                                        <span style="font-size: 12px;">🎯</span> Estrategia
+                                    </button>
+
+                                    <select onchange="updateLeadStatusAndNotify(this, '<?= $co['id'] ?>')" 
+                                            style="height: 36px; padding: 0 8px; border-radius: 8px; font-size: 9px; font-weight: 800; text-transform: uppercase; cursor: pointer; outline: none; background: <?= $st['bg'] ?>; color: <?= $st['color'] ?>; border: 1px solid <?= $st['border'] ?>; transition: all 0.2s; min-width: 100px;">
+                                        <option value="nuevo" <?= ($curStatus === 'nuevo') ? 'selected' : '' ?>>NUEVO</option>
+                                        <option value="contactado" <?= ($curStatus === 'contactado') ? 'selected' : '' ?>>CONTACTADO</option>
+                                        <option value="seguimiento" <?= ($curStatus === 'seguimiento') ? 'selected' : '' ?>>SEGUIMIENTO</option>
+                                        <option value="negociacion" <?= ($curStatus === 'negociacion') ? 'selected' : '' ?>>NEGOCIACIÓN</option>
+                                        <option value="ganado" <?= ($curStatus === 'ganado') ? 'selected' : '' ?>>GANADO</option>
+                                    </select>
+
+                                    <button type="button" 
+                                            class="ae-radar-page__btn-fav <?= ($co['is_favorite'] ?? false) ? 'is-active' : '' ?>" 
+                                            onclick="toggleFavorite(this, '<?= $co['id'] ?>')"
+                                            style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: white; border: 1px solid #f1f5f9; cursor: pointer; transition: all 0.2s;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="<?= ($co['is_favorite'] ?? false) ? '#ffb800' : 'none' ?>" stroke="<?= ($co['is_favorite'] ?? false) ? '#ffb800' : 'currentColor' ?>" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
