@@ -209,11 +209,6 @@
                                     Marcar contactado
                                 </button>
                             `}
-
-                            <button type="button" class="ai-action-btn ai-action-btn--list" onclick="addToListFromAI(${id}, this)">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                                Añadir a favoritos
-                            </button>
                         </div>
 
                         <!-- Señales detectadas -->
@@ -283,16 +278,6 @@
         });
     }
 
-    // Acciones comerciales con persistencia
-    function addToListFromAI(companyId, btn) {
-        if (typeof toggleFavorite === 'function') {
-            toggleFavorite(btn, companyId);
-            btn.innerHTML = '✅ En Favoritos';
-            btn.style.borderColor = '#10b981';
-            btn.style.color = '#10b981';
-            btn.disabled = true;
-        }
-    }
 
     function markAsContactedFromAI(companyId, btn) {
         btn.innerHTML = '⏳...';
