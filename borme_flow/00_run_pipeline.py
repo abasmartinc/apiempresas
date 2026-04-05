@@ -36,6 +36,7 @@ PIPELINE = [
     "05_associate_companies.py",
     "06_extract_from_borme_text.py",  # Extrae administradores y fecha de constitución
     "fill_radar_scores.py --all",
+    "07_linkedin_post.py",           # Publica resumen diario en LinkedIn
 ]
 
 LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pipeline_execution.log")

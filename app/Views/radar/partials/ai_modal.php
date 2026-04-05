@@ -175,14 +175,9 @@
                                 <p id="ae-ai-message" style="font-size: 15px; line-height: 1.6; color: #1e293b; margin: 0 0 16px 0; font-style: italic; font-weight: 500;">"${data.first_message}"</p>
                                 
                                 <!-- Botones de acción inmediata sobre el mensaje -->
-                                <div style="display: flex; gap: 10px;">
-                                    <button type="button" class="ai-action-btn ai-action-btn--copy" style="background: #2563eb; color: white; border: none; height: 38px; display: flex; align-items: center; justify-content: center; font-weight: 700; width: 50%;" onclick="copyToClipboard('ae-ai-message', this)">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px; margin-right: 6px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                        📋 Copiar mensaje
-                                    </button>
-                                    <button type="button" class="ai-action-btn" style="background: white; color: #2563eb; border: 2px solid #2563eb; height: 38px; display: flex; align-items: center; justify-content: center; font-weight: 700; width: 50%;" onclick="handleDirectContact(${id})">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px; margin-right: 6px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                                        📧 Usar para contactar
+                                    <button type="button" class="ai-action-btn ai-action-btn--copy" style="background: #2563eb; color: white; border: none; height: 42px; display: flex; align-items: center; justify-content: center; font-weight: 700; width: 100%; font-size: 15px;" onclick="copyToClipboard('ae-ai-message', this)">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px; margin-right: 8px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                        📋 Copiar mensaje sugerido
                                     </button>
                                 </div>
                             </div>
@@ -203,11 +198,6 @@
 
                         <!-- 9. Acciones Finales Dinámicas -->
                         <div class="ai-action-buttons">
-                            <button type="button" class="ai-action-btn ai-action-btn--copy" onclick="copyToClipboard('ae-ai-message', this)">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                Copiar mensaje
-                            </button>
-
                             ${isContactMissing ? `
                                 <button type="button" class="ai-action-btn ai-action-btn--alert" onclick="alertWhenContactAvailable(${id}, this)">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
@@ -221,8 +211,8 @@
                             `}
 
                             <button type="button" class="ai-action-btn ai-action-btn--list" onclick="addToListFromAI(${id}, this)">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
-                                Añadir a lista
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                Añadir a favoritos
                             </button>
                         </div>
 
@@ -297,7 +287,7 @@
     function addToListFromAI(companyId, btn) {
         if (typeof toggleFavorite === 'function') {
             toggleFavorite(btn, companyId);
-            btn.innerHTML = '✅ En la lista';
+            btn.innerHTML = '✅ En Favoritos';
             btn.style.borderColor = '#10b981';
             btn.style.color = '#10b981';
             btn.disabled = true;
