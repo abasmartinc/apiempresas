@@ -265,11 +265,11 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
                                 $needText = 'Web / CRM / Consultoría';
                             }
 
-                            $rowStyle = 'border-left: 4px solid transparent; transition: all 0.2s;';
-                            if ($isHighPriority) {
-                                $rowStyle = 'border-left: 4px solid #10b981;';
-                            } elseif ($isNew) {
-                                $rowStyle = 'border-left: 4px solid #2563eb; background: #f8fbff;';
+                            $rowStyle = 'border-left: 4px solid transparent; padding-top: 16px; padding-bottom: 16px; transition: all 0.2s;';
+                            if ($isNew) {
+                                $rowStyle = "border-left: 4px solid {$scoreColor}; background: #f8fbff;";
+                            } elseif ($isHighPriority) {
+                                $rowStyle = "border-left: 4px solid {$scoreColor};";
                             }
 
                             // 4. ESTADO CRM (Colores)
