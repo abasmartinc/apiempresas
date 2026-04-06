@@ -228,30 +228,33 @@ class RadarController extends BaseController
         $builder->orderBy('fecha_constitucion', 'DESC');
         $companies = $builder->get($limit)->getResultArray();
 
-        // Stats Logic
-        $statsBuilder = function() use ($db, $province, $sector) {
-            $b = $db->table('companies');
-            if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
-                if (strtolower($province) === 'alicante') {
-                    $b->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
-                } else {
-                    $b->where('registro_mercantil', $province);
-                }
+        // Stats Logic - Optimization: Unified query for current context
+        $statsRaw = $db->table('companies');
+        if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
+            if (strtolower($province) === 'alicante') {
+                $statsRaw->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+            } else {
+                $statsRaw->where('registro_mercantil', $province);
             }
-            if ($sector && !empty($sector['codes'])) {
-                $b->groupStart();
-                foreach ($sector['codes'] as $code) $b->orLike('cnae_code', $code, 'after');
-                $b->groupEnd();
-            }
-            $b->where('fecha_constitucion IS NOT NULL');
-            return $b;
-        };
+        }
+        if ($sector && !empty($sector['codes'])) {
+            $statsRaw->groupStart();
+            foreach ($sector['codes'] as $code) $statsRaw->orLike('cnae_code', $code, 'after');
+            $statsRaw->groupEnd();
+        }
+        $statsRaw->where('fecha_constitucion IS NOT NULL');
+        
+        $statsQuery = $statsRaw->select("
+            COUNT(CASE WHEN fecha_constitucion = '" . date('Y-m-d') . "' THEN 1 END) as hoy,
+            COUNT(CASE WHEN fecha_constitucion >= '" . date('Y-m-d', strtotime('-7 days')) . "' THEN 1 END) as semana,
+            COUNT(CASE WHEN fecha_constitucion >= '" . date('Y-m-d', strtotime('-30 days')) . "' THEN 1 END) as mes
+        ")->get()->getRowArray();
 
         $stats = [
-            'hoy' => $statsBuilder()->where('fecha_constitucion', date('Y-m-d'))->countAllResults(),
-            'semana' => $statsBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))->countAllResults(),
-            'mes' => $statsBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))->countAllResults(),
-            '30days' => $statsBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))->countAllResults()
+            'hoy'    => (int)($statsQuery['hoy'] ?? 0),
+            'semana' => (int)($statsQuery['semana'] ?? 0),
+            'mes'    => (int)($statsQuery['mes'] ?? 0),
+            '30days' => (int)($statsQuery['mes'] ?? 0)
         ];
 
         // Heading Generation
@@ -299,22 +302,25 @@ class RadarController extends BaseController
         $nationalPrices = $prices;
 
         if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
-            $nationalStatsBuilder = function() use ($db, $sector) {
-                $b = $db->table('companies');
-                if ($sector && !empty($sector['codes'])) {
-                    $b->groupStart();
-                    foreach ($sector['codes'] as $code) $b->orLike('cnae_code', $code, 'after');
-                    $b->groupEnd();
-                }
-                $b->where('fecha_constitucion IS NOT NULL');
-                return $b;
-            };
+            $nStatsRaw = $db->table('companies');
+            if ($sector && !empty($sector['codes'])) {
+                $nStatsRaw->groupStart();
+                foreach ($sector['codes'] as $code) $nStatsRaw->orLike('cnae_code', $code, 'after');
+                $nStatsRaw->groupEnd();
+            }
+            $nStatsRaw->where('fecha_constitucion IS NOT NULL');
+            
+            $nQuery = $nStatsRaw->select("
+                COUNT(CASE WHEN fecha_constitucion = '" . date('Y-m-d') . "' THEN 1 END) as hoy,
+                COUNT(CASE WHEN fecha_constitucion >= '" . date('Y-m-d', strtotime('-7 days')) . "' THEN 1 END) as semana,
+                COUNT(CASE WHEN fecha_constitucion >= '" . date('Y-m-d', strtotime('-30 days')) . "' THEN 1 END) as mes
+            ")->get()->getRowArray();
 
             $nationalStats = [
-                'hoy'    => $nationalStatsBuilder()->where('fecha_constitucion', date('Y-m-d'))->countAllResults(),
-                'semana' => $nationalStatsBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))->countAllResults(),
-                'mes'    => $nationalStatsBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))->countAllResults(),
-                '30days' => $nationalStatsBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')))->countAllResults(),
+                'hoy'    => (int)($nQuery['hoy'] ?? 0),
+                'semana' => (int)($nQuery['semana'] ?? 0),
+                'mes'    => (int)($nQuery['mes'] ?? 0),
+                '30days' => (int)($nQuery['mes'] ?? 0),
             ];
 
             $nationalPrices = [
@@ -325,14 +331,14 @@ class RadarController extends BaseController
             ];
         }
 
-        // Sectors / Provinces Top
+        // Sectors / Provinces Top - Optimization: Group by indexed code instead of text label
         if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
             $topData = $db->table('companies')
-                ->select('cnae_label, COUNT(id) as total')
+                ->select('MAX(cnae_label) as cnae_label, COUNT(id) as total')
                 ->where('registro_mercantil', $province)
-                ->where('cnae_label IS NOT NULL')->where('cnae_label !=', '')
+                ->where('cnae_code IS NOT NULL')->where('cnae_code !=', '')
                 ->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')))
-                ->groupBy('cnae_label')->orderBy('total', 'DESC')->limit(12)->get()->getResultArray();
+                ->groupBy('cnae_code')->orderBy('total', 'DESC')->limit(12)->get()->getResultArray();
         } else {
             $topData = $db->table('companies')
                 ->select('registro_mercantil as cnae_label, COUNT(id) as total')
