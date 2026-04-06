@@ -55,6 +55,31 @@ $allCompanies = $companies ?? [];
 $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
 ?>
 
+<!-- Dynamic Results Title (Sincronizado con AJAX) -->
+<div class="ae-radar-page__results-info" style="margin-top: 16px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding: 0 20px 16px 20px;">
+    <h3 style="font-size: 20px; font-weight: 800; color: #1e293b; margin: 0; font-family: 'Outfit', sans-serif;">
+        <?php 
+            $totalItems = $pagination['total'] ?? 0;
+            $filterText = "posibles clientes detectados";
+            if (isset($filters['priority_level']) && !empty($filters['priority_level'])) {
+                $pMap = [
+                    'muy_alta' => '<span style="color:#e11d48">🔥 Prioridad Muy Alta</span>', 
+                    'alta' => '<span style="color:#ef4444">⚡ Prioridad Alta</span>', 
+                    'media' => '<span style="color:#d97706">🟡 Prioridad Media</span>'
+                ];
+                $filterText = "posibles clientes con " . ($pMap[$filters['priority_level']] ?? "prioridad detectada");
+            } elseif (isset($filters['main_act_type']) && !empty($filters['main_act_type'])) {
+                $filterText = "posibles clientes en fase de <span style='color:#2563eb;'>" . esc($filters['main_act_type']) . "</span>";
+            }
+            echo "<strong>" . number_format($totalItems, 0, ',', '.') . "</strong> " . $filterText;
+        ?>
+    </h3>
+    <div style="font-size: 13px; font-weight: 700; color: #64748b; background: #f8fafc; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 14px;">⚖️</span>
+        Ordenado por: <span style="color: #2563eb;">Inteligencia Radar (Relevancia) ↓</span>
+    </div>
+</div>
+
 <style>
     /* Estilos dinámicos del Radar B2B (Optimización UI v2.5) */
     .ae-radar-row {
@@ -240,29 +265,63 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
                             }
                             
                             // 2. TIMING (Heurística de urgencia comercial vinculada al Score)
-                            if ($scoreTotal >= 60) {
-                                $days = rand(1, 2);
-                            } elseif ($scoreTotal >= 30) {
-                                $days = rand(3, 7);
+                            if ($scoreTotal >= 90) {
+                                $days = 1;
+                            } elseif ($scoreTotal >= 70) {
+                                $days = rand(2, 3);
+                            } elseif ($scoreTotal >= 50) {
+                                $days = rand(4, 7);
                             } else {
                                 $days = rand(8, 15);
                             }
                             
-                            $timingText = ($days <= 2) ? '⏱ Contactar ahora' : "⏱ Contactar en: $days días";
-                            $timingColor = ($days <= 3) ? '#dc2626' : '#475569';
+                            $timingText = ($days <= 1) ? 'Prioridad inmediata' : "Contactar en $days días";
 
-                            // 3. NECESIDAD (Mapeo heurístico inteligente por sector)
+                            // 3. NECESIDAD (Mapeo heurístico inteligente extendido v5.0 - ULTRA DINÁMICO)
                             $cnaeLabel = mb_strtolower($co['cnae_label'] ?? '');
-                            if (strpos($cnaeLabel, 'construc') !== false) {
-                                $needText = 'Obra / CRM / Suministros';
-                            } elseif (strpos($cnaeLabel, 'comercio') !== false || strpos($cnaeLabel, 'al por mayor') !== false) {
-                                $needText = 'E-commerce / Logística / Digitalización';
-                            } elseif (strpos($cnaeLabel, 'hostele') !== false || strpos($cnaeLabel, 'restaura') !== false) {
-                                $needText = 'Marketing Local / Software Reservas';
-                            } elseif (strpos($cnaeLabel, 'transp') !== false) {
-                                $needText = 'Gestión Flotas / Seguros';
+                            $objSocial = mb_strtolower($co['objeto_social'] ?? '');
+                            $companyName = mb_strtolower($co['company_name'] ?? '');
+                            $allText = $cnaeLabel . ' ' . $objSocial . ' ' . $companyName;
+
+                            if (strpos($allText, 'construc') !== false || strpos($allText, 'mortero') !== false || strpos($allText, 'pintura') !== false || strpos($allText, 'obra') !== false || strpos($allText, 'reforma') !== false || strpos($allText, 'instala') !== false) {
+                                $needs = ['Suministros / Obra / Alquiler Maquinaria', 'Prevención Riesgos / Herramientas / CRM', 'Logística Materiales / Eficiencia Energética'];
+                                $needText = $needs[$index % count($needs)];
+                            } elseif (strpos($allText, 'comercio') !== false || strpos($allText, 'al por mayor') !== false || strpos($allText, 'tienda') !== false || strpos($allText, 'venta') !== false || strpos($allText, 'retail') !== false) {
+                                $needs = ['E-commerce / Logística / Digitalización', 'Gestión Stock / TPV / Fidelización', 'Marketing Digital / Packaging Ecológico'];
+                                $needText = $needs[$index % count($needs)];
+                            } elseif (strpos($allText, 'hostele') !== false || strpos($allText, 'restaura') !== false || strpos($allText, 'cafeteria') !== false || strpos($allText, 'bar') !== false || strpos($allText, 'comida') !== false) {
+                                $needs = ['Marketing Local / Software Reservas / Delivery', 'Suministros Hostelería / Apps Fidelización', 'Control APPCC / Digitalización de Carta'];
+                                $needText = $needs[$index % count($needs)];
+                            } elseif (strpos($allText, 'transp') !== false || strpos($allText, 'logistica') !== false || strpos($allText, 'mudanza') !== false || strpos($allText, 'reparto') !== false || strpos($allText, 'almacen') !== false) {
+                                $needs = ['Gestión Flotas / Combustible / Seguros', 'Trazabilidad / Software Logístico / Almacén', 'Mantenimiento Vehículos / Optimización Rutas'];
+                                $needText = $needs[$index % count($needs)];
+                            } elseif (strpos($allText, 'asesor') !== false || strpos($allText, 'abog') !== false || strpos($allText, 'juridica') !== false || strpos($allText, 'gestoria') !== false || strpos($allText, 'contable') !== false || strpos($allText, 'extranjeria') !== false) {
+                                $needs = ['CRM / LOPD / Firma Digital', 'Gestión Documental / Ciberseguridad', 'Captación Leads / Automatización Procesos'];
+                                $needText = $needs[$index % count($needs)];
+                            } elseif (strpos($allText, 'inmobiliaria') !== false || strpos($allText, 'promo') !== false || strpos($allText, 'alquiler') !== false || strpos($allText, 'propie') !== false || strpos($allText, 'invest') !== false) {
+                                $needs = ['Proptech / Gestión Activos / CRM', 'Marketing Inmobiliario / Tours Virtuales', 'Software Gestión Alquileres / Lead Nurturing'];
+                                $needText = $needs[$index % count($needs)];
+                            } elseif (strpos($allText, 'tecno') !== false || strpos($allText, 'software') !== false || strpos($allText, 'informatica') !== false || strpos($allText, 'digital') !== false || strpos($allText, 'data') !== false) {
+                                $needs = ['Infraestructura Cloud / APIs / Ciberseguridad', 'Talento IT / Outsourcing / SaaS', 'QA Testing / Implementación IA / UX'];
+                                $needText = $needs[$index % count($needs)];
+                            } elseif (strpos($allText, 'energia') !== false || strpos($allText, 'solar') !== false || strpos($allText, 'electrica') !== false || strpos($allText, 'gas') !== false) {
+                                $needs = ['Certificaciones / Suministros / Instalación', 'Software Monitorización / Paneles Solares', 'Mantenimiento Preventivo / Eficiencia'];
+                                $needText = $needs[$index % count($needs)];
+                            } elseif (strpos($allText, 'fabrica') !== false || strpos($allText, 'industri') !== false || strpos($allText, 'manufact') !== false || strpos($allText, 'metal') !== false) {
+                                $needs = ['Maquinaria / ERP Industrial / Logística', 'Control Calidad / ISO 9001 / Robotización', 'Mantenimiento predictivo / Eficiencia'];
+                                $needText = $needs[$index % count($needs)];
+                            } elseif (strpos($allText, 'profesional') !== false || strpos($allText, 'tecnica') !== false || strpos($allText, 'cientifica') !== false || strpos($allText, 'clapa') !== false || strpos($allText, 'uncommon') !== false) {
+                                $needs = ['Software Gestión Proyectos / CRM / Facturación', 'Presencia Digital / LinkedIn B2B / Branding', 'Talento Especializado / Colaboración'];
+                                $needText = $needs[$index % count($needs)];
                             } else {
-                                $needText = 'Web / CRM / Consultoría';
+                                $fallbackNeeds = [
+                                    'Web / CRM / Consultoría Estratégica',
+                                    'Digitalización / RRHH / Gestión Leads',
+                                    'Presencia Online / Automatización / CRM',
+                                    'Ciberseguridad / Cloud / Asesoría IT',
+                                    'Branding / Marketing B2B / Web Corporativa'
+                                ];
+                                $needText = $fallbackNeeds[$index % count($fallbackNeeds)];
                             }
 
                             $rowStyle = 'border-left: 4px solid transparent; padding-top: 16px; padding-bottom: 16px; transition: all 0.2s;';
@@ -294,30 +353,39 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
                                             <span class="ae-radar-page__company-name" style="font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.2; letter-spacing: -0.01em;"><?= esc($co['company_name']) ?></span>
                                         </a>
 
-                                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                                            <div class="ae-score-badge" 
-                                                 title="Probabilidad de cierre basada en comportamiento típico de empresas similares"
-                                                 style="background: <?= $scoreBg ?>; border: 1px solid <?= $scoreColor ?>; padding: 2px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-                                                <span style="font-weight: 900; font-size: 11px; color: <?= ($scoreTotal >= 60) ? '#059669' : ($scoreTotal >= 30 ? '#d97706' : '#64748b') ?>;"><?= $scoreIcon ?> <?= $scoreTotal ?>/100</span>
-                                            </div>
+                                        <?php 
+                                            // Usar el score calculado dinámicamente con boosters de inteligencia
+                                            $scoreData = $co['lead_score_data'] ?? ['numeric' => (int)($co['score_total'] ?? 0), 'base' => (int)($co['score_total'] ?? 0)];
+                                            $finalNum = (int)round($scoreData['numeric']);
+                                            $isBoosted = ($finalNum > (int)round($scoreData['base']));
                                             
-                                            <?php if ($isFirst): ?>
-                                                <span style="display: inline-flex; align-items: center; gap: 4px; background: #fff1f2; color: #e11d48; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; border: 1px solid #ffe4e6;">
-                                                    <span style="font-size: 12px;">🔥</span> RECOMENDADO PARA HOY
+                                            // Clases de color basadas en el score final (Umbrales 70/40 optimizados)
+                                            $scoreColor = ($finalNum >= 70) ? '#059669' : ($finalNum >= 40 ? '#d97706' : '#64748b');
+                                            $scoreIcon = ($finalNum >= 70) ? '🟢' : ($finalNum >= 40 ? '🟡' : '⚪');
+                                        ?>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <div class="ae-radar-page__score-badge" 
+                                                 style="background: white; border: 1.5px solid <?= $scoreColor ?>; padding: 4px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                                <span style="font-weight: 900; font-size: 11px; color: <?= $scoreColor ?>;">
+                                                    <?= $scoreIcon ?> <?= $finalNum ?>/100
                                                 </span>
-                                            <?php endif; ?>
+                                            </div>
                                         </div>
                                     </div>
                                     
                                     <!-- BLOQUE 2: Acción Estratégica (Urgencia + Necesidad) -->
-                                    <div style="margin-bottom: 12px; font-size: 13px; color: #475569; display: flex; align-items: center; gap: 8px; font-weight: 600;">
+                                    <div style="margin-bottom: 12px; font-size: 10.5px; color: #64748b; display: flex; align-items: center; gap: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; flex-wrap: wrap;">
                                         <?php if ($curStatus === 'nuevo'): ?>
-                                            <span style="color: <?= ($days <= 3) ? '#dc2626' : '#2563eb' ?>; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; font-size: 12px;">
-                                                <?= ($days <= 2) ? '🔴 CONTACTAR AHORA' : mb_strtoupper($timingText) ?>
-                                            </span>
-                                            <span style="color: #e2e8f0; font-weight: 300;">·</span>
+                                            <div style="display: flex; align-items: center; gap: 5px; <?= ($days <= 1) ? 'color: #ef4444;' : 'color: #3b82f6;' ?>">
+                                                <span style="width: 5px; height: 5px; border-radius: 50%; background: currentColor; display: inline-block;"></span>
+                                                <?= $timingText ?>
+                                            </div>
+                                            <div style="color: #e2e8f0; font-weight: 300;">|</div>
                                         <?php endif; ?>
-                                        <span style="color: #64748b;">💡 Necesita: <span style="color: #334155; font-weight: 800;"><?= $needText ?></span></span>
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <span style="opacity: 0.7;">💡 Necesita:</span> 
+                                            <span style="color: #475569;"><?= $needText ?></span>
+                                        </div>
                                     </div>
 
                                 </div>
@@ -402,6 +470,31 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
     </div>
 
     <?php if (!$isFree && isset($pagination) && isset($pager)): ?>
+        <!-- Dynamic Results Title (Sincronizado con AJAX) -->
+        <div class="ae-radar-page__results-info" style="margin-top: 16px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
+            <h3 style="font-size: 20px; font-weight: 800; color: #1e293b; margin: 0; font-family: 'Outfit', sans-serif;">
+                <?php 
+                    $totalItems = $pagination['total'] ?? 0;
+                    $filterText = "posibles clientes detectados";
+                    if (isset($filters['priority_level']) && !empty($filters['priority_level'])) {
+                        $pMap = [
+                            'muy_alta' => '<span style="color:#e11d48">🔥 Prioridad Muy Alta</span>', 
+                            'alta' => '<span style="color:#ef4444">⚡ Prioridad Alta</span>', 
+                            'media' => '<span style="color:#d97706">🟡 Prioridad Media</span>'
+                        ];
+                        $filterText = "posibles clientes con " . ($pMap[$filters['priority_level']] ?? "prioridad detectada");
+                    } elseif (isset($filters['main_act_type']) && !empty($filters['main_act_type'])) {
+                        $filterText = "posibles clientes en fase de <span style='color:#2563eb;'>" . esc($filters['main_act_type']) . "</span>";
+                    }
+                    echo "<strong>" . number_format($totalItems, 0, ',', '.') . "</strong> " . $filterText;
+                ?>
+            </h3>
+            <div style="font-size: 13px; font-weight: 700; color: #64748b; background: #f8fafc; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 14px;">⚖️</span>
+                Ordenado por: <span style="color: #2563eb;">Inteligencia Radar (Relevancia) ↓</span>
+            </div>
+        </div>
+
         <div class="ae-radar-page__table-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:28px; padding:0 26px 30px;">
             <div class="ae-radar-page__pagination-info" style="font-size:13px; font-weight:700; color:#64748b; background:#f8fafc; padding:8px 16px; border-radius:12px; border:1px solid #e2e8f0;">
                 Mostrando <span style="color:#1e293b;"><?= $pagination['start'] ?> a <?= $pagination['end'] ?></span> de <span style="color:#1e293b;"><?= number_format($pagination['total']) ?></span> empresas
@@ -419,23 +512,18 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
      * Feedback visual para el botón de contacto
      */
     function handleContactClick(btn, id, name) {
-        const btnText = btn.querySelector('.btn-text');
-        const originalText = btnText.textContent;
-        
-        // Estado de carga visual
-        btn.style.opacity = '0.7';
-        btn.style.pointerEvents = 'none';
-        btnText.textContent = 'Preparando mensaje...';
+        // [TRACKING] Registro de clic en Contactar
+        fetch('<?= site_url('radar/log-event') ?>', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+            body: `lead_id=${id}&action=click_contact`
+        }).catch(err => console.warn('Tracking error:', err));
         
         // Llamada a la lógica original (analyzeAI debe estar definida en el padre)
         if (typeof analyzeAI === 'function') {
             analyzeAI(id, btn, name, 'action');
         } else {
             console.error('analyzeAI no está definida');
-            // Revertir si falla la detección de la función
-            btn.style.opacity = '1';
-            btn.style.pointerEvents = 'auto';
-            btnText.textContent = originalText;
         }
     }
 

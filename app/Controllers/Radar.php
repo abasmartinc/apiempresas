@@ -192,8 +192,23 @@ class Radar extends BaseController
         }
         
         $minScore = $this->request->getGet('min_score');
-        if ($minScore) {
-            $this->companyModel->where('crs.score_total >=', (int)$minScore);
+        $intel = $this->request->getGet('intel');
+        $ai = $this->request->getGet('ai');
+
+        if ($minScore || $intel === 'active') {
+            $scoreLimit = $minScore ? (int)$minScore : 70;
+            $this->companyModel->where('crs.score_total >=', $scoreLimit);
+        }
+
+        // 2.4 Filtro por Estado CRM (Sin contactar, Seguimiento, etc)
+        $status = $this->request->getGet('status');
+        if ($status) {
+            $this->companyModel->join('user_favorites uf_filter', 'uf_filter.company_id = companies.id AND uf_filter.user_id = ' . (int)$userId, 'left');
+            if ($status === 'nuevo') {
+                $this->companyModel->where('(uf_filter.status IS NULL OR uf_filter.status = "nuevo")');
+            } else {
+                $this->companyModel->where('uf_filter.status', $status);
+            }
         }
 
         // Rango de tiempo
@@ -258,12 +273,33 @@ class Radar extends BaseController
         // Inyectar Score de calidad y estado de favorito a cada empresa
         $favoriteMap = $this->favoriteModel->getFavoriteMap($userId);
         $followingIds = array_column((new \App\Models\LeadFollowupModel())->where('user_id', $userId)->findAll(), 'company_id');
+        
+        // [ENGAGEMENT] Obtener mapa de interacción para booster de score
+        $leadIds = array_column($companies, 'id');
+        $engagementMap = $this->getEngagementMap($userId, $leadIds);
+        
+        // [LEARNING] Mapa de aprendizaje grupal (Sector + Provincia)
+        $groupMap = $this->getGroupEngagementMap();
+        
+        // [PERSONALIZATION] Mapa de preferencias individuales (Aprendizaje de IA por usuario)
+        $userPrefMap = $this->getUserPersonalizationMap($userId);
+
         foreach ($companies as &$co) {
-            $co['lead_score'] = $this->getLeadScore($co);
+            $groupKey = strtolower(trim($co['cnae_label'] ?? '')) . '|' . strtolower(trim($co['registro_mercantil'] ?? ''));
+            $groupScore = $groupMap[$groupKey] ?? 0;
+            $userScore = $userPrefMap[$groupKey] ?? 0;
+            
+            $co['lead_score_data'] = $this->getLeadScore($co, $engagementMap[$co['id']] ?? 0, $groupScore, $userScore);
+            $co['lead_score'] = $co['lead_score_data']['label'];
             $co['status'] = $favoriteMap[$co['id']] ?? 'nuevo';
             $co['is_favorite'] = isset($favoriteMap[$co['id']]);
             $co['is_following'] = in_array($co['id'], $followingIds);
         }
+
+        // [RANKING] Re-ordenar en PHP por score FINAL (Incluyendo boosters que el SQL no ve)
+        usort($companies, function($a, $b) {
+            return ($b['lead_score_data']['numeric'] ?? 0) <=> ($a['lead_score_data']['numeric'] ?? 0);
+        });
 
         // 4. Datos para Filtros
         $provinces = $db->query("SELECT province as name FROM seo_stats ORDER BY total_companies DESC LIMIT 52")->getResultArray();
@@ -420,10 +456,30 @@ class Radar extends BaseController
         $totalItems = $this->favoriteModel->countFilteredFavorites($userId, $params);
         $totalPages = ceil($totalItems / $limit);
 
+        // [ENGAGEMENT] Mapa de booster
+        $leadIds = array_column($favorites, 'id');
+        $engagementMap = $this->getEngagementMap($userId, $leadIds);
+        
+        // [LEARNING] Mapa grupal
+        $groupMap = $this->getGroupEngagementMap();
+        
+        // [PERSONALIZATION] Mapa individual
+        $userPrefMap = $this->getUserPersonalizationMap($userId);
+
         // Añadir lead_score a cada favorito
         foreach ($favorites as &$f) {
-            $f['lead_score'] = $this->getLeadScore($f);
+            $groupKey = strtolower(trim($f['cnae_label'] ?? '')) . '|' . strtolower(trim($f['registro_mercantil'] ?? ''));
+            $groupScore = $groupMap[$groupKey] ?? 0;
+            $userScore = $userPrefMap[$groupKey] ?? 0;
+
+            $f['lead_score_data'] = $this->getLeadScore($f, $engagementMap[$f['id']] ?? 0, $groupScore, $userScore);
+            $f['lead_score'] = $f['lead_score_data']['label'];
         }
+
+        // [RANKING] Re-ordenar por score dinámico
+        usort($favorites, function($a, $b) {
+            return ($b['lead_score_data']['numeric'] ?? 0) <=> ($a['lead_score_data']['numeric'] ?? 0);
+        });
 
         $data = [
             'favorites' => $favorites,
@@ -464,14 +520,37 @@ class Radar extends BaseController
             'seguimiento' => []
         ];
 
+        // [ENGAGEMENT] Mapa de booster
+        $leadIds = array_column($favorites, 'id');
+        $engagementMap = $this->getEngagementMap($userId, $leadIds);
+        
+        // [LEARNING] Mapa grupal
+        $groupMap = $this->getGroupEngagementMap();
+        
+        // [PERSONALIZATION] Mapa individual
+        $userPrefMap = $this->getUserPersonalizationMap($userId);
+
         foreach ($favorites as &$f) {
-            $f['lead_score'] = $this->getLeadScore($f);
+            $groupKey = strtolower(trim($f['cnae_label'] ?? '')) . '|' . strtolower(trim($f['registro_mercantil'] ?? ''));
+            $groupScore = $groupMap[$groupKey] ?? 0;
+            $userScore = $userPrefMap[$groupKey] ?? 0;
+
+            $f['lead_score_data'] = $this->getLeadScore($f, $engagementMap[$f['id']] ?? 0, $groupScore, $userScore);
+            $f['lead_score'] = $f['lead_score_data']['label'];
+            
             $status = $f['status'] ?: 'nuevo';
             if (isset($columns[$status])) {
                 $columns[$status][] = $f;
             } else {
                 $columns['nuevo'][] = $f;
             }
+        }
+
+        // [RANKING] Re-ordenar dentro de cada columna del Kanban
+        foreach ($columns as &$items) {
+            usort($items, function($a, $b) {
+                return ($b['lead_score_data']['numeric'] ?? 0) <=> ($a['lead_score_data']['numeric'] ?? 0);
+            });
         }
 
         $data = [
@@ -535,6 +614,13 @@ class Radar extends BaseController
                 $error = $this->favoriteModel->errors();
                 log_message('error', '[Radar::updateFavoriteStatus] Update failed: ' . json_encode($error));
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Could not update status', 'details' => $error]);
+            }
+
+            // [TRACKING] Registrar cambios a estados clave
+            if ($status === 'contactado') {
+                $this->logLeadEvent($userId, $companyId ?: ($favorite['company_id'] ?? null), 'status_contacted');
+            } elseif ($status === 'seguimiento') {
+                $this->logLeadEvent($userId, $companyId ?: ($favorite['company_id'] ?? null), 'status_followup');
             }
 
             return $this->response->setJSON(['status' => 'success', 'action' => 'updated']);
@@ -767,21 +853,255 @@ class Radar extends BaseController
     }
 
     /**
-     * Calcula un score de calidad para el lead (A, B, C)
+     * Calcula un score de calidad para el lead (A, B, C) con booster de interacción real e inteligencia grupal/personalizado
      */
-    private function getLeadScore($co)
+    private function getLeadScore($co, $engagementScore = 0, $groupScore = 0, $userScore = 0)
     {
-        // Lógica simple basada en si tiene teléfono y longitud del objeto social
-        $score = 50;
+        // 1. Algoritmo base (Fiel a la base de datos authoritative)
+        $dbScore = (int)($co['score_total'] ?? 0);
         
-        if (!empty($co['phone'])) $score += 30;
-        if (!empty($co['cif']) && $co['cif'][0] === 'B') $score += 10; // Sociedades Limitadas suelen ser mejores leads B2B
-        if (strlen($co['objeto_social'] ?? '') > 150) $score += 10;
+        // Si no tenemos score en BD, calculamos el fallback dinámico
+        if ($dbScore <= 0) {
+            $baseScore = 50;
+            if (!empty($co['phone'])) $baseScore += 30;
+            if (!empty($co['cif']) && (!empty($co['cif'][0]) && $co['cif'][0] === 'B')) $baseScore += 10;
+            if (strlen($co['objeto_social'] ?? '') > 150) $baseScore += 10;
+        } else {
+            $baseScore = $dbScore;
+        }
 
-        if ($score >= 90) return 'A+';
-        if ($score >= 70) return 'A';
-        if ($score >= 50) return 'B';
-        return 'C';
+        // 2. Capa de Engagement Real (Booster suave personal del usuario por Lead específico)
+        $adjEngagement = min((int)$engagementScore, 50);
+        
+        // 3. Capa de Aprendizaje Grupal (Booster de sector/provincia global)
+        $adjGroupBoost = min((int)$groupScore, 100);
+        
+        // 4. Capa de Personalización Individual (Booster de IA aprendida por Usuario según sus nichos favoritos)
+        // final_score = base_score + (engagement_score * 0.3) + (group_score * 0.2) + (user_score * 0.2)
+        $adjUserPref = min((int)$userScore, 100);
+        
+        $finalScore = $baseScore + ($adjEngagement * 0.3) + ($adjGroupBoost * 0.2) + ($adjUserPref * 0.2);
+
+        // 5. Proyección a Categorías Visuales (Umbrales 70/40 (Optimización de Interés Radar)
+        $scoreColor = '#94a3b8'; $scoreProb = 'Baja probabilidad'; $scoreIcon = '⚪'; $scoreBg = 'rgba(148, 163, 184, 0.1)';
+        if ($finalScore >= 70) {
+            $scoreColor = '#10b981'; $scoreBg = 'rgba(16, 185, 129, 0.1)'; $scoreProb = 'Alta probabilidad'; $scoreIcon = '🟢';
+        } elseif ($finalScore >= 40) {
+            $scoreColor = '#f59e0b'; $scoreBg = 'rgba(245, 158, 11, 0.1)'; $scoreProb = 'Interés medio'; $scoreIcon = '🟡';
+        }
+        
+        return [
+            'label' => $scoreProb,
+            'numeric' => $finalScore,
+            'base' => $baseScore,
+            'color' => $scoreColor,
+            'icon' => $scoreIcon
+        ];
+    }
+
+    /**
+     * [PERSONALIZATION] Calcula el mapa de preferencias aprendidas para el usuario (con caché y umbral)
+     */
+    protected function getUserPersonalizationMap($userId)
+    {
+        if (!$userId) return [];
+        
+        $cacheKey = "radar_user_pref_{$userId}_v1";
+        $cached = cache($cacheKey);
+        if ($cached) return $cached;
+
+        try {
+            $db = \Config\Database::connect();
+            
+            // 1. Umbral de Aprendizaje: El usuario debe tener al menos 20 eventos totales registrados
+            $totalUserEvents = $db->table('radar_lead_events')
+                ->where('user_id', $userId)
+                ->countAllResults();
+            
+            if ($totalUserEvents < 20) return [];
+
+            // 2. Agrupar interacciones específicas del usuario por Sector + Provincia
+            $userEngaged = $db->table('radar_lead_events rle')
+                ->join('companies c', 'c.id = rle.lead_id')
+                ->select("c.cnae_label, c.registro_mercantil, COUNT(DISTINCT c.id) as engaged_count")
+                ->where('rle.user_id', $userId)
+                ->groupBy('c.cnae_label, c.registro_mercantil')
+                ->get()
+                ->getResultArray();
+
+            // 3. Calcular engagement_rate relativo del usuario frente al volumen del grupo
+            $finalUserMap = [];
+            foreach ($userEngaged as $ue) {
+                // Denominador: Total de leads en este nicho (para normalizar el interés)
+                $groupTotal = $db->table('companies')
+                    ->where('cnae_label', $ue['cnae_label'])
+                    ->where('registro_mercantil', $ue['registro_mercantil'])
+                    ->countAllResults();
+                
+                if ($groupTotal > 0) {
+                    $key = strtolower(trim($ue['cnae_label'])) . '|' . strtolower(trim($ue['registro_mercantil']));
+                    $rate = (int)($ue['engaged_count'] / $groupTotal * 100);
+                    $finalUserMap[$key] = $rate;
+                }
+            }
+
+            // Guardar en caché 12h (específico por usuario)
+            cache()->save($cacheKey, $finalUserMap, 43200);
+            return $finalUserMap;
+            
+        } catch (\Throwable $e) {
+            log_message('error', "[Radar::getUserPersonalizationMap] Error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * [LEARNING] Calcula el mapa de engagement grupal por sector y provincia (con caché)
+     */
+    protected function getGroupEngagementMap()
+    {
+        $cacheKey = 'radar_group_learning_map_v1';
+        $cached = cache($cacheKey);
+        if ($cached) return $cached;
+
+        try {
+            $db = \Config\Database::connect();
+            
+            // 1. Volumen total por grupo (Sector + Provincia)
+            $totals = $db->table('companies')
+                ->select("cnae_label, registro_mercantil, COUNT(id) as total")
+                ->where('cnae_label IS NOT NULL')
+                ->where('registro_mercantil IS NOT NULL')
+                ->groupBy('cnae_label, registro_mercantil')
+                ->get()
+                ->getResultArray();
+
+            // 2. Leads con interacciones reales por grupo
+            $engaged = $db->table('radar_lead_events rle')
+                ->join('companies c', 'c.id = rle.lead_id')
+                ->select("c.cnae_label, c.registro_mercantil, COUNT(DISTINCT c.id) as engaged_count")
+                ->groupBy('c.cnae_label, c.registro_mercantil')
+                ->get()
+                ->getResultArray();
+
+            // 3. Mapear participaciones para cruce rápido
+            $engagedMap = [];
+            foreach ($engaged as $e) {
+                $key = strtolower(trim($e['cnae_label'])) . '|' . strtolower(trim($e['registro_mercantil']));
+                $engagedMap[$key] = (int)$e['engaged_count'];
+            }
+
+            // 4. Calcular tasa de éxito (Rate) y generar mapa final
+            $finalMap = [];
+            foreach ($totals as $t) {
+                $totalInGroup = (int)$t['total'];
+                if ($totalInGroup < 20) continue; // Escudo estadístico: grupos pequeños no influyen
+
+                $key = strtolower(trim($t['cnae_label'])) . '|' . strtolower(trim($t['registro_mercantil']));
+                $countEngaged = $engagedMap[$key] ?? 0;
+                
+                $rate = ($countEngaged > 0) ? ($countEngaged / $totalInGroup) : 0;
+                $finalMap[$key] = (int)($rate * 100); // 0-100 score
+            }
+
+            // Guardar en caché 24h
+            cache()->save($cacheKey, $finalMap, 86400);
+            return $finalMap;
+            
+        } catch (\Throwable $e) {
+            log_message('error', '[Radar::getGroupEngagementMap] Error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * [TRACKING] Calcula un mapa de engagement para una lista de leads
+     */
+    protected function getEngagementMap($userId, $leadIds)
+    {
+        if (empty($leadIds)) return [];
+
+        try {
+            $db = \Config\Database::connect();
+            $results = $db->table('radar_lead_events')
+                ->select("lead_id, 
+                    SUM(
+                        (CASE 
+                            WHEN action = 'view_strategy' THEN 10 
+                            WHEN action = 'click_contact' THEN 30
+                            WHEN action = 'status_contacted' THEN 40
+                            WHEN action = 'status_followup' THEN 60
+                            ELSE 0 END)
+                        *
+                        (CASE 
+                            WHEN DATEDIFF(NOW(), created_at) <= 3 THEN 1
+                            WHEN DATEDIFF(NOW(), created_at) <= 7 THEN 0.6
+                            WHEN DATEDIFF(NOW(), created_at) <= 14 THEN 0.3
+                            ELSE 0.1 END)
+                    ) as score")
+                ->where('user_id', $userId)
+                ->whereIn('lead_id', $leadIds)
+                ->groupBy('lead_id')
+                ->get()
+                ->getResultArray();
+
+            $map = [];
+            foreach ($results as $row) {
+                $map[$row['lead_id']] = (int)$row['score'];
+            }
+            return $map;
+        } catch (\Throwable $e) {
+            log_message('error', '[Radar::getEngagementMap] Error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * [TRACKING] Registra un evento de interacción con un lead en radar_lead_events
+     */
+    protected function logLeadEvent($userId, $leadId, $action)
+    {
+        if (!$userId || !$leadId || !$action) {
+            return false;
+        }
+
+        try {
+            $db = \Config\Database::connect();
+            return $db->table('radar_lead_events')->insert([
+                'user_id'    => (int)$userId,
+                'lead_id'    => (int)$leadId,
+                'action'     => $action,
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', '[Radar::logLeadEvent] Error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * [AJAX API] Endpoint ligero para registrar eventos desde el frontend
+     */
+    public function logEvent()
+    {
+        if (!session('logged_in')) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'No autorizado']);
+        }
+
+        $userId = session('user_id');
+        $leadId = $this->request->getPost('lead_id');
+        $action = $this->request->getPost('action');
+
+        if (!$leadId || !$action) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Faltan parámetros']);
+        }
+
+        $ok = $this->logLeadEvent($userId, $leadId, $action);
+
+        return $this->response->setJSON([
+            'status' => $ok ? 'success' : 'error',
+            'logged' => $ok
+        ]);
     }
 
     /**
@@ -915,6 +1235,10 @@ class Radar extends BaseController
 
         try {
             $analysis = \App\Libraries\RadarAnalyzer::analyze($company);
+            
+            // [TRACKING] Registro de clic en Estrategia
+            $this->logLeadEvent(session('user_id'), $id, 'view_strategy');
+
             return $this->response->setJSON(['status' => 'success'] + $analysis);
         } catch (\Exception $e) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Error al analizar: ' . $e->getMessage()]);

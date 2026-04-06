@@ -258,7 +258,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                 </p>
 
                                 <?php if ($isFree): ?>
-                                    <div class="ae-radar-page__hero-actions" style="margin-top: 0;">
+                                    <div class="ae-radar-page__hero-actions" style="margin-top: 20px;">
                                         <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__hero-btn ae-radar-page__hero-btn--primary" style="height: 42px; padding: 0 24px; font-size: 13px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);">
                                             Desbloquear Radar PRO
                                         </a>
@@ -406,26 +406,22 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                             
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
                                 <?php 
-                                    // Sincronización Top Scoring: Asegurar que mostramos lo mejor de lo mejor
+                                                   // Sincronización Top Scoring: Asegurar que mostramos lo mejor de lo mejor basándonos en IA total
                                     $topPicks = $visibleCompanies;
-                                    usort($topPicks, fn($a, $b) => ($b['score_total'] ?? 0) <=> ($a['score_total'] ?? 0));
+                                    usort($topPicks, fn($a, $b) => ($b['lead_score_data']['numeric'] ?? 0) <=> ($a['lead_score_data']['numeric'] ?? 0));
                                     $top3 = array_slice($topPicks, 0, 3); 
                                     
                                     foreach ($top3 as $index => $co): 
-                                        $scoreTotal = (int)($co['score_total'] ?? 0);
+                                        $scoreData = $co['lead_score_data'] ?? ['numeric' => (int)($co['score_total'] ?? 0), 'base' => (int)($co['score_total'] ?? 0)];
+                                        $scoreTotal = (int)round($scoreData['numeric']);
+                                        $isBoosted = ($scoreTotal > (int)round($scoreData['base']));
                                         $prioKey = $co['priority_level'] ?? 'media';
                                         
-                                        // Fallback de score basado en prioridad (igual que en tabla)
-                                        if ($scoreTotal === 0) {
-                                            $fallbackMap = ['muy_alta' => 95, 'alta' => 85, 'media' => 65, 'baja' => 35, 'muy_baja' => 15];
-                                            $scoreTotal = $fallbackMap[$prioKey] ?? 50;
-                                        }
-
-                                        // Umbrales 60/30 (Sincronizado)
+                                        // Umbrales 70/40 (Optimización de Interés Radar)
                                         $scoreColor = '#94a3b8'; $scoreProb = 'Baja probabilidad'; $scoreIcon = '⚪'; $scoreBg = 'rgba(148, 163, 184, 0.1)';
-                                        if ($scoreTotal >= 60) {
+                                        if ($scoreTotal >= 70) {
                                             $scoreColor = '#10b981'; $scoreBg = 'rgba(16, 185, 129, 0.1)'; $scoreProb = 'Alta probabilidad'; $scoreIcon = '🟢';
-                                        } elseif ($scoreTotal >= 30) {
+                                        } elseif ($scoreTotal >= 40) {
                                             $scoreColor = '#f59e0b'; $scoreBg = 'rgba(245, 158, 11, 0.1)'; $scoreProb = 'Interés medio'; $scoreIcon = '🟡';
                                         }
 
@@ -453,7 +449,6 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                                 🔥 Mejor oportunidad del día
                                             </div>
                                         <?php endif; ?>
-
                                         <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
                                             <span style="width: 6px; height: 6px; background: <?= $scoreColor ?>; border-radius: 50%; display: block;"></span>
                                             Sugerencia #<?= $index + 1 ?>
@@ -575,11 +570,11 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                             <?php
                             $chips = [
                                 'todas' => ['label' => 'Todas las oportunidades', 'icon' => '📊', 'url' => site_url('radar')],
-                                'sin_ver' => ['label' => 'Sin contactar', 'icon' => '🆕', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['status' => 'nuevo', 'intel' => null, 'priority_level' => null, 'rango' => null, 'ticket' => null, 'ai' => null])))],
-                                'alta' => ['label' => 'Alta probabilidad de cierre', 'icon' => '🟢', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['priority_level' => 'muy_alta', 'intel' => null, 'rango' => null, 'ticket' => null, 'ai' => null, 'status' => null])))],
-                                'ventana' => ['label' => 'Momento óptimo de contacto', 'icon' => '⏱', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['rango' => '7', 'intel' => null, 'priority_level' => null, 'ticket' => null, 'ai' => null, 'status' => null])))],
-                                'mejores' => ['label' => 'Score alto (>80)', 'icon' => '🔥', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['intel' => 'active', 'priority_level' => 'muy_alta', 'rango' => '7', 'ticket' => null, 'ai' => null, 'status' => null])))],
-                                'ai' => ['label' => 'Recomendadas por el sistema', 'icon' => '🎯', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['ai' => 'active', 'intel' => 'active', 'priority_level' => null, 'rango' => null, 'ticket' => null, 'status' => null])))]
+                                'sin_ver' => ['label' => 'Sin contactar', 'icon' => '🆕', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['status' => 'nuevo', 'intel' => null, 'priority_level' => null, 'rango' => null, 'ticket' => null, 'ai' => null, 'min_score' => null])))],
+                                'alta' => ['label' => 'Alta probabilidad de cierre', 'icon' => '🟢', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['priority_level' => 'muy_alta', 'intel' => null, 'rango' => null, 'ticket' => null, 'ai' => null, 'status' => null, 'min_score' => null])))],
+                                'ventana' => ['label' => 'Momento óptimo de contacto', 'icon' => '⏱', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['rango' => '7', 'intel' => null, 'priority_level' => null, 'ticket' => null, 'ai' => null, 'status' => null, 'min_score' => null])))],
+                                'mejores' => ['label' => 'Score alto (>80)', 'icon' => '🔥', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['min_score' => 75, 'intel' => 'active', 'priority_level' => null, 'rango' => null, 'ticket' => null, 'ai' => null, 'status' => null])))],
+                                'ai' => ['label' => 'Recomendadas por el sistema', 'icon' => '🎯', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['ai' => 'active', 'min_score' => 60, 'intel' => null, 'priority_level' => null, 'rango' => null, 'ticket' => null, 'status' => null])))]
                             ];
 
                             foreach ($chips as $key => $chip):
@@ -598,29 +593,6 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                         </div>
                     </div>
 
-                    <!-- Dynamic Results Title -->
-                    <div class="ae-radar-page__results-info" style="margin-top: 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
-                        <h3 style="font-size: 20px; font-weight: 800; color: #1e293b; margin: 0; font-family: 'Outfit', sans-serif;">
-                            <?php 
-                                $totalItems = $pagination['total'] ?? 0;
-                                $filterText = "posibles clientes detectados";
-                                if (isset($filters['priority_level'])) {
-                                    $pMap = [
-                                        'muy_alta' => '<span style="color:#e11d48">🔥 Prioridad Muy Alta</span>', 
-                                        'alta' => '<span style="color:#ef4444">⚡ Prioridad Alta</span>', 
-                                        'media' => '<span style="color:#d97706">🟡 Prioridad Media</span>'
-                                    ];
-                                    $filterText = "posibles clientes con " . ($pMap[$filters['priority_level']] ?? "prioridad detectada");
-                                } elseif (isset($filters['main_act_type'])) {
-                                    $filterText = "posibles clientes en fase de <span style='color:#2563eb;'>" . esc($filters['main_act_type']) . "</span>";
-                                }
-                                echo "<strong>" . number_format($totalItems, 0, ',', '.') . "</strong> " . $filterText;
-                            ?>
-                        </h3>
-                        <div style="font-size: 13px; font-weight: 700; color: #64748b; background: #f8fafc; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                            Ordenado por: <span style="color: #2563eb;">Score Total ↓</span>
-                        </div>
-                    </div>
 
                         <section class="ae-radar-page__lead-wrap <?= $isFree ? 'is-paywalled' : '' ?>">
                             <div id="radar-results-container">

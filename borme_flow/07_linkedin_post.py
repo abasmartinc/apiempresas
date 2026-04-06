@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-import datetime
+import datetime as dt
 import requests
 import json
 import argparse
@@ -10,6 +10,10 @@ import json
 import argparse
 from config import mysql_connect
 from dotenv import load_dotenv
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 
 # Force UTF-8 for console output to handle emojis on Windows
 if sys.platform == 'win32':
@@ -71,9 +75,9 @@ class InfographicGenerator:
             print(f"[!] Font load error: {e}")
             font_title = font_huge = font_body = ImageFont.load_default()
 
-        # "RADAR B2B" Title
-        draw.text((60, 50), "RADAR B2B", fill=self.colors["primary"], font=font_title)
-        draw.text((340, 50), "| INFORME DIARIO", fill=self.colors["subtitle"], font=font_title)
+        # "RADAR B2B" Title (Moved down slightly)
+        draw.text((60, 60), "RADAR B2B", fill=self.colors["primary"], font=font_title)
+        draw.text((340, 60), "| INFORME DIARIO", fill=self.colors["subtitle"], font=font_title)
 
         # 3. Main Metric
         total = stats["total_companies"]
@@ -81,37 +85,55 @@ class InfographicGenerator:
         draw.text((60, 260), "NUEVAS EMPRESAS CREADAS HOY", fill=self.colors["text"], font=font_body)
 
         # 4. Provinces & Sectors Column
-        draw.line([60, 320, 600, 320], fill=self.colors["subtitle"], width=2)
+        draw.line([60, 310, 450, 310], fill=self.colors["subtitle"], width=2)
         
-        y_off = 360
-        draw.text((60, y_off), "📍 Proximidad Económica", fill=self.colors["subtitle"], font=font_body)
-        y_off += 40
-        for p in stats["provinces"][:3]:
-            draw.text((80, y_off), f"• {p['registro_mercantil']}: {p['count']} registros", fill=self.colors["text"], font=font_body)
-            y_off += 35
+        y_off = 340
+        
+        # --- Provinces Section ---
+        if stats.get("provinces"):
+            # Manual icon (circle)
+            draw.ellipse([60, y_off+8, 75, y_off+23], fill=self.colors["primary"])
+            draw.text((90, y_off), "Proximidad Geográfica", fill=self.colors["subtitle"], font=font_body)
+            y_off += 40
+            for p in stats["provinces"][:3]:
+                draw.text((90, y_off), f"• {p['registro_mercantil']}: {p['count']} registros", fill=self.colors["text"], font=font_body)
+                y_off += 30
+            y_off += 25
+        else:
+            print("[*] No province data. Skipping section in image.")
 
-        y_off += 40
-        draw.text((60, y_off), "📈 Sectores Relevantes", fill=self.colors["subtitle"], font=font_body)
-        y_off += 40
-        for cat, count in list(stats["sectors"].items())[:3]:
-            if count > 0:
-                draw.text((80, y_off), f"• {cat} ({count})", fill=self.colors["text"], font=font_body)
-                y_off += 35
+        # --- Sectors Section ---
+        has_sectors = any(count > 0 for count in stats.get("sectors", {}).values())
+        if has_sectors:
+            # Manual icon (triangle)
+            draw.polygon([(60, y_off+23), (75, y_off+8), (90, y_off+23)], fill=self.colors["gold"])
+            draw.text((105, y_off), "Sectores en Crecimiento", fill=self.colors["subtitle"], font=font_body)
+            y_off += 40
+            # Sort sectors by count and take top 3
+            sorted_sectors = sorted(stats["sectors"].items(), key=lambda x: x[1], reverse=True)
+            for cat, count in sorted_sectors[:3]:
+                if count > 0:
+                    draw.text((105, y_off), f"• {cat} ({count})", fill=self.colors["text"], font=font_body)
+                    y_off += 30
+        else:
+            print("[*] No sector data. Skipping section in image.")
 
         # 5. Footer / Logo
         logo_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "logo.png")
         if os.path.exists(logo_path):
             try:
                 logo = Image.open(logo_path).convert("RGBA")
-                # Resize logo to ~150px width
-                w_ratio = 150 / float(logo.size[0])
+                # Resize logo to ~100px width (smaller to avoid overlap)
+                w_ratio = 100 / float(logo.size[0])
                 new_h = int(float(logo.size[1]) * w_ratio)
-                logo = logo.resize((150, new_h), Image.Resampling.LANCZOS)
-                img.paste(logo, (self.width - 200, self.height - 100), logo)
+                logo = logo.resize((100, new_h), Image.Resampling.LANCZOS)
+                # Paste logo in a cleaner position (bottom right)
+                img.paste(logo, (self.width - 150, self.height - 180), logo)
             except:
                 pass
         
-        draw.text((self.width - 280, self.height - 50), "apiempresas.es", fill=self.colors["subtitle"], font=font_body)
+        url_font = font_body # or maybe smaller if needed
+        draw.text((self.width - 250, self.height - 70), "apiempresas.es", fill=self.colors["subtitle"], font=url_font)
 
         img.save(output_path)
         print(f"[*] Infographic generated: {output_path}")
@@ -166,11 +188,15 @@ def get_stats(is_test=False):
             else:
                 query_date = dt.date.today()
 
+            print(f"[*] Extracting details for date: {query_date}")
+
             # 2. Top Provinces
             cur.execute("""
                 SELECT registro_mercantil, COUNT(*) as count 
                 FROM companies 
                 WHERE created_at >= %s AND created_at < %s + INTERVAL 1 DAY
+                  AND registro_mercantil IS NOT NULL 
+                  AND registro_mercantil != ''
                 GROUP BY registro_mercantil 
                 ORDER BY count DESC 
                 LIMIT 3
@@ -213,7 +239,7 @@ def get_stats(is_test=False):
 
 def generate_post(stats):
     """Composes the LinkedIn post text."""
-    today_str = datetime.date.today().strftime("%d/%m/%Y")
+    today_str = dt.date.today().strftime("%d/%m/%Y")
     total = stats["total_companies"]
     if total == 0: return None
 
@@ -243,6 +269,73 @@ La analítica avanzada de APIEmpresas sigue monitorizando en tiempo real el puls
 #Emprendimiento #Empresas #BORME #DataIntel #España #Economía #B2B #DigitalOps"""
 
     return post
+
+def generate_post_with_gpt(stats):
+    """Generates a high-impact LinkedIn post using OpenAI ChatGPT."""
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key or "sk-" not in api_key:
+        print("[!] OpenAI API Key missing or invalid. Falling back to local template.")
+        return None
+
+    today_str = dt.date.today().strftime("%d/%m/%Y")
+    total = stats["total_companies"]
+    prov_list = [f"{p['registro_mercantil']} ({p['count']})" for p in stats["provinces"]]
+    top_provinces = ", ".join(prov_list)
+    
+    sector_summary = ""
+    for cat, count in list(stats["sectors"].items())[:3]:
+        if count > 0:
+            percentage = round((count / total) * 100, 1)
+            sector_summary += f"- {cat}: {percentage}%\n"
+
+    prompt = f"""Eres un experto en marketing y growth hacking para B2B. Crea una publicación de LinkedIn atractiva y profesional basada en estas estadísticas del día ({today_str}) de creación de empresas en España:
+
+Estadísticas:
+- Total de nuevas empresas: {total}
+- Registros Mercantiles líderes: {top_provinces}
+- Sectores con mayor crecimiento:
+{sector_summary}
+
+Directrices del post:
+1. Usa emojis de forma profesional y equilibrada.
+2. Usa hashtags estratégicos (ej: #BORME #DataIntel #B2B #España).
+3. El tono debe ser de autoridad pero cercano, destacando la vitalidad del tejido empresarial.
+4. MUY IMPORTANTE: El post DEBE terminar obligatoriamente con este llamado a la acción (CTA) exacto:
+
+¿Quieres acceder a la lista completa de estas nuevas empresas con sus datos de contacto (Email, Teléfono y Dirección)? 
+👇 Descarga tus leads segmentados aquí: 
+https://apiempresas.es/leads-empresas-nuevas
+
+Escribe el post directamente en español, sin preámbulos ni comentarios adicionales."""
+
+    try:
+        url = "https://api.openai.com/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": "gpt-4o",
+            "messages": [
+                {"role": "system", "content": "Eres un asistente experto en copy para redes sociales profesionales."},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": 0.7
+        }
+        
+        print("[*] Calling OpenAI for AI post generation...")
+        resp = requests.post(url, headers=headers, json=payload, timeout=30)
+        if resp.status_code == 200:
+            data = resp.json()
+            ai_content = data['choices'][0]['message']['content'].strip()
+            print("[OK] AI post content generated successfully!")
+            return ai_content
+        else:
+            print(f"[!] OpenAI Error: {resp.status_code} - {resp.text}")
+            return None
+    except Exception as e:
+        print(f"[!] Exception calling OpenAI: {e}")
+        return None
 
 def publish_to_linkedin(content, image_path=None):
     """Sends the post to LinkedIn API with optional image."""
@@ -328,6 +421,55 @@ def publish_to_linkedin(content, image_path=None):
         print(f"[!] Exception during LinkedIn post: {e}")
         return False
 
+def send_via_email(content, image_path=None):
+    """Sends the post content and image via SMTP email fallback."""
+    host = os.getenv("SMTP_HOST")
+    user = os.getenv("SMTP_USER")
+    password = os.getenv("SMTP_PASS")
+    port = int(os.getenv("SMTP_PORT", "465"))
+    dest = os.getenv("SUMMARY_EMAIL_TO", "papelo.amh@gmail.com")
+    
+    if not host or not user or not password:
+        print("[!] SMTP credentials missing in .env. Cannot send email.")
+        return False
+
+    print(f"[*] Preparing email for: {dest}")
+    msg = MIMEMultipart()
+    msg["Subject"] = f"🚀 Publicación LinkedIn Lista - {dt.date.today().strftime('%d/%m/%Y')}"
+    msg["From"] = user
+    msg["To"] = dest
+
+    # Add text body
+    body = f"Aquí tienes el contenido para tu publicación de LinkedIn:\n\n{'-'*40}\n{content}\n{'-'*40}\n\nAdjunto encontrarás la infografía generada."
+    msg.attach(MIMEText(body, "plain", "utf-8"))
+
+    # Attach image if exists
+    if image_path and os.path.exists(image_path):
+        try:
+            with open(image_path, 'rb') as f:
+                img_data = f.read()
+                image = MIMEImage(img_data, name=os.path.basename(image_path))
+                msg.attach(image)
+            print(f"[*] Image attached: {image_path}")
+        except Exception as e:
+            print(f"[!] Error attaching image to email: {e}")
+
+    try:
+        if port == 465:
+            server = smtplib.SMTP_SSL(host, port)
+        else:
+            server = smtplib.SMTP(host, port)
+            server.starttls()
+            
+        server.login(user, password)
+        server.sendmail(user, [dest], msg.as_string())
+        server.quit()
+        print("[OK] Email sent successfully with the LinkedIn content!")
+        return True
+    except Exception as e:
+        print(f"[!] Error sending email: {e}")
+        return False
+
 def main():
     parser = argparse.ArgumentParser(description="LinkedIn Dynamic Summary Bot")
     parser.add_argument("--dry-run", action="store_true", help="Preview post and image locally")
@@ -354,7 +496,16 @@ def main():
             print(f"[!] Error generating infographic: {e}")
     
     print("[*] Generating post content...")
-    post_content = generate_post(stats)
+    # Try AI generation first
+    post_content = generate_post_with_gpt(stats)
+    
+    # Fallback to local template if AI fails
+    if not post_content:
+        print("[*] Using local template as fallback.")
+        post_content = generate_post(stats)
+        # Ensure CTA is at least in the template if fallback occurs
+        if post_content and "https://apiempresas.es/leads-empresas-nuevas" not in post_content:
+            post_content += "\n\n¿Quieres los datos de contacto? Descarga tus leads aquí: https://apiempresas.es/leads-empresas-nuevas"
 
     if not post_content:
         print("[!] Failed to generate post content.")
@@ -369,7 +520,13 @@ def main():
             print("\n⚠️ Nota: Pillow no está instalado, no se ha generado infografía.")
         print("=======================================\n")
     else:
-        publish_to_linkedin(post_content, img_path)
+        # Check if we should use email fallback
+        send_email = os.getenv("LINKEDIN_SEND_EMAIL", "false").lower() == "true"
+        
+        if send_email:
+            send_via_email(post_content, img_path)
+        else:
+            publish_to_linkedin(post_content, img_path)
 
 if __name__ == "__main__":
     main()
