@@ -17,6 +17,8 @@ Patrones BORME reales:
 
 import re
 import datetime
+import time
+import requests
 from config import mysql_connect
 
 # ──────────────────────────────────────────
@@ -27,6 +29,31 @@ from config import mysql_connect
 RE_FECHA = re.compile(
     r"[Cc]omienzo\s+de\s+operaciones\s*[:\-]\s*(\d{1,2}[./]\d{1,2}[./]\d{2,4})"
 )
+
+# Objeto Social: Captura el texto hasta el siguiente punto que precede a Domicilio o Capital
+RE_OBJETO = re.compile(
+    r"[Oo]bjeto\s+social\s*[:\-]\s*(.*?)(?=\. [Dd]omicilio| \.? [Cc]apital| \.? [Dd]atos|\.? $)", 
+    re.DOTALL | re.IGNORECASE
+)
+
+# Domicilio: Captura la dirección hasta el siguiente bloque relevante
+RE_DOMICILIO = re.compile(
+    r"[Dd]omicilio\s*[:\-]\s*(.*?)(?=\.? [Cc]apital| \.? [Dd]atos| \.? [Dd]eclaración|\.? $)", 
+    re.DOTALL | re.IGNORECASE
+)
+
+# Capital: Importe numérico en euros
+RE_CAPITAL = re.compile(r"[Cc]apital\s*[:\-]\s*([\d.,]+)\s*[Ee]uros", re.IGNORECASE)
+
+# Ampliación de Capital: Específicamente el nuevo capital suscrito
+RE_AMPLIACION = re.compile(r"Ampliaci.n\s+de\s+capital\.\s+Capital\s*[:\-]\s*([\d.,]+)", re.IGNORECASE)
+RE_RESULTANTE = re.compile(r"Resultante\s+Suscrito\s*[:\-]\s*([\d.,]+)", re.IGNORECASE)
+
+# Cambio de Domicilio
+RE_CAMBIO_DOMICILIO = re.compile(r"Cambio\s+de\s+domicilio\s+social\.\s*(.*?)(?=\. Datos|\.? $)", re.IGNORECASE)
+
+# CNAE: Código de 4 dígitos si aparece
+RE_CNAE = re.compile(r"CNAE\s+(\d{4})", re.IGNORECASE)
 
 # Administrator block:  "Adm. Unico: NOMBRE1."  or  "Adm. Solid.: NOMBRE1;NOMBRE2."
 # Covers the most common positions in the BORME
@@ -102,6 +129,39 @@ def extract_administrators(text: str):
     return results
 
 
+def geocode_address(address_full: str):
+    """
+    Usa Nominatim (OpenStreetMap) para obtener lat/long.
+    Nominatim requiere un User-Agent identificativo y un límite de 1 req/seg.
+    """
+    if not address_full:
+        return None, None
+
+    url = "https://nominatim.openstreetmap.org/search"
+    params = {
+        "q": address_full + ", Spain",
+        "format": "json",
+        "limit": 1,
+        "addressdetails": 1
+    }
+    headers = {
+        "User-Agent": "ApiEmpresas-BormeBot/1.0 (papelo.amh@gmail.com)"
+    }
+
+    try:
+        # Respetamos el límite de 1 seg por petición de Nominatim
+        time.sleep(1.1)
+        resp = requests.get(url, params=params, headers=headers, timeout=10)
+        if resp.status_code == 200:
+            data = resp.json()
+            if data:
+                return float(data[0]["lat"]), float(data[0]["lon"])
+    except Exception as e:
+        print(f"    [GEO] Error geocodificando {address_full}: {e}")
+    
+    return None, None
+
+
 def run():
     conn = mysql_connect()
     total_admins   = 0
@@ -138,18 +198,71 @@ def run():
                 act_types   = post["act_types"] or ""
                 description = post["description"] or ""
 
-                # ── 1. Fecha de constitución ──────────────────────────────
-                if "Constitu" in act_types and not post["fecha_constitucion"]:
-                    m = RE_FECHA.search(description)
-                    if m:
-                        fecha = parse_date(m.group(1))
-                        if fecha:
-                            cur.execute(
-                                "UPDATE companies SET fecha_constitucion = %s WHERE id = %s",
-                                (fecha, company_id)
-                            )
-                            total_fechas = total_fechas + 1
-                            print(f"    [FECHA] company {company_id} -> {fecha}")
+                # ── 1. Datos de la empresa (Constituciones o Ampliaciones) ───────────
+                update_fields = {}
+                
+                # --- A. CONSTITUCIONES ---
+                if "Constitu" in act_types:
+                    # Fecha de Constitución
+                    if not post["fecha_constitucion"]:
+                        m_fecha = RE_FECHA.search(description)
+                        if m_fecha:
+                            val = parse_date(m_fecha.group(1))
+                            if val: update_fields["fecha_constitucion"] = val
+
+                    # Objeto Social
+                    m_obj = RE_OBJETO.search(description)
+                    if m_obj: update_fields["objeto_social"] = m_obj.group(1).strip()
+
+                    # Capital Social Inicial
+                    m_cap = RE_CAPITAL.search(description)
+                    if m_cap: update_fields["capital_social_raw"] = m_cap.group(1).strip()
+
+                    # CNAE
+                    m_cnae = RE_CNAE.search(description)
+                    if m_cnae: update_fields["cnae_code"] = m_cnae.group(1).strip()
+
+                # --- B. AMPLIACIONES DE CAPITAL ---
+                if "Ampliaci" in act_types:
+                    m_res = RE_RESULTANTE.search(description)
+                    if m_res:
+                        update_fields["capital_social_raw"] = m_res.group(1).strip()
+                    else:
+                        m_amp = RE_AMPLIACION.search(description)
+                        if m_amp: update_fields["capital_social_raw"] = m_amp.group(1).strip()
+
+                # --- C. DOMICILIO (Constitución o Cambio) ---
+                target_address = None
+                if "Constitu" in act_types:
+                    m_dom = RE_DOMICILIO.search(description)
+                    if m_dom: target_address = m_dom.group(1).strip()
+                elif "Cambio de domicilio" in act_types:
+                    m_dom = RE_CAMBIO_DOMICILIO.search(description)
+                    if m_dom: target_address = m_dom.group(1).strip()
+
+                if target_address:
+                    update_fields["address"] = target_address
+                    # Extraer Municipio e intentar Geolocalizar
+                    m_mun = re.search(r"\(([^)]+)\)$", target_address)
+                    if m_mun:
+                        municipio = m_mun.group(1).strip()
+                        update_fields["municipality"] = municipio
+                        clean_addr = target_address.split("(")[0].strip()
+                        lat, lng = geocode_address(f"{clean_addr}, {municipio}")
+                        if lat and lng:
+                            update_fields["lat_num"] = lat
+                            update_fields["lng_num"] = lng
+                            print(f"    [GEO] {municipio} -> {lat}, {lng}")
+
+                # --- D. EJECUTAR UPDATE SI HAY CAMBIOS ---
+                if update_fields:
+                    placeholders = ", ".join([f"{k} = %s" for k in update_fields.keys()])
+                    values = list(update_fields.values())
+                    values.append(company_id)
+                    query = f"UPDATE companies SET {placeholders} WHERE id = %s"
+                    cur.execute(query, tuple(values))
+                    total_fechas += 1
+                    print(f"    [DATA] company {company_id} updated: {', '.join(update_fields.keys())}")
 
                 # ── 2. Administradores ────────────────────────────────────
                 admins = extract_administrators(description)

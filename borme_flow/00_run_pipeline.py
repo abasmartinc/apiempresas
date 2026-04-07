@@ -123,12 +123,18 @@ def send_summary_email():
         log("[EMAIL] Credenciales SMTP faltantes. No se envía el resumen.")
         return
         
-    # Obtener totales de base de datos de hoy
+    # Obtener totales de base de datos de hoy (solo nuevas Constituciones)
     new_companies, new_posts = 0, 0
     conn = mysql_connect()
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT COUNT(*) as c FROM companies WHERE DATE(created_at) = CURDATE()")
+            # Contar empresas únicas que han tenido un acto de 'Constitución' hoy
+            cur.execute("""
+                SELECT COUNT(DISTINCT company_id) as c 
+                FROM borme_posts 
+                WHERE DATE(created_at) = CURDATE() 
+                  AND act_types LIKE '%Constitu%'
+            """)
             row = cur.fetchone()
             if row: new_companies = row.get('c', 0)
             

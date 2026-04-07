@@ -96,6 +96,10 @@ class RadarAnalyzer
                 'label' => 'Construcción / Reformas / Instalaciones',
                 'keywords' => ['construccion', 'reformas', 'rehabilitacion', 'instalaciones', 'fontaneria', 'electricidad', 'pintor', 'albañil', 'climatizacion', 'obras']
             ],
+            'energy' => [
+                'label' => 'Energías Renovables / Sostenibilidad',
+                'keywords' => ['solar', 'fotovoltaica', 'energias renovables', 'placas solares', 'eolico', 'medio ambiente', 'sostenible', 'eficiencia energetica']
+            ],
             'real_estate' => [
                 'label' => 'Inmobiliario / PropTech',
                 'keywords' => ['inmobiliaria', 'fincas', 'alquiler', 'inmuebles', 'viviendas', 'promocion inmobiliaria', 'real estate']
@@ -109,8 +113,8 @@ class RadarAnalyzer
                 'keywords' => ['hosteleria', 'restaurante', 'cafeteria', 'bar', 'hotel', 'alojamiento', 'gourmet', 'catering', 'comidas']
             ],
             'commerce' => [
-                'label' => 'Comercio / Retail',
-                'keywords' => ['comercio', 'retail', 'tienda', 'venta menor', 'boutique', 'mercado', 'tienda online', 'ecommerce']
+                'label' => 'Comercio / Retail / Ecommerce',
+                'keywords' => ['comercio', 'retail', 'tienda', 'venta menor', 'boutique', 'mercado', 'tienda online', 'ecommerce', 'shopify', 'prestashop', 'marketplace']
             ],
             'logistics' => [
                 'label' => 'Transporte / Logística',

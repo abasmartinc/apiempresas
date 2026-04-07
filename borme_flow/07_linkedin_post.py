@@ -168,18 +168,32 @@ def get_stats(is_test=False):
     
     try:
         with conn.cursor() as cur:
-            # 1. Total companies today (optimized range scan)
-            cur.execute("SELECT COUNT(*) as count FROM companies WHERE created_at >= CURDATE()")
+            # 1. Total nuevas Constituciones hoy (procesadas en esta ejecución)
+            cur.execute("""
+                SELECT COUNT(DISTINCT company_id) as count 
+                FROM borme_posts 
+                WHERE created_at >= CURDATE() 
+                  AND act_types LIKE '%%Constitu%%'
+            """)
             row = cur.fetchone()
             stats["total_companies"] = row['count'] if row else 0
             
             if stats["total_companies"] == 0:
-                # Fallback: Get stats for the LAST DAY that contains any data
-                cur.execute("SELECT DATE(MAX(created_at)) as last_day FROM companies")
+                # Fallback: Estadísticas del último día procesado que tenga Constituciones
+                cur.execute("""
+                    SELECT DATE(MAX(created_at)) as last_day 
+                    FROM borme_posts 
+                    WHERE act_types LIKE '%%Constitu%%'
+                """)
                 last_day_row = cur.fetchone()
                 if last_day_row and last_day_row['last_day']:
                     last_day = last_day_row['last_day']
-                    cur.execute("SELECT COUNT(*) as count FROM companies WHERE created_at >= %s AND created_at < %s + INTERVAL 1 DAY", (last_day, last_day))
+                    cur.execute("""
+                        SELECT COUNT(DISTINCT company_id) as count 
+                        FROM borme_posts 
+                        WHERE created_at >= %s AND created_at < %s + INTERVAL 1 DAY
+                          AND act_types LIKE '%%Constitu%%'
+                    """, (last_day, last_day))
                     row = cur.fetchone()
                     stats["total_companies"] = row['count'] if row else 0
                     query_date = last_day
@@ -188,26 +202,30 @@ def get_stats(is_test=False):
             else:
                 query_date = dt.date.today()
 
-            print(f"[*] Extracting details for date: {query_date}")
+            print(f"[*] Extracting details for Constitutions on: {query_date}")
 
-            # 2. Top Provinces
+            # 2. Top Provincias (de las nuevas Constituciones)
             cur.execute("""
-                SELECT registro_mercantil, COUNT(*) as count 
-                FROM companies 
-                WHERE created_at >= %s AND created_at < %s + INTERVAL 1 DAY
-                  AND registro_mercantil IS NOT NULL 
-                  AND registro_mercantil != ''
-                GROUP BY registro_mercantil 
+                SELECT c.registro_mercantil, COUNT(DISTINCT p.company_id) as count 
+                FROM borme_posts p
+                JOIN companies c ON c.id = p.company_id
+                WHERE p.created_at >= %s AND p.created_at < %s + INTERVAL 1 DAY
+                  AND p.act_types LIKE '%%Constitu%%'
+                  AND c.registro_mercantil IS NOT NULL 
+                  AND c.registro_mercantil != ''
+                GROUP BY c.registro_mercantil 
                 ORDER BY count DESC 
                 LIMIT 3
             """, (query_date, query_date))
             stats["provinces"] = cur.fetchall()
 
-            # 3. Sectors Categorization
+            # 3. Sectores (de las nuevas Constituciones)
             cur.execute("""
-                SELECT company_name 
-                FROM companies 
-                WHERE created_at >= %s AND created_at < %s + INTERVAL 1 DAY
+                SELECT DISTINCT c.company_name 
+                FROM borme_posts p
+                JOIN companies c ON c.id = p.company_id
+                WHERE p.created_at >= %s AND p.created_at < %s + INTERVAL 1 DAY
+                  AND p.act_types LIKE '%%Constitu%%'
                 LIMIT 1000
             """, (query_date, query_date))
             names = cur.fetchall()

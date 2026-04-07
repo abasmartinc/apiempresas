@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class RadarScorer:
     def __init__(self, dry_run: bool = False):
         self.dry_run = dry_run
-        self.version = "1.0.0"
+        self.version = "1.1.0" # Updated version for the new algorithm
 
     def parse_capital_amount(self, capital_raw: Optional[str]) -> float:
         """Parses capital strings like '3.000,00 Euros' or '3000 EUR' to float."""
@@ -79,20 +79,20 @@ class RadarScorer:
         return "Otros", 0, 0
 
     def get_recency_score(self, borme_date: Optional[datetime.date]) -> int:
-        """Calculates score based on how recent the BORME post is."""
+        """
+        BONO DE VELOCIDAD: Crucial para Radar.
+        Puntúa muy alto si el lead es de las últimas 48h-7d.
+        """
         if not borme_date:
             return 0
         
         days_diff = (datetime.date.today() - borme_date).days
         if days_diff < 0: days_diff = 0
         
-        if days_diff == 0: return 20
-        if days_diff == 1: return 18
-        if days_diff == 2: return 16
-        if 3 <= days_diff <= 4: return 13
-        if 5 <= days_diff <= 7: return 10
-        if 8 <= days_diff <= 15: return 6
-        if 16 <= days_diff <= 30: return 3
+        if days_diff <= 2: return 40 # Lead de hoy o ayer: ¡ORO!
+        if days_diff <= 7: return 20 # Esta semana
+        if days_diff <= 15: return 10
+        if days_diff <= 30: return 5
         return 0
 
     def get_capital_score(self, amount: float) -> int:
@@ -120,30 +120,22 @@ class RadarScorer:
         """Score based on activity (CNAE or Social Object keywords)."""
         text = (str(cnae_label) + " " + str(object_social)).lower()
         
-        tech_keywords = ["software", "programación", "tecnología", "consultoría it", "tecnologico", "digital", "informática"]
-        b2b_keywords = ["marketing", "publicidad", "consultoría", "formación", "servicios b2b", "asesoría", "gestión"]
-        industrial_keywords = ["inmobiliario", "construcción", "instalaciones", "reformas", "obras"]
-        health_keywords = ["clínica", "salud", "estética", "gimnasio", "deporte"]
-        logistics_keywords = ["transporte", "logística", "almacén", "distribución"]
-        retail_keywords = ["comercio", "hostelería", "tienda", "restaurante"]
-        passive_keywords = ["patrimonial", "alquiler", "tenencia"]
+        tech_keywords = ["software", "programación", "tecnología", "consultoría it", "tecnologico", "digital", "informática", "saas", "ciberseguridad", "ia", "inteligencia artificial"]
+        b2b_keywords = ["marketing", "publicidad", "consultoría", "formación", "servicios b2b", "asesoría", "gestión", "comercialización", "b2b"]
+        industrial_keywords = ["inmobiliario", "construcción", "instalaciones", "reformas", "obras", "energía", "solar", "fotovoltaica", "eléctrica"]
+        logistics_keywords = ["transporte", "logística", "almacén", "distribución", "mensajería", "e-commerce", "comercio electrónico"]
 
+        # CLUSTERS DE VALOR (Bonos directos)
         if any(kw in text for kw in tech_keywords) or (cnae_code and cnae_code.startswith(('62', '63'))):
-            return 12
+            return 25 # Cluster Premium
         if any(kw in text for kw in b2b_keywords) or (cnae_code and cnae_code.startswith(('70', '73', '85'))):
-            return 11
+            return 18
         if any(kw in text for kw in industrial_keywords) or (cnae_code and cnae_code.startswith(('41', '42', '43'))):
-            return 10
-        if any(kw in text for kw in health_keywords) or (cnae_code and cnae_code.startswith(('86', '93'))):
-            return 9
+            return 15
         if any(kw in text for kw in logistics_keywords) or (cnae_code and cnae_code.startswith(('49', '52'))):
-            return 8
-        if any(kw in text for kw in retail_keywords) or (cnae_code and cnae_code.startswith(('47', '56'))):
-            return 7
-        if any(kw in text for kw in passive_keywords):
-            return 4
+            return 12
         
-        return 2 # Default low if no clear match
+        return 5 # Por defecto
 
     def get_object_score(self, object_social: str, borme_desc: str) -> int:
         """Deep analysis of social object."""
@@ -196,22 +188,16 @@ class RadarScorer:
         # Act and Key Info
         reasons.append(f"{main_act}")
         
-        # Sector
-        if components['score_activity'] >= 11: reasons.append("Sector Estratégico")
-        elif components['score_activity'] >= 10: reasons.append("Sector Activo")
+        # Priority Messages
+        if components['score_recency'] >= 40: reasons.append("Oportunidad Crítica (48h)")
+        if components['score_activity'] >= 25: reasons.append("Cluster Tech/Digital")
         
         # Capital
-        if components['score_capital'] >= 10: reasons.append("Capital Sólido")
-        elif components['score_capital'] >= 4: reasons.append("Capital Inicial")
+        if components['score_capital'] >= 15: reasons.append("Inyección Financiera Sólida")
+        elif components['score_capital'] >= 5: reasons.append("Capital Inicial")
         
-        # Location
-        if components['score_location'] >= 4: reasons.append("Hub Económico")
-        
-        # Legal
-        if components['score_legal_form'] >= 8: reasons.append("Forma Jurídica Estable")
-
-        if components['penalty_score'] > 0:
-            reasons.append("Señal de Riesgo Detectada")
+        # Business triggers
+        if "Ampliación" in main_act: reasons.append("Señal de Crecimiento")
 
         return " · ".join(reasons[:4]) # Limit to top 4 reasons
 
@@ -286,8 +272,21 @@ class RadarScorer:
         # 9. Admin signal
         admin_score = self.calculate_admin_score(admins)
 
-        # Calculation
-        total = act_score + recency_score + capital_score + legal_score + activity_score + object_score + location_score + name_score + admin_score - penalty
+        # TOTAL SCORE CALCULATION (Weighted)
+        base_score = act_score + recency_score + activity_score + object_score + location_score + name_score + legal_score + admin_score
+        
+        # APLICAR MULTIPLICADOR DE CAPITAL
+        multiplier = 1.0
+        if cap_val >= 100000: multiplier = 1.6
+        elif cap_val >= 30000: multiplier = 1.4
+        elif cap_val >= 10000: multiplier = 1.2
+        
+        # Bonus por Ampliación de Capital (si es reciente y significativa)
+        ampliacion_bonus = 0
+        if "Ampliación" in main_act and cap_val > 5000:
+            ampliacion_bonus = 15
+
+        total = (base_score * multiplier) + capital_score + ampliacion_bonus - penalty
         total = max(0, min(100, total))
         
         comp_scores = {
