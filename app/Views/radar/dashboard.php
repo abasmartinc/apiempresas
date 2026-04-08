@@ -191,9 +191,18 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                 </div>
             </header>
 
+            <style>
+                .ae-radar-page { background: #e2e8f0 !important; }
+                .ae-radar-page__content { background: transparent !important; padding: 40px !important; }
+                .ae-radar-page__container { max-width: 100% !important; margin: 0 auto !important; }
+            </style>
+
             <div class="ae-radar-page__content">
                 <div class="ae-radar-page__container">
                     
+                    <!-- INICIO SECCION SUPERIOR (KPIs) -->
+                    <div class="ae-radar-page-top-section" style="width: 100%;">
+
                     <!-- BLOQUE: ACTIVIDAD DEL DÍA (NUDGE DIARIO) -->
                     <div class="ae-radar-page__daily-nudge" style="margin-bottom: 20px; background: linear-gradient(90deg, #eff6ff 0%, #ffffff 100%); border: 1px solid #dbeafe; border-radius: 12px; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.05);">
                         <div style="display: flex; align-items: center; gap: 12px;">
@@ -484,6 +493,20 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                             </div>
                         </div>
 <?php endif; ?>
+                    </div> <!-- FIN CARD SUPERIOR (KPIs) -->
+
+                    <!-- SEPARADOR VISUAL PREMIUM -->
+                    <div style="margin: 56px 0 40px 0; display: flex; align-items: center; gap: 20px; opacity: 0; animation: fadeUp 0.6s ease forwards 0.3s;">
+                        <div style="flex-grow: 1; height: 1px; background: linear-gradient(to right, rgba(226, 232, 240, 0), rgba(148, 163, 184, 0.4));"></div>
+                        <div style="font-size: 11px; font-weight: 900; color: #334155; text-transform: uppercase; letter-spacing: 0.15em; background: #ffffff; padding: 12px 28px; border-radius: 100px; border: 1px solid #cbd5e1; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 4px 10px -5px rgba(37, 99, 235, 0.1); display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 14px; animation: pulse 2s infinite;">🎯</span> 
+                            Explorar Base de Datos
+                        </div>
+                        <div style="flex-grow: 1; height: 1px; background: linear-gradient(to left, rgba(226, 232, 240, 0), rgba(148, 163, 184, 0.4));"></div>
+                    </div> <!-- FIN SEPARADOR VISUAL PREMIUM -->
+
+                    <!-- INICIO FONDO BUSCADOR Y TABLA -->
+                    <div style="background: #ffffff; padding: 40px; border-radius: 32px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); border: 1px solid #e1e7f0; margin-bottom: 40px;">
 
                     <form action="<?= site_url('radar') ?>" method="GET" class="ae-radar-page__filters <?= $isFree ? 'is-locked' : '' ?>" style="padding: 16px 24px; margin-bottom: 20px;">
                         <div class="ae-radar-page__filters-grid" style="grid-template-columns: 1fr 1fr 1fr auto; gap: 20px; align-items: flex-end;">
@@ -732,6 +755,8 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                             </div>
                         <?php endif; ?>
                     </section>
+
+                    </div> <!-- FIN FONDO BUSCADOR Y TABLA -->
 
                 </div>
             </div>

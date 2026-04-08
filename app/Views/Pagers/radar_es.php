@@ -2,14 +2,14 @@
 
 <nav aria-label="Page navigation">
     <ul class="ae-radar-page__pagination-list">
-        <?php if ($pager->hasPrevious()) : ?>
+        <?php if ($pager->hasPreviousPage()) : ?>
             <li>
                 <a href="<?= $pager->getFirst() ?>" aria-label="<?= lang('Pager.first') ?>">
                     <span aria-hidden="true">Primero</span>
                 </a>
             </li>
             <li>
-                <a href="<?= $pager->getPrevious() ?>" aria-label="<?= lang('Pager.previous') ?>">
+                <a href="<?= $pager->getPreviousPage() ?>" aria-label="<?= lang('Pager.previous') ?>">
                     <span aria-hidden="true">Anterior</span>
                 </a>
             </li>
@@ -23,9 +23,9 @@
             </li>
         <?php endforeach ?>
 
-        <?php if ($pager->hasNext()) : ?>
+        <?php if ($pager->hasNextPage()) : ?>
             <li>
-                <a href="<?= $pager->getNext() ?>" aria-label="<?= lang('Pager.next') ?>">
+                <a href="<?= $pager->getNextPage() ?>" aria-label="<?= lang('Pager.next') ?>">
                     <span aria-hidden="true">Siguiente</span>
                 </a>
             </li>

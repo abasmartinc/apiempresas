@@ -472,7 +472,7 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
 
     <?php if (!$isFree && isset($pagination) && isset($pager)): ?>
         <!-- Dynamic Results Title (Sincronizado con AJAX) -->
-        <div class="ae-radar-page__results-info" style="margin-top: 16px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
+        <div class="ae-radar-page__results-info" style="margin-top: 16px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; padding-left: 16px; padding-right: 16px;">
             <h3 style="font-size: 20px; font-weight: 800; color: #1e293b; margin: 0; font-family: 'Outfit', sans-serif;">
                 <?php 
                     $totalItems = $pagination['total'] ?? 0;
