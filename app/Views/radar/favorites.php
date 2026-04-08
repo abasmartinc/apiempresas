@@ -454,6 +454,60 @@
 
 <?= view('radar/partials/ai_modal') ?>
 
+    <!-- Modal QuickView -->
+    <div id="ae-qv-modal" class="ae-qv-modal" style="display:none;">
+        <div class="ae-qv-modal__backdrop" onclick="closeQuickView()"></div>
+        <div class="ae-qv-modal__container">
+            <div id="ae-qv-content" class="ae-qv-modal__content">
+                <!-- Se cargará por AJAX -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+    /**
+     * Abre el modal de QuickView por ID de empresa
+     */
+    function openQuickView(id) {
+        if (!id) return;
+
+        const $modal = document.getElementById('ae-qv-modal');
+        const $content = document.getElementById('ae-qv-content');
+        
+        // Mostrar modal vacío con loading
+        $content.innerHTML = '<div style="padding:100px; text-align:center; color:#64748b;"><div class="ae-spinner"></div><p style="margin-top:16px; font-weight:600;">Cargando información...</p></div>';
+        $modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        fetch('<?= site_url('radar/quickview/') ?>' + id, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Not found');
+            return response.text();
+        })
+        .then(html => {
+            $content.innerHTML = html;
+        })
+        .catch(err => {
+            $content.innerHTML = '<div style="padding:48px; text-align:center; color:#64748b;">' +
+                '<p style="font-size:18px; font-weight:700; color:#1e293b; margin-bottom:8px;">Error al cargar</p>' +
+                '<p>No se ha podido recuperar la información de la empresa.</p>' +
+                '<button onclick="closeQuickView()" style="margin-top:20px; padding:8px 16px; background:#2563eb; color:#fff; border:none; border-radius:8px; cursor:pointer;">Cerrar</button>' +
+                '</div>';
+        });
+    }
+
+    /**
+     * Cierra el modal de QuickView
+     */
+    function closeQuickView() {
+        const $modal = document.getElementById('ae-qv-modal');
+        $modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+    </script>
+
 <script>
 let searchTimeout;
 let currentPage = <?= $currentPage ?>;

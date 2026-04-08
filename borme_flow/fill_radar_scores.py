@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class RadarScorer:
     def __init__(self, dry_run: bool = False):
         self.dry_run = dry_run
-        self.version = "1.1.0" # Updated version for the new algorithm
+        self.version = "1.2.0" # Marketing Expert Adjusted Algorithm
 
     def parse_capital_amount(self, capital_raw: Optional[str]) -> float:
         """Parses capital strings like '3.000,00 Euros' or '3000 EUR' to float."""
@@ -59,17 +59,17 @@ class RadarScorer:
         
         # Priority mapping (Act, Score, Penalty)
         patterns = [
-            (r'extinci.n', "Extinción", -35, 35),
-            (r'concurso|liquidaci.n|concursal', "Situación Concursal/Liquidación", -30, 30),
-            (r'disoluci.n', "Disolución", -25, 25),
-            (r'constituci.n', "Constitución", 30, 0),
-            (r'ampliaci.n de capital', "Ampliación de Capital", 12, 0),
-            (r'cambio de objeto social', "Cambio de Objeto Social", 10, 0),
+            (r'extinci.n', "Extinción", -40, 40),
+            (r'concurso|liquidaci.n|concursal', "Situación Concursal/Liquidación", -35, 35),
+            (r'disoluci.n', "Disolución", -30, 30),
+            (r'constituci.n', "Constitución", 25, 0),
+            (r'ampliaci.n de capital', "Ampliación de Capital", 20, 0),
+            (r'cambio de objeto social', "Cambio de Objeto Social", 12, 0),
             (r'cambio de domicilio', "Cambio de Domicilio", 8, 0),
-            (r'unipersonalidad', "Declaración de Unipersonalidad", 6, 0),
+            (r'unipersonalidad', "Declaración de Unipersonalidad", 5, 0),
             (r'nombramiento', "Nombramientos", 5, 0),
             (r'apoderad|apoderamiento', "Apoderamientos", 3, 0),
-            (r'cese|dimisi.n', "Ceses/Dimisiones", -3, 0),
+            (r'cese|dimisi.n', "Ceses/Dimisiones", -5, 0),
         ]
 
         for pattern, label, score, penalty in patterns:
@@ -89,21 +89,20 @@ class RadarScorer:
         days_diff = (datetime.date.today() - borme_date).days
         if days_diff < 0: days_diff = 0
         
-        if days_diff <= 2: return 40 # Lead de hoy o ayer: ¡ORO!
-        if days_diff <= 7: return 20 # Esta semana
-        if days_diff <= 15: return 10
-        if days_diff <= 30: return 5
+        if days_diff <= 2: return 25 # Lead de hoy o ayer: ¡ORO! (Ajustado para no saturar)
+        if days_diff <= 7: return 15 # Esta semana
+        if days_diff <= 15: return 8
+        if days_diff <= 30: return 4
         return 0
 
     def get_capital_score(self, amount: float) -> int:
         """Score based on social capital amount."""
         if amount <= 0: return 0
-        if amount <= 3000: return 2
-        if amount <= 6000: return 4
-        if amount <= 15000: return 7
-        if amount <= 30000: return 10
-        if amount <= 100000: return 13
-        return 15
+        if amount <= 5000: return 2
+        if amount <= 15000: return 5
+        if amount <= 60000: return 12
+        if amount <= 150000: return 20
+        return 25 # Inyección potente de capital
 
     def get_legal_form_score(self, name: str) -> int:
         """Detects legal form and returns score."""
@@ -272,21 +271,24 @@ class RadarScorer:
         # 9. Admin signal
         admin_score = self.calculate_admin_score(admins)
 
-        # TOTAL SCORE CALCULATION (Weighted)
-        base_score = act_score + recency_score + activity_score + object_score + location_score + name_score + legal_score + admin_score
+        # TOTAL SCORE CALCULATION (Professional Weighted)
+        # 1. Base components sum (Max potential around 110 before cap)
+        total = (act_score + recency_score + activity_score + object_score + location_score + name_score + legal_score + admin_score)
         
-        # APLICAR MULTIPLICADOR DE CAPITAL
+        # 2. Applying Capital Multiplier (Impacto en la escalabilidad del lead)
         multiplier = 1.0
-        if cap_val >= 100000: multiplier = 1.6
-        elif cap_val >= 30000: multiplier = 1.4
-        elif cap_val >= 10000: multiplier = 1.2
+        if cap_val >= 200000: multiplier = 1.3
+        elif cap_val >= 50000: multiplier = 1.15
         
-        # Bonus por Ampliación de Capital (si es reciente y significativa)
-        ampliacion_bonus = 0
+        total = (total * multiplier) + capital_score
+        
+        # 3. Bonus por Ampliación de Capital (Si es reciente y significativa)
         if "Ampliación" in main_act and cap_val > 5000:
-            ampliacion_bonus = 15
+            total += 12
 
-        total = (base_score * multiplier) + capital_score + ampliacion_bonus - penalty
+        total = total - penalty
+        
+        # Capped at 100 for DB storage, but we target ~80-85 for the best dry leads
         total = max(0, min(100, total))
         
         comp_scores = {

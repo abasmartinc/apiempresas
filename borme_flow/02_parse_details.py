@@ -36,10 +36,15 @@ def process_item(cur, item):
     resp = requests.get(item["url_pdf"], headers=HTTP_HEADERS, timeout=64)
     if resp.status_code != 200: return
     with pdfplumber.open(io.BytesIO(resp.content)) as pdf:
+        full_text = ""
         for page in pdf.pages:
-            for name, block in split_blocks(page.extract_text()):
-                acts = ", ".join([a for a in KNOWN_ACTS if re.search(r"\b"+re.escape(a)+r"\b", block, re.IGNORECASE)]) or "Otros"
-                cur.execute("INSERT INTO borme_posts (borme_date, company_name, act_types, description, url_pdf) VALUES (%s,%s,%s,%s,%s)", (item["borme_date"], name, acts, block, item["url_pdf"]))
+            extr = page.extract_text()
+            if extr:
+                full_text += extr + "\n"
+        
+        for name, block in split_blocks(full_text):
+            acts = ", ".join([a for a in KNOWN_ACTS if re.search(r"\b"+re.escape(a)+r"\b", block, re.IGNORECASE)]) or "Otros"
+            cur.execute("INSERT INTO borme_posts (borme_date, company_name, act_types, description, url_pdf) VALUES (%s,%s,%s,%s,%s)", (item["borme_date"], name, acts, block, item["url_pdf"]))
     cur.execute("UPDATE borme_items_raw SET processed=1 WHERE id=%s", (item["id"],))
 
 def run():

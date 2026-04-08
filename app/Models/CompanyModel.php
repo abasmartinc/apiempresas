@@ -31,6 +31,10 @@ class CompanyModel extends Model
         'companies.estado             AS status',
         'companies.phone',
         'companies.phone_mobile',
+        'company_enrichment.website_official',
+        'company_enrichment.email',
+        'company_enrichment.phone_enriched',
+        'company_enrichment.phone_mobile_enriched',
     ];
 
     public function getByCif(string $cif): ?array
@@ -42,6 +46,7 @@ class CompanyModel extends Model
         return $this->asArray()
             ->select(implode(', ', $this->selectFields))
             ->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left')
+            ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left')
             ->where('companies.cif', $cif)
             ->limit(1)
             ->get()
@@ -53,6 +58,7 @@ class CompanyModel extends Model
         return $this->asArray()
             ->select(implode(', ', $this->selectFields))
             ->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left')
+            ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left')
             ->where('companies.id', $id)
             ->limit(1)
             ->get()
@@ -143,6 +149,7 @@ class CompanyModel extends Model
                 MATCH(companies.company_name) AGAINST (? IN BOOLEAN MODE) AS score
             FROM {$this->table}
             LEFT JOIN cnae_2009_2025 ON cnae_2009_2025.cnae_2009 = companies.cnae_code
+            LEFT JOIN company_enrichment ON company_enrichment.company_id = companies.id
             WHERE companies.company_name IS NOT NULL
               AND MATCH(companies.company_name) AGAINST (? IN BOOLEAN MODE)
             ORDER BY score DESC
@@ -196,6 +203,7 @@ class CompanyModel extends Model
         $builder = $this->builder();
         $builder->select(implode(', ', $this->selectFields));
         $builder->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
+        $builder->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
         $builder->where('companies.company_name IS NOT NULL', null, false);
 
         // Filtro barato inicial (OR por tokens)
@@ -437,6 +445,7 @@ class CompanyModel extends Model
                         MATCH(companies.company_name, companies.cnae_label, companies.registro_mercantil) AGAINST (? IN BOOLEAN MODE) as score
                         FROM {$this->table}
                         LEFT JOIN cnae_2009_2025 ON cnae_2009_2025.cnae_2009 = companies.cnae_code
+                        LEFT JOIN company_enrichment ON company_enrichment.company_id = companies.id
                         WHERE MATCH(companies.company_name, companies.cnae_label, companies.registro_mercantil) AGAINST (? IN BOOLEAN MODE)
                         ORDER BY score DESC
                         LIMIT ?";
@@ -515,6 +524,7 @@ class CompanyModel extends Model
         return $this->asArray()
             ->select(implode(', ', $this->selectFields))
             ->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left')
+            ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left')
             ->whereIn('companies.id', $ids)
             ->orderBy('companies.fecha_constitucion', 'DESC')
             ->orderBy('companies.id', 'DESC')

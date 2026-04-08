@@ -28,7 +28,7 @@ def run():
         with conn.cursor() as cur:
             while True:
                 # 1. Get unprocessed candidates in batches
-                cur.execute("SELECT id, post_id, raw_name, borme_date FROM borme_candidates WHERE processed = 0 LIMIT 10000")
+                cur.execute("SELECT id, post_id, raw_name, borme_date, province FROM borme_candidates WHERE processed = 0 LIMIT 10000")
                 candidates = cur.fetchall()
                 
                 if not candidates:
@@ -41,6 +41,7 @@ def run():
                     raw_name = cand["raw_name"]
                     cleaned_name = clean_company_name(raw_name)
                     slug = slugify(cleaned_name)
+                    province = cand["province"]
                     
                     # Check if slug already exists to avoid duplicates (basic check)
                     cur.execute("SELECT id FROM companies WHERE slug = %s", (slug,))
@@ -59,13 +60,13 @@ def run():
 
                     # 2. Insert into emp companies
                     now = datetime.datetime.now()
-                    print(f"    [NEW] Creating company: {raw_name}")
+                    print(f"    [NEW] Creating company: {raw_name} (Prov: {province})")
                     
                     cur.execute("""
                         INSERT INTO companies 
-                        (company_name, slug, created_at, updated_at) 
-                        VALUES (%s, %s, %s, %s)
-                    """, (raw_name, slug, now, now))
+                        (company_name, slug, registro_mercantil, created_at, updated_at) 
+                        VALUES (%s, %s, %s, %s, %s)
+                    """, (raw_name, slug, province, now, now))
                     
                     new_company_id = cur.lastrowid
                     

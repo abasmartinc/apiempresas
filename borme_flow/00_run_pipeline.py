@@ -35,7 +35,9 @@ PIPELINE = [
     "04_insert_new_companies.py",
     "05_associate_companies.py",
     "06_extract_from_borme_text.py",  # Extrae administradores y fecha de constitución
+    "10_ai_cnae_classifier.py",       # Clasifica sector por IA si no viene en el BORME
     "fill_radar_scores.py --all",
+    "08_enrich_contacts.py",           # Descubre CIF, Web y Email para los mejores leads
     "07_linkedin_post.py",           # Publica resumen diario en LinkedIn
 ]
 
@@ -111,7 +113,7 @@ def clear_radar_cache():
         log(f"[CACHE] Error al limpiar cache: {e}")
 
 def send_summary_email():
-    """ Envia un email automatizado por SMTP con el recuento de inserciones del día. """
+    """ Envia un email automatizado por SMTP con una tabla detallada del enriquecimiento del día. """
     host = os.getenv("SMTP_HOST") or os.getenv("email.SMTPHost")
     user = os.getenv("SMTP_USER") or os.getenv("email.SMTPUser")
     password = os.getenv("SMTP_PASS") or os.getenv("email.SMTPPass")
@@ -123,39 +125,102 @@ def send_summary_email():
         log("[EMAIL] Credenciales SMTP faltantes. No se envía el resumen.")
         return
         
-    # Obtener totales de base de datos de hoy (solo nuevas Constituciones)
-    new_companies, new_posts = 0, 0
+    enriched_rows = []
+    new_companies_count = 0
+    new_posts_count = 0
+    
     conn = mysql_connect()
     try:
         with conn.cursor() as cur:
-            # Contar empresas únicas que han tenido un acto de 'Constitución' hoy
+            # 1. Stats
             cur.execute("""
                 SELECT COUNT(DISTINCT company_id) as c 
                 FROM borme_posts 
                 WHERE DATE(created_at) = CURDATE() 
                   AND act_types LIKE '%Constitu%'
             """)
-            row = cur.fetchone()
-            if row: new_companies = row.get('c', 0)
+            r = cur.fetchone()
+            if r: new_companies_count = r.get('c', 0)
             
             cur.execute("SELECT COUNT(*) as c FROM borme_posts WHERE DATE(created_at) = CURDATE()")
-            row = cur.fetchone()
-            if row: new_posts = row.get('c', 0)
+            r = cur.fetchone()
+            if r: new_posts_count = r.get('c', 0)
+
+            # 2. Detail Data for Tablet
+            # We look for leads enriched today that were also created/updated today
+            sql = """
+            SELECT c.company_name, c.cif, ce.website_official, ce.email, ce.phone_enriched
+            FROM company_enrichment ce
+            JOIN companies c ON ce.company_id = c.id
+            WHERE DATE(ce.updated_at) = CURDATE()
+            ORDER BY ce.updated_at DESC
+            LIMIT 100
+            """
+            cur.execute(sql)
+            enriched_rows = cur.fetchall()
+            
     except Exception as e:
-        log(f"[EMAIL] Error contando estadísticas: {e}")
+        log(f"[EMAIL] Error obteniendo datos para el resumen: {e}")
     finally:
         conn.close()
 
-    subject = f"Resumen diario BORME: {new_companies} nuevas empresas"
-    body = f"El pipeline del BORME ha finalizado correctamente hoy.\n\nNuevas empresas insertadas: {new_companies}\nNuevos anuncios BORME procesados: {new_posts}\n\nSaludos,\nEl Bot de APIEmpresas"
+    subject = f"Resumen BORME: {new_companies_count} nuevas empresas y {len(enriched_rows)} enriquecidas"
     
-    msg = MIMEText(body, "plain", "utf-8")
+    # HTML Table Construction
+    table_html = """
+    <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif;">
+        <tr style="background-color: #f2f2f2;">
+            <th>Empresa</th>
+            <th>CIF</th>
+            <th>Web Oficial</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+        </tr>
+    """
+    
+    if not enriched_rows:
+        table_html += "<tr><td colspan='5' style='text-align: center;'>No se han enriquecido empresas hoy todavía.</td></tr>"
+    else:
+        for row in enriched_rows:
+            web = row.get('website_official') or '-'
+            email = row.get('email') or '-'
+            phone = row.get('phone_enriched') or '-'
+            table_html += f"""
+            <tr>
+                <td>{row.get('company_name')}</td>
+                <td>{row.get('cif') or '-'}</td>
+                <td><a href='{web}'>{web}</a></td>
+                <td>{email}</td>
+                <td>{phone}</td>
+            </tr>
+            """
+    table_html += "</table>"
+
+    body_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333;">
+        <h2>Pipeline BORME - Informe Diario</h2>
+        <p>El proceso automatizado de extracción y enriquecimiento ha finalizado hoy.</p>
+        <ul>
+            <li><strong>Nuevas empresas detectadas:</strong> {new_companies_count}</li>
+            <li><strong>Anuncios procesados:</strong> {new_posts_count}</li>
+            <li><strong>Empresas enriquecidas (CIF/Web/Email):</strong> {len(enriched_rows)}</li>
+        </ul>
+        <h3>Detalle de Enriquecimiento (Últimos 100)</h3>
+        {table_html}
+        <br>
+        <p>Saludos,<br><strong>Radar B2B Bot</strong></p>
+    </body>
+    </html>
+    """
+    
+    msg = MIMEText(body_html, "html", "utf-8")
     msg["Subject"] = subject
     msg["From"] = user
     msg["To"] = dest
     
     try:
-        log("[EMAIL] Enviando correo de resumen...")
+        log("[EMAIL] Enviando correo de resumen HTML...")
         if port == 465:
             server = smtplib.SMTP_SSL(host, port)
         else:

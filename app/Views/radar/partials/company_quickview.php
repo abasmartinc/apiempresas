@@ -96,17 +96,36 @@
                     </p>
                 </div>
                 <div class="ae-qv__item">
-                    <label>Acceso Web</label>
-                    <p>N/D</p>
+                    <label>Email de Contacto</label>
+                    <p class="ae-qv__contact-value">
+                        <?php if ($isFree): ?>
+                            <span class="ae-radar-page__locked-phone">🔒 Bloqueado</span>
+                        <?php elseif (!empty($co['email'])): ?>
+                            <a href="mailto:<?= esc($co['email']) ?>" style="color: #2563eb; text-decoration: underline; font-weight: 500;">
+                                <?= esc($co['email']) ?>
+                            </a>
+                        <?php else: ?>
+                            -
+                        <?php endif; ?>
+                    </p>
+                </div>
+                <div class="ae-qv__item">
+                    <label>Sitio Web Oficial</label>
+                    <p>
+                        <?php if (!empty($co['website_official'])): ?>
+                            <a href="<?= esc($co['website_official']) ?>" target="_blank" style="color: #2563eb; text-decoration: underline; font-weight: 500;">
+                                Visitar web ↗
+                            </a>
+                        <?php else: ?>
+                            -
+                        <?php endif; ?>
+                    </p>
                 </div>
             </div>
         </div>
 
-        <div class="ae-qv__actions">
-            <a href="<?= $isFree ? site_url('leads-empresas-nuevas') : company_url(['cif' => $co['cif'], 'name' => $co['company_name']]) ?>" class="ae-qv__btn ae-qv__btn--primary">
-                <?= $isFree ? 'Activar Radar PRO ahora' : 'Ver perfil completo' ?>
-            </a>
-            <button type="button" class="ae-qv__btn ae-qv__btn--text" onclick="closeQuickView()">Cerrar</button>
+        <div class="ae-qv__actions" style="justify-content: center;">
+            <button type="button" class="ae-qv__btn ae-qv__btn--text" onclick="closeQuickView()" style="background: #f1f5f9; color: #475569; padding: 10px 24px; border-radius: 8px; font-weight: 700;">Cerrar ventana</button>
         </div>
     </div>
 </div>

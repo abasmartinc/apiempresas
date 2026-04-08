@@ -918,6 +918,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
     function initRadarMap() {
         if (radarMap) {
             radarMap.invalidateSize();
+            loadMapData(); // FORCE DATA REFRESH 
             return;
         }
 

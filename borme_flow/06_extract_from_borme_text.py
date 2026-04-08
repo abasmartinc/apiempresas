@@ -256,6 +256,15 @@ def run():
 
                 # --- D. EJECUTAR UPDATE SI HAY CAMBIOS ---
                 if update_fields:
+                    # Si tenemos cnae_code pero no label, intentamos buscarlo en el mapeo (cargado al inicio)
+                    if "cnae_code" in update_fields and "cnae_label" not in update_fields:
+                        code = update_fields["cnae_code"]
+                        # Buscamos en la base de datos (puedes cargar un dict al inicio para más velocidad si hay muchos)
+                        cur.execute("SELECT label_2009 FROM cnae_2009_2025 WHERE cnae_2009 = %s OR cnae_2025 = %s LIMIT 1", (code, code))
+                        row_cnae = cur.fetchone()
+                        if row_cnae:
+                            update_fields["cnae_label"] = row_cnae["label_2009"]
+
                     placeholders = ", ".join([f"{k} = %s" for k in update_fields.keys()])
                     values = list(update_fields.values())
                     values.append(company_id)

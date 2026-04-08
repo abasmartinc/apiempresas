@@ -142,8 +142,7 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
     }
 </style>
 
-<div id="radar-list-view">
-    <div class="ae-radar-page__lead-top" style="display:flex; justify-content:space-between; align-items:flex-end; padding:24px 26px;">
+<div class="ae-radar-page__lead-top" style="display:flex; justify-content:space-between; align-items:flex-end; padding:24px 26px;">
         <!-- Left Side: Title & Info -->
         <div class="ae-radar-page__lead-headings">
             <h2 class="ae-radar-page__lead-title" style="margin-bottom:4px;">Clientes detectados con intención de compra</h2>
@@ -201,6 +200,7 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
         </div>
     </div>
 
+<div id="radar-list-view">
     <div class="ae-radar-page__table-scroll">
         <table class="ae-radar-page__table">
             <thead>
@@ -347,9 +347,10 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
                                 <div class="ae-radar-page__company">
                                     <!-- BLOQUE 1: Identificación y Score (Pilar de Decisión) -->
                                     <div class="ae-radar-page__company-header" style="margin-bottom: 4px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                                        <a href="<?= $isFree ? site_url('leads-empresas-nuevas') : company_url(['cif' => $co['cif'], 'name' => $co['company_name']]) ?>" 
+                                        <a href="javascript:void(0)" 
+                                           onclick="openQuickView('<?= $co['id'] ?>')"
                                            class="ae-radar-page__company-link" 
-                                               style="display: block; text-decoration: none; margin-bottom: 6px;">
+                                           style="display: block; text-decoration: none; margin-bottom: 6px;">
                                             <span class="ae-radar-page__company-name" style="font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.2; letter-spacing: -0.01em;"><?= esc($co['company_name']) ?></span>
                                         </a>
 

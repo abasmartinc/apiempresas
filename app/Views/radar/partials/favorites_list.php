@@ -34,7 +34,9 @@
                 </div>
 
                 <div class="ae-fav-card__info">
-                    <a href="<?= company_url(['cif' => $f['cif'], 'name' => $f['company_name']]) ?>" class="ae-fav-card__company-name">
+                    <a href="javascript:void(0)" 
+                       onclick="openQuickView('<?= $f['company_id'] ?>')"
+                       class="ae-fav-card__company-name">
                         <?= esc($f['company_name']) ?>
                     </a>
 

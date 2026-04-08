@@ -819,32 +819,35 @@ class Radar extends BaseController
         $q = $this->request->getGet('q');
 
         $builder = $this->companyModel->builder();
-        $builder->select('registro_mercantil as province, COUNT(*) as total');
-        $builder->where('registro_mercantil IS NOT NULL');
-        $builder->where('fecha_constitucion IS NOT NULL');
+        $builder->select('companies.registro_mercantil as province, COUNT(*) as total');
+        $builder->join('company_radar_scores crs', 'crs.company_id = companies.id', 'left');
+        $builder->where('companies.registro_mercantil IS NOT NULL');
+        $builder->where('crs.last_borme_date IS NOT NULL');
 
         // Aplicar mismos filtros que en el listado
         if ($province) {
-            $builder->where('registro_mercantil', strtoupper(str_replace('-', ' ', $province)));
+            $builder->where('companies.registro_mercantil', strtoupper(str_replace('-', ' ', $province)));
         }
         if ($cnae) {
             // Simplificado para el mapa
-            $builder->like('cnae_code', $cnae, 'after');
+            $builder->like('companies.cnae_code', $cnae, 'after');
         }
         if ($q) {
-            $builder->like('objeto_social', $q);
+            $builder->groupStart()
+                ->like('companies.objeto_social', $q)
+                ->orLike('companies.company_name', $q)
+                ->groupEnd();
         }
 
         $today = date('Y-m-d');
         if ($timeRange === 'hoy') {
-            $builder->where('fecha_constitucion >=', $today);
+            $builder->where('crs.last_borme_date >=', $today);
         } else {
             $days = (int)$timeRange;
-            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime("-$days days")));
+            $builder->where('crs.last_borme_date >=', date('Y-m-d', strtotime("-$days days")));
         }
-        $builder->where('fecha_constitucion <=', $today); // Excluir fechas futuras
 
-        $results = $builder->groupBy('registro_mercantil')
+        $results = $builder->groupBy('companies.registro_mercantil')
                           ->orderBy('total', 'DESC')
                           ->get()
                           ->getResultArray();
@@ -877,10 +880,10 @@ class Radar extends BaseController
         $adjGroupBoost = min((int)$groupScore, 100);
         
         // 4. Capa de Personalización Individual (Booster de IA aprendida por Usuario según sus nichos favoritos)
-        // final_score = base_score + (engagement_score * 0.3) + (group_score * 0.2) + (user_score * 0.2)
         $adjUserPref = min((int)$userScore, 100);
-        
-        $finalScore = $baseScore + ($adjEngagement * 0.3) + ($adjGroupBoost * 0.2) + ($adjUserPref * 0.2);
+        // FÓRMULA ÓPTIMA (Elastic Weighted): 80% Base + 20% Dynamic Boosters
+        $dynamicBoosters = ($adjEngagement * 0.4) + ($adjGroupBoost * 0.3) + ($adjUserPref * 0.3);
+        $finalScore = max(0, min(100, ($baseScore * 0.8) + ($dynamicBoosters * 0.2)));
 
         // 5. Proyección a Categorías Visuales (Umbrales 70/40 (Optimización de Interés Radar)
         $scoreColor = '#94a3b8'; $scoreProb = 'Baja probabilidad'; $scoreIcon = '⚪'; $scoreBg = 'rgba(148, 163, 184, 0.1)';
