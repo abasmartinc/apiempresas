@@ -359,6 +359,7 @@ class CompanyModel extends Model
         $builder = $this->builder();
         $builder->select(implode(', ', $this->selectFields));
         $builder->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
+        $builder->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
         $builder->where('companies.cif !=', $excludeCif);
 
         // Prioridad: Mismo CNAE
@@ -415,6 +416,7 @@ class CompanyModel extends Model
         $builderCif = $this->builder();
         $builderCif->select(implode(', ', $this->selectFields));
         $builderCif->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
+        $builderCif->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
         $builderCif->like('companies.cif', $term, 'after');
         $builderCif->limit($limit);
 
@@ -473,6 +475,7 @@ class CompanyModel extends Model
             $builderFallback = $this->builder();
             $builderFallback->select(implode(', ', $this->selectFields));
             $builderFallback->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
+            $builderFallback->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
             $builderFallback->like('companies.company_name', $term, 'after');
 
             if (!empty($seenCifs)) {
