@@ -63,6 +63,8 @@ $getCommercialSignals = function($sector, $object) {
     return 'asesoría · software · marketing';
 };
 
+$sector_label = $sector_label ?? ($sector['label'] ?? '');
+
 $buildCheckoutUrl = site_url('checkout/radar-export') .
     '?type=single&period=' . urlencode($period === 'general' ? '30days' : ($period ?? ''));
 
@@ -726,7 +728,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
 
                     <div class="ae-radar-page__excel-actions">
                             <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 400px;">
-                                <a href="<?= site_url('checkout/radar-export?period=' . urlencode($period) . ($sectorLabel ? '&sector=' . urlencode($sectorLabel) : '')) ?>" class="ae-radar-page__excel-btn js-loading-btn">
+                                <a href="<?= site_url('checkout/radar-export?period=' . urlencode($period) . ($sector_label ? '&sector=' . urlencode($sector_label) : '')) ?>" class="ae-radar-page__excel-btn js-loading-btn">
                                     Descargar listado (<?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€
                                 </a>
                                 <button type="button" class="ae-radar-page__excel-btn ae-radar-page__excel-btn--alt ae-email-export-btn" 
