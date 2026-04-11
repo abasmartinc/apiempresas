@@ -133,6 +133,7 @@ header {
     border: 1px solid rgba(255, 255, 255, .9);
     transition: all .25s ease
 }
+
 /* Button loading state */
 .btn-loading {
     pointer-events: none !important;
@@ -153,7 +154,9 @@ header {
 }
 
 @keyframes btn-spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .btn.secondary {
@@ -5998,12 +6001,14 @@ footer .container {
         grid-template-columns: 1fr;
         gap: 32px;
     }
+
     /* Links in 2 Columns as requested by user */
     .foot-links {
         display: grid !important;
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 10px 20px !important;
     }
+
     .foot-links li {
         margin-bottom: 0 !important;
     }

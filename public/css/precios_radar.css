@@ -240,7 +240,7 @@ body {
 
 .radar-hero__title {
     margin: 0 0 18px;
-    font-size: clamp(2.5rem, 5vw, 4.25rem);
+    font-size: clamp(2.2rem, 4.5vw, 3.25rem);
     line-height: 1.1;
     font-weight: 950;
     letter-spacing: -0.03em;

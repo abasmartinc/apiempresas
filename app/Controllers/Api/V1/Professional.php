@@ -44,12 +44,26 @@ class Professional extends ResourceController
 
             // Formateamos la respuesta para que sea ligera (estilo buscador)
             $formatted = array_map(function($item) {
-                return [
+                $data = [
                     'name'    => $item['name'] ?? ($item['company_name'] ?? ''),
                     'cif'     => $item['cif'] ?? '',
                     'address' => $item['address'] ?? '',
                     'cnae'    => $item['cnae'] ?? '',
                 ];
+
+                // Apply masking if Free plan
+                $planId = $this->request->api_meta['plan_id'] ?? 1;
+                if ((int)$planId === 1) {
+                    // 4. Remove technical fields
+                    unset($data['lat'], $data['lng']);
+
+                    // 5. Mask CIF (Key identifier)
+                    if (!empty($data['cif'])) {
+                        $data['cif'] = 'B********';
+                    }
+                }
+
+                return $data;
             }, $results);
 
             return $this->respond([
@@ -94,8 +108,11 @@ class Professional extends ResourceController
                 ], ResponseInterface::HTTP_NOT_FOUND);
             }
 
-            // Nota: El ApiKeyFilter se encargará de registrar el consumo en el after() 
-            // ya que este endpoint NO está en la lista de excepciones (skipBilling).
+            // Apply masking if Free plan (Mirroring CompaniesByCif logic)
+            $planId = $this->request->api_meta['plan_id'] ?? 1;
+            if ((int)$planId === 1) {
+                $company = mask_company_data($company);
+            }
 
             return $this->respond([
                 'success' => true,

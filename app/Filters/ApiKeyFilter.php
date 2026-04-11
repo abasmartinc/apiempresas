@@ -64,34 +64,45 @@ class ApiKeyFilter implements FilterInterface
 
         // 4.1) Resolver suscripción y plan
         $subscriptionId = null;
-        $planId = 1;
+        $planId         = 1;
+        $planSlug       = 'free';
 
         try {
             if ($db->tableExists('user_subscriptions')) {
                 $sub = $db->table('user_subscriptions')
-                    ->select('id AS subscription_id, plan_id, status')
-                    ->where('user_id', (int)$row->user_id)
-                    ->where('status', 'active')
-                    ->orderBy('id', 'DESC')
+                    ->select('user_subscriptions.id AS subscription_id, user_subscriptions.plan_id, user_subscriptions.status, user_subscriptions.current_period_end, api_plans.slug as plan_slug')
+                    ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id')
+                    ->where('user_subscriptions.user_id', (int)$row->user_id)
+                    ->where('user_subscriptions.status', 'active')
+                    ->orderBy('user_subscriptions.id', 'DESC')
                     ->get()
                     ->getRow();
 
                 if ($sub) {
-                    $subscriptionId = (int)$sub->subscription_id;
-                    $planId = (int)$sub->plan_id;
+                    $now = date('Y-m-d H:i:s');
+                    // Perpetual Free Plan: If slug is 'free', it never expires.
+                    // For others, we check the date.
+                    if ($sub->plan_slug === 'free' || $sub->current_period_end > $now) {
+                        $subscriptionId = (int)$sub->subscription_id;
+                        $planId         = (int)$sub->plan_id;
+                        $planSlug       = $sub->plan_slug;
+                    }
                 }
             } elseif ($db->tableExists('usersuscriptions')) {
                 $sub = $db->table('usersuscriptions')
-                    ->select('id AS subscription_id, plan_id, status')
-                    ->where('user_id', (int)$row->user_id)
-                    ->where('status', 'active')
-                    ->orderBy('id', 'DESC')
+                    ->select('usersuscriptions.id AS subscription_id, usersuscriptions.plan_id, usersuscriptions.status, api_plans.slug as plan_slug')
+                    ->join('api_plans', 'api_plans.id = usersuscriptions.plan_id')
+                    ->where('usersuscriptions.user_id', (int)$row->user_id)
+                    ->where('usersuscriptions.status', 'active')
+                    ->orderBy('usersuscriptions.id', 'DESC')
                     ->get()
                     ->getRow();
 
                 if ($sub) {
+                    // For the legacy/fallback table, we just assume active means valid if found
                     $subscriptionId = (int)$sub->subscription_id;
-                    $planId = (int)$sub->plan_id;
+                    $planId         = (int)$sub->plan_id;
+                    $planSlug       = $sub->plan_slug;
                 }
             }
         } catch (\Throwable $e) {
@@ -138,19 +149,20 @@ class ApiKeyFilter implements FilterInterface
             log_message('error', '[ApiKeyFilter::before:limit_check] ' . $e->getMessage());
         }
 
-        // 4.3) Resolver slug del plan
-        $planSlug = 'free';
-        try {
-            $planRow = $db->table('api_plans')
-                ->select('slug')
-                ->where('id', (int)$planId)
-                ->get()
-                ->getRow();
-            if ($planRow) {
-                $planSlug = $planRow->slug;
+        // 4.3) Resolver slug del plan (if not already resolved in step 4.1)
+        if ($planId !== 1 && $planSlug === 'free') {
+            try {
+                $planRow = $db->table('api_plans')
+                    ->select('slug')
+                    ->where('id', (int)$planId)
+                    ->get()
+                    ->getRow();
+                if ($planRow) {
+                    $planSlug = $planRow->slug;
+                }
+            } catch (\Throwable $e) {
+                log_message('error', '[ApiKeyFilter::before:plan_slug] ' . $e->getMessage());
             }
-        } catch (\Throwable $e) {
-            log_message('error', '[ApiKeyFilter::before:plan_slug] ' . $e->getMessage());
         }
 
         // Capture search term

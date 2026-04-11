@@ -317,7 +317,7 @@ class CompanyModel extends Model
 
         $tokens = [];
         foreach ($parts as $p) {
-            if (strlen($p) >= 3)
+            if (mb_strlen($p, 'UTF-8') >= 2)
                 $tokens[] = $p;
         }
         if (empty($tokens)) {
@@ -327,7 +327,12 @@ class CompanyModel extends Model
         // "+token*" => requerido y prefijo
         $out = [];
         foreach (array_slice($tokens, 0, 6) as $t) {
-            $out[] = '+' . $t . '*';
+            $len = mb_strlen($t, 'UTF-8');
+            if ($len >= 4) {
+               $out[] = '+' . $t . '*';
+            } else {
+               $out[] = $t . '*'; // Not required if short/stopword
+            }
         }
         return implode(' ', $out);
     }
@@ -435,8 +440,11 @@ class CompanyModel extends Model
             $parts = array_filter(explode(' ', $cleanTerm));
             $booleanTerm = '';
             foreach ($parts as $p) {
-                if (mb_strlen($p) >= 3) {
+                $len = mb_strlen($p, 'UTF-8');
+                if ($len >= 4) {
                     $booleanTerm .= '+' . $p . '* ';
+                } elseif ($len >= 2) {
+                    $booleanTerm .= $p . '* ';
                 }
             }
             $booleanTerm = trim($booleanTerm);
@@ -476,7 +484,7 @@ class CompanyModel extends Model
             $builderFallback->select(implode(', ', $this->selectFields));
             $builderFallback->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
             $builderFallback->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
-            $builderFallback->like('companies.company_name', $term, 'after');
+            $builderFallback->like('companies.company_name', $term, 'both');
 
             if (!empty($seenCifs)) {
                 $builderFallback->whereNotIn('companies.cif', array_keys($seenCifs));

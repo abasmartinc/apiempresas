@@ -2,107 +2,190 @@
 	"info": {
 		"_postman_id": "8c5e2a1b-7d3a-4f5a-9e2c-1b2a3d4f5g6h",
 		"name": "APIEmpresas.es - API V1",
-		"description": "Colección de peticiones para la API de APIEmpresas.es. Permite consultar datos de empresas por CIF y realizar búsquedas por nombre.",
+		"description": "Colección completa de la API de APIEmpresas.es. Datos mercantiles, scoring comercial, señales BORME, Radar de empresas y Webhooks.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Consulta por CIF",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "X-API-KEY",
-						"value": "{{API_KEY}}",
-						"description": "Tu clave de API obtenida en el panel",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "https://apiempresas.es/api/v1/companies?cif=B12345678",
-					"protocol": "https",
-					"host": [
-						"apiempresas",
-						"es"
-					],
-					"path": [
-						"api",
-						"v1",
-						"companies"
-					],
-					"query": [
-						{
-							"key": "cif",
-							"value": "B12345678"
+			"name": "Core",
+			"item": [
+				{
+					"name": "Consulta por CIF",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" },
+							{ "key": "Accept", "value": "application/json", "type": "text" }
+						],
+						"url": {
+							"raw": "https://apiempresas.es/api/v1/companies?cif=B12345678",
+							"protocol": "https",
+							"host": ["apiempresas", "es"],
+							"path": ["api", "v1", "companies"],
+							"query": [
+								{ "key": "cif", "value": "B12345678" }
+							]
 						}
-					]
+					}
+				},
+				{
+					"name": "Búsqueda por Nombre",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" },
+							{ "key": "Accept", "value": "application/json", "type": "text" }
+						],
+						"url": {
+							"raw": "https://apiempresas.es/api/v1/companies/search?q=Telefónica",
+							"protocol": "https",
+							"host": ["apiempresas", "es"],
+							"path": ["api", "v1", "companies", "search"],
+							"query": [
+								{ "key": "q", "value": "Telefónica" }
+							]
+						}
+					}
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "Búsqueda por Nombre",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "X-API-KEY",
-						"value": "{{API_KEY}}",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "https://apiempresas.es/api/v1/companies/search?name=Telefónica",
-					"protocol": "https",
-					"host": [
-						"apiempresas",
-						"es"
-					],
-					"path": [
-						"api",
-						"v1",
-						"companies",
-						"search"
-					],
-					"query": [
-						{
-							"key": "name",
-							"value": "Telefónica"
+			"name": "Enriquecimiento (Pro / Business)",
+			"item": [
+				{
+					"name": "Score Comercial",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
+						],
+						"url": {
+							"raw": "https://apiempresas.es/api/v1/companies/score?cif=B12345678",
+							"protocol": "https",
+							"host": ["apiempresas", "es"],
+							"path": ["api", "v1", "companies", "score"],
+							"query": [
+								{ "key": "cif", "value": "B12345678" }
+							]
 						}
-					]
+					}
+				},
+				{
+					"name": "Señales Societarias",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
+						],
+						"url": {
+							"raw": "https://apiempresas.es/api/v1/companies/signals?cif=B12345678",
+							"protocol": "https",
+							"host": ["apiempresas", "es"],
+							"path": ["api", "v1", "companies", "signals"],
+							"query": [
+								{ "key": "cif", "value": "B12345678" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Insights IA",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
+						],
+						"url": {
+							"raw": "https://apiempresas.es/api/v1/companies/insights?cif=B12345678",
+							"protocol": "https",
+							"host": ["apiempresas", "es"],
+							"path": ["api", "v1", "companies", "insights"],
+							"query": [
+								{ "key": "cif", "value": "B12345678" }
+							]
+						}
+					}
 				}
-			},
-			"response": []
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
+			]
 		},
 		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
+			"name": "Radar",
+			"item": [
+				{
+					"name": "Listado de nuevas empresas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
+						],
+						"url": {
+							"raw": "https://apiempresas.es/api/v1/companies/radar?province=MADRID&range=7",
+							"protocol": "https",
+							"host": ["apiempresas", "es"],
+							"path": ["api", "v1", "companies", "radar"],
+							"query": [
+								{ "key": "province", "value": "MADRID" },
+								{ "key": "range", "value": "7" }
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Webhooks (Business)",
+			"item": [
+				{
+					"name": "Listar Webhooks",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
+						],
+						"url": {
+							"raw": "https://apiempresas.es/api/v1/webhooks",
+							"protocol": "https",
+							"host": ["apiempresas", "es"],
+							"path": ["api", "v1", "webhooks"]
+						}
+					}
+				},
+				{
+					"name": "Crear Webhook",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"url\": \"https://tu-dominio.com/webhook\",\n  \"event\": \"company_created\"\n}"
+						},
+						"url": {
+							"raw": "https://apiempresas.es/api/v1/webhooks",
+							"protocol": "https",
+							"host": ["apiempresas", "es"],
+							"path": ["api", "v1", "webhooks"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar Webhook",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
+						],
+						"url": {
+							"raw": "https://apiempresas.es/api/v1/webhooks/123",
+							"protocol": "https",
+							"host": ["apiempresas", "es"],
+							"path": ["api", "v1", "webhooks", "123"]
+						}
+					}
+				}
+			]
 		}
 	],
 	"variable": [

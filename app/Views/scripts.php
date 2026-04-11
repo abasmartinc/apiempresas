@@ -40,80 +40,74 @@
         }
 
         function renderResult(data) {
+            const jsonOutput = document.getElementById('json-output');
+            const resultContainer = document.getElementById('resultado_container');
+
             if (!data.success) {
-                searchResultContainer.innerHTML = `<div class="card"><p class="muted">${data.message || 'No se han encontrado resultados.'}</p></div>`;
+                searchResultContainer.innerHTML = `
+                    <div class="search-result-card" style="text-align: center; padding: 48px;">
+                        <p style="color: #64748b; font-size: 1.1rem;">${data.message || 'No se han encontrado resultados.'}</p>
+                    </div>`;
+                if (jsonOutput) jsonOutput.textContent = JSON.stringify(data, null, 2);
+                if (resultContainer) resultContainer.style.display = 'block';
                 return;
             }
 
             const company = data.data;
             const jsonPretty = JSON.stringify(data, null, 2);
+            if (jsonOutput) jsonOutput.textContent = jsonPretty;
+
+            const province = company.province || company.provincia || 'España';
+            const status = (company.status || '').toLowerCase() === 'activa' ? 'activa' : 'inactiva';
 
             searchResultContainer.innerHTML = `
-<article class="card company-card" style="margin-top:20px; animation: fadeIn 0.4s ease-out;">
-  <div class="card-head" style="display:flex; justify-content:space-between; align-items:flex-start;">
-    <div style="flex:1">
-      <h2 style="margin:0; font-size:1.4rem; color:var(--primary);">${company.name || 'N/A'}</h2>
-      <div class="meta" style="margin-top:4px">
-        <span class="pill mini-pill">${company.cif || company.nif || 'Sin CIF'}</span>
-      </div>
+<div class="search-result-card">
+  <div class="result-header">
+    <div class="result-title-group">
+      <h2 class="result-company-name">${company.name || 'N/A'}</h2>
+      <span class="result-cif-pill">${company.cif || company.nif || 'Sin CIF'}</span>
     </div>
-    <span class="pill estado--${(company.status || '').toLowerCase() === 'activa' ? 'activa' : 'inactiva'}" style="margin-top:4px;">${company.status || 'N/A'}</span>
+    <span class="status-badge ${status}">${company.status || 'N/A'}</span>
   </div>
 
-  <section style="margin-top:16px;">
-    <dl class="grid-2">
-      <div>
-        <dt>Sector (CNAE)</dt>
-        <dd>${company.cnae || 'N/A'} - ${company.cnae_label || 'Sin sector'}</dd>
-      </div>
-      <div>
-        <dt>Provincia</dt>
-        <dd>${company.province || company.provincia || 'N/A'}</dd>
-      </div>
-      <div>
-        <dt>Fecha de constitución</dt>
-        <dd>${company.founded || 'N/A'}</dd>
-      </div>
-      <div style="grid-column: span 2; margin-top:8px;">
-        <dt>Objeto social</dt>
-        <dd style="font-weight:400; line-height:1.4; color:#334155;">${company.corporate_purpose || 'N/A'}</dd>
-      </div>
-    </dl>
-  </section>
-
-  <div class="company-card__footer">
-    <button type="button" class="btn-json-api">Ver JSON de la API</button>
-    <a href="${BASE_URL}${company.cif || company.nif}" class="btn" style="text-decoration:none;">Ver ficha completa</a>
-  </div>
-
-  <!-- Premium Lead CTA -->
-  <div class="premium-cta-card" style="margin-top:24px; background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); border: 1px solid #e2e8f0; border-radius: 20px; padding: 32px; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(33, 82, 255, 0.05); text-align: left;">
-    <!-- Decorative Glow -->
-    <div style="position: absolute; top: -20px; right: -20px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(33, 82, 255, 0.1) 0%, transparent 70%);"></div>
-    
-    <div style="display: flex; gap: 24px; align-items: center; position: relative; z-index: 1;">
-      <div style="background: #ffffff; color: #2152ff; width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 8px 16px rgba(33, 82, 255, 0.1); border: 1px solid #f1f5f9;">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: pulse_radar_final 2s infinite;"><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-      </div>
-      <div style="flex: 1;">
-        <h3 style="margin: 0 0 8px; font-size: 1.25rem; font-weight: 800; color: #0f172a; line-height: 1.2;">¿Vendes a otras empresas?</h3>
-        <p style="margin: 0; color: #64748b; font-size: 1rem; line-height: 1.5;">Monitorizamos el BORME cada día para entregarte leads cualificados de <strong>${company.province || company.provincia || 'España'}</strong> antes que nadie.</p>
-      </div>
+  <div class="result-info-grid">
+    <div class="info-item">
+      <span class="info-label">Sector (CNAE)</span>
+      <span class="info-value bold">${company.cnae || 'N/A'} - ${company.cnae_label || 'Sin sector'}</span>
     </div>
-    
-    <div style="margin-top: 24px; display: flex; align-items: center; justify-content: center;">
-      <a href="${BASE_URL}leads-empresas-nuevas" class="btn" style="background: linear-gradient(90deg, #2152ff, #12b48a); color: white; border: none !important; font-weight: 700; padding: 16px 36px; border-radius: 14px; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(33, 82, 255, 0.2); text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; display: inline-flex; align-items: center; gap: 10px;"
-         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 28px rgba(33, 82, 255, 0.3)'"
-         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(33, 82, 255, 0.2)'">
-        Descubrir oportunidades en Radar PRO →
-      </a>
+    <div class="info-item">
+      <span class="info-label">Provincia</span>
+      <span class="info-value">${province}</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">Fecha de constitución</span>
+      <span class="info-value">${company.founded || 'N/A'}</span>
     </div>
   </div>
 
-  <pre class="company-card__json is-hidden"><code>${jsonPretty}</code></pre>
-</article>`;
+  <div class="info-item" style="margin-bottom: 32px;">
+    <span class="info-label">Objeto social</span>
+    <span class="info-value" style="font-size: 0.9rem; font-weight: 400;">${company.corporate_purpose || 'N/A'}</span>
+  </div>
+
+  <!-- Radar PRO Integration (Integrated as Insight) -->
+  <div class="radar-insight-nudge">
+    <div class="radar-insight-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+    </div>
+    <div class="radar-insight-content">
+      <h4>Oportunidad comercial detectada</h4>
+      <p>Monitorizamos el BORME para entregarte leads de <strong>${province}</strong> antes que nadie. ¿Quieres ver quién más ha nacido hoy?</p>
+    </div>
+    <a href="${BASE_URL}leads-empresas-nuevas" class="btn-radar-insight">Descubrir en Radar PRO →</a>
+  </div>
+
+  <div class="result-actions">
+    <a href="${BASE_URL}${company.cif || company.nif}" class="btn" style="text-decoration:none; padding: 12px 24px;">Ver ficha completa</a>
+  </div>
+</div>`;
             
-            bindJsonButtons(searchResultContainer);
+            if (resultContainer) resultContainer.style.display = 'block';
         }
 
         function bindJsonButtons(container) {

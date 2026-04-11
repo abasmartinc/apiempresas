@@ -1,4 +1,4 @@
-<header>
+<header class="main-site-header">
         <?php if (session('impersonator_id')): ?>
         <div style="background: #e0f2fe; border-bottom: 1px solid #bae6fd; padding: 10px; text-align: center; color: #0369a1; font-size: 0.9rem; font-weight: 500;">
             👀 Estás viendo el sitio como <strong><?= esc(session('user_name')) ?></strong>.
@@ -133,6 +133,14 @@
             padding-left: var(--container-gutter) !important;
             padding-right: var(--container-gutter) !important;
             margin-inline: auto;
+        }
+
+        /* --- Main Header Container --- */
+        .main-site-header {
+            position: relative;
+            z-index: 10001 !important; /* Higher than any secondary header or hero */
+            background: var(--ae-primary, #133A82);
+            overflow: visible !important; /* Vital for dropdowns */
         }
 
         /* Mobile Toggle Styling */

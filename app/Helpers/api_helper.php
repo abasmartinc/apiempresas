@@ -40,6 +40,11 @@ if (!function_exists('mask_company_data')) {
         // 4. Remove technical fields
         unset($data['lat'], $data['lng']);
 
+        // 5. Mask CIF (Key identifier)
+        if (!empty($data['cif'])) {
+            $data['cif'] = 'B********';
+        }
+
         return $data;
     }
 }

@@ -3,526 +3,406 @@
 
 <head>
     <?= view('partials/head') ?>
-    <style>
-        /* Responsive Fixes for Enterprise & Radar Sections */
-        @media (max-width: 980px) {
-            #custom-integrations .band, #radar-leads .band {
-                padding: 40px 24px !important;
-                border-radius: 20px !important;
-            }
-            
-            #custom-integrations .grid, #radar-leads .grid {
-                grid-template-columns: 1fr !important;
-                gap: 40px !important;
-            }
-
-            #custom-integrations h2, #radar-leads h2 {
-                font-size: 2rem !important;
-            }
-
-            #radar-leads h2 {
-                font-size: 2.2rem !important;
-            }
-
-            /* Custom Integrations list adjustments */
-            #custom-integrations ul {
-                gap: 24px !important;
-                margin-bottom: 32px !important;
-            }
-
-            /* Radar Leads specific adjustments */
-            #radar-leads .grid > div:first-child {
-                padding-right: 0 !important;
-            }
-
-            #radar-leads .grid > div:first-child > div:nth-of-type(1) {
-                grid-template-columns: 1fr !important;
-                gap: 24px !important;
-            }
-
-            #radar-leads .btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            /* Visual/Image adjustments for mobile */
-            #custom-integrations .grid > div:last-child, 
-            #radar-leads .grid > div:last-child {
-                margin-top: 20px;
-            }
-
-            #radar-leads img {
-                max-width: 100% !important;
-            }
-            
-            #radar-leads div[style*="bottom: -8%"] {
-                bottom: -5% !important;
-            }
-        }
-
-        @media (max-width: 480px) {
-            #custom-integrations h2, #radar-leads h2 {
-                font-size: 1.7rem !important;
-            }
-            
-            #radar-leads h2 {
-                font-size: 1.8rem !important;
-            }
-            
-            #custom-integrations .band, #radar-leads .band {
-                padding: 32px 16px !important;
-            }
-        }
-
-        /* Header & Core Responsive Fixes (Extreme Space + Header Air) */
-        @media (max-width: 640px) {
-            /* Fix Container Padding WITHOUT wiping out vertical air */
-            .container {
-                padding-left: 6px !important;
-                padding-right: 6px !important;
-            }
-
-            /* Header specific spacing - More "air" on sides for logo/hamburger */
-            header .nav {
-                padding: 16px 20px !important; 
-            }
-
-            main {
-                margin-top: 10px; /* Air between header and hero */
-            }
-
-            .band {
-                padding: 24px 6px !important;
-                border-radius: 12px !important;
-            }
-
-            .search-section .search-card {
-                padding: 20px 8px !important;
-                border-radius: 12px !important;
-            }
-
-            .search-section h2 {
-                font-size: 1.4rem !important;
-                line-height: 1.25 !important;
-                margin-bottom: 12px !important;
-            }
-
-            .search-row {
-                flex-direction: column !important;
-                gap: 8px !important;
-            }
-
-            .search-row .input {
-                width: 100% !important;
-                font-size: 15px !important;
-                padding: 12px !important;
-            }
-
-            .search-row .btn {
-                width: 100% !important;
-                padding: 15px !important;
-                justify-content: center !important;
-                font-size: 16px !important;
-                line-height: 1.2 !important;
-                text-align: center;
-                height: auto !important;
-            }
-
-            .search-card .muted {
-                font-size: 0.88rem !important;
-                line-height: 1.4 !important;
-            }
-
-            /* Features Section optimization */
-            .feature-row {
-                grid-template-columns: 44px 1fr !important;
-                gap: 12px !important;
-                padding: 14px 0 !important;
-            }
-
-            .feature-row h3 {
-                font-size: 1.1rem !important;
-                margin-bottom: 4px !important;
-            }
-
-            .feature-row p {
-                font-size: 0.92rem !important;
-                line-height: 1.4 !important;
-            }
-
-        }
-
-        /* Help Button & Modal Styles */
-        .ve-help-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-            border-radius: 6px;
-            background: linear-gradient(135deg, #2152ff 0%, #5c7cff 100%);
-            color: #fff;
-            font-size: 11px;
-            font-weight: 800;
-            margin-left: 8px;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            box-shadow: 0 2px 4px rgba(33, 82, 255, 0.2);
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        .ve-help-btn:hover {
-            opacity: 0.9;
-        }
-
-        .ve-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 10000;
-        }
-
-        .ve-modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .ve-modal-content {
-            background: #fff;
-            width: 100%;
-            max-width: 500px;
-            border-radius: 20px;
-            padding: 32px;
-            position: relative;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
-        }
-
-        .ve-modal-overlay.active .ve-modal-content {
-            transform: translateY(0);
-        }
-
-        .ve-modal-close {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: #f1f5f9;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #64748b;
-            transition: all 0.2s;
-        }
-
-        .ve-modal-close:hover {
-            background: #e2e8f0;
-            color: #0f172a;
-        }
-
-        .ve-modal-body h4 {
-            font-size: 1.25rem;
-            margin-bottom: 12px;
-            color: #0f172a;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .ve-modal-body p {
-            color: #475569;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .ve-modal-icon {
-            font-size: 24px;
-        }
-
-        /* View all API button */
-        .ve-api-view-all {
-            display: inline-block;
-            background: linear-gradient(135deg, #2152ff 0%, #5c7cff 100%);
-            color: #fff;
-            padding: 14px 32px;
-            border-radius: 99px;
-            font-weight: 800;
-            font-size: 15px;
-            text-decoration: none;
-            border: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 10px 20px -5px rgba(33, 82, 255, 0.4);
-        }
-
-        .ve-api-view-all:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 30px -8px rgba(33, 82, 255, 0.5);
-            opacity: 1;
-        }
-    </style>
+    <link rel="stylesheet"
+        href="<?= base_url('public/css/home.css?v=' . (file_exists(FCPATH . 'public/css/home.css') ? filemtime(FCPATH . 'public/css/home.css') : time())) ?>" />
 </head>
 
-<body><div class="bg-halo" aria-hidden="true"></div><?= view('partials/header', [], ['debug' => false]) ?>
+<body>
+    <div class="bg-halo" aria-hidden="true"></div><?= view('partials/header', [], ['debug' => false]) ?>
 
     <main>
-        <!-- HERO -->
-        <section class="hero container" id="inicio">
-            <div class="grid">
-                <div>
-                    <span class="pill top">Datos oficiales · Valida CIF/NIF · API REST + Buscador</span>
 
-                    <h1 class="title">
-                        <a href="<?= site_url() ?>autocompletado-cif-empresas" class="pill"
-                            style="margin-bottom:15px; background:rgba(33,82,255,0.1); border-color:rgba(33,82,255,0.2); text-decoration:none;">
-                            <span class="dot"></span> Nuevo: Autocompletado Predictivo Inteligente
-                        </a><br>
-                        Valida un CIF y verifica una empresa española en segundos
-                        <span class="grad">con datos oficiales y trazables</span>.
-                    </h1>
+        <!-- HERO DUAL -->
+        <section class="hero-dual container" id="inicio">
+            <span class="eyebrow">Datos oficiales de empresas en tiempo real</span>
+            <h1 class="title">
+                Valida CIF, verifica empresas y <span class="grad">convierte datos en oportunidades</span>
+            </h1>
+            <p class="subheadline">
+                Accede a datos oficiales, scoring y señales de negocio directamente desde fuentes oficiales. La
+                infraestructura definitiva para productos que escalan.
+            </p>
 
-                    <p class="subtitle">
-                        <strong>Comprueba CIF, razón social y estado</strong> con información de
-                        <strong>BOE/BORME, AEAT, INE y VIES</strong>.
-                        Integra la verificación en tus flujos de <strong>KYB/KYC</strong>, onboarding,
-                        facturación y scoring con una <strong>API REST</strong> lista para producción.
-                    </p>
-
-                    <div class="cta-row">
-                        <a class="btn btn_start" href="<?= site_url('register') ?>">Crear cuenta y obtener API Key
-                            (gratis)</a>
-                        <a class="btn ghost" href="<?= site_url() ?>documentation">Ver documentación
-                            (OpenAPI/Swagger)</a>
+            <div class="dual-grid">
+                <!-- API CARD -->
+                <div class="dual-card api-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="16 18 22 12 16 6"></polyline>
+                                <polyline points="8 6 2 12 8 18"></polyline>
+                            </svg>
+                        </div>
+                        <div class="card-tags">
+                            <span class="card-tag">REST API</span>
+                            <span class="card-tag">JSON</span>
+                            <span class="card-tag">Ready to scale</span>
+                        </div>
                     </div>
-
-                    <p class="muted" style="margin-top:10px;font-size:13px;">
-                        Para SaaS, ERPs, CRMs y fintech que necesitan validar CIF y evitar altas con datos erróneos
-                        antes de facturar.
-                    </p>
+                    <h3>API Empresas</h3>
+                    <p>Integra validación de CIF, datos oficiales y scoring en minutos con una infraestructura latente y
+                        segura.</p>
+                    <a class="btn" href="<?= site_url('api-empresas') ?>">Ver las capacidades de la API →</a>
                 </div>
 
-                <div class="code-card" aria-label="Ejemplo de respuesta">
-                    <div class="code-top">
-                        <span>GET /api/v1/companies?cif=B12345678</span>
-                        <span class="muted">200 OK • 142 ms</span>
+                <!-- RADAR CARD -->
+                <div class="dual-card radar-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 2v4"></path>
+                                <path d="M12 18v4"></path>
+                                <path d="M4.93 4.93l2.83 2.83"></path>
+                                <path d="M16.24 16.24l2.83 2.83"></path>
+                                <path d="M2 12h4"></path>
+                                <path d="M18 12h4"></path>
+                                <path d="M4.93 19.07l2.83-2.83"></path>
+                                <path d="M16.24 7.76l2.83-2.83"></path>
+                            </svg>
+                        </div>
+                        <div class="card-tags">
+                            <span class="card-tag">INTELIGENCIA B2B</span>
+                            <span class="card-tag">IA</span>
+                            <span class="card-tag">Lead scoring</span>
+                        </div>
                     </div>
-                    <pre><code>{
-  <span class="key">"success"</span>: <span class="str">true</span>,
-  <span class="key">"data"</span>: {
-    <span class="key">"name"</span>: <span class="str">"Producciones Martinez SL"</span>,
-    <span class="key">"cif"</span>: <span class="str">"B85438414"</span>,
-    <span class="key">"cnae"</span>: <span class="str">1200</span>,
-    <span class="key">"cnae_label"</span>: <span class="str">"Actividades varias"</span>,
-    <span class="key">"corporate_purpose"</span>: <span class="str">"Fabricación y distribución"</span>,
-    <span class="key">"founded"</span>: <span class="str">"2008-07-02"</span>,
-    <span class="key">"province"</span>: <span class="str">"Madrid"</span>,
-    <span class="key">"status"</span>: <span class="str">"ACTIVA"</span>
-  }
-}</code></pre>
+                    <h3>Radar de Empresas</h3>
+                    <p>Detecta nuevas empresas, prioriza oportunidades y acelera tu prospección B2B antes
+                        que tu competencia.</p>
+                    <a class="btn secondary" href="<?= site_url('leads-empresas-nuevas') ?>">Explorar las ventajas del
+                        Radar →</a>
                 </div>
             </div>
+
+            <div class="cta-row">
+                <a class="btn btn_start" href="<?= site_url('register') ?>">Crear cuenta gratis</a>
+                <a class="btn ghost" href="#buscar">Ver ejemplo en vivo</a>
+            </div>
         </section>
+        <!-- HERO DUAL -->
 
-        <!-- SEARCH -->
+
+        <!-- BUSCADOR -->
         <section id="buscar" class="search-section container">
-            <svg class="hint-arrow-svg hint-arrow-svg--right" viewBox="0 0 220 110" aria-hidden="true">
-                <defs>
-                    <linearGradient id="ve-g" x1="0" y1="0" x2="1" y2="1">
-                        <stop stop-color="#2152FF" />
-                        <stop offset=".65" stop-color="#5C7CFF" />
-                        <stop offset="1" stop-color="#12B48A" />
-                    </linearGradient>
-                </defs>
-                <path class="path" d="M5,75 C60,10 150,10 205,45" fill="none" stroke="url(#ve-g)" stroke-width="5"
-                    stroke-linecap="round" />
-                <path class="arrow" d="M200,38 l15,6 -13,10" fill="none" stroke="url(#ve-g)" stroke-width="5"
-                    stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-
             <div class="search-card">
                 <div>
-                    <h2>Validar CIF online: prueba el buscador (mismo motor que la API)</h2>
+                    <h2>Prueba la API con un CIF real</h2>
                     <p class="muted">
-                        Introduce un <strong>CIF/NIF</strong> o el <strong>nombre de la empresa</strong>.
-                        Verás el resultado en una ficha clara y puedes consultar el <strong>JSON exacto</strong> que
-                        devuelve la API.
+                        Consulta al instante datos oficiales y comprueba cómo respondería la API en un caso real.
                     </p>
                 </div>
 
                 <div class="search-row">
-                    <input class="input" id="q" placeholder="Ej. B12345678 o “Gestiones López”"
+                    <input class="input" id="q" placeholder="Introduce un CIF o razón social"
                         aria-label="Buscar empresa por nombre o CIF" />
-                    <button type="button" class="btn" id="btnBuscar" aria-label="Buscar">Validar CIF / Buscar
-                        empresa</button>
+                    <button type="button" class="btn" id="btnBuscar" aria-label="Buscar">Validar ahora</button>
                 </div>
 
-                <div style="margin-top:12px; display:flex; align-items:center; gap:8px;">
-                    <span class="pill mini-pill" style="font-size:10px; padding:2px 8px;">TIP</span>
-                    <p class="muted" style="font-size:13px; margin:0;">
-                        ¿Buscas más velocidad? Prueba el <a href="<?= site_url() ?>autocompletado-cif-empresas"
-                            style="color:var(--primary); font-weight:700; text-decoration:underline;">Autocompletado
-                            Predictivo Pro</a>.
-                    </p>
+                <p class="muted" style="font-size:13px; margin-top: 12px;">
+                    Datos obtenidos en tiempo real desde fuentes oficiales
+                </p>
+
+                <div id="resultado_container" style="display:none; margin-top: 32px;">
+                    <div class="demo-tabs">
+                        <button class="tab-btn active" data-tab="visual">Ficha de empresa</button>
+                        <button class="tab-btn" data-tab="json">JSON de la API</button>
+                    </div>
+
+                    <div id="tab-visual" class="tab-content active">
+                        <div id="resultado"></div>
+                    </div>
+
+                    <div id="tab-json" class="tab-content">
+                        <div class="code-card">
+                            <pre><code id="json-output"></code></pre>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </section>
+        <!-- BUSCADOR -->
 
-                <div id="resultado" class="result"></div>
+        <!-- DOS FORMAS DE CRECER -->
+        <section class="container growth-section">
+            <div class="band">
+                <h3 class="section-heading">Una única plataforma, <span
+                        style="background: linear-gradient(90deg, #2152ff, #12b48a); -webkit-background-clip: text; background-clip: text; color: transparent;">dos
+                        formas de crecer</span></h3>
+                <p class="section-subheading">
+                    Integra datos oficiales en tu producto o utilízalos para acelerar tu prospección comercial con una
+                    misma infraestructura.
+                </p>
 
-                <div id="resultado" class="result"></div>
+                <div class="growth-grid">
+                    <!-- API COLUMN -->
+                    <div class="path-column growth-api">
+                        <div class="growth-card-top">
+                            <div class="growth-card-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="16 18 22 12 16 6"></polyline>
+                                    <polyline points="8 6 2 12 8 18"></polyline>
+                                </svg>
+                            </div>
+                            <h3 class="growth-card-title">Para tu producto</h3>
+                        </div>
 
-                <p class="muted">
-                    ¿Vas a automatizarlo en tu producto?
-                    <a href="<?= site_url('register') ?>">Crea tu cuenta y copia tu API Key</a> para integrar la validación
-                    en minutos.
+                        <p class="growth-card-lead">
+                            Automatiza validaciones, enriquece registros y lleva datos oficiales directamente a tu CRM,
+                            ERP o SaaS.
+                        </p>
+
+                        <div class="growth-feature-list">
+                            <div class="feature-item">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2152ff"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span><strong>Validación automática</strong> de CIF en formularios y onboarding</span>
+                            </div>
+
+                            <div class="feature-item">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2152ff"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span><strong>Enriquecimiento en tiempo real</strong> con datos oficiales de
+                                    empresa</span>
+                            </div>
+
+                            <div class="feature-item">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2152ff"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span><strong>Scoring e insights</strong> para riesgos, validación y
+                                    automatización</span>
+                            </div>
+                        </div>
+
+                        <a href="<?= site_url() ?>documentation" class="btn">Explorar API REST →</a>
+                    </div>
+
+                    <!-- RADAR COLUMN -->
+                    <div class="path-column growth-radar">
+                        <div class="growth-card-top">
+                            <div class="growth-card-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M12 2v4"></path>
+                                    <path d="M12 18v4"></path>
+                                </svg>
+                            </div>
+                            <h3 class="growth-card-title">Para tu equipo comercial</h3>
+                        </div>
+
+                        <p class="growth-card-lead">
+                            Detecta nuevas empresas cada día, prioriza oportunidades por scoring y acelera tu
+                            prospección B2B.
+                        </p>
+
+                        <div class="growth-feature-list">
+                            <div class="feature-item">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12b48a"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span><strong>Detección diaria</strong> de nuevas constituciones</span>
+                            </div>
+
+                            <div class="feature-item">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12b48a"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span><strong>Filtrado avanzado</strong> por sector, provincia y oportunidad</span>
+                            </div>
+
+                            <div class="feature-item">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12b48a"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span><strong>Exportación directa</strong> a CSV/Excel para tu flujo comercial</span>
+                            </div>
+                        </div>
+
+                        <a href="<?= site_url('leads-empresas-nuevas') ?>" class="btn secondary">Explorar Radar B2B
+                            →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- DOS FORMAS DE CRECER -->
+
+
+        <!-- DECISIONES REALES -->
+        <section class="container decisions-section">
+            <div>
+                <h3 style="margin-top:0;" class="section-heading">Convierte datos en <span
+                        style="background: linear-gradient(90deg, #2152ff, #12b48a); -webkit-background-clip: text; background-clip: text; color: transparent;">decisiones
+                        reales</span></h3>
+                <p class="section-subheading">
+                    No se trata solo de consultar información. Se trata de usarla para automatizar procesos, reducir
+                    fricción y mejorar resultados.
                 </p>
             </div>
-        </section>
 
-        <!-- FEATURES -->
-        <section id="caracteristicas" class="container">
-            <div class="band">
-                <span class="eyebrow">Fuentes oficiales y trazabilidad</span>
-                <h2>Datos listos para producción: valida CIF, razón social y estado de empresa</h2>
-
-                <div class="features-stripe">
-                    <!-- LEFT -->
-                    <div class="feature-left">
-                        <div class="feature-hero">
-                            <h3 style="margin:0 0 6px; font-weight:800;">Fiables y rápidos para verificación de empresas
-                            </h3>
-                            <p class="muted" style="margin:0; color:#cdd6ea">
-                                Origen BOE/BORME, AEAT, INE y VIES. Respuestas rápidas con caché inteligente y
-                                referencia a la fuente para trazabilidad y auditoría.
-                            </p>
-                        </div>
-
-                        <div class="ve-stat-strip" role="group" aria-label="Métricas del servicio">
-                            <div class="ve-stat">
-                                <span class="ve-stat__label">Latencia media</span>
-                                <span class="ve-stat__value">~142 ms</span>
-                            </div>
-
-                            <span class="ve-stat__divider" aria-hidden="true"></span>
-
-                            <div class="ve-stat">
-                                <span class="ve-stat__label">Uptime objetivo</span>
-                                <span class="ve-stat__value">99,9 %</span>
-                            </div>
-
-                            <span class="ve-stat__divider" aria-hidden="true"></span>
-
-                            <div class="ve-stat">
-                                <span class="ve-stat__label">Fuentes oficiales</span>
-                                <span class="ve-stat__value ve-wrap" style="font-size: 14px;line-height: 20px;">
-                                    BOE/BORME · AEAT · INE · VIES
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="ve-stat ve-stat--sources">
-                            <span class="ve-stat__label">Fuentes oficiales</span>
-                            <div class="ve-sources-inline">
-                                <span class="chip">BOE/BORME</span>
-                                <span class="chip">AEAT</span>
-                                <span class="chip">INE</span>
-                                <span class="chip">VIES (UE)</span>
-                            </div>
-                        </div>
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
                     </div>
-
-                    <!-- RIGHT -->
-                    <div class="feature-rows">
-                        <div class="feature-row">
-                            <div class="feat-badge feat-badge--bolt">⚡</div>
-                            <div>
-                                <h3>Pensada para developers</h3>
-                                <p>
-                                    JSON limpio y normalizado (CIF, razón social, CNAE, estado, domicilio) con ejemplos
-                                    listos en
-                                    PHP/Laravel, Node, Python y cURL.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="feature-row">
-                            <div class="feat-badge feat-badge--check">✔︎</div>
-                            <div>
-                                <h3>Validación y control de calidad</h3>
-                                <p>
-                                    Reduce errores en altas y facturación: valida CIF y verifica datos clave para evitar
-                                    registros duplicados o con información incorrecta.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="feature-row">
-                            <div class="feat-badge feat-badge--api">API</div>
-                            <div>
-                                <h3>Listo para producción</h3>
-                                <p>
-                                    Endpoint REST unificado, rate-limits, logs de actividad y versiones estables para
-                                    mantener integraciones robustas.
-                                </p>
-                            </div>
-                        </div>
+                    <div class="benefit-copy">
+                        <h4>Valida empresas automáticamente</h4>
+                        <p>Evita errores en onboarding, facturación o alta de proveedores verificando datos oficiales en
+                            segundos.</p>
                     </div>
                 </div>
 
-            </div>
-        </section>
-
-        <!-- AUDIENCES -->
-        <section class="audiences container">
-            <div class="band">
-                <span class="eyebrow">Casos de uso</span>
-                <h2>Automatiza la verificación de empresas por CIF en tu producto</h2>
-                <br />
-
-                <div class="audience-lines">
-                    <div class="aud-line dev">
-                        <h3>Developers & SaaS</h3>
-                        <p>
-                            Evita registros con datos erróneos: valida CIF en formularios de alta, billing y paneles
-                            internos.
-                            Integra en minutos y automatiza el onboarding.
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                            </polygon>
+                        </svg>
+                    </div>
+                    <div class="benefit-copy">
+                        <h4>Enriquece tus datos sin esfuerzo</h4>
+                        <p>Completa registros con información oficial y mantén tu CRM o base de datos más limpia y útil.
                         </p>
                     </div>
+                </div>
 
-                    <div class="aud-line gest">
-                        <h3>ERPs, CRMs y automatización</h3>
-                        <p>
-                            Enriquecimiento de fichas, deduplicación y validación previa a facturar:
-                            consulta empresa por CIF y normaliza datos para conciliación.
-                        </p>
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="20" x2="12" y2="10"></line>
+                            <line x1="18" y1="20" x2="18" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="16"></line>
+                        </svg>
                     </div>
+                    <div class="benefit-copy">
+                        <h4>Prioriza mejor tus leads</h4>
+                        <p>Apóyate en scoring y señales para centrarte antes en las empresas con mayor potencial
+                            comercial.</p>
+                    </div>
+                </div>
 
-                    <div class="aud-line fin">
-                        <h3>Fintech, marketplaces y plataformas B2B</h3>
-                        <p>
-                            Automatiza KYB/KYC, reduce fraude en altas y guarda evidencia trazable con referencia a
-                            fuentes oficiales.
-                        </p>
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            <line x1="11" y1="8" x2="11" y2="14"></line>
+                            <line x1="8" y1="11" x2="14" y2="11"></line>
+                        </svg>
+                    </div>
+                    <div class="benefit-copy">
+                        <h4>Detecta oportunidades antes</h4>
+                        <p>Accede a nuevas empresas en cuanto aparecen y gana velocidad comercial frente a tu
+                            competencia.</p>
                     </div>
                 </div>
             </div>
         </section>
+        <!-- DECISIONES REALES -->
+
+
+        <!-- USE CASES -->
+        <section class="container usecases-section" id="casos-uso">
+            <div>
+                <h3 class="section-heading">Qué puedes hacer con nuestra plataforma</h3>
+                <p class="section-subheading">
+                    Casos de uso reales para automatizar procesos, mejorar datos y acelerar tu crecimiento comercial.
+                </p>
+
+                <div class="usecases-grid">
+                    <!-- API -->
+                    <div class="usecase-card usecase-api">
+                        <div class="usecase-header">
+                            <div class="usecase-icon">API</div>
+                            <h3 class="usecase-title">Con la API de Empresas</h3>
+                        </div>
+
+                        <p class="usecase-lead">
+                            Lleva validación, enriquecimiento y verificación oficial directamente a tus flujos internos.
+                        </p>
+
+                        <div class="usecase-list">
+                            <div class="usecase-item">
+                                <div class="usecase-dot"></div>
+                                <span>Validar CIF en formularios y procesos de onboarding</span>
+                            </div>
+
+                            <div class="usecase-item">
+                                <div class="usecase-dot"></div>
+                                <span>Enriquecer leads automáticamente dentro de tu CRM</span>
+                            </div>
+
+                            <div class="usecase-item">
+                                <div class="usecase-dot"></div>
+                                <span>Normalizar bases de datos de clientes y proveedores</span>
+                            </div>
+
+                            <div class="usecase-item">
+                                <div class="usecase-dot"></div>
+                                <span>Verificar empresas antes de operar o facturar</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RADAR -->
+                    <div class="usecase-card usecase-radar">
+                        <div class="usecase-header">
+                            <div class="usecase-icon">RDE</div>
+                            <h3 class="usecase-title">Con el Radar de Empresas</h3>
+                        </div>
+
+                        <p class="usecase-lead">
+                            Descubre oportunidades nuevas, filtra mejor y llega antes a las empresas que te interesan.
+                        </p>
+
+                        <div class="usecase-list">
+                            <div class="usecase-item">
+                                <div class="usecase-dot"></div>
+                                <span>Detectar nuevas empresas antes que la competencia</span>
+                            </div>
+
+                            <div class="usecase-item">
+                                <div class="usecase-dot"></div>
+                                <span>Priorizar leads por scoring y señales de negocio</span>
+                            </div>
+
+                            <div class="usecase-item">
+                                <div class="usecase-dot"></div>
+                                <span>Segmentar oportunidades por provincia, sector o actividad</span>
+                            </div>
+
+                            <div class="usecase-item">
+                                <div class="usecase-dot"></div>
+                                <span>Preparar mejor la prospección y el primer contacto comercial</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
 
         <!-- CUSTOM INTEGRATIONS -->
-        <section id="custom-integrations" class="container" style="margin-top: 40px; margin-bottom: 40px;">
+        <section id="custom-integrations" class="container" style="margin-top: 0px; margin-bottom: 20px;">
             <div class="band"
                 style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 24px; padding: 60px 40px; color: #0f172a; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05); border: 1px solid #e2e8f0;">
 
@@ -652,38 +532,41 @@
             </div>
         </section>
 
-        <!-- HOW -->
-        <section class="how container">
-            <h2>Empieza en menos de 5 minutos</h2>
+        <!-- INTEGRATION -->
+        <section id="integracion" class="container" style="margin-top: 20px;">
+            <div class="band">
+                <span class="eyebrow">Developers First</span>
+                <h2>Integra en minutos, escala sin límites</h2>
+                <p class="muted" style="font-size: 1.1rem; margin-bottom: 40px;">Una API REST simple, rápida y preparada
+                    para producción desde el primer día.</p>
 
-            <div class="steps">
-                <div class="card">
-                    <span class="pill mini-pill">1</span>
-                    <h3>Crea tu cuenta</h3>
-                    <p>Regístrate y obtén al instante tu <strong>API Key gratuita</strong> para entorno de pruebas.</p>
+                <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 24px; text-align: center;">
+                    <div class="card">
+                        <div style="font-size: 2rem; margin-bottom: 12px;">{ }</div>
+                        <h4>JSON REST</h4>
+                        <p class="muted" style="font-size: 0.9rem;">Formato estándar y predecible.</p>
+                    </div>
+                    <div class="card">
+                        <div style="font-size: 2rem; margin-bottom: 12px;">⚡</div>
+                        <h4>Milisegundos</h4>
+                        <p class="muted" style="font-size: 0.9rem;">Respuestas ultra rápidas.</p>
+                    </div>
+                    <div class="card">
+                        <div style="font-size: 2rem; margin-bottom: 12px;">📑</div>
+                        <h4>Docs Claras</h4>
+                        <p class="muted" style="font-size: 0.9rem;">OpenAPI / Swagger.</p>
+                    </div>
+                    <div class="card">
+                        <div style="font-size: 2rem; margin-bottom: 12px;">🚀</div>
+                        <h4>Escalable</h4>
+                        <p class="muted" style="font-size: 0.9rem;">Preparado para alto volumen.</p>
+                    </div>
                 </div>
 
-                <div class="card">
-                    <span class="pill mini-pill">2</span>
-                    <h3>Conecta la API</h3>
-                    <p>
-                        Llama al endpoint REST desde tu backend o frontend.
-                        Ejemplos en PHP/Laravel, Node, Python y cURL listos para copiar.
-                    </p>
-                </div>
-
-                <div class="card">
-                    <span class="pill mini-pill">3</span>
-                    <h3>Escala cuando lo necesites</h3>
-                    <p>
-                        Pasa del plan gratuito a Pro o Business cuando tu volumen de verificaciones crezca.
-                        Sin permanencias ni costes ocultos.
-                    </p>
+                <div style="text-align: center; margin-top: 48px;">
+                    <a href="<?= site_url() ?>documentation" class="btn">Ver documentación</a>
                 </div>
             </div>
-
-            <br />
-            <br />
         </section>
 
         <!-- PRICING -->
@@ -696,67 +579,59 @@
             </p>
 
             <div class="tiers">
-                <!-- PLAN FREE -->
-                <div class="tier">
-                    <span class="badge">Sandbox</span>
+                <div class="tier free-plan">
+                    <span class="badge">Testing</span>
                     <h3>Free</h3>
-                    <p class="muted">Prueba la API con datos reales y valida resultados en un entorno de pruebas.</p>
-                    <div class="price">0 €</div>
+                    <p class="tier-subtitle">Para probar la API</p>
+                    <p class="tier-desc">
+                        Prueba la API con datos reales y valida resultados antes de pasar a producción.
+                    </p>
+                    <div class="price">0 € <small>/mes</small></div>
 
                     <ul class="tier__list">
-                        <li><strong>100</strong> consultas / mes</li>
-                        <li>Acceso al mismo motor de producción</li>
-                        <li>Datos oficiales para validar resultados</li>
-                        <li>Perfecto para pruebas técnicas y POCs</li>
+                        <li><strong>100</strong> consultas al mes</li>
+                        <li>Acceso al mismo motor de validación</li>
+                        <li>Datos oficiales para comprobar resultados</li>
                         <li>Sin tarjeta de crédito</li>
                     </ul>
-
-                    <p class="tier__note muted">
-                        Pensado para desarrollo y validación. No recomendado para uso en producción.
-                    </p>
 
                     <a class="btn secondary" href="<?= site_url('register?plan=free') ?>">Empezar gratis</a>
                 </div>
 
-                <!-- PLAN PRO -->
-                <div class="tier">
-                    <span class="badge">Recomendado</span>
+                <div class="tier featured">
+                    <span class="badge">Más elegido</span>
                     <h3>Pro</h3>
-                    <p class="muted">El plan estándar para SaaS, ERPs y productos en producción.</p>
-                    <div class="price">19 €/mes</div>
+                    <p class="tier-subtitle">Para automatizar validaciones</p>
+                    <p class="tier-desc">
+                        La opción ideal para SaaS, ERPs y productos que ya necesitan validación en producción.
+                    </p>
+                    <div class="price">19 € <small>/mes</small></div>
 
                     <ul class="tier__list">
-                        <li><strong>3.000</strong> consultas / mes</li>
+                        <li><strong>3.000</strong> consultas al mes</li>
                         <li>Verificación completa y actualizada</li>
-                        <li>Tiempo real, lista para automatización</li>
+                        <li>Tiempo real para automatización</li>
                         <li>Ideal para facturación y scoring</li>
-                        <li>Logs y control de consumo</li>
                     </ul>
 
-                    <p class="tier__note muted">
-                        Para automatizar altas y facturación con trazabilidad.
-                    </p>
-
-                    <a class="btn secondary" href="<?= site_url('register') ?>">Empezar con Pro</a>
+                    <a class="btn" href="<?= site_url('register') ?>">Empezar con Pro</a>
                 </div>
 
-                <!-- PLAN BUSINESS -->
-                <div class="tier">
+                <div class="tier business-plan">
+                    <span class="badge">Escala</span>
                     <h3>Business</h3>
-                    <p class="muted">Para plataformas con alto volumen y procesos críticos.</p>
-                    <div class="price">49 €/mes</div>
+                    <p class="tier-subtitle">Para equipos y alto volumen</p>
+                    <p class="tier-desc">
+                        Pensado para plataformas con más carga, procesos críticos y necesidades de mayor disponibilidad.
+                    </p>
+                    <div class="price">49 € <small>/mes</small></div>
 
                     <ul class="tier__list">
-                        <li><strong>10.000</strong> consultas / mes</li>
-                        <li>Infraestructura para cargas elevadas</li>
-                        <li>Para alto volumen y procesos críticos</li>
+                        <li><strong>10.000</strong> consultas al mes</li>
+                        <li>Infraestructura preparada para alta carga</li>
                         <li>SLA y alta disponibilidad</li>
-                        <li>Soporte prioritario y alertas de uso</li>
+                        <li>Soporte prioritario</li>
                     </ul>
-
-                    <p class="tier__note muted">
-                        Pensado para fintech, marketplaces y plataformas críticas.
-                    </p>
 
                     <a class="btn secondary" href="<?= site_url('register') ?>">Empezar con Business</a>
                 </div>
@@ -778,87 +653,134 @@
             </div>
 
             <!-- PLAN COMPARISON TABLE NESTED -->
-            <div style="margin-top: 60px; padding: 20px 0;">
-                <h3 style="text-align: center; margin-bottom: 30px; font-size: 1.3rem; font-weight: 800; color: #1e293b;">Detalle de capacidades por Plan</h3>
-                
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
-                        <thead>
-                            <tr style="border-bottom: 2px solid #e2e8f0;">
-                                <th style="text-align: left; padding: 12px; color: #64748b; font-weight: 600;">Extensión / Endpoint</th>
-                                <th style="text-align: center; padding: 12px; color: #94a3b8; font-weight: 700;">Plan FREE</th>
-                                <th style="text-align: center; padding: 12px; color: #2152ff; font-weight: 700; background: rgba(33, 82, 255, 0.02);">Plan PRO</th>
-                                <th style="text-align: center; padding: 12px; color: #12b48a; font-weight: 700; background: rgba(18, 180, 138, 0.02);">Plan BUSINESS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 16px 12px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; color: #334155;">
-                                    /companies
-                                    <span class="ve-help-btn" onclick="openInfo(event, 'companies')" title="Ver más info">?</span>
-                                </td>
-                                <td style="text-align: center; padding: 12px; color: #12b48a; font-size: 1.1rem;">✔</td>
-                                <td style="text-align: center; padding: 12px; color: #12b48a; font-size: 1.1rem;">✔</td>
-                                <td style="text-align: center; padding: 12px; color: #12b48a; font-size: 1.1rem;">✔</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 16px 12px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; color: #334155;">
-                                    /score
-                                    <span class="ve-help-btn" onclick="openInfo(event, 'score')" title="Ver más info">?</span>
-                                </td>
-                                <td style="text-align: center; padding: 12px; color: #94a3b8; font-size: 0.85rem;">Solo Score</td>
-                                <td style="text-align: center; padding: 12px;"><span style="background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;">Básico</span></td>
-                                <td style="text-align: center; padding: 12px;"><span style="background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;">Avanzado</span></td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 16px 12px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; color: #334155;">
-                                    /signals
-                                    <span class="ve-help-btn" onclick="openInfo(event, 'signals')" title="Ver más info">?</span>
-                                </td>
-                                <td style="text-align: center; padding: 12px; color: #ef4444; font-size: 1.1rem;">❌</td>
-                                <td style="text-align: center; padding: 12px;"><span style="background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;">Básico</span></td>
-                                <td style="text-align: center; padding: 12px;"><span style="background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;">Avanzado</span></td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 16px 12px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; color: #334155;">
-                                    /radar
-                                    <span class="ve-help-btn" onclick="openInfo(event, 'radar')" title="Ver más info">?</span>
-                                </td>
-                                <td style="text-align: center; padding: 12px; color: #94a3b8; font-size: 0.85rem;">Limitado (10)</td>
-                                <td style="text-align: center; padding: 12px; color: #64748b; font-style: italic; font-size: 0.9rem;">Limitado (100)</td>
-                                <td style="text-align: center; padding: 12px; color: #12b48a; font-weight: 600;">COMPLETO</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 16px 12px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; color: #334155;">
-                                    /insights
-                                    <span class="ve-help-btn" onclick="openInfo(event, 'insights')" title="Ver más info">?</span>
-                                </td>
-                                <td style="text-align: center; padding: 12px; color: #ef4444; font-size: 1.1rem;">❌</td>
-                                <td style="text-align: center; padding: 12px; color: #94a3b8; font-size: 0.85rem;">Solo Perfil</td>
-                                <td style="text-align: center; padding: 12px; color: #12b48a; font-size: 1.1rem;">✔</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 16px 12px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; color: #334155;">
-                                    /contact-prep
-                                    <span class="ve-help-btn" onclick="openInfo(event, 'contact-prep')" title="Ver más info">?</span>
-                                </td>
-                                <td style="text-align: center; padding: 12px; color: #ef4444; font-size: 1.1rem;">❌</td>
-                                <td style="text-align: center; padding: 12px; color: #ef4444; font-size: 1.1rem;">❌</td>
-                                <td style="text-align: center; padding: 12px; color: #12b48a; font-size: 1.1rem;">✔</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 16px 12px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; color: #334155;">
-                                    /webhooks
-                                    <span class="ve-help-btn" onclick="openInfo(event, 'webhooks')" title="Ver más info">?</span>
-                                </td>
-                                <td style="text-align: center; padding: 12px; color: #ef4444; font-size: 1.1rem;">❌</td>
-                                <td style="text-align: center; padding: 12px; color: #ef4444; font-size: 1.1rem;">❌</td>
-                                <td style="text-align: center; padding: 12px; color: #12b48a; font-size: 1.1rem;">✔</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                    <div style="text-align: center; margin-top: 32px; padding-bottom: 20px;">
+            <div class="capabilities-wrap">
+                <h3 class="capabilities-title">Detalle de capacidades por Plan</h3>
+
+                <div class="capabilities-card">
+                    <div class="capabilities-scroll">
+                        <table class="capabilities-table">
+                            <thead>
+                                <tr>
+                                    <th>Funcionalidad</th>
+                                    <th>Free</th>
+                                    <th class="cap-featured-col">Pro</th>
+                                    <th>Business</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="cap-col-feature">
+                                            <div class="cap-feature-name">
+                                                <code>/companies</code>
+                                            </div>
+                                            <span class="ve-help-btn" onclick="openInfo(event, 'companies')"
+                                                title="Ver más info">?</span>
+                                        </div>
+                                    </td>
+                                    <td class="cap-center"><span class="cap-check">✓</span></td>
+                                    <td class="cap-center cap-featured-col"><span class="cap-check">✓</span></td>
+                                    <td class="cap-center"><span class="cap-check">✓</span></td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        <div class="cap-col-feature">
+                                            <div class="cap-feature-name">
+                                                <code>/score</code>
+                                            </div>
+                                            <span class="ve-help-btn" onclick="openInfo(event, 'score')"
+                                                title="Ver más info">?</span>
+                                        </div>
+                                    </td>
+                                    <td class="cap-center"><span class="cap-muted">Solo Score</span></td>
+                                    <td class="cap-center cap-featured-col"><span class="cap-pill basic">Básico</span>
+                                    </td>
+                                    <td class="cap-center"><span class="cap-pill advanced">Avanzado</span></td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        <div class="cap-col-feature">
+                                            <div class="cap-feature-name">
+                                                <code>/signals</code>
+                                            </div>
+                                            <span class="ve-help-btn" onclick="openInfo(event, 'signals')"
+                                                title="Ver más info">?</span>
+                                        </div>
+                                    </td>
+                                    <td class="cap-center"><span class="cap-cross">✕</span></td>
+                                    <td class="cap-center cap-featured-col"><span class="cap-pill basic">Básico</span>
+                                    </td>
+                                    <td class="cap-center"><span class="cap-pill advanced">Avanzado</span></td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        <div class="cap-col-feature">
+                                            <div class="cap-feature-name">
+                                                <code>/radar</code>
+                                            </div>
+                                            <span class="ve-help-btn" onclick="openInfo(event, 'radar')"
+                                                title="Ver más info">?</span>
+                                        </div>
+                                    </td>
+                                    <td class="cap-center"><span class="cap-muted">Limitado (10)</span></td>
+                                    <td class="cap-center cap-featured-col"><span class="cap-note">Limitado (100)</span>
+                                    </td>
+                                    <td class="cap-center"><span class="cap-business-strong">COMPLETO</span></td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        <div class="cap-col-feature">
+                                            <div class="cap-feature-name">
+                                                <code>/insights</code>
+                                            </div>
+                                            <span class="ve-help-btn" onclick="openInfo(event, 'insights')"
+                                                title="Ver más info">?</span>
+                                        </div>
+                                    </td>
+                                    <td class="cap-center"><span class="cap-cross">✕</span></td>
+                                    <td class="cap-center cap-featured-col"><span class="cap-muted">Solo Perfil</span>
+                                    </td>
+                                    <td class="cap-center"><span class="cap-check">✓</span></td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        <div class="cap-col-feature">
+                                            <div class="cap-feature-name">
+                                                <code>/contact-prep</code>
+                                            </div>
+                                            <span class="ve-help-btn" onclick="openInfo(event, 'contact-prep')"
+                                                title="Ver más info">?</span>
+                                        </div>
+                                    </td>
+                                    <td class="cap-center"><span class="cap-cross">✕</span></td>
+                                    <td class="cap-center cap-featured-col"><span class="cap-cross">✕</span></td>
+                                    <td class="cap-center"><span class="cap-check">✓</span></td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        <div class="cap-col-feature">
+                                            <div class="cap-feature-name">
+                                                <code>/webhooks</code>
+                                            </div>
+                                            <span class="ve-help-btn" onclick="openInfo(event, 'webhooks')"
+                                                title="Ver más info">?</span>
+                                        </div>
+                                    </td>
+                                    <td class="cap-center"><span class="cap-cross">✕</span></td>
+                                    <td class="cap-center cap-featured-col"><span class="cap-cross">✕</span></td>
+                                    <td class="cap-center"><span class="cap-check">✓</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="cap-link-row">
                         <a href="<?= site_url('api-empresas') ?>" class="ve-api-view-all">
                             Explorar todas las capacidades de la API →
                         </a>
@@ -868,115 +790,97 @@
         </section>
 
         <!-- RADAR SHOWCASE -->
-        <section id="radar-leads" class="container" style="margin-top: 30px; margin-bottom: 30px;">
-            <div class="band"
-                style="background: radial-gradient(circle at 100% 100%, #f0f4ff 0%, #ffffff 40%); border-radius: 32px; padding: 80px 60px; color: #0f172a; position: relative; overflow: hidden; border: none;">
-                
-                <div class="grid radar-leads-grid"
-                    style="grid-template-columns: 1.1fr 0.9fr; gap: 80px; align-items: center; position: relative; z-index: 1;">
+        <section id="radar-leads" class="container radar-conversion">
+            <div class="band">
 
-                    <!-- Content -->
-                    <div style="padding-right: 20px;">
-                        <span class="pill"
-                            style="background: #edf2ff; color: #2152ff; border: none; font-weight: 700; font-size: 0.8rem; padding: 6px 14px; margin-bottom: 24px; display: inline-flex; align-items: center; border-radius: 8px;">
-                            INTELIGENCIA B2B AVANZADA
+                <div class="grid" style="grid-template-columns: 1.1fr 0.9fr; gap: 80px; align-items: center;">
+
+                    <!-- TEXTO -->
+                    <div>
+                        <span class="pill" style="background:#edf2ff;color:#2152ff;font-weight:700;">
+                            INTELIGENCIA B2B REAL
                         </span>
-                        
-                        <h2
-                            style="color: #0f172a; margin-top: 0; margin-bottom: 24px; font-size: 3rem; letter-spacing: -0.03em; font-weight: 800; line-height: 1.1;">
-                            ¿Vendes a otras empresas?<br>
-                            Descubre a tus clientes <span style="color: #2152ff;">antes que nadie</span>
+
+                        <h2 style="margin-top:20px;margin-bottom:20px;">
+                            ¿Vendes a empresas?<br>
+                            <span style="color:#2152ff;">Consigue clientes antes que nadie</span>
                         </h2>
-                        
-                        <p style="color: #64748b; font-size: 1.25rem; line-height: 1.6; margin-bottom: 40px; font-weight: 500;">
-                            Monitorizamos el BORME cada día para entregarte oportunidades de negocio antes de que lleguen a manos de tu competencia.
+
+                        <p style="margin-bottom:32px;">
+                            Detecta nuevas empresas cada día, prioriza por scoring y accede a oportunidades comerciales
+                            antes de que aparezcan en el mercado.
                         </p>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 48px;">
-                            <div style="display: flex; gap: 16px; align-items: flex-start;">
-                                <div style="background: #ffffff; color: #2152ff; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                                </div>
+                        <!-- BENEFICIOS -->
+                        <div class="radar-benefits">
+
+                            <div class="radar-benefit">
+                                <div class="radar-dot"></div>
                                 <div>
-                                    <h4 style="margin: 0 0 2px; font-weight: 750; color: #1e293b; font-size: 1.05rem;">Detección Diaria</h4>
-                                    <p style="margin: 0; color: #94a3b8; font-size: 0.9rem; line-height: 1.4;">Nuevas empresas del día en tiempo real.</p>
-                                </div>
-                            </div>
-                            
-                            <div style="display: flex; gap: 16px; align-items: flex-start;">
-                                <div style="background: #ffffff; color: #12b48a; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                </div>
-                                <div>
-                                    <h4 style="margin: 0 0 2px; font-weight: 750; color: #1e293b; font-size: 1.05rem;">Exportación Directa</h4>
-                                    <p style="margin: 0; color: #94a3b8; font-size: 0.9rem; line-height: 1.4;">Descarga listados filtrados en 1 clic.</p>
+                                    <strong>Nuevas empresas cada día</strong>
+                                    <p>Accede a leads recién creados en España en tiempo real.</p>
                                 </div>
                             </div>
 
-                            <div style="display: flex; gap: 16px; align-items: flex-start;">
-                                <div style="background: #ffffff; color: #d97706; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/><path d="M12 8l4 4-4 4M8 12h7"/></svg>
-                                </div>
+                            <div class="radar-benefit">
+                                <div class="radar-dot"></div>
                                 <div>
-                                    <h4 style="margin: 0 0 2px; font-weight: 750; color: #1e293b; font-size: 1.05rem;">Consejos con IA</h4>
-                                    <p style="margin: 0; color: #94a3b8; font-size: 0.9rem; line-height: 1.4;">Estrategias personalizadas para cada lead.</p>
+                                    <strong>Prioriza con scoring</strong>
+                                    <p>Enfócate solo en empresas con mayor probabilidad de compra.</p>
                                 </div>
                             </div>
 
-                            <div style="display: flex; gap: 16px; align-items: flex-start;">
-                                <div style="background: #ffffff; color: #7c3aed; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                </div>
+                            <div class="radar-benefit">
+                                <div class="radar-dot"></div>
                                 <div>
-                                    <h4 style="margin: 0 0 2px; font-weight: 750; color: #1e293b; font-size: 1.05rem;">Datos Oficiales</h4>
-                                    <p style="margin: 0; color: #94a3b8; font-size: 0.9rem; line-height: 1.4;">Información 100% verificada del BORME.</p>
+                                    <strong>Filtra como quieras</strong>
+                                    <p>Sector, provincia, actividad o tipo de empresa.</p>
                                 </div>
                             </div>
+
+                            <div class="radar-benefit">
+                                <div class="radar-dot"></div>
+                                <div>
+                                    <strong>Exporta y actúa</strong>
+                                    <p>Descarga leads listos para tu CRM en segundos.</p>
+                                </div>
+                            </div>
+
                         </div>
 
-                        <div style="display: flex; gap: 20px;">
-                            <a href="<?= site_url('leads-empresas-nuevas') ?>" class="btn" style="background: #2152ff; color: #ffffff; border: none; font-weight: 700; padding: 18px 36px; border-radius: 16px; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(33, 82, 255, 0.2);">
-                                Ver beneficios del radar
+                        <!-- CTA -->
+                        <div class="radar-cta">
+                            <a href="<?= site_url('leads-empresas-nuevas') ?>" class="btn">
+                                Ver oportunidades ahora →
                             </a>
+
+                            <span class="radar-secondary">
+                                Sin scraping • Datos oficiales • Actualizado diariamente
+                            </span>
                         </div>
+
+                        <!-- METRICS -->
+                        <div class="radar-metrics">
+                            <div class="radar-metric">
+                                +1200
+                                <span>empresas nuevas / día</span>
+                            </div>
+                            <div class="radar-metric">
+                                +4.5M
+                                <span>empresas en base</span>
+                            </div>
+                            <div class="radar-metric">
+                                100%
+                                <span>datos oficiales</span>
+                            </div>
+                        </div>
+
                     </div>
 
-                    <!-- Visual (Seamless Fade) -->
-                    <div style="position: relative; display: flex; justify-content: center; align-items: center;">
-                        <div style="position: relative; z-index: 1; width: 100%; max-width: 520px;">
-                            <img src="<?= base_url('public/img/radar_showcase.png?v=' . time()) ?>" 
-                                 alt="Radar B2B Profesional" 
-                                 style="width: 100%; display: block; -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%); mask-image: radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%); filter: contrast(1.01);">
-                            
-                            <!-- Heartbeat Pulse Dots -->
-                            <div class="radar-pulse" style="position: absolute; top: 40%; left: 35%; width: 8px; height: 8px; background: #2152ff; border-radius: 50%; box-shadow: 0 0 12px #2152ff; animation: heartbeat_sync 3s infinite;"></div>
-                            <div class="radar-pulse" style="position: absolute; top: 30%; right: 40%; width: 6px; height: 6px; background: #2152ff; border-radius: 50%; box-shadow: 0 0 10px #2152ff; animation: heartbeat_sync 3s infinite 0.5s;"></div>
-                            <div class="radar-pulse" style="position: absolute; bottom: 45%; right: 30%; width: 7px; height: 7px; background: #2152ff; border-radius: 50%; box-shadow: 0 0 12px #2152ff; animation: heartbeat_sync 3s infinite 1.2s;"></div>
-                            <div class="radar-pulse" style="position: absolute; top: 55%; left: 50%; width: 5px; height: 5px; background: #2152ff; border-radius: 50%; box-shadow: 0 0 8px #2152ff; animation: heartbeat_sync 3s infinite 0.8s;"></div>
-
-                            <!-- Floating Status Indicator -->
-                            <div style="position: absolute; bottom: -8%; left: 0; right: 0; padding: 0 24px; display: flex; justify-content: center;">
-                                <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); padding: 10px 18px; border-radius: 99px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid rgba(255,255,255,0.8);">
-                                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #2152ff; box-shadow: 0 0 10px rgba(33, 82, 255, 0.4); animation: pulse_radar_final 2s infinite;"></div>
-                                    <span style="font-size: 0.85rem; font-weight: 700; color: #1e293b;">Radar: Escaneando oportunidades</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <style>
-                            @keyframes heartbeat_sync {
-                                0% { transform: scale(1); opacity: 0.8; }
-                                14% { transform: scale(1.3); opacity: 1; }
-                                28% { transform: scale(1); opacity: 0.8; }
-                                42% { transform: scale(1.3); opacity: 1; }
-                                70% { transform: scale(1); opacity: 0.8; }
-                            }
-                            @keyframes pulse_radar_final {
-                                0% { opacity: 1; transform: scale(1); }
-                                50% { opacity: 0.6; transform: scale(1.2); }
-                                100% { opacity: 1; transform: scale(1); }
-                            }
-                        </style>
+                    <!-- VISUAL (dejas tu imagen igual) -->
+                    <div>
+                        <img src="<?= base_url('public/img/radar_showcase.png?v=' . time()) ?>" alt="Radar B2B"
+                            style="width:100%;border-radius:20px;">
                     </div>
 
                 </div>
@@ -999,92 +903,56 @@
                     <!-- Left: FAQs -->
                     <div class="faq-grid" style="display: grid; gap: 14px;">
                         <details class="faq-item">
-                            <summary>
-                                ¿Cómo validar un CIF en España?
-                            </summary>
+                            <summary>¿Qué datos devuelve la API?</summary>
                             <div class="muted" style="margin-top: 10px;">
-                                Validar un CIF puede incluir dos cosas: comprobar el <strong>formato</strong> y, además,
-                                verificar datos de empresa
-                                como <strong>razón social</strong> y <strong>estado</strong>. En APIEmpresas.es puedes
-                                hacerlo desde el buscador web
-                                o automatizarlo por <strong>API REST</strong> con tu API Key.
+                                La API devuelve datos oficiales como razón social, CIF, estado de la empresa
+                                (Activa/Inactiva), domicilio social, código CNAE y su descripción. En los planes
+                                Pro/Business también incluye scoring comercial, señales societarias e insights
+                                avanzados.
                             </div>
                         </details>
 
                         <details class="faq-item">
-                            <summary>
-                                ¿Qué diferencia hay entre validar CIF y verificar una empresa?
-                            </summary>
+                            <summary>¿Puedo probarla gratis?</summary>
                             <div class="muted" style="margin-top: 10px;">
-                                "Validar CIF" suele referirse a la comprobación de <strong>estructura</strong> y
-                                consistencia.
-                                "Verificar empresa" implica contrastar información relevante (p. ej., <strong>razón
-                                    social</strong>,
-                                <strong>estado</strong>, domicilio básico) para reducir errores en
-                                <strong>altas</strong> y <strong>facturación</strong>.
+                                Sí, disponemos de un plan **Free (Sandbox)** con 100 consultas mensuales gratuitas para
+                                que puedas realizar pruebas técnicas e integrar el sistema antes de pasar a producción.
                             </div>
                         </details>
 
                         <details class="faq-item">
-                            <summary>
-                                ¿Puedo comprobar un NIF-IVA intracomunitario (VIES)?
-                            </summary>
+                            <summary>¿La información es oficial?</summary>
                             <div class="muted" style="margin-top: 10px;">
-                                Sí. Puedes validar el NIF-IVA intracomunitario contra <strong>VIES</strong> y usar el
-                                resultado en procesos
-                                de onboarding, cumplimiento y validación fiscal en operaciones B2B.
+                                Totalmente. Todos nuestros datos provienen de fuentes oficiales como el BOE, BORME, la
+                                Agencia Tributaria (AEAT), el INE y el registro VIES de la Unión Europea.
                             </div>
                         </details>
 
                         <details class="faq-item">
-                            <summary>
-                                ¿Para qué sirve en KYB/KYC y prevención de fraude?
-                            </summary>
+                            <summary>¿Qué diferencia hay entre API y Radar?</summary>
                             <div class="muted" style="margin-top: 10px;">
-                                Para automatizar verificaciones, reducir altas con datos falsos o inconsistentes y
-                                mantener un rastro consultable
-                                del dato verificado. Es especialmente útil si vendes a empresas (B2B), trabajas con
-                                pagos, crédito o acceso a producto.
+                                La **API** está diseñada para automatizar validaciones dentro de tu propio software
+                                (onboarding, facturación, riesgos). El **Radar** es una herramienta comercial para
+                                descubrir nuevas empresas cada día y priorizar oportunidades de venta B2B de forma
+                                sencilla.
                             </div>
                         </details>
 
                         <details class="faq-item">
-                            <summary>
-                                ¿La API es adecuada para producción?
-                            </summary>
+                            <summary>¿Cuánto se tarda en integrar?</summary>
                             <div class="muted" style="margin-top: 10px;">
-                                Sí. Tienes <strong>API estable</strong>, control de consumo y planes preparados para
-                                producción.
-                                Puedes empezar en Sandbox, validar tu integración y escalar a Pro/Business cuando lo
-                                necesites.
+                                Minutos. Al ser una API REST estándar, puedes conectar el servicio con un simple comando
+                                cURL o usando nuestras librerías en PHP, Node o Python. La documentación es clara y
+                                directa.
                             </div>
                         </details>
 
                         <details class="faq-item">
-                            <summary>
-                                ¿Qué datos devuelvo y qué obtengo en una consulta?
-                            </summary>
+                            <summary>¿Sirve para prospección B2B?</summary>
                             <div class="muted" style="margin-top: 10px;">
-                                Una consulta devuelve una ficha normalizada en JSON con los campos esenciales para
-                                automatización (CIF, razón social,
-                                estado, CNAE y datos básicos). El objetivo es integrarlo rápido en formularios de alta,
-                                ERPs/CRMs y flujos de riesgo.
-                            </div>
-                        </details>
-
-                        <details class="faq-item">
-                            <summary>
-                                ¿Cómo integro la API para validar CIF?
-                            </summary>
-                            <div class="muted" style="margin-top: 10px;">
-                                Creas una cuenta, obtienes tu <strong>API Key</strong> y llamas al endpoint REST. En la
-                                documentación tienes ejemplos
-                                listos en cURL, PHP/Laravel, Node y Python para copiar y pegar.
-                                <div style="margin-top: 10px;">
-                                    <a class="btn secondary" href="<?= site_url() ?>documentation">Ver documentación</a>
-                                    <a class="btn btn_start" style="margin-left: 8px;"
-                                        href="<?= site_url() ?>register">Crear cuenta gratis</a>
-                                </div>
+                                Sí, especialmente la herramienta Radar y los endpoints de Scoring. Permiten identificar
+                                empresas de reciente creación, filtrar por provincia/sector y preparar el primer
+                                contacto comercial con datos verificados.
                             </div>
                         </details>
                     </div>
@@ -1263,80 +1131,11 @@
     }
     </script>
 
-
-        <!-- CTA FINAL -->
-        <section id="beta" class="cta-final container">
-            <div class="cta-box">
-                <div class="cta-layout">
-                    <div class="cta-copy">
-                        <h2>Empieza hoy a validar CIF con tu API Key (gratis)</h2>
-
-                        <p class="muted">
-                            Regístrate en minutos y prueba la API con el mismo motor que usamos en producción.
-                            Ideal para validar CIF, razón social y estado de empresas españolas sin fricción.
-                        </p>
-
-                        <ul class="cta-benefits">
-                            <li><strong>Sin tarjeta</strong> ni permanencias: cancela cuando quieras.</li>
-                            <li><strong>100 consultas/mes</strong> incluidas en el plan Sandbox.</li>
-                            <li><strong>Acceso al buscador web</strong> y a la documentación completa.</li>
-                        </ul>
-                    </div>
-
-                    <div class="cta-actions">
-                        <span class="cta-pill">Sandbox · Entorno de pruebas</span>
-
-                        <a class="btn btn_start cta-main-btn" href="<?= site_url() ?>register">
-                            Obtén tu API Key
-                        </a>
-
-                        <p class="muted cta-note">
-                            Sin tarjeta, sin compromiso. Solo necesitas tu email.
-                        </p>
-
-                        <p class="muted cta-login">
-                            ¿Ya tienes cuenta?
-                            <a href="<?= site_url() ?>login">Inicia sesión aquí</a>.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
     </main>
 
 
 
-    <!-- DIRECTORIO SEO (Very subtle for crawlers only) -->
-    <section id="directory-links" class="container"
-        style="padding: 30px 0 20px; border-top: 1px solid rgba(255,255,255,0.02);">
-        <div class="band">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-                <h3 style="font-size: 0.95rem; margin: 0; color: #475569; font-weight: 500;">Directorio por provincia
-                </h3>
-                <a href="<?= site_url('directorio') ?>"
-                    style="color: #64748b; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-size: 0.8rem;">
-                    Ver todo
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                        <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                </a>
-            </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px;">
-                <?php if (!empty($provinces)): ?>
-                    <?php foreach ($provinces as $prov): ?>
-                        <a href="<?= site_url('directorio/provincia/' . urlencode($prov['name'])) ?>"
-                            style="color: #64748b; text-decoration: none; font-size: 12px; padding: 5px 8px; background: rgba(255,255,255,0.01); border-radius: 4px; border: 1px solid rgba(255,255,255,0.02); transition: all 0.2s;"
-                            onmouseover="this.style.borderColor='rgba(33, 82, 255, 0.2)'; this.style.color='#94a3b8'; this.style.background='rgba(255,255,255,0.03)'"
-                            onmouseout="this.style.borderColor='rgba(255,255,255,0.02)'; this.style.color='#64748b'; this.style.background='rgba(255,255,255,0.01)'">
-                            <?= esc($prov['name']) ?>
-                        </a>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-        </div>
-    </section>
 
     <!-- =========================
          MODAL · INTEGRACIÓN A MEDIDA (Marketing/WOW)
@@ -1429,144 +1228,159 @@
     </div>
 
     <?php if (isset($showReviewModal) && $showReviewModal): ?>
-    <!-- =========================
+        <!-- =========================
          MODAL · REVIEW USUARIO
          ========================= -->
-    <div class="modal-overlay active" id="modalUserReview" aria-hidden="false" data-prevent-overlay-close="true" style="z-index: 10000; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px);">
-        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reviewTitle" tabindex="-1"
-            style="max-width: 500px; padding: 0; background: #ffffff; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25); overflow: hidden; position: relative;">
-            
-            <button class="modal-close" type="button" aria-label="Cerrar modal" onclick="closeReviewModal()"
-                style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; font-size: 28px; color: #94a3b8; cursor: pointer; transition: color 0.2s; line-height: 1;">
-                &times;
-            </button>
+        <div class="modal-overlay active" id="modalUserReview" aria-hidden="false" data-prevent-overlay-close="true"
+            style="z-index: 10000; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px);">
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reviewTitle" tabindex="-1"
+                style="max-width: 500px; padding: 0; background: #ffffff; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25); overflow: hidden; position: relative;">
 
-            <div style="padding: 40px 32px 32px; text-align: center;">
-                <div style="width: 56px; height: 56px; background: #f0fdf4; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #16a34a; margin: 0 auto 20px;">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-                    </svg>
-                </div>
-                <h2 id="reviewTitle" style="font-size: 24px; color: #0f172a; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.02em;">¿Qué te parece APIEmpresas?</h2>
-                <p style="color: #64748b; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">Hemos notado que estás usando bastante nuestro buscador. Nos ayudaría mucho saber tu opinión para seguir mejorando.</p>
-                
-                <form id="reviewForm" onsubmit="submitReview(event)">
-                    <!-- Stars -->
-                    <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 24px;" id="starRatingContainer">
-                        <?php for ($i = 1; $i <= 5; $i++): ?>
-                            <button type="button" class="star-btn" data-value="<?= $i ?>" onclick="setRating(<?= $i ?>)" onmouseover="hoverRating(<?= $i ?>)" onmouseout="resetRating()"
-                                style="background: transparent; border: none; cursor: pointer; padding: 0; color: #cbd5e1; transition: color 0.2s, transform 0.2s;">
-                                <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-                                </svg>
-                            </button>
-                        <?php endfor; ?>
+                <button class="modal-close" type="button" aria-label="Cerrar modal" onclick="closeReviewModal()"
+                    style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; font-size: 28px; color: #94a3b8; cursor: pointer; transition: color 0.2s; line-height: 1;">
+                    &times;
+                </button>
+
+                <div style="padding: 40px 32px 32px; text-align: center;">
+                    <div
+                        style="width: 56px; height: 56px; background: #f0fdf4; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #16a34a; margin: 0 auto 20px;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
+                            </path>
+                        </svg>
                     </div>
-                    <input type="hidden" name="rating" id="reviewRating" value="0" required>
-                    
-                    <textarea name="comment" id="reviewComment" placeholder="Comentarios, mejoras o funciones que eches en falta (opcional)..." rows="3"
-                        style="width: 100%; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px; font-size: 14px; color: #1e293b; background: #f8fafc; resize: none; margin-bottom: 24px; font-family: inherit; transition: border-color 0.2s; box-sizing: border-box;"
-                        onfocus="this.style.borderColor='#2152ff'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
-                        
-                    <button type="submit" id="reviewSubmitBtn" disabled
-                        style="width: 100%; background: linear-gradient(135deg, #2152ff 0%, #1d4ed8 100%); color: white; border: none; font-weight: 700; padding: 16px; border-radius: 12px; font-size: 1.05rem; cursor: not-allowed; opacity: 0.6; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 14px rgba(33, 82, 255, 0.4);">
-                        Enviar valoración
-                    </button>
-                </form>
-                
-                <div id="reviewSuccess" style="display: none; padding: 20px 0;">
-                    <div style="color: #16a34a; font-size: 48px; margin-bottom: 16px;">✓</div>
-                    <h3 style="font-size: 20px; color: #0f172a; margin-bottom: 8px;">¡Gracias por tu reseña!</h3>
-                    <p style="color: #64748b; font-size: 15px;">Tu feedback es muy valioso para nosotros.</p>
+                    <h2 id="reviewTitle"
+                        style="font-size: 24px; color: #0f172a; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.02em;">
+                        ¿Qué te parece APIEmpresas?</h2>
+                    <p style="color: #64748b; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">Hemos notado que
+                        estás usando bastante nuestro buscador. Nos ayudaría mucho saber tu opinión para seguir mejorando.
+                    </p>
+
+                    <form id="reviewForm" onsubmit="submitReview(event)">
+                        <!-- Stars -->
+                        <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 24px;"
+                            id="starRatingContainer">
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                <button type="button" class="star-btn" data-value="<?= $i ?>" onclick="setRating(<?= $i ?>)"
+                                    onmouseover="hoverRating(<?= $i ?>)" onmouseout="resetRating()"
+                                    style="background: transparent; border: none; cursor: pointer; padding: 0; color: #cbd5e1; transition: color 0.2s, transform 0.2s;">
+                                    <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor"
+                                        stroke-width="1.5" stroke-linejoin="round">
+                                        <path
+                                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
+                                        </path>
+                                    </svg>
+                                </button>
+                            <?php endfor; ?>
+                        </div>
+                        <input type="hidden" name="rating" id="reviewRating" value="0" required>
+
+                        <textarea name="comment" id="reviewComment"
+                            placeholder="Comentarios, mejoras o funciones que eches en falta (opcional)..." rows="3"
+                            style="width: 100%; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px; font-size: 14px; color: #1e293b; background: #f8fafc; resize: none; margin-bottom: 24px; font-family: inherit; transition: border-color 0.2s; box-sizing: border-box;"
+                            onfocus="this.style.borderColor='#2152ff'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+
+                        <button type="submit" id="reviewSubmitBtn" disabled
+                            style="width: 100%; background: linear-gradient(135deg, #2152ff 0%, #1d4ed8 100%); color: white; border: none; font-weight: 700; padding: 16px; border-radius: 12px; font-size: 1.05rem; cursor: not-allowed; opacity: 0.6; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 14px rgba(33, 82, 255, 0.4);">
+                            Enviar valoración
+                        </button>
+                    </form>
+
+                    <div id="reviewSuccess" style="display: none; padding: 20px 0;">
+                        <div style="color: #16a34a; font-size: 48px; margin-bottom: 16px;">✓</div>
+                        <h3 style="font-size: 20px; color: #0f172a; margin-bottom: 8px;">¡Gracias por tu reseña!</h3>
+                        <p style="color: #64748b; font-size: 15px;">Tu feedback es muy valioso para nosotros.</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script>
-    let currentRating = 0;
-    
-    function setRating(rating) {
-        currentRating = rating;
-        document.getElementById('reviewRating').value = rating;
-        updateStars(rating);
-        
-        const submitBtn = document.getElementById('reviewSubmitBtn');
-        submitBtn.disabled = false;
-        submitBtn.style.cursor = 'pointer';
-        submitBtn.style.opacity = '1';
-        submitBtn.style.transform = 'translateY(-2px)';
-        submitBtn.style.boxShadow = '0 10px 20px rgba(33, 82, 255, 0.3)';
-    }
-    
-    function hoverRating(rating) {
-        updateStars(rating);
-    }
-    
-    function resetRating() {
-        updateStars(currentRating);
-    }
-    
-    function updateStars(activeCount) {
-        const stars = document.querySelectorAll('#starRatingContainer .star-btn');
-        stars.forEach((star, index) => {
-            if (index < activeCount) {
-                star.style.color = '#fbbf24'; // yellow
-                star.style.transform = 'scale(1.1)';
-            } else {
-                star.style.color = '#cbd5e1'; // gray
-                star.style.transform = 'scale(1)';
+        <script>
+            let currentRating = 0;
+
+            function setRating(rating) {
+                currentRating = rating;
+                document.getElementById('reviewRating').value = rating;
+                updateStars(rating);
+
+                const submitBtn = document.getElementById('reviewSubmitBtn');
+                submitBtn.disabled = false;
+                submitBtn.style.cursor = 'pointer';
+                submitBtn.style.opacity = '1';
+                submitBtn.style.transform = 'translateY(-2px)';
+                submitBtn.style.boxShadow = '0 10px 20px rgba(33, 82, 255, 0.3)';
             }
-        });
-    }
-    
-    function closeReviewModal() {
-        const modal = document.getElementById('modalUserReview');
-        modal.classList.remove('active');
-        setTimeout(() => modal.style.display = 'none', 300);
-        document.body.style.overflow = '';
-    }
-    
-    function submitReview(e) {
-        e.preventDefault();
-        if(currentRating < 1) return;
-        
-        const btn = document.getElementById('reviewSubmitBtn');
-        const form = document.getElementById('reviewForm');
-        const success = document.getElementById('reviewSuccess');
-        
-        btn.innerHTML = 'Enviando...';
-        btn.disabled = true;
-        
-        const formData = new FormData();
-        formData.append('rating', currentRating);
-        formData.append('comment', document.getElementById('reviewComment').value);
-        
-        fetch('<?= site_url('submit-review') ?>', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+
+            function hoverRating(rating) {
+                updateStars(rating);
             }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.success) {
-                form.style.display = 'none';
-                success.style.display = 'block';
-                setTimeout(() => {
-                    closeReviewModal();
-                }, 3000);
+
+            function resetRating() {
+                updateStars(currentRating);
             }
-        })
-        .catch(err => {
-            console.error(err);
-            btn.innerHTML = 'Error al enviar. Reintentar';
-            btn.disabled = false;
-        });
-    }
-    document.body.style.overflow = 'hidden';
-    </script>
+
+            function updateStars(activeCount) {
+                const stars = document.querySelectorAll('#starRatingContainer .star-btn');
+                stars.forEach((star, index) => {
+                    if (index < activeCount) {
+                        star.style.color = '#fbbf24'; // yellow
+                        star.style.transform = 'scale(1.1)';
+                    } else {
+                        star.style.color = '#cbd5e1'; // gray
+                        star.style.transform = 'scale(1)';
+                    }
+                });
+            }
+
+            function closeReviewModal() {
+                const modal = document.getElementById('modalUserReview');
+                modal.classList.remove('active');
+                setTimeout(() => modal.style.display = 'none', 300);
+                document.body.style.overflow = '';
+            }
+
+            function submitReview(e) {
+                e.preventDefault();
+                if (currentRating < 1) return;
+
+                const btn = document.getElementById('reviewSubmitBtn');
+                const form = document.getElementById('reviewForm');
+                const success = document.getElementById('reviewSuccess');
+
+                btn.innerHTML = 'Enviando...';
+                btn.disabled = true;
+
+                const formData = new FormData();
+                formData.append('rating', currentRating);
+                formData.append('comment', document.getElementById('reviewComment').value);
+
+                fetch('<?= site_url('submit-review') ?>', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            form.style.display = 'none';
+                            success.style.display = 'block';
+                            setTimeout(() => {
+                                closeReviewModal();
+                            }, 3000);
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        btn.innerHTML = 'Error al enviar. Reintentar';
+                        btn.disabled = false;
+                    });
+            }
+            document.body.style.overflow = 'hidden';
+        </script>
     <?php endif; ?>
 
     <?= view('partials/footer') ?>
@@ -1692,13 +1506,13 @@
         };
 
         function openInfo(e, slug) {
-            if(e) {
+            if (e) {
                 e.preventDefault();
                 e.stopPropagation();
             }
-            
+
             const data = endpointData[slug];
-            if(!data) return;
+            if (!data) return;
 
             const body = document.getElementById('veModalBody');
             body.innerHTML = `
@@ -1708,14 +1522,28 @@
 
             const modal = document.getElementById('veModalHelp');
             modal.classList.add('active');
-            // document.body.style.overflow = 'hidden'; 
         }
 
         function closeInfo() {
             const modal = document.getElementById('veModalHelp');
             modal.classList.remove('active');
-            // document.body.style.overflow = '';
         }
+
+        // Tabs functionality for search results
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains('tab-btn')) {
+                const tabId = e.target.getAttribute('data-tab');
+                const container = e.target.closest('#resultado_container') || e.target.closest('.search-card');
+                if (!container) return;
+
+                container.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                container.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+                e.target.classList.add('active');
+                const targetTab = container.querySelector('#tab-' + tabId);
+                if (targetTab) targetTab.classList.add('active');
+            }
+        });
     </script>
 </body>
 
