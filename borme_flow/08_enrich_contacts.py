@@ -7,26 +7,17 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, quote, unquote
 import pymysql
+import config # Import central configuration
 
 def get_env_var(var_name):
-    """Simple .env reader for Python since we might not have python-dotenv."""
-    env_path = os.path.join(os.path.dirname(__file__), "..", ".env")
-    if os.path.exists(env_path):
-        with open(env_path, "r") as f:
-            for line in f:
-                line = line.strip()
-                if not line or line.startswith("#"): continue
-                if "=" in line:
-                    key, val = line.split("=", 1)
-                    if key.strip() == var_name:
-                        return val.strip().strip('"').strip("'")
-    return os.environ.get(var_name)
+    """Retrieve environment variable using config or os.environ."""
+    return os.getenv(var_name)
 
-# Use remote production credentials
-DB_HOST = "217.61.210.127"
-DB_USER = "apiempresas_user"
-DB_PASS = "WONwyjpsmx3h3$@2"
-DB_NAME = "reseller3537_apiempresas"
+# Database parameters from central config
+DB_HOST = config.DB_HOST
+DB_USER = config.DB_USER
+DB_PASS = config.DB_PASS
+DB_NAME = config.DB_NAME
 SERPER_API_KEY = get_env_var("SERPER_API_KEY")
 
 HEADERS = {
@@ -192,10 +183,60 @@ def find_cif_in_directories(name, municipality=""):
                 
     return None
 
+def get_similarity(s1, s2):
+    """Simple similarity ratio between two strings."""
+    if not s1 or not s2: return 0
+    s1, s2 = s1.lower(), s2.lower()
+    if s1 in s2 or s2 in s1: return 0.8
+    # Basic overlap check
+    words1 = set(re.findall(r'\w+', s1))
+    words2 = set(re.findall(r'\w+', s2))
+    if not words1: return 0
+    intersection = words1.intersection(words2)
+    return len(intersection) / len(words1)
+
+def verify_website_content(url, company_name, cif):
+    """Visits the site and checks for CIF or Company Name in critical areas."""
+    try:
+        resp = requests.get(url, headers=HEADERS, timeout=10)
+        if resp.status_code != 200: return False
+        text = resp.text.lower()
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        
+        # 1. Check for CIF if provided
+        if cif and cif.lower() in text:
+            print(f"    [VERIFY] CIF {cif} found in content!")
+            return True
+        
+        # 2. Check for company name in footer/legal or title
+        clean_name = clean_company_name(company_name).lower()
+        if clean_name in text:
+            # Check if it appears in common legal/footer tags
+            footer = soup.find('footer')
+            if footer and clean_name in footer.get_text().lower():
+                print(f"    [VERIFY] Company name found in footer.")
+                return True
+            
+            title = soup.title.string.lower() if soup.title else ""
+            if clean_name in title:
+                print(f"    [VERIFY] Company name found in page title.")
+                return True
+
+        # 3. Simple domain check as fallback
+        domain = urlparse(url).netloc.lower()
+        if get_similarity(clean_name, domain) > 0.6:
+            print(f"    [VERIFY] Domain similarity high: {domain}")
+            return True
+            
+    except Exception as e:
+        print(f"    [VERIFY ERROR] {url}: {e}")
+    return False
+
 def find_official_website(company_name, municipality="", cif=""):
-    """Attempts to find the company website using Serper API."""
-    query = f'"{company_name}" {municipality} {cif} web oficial'
-    print(f"    [API WEB SEARCH] Looking for official site via Serper...")
+    """Attempts to find the company website using Serper API with verification."""
+    clean_name = clean_company_name(company_name)
+    query = f'"{clean_name}" {municipality} web oficial'
+    print(f"    [API WEB SEARCH] Looking for official site: {query}")
     
     results = search_google_serper(query)
     
@@ -205,36 +246,138 @@ def find_official_website(company_name, municipality="", cif=""):
         'infocif.es', 'eleconomista.es', 'cylex.es', 'paginasamarillas.es', 'vulka.es',
         'guiaempresa.es', 'infoconcurso.es', 'vincit.com', 'oficinaempleo.com',
         'openthenews.com', 'datocapital.com', 'librebor.me', 'google.com', 'bing.com',
-        'economiadigital.es', 'expansion.com', 'elpais.com', 'yahoo.com', 'youtube.com'
+        'economiadigital.es', 'expansion.com', 'elpais.com', 'yahoo.com', 'youtube.com',
+        'mapa.es', 'justicia.es', 'hacienda.gob.es', 'boe.es', 'notarios.org',
+        'infoempresa.com', 'directorio-empresas.es', 'empresite', 'vulka', 'sucatcat'
     ]
     
+    candidates = []
     for res in results:
         href = res.get('link', '').strip()
         if not href.startswith('http'): continue
+        
         parsed = urlparse(href)
         domain = parsed.netloc.lower()
+        
         if any(skip in domain for skip in skip_domains): continue
-        return href
+        
+        # Calculate a preliminary score
+        title = res.get('title', '')
+        snippet = res.get('snippet', '')
+        
+        score = 0
+        if clean_name.lower() in title.lower(): score += 5
+        if clean_name.lower() in domain: score += 10
+        if clean_name.lower() in snippet.lower(): score += 2
+        
+        candidates.append({"url": href, "score": score})
+    
+    # Sort candidates by score
+    candidates.sort(key=lambda x: x['score'], reverse=True)
+    
+    # Verify the top 3 candidates
+    for cand in candidates[:3]:
+        print(f"    [CANDIDATE] Checking {cand['url']} (Score: {cand['score']})...")
+        if cand['score'] > 5 or verify_website_content(cand['url'], company_name, cif):
+            return cand['url']
         
     return None
 
+def extract_from_html(html, base_url=""):
+    """Internal helper to extract emails and phones from HTML."""
+    results = {"email": None, "phone": None}
+    
+    # 1. Email Extraction
+    # Filter out common false positives like .png, .jpg, etc.
+    emails = re.findall(r'[a-zA-Z0-9\._%+-]+@[a-zA-Z0-9\.-]+\.[a-zA-Z]{2,}', html)
+    valid_emails = []
+    for e in emails:
+        e = e.lower()
+        if any(e.endswith(ext) for ext in ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp']): continue
+        # If possible, check if email domain matches base_url domain
+        if base_url:
+            domain = urlparse(base_url).netloc.lower().replace('www.', '')
+            if domain in e:
+                # Prioritize emails from the same domain
+                valid_emails.insert(0, e)
+                continue
+        valid_emails.append(e)
+    
+    if valid_emails:
+        results["email"] = valid_emails[0]
+        
+    # 2. Phone Extraction
+    # Spanish format: +34, 0034, or just 9 digits starting with 6, 7, 8, 9
+    # We use a pattern that allows spaces, hyphens and dots
+    phone_pattern = re.compile(r'(?:(?:\+|00)34[\s.-]?)?([6789]\d{2}[\s.-]?\d{3}[\s.-]?\d{3})\b')
+    phones = phone_pattern.findall(html)
+    if phones:
+        # Clean up the phone number (remove non-digits, ensuring it's 9 digits)
+        clean_phone = re.sub(r'\D', '', phones[0])
+        if len(clean_phone) >= 9:
+            results["phone"] = clean_phone[-9:]
+            
+    return results
+
 def scrape_contact_info(website_url):
-    """Scrapes a website for phone numbers and emails."""
-    info = {"email": None, "phone": None}
+    """Scrapes a website and its common subpages for contact info."""
+    print(f"    [SCRAPE] Crawling {website_url}...")
+    final_info = {"email": None, "phone": None}
+    
     try:
         time.sleep(1)
-        resp = requests.get(website_url, headers=HEADERS, timeout=5)
-        if resp.status_code != 200: return info
-        text = resp.text
-        emails = re.findall(r'[a-zA-Z0-9\._%+-]+@[a-zA-Z0-9\.-]+\.[a-zA-Z]{2,}', text)
-        if emails: info["email"] = emails[0].lower()
-        phones = re.findall(r'\b(?:(?:\+|00)34|34)?[6789]\d{8}\b', text)
-        if phones: info["phone"] = phones[0]
-    except: pass
-    return info
+        resp = requests.get(website_url, headers=HEADERS, timeout=10)
+        if resp.status_code != 200: return final_info
+        
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        home_results = extract_from_html(resp.text, website_url)
+        final_info.update(home_results)
+        
+        # If we already have both, stop here
+        if final_info["email"] and final_info["phone"]:
+            return final_info
+            
+        # Look for subpages
+        subpage_keywords = ['contacto', 'contact', 'aviso-legal', 'legal', 'quienes', 'about', 'privacidad']
+        links_to_crawl = []
+        
+        for link in soup.find_all('a', href=True):
+            href = link['href'].lower()
+            if any(key in href for key in subpage_keywords):
+                # Ensure it's an absolute URL
+                if href.startswith('/'):
+                    parsed_base = urlparse(website_url)
+                    href = f"{parsed_base.scheme}://{parsed_base.netloc}{href}"
+                elif not href.startswith('http'):
+                    href = website_url.rstrip('/') + '/' + href.lstrip('/')
+                
+                if website_url in href and href != website_url:
+                    links_to_crawl.append(href)
+        
+        # Deduplicate and limit
+        links_to_crawl = list(dict.fromkeys(links_to_crawl))[:3]
+        
+        for link in links_to_crawl:
+            if final_info["email"] and final_info["phone"]: break
+            print(f"    [SCRAPE-SUB] Checking {link}...")
+            try:
+                time.sleep(1)
+                s_resp = requests.get(link, headers=HEADERS, timeout=7)
+                if s_resp.status_code == 200:
+                    sub_results = extract_from_html(s_resp.text, website_url)
+                    if sub_results["email"] and not final_info["email"]:
+                        final_info["email"] = sub_results["email"]
+                    if sub_results["phone"] and not final_info["phone"]:
+                        final_info["phone"] = sub_results["phone"]
+            except: pass
+            
+    except Exception as e:
+        print(f"    [SCRAPE ERROR] {e}")
+        
+    return final_info
 
 def run_enrichment(limit=10):
-    conn = pymysql.connect(host=DB_HOST, user=DB_USER, password=DB_PASS, db=DB_NAME, cursorclass=pymysql.cursors.DictCursor)
+    conn = config.mysql_connect()
     try:
         with conn.cursor() as cur:
             sql = """

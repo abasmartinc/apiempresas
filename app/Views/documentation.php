@@ -92,6 +92,9 @@
                     <li><a href="#auth">Autenticación</a></li>
                     <li><a href="#endpoint-by-cif">Consulta por CIF</a></li>
                     <li><a href="#endpoint-search">Búsqueda por Nombre</a></li>
+                    <li><a href="#endpoint-expanded">Capacidades Comerciales</a></li>
+                    <li><a href="#endpoint-radar">Radar de Empresas</a></li>
+                    <li><a href="#endpoint-webhooks">Webhooks</a></li>
                     <li><a href="#examples">Ejemplos de Código</a></li>
                     <li><a href="#postman">Postman Collection</a></li>
                 </ul>
@@ -196,9 +199,127 @@ Accept: application/json</code></pre>
                     </table>
                 </section>
 
+                <!-- EXPANDED -->
+                <section class="docs-section" id="endpoint-expanded">
+                    <h2>5. Capacidades Comerciales (Pro & Business)</h2>
+                    <p>Potencia tu prospección con datos enriquecidos y señales de negocio en tiempo real.</p>
+                    
+                    <!-- SCORE -->
+                    <div style="margin-top: 32px;">
+                        <div class="endpoint-header">
+                            <span class="http-badge get">GET</span>
+                            <code>/companies/score</code>
+                            <span class="plan-badge pro">Pro</span>
+                        </div>
+                        <p>Obtén el score de interés comercial y el nivel de prioridad de una empresa.</p>
+                        <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "cif": "B12345678",
+    "score": 85,
+    "priority": "Muy Alta",
+    "reasons": "Constitución reciente, Sector en crecimiento",
+    "last_signal": { "type": "CONSTITUCION", "date": "2023-10-01" }
+  }
+}</code></pre>
+                    </div>
+
+                    <!-- SIGNALS -->
+                    <div style="margin-top: 32px;">
+                        <div class="endpoint-header">
+                            <span class="http-badge get">GET</span>
+                            <code>/companies/signals</code>
+                            <span class="plan-badge pro">Pro</span>
+                        </div>
+                        <p>Eventos y actos societarios detectados recientemente.</p>
+                    </div>
+
+                    <!-- INSIGHTS -->
+                    <div style="margin-top: 32px;">
+                        <div class="endpoint-header">
+                            <span class="http-badge get">GET</span>
+                            <code>/companies/insights</code>
+                            <span class="plan-badge business">Business</span>
+                        </div>
+                        <p>Análisis IA del perfil comercial y necesidades probables de la empresa.</p>
+                        <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "profile": "Servicios de Tecnología",
+    "summary": "Empresa enfocada en desarrollo software...",
+    "needs": ["Presencia Web", "Gestión Cloud"],
+    "conversion_probability": "Alta"
+  }
+}</code></pre>
+                    </div>
+
+                    <!-- CONTACT PREP -->
+                    <div style="margin-top: 32px;">
+                        <div class="endpoint-header">
+                            <span class="http-badge get">GET</span>
+                            <code>/companies/contact-prep</code>
+                            <span class="plan-badge business">Business</span>
+                        </div>
+                        <p>Pitch de venta sugerido y manejo de objeciones generado por IA.</p>
+                    </div>
+                </section>
+
+                <!-- RADAR -->
+                <section class="docs-section" id="endpoint-radar">
+                    <h2>6. Radar de Empresas</h2>
+                    <p>Consulta programáticamente el listado de nuevas empresas detectadas por nuestro radar.</p>
+                    
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/companies/radar</code>
+                        <span class="plan-badge pro">Pro</span>
+                    </div>
+
+                    <h4>Parámetros opcionales</h4>
+                    <table class="docs-table">
+                        <thead>
+                            <tr>
+                                <th>Campo</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>province</code></td>
+                                <td>Filtrar por provincia (ej: MADRID).</td>
+                            </tr>
+                            <tr>
+                                <td><code>range</code></td>
+                                <td>Ventana temporal: <code>hoy</code>, <code>7</code> (días), <code>30</code> (días).</td>
+                            </tr>
+                            <tr>
+                                <td><code>priority</code></td>
+                                <td>Nivel de score: <code>muy_alta</code>, <code>alta</code>, <code>media</code>.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- WEBHOOKS -->
+                <section class="docs-section" id="endpoint-webhooks">
+                    <h2>7. Webhooks (Solo Business)</h2>
+                    <p>Recibe notificaciones automáticas en tiempo real en tu sistema cuando detectemos nuevas empresas o señales.</p>
+                    
+                    <div class="endpoint-header" style="margin-bottom: 5px;">
+                        <span class="http-badge get">GET</span>
+                        <code>/webhooks</code>
+                        <span class="plan-badge business">Business</span>
+                    </div>
+                    <div class="endpoint-header">
+                        <span class="http-badge post">POST</span>
+                        <code>/webhooks</code>
+                        <span class="plan-badge business">Business</span>
+                    </div>
+                </section>
+
                 <!-- EXAMPLES -->
                 <section class="docs-section" id="examples">
-                    <h2>5. Ejemplos de Código</h2>
+                    <h2>8. Ejemplos de Código</h2>
                     <p>Implementa la conexión en minutos con estos ejemplos listos para usar.</p>
 
                     <div class="code-tabs">
@@ -281,7 +402,7 @@ print(response.json())</code></pre>
 
                 <!-- POSTMAN -->
                 <section class="docs-section" id="postman">
-                    <h2>6. Postman Collection</h2>
+                    <h2>9. Postman Collection</h2>
                     <p>Si prefieres probar la API directamente en Postman, puedes descargarte nuestra colección oficial e importarla con un clic.</p>
                     
                     <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px dashed #cbd5e1; text-align: center; margin-top: 20px;">
@@ -300,7 +421,11 @@ print(response.json())</code></pre>
 <style>
     .http-badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; margin-right: 8px; color: white; }
     .http-badge.get { background: #61affe; }
-    .endpoint-header { display: flex; align-items: center; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+    .http-badge.post { background: #49cc90; }
+    .endpoint-header { display: flex; align-items: center; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px; gap: 10px; }
+    .plan-badge { font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 99px; margin-left: auto; }
+    .plan-badge.pro { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+    .plan-badge.business { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
     .docs-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
     .docs-table th, .docs-table td { text-align: left; padding: 12px; border-bottom: 1px solid #e2e8f0; }
     .docs-table th { background: #f8fafc; color: #64748b; }

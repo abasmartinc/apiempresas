@@ -57,6 +57,7 @@ $routes->get('billing/paypal/return', 'Billing::paypalReturn');
 
 $routes->get('consumption', 'Usage::index');
 $routes->get('leads-empresas-nuevas', 'RadarPrices::index');
+$routes->get('api-empresas', 'ApiPrices::index');
 $routes->get('radar', 'Radar::index', ['filter' => 'subscription:radar']); // Radar PRO
 $routes->get('radar/quickview/(:num)', 'Radar::quickView/$1');
 $routes->get('radar/favoritos', 'Radar::favorites');
@@ -87,6 +88,18 @@ $routes->get('e/c/(:any)', 'EmailTracking::click/$1');
 $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function ($routes) {
     $routes->get('api/v1/companies', 'Api\V1\CompaniesByCif::index');
     $routes->get('api/v1/companies/search', 'Api\V1\CompaniesSearch::index');
+
+    // New Commercial Endpoints (Expansion)
+    $routes->get('api/v1/companies/score', 'Api\V1\CompanyEnrichmentController::score');
+    $routes->get('api/v1/companies/signals', 'Api\V1\CompanyEnrichmentController::signals');
+    $routes->get('api/v1/companies/insights', 'Api\V1\CompanyEnrichmentController::insights');
+    $routes->get('api/v1/companies/contact-prep', 'Api\V1\CompanyEnrichmentController::contactPrep');
+    $routes->get('api/v1/companies/radar', 'Api\V1\RadarApiController::index');
+
+    // Webhooks CRUD
+    $routes->get('api/v1/webhooks', 'Api\V1\WebhookController::index');
+    $routes->post('api/v1/webhooks', 'Api\V1\WebhookController::create');
+    $routes->delete('api/v1/webhooks/(:num)', 'Api\V1\WebhookController::delete/$1');
 
     // Dedicated Professional Plan routes
     $routes->get('api/v1/professional/search', 'Api\V1\Professional::search');

@@ -49,17 +49,32 @@
             </div>
 
             <!-- Programmatic Navigation (Desktop) -->
-            <nav class="desktop-only" aria-label="Principal" style="display:flex; align-items:center;">
-                <a class="btn_header btn_header--pro" href="<?=site_url() ?>autocompletado-cif-empresas">Buscador Pro</a>
-                <a class="minor-nav-link" href="<?=site_url() ?>#buscar">Buscar</a>
-                <span class="nav-sep">•</span>
-                <a class="minor-nav-link" href="<?=site_url('directorio') ?>">Empresas</a>
-                <span class="nav-sep">•</span>
-                <a class="minor-nav-link" href="<?=site_url('empresas-nuevas') ?>">Nuevas</a>
-                <span class="nav-sep">•</span>
+            <nav class="desktop-only" aria-label="Principal" style="display:flex; align-items:center; gap: 20px;">
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger">
+                        Productos
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div class="nav-dropdown-menu">
+                        <a href="<?=site_url('api-empresas') ?>">
+                            <div class="nav-item-icon">🔌</div>
+                            <div>
+                                <strong>API Empresas</strong>
+                                <span>Verificación y datos oficiales</span>
+                            </div>
+                        </a>
+                        <a href="<?=site_url('leads-empresas-nuevas') ?>">
+                            <div class="nav-item-icon">📡</div>
+                            <div>
+                                <strong>Radar Inteligente</strong>
+                                <span>Nuevas empresas en tiempo real</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                
                 <a class="minor-nav-link" href="<?=site_url('blog') ?>">Blog</a>
-                <span class="nav-sep">•</span>
-                <a class="minor-nav-link" href="<?=site_url('documentation') ?>">Docs</a>
+                <a class="minor-nav-link" href="<?=site_url('documentation') ?>">Documentación</a>
             </nav>
 
             <div class="desktop-only auth-buttons">
@@ -83,17 +98,20 @@
                     <button class="mobile-menu-close" aria-label="Cerrar menú">&times;</button>
                 </div>
                 <nav class="mobile-nav">
-                    <a href="<?=site_url() ?>autocompletado-cif-empresas" class="mobile-nav-link pro-link">
-                        <span>Buscador Pro</span>
-                        <span class="badge">Nuevo</span>
-                    </a>
-                    <a href="<?=site_url() ?>#buscar" class="mobile-nav-link">Buscador</a>
-                    <a href="<?=site_url('directorio') ?>" class="mobile-nav-link">Empresas</a>
-                    <a href="<?=site_url('empresas-nuevas-sector/construccion') ?>" class="mobile-nav-link">Sectores</a>
-                    <a href="<?=site_url('empresas-nuevas/madrid') ?>" class="mobile-nav-link" style="color: var(--primary);">Empresas Nuevas</a>
-                    <a href="<?=site_url() ?>#precios" class="mobile-nav-link">Precios</a>
-                    <a href="<?=site_url() ?>documentation" class="mobile-nav-link">Documentación</a>
-                    <a href="<?=site_url('blog') ?>" class="mobile-nav-link">Blog de Actualidad</a>
+                    <div class="mobile-nav-group">
+                        <div class="mobile-nav-label">Productos</div>
+                        <a href="<?=site_url('api-empresas') ?>" class="mobile-nav-link">
+                            <span>API Empresas</span>
+                        </a>
+                        <a href="<?=site_url('leads-empresas-nuevas') ?>" class="mobile-nav-link">
+                            <span>Radar Inteligente</span>
+                        </a>
+                    </div>
+                    
+                    <div class="mobile-nav-group" style="margin-top: 16px;">
+                        <a href="<?=site_url('blog') ?>" class="mobile-nav-link">Blog</a>
+                        <a href="<?=site_url('documentation') ?>" class="mobile-nav-link">Documentación</a>
+                    </div>
                     <div class="mobile-auth">
                         <a href="<?=site_url() ?>enter" class="btn btn-full ghost">Iniciar sesión</a>
                         <a href="<?=site_url() ?>register" class="btn btn-full primary">Crear cuenta gratis</a>
@@ -104,6 +122,19 @@
     </header>
 
     <style>
+        /* GLOBAL LAYOUT SYNC (PRODUCTION) */
+        :root {
+            --container-max: 1240px;
+            --container-gutter: 32px;
+        }
+
+        .container {
+            max-width: var(--container-max) !important;
+            padding-left: var(--container-gutter) !important;
+            padding-right: var(--container-gutter) !important;
+            margin-inline: auto;
+        }
+
         /* Mobile Toggle Styling */
         .mobile-menu-toggle {
             display: none;
@@ -291,14 +322,113 @@
             font-weight: 900 !important;
         }
 
+        /* Desktop Dropdown Styles */
+        .nav-dropdown {
+            position: relative;
+            padding: 8px 0;
+        }
+
+        .nav-dropdown-trigger {
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: 8px 4px;
+            opacity: 0.9;
+            transition: all 0.2s;
+        }
+
+        .nav-dropdown-trigger:hover { opacity: 1; }
+
+        .nav-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border: 1px solid #f1f5f9;
+            border-radius: 16px;
+            width: 280px;
+            padding: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 1000;
+        }
+
+        .nav-dropdown:hover .nav-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .nav-dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .nav-dropdown-menu a:hover {
+            background: #f8fafc;
+        }
+
+        .nav-item-icon {
+            width: 36px;
+            height: 36px;
+            background: #eff6ff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .nav-dropdown-menu strong {
+            display: block;
+            color: #0f172a;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .nav-dropdown-menu span {
+            display: block;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Mobile Adjustments */
+        .mobile-nav-group {
+            padding: 8px 0;
+        }
+        .mobile-nav-label {
+            padding: 0 18px 8px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
         /* Desktop Nav Link Polish */
         .minor-nav-link {
             color: #ffffff !important; /* Force white for contrast */
             font-weight: 700;
-            font-size: 14px;
+            font-size: 15px;
             text-decoration: none;
             transition: all 0.2s;
-            padding: 6px 4px;
+            padding: 8px 4px;
             opacity: 0.9;
         }
         .minor-nav-link:hover { opacity: 1; transform: translateY(-1px); }

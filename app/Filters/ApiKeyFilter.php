@@ -11,14 +11,13 @@ class ApiKeyFilter implements FilterInterface
     public function before(RequestInterface $request, $arguments = null)
     {
         // ====== Medición de duración + request_id ======
-        // No afecta a tu lógica actual
         $request->api_t0 = microtime(true);
         $request->api_request_id = bin2hex(random_bytes(16)); // 32 hex chars
 
-        // 1) Leer API key (header recomendado)  [NO CAMBIADO]
+        // 1) Leer API key (header recomendado)
         $apiKey = trim((string) $request->getHeaderLine('X-API-KEY'));
 
-        // 2) Alternativa: permitir también "Authorization: Bearer <APIKEY>"  [NO CAMBIADO]
+        // 2) Alternativa: permitir también "Authorization: Bearer <APIKEY>"
         if ($apiKey === '') {
             $auth = trim((string) $request->getHeaderLine('Authorization'));
             if (stripos($auth, 'Bearer ') === 0) {
@@ -32,7 +31,7 @@ class ApiKeyFilter implements FilterInterface
                 ->setJSON(['error' => 'Falta la API key (X-API-KEY).']);
         }
 
-        // 3) Validar contra DB  [MISMA IDEA, solo alias para claridad]
+        // 3) Validar contra DB
         $db = \Config\Database::connect('default');
 
         $row = $db->table('api_keys')
@@ -54,7 +53,7 @@ class ApiKeyFilter implements FilterInterface
                 ->setJSON(['error' => 'API key inactiva o usuario inactivo']);
         }
 
-        // 4) Registrar uso (opcional)  [IGUAL]
+        // 4) Registrar uso (opcional)
         try {
             $db->table('api_keys')
                 ->where('id', (int)$row->api_key_id)
@@ -63,14 +62,11 @@ class ApiKeyFilter implements FilterInterface
             log_message('error', '[ApiKeyFilter::before:last_used_at] ' . $e->getMessage());
         }
 
-        // 4.1) Resolver suscripción y plan (para api_requests / api_usage_daily)
-        // - Soporta ambos nombres por si en tu proyecto conviven: user_subscriptions o usersuscriptions
-        // - Si no existe, fallback plan_id = 1
+        // 4.1) Resolver suscripción y plan
         $subscriptionId = null;
         $planId = 1;
 
         try {
-            // Intento 1: user_subscriptions
             if ($db->tableExists('user_subscriptions')) {
                 $sub = $db->table('user_subscriptions')
                     ->select('id AS subscription_id, plan_id, status')
@@ -84,9 +80,7 @@ class ApiKeyFilter implements FilterInterface
                     $subscriptionId = (int)$sub->subscription_id;
                     $planId = (int)$sub->plan_id;
                 }
-            }
-            // Intento 2: usersuscriptions (tu modelo de registro usa este nombre)
-            elseif ($db->tableExists('usersuscriptions')) {
+            } elseif ($db->tableExists('usersuscriptions')) {
                 $sub = $db->table('usersuscriptions')
                     ->select('id AS subscription_id, plan_id, status')
                     ->where('user_id', (int)$row->user_id)
@@ -102,75 +96,79 @@ class ApiKeyFilter implements FilterInterface
             }
         } catch (\Throwable $e) {
             log_message('error', '[ApiKeyFilter::before:subscription] ' . $e->getMessage());
-            // fallback planId=1
         }
 
-        // 4.2) Verificar Límites de Consumo (ENFORCEMENT)
+        // 4.2) Verificar Límites de Consumo
         try {
-            // Obtener cuota del plan (mensual)
             $planRow = $db->table('api_plans')
                 ->select('monthly_quota')
                 ->where('id', (int)$planId)
                 ->get()
                 ->getRow();
             
-            // Fallback razonable si falla query: 100 peticiones (plan free habitual)
             $monthlyQuota = $planRow ? (int)$planRow->monthly_quota : 100;
 
-            // Calcular consumo del mes actual
-            $currentMonth = date('Y-m'); // '2023-10'
+            $currentMonth = date('Y-m');
             $usageRow = $db->table('api_usage_daily')
                 ->selectSum('requests_count')
                 ->where('user_id', (int)$row->user_id)
-                ->like('date', $currentMonth, 'after') // date comienza con Y-m
+                ->like('date', $currentMonth, 'after')
                 ->get()
                 ->getRow();
 
             $currentUsage = $usageRow ? (int)$usageRow->requests_count : 0;
 
-            // Bloquear si excede
-            // EXCEPCIÓN: El Plan Professional (ID 7) admite excedentes (overage)
             if ($currentUsage >= $monthlyQuota && (int)$planId !== 7) {
                 return service('response')
-                    ->setStatusCode(429) // Too Many Requests
+                    ->setStatusCode(429)
                     ->setJSON([
                         'success' => false,
                         'error'   => 'Quota Exceeded',
                         'message' => 'Has superado el límite mensual de consultas de tu plan (' . $monthlyQuota . ').',
                         'current_usage' => $currentUsage,
-                        'upgrade_url' => site_url('billing/manage') // O link directo a upgrade
+                        'upgrade_url' => site_url('billing/manage')
                     ]);
             }
 
-            // --- Notificación de Umbral (42.500 en últimos 30 días) para Plan Professional ---
             if ((int)$planId === 7) {
                 $this->checkThresholdNotification($db, (int)$row->user_id);
             }
 
         } catch (\Throwable $e) {
             log_message('error', '[ApiKeyFilter::before:limit_check] ' . $e->getMessage());
-            // En caso de error de DB al chequear límites, ¿dejamos pasar o bloqueamos?
-            // "Fail open" suele ser mejor para UX si es un bug nuestro, 
-            // pero "Fail closed" protege la infra.
-            // Dejamos pasar (fail open) logueando error.
         }
 
-        // Capture search term (CIF, q, or name)
+        // 4.3) Resolver slug del plan
+        $planSlug = 'free';
+        try {
+            $planRow = $db->table('api_plans')
+                ->select('slug')
+                ->where('id', (int)$planId)
+                ->get()
+                ->getRow();
+            if ($planRow) {
+                $planSlug = $planRow->slug;
+            }
+        } catch (\Throwable $e) {
+            log_message('error', '[ApiKeyFilter::before:plan_slug] ' . $e->getMessage());
+        }
+
+        // Capture search term
         $searchTerm = $request->getGet('cif');
         if (!$searchTerm) $searchTerm = $request->getGet('q');
         if (!$searchTerm) $searchTerm = $request->getGet('name');
 
-        // Guardamos meta para usarlo en after()
         $request->api_meta = [
             'user_id'         => (int)$row->user_id,
             'api_key_id'      => (int)$row->api_key_id,
-            'subscription_id' => $subscriptionId, // puede ser null
+            'subscription_id' => $subscriptionId,
             'plan_id'         => (int)$planId,
+            'plan_slug'       => $planSlug,
             'request_id'      => (string)$request->api_request_id,
             'search_term'     => $searchTerm ? (string)$searchTerm : null,
         ];
 
-        // 5) Exponer el user_id al resto de la request  [NO CAMBIADO]
+        // 5) Exponer el user_id
         $request->setGlobal('get', array_merge($request->getGet(), [
             '__auth_user_id'    => (int)$row->user_id,
             '__auth_api_key_id' => (int)$row->api_key_id,
@@ -181,19 +179,15 @@ class ApiKeyFilter implements FilterInterface
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        // Si la request no pasó por auth OK, no hay meta -> no logueamos
         $meta = $request->api_meta ?? null;
         if (!$meta || empty($meta['user_id']) || empty($meta['api_key_id'])) {
             return;
         }
 
-        // Nunca romper la API por logging
         try {
             $db = \Config\Database::connect('default');
-
             $now = date('Y-m-d H:i:s');
             $today = date('Y-m-d');
-
             $statusCode = (int)$response->getStatusCode();
 
             $t0 = $request->api_t0 ?? null;
@@ -202,14 +196,12 @@ class ApiKeyFilter implements FilterInterface
                 $durationMs = (int) round((microtime(true) - $t0) * 1000);
             }
 
-            $endpoint = (string)$request->getUri()->getPath(); // ej: /api/v1/companies
+            $endpoint = (string)$request->getUri()->getPath();
             $method   = (string)$request->getMethod();
-
             $ip = $request->getIPAddress();
             $ua = (string)$request->getUserAgent();
             if (strlen($ua) > 255) $ua = substr($ua, 0, 255);
 
-            // 1) Insert en api_requests (si existe la tabla)
             if ($db->tableExists('api_requests')) {
                 $db->table('api_requests')->insert([
                     'user_id'         => (int)$meta['user_id'],
@@ -227,16 +219,12 @@ class ApiKeyFilter implements FilterInterface
                 ]);
             }
 
-            // 2) Upsert contador diario (si existe la tabla)
             $skipBilling = $request->api_skip_billing ?? false;
             if (!$skipBilling && (strpos($endpoint, 'api/v1/professional/search') !== false)) {
                 $skipBilling = true;
             }
 
             if ($db->tableExists('api_usage_daily') && !$skipBilling) {
-                $planId = (int)($meta['plan_id'] ?? 1);
-
-                // MySQL upsert por UNIQUE(user_id, plan_id, date)
                 $sql = "
                     INSERT INTO api_usage_daily (user_id, plan_id, date, requests_count, created_at, updated_at)
                     VALUES (?, ?, ?, 1, ?, ?)
@@ -246,28 +234,22 @@ class ApiKeyFilter implements FilterInterface
                 ";
                 $db->query($sql, [
                     (int)$meta['user_id'],
-                    $planId,
+                    (int)$meta['plan_id'],
                     $today,
                     $now,
                     $now,
                 ]);
             }
 
-            // (Opcional) header útil para soporte / trazabilidad (no cambia body)
             $response->setHeader('X-Request-Id', (string)$meta['request_id']);
         } catch (\Throwable $e) {
             log_message('error', '[ApiKeyFilter::after] ' . $e->getMessage());
         }
     }
 
-    /**
-     * Verifica si se ha alcanzado el umbral de 42.500 peticiones en los últimos 30 días
-     * y envía un correo de notificación.
-     */
     protected function checkThresholdNotification($db, int $userId)
     {
         try {
-            // 1. Calcular consumo últimos 30 días
             $thirtyDaysAgo = date('Y-m-d', strtotime('-30 days'));
             $usage = $db->table('api_usage_daily')
                 ->selectSum('requests_count')
@@ -279,13 +261,9 @@ class ApiKeyFilter implements FilterInterface
             $total = $usage ? (int)$usage->requests_count : 0;
 
             if ($total >= 42500) {
-                // 2. Evitar spam (usamos caché simple por 24h)
                 $cacheKey = "threshold_notif_sent_{$userId}";
-                if (cache()->get($cacheKey)) {
-                    return;
-                }
+                if (cache()->get($cacheKey)) return;
 
-                // 3. Enviar correo
                 $email = \Config\Services::email();
                 $email->setFrom('soporte@apiempresas.es', 'APIEmpresas Support');
                 $email->setTo('papelo.amh@gmail.com');
@@ -300,10 +278,7 @@ class ApiKeyFilter implements FilterInterface
                 $email->setMessage($message);
                 
                 if ($email->send()) {
-                    // Marcar como enviado por 24 horas para no repetir en cada request
                     cache()->save($cacheKey, true, 86400);
-                } else {
-                    log_message('error', '[ApiKeyFilter::checkThresholdNotification] Error al enviar email: ' . $email->printDebugger(['headers']));
                 }
             }
         } catch (\Throwable $e) {

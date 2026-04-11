@@ -151,6 +151,130 @@
             }
 
         }
+
+        /* Help Button & Modal Styles */
+        .ve-help-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #2152ff 0%, #5c7cff 100%);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            margin-left: 8px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            box-shadow: 0 2px 4px rgba(33, 82, 255, 0.2);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .ve-help-btn:hover {
+            opacity: 0.9;
+        }
+
+        .ve-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 10000;
+        }
+
+        .ve-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .ve-modal-content {
+            background: #fff;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 20px;
+            padding: 32px;
+            position: relative;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+        }
+
+        .ve-modal-overlay.active .ve-modal-content {
+            transform: translateY(0);
+        }
+
+        .ve-modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #f1f5f9;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .ve-modal-close:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .ve-modal-body h4 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ve-modal-body p {
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .ve-modal-icon {
+            font-size: 24px;
+        }
+
+        /* View all API button */
+        .ve-api-view-all {
+            display: inline-block;
+            background: linear-gradient(135deg, #2152ff 0%, #5c7cff 100%);
+            color: #fff;
+            padding: 14px 32px;
+            border-radius: 99px;
+            font-weight: 800;
+            font-size: 15px;
+            text-decoration: none;
+            border: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 20px -5px rgba(33, 82, 255, 0.4);
+        }
+
+        .ve-api-view-all:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 30px -8px rgba(33, 82, 255, 0.5);
+            opacity: 1;
+        }
     </style>
 </head>
 
@@ -580,6 +704,7 @@
                     <div class="price">0 €</div>
 
                     <ul class="tier__list">
+                        <li><strong>100</strong> consultas / mes</li>
                         <li>Acceso al mismo motor de producción</li>
                         <li>Datos oficiales para validar resultados</li>
                         <li>Perfecto para pruebas técnicas y POCs</li>
@@ -601,6 +726,7 @@
                     <div class="price">19 €/mes</div>
 
                     <ul class="tier__list">
+                        <li><strong>3.000</strong> consultas / mes</li>
                         <li>Verificación completa y actualizada</li>
                         <li>Tiempo real, lista para automatización</li>
                         <li>Ideal para facturación y scoring</li>
@@ -611,7 +737,7 @@
                         Para automatizar altas y facturación con trazabilidad.
                     </p>
 
-                    <a class="btn secondary" href="<?= site_url('checkout/radar-export?type=subscription&plan=pro&period=monthly') ?>">Empezar con Pro</a>
+                    <a class="btn secondary" href="<?= site_url('register') ?>">Empezar con Pro</a>
                 </div>
 
                 <!-- PLAN BUSINESS -->
@@ -621,6 +747,7 @@
                     <div class="price">49 €/mes</div>
 
                     <ul class="tier__list">
+                        <li><strong>10.000</strong> consultas / mes</li>
                         <li>Infraestructura para cargas elevadas</li>
                         <li>Para alto volumen y procesos críticos</li>
                         <li>SLA y alta disponibilidad</li>
@@ -631,7 +758,7 @@
                         Pensado para fintech, marketplaces y plataformas críticas.
                     </p>
 
-                    <a class="btn secondary" href="<?= site_url('checkout/radar-export?type=subscription&plan=business&period=monthly') ?>">Empezar con Business</a>
+                    <a class="btn secondary" href="<?= site_url('register') ?>">Empezar con Business</a>
                 </div>
             </div>
 
@@ -649,21 +776,94 @@
                         volumen y requisitos</a>
                 </div>
             </div>
-        </section>
 
-        <!-- DOCS -->
-        <section id="docs" class="dev container">
-            <h2>API para validar CIF en España: documentación y ejemplos listos</h2>
-
-            <p>
-                Documentación en español, <strong>OpenAPI/Swagger</strong>, SDKs oficiales y entorno de pruebas
-                interactivo.
-                Incluye ejemplos completos de integración para alta de clientes, flujos KYB y validación masiva.
-            </p>
-
-            <div class="code-card">
-                <pre><code>curl -H "Authorization: Bearer &lt;API_KEY&gt;" \
-"https://apiempresas.es/api/v1/companies?cif=B12345678"</code></pre>
+            <!-- PLAN COMPARISON TABLE NESTED -->
+            <div style="margin-top: 60px; padding: 20px 0;">
+                <h3 style="text-align: center; margin-bottom: 30px; font-size: 1.3rem; font-weight: 800; color: #1e293b;">Detalle de capacidades por Plan</h3>
+                
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #e2e8f0;">
+                                <th style="text-align: left; padding: 12px; color: #64748b; font-weight: 600;">Extensión / Endpoint</th>
+                                <th style="text-align: center; padding: 12px; color: #94a3b8; font-weight: 700;">Plan FREE</th>
+                                <th style="text-align: center; padding: 12px; color: #2152ff; font-weight: 700; background: rgba(33, 82, 255, 0.02);">Plan PRO</th>
+                                <th style="text-align: center; padding: 12px; color: #12b48a; font-weight: 700; background: rgba(18, 180, 138, 0.02);">Plan BUSINESS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 16px 12px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; color: #334155;">
+                                    /companies
+                                    <span class="ve-help-btn" onclick="openInfo(event, 'companies')" title="Ver más info">?</span>
+                                </td>
+                                <td style="text-align: center; padding: 12px; color: #12b48a; font-size: 1.1rem;">✔</td>
+                                <td style="text-align: center; padding: 12px; color: #12b48a; font-size: 1.1rem;">✔</td>
+                                <td style="text-align: center; padding: 12px; color: #12b48a; font-size: 1.1rem;">✔</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 16px 12px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; color: #334155;">
+                                    /score
+                                    <span class="ve-help-btn" onclick="openInfo(event, 'score')" title="Ver más info">?</span>
+                                </td>
+                                <td style="text-align: center; padding: 12px; color: #94a3b8; font-size: 0.85rem;">Solo Score</td>
+                                <td style="text-align: center; padding: 12px;"><span style="background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;">Básico</span></td>
+                                <td style="text-align: center; padding: 12px;"><span style="background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;">Avanzado</span></td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 16px 12px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; color: #334155;">
+                                    /signals
+                                    <span class="ve-help-btn" onclick="openInfo(event, 'signals')" title="Ver más info">?</span>
+                                </td>
+                                <td style="text-align: center; padding: 12px; color: #ef4444; font-size: 1.1rem;">❌</td>
+                                <td style="text-align: center; padding: 12px;"><span style="background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;">Básico</span></td>
+                                <td style="text-align: center; padding: 12px;"><span style="background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;">Avanzado</span></td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 16px 12px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; color: #334155;">
+                                    /radar
+                                    <span class="ve-help-btn" onclick="openInfo(event, 'radar')" title="Ver más info">?</span>
+                                </td>
+                                <td style="text-align: center; padding: 12px; color: #94a3b8; font-size: 0.85rem;">Limitado (10)</td>
+                                <td style="text-align: center; padding: 12px; color: #64748b; font-style: italic; font-size: 0.9rem;">Limitado (100)</td>
+                                <td style="text-align: center; padding: 12px; color: #12b48a; font-weight: 600;">COMPLETO</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 16px 12px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; color: #334155;">
+                                    /insights
+                                    <span class="ve-help-btn" onclick="openInfo(event, 'insights')" title="Ver más info">?</span>
+                                </td>
+                                <td style="text-align: center; padding: 12px; color: #ef4444; font-size: 1.1rem;">❌</td>
+                                <td style="text-align: center; padding: 12px; color: #94a3b8; font-size: 0.85rem;">Solo Perfil</td>
+                                <td style="text-align: center; padding: 12px; color: #12b48a; font-size: 1.1rem;">✔</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 16px 12px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; color: #334155;">
+                                    /contact-prep
+                                    <span class="ve-help-btn" onclick="openInfo(event, 'contact-prep')" title="Ver más info">?</span>
+                                </td>
+                                <td style="text-align: center; padding: 12px; color: #ef4444; font-size: 1.1rem;">❌</td>
+                                <td style="text-align: center; padding: 12px; color: #ef4444; font-size: 1.1rem;">❌</td>
+                                <td style="text-align: center; padding: 12px; color: #12b48a; font-size: 1.1rem;">✔</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 16px 12px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; color: #334155;">
+                                    /webhooks
+                                    <span class="ve-help-btn" onclick="openInfo(event, 'webhooks')" title="Ver más info">?</span>
+                                </td>
+                                <td style="text-align: center; padding: 12px; color: #ef4444; font-size: 1.1rem;">❌</td>
+                                <td style="text-align: center; padding: 12px; color: #ef4444; font-size: 1.1rem;">❌</td>
+                                <td style="text-align: center; padding: 12px; color: #12b48a; font-size: 1.1rem;">✔</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div style="text-align: center; margin-top: 32px; padding-bottom: 20px;">
+                        <a href="<?= site_url('api-empresas') ?>" class="ve-api-view-all">
+                            Explorar todas las capacidades de la API →
+                        </a>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -1222,6 +1422,7 @@
                             Ahora no, gracias
                         </button>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -1437,6 +1638,84 @@
                 }, DELAY_MS);
             })();
         });
+    </script>
+    <!-- INFO MODAL -->
+    <div id="veModalHelp" class="ve-modal-overlay" onclick="if(event.target === this) closeInfo()">
+        <div class="ve-modal-content">
+            <button class="ve-modal-close" onclick="closeInfo()">×</button>
+            <div id="veModalBody" class="ve-modal-body">
+                <!-- Dynamic Content -->
+            </div>
+            <div style="margin-top: 24px; text-align: right;">
+                <button class="btn primary" onclick="closeInfo()">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const endpointData = {
+            'companies': {
+                icon: '🏢',
+                title: 'Validación de Empresas (Datos base)',
+                text: 'Obtén la información oficial de cualquier empresa española en tiempo real. Incluye razón social, CIF, domicilio social registrado, código CNAE y estado de actividad (Activa, Disuelta, etc.).<br><br><strong>Origen de datos:</strong> Conexión directa con AEAT y Registro Mercantil para máxima fiabilidad en tus procesos de facturación o alta de clientes.'
+            },
+            'score': {
+                icon: '📊',
+                title: 'Inteligencia de Prioridad Comercial',
+                text: 'Nuestro algoritmo propietario analiza múltiples señales para predecir el interés comercial de una empresa. Asigna una puntuación del 0 al 100 y una prioridad de contacto.<br><br><strong>Valor añadido:</strong> Optimiza el tiempo de tu equipo de ventas enfocándolos en las empresas que tienen mayor probabilidad de contratar tus servicios ahora mismo.'
+            },
+            'signals': {
+                icon: '🔔',
+                title: 'Alertas y Señales de Negocio',
+                text: 'Monitorizamos diariamente el BORME para informarte sobre cambios estructurales en empresas: ampliaciones de capital, cambios de administradores, nombramientos o traslados de domicilio.<br><br><strong>Utilidad:</strong> Detecta oportunidades de "venta cruzada" o riesgos de negocio antes que tu competencia.'
+            },
+            'radar': {
+                icon: '📡',
+                title: 'Radar de Nuevas Empresas',
+                text: 'Accede programáticamente al listado de todas las empresas constituidas en las últimas 24 horas en España.<br><br><strong>Detalle:</strong> Puedes filtrar por provincia y sector. Es la herramienta definitiva para ser el primero en ofrecer tus servicios a nuevos proyectos recién creados.'
+            },
+            'insights': {
+                icon: '🧠',
+                title: 'Análisis Estratégico por IA',
+                text: 'Utilizamos modelos de IA avanzados para "leer" el perfil de la empresa y generar un resumen ejecutivo de su actividad y necesidades probables.<br><br><strong>Resultado:</strong> Te entregamos una visión clara de por qué esa empresa es un buen cliente para ti y qué problemas podrías resolverles.'
+            },
+            'contact-prep': {
+                icon: '💬',
+                title: 'Preparación Comercial Inteligente',
+                text: 'La IA genera automáticamente un pitch de ventas personalizado para el lead seleccionado.<br><br><strong>Contenido:</strong> Incluye un guion de apertura persuasivo y una lista de preguntas para manejar las objeciones más comunes en su sector específico.'
+            },
+            'webhooks': {
+                icon: '⚡',
+                title: 'Sincronización vía Webhooks',
+                text: 'Recibe notificaciones automáticas (PUSH) en tu servidor cada vez que detectemos una nueva empresa que cumpla tus criterios o una señal relevante.<br><br><strong>Automatización:</strong> Elimina la necesidad de consultar la API manualmente. Tu sistema se mantiene actualizado en tiempo real.'
+            }
+        };
+
+        function openInfo(e, slug) {
+            if(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            const data = endpointData[slug];
+            if(!data) return;
+
+            const body = document.getElementById('veModalBody');
+            body.innerHTML = `
+                <h4><span class="ve-modal-icon">${data.icon}</span> ${data.title}</h4>
+                <p>${data.text}</p>
+            `;
+
+            const modal = document.getElementById('veModalHelp');
+            modal.classList.add('active');
+            // document.body.style.overflow = 'hidden'; 
+        }
+
+        function closeInfo() {
+            const modal = document.getElementById('veModalHelp');
+            modal.classList.remove('active');
+            // document.body.style.overflow = '';
+        }
     </script>
 </body>
 
