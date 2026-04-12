@@ -45,9 +45,24 @@ $getScoreClass = function($score) {
 
 $formatCapital = function($val) {
     if (empty($val)) return null;
-    $clean = preg_replace('/[^0-9,\.]/', '', $val);
-    if (!$clean) return null;
-    return $val; // Return raw if it already looks like "3.000,00 Euros"
+    $clean = preg_replace('/[^0-9]/', '', $val);
+    if (!$clean) return 0;
+    return (float)$clean;
+};
+
+$getOpportunityText = function($score) {
+    if ($score >= 85) return ['label' => 'LEAD CALIENTE', 'class' => 'hot'];
+    if ($score >= 70) return ['label' => 'OPORTUNIDAD ALTA', 'class' => 'high'];
+    if ($score >= 40) return ['label' => 'CONTACTAR AHORA', 'class' => 'now'];
+    return ['label' => 'POTENCIAL MEDIO', 'class' => 'medium'];
+};
+
+$getEstimatedTicket = function($capital) {
+    if (!$capital || $capital <= 0) return '500€ - 1.500€';
+    if ($capital > 100000) return '5.000€ - 12.000€';
+    if ($capital > 50000) return '3.000€ - 7.000€';
+    if ($capital > 10000) return '1.500€ - 4.000€';
+    return '1.000€ - 2.500€';
 };
 
 $filters = $filters ?? [];
@@ -140,17 +155,151 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
     .ae-score-badge:hover {
         opacity: 0.85;
     }
+
+    /* Nuevos estilos Pro-Comercial */
+    .ae-opp-badge {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .ae-opp-badge.hot { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; }
+    .ae-opp-badge.high { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+    .ae-opp-badge.now { background: #dcfce7; color: #10b981; border: 1px solid #bbf7d0; }
+    .ae-opp-badge.medium { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+
+    .ae-ticket-val {
+        font-size: 15px;
+        font-weight: 800;
+        color: #1e293b;
+        letter-spacing: -0.01em;
+    }
+
+    .ae-reason-text {
+        font-size: 12px;
+        line-height: 1.4;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .ae-radar-page__table thead th {
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 0.05em;
+        color: #94a3b8;
+        padding-bottom: 16px;
+    }
+
+    .ae-radar-page__td-identity { width: 42%; }
+    .ae-radar-page__td-opportunity { width: 38%; }
+    .ae-radar-page__td-actions { width: 20%; }
+
+    .ae-btn-strategy {
+        background: #fff;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s;
+    }
+    .ae-btn-strategy:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #1e293b;
+    }
+
+    .ae-btn-fav-v3 {
+        background: #fff;
+        border: 1px solid #f1f5f9;
+        color: #94a3b8;
+        transition: all 0.2s;
+    }
+    .ae-btn-fav-v3:hover {
+        border-color: #e2e8f0;
+        background: #f8fafc;
+    }
+    .ae-btn-fav-v3.is-active {
+        color: #ffb800;
+        background: #fffbeb;
+        border-color: #fef3c7;
+    }
+
+    .ae-status-pill-v3 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 8px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        cursor: pointer;
+        transition: all 0.2s;
+        width: 100%;
+        justify-content: space-between;
+        position: relative;
+    }
+    .ae-status-pill-v3:hover {
+        border-color: #cbd5e1;
+        background: #f8fafc;
+    }
+    .ae-status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .ae-status-text {
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .ae-meta-sub {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 500;
+        margin-top: 6px;
+    }
+    .ae-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .ae-meta-icon {
+        opacity: 0.7;
+        font-size: 12px;
+    }
+
+    .ae-value-box {
+        background: rgba(248, 250, 252, 0.5);
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px 16px;
+        transition: all 0.2s;
+    }
+    .ae-radar-row:hover .ae-value-box {
+        border-color: #cbd5e1;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
 </style>
 
 <div class="ae-radar-page__lead-top" style="display:flex; justify-content:space-between; align-items:flex-end; padding:24px 26px;">
         <!-- Left Side: Title & Info -->
         <div class="ae-radar-page__lead-headings">
-            <h2 class="ae-radar-page__lead-title" style="margin-bottom:4px;">Clientes detectados con intención de compra</h2>
+            <h2 class="ae-radar-page__lead-title" style="margin-bottom:4px;">Oportunidades con potencial de compra</h2>
             <div class="ae-radar-page__lead-desc">
                 <?php if ($isFree): ?>
                     Muestra limitada de radar. Desbloquea PRO para ver todas las empresas.
                 <?php else: ?>
-                    Mostrando <strong><?= $pagination['start'] ?>-<?= $pagination['end'] ?></strong> de <strong><?= number_format($pagination['total']) ?></strong> resultados.
+                    Mostrando del <strong><?= $pagination['start'] ?> al <?= $pagination['end'] ?></strong> de <strong><?= number_format($pagination['total']) ?></strong> oportunidades con potencial de compra.
                 <?php endif; ?>
             </div>
         </div>
@@ -205,262 +354,168 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
         <table class="ae-radar-page__table">
             <thead>
                 <tr>
-                    <th>Razón social & Objetivo</th>
-                    <th>Fecha</th>
-                    <th>Provincia / Municipio</th>
-                    <th>Actividad principal</th>
-                    <th>Contacto</th>
-                    <th style="text-align:right;">Acciones</th>
+                    <th class="ae-radar-page__td-identity">Empresa y Contexto</th>
+                    <th class="ae-radar-page__td-opportunity">Potencial Comercial</th>
+                    <th class="ae-radar-page__td-actions" style="text-align:right;">Gestión y Acción</th>
                 </tr>
             </thead>
 
             <tbody>
                 <?php if (empty($visibleCompanies)): ?>
                     <tr>
-                        <td colspan="6" style="text-align:center; padding: 40px; color: #6b7280;">
+                        <td colspan="3" style="text-align:center; padding: 40px; color: #6b7280;">
                             No se han encontrado empresas con los filtros seleccionados.
                         </td>
                     </tr>
                 <?php else: ?>
+                    <?php 
+                        $statusStyleMap = [
+                            'nuevo' => ['bg' => '#f3f4f6', 'color' => '#4b5563', 'border' => '#e5e7eb'],
+                            'contactado' => ['bg' => '#eff6ff', 'color' => '#2563eb', 'border' => '#dbeafe'],
+                            'seguimiento' => ['bg' => '#fff7ed', 'color' => '#ea580c', 'border' => '#ffedd5'],
+                            'negociacion' => ['bg' => '#f5f3ff', 'color' => '#7c3aed', 'border' => '#ddd6fe'],
+                            'ganado' => ['bg' => '#f0fdf4', 'color' => '#16a34a', 'border' => '#dcfce7']
+                        ];
+                    ?>
                     <?php foreach ($visibleCompanies as $index => $co): ?>
                         <?php 
                             $isFirst = ($index === 0 && ($pagination['start'] ?? 1) == 1);
                             $isNew = ($co['status'] ?? 'nuevo') === 'nuevo';
-                            $prioKey = $co['priority_level'] ?? 'media';
                             
-                            // 0. Inteligencia Resiliente: Fallback de score basado en prioridad (AJUSTADO A 60+)
-                            $rawScore = (int)($co['score_total'] ?? 0);
-                            if ($rawScore === 0) {
-                                $fallbackMap = [
-                                    'muy_alta' => rand(85, 98),
-                                    'alta' => rand(65, 84),
-                                    'media' => rand(35, 64),
-                                    'baja' => rand(15, 34),
-                                    'muy_baja' => rand(5, 14)
-                                ];
-                                $scoreTotal = $fallbackMap[$prioKey] ?? 40;
+                            // 1. Score y Colores (Heurística unificada)
+                            $scoreData = $co['lead_score_data'] ?? ['numeric' => (int)($co['score_total'] ?? 0), 'base' => (int)($co['score_total'] ?? 0)];
+                            $scoreTotal = (int)round($scoreData['numeric']);
+                            $scoreColor = ($scoreTotal >= 70) ? '#059669' : ($scoreTotal >= 40 ? '#d97706' : '#64748b');
+                            $scoreIcon = ($scoreTotal >= 70) ? '🟢' : ($scoreTotal >= 40 ? '🟡' : '⚪');
+
+                            // 2. Datos Comerciales
+                            $opp = $getOpportunityText($scoreTotal);
+                            $capitalNum = $formatCapital($co['capital_social_raw'] ?? '');
+                            $ticket = $getEstimatedTicket($capitalNum);
+                            
+                            // 3. Timing y Urgencia
+                            $fechaConst = $co['fecha_constitucion'] ?? 'today';
+                            $daysSince = (strtotime('today') - strtotime($fechaConst)) / 86400;
+                            $urgencyClass = ($daysSince <= 5) ? 'color: #ef4444;' : 'color: #3b82f6;';
+                            if ($daysSince <= 2) $timingLabel = 'Ventana ideal: Ahora';
+                            elseif ($daysSince <= 10) $timingLabel = 'Oportunidad temprana';
+                            else $timingLabel = 'Fase activa';
+
+                            // 4. Motivo Inteligente (Fallback mejorado)
+                            $sectorSimple = esc(mb_strimwidth($co['cnae_label'] ?? 'su sector', 0, 30, '...'));
+                            if (empty($needText) || $needText == 'Necesidad detectada por Radar') {
+                                if ($scoreTotal >= 85) $reason = "Liderazgo detectado en $sectorSimple con alta tracción.";
+                                elseif ($daysSince <= 3) $reason = "Nueva constitución en $sectorSimple con necesidad inminente.";
+                                else $reason = "Empresa de $sectorSimple con señales de escalado detectadas.";
                             } else {
-                                $scoreTotal = $rawScore;
+                                $reason = $needText;
                             }
 
-                            // Umbral de alta prioridad ajustado a 60+ (Ajuste Final 4)
-                            $isHighPriority = ($prioKey === 'high' || $prioKey === 'alta' || $prioKey === 'muy_alta' || $scoreTotal >= 60);
-                            
-                            // 1. Lógica de Semáforo PRO (Ajuste Final - Umbrales 60/30)
-                            $scoreColor = '#94a3b8'; // Gris por defecto
-                            $scoreProb = 'Baja probabilidad / Exploratorio';
-                            $scoreIcon = '⚪';
-                            $scoreBg = 'rgba(148, 163, 184, 0.1)';
-
-                            if ($scoreTotal >= 60) {
-                                $scoreColor = '#10b981'; // Verde fuerte
-                                $scoreBg = 'rgba(16, 185, 129, 0.1)';
-                                $scoreProb = 'Alta probabilidad de cierre';
-                                $scoreIcon = '🟢';
-                            } elseif ($scoreTotal >= 30) {
-                                $scoreColor = '#f59e0b'; // Amarillo/Ámbar
-                                $scoreBg = 'rgba(245, 158, 11, 0.1)';
-                                $scoreProb = 'Interés medio detectado';
-                                $scoreIcon = '🟡';
-                            }
-                            
-                            // 2. TIMING (Heurística de urgencia comercial vinculada al Score)
-                            if ($scoreTotal >= 90) {
-                                $days = 1;
-                            } elseif ($scoreTotal >= 70) {
-                                $days = rand(2, 3);
-                            } elseif ($scoreTotal >= 50) {
-                                $days = rand(4, 7);
-                            } else {
-                                $days = rand(8, 15);
-                            }
-                            
-                            $timingText = ($days <= 1) ? 'Prioridad inmediata' : "Contactar en $days días";
-
-                            // 3. NECESIDAD (Mapeo heurístico inteligente extendido v5.0 - ULTRA DINÁMICO)
-                            $cnaeLabel = mb_strtolower($co['cnae_label'] ?? '');
-                            $objSocial = mb_strtolower($co['objeto_social'] ?? '');
-                            $companyName = mb_strtolower($co['company_name'] ?? '');
-                            $allText = $cnaeLabel . ' ' . $objSocial . ' ' . $companyName;
-
-                            if (strpos($allText, 'construc') !== false || strpos($allText, 'mortero') !== false || strpos($allText, 'pintura') !== false || strpos($allText, 'obra') !== false || strpos($allText, 'reforma') !== false || strpos($allText, 'instala') !== false) {
-                                $needs = ['Suministros / Obra / Alquiler Maquinaria', 'Prevención Riesgos / Herramientas / CRM', 'Logística Materiales / Eficiencia Energética'];
-                                $needText = $needs[$index % count($needs)];
-                            } elseif (strpos($allText, 'comercio') !== false || strpos($allText, 'al por mayor') !== false || strpos($allText, 'tienda') !== false || strpos($allText, 'venta') !== false || strpos($allText, 'retail') !== false) {
-                                $needs = ['E-commerce / Logística / Digitalización', 'Gestión Stock / TPV / Fidelización', 'Marketing Digital / Packaging Ecológico'];
-                                $needText = $needs[$index % count($needs)];
-                            } elseif (strpos($allText, 'hostele') !== false || strpos($allText, 'restaura') !== false || strpos($allText, 'cafeteria') !== false || strpos($allText, 'bar') !== false || strpos($allText, 'comida') !== false) {
-                                $needs = ['Marketing Local / Software Reservas / Delivery', 'Suministros Hostelería / Apps Fidelización', 'Control APPCC / Digitalización de Carta'];
-                                $needText = $needs[$index % count($needs)];
-                            } elseif (strpos($allText, 'transp') !== false || strpos($allText, 'logistica') !== false || strpos($allText, 'mudanza') !== false || strpos($allText, 'reparto') !== false || strpos($allText, 'almacen') !== false) {
-                                $needs = ['Gestión Flotas / Combustible / Seguros', 'Trazabilidad / Software Logístico / Almacén', 'Mantenimiento Vehículos / Optimización Rutas'];
-                                $needText = $needs[$index % count($needs)];
-                            } elseif (strpos($allText, 'asesor') !== false || strpos($allText, 'abog') !== false || strpos($allText, 'juridica') !== false || strpos($allText, 'gestoria') !== false || strpos($allText, 'contable') !== false || strpos($allText, 'extranjeria') !== false) {
-                                $needs = ['CRM / LOPD / Firma Digital', 'Gestión Documental / Ciberseguridad', 'Captación Leads / Automatización Procesos'];
-                                $needText = $needs[$index % count($needs)];
-                            } elseif (strpos($allText, 'inmobiliaria') !== false || strpos($allText, 'promo') !== false || strpos($allText, 'alquiler') !== false || strpos($allText, 'propie') !== false || strpos($allText, 'invest') !== false) {
-                                $needs = ['Proptech / Gestión Activos / CRM', 'Marketing Inmobiliario / Tours Virtuales', 'Software Gestión Alquileres / Lead Nurturing'];
-                                $needText = $needs[$index % count($needs)];
-                            } elseif (strpos($allText, 'tecno') !== false || strpos($allText, 'software') !== false || strpos($allText, 'informatica') !== false || strpos($allText, 'digital') !== false || strpos($allText, 'data') !== false) {
-                                $needs = ['Infraestructura Cloud / APIs / Ciberseguridad', 'Talento IT / Outsourcing / SaaS', 'QA Testing / Implementación IA / UX'];
-                                $needText = $needs[$index % count($needs)];
-                            } elseif (strpos($allText, 'energia') !== false || strpos($allText, 'solar') !== false || strpos($allText, 'electrica') !== false || strpos($allText, 'gas') !== false) {
-                                $needs = ['Certificaciones / Suministros / Instalación', 'Software Monitorización / Paneles Solares', 'Mantenimiento Preventivo / Eficiencia'];
-                                $needText = $needs[$index % count($needs)];
-                            } elseif (strpos($allText, 'fabrica') !== false || strpos($allText, 'industri') !== false || strpos($allText, 'manufact') !== false || strpos($allText, 'metal') !== false) {
-                                $needs = ['Maquinaria / ERP Industrial / Logística', 'Control Calidad / ISO 9001 / Robotización', 'Mantenimiento predictivo / Eficiencia'];
-                                $needText = $needs[$index % count($needs)];
-                            } elseif (strpos($allText, 'profesional') !== false || strpos($allText, 'tecnica') !== false || strpos($allText, 'cientifica') !== false || strpos($allText, 'clapa') !== false || strpos($allText, 'uncommon') !== false) {
-                                $needs = ['Software Gestión Proyectos / CRM / Facturación', 'Presencia Digital / LinkedIn B2B / Branding', 'Talento Especializado / Colaboración'];
-                                $needText = $needs[$index % count($needs)];
-                            } else {
-                                $fallbackNeeds = [
-                                    'Web / CRM / Consultoría Estratégica',
-                                    'Digitalización / RRHH / Gestión Leads',
-                                    'Presencia Online / Automatización / CRM',
-                                    'Ciberseguridad / Cloud / Asesoría IT',
-                                    'Branding / Marketing B2B / Web Corporativa'
-                                ];
-                                $needText = $fallbackNeeds[$index % count($fallbackNeeds)];
+                            // 5. Estilo de Fila y Estado
+                            $rowStyle = 'border-left: 5px solid transparent; transition: all 0.2s; vertical-align: middle;';
+                            if ($isNew || $scoreTotal >= 70) {
+                                $rowStyle = "border-left: 5px solid {$scoreColor}; background: linear-gradient(to right, #f8fbff, #ffffff);";
                             }
 
-                            $rowStyle = 'border-left: 4px solid transparent; padding-top: 16px; padding-bottom: 16px; transition: all 0.2s;';
-                            if ($isNew) {
-                                $rowStyle = "border-left: 4px solid {$scoreColor}; background: #f8fbff;";
-                            } elseif ($isHighPriority) {
-                                $rowStyle = "border-left: 4px solid {$scoreColor};";
-                            }
-
-                            // 4. ESTADO CRM (Colores)
-                            $statusStyleMap = [
-                                'nuevo' => ['bg' => '#f3f4f6', 'color' => '#4b5563', 'border' => '#e5e7eb'],
-                                'contactado' => ['bg' => '#eff6ff', 'color' => '#2563eb', 'border' => '#dbeafe'],
-                                'seguimiento' => ['bg' => '#fff7ed', 'color' => '#ea580c', 'border' => '#ffedd5'],
-                                'negociacion' => ['bg' => '#f5f3ff', 'color' => '#7c3aed', 'border' => '#ddd6fe'],
-                                'ganado' => ['bg' => '#f0fdf4', 'color' => '#16a34a', 'border' => '#dcfce7']
-                            ];
                             $curStatus = $co['status'] ?? 'nuevo';
                             $st = $statusStyleMap[$curStatus] ?? $statusStyleMap['nuevo'];
                         ?>
                         <tr class="ae-radar-row ae-row-entrance <?= $isFirst ? 'ae-recommended-row' : '' ?>" style="<?= $rowStyle ?> animation-delay: <?= $index * 0.03 ?>s;">
-                            <td class="ae-radar-page__td-company">
-                                <div class="ae-radar-page__company">
-                                    <!-- BLOQUE 1: Identificación y Score (Pilar de Decisión) -->
-                                    <div class="ae-radar-page__company-header" style="margin-bottom: 4px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                                        <a href="javascript:void(0)" 
-                                           onclick="openQuickView('<?= $co['id'] ?>')"
-                                           class="ae-radar-page__company-link" 
-                                           style="display: block; text-decoration: none; margin-bottom: 6px;">
-                                            <span class="ae-radar-page__company-name" style="font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.2; letter-spacing: -0.01em;"><?= esc($co['company_name']) ?></span>
+                            <!-- ZONA 1: IDENTIDAD Y CONTEXTO (42%) -->
+                            <td class="ae-radar-page__td-identity" style="padding: 24px 20px;">
+                                <div style="display: flex; flex-direction: column;">
+                                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                                        <a href="javascript:void(0)" onclick="openQuickView('<?= $co['id'] ?>')" style="text-decoration: none;">
+                                            <span style="font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.2; letter-spacing: -0.01em;"><?= esc($co['company_name']) ?></span>
                                         </a>
-
-                                        <?php 
-                                            // Usar el score calculado dinámicamente con boosters de inteligencia
-                                            $scoreData = $co['lead_score_data'] ?? ['numeric' => (int)($co['score_total'] ?? 0), 'base' => (int)($co['score_total'] ?? 0)];
-                                            $finalNum = (int)round($scoreData['numeric']);
-                                            $isBoosted = ($finalNum > (int)round($scoreData['base']));
-                                            
-                                            // Clases de color basadas en el score final (Umbrales 70/40 optimizados)
-                                            $scoreColor = ($finalNum >= 70) ? '#059669' : ($finalNum >= 40 ? '#d97706' : '#64748b');
-                                            $scoreIcon = ($finalNum >= 70) ? '🟢' : ($finalNum >= 40 ? '🟡' : '⚪');
-                                        ?>
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <div class="ae-radar-page__score-badge" 
-                                                 style="background: white; border: 1.5px solid <?= $scoreColor ?>; padding: 4px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                                                <span style="font-weight: 900; font-size: 11px; color: <?= $scoreColor ?>;">
-                                                    <?= $scoreIcon ?> <?= $finalNum ?>/100
-                                                </span>
-                                            </div>
+                                        <div style="background: white; border: 1.5px solid <?= $scoreColor ?>; padding: 2px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;">
+                                            <span style="font-weight: 900; font-size: 10px; color: <?= $scoreColor ?>;">
+                                                <?= $scoreIcon ?> <?= $scoreTotal ?>/100
+                                            </span>
                                         </div>
                                     </div>
                                     
-                                    <!-- BLOQUE 2: Acción Estratégica (Urgencia + Necesidad) -->
-                                    <div style="margin-bottom: 12px; font-size: 10.5px; color: #64748b; display: flex; align-items: center; gap: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; flex-wrap: wrap;">
-                                        <?php if ($curStatus === 'nuevo'): ?>
-                                            <div style="display: flex; align-items: center; gap: 5px; <?= ($days <= 1) ? 'color: #ef4444;' : 'color: #3b82f6;' ?>">
-                                                <span style="width: 5px; height: 5px; border-radius: 50%; background: currentColor; display: inline-block;"></span>
-                                                <?= $timingText ?>
-                                            </div>
-                                            <div style="color: #e2e8f0; font-weight: 300;">|</div>
-                                        <?php endif; ?>
-                                        <div style="display: flex; align-items: center; gap: 6px;">
-                                            <span style="opacity: 0.7;">💡 Necesita:</span> 
-                                            <span style="color: #475569;"><?= $needText ?></span>
+                                    <div class="ae-meta-sub">
+                                        <div class="ae-meta-item" title="Actividad">
+                                            <span class="ae-meta-icon">🏢</span>
+                                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;"><?= esc($co['cnae_label'] ?? 'Sector no especificado') ?></span>
+                                        </div>
+                                        <div style="width: 1px; height: 10px; background: #e2e8f0;"></div>
+                                        <div class="ae-meta-item" title="Ubicación">
+                                            <span class="ae-meta-icon">📍</span>
+                                            <span><?= esc($co['registro_mercantil'] ?? 'N/D') ?></span>
                                         </div>
                                     </div>
 
-                                </div>
-
-<div class="ae-radar-page__sales-intel-legacy" style="display:none;"></div>
-                                </div>
-                            </td>
-                            <td class="ae-radar-page__td-date">
-                                <span class="ae-radar-page__date" style="display: block; font-weight: 800; color: #1e293b;"><?= $formatEsDate($co['last_borme_date'] ?? $co['fecha_constitucion']) ?></span>
-                                <?php if (!empty($co['last_borme_date']) && (strtotime($co['last_borme_date']) >= strtotime('-7 days'))): ?>
-                                    <span style="font-size: 10px; background: #ecfdf5; color: #059669; padding: 2px 6px; border-radius: 6px; font-weight: 800; text-transform: uppercase;">Reciente</span>
-                                <?php endif; ?>
-                            </td>
-                            <td class="ae-radar-page__td-location">
-                                <div class="ae-radar-page__location">
-                                    <span class="ae-radar-page__province"><?= esc($co['registro_mercantil'] ?? 'N/D') ?></span>
-                                    <span class="ae-radar-page__municipality"><?= esc($co['municipality'] ?? '') ?></span>
-                                </div>
-                            </td>
-                            <td class="ae-radar-page__td-activity">
-                                <div class="ae-radar-page__activity">
-                                    <span class="ae-radar-page__badge ae-radar-page__badge--sector" style="display: block;">
-                                        <?= esc(mb_strimwidth($co['cnae_label'] ?? 'N/D', 0, 48, '...')) ?>
-                                    </span>
-                                </div>
-                            </td>
-                            <td class="ae-radar-page__td-contact">
-                                <div class="ae-radar-page__contact">
-                                    <?php if ($isFree): ?>
-                                        <span class="ae-radar-page__locked-phone">🔒 Bloqueado</span>
-                                    <?php elseif (!empty($co['phone'])): ?>
-                                        <div class="ae-radar-page__phone-group">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79(19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.21-2.21a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                                            <span class="ae-radar-page__phone-number"><?= esc($co['phone']) ?></span>
+                                    <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+                                        <div style="font-size: 10px; font-weight: 800; background: #f1f5f9; padding: 3px 8px; border-radius: 6px; <?= $urgencyClass ?> text-transform: uppercase;">
+                                            ⏱️ <?= $timingLabel ?>
                                         </div>
-                                    <?php else: ?>
-                                        <span class="ae-radar-page__no-phone">-</span>
-                                    <?php endif; ?>
+                                        <span style="font-size: 10px; color: #94a3b8; font-weight: 600;">(<?= $formatEsDate($co['last_borme_date'] ?? $co['fecha_constitucion']) ?>)</span>
+                                    </div>
                                 </div>
                             </td>
-                            <td class="ae-radar-page__td-actions" style="text-align:right; vertical-align: middle;">
-                                <div class="ae-radar-page__company-actions" style="display: flex; align-items: center; gap: 8px; justify-content: flex-end;">
+
+                            <!-- ZONA 2: POTENCIAL COMERCIAL (38%) -->
+                            <td class="ae-radar-page__td-opportunity" style="padding: 24px 10px;">
+                                <div class="ae-value-box">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <span class="ae-opp-badge <?= $opp['class'] ?>"><?= $opp['label'] ?></span>
+                                        <div style="text-align: right;">
+                                            <div style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 1px;">Ticket Est.</div>
+                                            <div class="ae-ticket-val"><?= $ticket ?></div>
+                                        </div>
+                                    </div>
+                                    <div class="ae-reason-text" style="border-top: 1px solid #f1f5f9; padding-top: 8px; font-style: italic;">
+                                        <span style="color: #475569; font-weight: 800; font-style: normal;">Motivo:</span> 
+                                        "<?= esc($reason) ?>"
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- ZONA 3: GESTIÓN Y ACCIÓN (20%) -->
+                            <td class="ae-radar-page__td-actions" style="padding: 24px 20px; text-align: right; vertical-align: top;">
+                                <div style="display: flex; flex-direction: column; gap: 10px; align-items: stretch; max-width: 180px; margin-left: auto;">
                                     <?php if ($curStatus === 'nuevo'): ?>
-                                        <button type="button" 
-                                                class="ae-btn-hover ae-btn-contact-main"
-                                                onclick="handleContactClick(this, '<?= $co['id'] ?>', '<?= esc($co['company_name']) ?>')" 
-                                                style="background: #2563eb; color: white; padding: 0 14px; height: 36px; border-radius: 8px; font-weight: 800; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); transition: all 0.2s;">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width: 12px; height: 12px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                                            <span class="btn-text">Contactar</span>
+                                        <!-- Acción Primaria -->
+                                        <button type="button" class="ae-btn-hover" onclick="handleContactClick(this, '<?= $co['id'] ?>', '<?= esc($co['company_name']) ?>')" 
+                                                style="background: #2563eb; color: white; width: 100%; height: 42px; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width: 14px; height: 14px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                            Contactar ahora
                                         </button>
                                     <?php endif; ?>
+                                    
+                                    <!-- Acciones Secundarias -->
+                                    <div style="display: flex; gap: 6px;">
+                                        <button type="button" class="ae-btn-strategy ae-btn-hover" onclick="analyzeAI('<?= $co['id'] ?>', this, '<?= esc($co['company_name']) ?>', 'analyze')" 
+                                                style="flex: 1; height: 36px; border-radius: 8px; font-weight: 700; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                            🎯 Cómo venderle
+                                        </button>
 
-                                    <button type="button" 
-                                            class="ae-btn-hover"
-                                            onclick="analyzeAI('<?= $co['id'] ?>', this, '<?= esc($co['company_name']) ?>', 'analyze')" 
-                                            style="background: white; color: #475569; padding: 0 10px; height: 36px; border-radius: 8px; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.02em; border: 1px solid #e2e8f0; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">
-                                        <span style="font-size: 12px;">🎯</span> Estrategia
-                                    </button>
-
-                                    <select onchange="updateLeadStatusAndNotify(this, '<?= $co['id'] ?>')" 
-                                            style="height: 36px; padding: 0 8px; border-radius: 8px; font-size: 9px; font-weight: 800; text-transform: uppercase; cursor: pointer; outline: none; background: <?= $st['bg'] ?>; color: <?= $st['color'] ?>; border: 1px solid <?= $st['border'] ?>; transition: all 0.2s; min-width: 100px;">
-                                        <option value="nuevo" <?= ($curStatus === 'nuevo') ? 'selected' : '' ?>>NUEVO</option>
-                                        <option value="contactado" <?= ($curStatus === 'contactado') ? 'selected' : '' ?>>CONTACTADO</option>
-                                        <option value="seguimiento" <?= ($curStatus === 'seguimiento') ? 'selected' : '' ?>>SEGUIMIENTO</option>
-                                        <option value="negociacion" <?= ($curStatus === 'negociacion') ? 'selected' : '' ?>>NEGOCIACIÓN</option>
-                                        <option value="ganado" <?= ($curStatus === 'ganado') ? 'selected' : '' ?>>GANADO</option>
-                                    </select>
-
-                                    <button type="button" 
-                                            class="ae-radar-page__btn-fav <?= ($co['is_favorite'] ?? false) ? 'is-active' : '' ?>" 
-                                            onclick="toggleFavorite(this, '<?= $co['id'] ?>')"
-                                            style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: white; border: 1px solid #f1f5f9; cursor: pointer; transition: all 0.2s;">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="<?= ($co['is_favorite'] ?? false) ? '#ffb800' : 'none' ?>" stroke="<?= ($co['is_favorite'] ?? false) ? '#ffb800' : 'currentColor' ?>" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                    </button>
+                                        <button type="button" class="ae-btn-fav-v3 <?= ($co['is_favorite'] ?? false) ? 'is-active' : '' ?>" onclick="toggleFavorite(this, '<?= $co['id'] ?>')"
+                                                style="width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="<?= ($co['is_favorite'] ?? false) ? '#ffb800' : 'none' ?>" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Píldora de Estado (V3) -->
+                                    <div style="margin-top: 4px;">
+                                        <div class="ae-status-pill-v3" onclick="this.querySelector('select').focus()">
+                                            <div style="display: flex; align-items: center; gap: 6px;">
+                                                <span class="ae-status-dot" style="background: <?= $st['color'] ?>;"></span>
+                                                <span class="ae-status-text" style="color: <?= $st['color'] ?>;"><?= $curStatus ?></span>
+                                            </div>
+                                            <select onchange="updateLeadStatusAndNotify(this, '<?= $co['id'] ?>')" 
+                                                    style="position: absolute; opacity: 0; width: 100%; height: 100%; top:0; left:0; cursor: pointer;">
+                                                <option value="nuevo" <?= ($curStatus === 'nuevo') ? 'selected' : '' ?>>NUEVO</option>
+                                                <option value="contactado" <?= ($curStatus === 'contactado') ? 'selected' : '' ?>>CONTACTADO</option>
+                                                <option value="seguimiento" <?= ($curStatus === 'seguimiento') ? 'selected' : '' ?>>SEGUIMIENTO</option>
+                                                <option value="negociacion" <?= ($curStatus === 'negociacion') ? 'selected' : '' ?>>NEGOCIACIÓN</option>
+                                                <option value="ganado" <?= ($curStatus === 'ganado') ? 'selected' : '' ?>>GANADO</option>
+                                            </select>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
                         </tr>

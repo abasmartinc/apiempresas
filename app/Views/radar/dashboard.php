@@ -258,13 +258,58 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                     </button>
                                 </div>
 
-                                <h1 class="ae-radar-page__hero-title" style="font-size: 32px; margin-bottom: 12px; line-height: 1.1; color: #0f172a !important; font-weight: 800;">
-                                    Detecta clientes nuevos antes que tu competencia
+                                <h1 class="ae-radar-page__hero-title" style="font-size: 32px; margin-bottom: 8px; line-height: 1.1; color: #0f172a !important; font-weight: 800;">
+                                    Consigue clientes nuevos antes que tu competencia
                                 </h1>
 
-                                <p class="ae-radar-page__hero-text" style="font-size: 15px; margin-bottom: 20px; max-width: 600px; color: #334155; font-weight: 500; line-height: 1.5;">
-                                    Detecta empresas en fase inicial con alta probabilidad de contratar servicios en los próximos días.
+                                <p class="ae-radar-page__hero-text" style="font-size: 14px; margin-bottom: 24px; max-width: 600px; color: #64748b; font-weight: 500; line-height: 1.4;">
+                                    Tu pipeline de ventas inteligente: detectamos empresas en fase inicial con alta probabilidad de compra.
                                 </p>
+
+                                <!-- BLOQUE PRINCIPAL DE PIPELINE (ROI REFINADO V2) -->
+                                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); position: relative; overflow: hidden;">
+                                    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; position: relative; z-index: 2;">
+                                        <div style="display: flex; flex-direction: column; gap: 14px;">
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <span style="font-size: 18px;">💼</span>
+                                                <span style="font-size: 14px; font-weight: 700; color: #1e293b;"><?= number_format($pipelineMetrics['total_opps']) ?> oportunidades detectadas</span>
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <span style="font-size: 18px;">🎯</span>
+                                                <span style="font-size: 14px; font-weight: 700; color: #1e293b;"><?= $pipelineMetrics['clients_label'] ?> clientes reales <span style="font-weight: 500; color: #64748b; font-size: 12px;">(según conv. media)</span></span>
+                                            </div>
+                                            <div style="margin-top: 4px; font-size: 12px; font-weight: 600; color: #64748b; display: flex; align-items: center; gap: 6px;">
+                                                🚀 Equipos comerciales ya están usando este radar para generar nuevos clientes
+                                            </div>
+                                        </div>
+
+                                        <div style="display: flex; flex-direction: column; gap: 16px; border-left: 1px solid #f1f5f9; padding-left: 24px;">
+                                            <div>
+                                                <span style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Potencial económico</span>
+                                                <div style="font-size: 22px; font-weight: 900; color: #2563eb; letter-spacing: -0.5px; margin-top: 2px;">
+                                                    💰 Hasta <?= $metricsService->formatCurrency($pipelineMetrics['pipeline_max']) ?> <span style="font-size: 12px; font-weight: 700; color: #64748b; display: block; margin-top: -2px;">en pipeline potencial detectado</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <button type="button" onclick="document.getElementById('radar-results-container').scrollIntoView({behavior:'smooth'})" 
+                                                    style="background: #2563eb; color: white; height: 42px; width: 100%; border-radius: 12px; font-weight: 800; font-size: 12px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                                Ir a las mejores oportunidades
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width: 14px; height: 14px;"><path d="M7 13l5 5 5-5M7 6l5 5 5-5"></path></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <!-- ROI Highlight Footer -->
+                                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="font-size: 14px;">✅</span>
+                                            <span style="font-size: 13px; font-weight: 700; color: #10b981;"><?= $pipelineMetrics['roi_message'] ?></span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: #ea580c; text-transform: uppercase;">
+                                            <span style="width: 6px; height: 6px; background: #ea580c; border-radius: 50%; display: block; animation: pulse 2s infinite;"></span>
+                                            Ventana de contacto activa
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <?php if ($isFree): ?>
                                     <div class="ae-radar-page__hero-actions" style="margin-top: 20px;">
@@ -321,6 +366,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                     </h3>
                                     <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 500;">
                                         Gestiona tu embudo de ventas y asegura el cierre de cada oportunidad.
+                                        <span style="display: block; margin-top: 6px; color: #10b981; font-weight: 800; font-size: 14px; letter-spacing: -0.2px;">💰 Valor total estimado hoy: <?= $todayMetrics['pipeline_label'] ?></span>
                                     </p>
                                 </div>
                                 
@@ -366,6 +412,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                     </h3>
                                     <p style="margin: 0; font-size: 14px; color: #64748b; font-weight: 500; max-width: 700px;">
                                         Empresas recién creadas con mayor probabilidad de contratar servicios en sus primeros días.
+                                        <span style="display: block; margin-top: 4px; color: #2563eb; font-weight: 700; font-size: 13px;">💰 Valor estimado de estas oportunidades: <?= $intelMetrics['pipeline_label'] ?></span>
                                     </p>
                                 </div>
                                 <a href="<?= site_url('radar?' . http_build_query(array_merge($filters, ['priority_level' => 'muy_alta', 'rango' => '7', 'intel' => 'active']))) ?>#radar-results-container" 

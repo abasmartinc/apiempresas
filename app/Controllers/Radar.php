@@ -241,7 +241,13 @@ class Radar extends BaseController
         $startRecord = ($currentPage - 1) * $perPage + 1;
         $endRecord = min($currentPage * $perPage, $totalCount);
 
-        // 3. Estadísticas de progreso CRM (Ajuste 1)
+        // 3. Cálculo de ROI y Pipeline (Refuerzo de Valor)
+        $metricsService = new \App\Libraries\RadarMetricsService();
+        $pipelineMetrics = $metricsService->getMetrics($totalCount);
+        $todayMetrics = $metricsService->getMetrics($stats['hoy']);
+        $intelMetrics = $metricsService->getMetrics(round(($freshness['todayCount'] ?? 250) * 0.15)); // Proporción de alta prob.
+
+        // 4. Estadísticas de progreso CRM (Ajuste 1)
         $crmStats = ['contactado' => 0, 'seguimiento' => 0, 'nuevo' => 0];
         $statusCounts = $db->table('user_favorites uf')
             ->select('uf.status, COUNT(*) as total')
@@ -307,6 +313,10 @@ class Radar extends BaseController
         $data = [
             'stats' => $stats,
             'crmStats' => $crmStats,
+            'metricsService' => $metricsService,
+            'pipelineMetrics' => $pipelineMetrics,
+            'todayMetrics' => $todayMetrics,
+            'intelMetrics' => $intelMetrics,
             'companies' => $companies,
             'pager' => $pager,
             'provinces' => $provinces,
