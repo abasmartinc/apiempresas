@@ -124,15 +124,15 @@ class Sitemap extends Controller
         if ($page < 1) $page = 1;
 
         $model = new CompanyModel();
-        helper('text'); // para url_title
+        helper(['text', 'seo_dynamic_helper', 'company']); // para url_title, scoring y urls de empresa
 
         // Calcular offset
         $offset = ($page - 1) * $this->perPage;
 
         // Obtener lote de empresas
-        // Necesitamos ID, CIF y Nombre
+        // Necesitamos campos extra para el cálculo del score SEO (shouldIndexCompany)
         $companies = $model->builder()
-            ->select('id, cif, company_name as name') 
+            ->select('id, cif, company_name as name, cnae_code as cnae, registro_mercantil as province, objeto_social as corporate_purpose') 
             ->orderBy('id', 'ASC') // Orden consistente
             ->limit($this->perPage, $offset)
             ->get()
@@ -145,8 +145,16 @@ class Sitemap extends Controller
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
+        $included = 0;
+        $excluded = 0;
+
         foreach ($companies as $company) {
-            helper('company');
+            // FILTRO SEO: Saltar empresas que no cumplan el mínimo de calidad
+            if (!shouldIndexCompany($company)) {
+                $excluded++;
+                continue;
+            }
+
             $url = company_url($company);
             
             $xml .= '<url>' . PHP_EOL;
@@ -155,9 +163,14 @@ class Sitemap extends Controller
             $xml .= '  <changefreq>monthly</changefreq>' . PHP_EOL;
             $xml .= '  <priority>0.6</priority>' . PHP_EOL;
             $xml .= '</url>' . PHP_EOL;
+            
+            $included++;
         }
 
         $xml .= '</urlset>';
+
+        // Log opcional para monitorear el ratio de indexación (puedes comentarlo si no lo necesitas)
+        log_message('debug', "Sitemap Companies Page {$page}: Included {$included}, Excluded {$excluded}");
 
         return $this->response->setContentType('application/xml')->setBody($xml);
     }
