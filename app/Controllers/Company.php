@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\CompanyModel;
 use App\Models\BormePostsModel;
+use App\Models\CompanyAdministratorModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -14,11 +15,14 @@ class Company extends BaseController
     protected $companyModel;
     /** @var BormePostsModel */
     protected $bormePostsModel;
+    /** @var CompanyAdministratorModel */
+    protected $adminModel;
 
     public function __construct()
     {
         $this->companyModel = new CompanyModel();
         $this->bormePostsModel = new BormePostsModel();
+        $this->adminModel = new CompanyAdministratorModel();
         helper(['text', 'seo_dynamic_helper']); // Cargar text para url_title y nuestro nuevo helper SEO
     }
 
@@ -131,6 +135,34 @@ class Company extends BaseController
         $company['seo_score']     = calculateCompanySeoScore($company);
         // --- DINAMIC SEO INDEXING ---
 
+        // Administrators
+        $adminsRaw = $this->adminModel->getByCompanyId((int)$company['id']);
+        $filteredAdmins = [];
+        $excludeKeywords = ['CAPITAL', 'DOMICILIO', 'OBJETO SOCIAL', 'OTROS CONCEPTOS', 'COMIENZO DE OPERACIONES', 'INSCRIPCION', 'RESULTANTE', 'SUSCRITO', 'EURO', 'REMITIDO'];
+        $seenAdmins = [];
+
+        foreach ($adminsRaw as $admin) {
+            $nameStr = strtoupper($admin['name'] ?? '');
+            $posStr = strtoupper($admin['position'] ?? '');
+            $combinedText = $nameStr . ' ' . $posStr;
+
+            $exclude = false;
+            foreach ($excludeKeywords as $kw) {
+                if (strpos($combinedText, $kw) !== false) {
+                    $exclude = true;
+                    break;
+                }
+            }
+            // Tambien excluir si el nombre contiene números (ej: CIFs o Importes)
+            if ($exclude || preg_match('/[0-9]+/', $nameStr)) continue;
+
+            $uniqueKey = md5(trim($nameStr) . '|' . trim($posStr));
+            if (isset($seenAdmins[$uniqueKey])) continue;
+
+            $seenAdmins[$uniqueKey] = true;
+            $filteredAdmins[] = $admin;
+        }
+
         return [
             'company'          => $company,
             'statusRaw'        => $statusRaw,
@@ -140,6 +172,7 @@ class Company extends BaseController
             'robots'           => $robots,
             'related'          => $related,
             'bormePosts'       => $this->bormePostsModel->getByCompanyId((int)$company['id']),
+            'administrators'   => $filteredAdmins,
             'provinceUrl'      => $provinceUrl,
             'cnaeUrl'          => $cnaeUrl,
             'provinceCnaeUrl'  => $provinceCnaeUrl
