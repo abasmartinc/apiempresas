@@ -4,6 +4,8 @@
          bootstrap="tests/bootstrap.php"
          cacheDirectory=".phpunit.cache"
          beStrictAboutOutputDuringTests="true"
+         displayDetailsOnPhpunitDeprecations="true"
+         failOnPhpunitDeprecation="true"
          failOnRisky="true"
          failOnWarning="true"
          colors="true">
@@ -14,6 +16,7 @@
 
         <testsuite name="end-to-end">
             <directory suffix=".phpt">tests/end-to-end/baseline</directory>
+            <directory suffix=".phpt">tests/end-to-end/check-php-configuration</directory>
             <directory suffix=".phpt">tests/end-to-end/cli</directory>
             <directory suffix=".phpt">tests/end-to-end/code-coverage</directory>
             <directory suffix=".phpt">tests/end-to-end/data-provider</directory>
@@ -21,7 +24,9 @@
             <directory suffix=".phpt">tests/end-to-end/execution-order</directory>
             <directory suffix=".phpt">tests/end-to-end/extension</directory>
             <directory suffix=".phpt">tests/end-to-end/generic</directory>
-            <directory suffix=".phpt">tests/end-to-end/logging</directory>
+            <directory suffix=".phpt">tests/end-to-end/logging/junit</directory>
+            <directory suffix=".phpt">tests/end-to-end/logging/teamcity</directory>
+            <directory suffix=".phpt">tests/end-to-end/logging/testdox</directory>
             <directory suffix=".phpt">tests/end-to-end/metadata</directory>
             <directory suffix=".phpt">tests/end-to-end/migration</directory>
             <directory suffix=".phpt">tests/end-to-end/mock-objects</directory>
@@ -37,7 +42,7 @@
         </testsuite>
     </testsuites>
 
-    <source>
+    <source restrictDeprecations="true" restrictNotices="true" restrictWarnings="true">
         <include>
             <directory>src</directory>
         </include>

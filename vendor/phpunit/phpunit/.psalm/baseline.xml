@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="5.24.0@462c80e31c34e58cc4f750c656be3927e80e550e">
+<files psalm-version="5.26.1@d747f6500b38ac4f7dfc5edbcae6e4b637d7add0">
   <file src="src/Event/Dispatcher/DirectDispatcher.php">
     <UndefinedInterfaceMethod>
       <code><![CDATA[notify]]></code>
@@ -217,11 +217,6 @@
       <code><![CDATA[Assert::isTrue(...func_get_args())]]></code>
       <code><![CDATA[Assert::isWritable(...func_get_args())]]></code>
     </TooManyArguments>
-  </file>
-  <file src="src/Framework/Constraint/Cardinality/Count.php">
-    <PossiblyInvalidArgument>
-      <code><![CDATA[$e->getCode()]]></code>
-    </PossiblyInvalidArgument>
   </file>
   <file src="src/Framework/Constraint/Cardinality/GreaterThan.php">
     <DeprecatedClass>
@@ -442,7 +437,7 @@
                 'arguments_call'     => $this->argumentsForCall,
                 'return_declaration' => !empty($this->returnType->asString()) ? (': ' . $this->returnType->asString()) : '',
                 'return_type'        => $this->returnType->asString(),
-                'arguments_count'    => !empty($this->argumentsForCall) ? substr_count($this->argumentsForCall, ',') + 1 : 0,
+                'arguments_count'    => $argumentsCount,
                 'class_name'         => $this->className,
                 'method_name'        => $this->methodName,
                 'modifier'           => $this->modifier,
@@ -591,9 +586,9 @@
     </RedundantCondition>
   </file>
   <file src="src/Logging/TestDox/NamePrettifier.php">
-    <InvalidCast>
-      <code><![CDATA[$value]]></code>
-    </InvalidCast>
+    <LessSpecificReturnStatement>
+      <code><![CDATA[(string) $value->value]]></code>
+    </LessSpecificReturnStatement>
   </file>
   <file src="src/Logging/TestDox/TestResult/TestResultCollection.php">
     <PropertyTypeCoercion>
@@ -620,9 +615,6 @@
     </RedundantCondition>
   </file>
   <file src="src/Metadata/Api/DataProvider.php">
-    <PossiblyInvalidArgument>
-      <code><![CDATA[$e->getCode()]]></code>
-    </PossiblyInvalidArgument>
     <RedundantCast>
       <code><![CDATA[(int) $matches[0][1]]]></code>
     </RedundantCast>
@@ -731,6 +723,10 @@
     </ArgumentTypeCoercion>
   </file>
   <file src="src/Metadata/Parser/AttributeParser.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$e->getMessage()]]></code>
+      <code><![CDATA[$e->getMessage()]]></code>
+    </ArgumentTypeCoercion>
     <DeprecatedClass>
       <code><![CDATA[IgnoreClassForCodeCoverage::class]]></code>
       <code><![CDATA[IgnoreFunctionForCodeCoverage::class]]></code>
@@ -926,6 +922,16 @@
     <UnresolvableInclude>
       <code><![CDATA[include_once $filename]]></code>
     </UnresolvableInclude>
+  </file>
+  <file src="src/TextUI/Command/Commands/CheckPhpConfigurationCommand.php">
+    <LessSpecificReturnStatement>
+      <code><![CDATA[Color::colorizeTextBox('fg-green, bold', 'ok')]]></code>
+      <code><![CDATA[Color::colorizeTextBox('fg-red, bold', $message)]]></code>
+    </LessSpecificReturnStatement>
+    <MoreSpecificReturnType>
+      <code><![CDATA[non-empty-string]]></code>
+      <code><![CDATA[non-empty-string]]></code>
+    </MoreSpecificReturnType>
   </file>
   <file src="src/TextUI/Configuration/Builder.php">
     <MissingThrowsDocblock>

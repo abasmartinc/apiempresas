@@ -2,9 +2,9 @@
 
 namespace Masterminds\HTML5\Tests\Serializer;
 
+use Masterminds\HTML5;
 use Masterminds\HTML5\Serializer\OutputRules;
 use Masterminds\HTML5\Serializer\Traverser;
-use Masterminds\HTML5;
 
 class OutputRulesTest extends \Masterminds\HTML5\Tests\TestCase
 {
@@ -651,5 +651,22 @@ class OutputRulesTest extends \Masterminds\HTML5\Tests\TestCase
         $this->assertTrue(false !== strpos($contents, '<script id="template" type="x-tmpl-mustache">
            <h1>Hello!</h1>
        <p>Bar</p></script>'));
+    }
+
+    public function testSvgAndMathElementsWithoutChildNodesAreHandledAsVoidTags()
+    {
+        $dom = $this->html5->loadHTML(
+            '<!doctype html>
+<html lang="en" id="base">
+    <body>
+       <svg></svg>
+       <math></math>
+    </body>
+</html>');
+
+        $contents = $this->html5->saveHTML($dom);
+
+        self::assertRegExp('|^\h*<svg />$|m', $contents);
+        self::assertRegExp('|^\h*<math />$|m', $contents);
     }
 }

@@ -1,3 +1,8 @@
-Free Plan (Tests\Feature\Api\V1\FreePlan)
- [x] Free plan masking
+Public Routes (Tests\Feature\PublicRoutes)
+ [x] Header navigation
+ [x] Footer radar routes
+ [x] Utilities routes
+ [x] Province routes
+ [x] Business profiles
+ [x] Dynamic seo routes
 

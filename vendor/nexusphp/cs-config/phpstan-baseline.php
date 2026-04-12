@@ -2,32 +2,62 @@
 
 $ignoreErrors = [];
 $ignoreErrors[] = [
-	'message' => '#^Call to static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertSame\\(\\) with arguments "\\\\n", string and string will always evaluate to true\\.$#',
+	'rawMessage' => 'Access to constant VERSION of internal class PhpCsFixer\\Console\\Application from outside its root namespace PhpCsFixer.',
+	'identifier' => 'classConstant.internalClass',
 	'count' => 1,
-	'path' => __DIR__ . '/src/Test/AbstractCustomFixerTestCase.php',
+	'path' => __DIR__ . '/src/Factory.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Method Nexus\\\\CsConfig\\\\Test\\\\AbstractCustomFixerTestCase\\:\\:getLinter\\(\\) should return PhpCsFixer\\\\Linter\\\\LinterInterface but returns mixed\\.$#',
+	'rawMessage' => 'Comparison operation ">" between int<80200, 80599> and 80599 is always false.',
+	'identifier' => 'greater.alwaysFalse',
 	'count' => 1,
-	'path' => __DIR__ . '/src/Test/AbstractCustomFixerTestCase.php',
+	'path' => __DIR__ . '/src/Ruleset/AbstractRuleset.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Method Nexus\\\\CsConfig\\\\Tests\\\\Fixer\\\\Comment\\\\NoCodeSeparatorCommentFixerTest\\:\\:provideFixCases\\(\\) return type has no value type specified in iterable type iterable\\.$#',
+	'rawMessage' => 'Call to method __construct() of internal class PhpCsFixer\\FixerFactory from outside its root namespace PhpCsFixer.',
+	'identifier' => 'method.internalClass',
 	'count' => 1,
-	'path' => __DIR__ . '/tests/Fixer/Comment/NoCodeSeparatorCommentFixerTest.php',
+	'path' => __DIR__ . '/src/Test/FixerProvider.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Method Nexus\\\\CsConfig\\\\Tests\\\\Fixer\\\\Comment\\\\SpaceAfterCommentStartFixerTest\\:\\:provideFixCases\\(\\) return type has no value type specified in iterable type iterable\\.$#',
+	'rawMessage' => 'Call to method __construct() of internal class PhpCsFixer\\RuleSet\\RuleSet from outside its root namespace PhpCsFixer.',
+	'identifier' => 'method.internalClass',
 	'count' => 1,
-	'path' => __DIR__ . '/tests/Fixer/Comment/SpaceAfterCommentStartFixerTest.php',
+	'path' => __DIR__ . '/src/Test/FixerProvider.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Call to static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertEmpty\\(\\) with non\\-empty\\-array will always evaluate to false\\.$#',
+	'rawMessage' => 'Call to method getFixers() of internal class PhpCsFixer\\FixerFactory from outside its root namespace PhpCsFixer.',
+	'identifier' => 'method.internalClass',
 	'count' => 1,
-	'path' => __DIR__ . '/tests/Test/FixerProviderTest.php',
+	'path' => __DIR__ . '/src/Test/FixerProvider.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Method Nexus\\\\CsConfig\\\\Tests\\\\Test\\\\FixerProviderTest\\:\\:provideCreateMethodGivesNoDeprecatedBuiltInFixersCases\\(\\) return type has no value type specified in iterable type iterable\\.$#',
+	'rawMessage' => 'Call to method getRules() of internal class PhpCsFixer\\RuleSet\\RuleSet from outside its root namespace PhpCsFixer.',
+	'identifier' => 'method.internalClass',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Test/FixerProvider.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Call to method registerBuiltInFixers() of internal class PhpCsFixer\\FixerFactory from outside its root namespace PhpCsFixer.',
+	'identifier' => 'method.internalClass',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Test/FixerProvider.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Instantiation of internal class PhpCsFixer\\FixerFactory.',
+	'identifier' => 'new.internalClass',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Test/FixerProvider.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Instantiation of internal class PhpCsFixer\\RuleSet\\RuleSet.',
+	'identifier' => 'new.internalClass',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Test/FixerProvider.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Call to static method PHPUnit\\Framework\\Assert::assertEmpty() with non-empty-array<string, PhpCsFixer\\Fixer\\FixerInterface> will always evaluate to false.',
+	'identifier' => 'staticMethod.impossibleType',
 	'count' => 1,
 	'path' => __DIR__ . '/tests/Test/FixerProviderTest.php',
 ];

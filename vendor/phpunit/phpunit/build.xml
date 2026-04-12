@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="phpunit" default="setup">
-    <target name="setup" depends="install-dependencies"/>
+    <target name="setup" depends="clean-build-artifacts,install-dependencies"/>
 
-    <target name="clean" description="Cleanup build artifacts">
+    <target name="clean" description="Cleanup build artifacts and vendor directory" depends="clean-build-artifacts,clean-vendor">
+    </target>
+
+    <target name="clean-build-artifacts" description="Cleanup build artifacts">
         <delete dir="${basedir}/build/artifacts"/>
         <delete dir="${basedir}/build/tmp"/>
+    </target>
+
+    <target name="clean-vendor" description="Cleanup vendor directory">
         <delete dir="${basedir}/vendor"/>
     </target>
 
@@ -13,6 +19,32 @@
             <arg value="install"/>
             <arg value="--no-interaction"/>
             <arg value="--no-progress"/>
+            <arg value="--no-ansi"/>
+        </exec>
+    </target>
+
+    <target name="check-dependencies" depends="clean,install-dependencies" description="Check dependencies for outdated versions">
+        <exec executable="${basedir}/tools/composer" taskname="composer">
+            <arg value="outdated"/>
+            <arg value="--locked"/>
+            <arg value="--direct"/>
+            <arg value="--strict"/>
+            <arg value="--sort-by-age"/>
+            <arg value="--no-ansi"/>
+        </exec>
+    </target>
+
+    <target name="update-dependencies" description="Update (and bump) dependencies with Composer">
+        <exec executable="${basedir}/tools/composer" taskname="composer">
+            <arg value="update"/>
+            <arg value="--no-interaction"/>
+            <arg value="--no-progress"/>
+            <arg value="--no-ansi"/>
+        </exec>
+
+        <exec executable="${basedir}/tools/composer" taskname="composer">
+            <arg value="bump"/>
+            <arg value="--no-interaction"/>
             <arg value="--no-ansi"/>
         </exec>
     </target>
@@ -265,6 +297,18 @@
             </fileset>
         </copy>
 
+        <!-- https://github.com/sebastianbergmann/phpunit/issues/6092 -->
+        <delete file="${basedir}/build/tmp/phar/nikic-php-parser/PhpParser/Node/Expr/ArrayItem.php"/>
+        <delete file="${basedir}/build/tmp/phar/nikic-php-parser/PhpParser/Node/Expr/ClosureUse.php"/>
+        <delete file="${basedir}/build/tmp/phar/nikic-php-parser/PhpParser/Node/Scalar/DNumber.php"/>
+        <delete file="${basedir}/build/tmp/phar/nikic-php-parser/PhpParser/Node/Scalar/Encapsed.php"/>
+        <delete file="${basedir}/build/tmp/phar/nikic-php-parser/PhpParser/Node/Scalar/EncapsedStringPart.php"/>
+        <delete file="${basedir}/build/tmp/phar/nikic-php-parser/PhpParser/Node/Scalar/LNumber.php"/>
+        <delete file="${basedir}/build/tmp/phar/nikic-php-parser/PhpParser/Node/Stmt/DeclareDeclare.php"/>
+        <delete file="${basedir}/build/tmp/phar/nikic-php-parser/PhpParser/Node/Stmt/PropertyProperty.php"/>
+        <delete file="${basedir}/build/tmp/phar/nikic-php-parser/PhpParser/Node/Stmt/StaticVar.php"/>
+        <delete file="${basedir}/build/tmp/phar/nikic-php-parser/PhpParser/Node/Stmt/UseUse.php"/>
+
         <copy file="${basedir}/vendor/phar-io/manifest/LICENSE" tofile="${basedir}/build/tmp/phar/phar-io-manifest/LICENSE"/>
         <copy todir="${basedir}/build/tmp/phar/phar-io-manifest">
             <fileset dir="${basedir}/vendor/phar-io/manifest/src">
@@ -320,8 +364,6 @@
         <replace file="${basedir}/build/tmp/phar-scoped/phpunit/Util/PHP/Template/TestCaseMethod.tpl" token="SebastianBergmann\CodeCoverage\CodeCoverage" value="PHPUnitPHAR\SebastianBergmann\CodeCoverage\CodeCoverage"/>
         <replace file="${basedir}/build/tmp/phar-scoped/phpunit/Util/PHP/Template/TestCaseMethod.tpl" token="SebastianBergmann\CodeCoverage\Driver\Selector" value="PHPUnitPHAR\SebastianBergmann\CodeCoverage\Driver\Selector"/>
 
-        <copy file="${basedir}/.phpstorm.meta.php" tofile="${basedir}/build/tmp/phar-scoped/.phpstorm.meta.php"/>
-
         <exec executable="${basedir}/tools/phpab" taskname="phpab" failonerror="true">
             <arg value="--all" />
             <arg value="--tolerant" />
@@ -336,6 +378,10 @@
         </exec>
 
         <exec executable="${basedir}/build/scripts/phar-set-timestamps/run.php" taskname="phar-set-timestamps" failonerror="true">
+            <arg path="${basedir}/build/artifacts/phpunit-library-${_version}.phar" />
+        </exec>
+
+        <exec executable="${basedir}/build/scripts/check-scoped-phar.php" taskname="check-scoped-phar" failonerror="true">
             <arg path="${basedir}/build/artifacts/phpunit-library-${_version}.phar" />
         </exec>
 
@@ -362,6 +408,10 @@
 
         <chmod file="${basedir}/build/artifacts/phpunit-${_version}.phar" perm="ugo+rx"/>
 
+        <exec executable="${basedir}/build/scripts/check-scoped-phar.php" taskname="check-scoped-phar" failonerror="true">
+            <arg path="${basedir}/build/artifacts/phpunit-${_version}.phar" />
+        </exec>
+
         <delete dir="${basedir}/build/tmp"/>
     </target>
 
@@ -380,6 +430,17 @@
             <arg value="--configuration" />
             <arg value="tests/end-to-end/phar/phpunit.xml" />
             <arg value="--coverage-text" />
+        </exec>
+    </target>
+
+    <target name="publish-phar" description="Publish PHAR on phar.phpunit.de">
+        <exec executable="sh" taskname="scp">
+            <arg value="-c" />
+            <arg value="scp build/artifacts/* phar:"/>
+        </exec>
+
+        <exec executable="ssh">
+            <arg line="phar ./publish-phars.sh" />
         </exec>
     </target>
 </project>

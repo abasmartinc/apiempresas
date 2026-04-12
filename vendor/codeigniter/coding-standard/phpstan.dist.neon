@@ -1,0 +1,20 @@
+includes:
+  - vendor/phpstan/phpstan/conf/bleedingEdge.neon
+
+parameters:
+  tmpDir: build/phpstan
+  level: 10
+  paths:
+    - src
+    - tests
+  bootstrapFiles:
+    - vendor/autoload.php
+  polluteScopeWithLoopInitialAssignments: false
+  polluteScopeWithAlwaysIterableForeach: false
+  checkExplicitMixedMissingReturn: true
+  checkFunctionNameCase: true
+  checkInternalClassCaseSensitivity: true
+  checkTooWideReturnTypesInProtectedAndPublicMethods: true
+  reportMaybesInMethodSignatures: true
+  reportStaticMethodSignatures: true
+  treatPhpDocTypesAsCertain: false

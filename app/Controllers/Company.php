@@ -19,7 +19,7 @@ class Company extends BaseController
     {
         $this->companyModel = new CompanyModel();
         $this->bormePostsModel = new BormePostsModel();
-        helper('text'); // For url_title
+        helper(['text', 'seo_dynamic_helper']); // Cargar text para url_title y nuestro nuevo helper SEO
     }
 
     /**
@@ -116,13 +116,28 @@ class Company extends BaseController
             $provinceCnaeUrl = site_url('directorio/provincia/' . urlencode($prov) . '/cnae/' . $cnaeCode);
         }
 
+        // --- DINAMIC SEO INDEXING ---
+        $indexable = shouldIndexCompany($company);
+        $robots    = $indexable ? 'index, follow' : 'noindex, follow';
+        
+        // Si no es indexable, añadir cabecera HTTP (X-Robots-Tag)
+        if (!$indexable) {
+            // Nota: CodeIgniter 4 maneja la respuesta mediante el servicio response
+            service('response')->setHeader('X-Robots-Tag', 'noindex, follow');
+        }
+        
+        // Añadir flag al objeto empresa para uso en sitemaps/logs
+        $company['seo_indexable'] = $indexable;
+        $company['seo_score']     = calculateCompanySeoScore($company);
+        // --- DINAMIC SEO INDEXING ---
+
         return [
             'company'          => $company,
             'statusRaw'        => $statusRaw,
             'statusClass'      => $isActive ? 'company-status company-status--active' : 'company-status company-status--inactive',
             'title'            => $title,
             'meta_description' => $desc,
-            'robots'           => 'index, follow',
+            'robots'           => $robots,
             'related'          => $related,
             'bormePosts'       => $this->bormePostsModel->getByCompanyId((int)$company['id']),
             'provinceUrl'      => $provinceUrl,

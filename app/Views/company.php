@@ -6,7 +6,7 @@
         'title' => $title,
         'excerptText' => $meta_description,
         'canonical' => $canonical,
-        'robots' => 'index,follow',
+        'robots' => $robots,
     ]) ?>
     <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style"
         onload="this.onload=null;this.rel='stylesheet'">

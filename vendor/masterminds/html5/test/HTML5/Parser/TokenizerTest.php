@@ -2,9 +2,9 @@
 
 namespace Masterminds\HTML5\Tests\Parser;
 
-use Masterminds\HTML5\Parser\UTF8Utils;
 use Masterminds\HTML5\Parser\Scanner;
 use Masterminds\HTML5\Parser\Tokenizer;
+use Masterminds\HTML5\Parser\UTF8Utils;
 
 class TokenizerTest extends \Masterminds\HTML5\Tests\TestCase
 {
@@ -702,6 +702,14 @@ class TokenizerTest extends \Masterminds\HTML5\Tests\TestCase
                 'foo',
                 array(
                     'bar' => 'baz/',
+                ),
+                false,
+            ),
+            // duplicate attributes must be ignored
+            '<foo bar="first" bar="second">' => array(
+                'foo',
+                array(
+                    'bar' => 'first',
                 ),
                 false,
             ),

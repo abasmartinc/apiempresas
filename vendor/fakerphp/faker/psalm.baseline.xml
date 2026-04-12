@@ -125,7 +125,7 @@
   <file src="src/Faker/ORM/Spot/Populator.php">
     <UndefinedClass>
       <code><![CDATA[$this->locator]]></code>
-      <code>Locator</code>
+      <code>?Locator</code>
     </UndefinedClass>
     <UndefinedDocblockClass>
       <code>Locator</code>

@@ -24,7 +24,7 @@ use PhpCsFixer\Tokenizer\Tokens;
 /**
  * Simple comments should have one space after the `//`.
  *
- * @deprecated
+ * @deprecated v3.26.0
  */
 final class SpaceAfterCommentStartFixer extends AbstractCustomFixer implements DeprecatedFixerInterface
 {
@@ -79,7 +79,9 @@ final class SpaceAfterCommentStartFixer extends AbstractCustomFixer implements D
                 continue;
             }
 
-            preg_match('/^\/\/(\s*)(.+)/', $comment, $matches);
+            if (preg_match('/^\/\/(\s*)(.+)/', $comment, $matches) !== 1) {
+                continue;
+            }
 
             if (' ' === $matches[1]) {
                 continue;

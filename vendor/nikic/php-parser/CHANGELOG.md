@@ -1,3 +1,142 @@
+Version 5.7.0 (2025-12-06)
+--------------------------
+
+### Fixed
+
+* Fixed changing modifier on anonymous class with formatting preserving pretty printer.
+* Emit an error for unparenthesized arrow functions in pipe operator, and print necessary
+  parentheses in the pretty printer.
+* Fix PHP 8.5 deprecation warning in php-parse binary.
+
+### Changed
+
+* When targeting PHP 8.4 or newer, omit parentheses around immediately dereferenced new expressions.
+
+### Added
+
+* Added `shouldPrintRawValue` attribute to `Scalar\Int_`, which makes the pretty printer use the
+  `rawValue` of the node. This can be used to print integers with separators.
+
+Version 5.6.2 (2025-10-21)
+--------------------------
+
+### Fixed
+
+* Fixed formatting-preserving pretty-printing when changing the visibility modifier on a node that
+  has attributes.
+* Fixed `chr()` deprecation warning on PHP 8.5.
+
+### Added
+
+* Added `Param::isFinal()` method.
+
+Version 5.6.1 (2025-08-13)
+--------------------------
+
+### Fixed
+
+* Fixed `Param::isPublic()` for parameters with asymmetric visibility keyword.
+* Fixed PHP 8.5 deprecation warnings for `SplObjectStorage` methods.
+
+### Added
+
+* Added cast `kind` attributes to `Cast\Int_`, `Cast\Bool_` and `Cast\String_`.
+  These allow distinguishing the deprecated versions of these casts.
+
+Version 5.6.0 (2025-07-27)
+--------------------------
+
+### Added
+
+* [8.5] Added support for `clone` with arbitrary function arguments. This will be parsed as an
+  `Expr\FuncCall` node, instead of the usual `Expr\Clone_` node.
+* [8.5] Permit declaration of `function clone` for use in stubs.
+* [8.5] Added support for the pipe operator, represented by `Expr\BinaryOp\Pipe`.
+* [8.5] Added support for the `(void)` cast, represented by `Expr\Cast\Void_`.
+* [8.5] Added support for the `final` modifier on promoted properties.
+* Added `CallLike::getArg()` to fetch an argument by position and name.
+
+Version 5.5.0 (2025-05-31)
+--------------------------
+
+### Added
+
+* [8.5] Added support for attributes on constants. `Stmt\Const_` now has an `attrGroups` subnode.
+* Added `weakReferences` option to `NodeConnectingVisitor` and `ParentConnectingVisitor`. This
+  will create the parent/next/prev references as WeakReferences, to avoid making the AST cyclic
+  and thus increasing GC pressure.
+
+### Changed
+
+* Attributes on parameters are now printed on separate lines if the pretty printer target version
+  is PHP 7.4 or older (which is the default). This allows them to be interpreted as comments,
+  instead of causing a parse error. Specify a target version of PHP 8.0 or newer to restore the
+  previous behavior.
+
+Version 5.4.0 (2024-12-30)
+--------------------------
+
+### Added
+
+* Added `Property::isAbstract()` and `Property::isFinal()` methods.
+* Added `PropertyHook::isFinal()` method.
+* Emit an error if property hook is used on declaration with multiple properties.
+
+### Fixed
+
+* Make legacy class aliases compatible with classmap-authoritative autoloader.
+* `Param::isPromoted()` and `Param::isPublic()` now returns true for parameters that have property
+  hooks but no explicit visibility modifier.
+* `PropertyHook::getStmts()` now correctly desugars short `set` hooks. `set => $value` will be
+  expanded to `set { $this->propertyName = $value; }`. This requires the `propertyName` attribute
+  on the hook to be set, which is now also set by the parser. If the attribute is not set,
+  `getStmts()` will throw an error for short set hooks, as it is not possible to produce a correct
+  desugaring.
+
+Version 5.3.1 (2024-10-08)
+--------------------------
+
+### Added
+
+* Added support for declaring functions with name `exit` or `die`, to allow their use in stubs.
+
+Version 5.3.0 (2024-09-29)
+--------------------------
+
+### Added
+
+* Added `indent` option to pretty printer, which can be used to specify the indentation to use
+  (defaulting to four spaces). This also allows using tab indentation.
+
+### Fixed
+
+* Resolve names in `PropertyHook`s in the `NameResolver`.
+* Include the trailing semicolon inside `Stmt\GroupUse` nodes, making them consistent with
+  `Stmt\Use_` nodes.
+* Fixed indentation sometimes becoming negative in formatting-preserving pretty printer, resulting
+  in `ValueError`s.
+
+Version 5.2.0 (2024-09-15)
+--------------------------
+
+### Added
+
+* [8.4] Added support for `__PROPERTY__` magic constant, represented using a
+  `Node\Scalar\MagicConst\Property` node.
+* [8.4] Added support for property hooks, which are represented using a new `hooks` subnode on
+  `Node\Stmt\Property` and `Node\Param`, which contains an array of `Node\PropertyHook`.
+* [8.4] Added support for asymmetric visibility modifiers. Property `flags` can now hold the
+  additional bits `Modifiers::PUBLIC_SET`, `Modifiers::PROTECTED_SET` and `Modifiers::PRIVATE_SET`.
+* [8.4] Added support for generalized exit function. For backwards compatibility, exit without
+  argument or a single plain argument continues to use a `Node\Expr\Exit_` node. Otherwise (e.g.
+  if a named argument is used) it will be represented as a plain `Node\Expr\FuncCall`.
+* Added support for passing enum values to various builder methods, like `BuilderFactory::val()`.
+
+### Removed
+
+* Removed support for alternative array syntax `$array{0}` from the PHP 8 parser. It is still
+  supported by the PHP 7 parser. This is necessary in order to support property hooks.
+
 Version 5.1.0 (2024-07-01)
 --------------------------
 

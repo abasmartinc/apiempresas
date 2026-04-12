@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="Tests\Feature\Api\V1\FreePlanTest" file="D:\laragon\www\apiempresas\tests\feature\Api\V1\FreePlanTest.php" tests="1" assertions="9" errors="0" failures="0" skipped="0" time="0.517865">
-    <testcase name="testFreePlanMasking" file="D:\laragon\www\apiempresas\tests\feature\Api\V1\FreePlanTest.php" line="31" class="Tests\Feature\Api\V1\FreePlanTest" classname="Tests.Feature.Api.V1.FreePlanTest" assertions="9" time="0.517865"/>
+  <testsuite name="Tests\Feature\PublicRoutesTest" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" tests="6" assertions="45" errors="0" failures="0" skipped="0" time="5.924647">
+    <testcase name="testHeaderNavigation" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="59" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="14" time="2.791051"/>
+    <testcase name="testFooterRadarRoutes" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="73" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="9" time="1.060232"/>
+    <testcase name="testUtilitiesRoutes" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="85" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="6" time="0.542469"/>
+    <testcase name="testProvinceRoutes" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="95" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="6" time="0.514546"/>
+    <testcase name="testBusinessProfiles" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="105" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="8" time="0.814508"/>
+    <testcase name="testDynamicSeoRoutes" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="124" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="2" time="0.201841"/>
   </testsuite>
 </testsuites>

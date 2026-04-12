@@ -12,9 +12,7 @@ declare(strict_types=1);
  */
 
 use Nexus\CsConfig\Factory;
-use Nexus\CsConfig\Fixer\Comment\NoCodeSeparatorCommentFixer;
-use Nexus\CsConfig\FixerGenerator;
-use Nexus\CsConfig\Ruleset\Nexus81;
+use Nexus\CsConfig\Ruleset\Nexus82;
 use PhpCsFixer\Finder;
 
 $finder = Finder::create()
@@ -22,6 +20,10 @@ $finder = Finder::create()
     ->in([
         __DIR__.'/src',
         __DIR__.'/tests',
+    ])
+    ->notPath([
+        '/Fixer\/Comment/',
+        '/Test\/AbstractCustomFixerTestCase\.php/',
     ])
     ->append([__FILE__])
 ;
@@ -32,13 +34,9 @@ $overrides = [
 $options = [
     'finder' => $finder,
     'cacheFile' => 'build/.php-cs-fixer.cache',
-    'customFixers' => FixerGenerator::create('src/Fixer', 'Nexus\\CsConfig\\Fixer'),
-    'customRules' => [
-        NoCodeSeparatorCommentFixer::name() => true,
-    ],
 ];
 
-return Factory::create(new Nexus81(), $overrides, $options)->forLibrary(
+return Factory::create(new Nexus82(), $overrides, $options)->forLibrary(
     'Nexus CS Config',
     'John Paul E. Balandan, CPA',
     'paulbalandan@gmail.com',

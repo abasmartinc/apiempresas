@@ -2,6 +2,7 @@
 
 /** @var PhpFuzzer\Fuzzer $fuzzer */
 
+use PhpParser\Node;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;
@@ -95,6 +96,13 @@ $visitor = new class extends PhpParser\NodeVisitorAbstract {
         ) {
             $this->hasProblematicConstruct = true;
         }
+
+        // clone($x, ) is not preserved precisely.
+        if ($node instanceof Expr\FuncCall && $node->name instanceof Node\Name &&
+            $node->name->toLowerString() == 'clone' && count($node->args) == 1
+        ) {
+            $this->hasProblematicConstruct = true;
+        }
     }
 };
 $traverser = new PhpParser\NodeTraverser();
@@ -104,7 +112,7 @@ $fuzzer->setTarget(function(string $input) use($lexer, $parser, $prettyPrinter, 
     $stmts = $parser->parse($input);
     $printed = $prettyPrinter->prettyPrintFile($stmts);
 
-    $visitor->setTokens($lexer->getTokens());
+    $visitor->setTokens($parser->getTokens());
     $stmts = $traverser->traverse($stmts);
     if ($visitor->hasProblematicConstruct) {
         return;
@@ -116,7 +124,7 @@ $fuzzer->setTarget(function(string $input) use($lexer, $parser, $prettyPrinter, 
         throw new Error("Failed to parse pretty printer output");
     }
 
-    $visitor->setTokens($lexer->getTokens());
+    $visitor->setTokens($parser->getTokens());
     $printedStmts = $traverser->traverse($printedStmts);
     $same = $nodeDumper->dump($stmts) == $nodeDumper->dump($printedStmts);
     if (!$same && !preg_match('/<\?php<\?php/i', $input)) {

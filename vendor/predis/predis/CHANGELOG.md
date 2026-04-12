@@ -1,5 +1,53 @@
 ## Changelog
 
+## v2.4.1 (2025-11-12)
+### Fixed
+- Fixed return type for `ZCOUNT` to be `int` (#1546)
+- Removed automatic `conn_uid` parameter assignment (#1551)
+
+## v2.4.0 (2025-04-30)
+### Added
+- Added new hash-field expiration commands (#1520)
+- Added missing `FT._LIST` and `BITFIELD_RO` commands (#1521)
+
+### Changed
+- Update `WATCH` command to accept `string|string[]` (#1476)
+- Optimize cluster slotmap with compact slot range object (#1493)
+
+### Fixed
+- Fixed `EVAL_RO` cluster support (#1449)
+- Fixed PHP 8.4 compatibility with `stream_context_set_option()` (#1503)
+- Prevent named arguments runtime failure (#1509)
+- Mark `GEOSEARCH` as read-only to ensure execution on replica (#1481)
+- Fixed protocol loss during redis cluster `MOVED` / `ASK` (#1530)
+
+### Maintenance
+- Added CI testing with Redis 8.0 (#1510)
+- Added test coverage for compatibility with Redis 8.0 (#1513)
+- Use parallel on PHP-CS-Fixer (#1489)
+
+## v2.3.0 (2024-11-21)
+### Added
+- Added `GeoShapeField` field (#1467)
+- Added hash expiration commands (#1456)
+- Added support for time series `IGNORE` filter (#1458)
+- Added `XREAD` commands (#1459)
+- Added `NOVALUES` argument support to `HSCAN` (#1459)
+- Added support for search `INDEXMISSING` and `INDEXEMPTY` arguments (#1464)
+
+### Changed
+- Explicitly mark nullable parameters as nullable (#1448)
+- Filter out available replicas based on link status flag (#1440)
+- Respect `prefix` for `ZPOPMIN`, `ZPOPMAX`, `ZMSCORE`, `LMOVE`, `BLMOVE`, `SMISMEMBER` and `GEOSEARCH` (#1451, #1453, #1455, #1468)
+- Updated test infrastructure (#1510)
+
+### Fixed
+- Fixed Relay support when using Redis Cluster (#1397)
+- Fixed `cmsincrby()` type annotation (#1333)
+- Fixed `set()` type annotation (#1394)
+- Fixed operator precedence in connection factory (#1405)
+- Fixed a bug with `null` arguments in `set()` method (#1470, #1471)
+
 ## v2.2.2 (2023-09-13)
 
 ### Added

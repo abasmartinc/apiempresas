@@ -14,6 +14,9 @@ class ParamTest extends \PHPUnit\Framework\TestCase {
         $this->assertFalse($node->isProtected());
         $this->assertFalse($node->isPrivate());
         $this->assertFalse($node->isReadonly());
+        $this->assertFalse($node->isPublicSet());
+        $this->assertFalse($node->isProtectedSet());
+        $this->assertFalse($node->isPrivateSet());
     }
 
     /**
@@ -32,6 +35,34 @@ class ParamTest extends \PHPUnit\Framework\TestCase {
             ['protected'],
             ['private'],
             ['readonly'],
+            ['final'],
         ];
+    }
+
+    public function testSetVisibility() {
+        $node = new Param(new Variable('foo'));
+        $node->flags = Modifiers::PRIVATE_SET;
+        $this->assertTrue($node->isPrivateSet());
+        $this->assertTrue($node->isPublic());
+        $node->flags = Modifiers::PROTECTED_SET;
+        $this->assertTrue($node->isProtectedSet());
+        $this->assertTrue($node->isPublic());
+        $node->flags = Modifiers::PUBLIC_SET;
+        $this->assertTrue($node->isPublicSet());
+        $this->assertTrue($node->isPublic());
+    }
+
+    public function testPromotedPropertyWithoutVisibilityModifier(): void {
+        $node = new Param(new Variable('foo'));
+        $get = new PropertyHook('get', null);
+        $node->hooks[] = $get;
+
+        $this->assertTrue($node->isPromoted());
+        $this->assertTrue($node->isPublic());
+    }
+
+    public function testNonPromotedPropertyIsNotPublic(): void {
+        $node = new Param(new Variable('foo'));
+        $this->assertFalse($node->isPublic());
     }
 }

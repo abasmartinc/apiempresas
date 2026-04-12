@@ -16,6 +16,8 @@ class Bar {
 -----
 array(
     0: Stmt_Const(
+        attrGroups: array(
+        )
         consts: array(
             0: Const(
                 name: Identifier(
@@ -55,6 +57,8 @@ array(
                     )
                     args: array(
                     )
+                )
+                hooks: array(
                 )
             )
         )
@@ -150,6 +154,8 @@ array(
                             )
                         )
                     )
+                )
+                hooks: array(
                 )
             )
         )

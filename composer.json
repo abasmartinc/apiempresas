@@ -19,16 +19,13 @@
         "guzzlehttp/guzzle": "^7.10",
         "laminas/laminas-escaper": "^2.13",
         "openai-php/client": "^0.19.1",
-        "phpmailer/phpmailer": "^6.9",
         "phpoffice/phpword": "^1.4",
         "psr/log": "^3.0",
         "sentry/sentry": "4.0",
-        "setasign/fpdf": "^1.8",
         "stripe/stripe-php": "^19.1",
         "symfony/polyfill-intl-idn": "*",
         "symfony/polyfill-php82": "*",
-        "symfony/polyfill-php83": "*",
-        "zircote/swagger-php": "^4.11"
+        "symfony/polyfill-php83": "*"
     },
     "require-dev": {
         "codeigniter/coding-standard": "^1.7",
@@ -38,7 +35,8 @@
         "mikey179/vfsstream": "^1.6",
         "nexusphp/cs-config": "^3.6",
         "phpunit/phpunit": "^10.5.16",
-        "predis/predis": "^1.1 || ^2.0"
+        "predis/predis": "^1.1 || ^2.0",
+        "zircote/swagger-php": "^4.11"
     },
     "suggest": {
         "ext-curl": "If you use CURLRequest class",
@@ -72,9 +70,18 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "audit": {
+            "ignore": ["PKSA-y2cr-5h3j-g3ys"]
+        }
+    },
+    "extra": {
+        "google/apiclient-services": [
+            "SearchConsole"
+        ]
     },
     "scripts": {
-        "test": "phpunit"
+        "test": "phpunit",
+        "pre-autoload-dump": "Google\\Task\\Composer::cleanup"
     }
 }
