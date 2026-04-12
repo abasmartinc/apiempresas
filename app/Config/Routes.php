@@ -246,6 +246,10 @@ $routes->post('checkout/radar-email', 'RadarController::sendExportEmail');
 // --- Programmatic SEO Routes ---
 $routes->get('empresas/(:any)', 'RadarController::provinceCatalog/$1');
 
+// Radar Demo (Conversion Page)
+$routes->get('radar-demo', 'Radar::demo');
+$routes->post('tracking/radar-demo-event', 'TrackingController::processRadarEvent');
+
 // Radar Hub (New Companies Strategy)
 $routes->get('empresas-nuevas', 'RadarController::index'); // Central Hub
 $routes->get('empresas-nuevas-hoy', 'RadarController::today');

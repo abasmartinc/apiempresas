@@ -94,6 +94,90 @@ class Radar extends BaseController
         return view('radar/partials/company_quickview', $data);
     }
 
+    /**
+     * Página de Demo Interactiva (Pública)
+     * Optimizada para conversión sin necesidad de login
+     */
+    public function demo()
+    {
+        $db = \Config\Database::connect();
+        $metricsService = new \App\Libraries\RadarMetricsService();
+
+        // 1. Selección de Empresas Curadas (Top Oportunidades B2B)
+        // Buscamos empresas con Score > 80 y sectores B2B
+        $builder = $this->companyModel->builder();
+        $builder->select('
+            companies.id, 
+            companies.company_name, 
+            companies.fecha_constitucion, 
+            companies.cnae_label, 
+            companies.registro_mercantil, 
+            companies.municipality, 
+            companies.objeto_social, 
+            crs.score_total,
+            crs.priority_level,
+            crs.score_reasons
+        ');
+        $builder->join('company_radar_scores crs', 'crs.company_id = companies.id', 'inner');
+        
+        // Filtro de "Elite" para la demo
+        $builder->where('crs.score_total >=', 82);
+        $builder->whereIn('crs.priority_level', ['alta', 'muy_alta']);
+        
+        // Priorizar sectores B2B para mayor credibilidad de venta
+        $builder->groupStart()
+            ->like('companies.cnae_label', 'Tecnolog')
+            ->orLike('companies.cnae_label', 'Consult')
+            ->orLike('companies.cnae_label', 'Inform')
+            ->orLike('companies.cnae_label', 'Marketing')
+            ->orLike('companies.cnae_label', 'Constru')
+            ->orLike('companies.cnae_label', 'Ingenier')
+        ->groupEnd();
+
+        $builder->orderBy('crs.score_total', 'DESC');
+        $builder->limit(12);
+        
+        $companies = $builder->get()->getResultArray();
+
+        // 2. Cálculos de Pipeline Dinámicos (basados en el volumen total del día para dar escala)
+        $todayCount = $this->countNewCompanies('hoy');
+        $pipelineVolume = $todayCount > 100 ? $todayCount : 206; // Usar 206 como default si hay pocos datos (según request)
+        $pipelineMetrics = $metricsService->getMetrics($pipelineVolume);
+
+        // 3. Preparar estrategias para la demo (reutilizando lógica de score_reasons)
+        foreach ($companies as &$co) {
+            $co['strategy'] = $this->generateDemoStrategy($co);
+        }
+
+        $data = [
+            'companies' => $companies,
+            'metrics'   => $pipelineMetrics,
+            'opps_count' => $pipelineVolume,
+            'title'     => 'Radar Demo - Oportunidades de Negocio en Tiempo Real'
+        ];
+
+        return view('radar/demo', $data);
+    }
+
+    /**
+     * Genera una estrategia simplificada para la demo basada en los motivos del score
+     */
+    private function generateDemoStrategy($co)
+    {
+        $reasons = json_decode($co['score_reasons'] ?? '[]', true);
+        $sector = $co['cnae_label'] ?? 'su sector';
+        $location = $co['municipality'] ?? 'España';
+        
+        // Estrategia base con tono comercial directo
+        return [
+            'motivo' => !empty($reasons) ? $reasons[0] : "Empresa de nueva creación con alta prioridad en sector estratégico ($sector).",
+            'que_vender' => "Servicios profesionales B2B, consultoría de expansión, suministros industriales o software de gestión operativa.",
+            'objecion' => "No tenemos presupuesto asignado todavía.",
+            'enfoque' => "Enfocarse en la 'ventaja del primer paso'. Al ser una empresa en fase de constitución, aún no han cerrado contratos fijos con proveedores locales en $location.",
+            'mensaje' => "Hola, he visto que acabáis de registrar la sociedad para [Proyecto]. Enhorabuena por el lanzamiento en $location. Te escribo porque ayudamos a empresas de $sector a optimizar su fase de arranque reduciendo costes operativos en un 15%..."
+        ];
+    }
+
     public function index()
     {
         if (!session('logged_in')) {

@@ -115,12 +115,12 @@
     filter: drop-shadow(0 0 12px rgba(33, 82, 255, 0.4));
 }
 
-.brand-text {
+.ae-radar-page__brand-header .brand-text {
     display: flex;
     flex-direction: column;
 }
 
-.brand-name {
+.ae-radar-page__brand-header .brand-name {
     font-family: 'Outfit', sans-serif;
     font-size: 22px;
     font-weight: 900;
@@ -129,14 +129,14 @@
     line-height: 1;
 }
 
-.brand-name .grad {
+.ae-radar-page__brand-header .brand-name .grad {
     background: linear-gradient(90deg, #60a5fa, #34d399);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-.brand-tag {
+.ae-radar-page__brand-header .brand-tag {
     font-size: 10px;
     font-weight: 800;
     text-transform: uppercase;

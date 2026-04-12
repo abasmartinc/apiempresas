@@ -156,6 +156,13 @@ def get_stats(is_test=False):
                 "Servicios B2B": 7,
                 "Hostelería": 5,
                 "Energía/Sosten.": 4
+            },
+            "featured_company": {
+                "company_name": "TECHNO SOLUTIONS SL",
+                "registro_mercantil": "MADRID",
+                "score_total": 92,
+                "priority_level": "muy_alta",
+                "cnae_label": "Servicios informáticos"
             }
         }
 
@@ -163,7 +170,8 @@ def get_stats(is_test=False):
     stats = {
         "total_companies": 0,
         "provinces": [],
-        "sectors": {}
+        "sectors": {},
+        "featured_company": None
     }
     
     try:
@@ -247,45 +255,80 @@ def get_stats(is_test=False):
                         break
             
             stats["sectors"] = dict(sorted(sector_counts.items(), key=lambda item: item[1], reverse=True))
+            
+            # 4. Empresa Destacada (B2B, High Score, Vendible)
+            cur.execute("""
+                SELECT c.company_name, c.registro_mercantil, crs.score_total, crs.priority_level, c.cnae_label
+                FROM borme_posts p
+                JOIN companies c ON c.id = p.company_id
+                JOIN company_radar_scores crs ON crs.company_id = c.id
+                WHERE p.created_at >= %s AND p.created_at < %s + INTERVAL 1 DAY
+                  AND p.act_types LIKE '%%Constitu%%'
+                  AND (c.cnae_label LIKE '%%Tecnolog%%' OR c.cnae_label LIKE '%%Consult%%' OR c.cnae_label LIKE '%%Inform%%' OR c.cnae_label LIKE '%%Marketing%%' OR c.cnae_label LIKE '%%Publi%%' OR c.cnae_label LIKE '%%Constru%%')
+                ORDER BY crs.score_total DESC, c.capital_social_raw DESC
+                LIMIT 1
+            """, (query_date, query_date))
+            featured = cur.fetchone()
+            
+            if not featured:
+                cur.execute("""
+                    SELECT c.company_name, c.registro_mercantil, crs.score_total, crs.priority_level, c.cnae_label
+                    FROM borme_posts p
+                    JOIN companies c ON c.id = p.company_id
+                    JOIN company_radar_scores crs ON crs.company_id = c.id
+                    WHERE p.created_at >= %s AND p.created_at < %s + INTERVAL 1 DAY
+                      AND p.act_types LIKE '%%Constitu%%'
+                    ORDER BY crs.score_total DESC
+                    LIMIT 1
+                """, (query_date, query_date))
+                featured = cur.fetchone()
+                
+            stats["featured_company"] = featured
 
     except Exception as e:
         print(f"[!] Error gathering stats: {e}")
     finally:
         conn.close()
         
-    return stats
-
 def generate_post(stats):
-    """Composes the LinkedIn post text."""
-    today_str = dt.date.today().strftime("%d/%m/%Y")
+    """Composes the LinkedIn post text (Local Fallback)."""
     total = stats["total_companies"]
-    if total == 0: return None
+    if total <= 0: return None
 
-    prov_list = [f"{p['registro_mercantil']} ({p['count']})" for p in stats["provinces"]]
-    top_provinces = ", ".join(prov_list)
+    featured = stats.get("featured_company")
+    example_block = ""
+    if featured:
+        example_block = f"""
+Ejemplo real detectado hoy:
 
-    top_sectors = []
-    for cat, count in list(stats["sectors"].items())[:3]:
-        if count > 0:
-            percentage = round((count / total) * 100, 1)
-            top_sectors.append(f"• {cat}: {percentage}%")
-    
-    sectors_str = "\n".join(top_sectors) if top_sectors else "• Diversos sectores industriales"
+Empresa: {featured['company_name']}
+📍 {featured['registro_mercantil']}
+💰 Ticket estimado: 5.000€ – 12.000€
+🎯 Probabilidad: Alta
 
-    post = f"""🚀 Resumen de Creación de Empresas en España - {today_str}
+👉 Momento ideal para contactar: ahora"""
 
-¡Día de gran actividad económica! Nuestro Radar B2B ha detectado la constitución de {total} nuevas sociedades en las últimas 24 horas.
+    post = f"""Hoy se han creado +{total} nuevas empresas en España 👇
 
-📍 Liderazgo Geográfico:
-Los registros mercantiles con mayor movimiento han sido {top_provinces}.
+Contexto rápido de hoy:
+- Total: {total} empresas nuevas.
+- Provincias top: {", ".join([p['registro_mercantil'] for p in stats["provinces"]])}.
+- Sectores: {", ".join(list(stats["sectors"].keys())[:2])}.
 
-📈 Sectores en Crecimiento:
-{sectors_str}
+Pero esto es lo importante 👇
 
-La analítica avanzada de APIEmpresas sigue monitorizando en tiempo real el pulso económico del país.
+👉 Muchas están en sus primeros días
+👉 Sin proveedores definidos
+👉 Con necesidad inmediata de servicios
+{example_block}
 
-#Emprendimiento #Empresas #BORME #DataIntel #España #Economía #B2B #DigitalOps"""
+Estamos detectando este tipo de oportunidades automáticamente y mostrando a quién contactar, por qué y qué decirle.
 
+Si trabajas con empresas (agencia, SaaS, asesoría...) esto te interesa.
+
+Puedes ver ejemplos reales aquí:
+https://apiempresas.es/radar-demo
+"""
     return post
 
 def generate_post_with_gpt(stats):
@@ -306,25 +349,47 @@ def generate_post_with_gpt(stats):
             percentage = round((count / total) * 100, 1)
             sector_summary += f"- {cat}: {percentage}%\n"
 
-    prompt = f"""Eres un experto en marketing y growth hacking para B2B. Crea una publicación de LinkedIn atractiva y profesional basada en estas estadísticas del día ({today_str}) de creación de empresas en España:
+    featured = stats.get("featured_company")
+    example_data = ""
+    if featured:
+        example_data = f"""
+        Empresa: {featured['company_name']}
+        Provincia: {featured['registro_mercantil']}
+        Sector: {featured['cnae_label']}
+        Score Radar: {featured['score_total']} (Sobre 100)
+        """
 
-Estadísticas:
-- Total de nuevas empresas: {total}
-- Registros Mercantiles líderes: {top_provinces}
-- Sectores con mayor crecimiento:
-{sector_summary}
+    prompt = f"""Eres un experto en Social Selling B2B y Growth Marketing. Crea un post de LinkedIn irresistible basado en estos datos del BORME ({today_str}).
 
-Directrices del post:
-1. Usa emojis de forma profesional y equilibrada.
-2. Usa hashtags estratégicos (ej: #BORME #DataIntel #B2B #España).
-3. El tono debe ser de autoridad pero cercano, destacando la vitalidad del tejido empresarial.
-4. MUY IMPORTANTE: El post DEBE terminar obligatoriamente con este llamado a la acción (CTA) exacto:
+DATOS CLAVE:
+- Total empresas creadas hoy: {total}
+- Provincias top: {top_provinces}
+- Sectores activos: {sector_summary}
+- Ejemplo de oportunidad destacada: {example_data}
 
-¿Quieres acceder a la lista completa de estas nuevas empresas con sus datos de contacto (Email, Teléfono y Dirección)? 
-👇 Descarga tus leads segmentados aquí: 
-https://apiempresas.es/leads-empresas-nuevas
+REGLAS DE ORO:
+- OBJETIVO: Generar leads y tráfico a la demo. Que el lector piense "aquí hay dinero".
+- TONO: Humano, directo, cero corporativo. Nada de "ecosistema" o "innovación". Habla de clientes y dinero.
+- LONGITUD: 10-14 líneas. Frases cortas. 2-4 emojis (💰 🎯 📈 ⚡).
+- ESTRUCTURA:
+  1. HOOK: "Hoy se han creado +{total} empresas en España 👇" o similar.
+  2. CONTEXTO: Datos de provincias y sectores (formato lista corta).
+  3. CAMBIO A OPORTUNIDAD: "Pero esto es lo importante 👇" + 3 bullets sobre por qué es una oportunidad ahora.
+  4. EJEMPLO REAL: Formato exacto:
+     Empresa: {featured['company_name'] if featured else 'Nombre'}
+     📍 {featured['registro_mercantil'] if featured else 'Provincia'}
+     💰 Ticket estimado: 5.000€ – 12.000€
+     🎯 Probabilidad: Alta
+     👉 Momento ideal para contactar: ahora
+  5. VALOR: Breve (detectamos automáticamente quién, por qué y qué decir).
+  6. TARGET: "Si trabajas con empresas (agencia, SaaS, asesoría...)"
+  7. CTA: "Puedes ver ejemplos reales aquí: https://apiempresas.es/radar-demo"
 
-Escribe el post directamente en español, sin preámbulos ni comentarios adicionales."""
+QUIERO 2 VARIANTES:
+1. VERSIÓN ESTÁNDAR: Equilibrada y profesional.
+2. VERSIÓN AGRESIVA: Más directa a negocio y dinero, enfocada en la oportunidad perdida si no actúan.
+
+Escribe ambas variantes separadas por una línea de guiones. Escribe directamente en español."""
 
     try:
         url = "https://api.openai.com/v1/chat/completions"
@@ -517,20 +582,17 @@ def main():
     # Try AI generation first
     post_content = generate_post_with_gpt(stats)
     
-    # Fallback to local template if AI fails
-    if not post_content:
-        print("[*] Using local template as fallback.")
-        post_content = generate_post(stats)
-        # Ensure CTA is at least in the template if fallback occurs
-        if post_content and "https://apiempresas.es/leads-empresas-nuevas" not in post_content:
-            post_content += "\n\n¿Quieres los datos de contacto? Descarga tus leads aquí: https://apiempresas.es/leads-empresas-nuevas"
-
     if not post_content:
         print("[!] Failed to generate post content.")
         return
 
+    # If it is multiple variants, we might want to split them for publishing if publishing is enabled
+    # but for now we keep the full content for preview/email.
+    # publish_to_linkedin currently takes 'content' as a whole. 
+    # If the user wants to publish TWO posts, that's different, but for now they likely want to choose one.
+    
     if args.dry_run:
-        print("\n=== PREVISUALIZACIÓN DEL CONTENIDO ===")
+        print("\n=== PREVISUALIZACIÓN DE POSTS ===")
         print(post_content)
         if img_path:
             print(f"\n📊 Infografía generada en: {os.path.abspath(img_path)}")
