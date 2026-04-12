@@ -3,8 +3,8 @@
 
 <head>
     <?= view('partials/head', [
-        'title' => 'API de Datos Mercantiles y Registro Mercantil | Infraestructura B2B Pro',
-        'excerptText' => 'Conecta tu plataforma a la infraestructura de datos de empresas definitiva en España. API REST, Webhooks BORME y enriquecimiento masivo para soluciones tecnológicas.',
+        'title' => 'API Registro Mercantil y Webhooks BORME en tiempo real | APIEmpresas.es',
+        'excerptText' => 'Infraestructura técnica para integración masiva de datos mercantiles. API REST, Webhooks para el BORME y enriquecimiento de leads con IA para desarrolladores.',
         'canonical' => site_url('api-empresas'),
         'robots' => 'index,follow',
     ]) ?>
@@ -623,6 +623,73 @@
             }
         }
 
+        .api-faq {
+            margin-top: 60px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .api-faq-item {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .api-faq-item:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 10px 25px -10px rgba(59, 130, 246, 0.12);
+        }
+
+        .api-faq-question {
+            padding: 24px 28px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #0f172a;
+            cursor: pointer;
+        }
+
+        .api-faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #f8fafc;
+        }
+
+        .api-faq-answer-inner {
+            padding: 0 28px 24px;
+            font-size: 0.95rem;
+            color: #475569;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .api-faq-item.active .api-faq-answer {
+            max-height: 400px;
+        }
+
+        .api-faq-icon {
+            font-size: 1.4rem;
+            transition: transform 0.2s ease;
+            color: #94a3b8;
+            font-weight: 400;
+        }
+
+        .api-faq-item.active .api-faq-icon {
+            transform: rotate(45deg);
+            color: #3b82f6;
+        }
+
         .technical-grid {
             mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
@@ -645,13 +712,12 @@
                     </div>
 
                     <h1 class="radar-hero__title">
-                        Automatización de Datos Mercantiles.
-                        <span>Infraestructura B2B nativa.</span>
+                        Infraestructura API para el<br>
+                        <span>Registro Mercantil y BORME.</span>
                     </h1>
 
                     <p class="radar-hero__subtitle">
-                        Integra el Registro Mercantil directamente en tu flujo de trabajo. Nuestra API permite escalar
-                        la ingesta de datos del BORME, modelos de scoring y señales de mercado para volúmenes masivos.
+                        Integra datos oficiales de empresas, procesos de scoring IA y monitorización del BORME directamente en tu stack. Diseñada para ingesta masiva y alta disponibilidad.
                     </p>
 
                     <div class="radar-hero__proof">
@@ -679,16 +745,13 @@
                     </div>
 
                     <!-- API HERO TWO-COLUMN PANEL -->
-                    <div class="radar-hero__feature-panel" style="max-width: 1040px; margin-top: 40px;">
+                <div class="radar-hero__feature-panel" style="max-width: 1040px; margin-top: 40px;">
                         <div class="radar-hero__feature-copy">
                             <h2>Impulsa tu prospección con datos en tiempo real</h2>
                             <ul style="display: grid; gap: 16px;">
-                                <li><strong>REST API Nativa:</strong> Integración simple con JSON de alto rendimiento
-                                    para validar cada oportunidad.</li>
-                                <li><strong>Motor de Scoring IA:</strong> Prioriza tus esfuerzos comerciales basándote
-                                    en el potencial financiero real.</li>
-                                <li><strong>Webhooks Automáticos:</strong> Tu CRM actualizado al instante con cada nueva
-                                    constitución en el BORME.</li>
+                                <li><strong>Infraestructura API Nativa:</strong> Integración simple con JSON de alto rendimiento para validar cada oportunidad técnica.</li>
+                                <li><strong>Webhooks del Registro Mercantil:</strong> Notificaciones HTTP directas del BORME para automatizar tu CRM o ERP.</li>
+                                <li><strong>Enriquecimiento de Leads:</strong> Ingesta masiva de datos societarios, cargos y capital social para scoring avanzado.</li>
                             </ul>
                         </div>
 
@@ -1243,6 +1306,79 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
         </script>
 
 
+        <!-- FAQ SECTION -->
+        <section class="radar-section">
+            <div class="container">
+                <div class="radar-heading radar-heading--center">
+                    <div class="radar-kicker">Respuesta a dudas técnicas</div>
+                    <h2 class="radar-title">Preguntas Frecuentes sobre la API</h2>
+                    <p class="radar-subtitle">Todo lo que necesitas saber para integrar nuestra infraestructura en tu producto.</p>
+                </div>
+
+                <div class="api-faq">
+                    <div class="api-faq-item active">
+                        <button class="api-faq-question" onclick="this.parentElement.classList.toggle('active')">
+                            <span>¿Cómo se integra la API de empresas?</span>
+                            <span class="api-faq-icon">+</span>
+                        </button>
+                        <div class="api-faq-answer">
+                            <div class="api-faq-answer-inner">
+                                La integración es sencilla mediante una API REST estándar. Solo necesitas tu API Key para realizar peticiones GET a nuestros endpoints. Disponemos de ejemplos listos para usar en Python, PHP, Node.js y cURL en nuestra documentación oficial.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="api-faq-item">
+                        <button class="api-faq-question" onclick="this.parentElement.classList.toggle('active')">
+                            <span>¿Con qué frecuencia se actualizan los datos del Registro Mercantil?</span>
+                            <span class="api-faq-icon">+</span>
+                        </button>
+                        <div class="api-faq-answer">
+                            <div class="api-faq-answer-inner">
+                                Nuestro motor monitoriza el BORME (Boletín Oficial del Registro Mercantil) diariamente. Las nuevas constituciones, ceses, nombramientos y ampliaciones de capital suelen estar disponibles en la API pocas horas después de su publicación oficial.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="api-faq-item">
+                        <button class="api-faq-question" onclick="this.parentElement.classList.toggle('active')">
+                            <span>¿Soportan Webhooks para recibir alertas del BORME?</span>
+                            <span class="api-faq-icon">+</span>
+                        </button>
+                        <div class="api-faq-answer">
+                            <div class="api-faq-answer-inner">
+                                Sí, el plan Business permite configurar Webhooks. Puedes registrar una URL de callback para recibir notificaciones PUSH cada vez que detectemos una nueva empresa que cumpla tus filtros de sector o provincia, evitando el polling constante.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="api-faq-item">
+                        <button class="api-faq-question" onclick="this.parentElement.classList.toggle('active')">
+                            <span>¿Qué tipo de datos devuelve la API?</span>
+                            <span class="api-faq-icon">+</span>
+                        </button>
+                        <div class="api-faq-answer">
+                            <div class="api-faq-answer-inner">
+                                Devolvemos un JSON estructurado con: Datos legales (CIF, Razón Social), CNAE, Capital Social, Localización (Dirección, Provincia), Estado (Activa/Extinguida), Cargos Directivos y Scoring de propensión comercial basado en IA.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="api-faq-item">
+                        <button class="api-faq-question" onclick="this.parentElement.classList.toggle('active')">
+                            <span>¿Cuál es el límite de peticiones por segundo?</span>
+                            <span class="api-faq-icon">+</span>
+                        </button>
+                        <div class="api-faq-answer">
+                            <div class="api-faq-answer-inner">
+                                Nuestra infraestructura está diseñada para ser escalable. Por defecto, permitimos ráfagas de hasta 10 peticiones por segundo en planes estándar, pero podemos habilitar cuotas personalizadas para ingestas masivas de datos en planes Enterprise.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- FINAL CTA -->
         <section style="padding: 80px 0 100px;">
             <div class="container">
@@ -1333,6 +1469,40 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                 </div>
             </div>
         </section>
+
+        <!-- FAQ SCHEMA -->
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "¿Cómo se integra la API de empresas?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "La integración se realiza mediante una API REST estándar usando una API Key. Tienes ejemplos disponibles en Python, PHP y Node.js."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Qué frecuencia de actualización tienen los datos del BORME?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Monitorizamos el BORME diariamente, procesando altas y cambios societarios pocas horas después de su publicación oficial."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Ofrecen soporte para Webhooks?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Sí, el plan Business permite configurar Webhooks para recibir notificaciones push en tiempo real sobre eventos del Registro Mercantil."
+              }
+            }
+          ]
+        }
+        </script>
 
     </main>
 

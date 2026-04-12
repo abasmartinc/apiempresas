@@ -1,0 +1,3 @@
+Free Plan (Tests\Feature\Api\V1\FreePlan)
+ [x] Free plan masking
+

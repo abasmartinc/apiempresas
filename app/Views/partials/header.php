@@ -78,8 +78,13 @@
             </nav>
 
             <div class="desktop-only auth-buttons">
-                <a class="btn btn_header btn_header--ghost" href="<?=site_url() ?>enter">Iniciar sesión</a>
-                <a class="btn btn_header btn_header--primary" href="<?=site_url() ?>register">Crear cuenta gratis</a>
+                <?php if (!session('logged_in')): ?>
+                    <a class="btn btn_header btn_header--ghost" href="<?= site_url() ?>enter">Iniciar sesión</a>
+                    <a class="btn btn_header btn_header--primary" href="<?= site_url() ?>register">Crear cuenta gratis</a>
+                <?php else: ?>
+                    <a class="btn btn_header btn_header--ghost" href="<?= site_url('dashboard') ?>">Dashboard</a>
+                    <a class="btn btn_header btn_header--ghost logout" href="<?= site_url('logout') ?>">Salir</a>
+                <?php endif; ?>
             </div>
 
             <!-- Hamburger Button (Mobile) -->
@@ -113,8 +118,13 @@
                         <a href="<?=site_url('documentation') ?>" class="mobile-nav-link">Documentación</a>
                     </div>
                     <div class="mobile-auth">
-                        <a href="<?=site_url() ?>enter" class="btn btn-full ghost">Iniciar sesión</a>
-                        <a href="<?=site_url() ?>register" class="btn btn-full primary">Crear cuenta gratis</a>
+                        <?php if (!session('logged_in')): ?>
+                            <a href="<?= site_url() ?>enter" class="btn btn-full ghost">Iniciar sesión</a>
+                            <a href="<?= site_url() ?>register" class="btn btn-full primary">Crear cuenta gratis</a>
+                        <?php else: ?>
+                            <a href="<?= site_url('dashboard') ?>" class="btn btn-full ghost">Dashboard</a>
+                            <a href="<?= site_url('logout') ?>" class="btn btn-full ghost logout">Salir</a>
+                        <?php endif; ?>
                     </div>
                 </nav>
             </div>
@@ -485,6 +495,50 @@
             document.querySelectorAll('.mobile-nav-link').forEach(link => {
                 link.addEventListener('click', closeMenu);
             });
+
+            // Logout Confirmation Logic (Global)
+            const logoutLinks = document.querySelectorAll('.logout');
+            if (logoutLinks.length > 0) {
+                logoutLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const targetUrl = this.getAttribute('href') || '/logout';
+
+                        // Check if Swal is available (loaded in head or footer of page)
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                title: '¿Cerrar sesión?',
+                                html: 'Se cerrará tu sesión en <strong>APIEmpresas.es</strong> y volverás a la pantalla de acceso.',
+                                icon: null,
+                                iconHtml: '<span class="ve-swal-icon-inner">✓</span>',
+                                showCancelButton: true,
+                                confirmButtonText: 'Sí, cerrar sesión',
+                                cancelButtonText: 'Cancelar',
+                                reverseButtons: true,
+                                focusCancel: true,
+                                customClass: {
+                                    popup: 've-swal',
+                                    title: 've-swal-title',
+                                    htmlContainer: 've-swal-text',
+                                    confirmButton: 'btn ve-swal-confirm',
+                                    cancelButton: 'btn btn_header--ghost ve-swal-cancel',
+                                    icon: 've-swal-icon'
+                                },
+                                buttonsStyling: false
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = targetUrl;
+                                }
+                            });
+                        } else {
+                            // Fallback if Swal not present
+                            if (confirm('¿Cerrar sesión?')) {
+                                window.location.href = targetUrl;
+                            }
+                        }
+                    });
+                });
+            }
         });
     </script>
 

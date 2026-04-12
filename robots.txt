@@ -1,0 +1,12 @@
+User-agent: *
+Disallow: /api/
+
+# Opcional pero recomendado: bloquear parámetros
+Disallow: /*?cif=
+Disallow: /*?
+
+# Permitir todo lo demás
+Allow: /
+
+# Sitemap
+Sitemap: https://apiempresas.es/sitemap.xml

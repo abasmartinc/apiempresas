@@ -89,7 +89,7 @@
         <section id="buscar" class="search-section container">
             <div class="search-card">
                 <div>
-                    <h2>Prueba la API con un CIF real</h2>
+                    <h2>Validar CIF online: prueba el buscador (mismo motor que la API)</h2>
                     <p class="muted">
                         Consulta al instante datos oficiales y comprueba cómo respondería la API en un caso real.
                     </p>
@@ -101,8 +101,11 @@
                     <button type="button" class="btn" id="btnBuscar" aria-label="Buscar">Validar ahora</button>
                 </div>
 
-                <p class="muted" style="font-size:13px; margin-top: 12px;">
-                    Datos obtenidos en tiempo real desde fuentes oficiales
+                <p class="muted">
+                    ¿Vas a automatizarlo en tu producto?
+                    <a href="<?= site_url('register') ?>">Crea tu cuenta y copia tu API Key</a> para integrar la
+                    validación
+                    en minutos.
                 </p>
 
                 <div id="resultado_container" style="display:none; margin-top: 32px;">
@@ -343,7 +346,7 @@
                         <div class="usecase-list">
                             <div class="usecase-item">
                                 <div class="usecase-dot"></div>
-                                <span>Validar CIF en formularios y procesos de onboarding</span>
+                                <span><strong>Validar CIF</strong> en formularios y procesos de onboarding</span>
                             </div>
 
                             <div class="usecase-item">
@@ -883,6 +886,100 @@
                             style="width:100%;border-radius:20px;">
                     </div>
 
+                </div>
+            </div>
+        </section>
+
+        <!-- DIRECTORY GRID -->
+        <section class="container directory-section">
+            <div class="directory-card">
+                <div class="directory-header">
+                    <h3>Directorio por provincia</h3>
+                    <a href="<?= site_url('directorio') ?>" class="ver-todo">Ver todo &rarr;</a>
+                </div>
+
+                <div class="directory-grid">
+                    <?php
+                    $provinces = [
+                        "A Coruña",
+                        "Alacant",
+                        "Albacete",
+                        "Alicante",
+                        "Alicante/Alacant",
+                        "Almería",
+                        "Araba/Álava",
+                        "Asturias",
+                        "Badajoz",
+                        "Baleares",
+                        "Balears, Illes",
+                        "Barcelona",
+                        "Burgos",
+                        "Cantabria",
+                        "Castelló",
+                        "Castellón",
+                        "Castellón/Castelló",
+                        "Ceuta",
+                        "Ciudad Real",
+                        "Coruña, A",
+                        "Cuenca",
+                        "Cáceres",
+                        "Cádiz",
+                        "Córdoba",
+                        "Gerona",
+                        "Girona",
+                        "Granada",
+                        "Guadalajara",
+                        "Guipúzcoa",
+                        "Huelva",
+                        "Huesca",
+                        "Illes Balears",
+                        "Jaén",
+                        "La Rioja",
+                        "Las Palmas",
+                        "Lerida",
+                        "León",
+                        "Lleida",
+                        "Lugo",
+                        "Madrid",
+                        "Melilla",
+                        "Murcia",
+                        "Málaga",
+                        "Navarra",
+                        "No Detectado",
+                        "Ourense",
+                        "Palencia",
+                        "Palmas, Las",
+                        "Pontevedra",
+                        "Rioja, La",
+                        "Salamanca",
+                        "Santa Cruz De Tenerife",
+                        "Segovia",
+                        "Sevilla",
+                        "Soria",
+                        "Tarragona",
+                        "Teruel",
+                        "Toledo",
+                        "Valencia",
+                        "Valencia/València",
+                        "Valladolid",
+                        "Vizcaya",
+                        "Zamora",
+                        "Zaragoza",
+                        "Álava",
+                        "Ávila",
+                        "Índice Alfabético De Sociedades"
+                    ];
+                    foreach ($provinces as $p):
+                        // Slug format: directorio/provincia/Albacete
+                        $slug = str_replace(['/', ', '], ['-', '-'], $p);
+                        if ($p === "Índice Alfabético De Sociedades") {
+                            $href = site_url('directorio');
+                        } else {
+                            $href = site_url('directorio/provincia/' . $slug);
+                        }
+                        ?>
+                        <a href="<?= $href ?>" class="directory-link"><?= esc($p) ?></a>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </section>

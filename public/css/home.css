@@ -1987,4 +1987,93 @@
 .ve-modal-content .btn.primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 28px rgba(33, 82, 255, 0.35);
-}
+}
+
+/* =========================
+   DIRECTORY GRID SECTION
+   ========================= */
+
+.directory-section {
+    padding-bottom: 20px;
+    margin-top: 20px;
+}
+
+.directory-card {
+    background: #f8fafc;
+    border: 1px solid rgba(15, 23, 42, 0.05);
+    border-radius: 28px;
+    padding: 48px 56px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.directory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.directory-header h3 {
+    font-size: 1.4rem;
+    font-weight: 850;
+    color: #475569;
+    margin: 0;
+}
+
+.directory-header .ver-todo {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #64748b;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.directory-header .ver-todo:hover {
+    color: var(--primary);
+}
+
+.directory-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 14px 24px;
+}
+
+.directory-link {
+    font-size: 0.88rem;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s;
+    font-weight: 500;
+    display: block;
+}
+
+.directory-link:hover {
+    color: var(--primary);
+    transform: translateX(3px);
+}
+
+@media (max-width: 1200px) {
+    .directory-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .directory-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .directory-card {
+        padding: 32px 24px;
+    }
+}
+
+@media (max-width: 600px) {
+    .directory-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .directory-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}

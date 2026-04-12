@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Tests\Feature\Api\V1\FreePlanTest" file="D:\laragon\www\apiempresas\tests\feature\Api\V1\FreePlanTest.php" tests="1" assertions="9" errors="0" failures="0" skipped="0" time="0.517865">
+    <testcase name="testFreePlanMasking" file="D:\laragon\www\apiempresas\tests\feature\Api\V1\FreePlanTest.php" line="31" class="Tests\Feature\Api\V1\FreePlanTest" classname="Tests.Feature.Api.V1.FreePlanTest" assertions="9" time="0.517865"/>
+  </testsuite>
+</testsuites>

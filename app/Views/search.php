@@ -14,11 +14,7 @@
 <body>
     <div class="bg-halo" aria-hidden="true"></div>
 
-    <?php if (session('logged_in')): ?>
-        <?= view('partials/header_inner') ?>
-    <?php else: ?>
-        <?= view('partials/header') ?>
-    <?php endif; ?>
+    <?= view('partials/header') ?>
 
     <main style="padding:40px 0 70px;">
         <section class="container search-section">
@@ -371,43 +367,6 @@
         })();
     </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const logoutLink = document.querySelector('.logout');
-            if (!logoutLink) return;
-
-            logoutLink.addEventListener('click', function (e) {
-                e.preventDefault();
-
-                const targetUrl = this.getAttribute('href') || '<?= site_url('logout') ?>';
-
-                Swal.fire({
-                    title: '¿Cerrar sesión?',
-                    html: 'Se cerrará tu sesión en <strong>APIEmpresas.es</strong> y volverás a la pantalla de acceso.',
-                    icon: null,
-                    iconHtml: '<span class="ve-swal-icon-inner">✓</span>',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí, cerrar sesión',
-                    cancelButtonText: 'Cancelar',
-                    reverseButtons: true,
-                    focusCancel: true,
-                    customClass: {
-                        popup: 've-swal',
-                        title: 've-swal-title',
-                        htmlContainer: 've-swal-text',
-                        confirmButton: 'btn ve-swal-confirm',
-                        cancelButton: 'btn btn_header--ghost ve-swal-cancel',
-                        icon: 've-swal-icon'
-                    },
-                    buttonsStyling: false
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = targetUrl;
-                    }
-                });
-            });
-        });
-    </script>
 </body>
 
 </html>

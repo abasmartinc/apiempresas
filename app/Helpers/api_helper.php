@@ -17,15 +17,22 @@ if (!function_exists('mask_company_data')) {
             $data['phone_mobile'] = mask_string($data['phone_mobile'], 3, 2);
         }
 
-        // 2. Mask Address detail (keep municipality and province, hide street)
+        // 2. Mask Address detail
+        // Requested format: "****************************************** (Alicante). España"
         if (!empty($data['address'])) {
-            // Usually addresses are like "C/ STREET NAME, 12, MADRID"
-            // We want to hide "STREET NAME, 12" and keep "MADRID" and "(MADRID)"
-            // Simplest approach: mask first 60% of the string but keep it looks like an address
-            $len = mb_strlen($data['address']);
-            $maskLen = (int) ($len * 0.7);
-            if ($maskLen > 0) {
-                $data['address'] = str_repeat('*', $maskLen) . mb_substr($data['address'], $maskLen);
+            $address = (string) $data['address'];
+            // Try to find the location part (starts with '(')
+            $lastPartIndex = mb_strrpos($address, '(');
+            
+            if ($lastPartIndex !== false) {
+                $locationPart = mb_substr($address, $lastPartIndex);
+                $streetPart = mb_substr($address, 0, $lastPartIndex);
+                $data['address'] = str_repeat('*', mb_strlen($streetPart)) . $locationPart;
+            } else {
+                // Fallback: mask 70%
+                $len = mb_strlen($address);
+                $maskLen = (int) ($len * 0.7);
+                $data['address'] = str_repeat('*', $maskLen) . mb_substr($address, $maskLen);
             }
         }
 
@@ -40,10 +47,8 @@ if (!function_exists('mask_company_data')) {
         // 4. Remove technical fields
         unset($data['lat'], $data['lng']);
 
-        // 5. Mask CIF (Key identifier)
-        if (!empty($data['cif'])) {
-            $data['cif'] = 'B********';
-        }
+        // 5. CIF -> The user sample shows it UNMASKED. 
+        // We will keep it as is (removing the previous masking logic).
 
         return $data;
     }

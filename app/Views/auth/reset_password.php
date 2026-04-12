@@ -9,29 +9,7 @@
 <div class="bg-halo" aria-hidden="true"></div>
 
 <div class="auth-wrapper">
-    <header>
-        <div class="container nav">
-            <div class="brand">
-                <a href="<?=site_url() ?>">
-                    <svg class="ve-logo" width="32" height="32" viewBox="0 0 64 64">
-                        <defs>
-                            <linearGradient id="ve-g" x1="10" y1="54" x2="54" y2="10">
-                                <stop stop-color="#2152FF"/>
-                                <stop offset=".65" stop-color="#5C7CFF"/>
-                                <stop offset="1" stop-color="#12B48A"/>
-                            </linearGradient>
-                        </defs>
-                        <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#ve-g)"/>
-                        <path d="M18 33 L28 43 L46 22" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                    </svg>
-                </a>
-                <div class="brand-text">
-                    <span class="brand-name">API<span class="grad">Empresas</span>.es</span>
-                    <span class="brand-tag">Verificación mercantil y Radar de empresas</span>
-                </div>
-            </div>
-        </div>
-    </header>
+    <?= view('partials/header') ?>
 
     <main class="auth-main">
         <div class="container auth-center">

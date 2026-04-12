@@ -1,0 +1,23 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '**'
+
+jobs:
+  build:
+    name: Create a release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create release
+        uses: crazy-max/ghaction-github-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        with:
+          name: ${{ github.ref_name }} Coding Standard
+          draft: true
+          prerelease: false
