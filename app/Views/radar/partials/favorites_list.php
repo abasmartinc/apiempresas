@@ -10,7 +10,7 @@
             <div class="ae-fav-card" id="fav-card-<?= $f['company_id'] ?>" data-status="<?= esc($f['status'] ?? 'nuevo') ?>">
                 <div class="ae-fav-card__badge-row">
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        <span class="ae-fav-card__status ae-fav-card__status--<?= esc($f['status'] ?? 'nuevo') ?>">
+                        <span class="ae-status-badge ae-status-badge--<?= esc($f['status'] ?? 'nuevo') ?>">
                             <?php 
                                 $statusLabels = [
                                     'nuevo' => 'Nuevo', 
@@ -28,8 +28,26 @@
                             </span>
                         <?php endif; ?>
                     </div>
-                    <span class="ae-radar-page__score ae-radar-page__score--<?= strtolower(str_replace('+', 'plus', $f['lead_score'])) ?>" title="Score de calidad: <?= $f['lead_score'] ?>">
-                        <?= $f['lead_score'] ?>
+                    <?php 
+                        $rawScore = $f['lead_score'] ?? 'POTENCIAL MEDIO';
+                        $displayLabel = $rawScore;
+                        $scoreClass = 'medium';
+
+                        // Mapeo unificado de etiquetas a clases CSS
+                        $classMap = [
+                            'LEAD CALIENTE'    => 'hot',
+                            'OPORTUNIDAD ALTA' => 'high',
+                            'CONTACTAR AHORA'  => 'now',
+                            'POTENCIAL MEDIO'  => 'medium',
+                            'MÍNIMO INTERÉS'   => 'low',
+                        ];
+
+                        if (isset($classMap[$rawScore])) {
+                            $scoreClass = $classMap[$rawScore];
+                        }
+                    ?>
+                    <span class="ae-radar-page__score ae-radar-page__score--<?= $scoreClass ?>" title="Score original: <?= esc($rawScore) ?>">
+                        <?= esc($displayLabel) ?>
                     </span>
                 </div>
 

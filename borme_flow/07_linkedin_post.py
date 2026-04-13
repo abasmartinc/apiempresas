@@ -166,7 +166,6 @@ def get_stats(is_test=False):
             }
         }
 
-    conn = mysql_connect()
     stats = {
         "total_companies": 0,
         "provinces": [],
@@ -174,7 +173,9 @@ def get_stats(is_test=False):
         "featured_company": None
     }
     
+    conn = None
     try:
+        conn = mysql_connect()
         with conn.cursor() as cur:
             # 1. Total nuevas Constituciones hoy (procesadas en esta ejecución)
             cur.execute("""
@@ -288,7 +289,10 @@ def get_stats(is_test=False):
     except Exception as e:
         print(f"[!] Error gathering stats: {e}")
     finally:
-        conn.close()
+        if conn:
+            conn.close()
+    return stats
+
         
 def generate_post(stats):
     """Composes the LinkedIn post text (Local Fallback)."""
@@ -583,7 +587,11 @@ def main():
     post_content = generate_post_with_gpt(stats)
     
     if not post_content:
-        print("[!] Failed to generate post content.")
+        print("[!] GPT generation failed or disabled. Falling back to local template...")
+        post_content = generate_post(stats)
+
+    if not post_content:
+        print("[!] Failed to generate post content (all methods).")
         return
 
     # If it is multiple variants, we might want to split them for publishing if publishing is enabled

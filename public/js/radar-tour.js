@@ -10,105 +10,88 @@ function initRadarTour(force = false) {
 
     const steps = [
         {
-            element: isPro ? '.ae-radar-page__topbar' : '.ae-radar-page__pill',
+            element: '.ae-radar-page__topbar',
             popover: {
-                title: '🚀 Bienvenido al Radar',
-                description: isPro ? 'Este es tu panel profesional para monitorizar nuevas empresas en tiempo real.' : 'Estás en el centro de control de nuevas empresas en España. Aquí monitorizamos el BORME a diario para ti.',
+                title: '🚀 Tu Centro de Inteligencia',
+                description: 'Bienvenido al Radar PRO. Aquí monitorizamos el BORME a diario para entregarte las mejores oportunidades de negocio antes que a nadie.',
                 side: "bottom",
                 align: 'start'
-            }
-        },
-        {
-            element: isPro ? '.ae-radar-page__metrics' : '.ae-radar-page__stats',
-            popover: {
-                title: '📊 Estadísticas de Impacto',
-                description: 'Visualiza rápidamente cuántas empresas se han constituido hoy, esta semana o este mes.',
-                side: "bottom",
-                align: 'center'
             }
         }
     ];
 
-    // Filters step
-    if (document.querySelector('.ae-radar-page__filters')) {
+    // 1. Daily Nudge
+    if (document.querySelector('.ae-radar-page__daily-nudge')) {
         steps.push({
-            element: '.ae-radar-page__filters',
+            element: '.ae-radar-page__daily-nudge',
             popover: {
-                title: '🔍 Filtros Estratégicos',
-                description: 'Encuentra exactamente lo que buscas filtrando por provincia, sector o palabras clave específicas.',
-                side: "top",
+                title: '📅 Tu Selección Diaria',
+                description: 'Cada mañana, nuestro algoritmo selecciona las empresas recién constituidas que tienen más probabilidad de necesitar tus servicios hoy mismo.',
+                side: "bottom",
                 align: 'center'
             }
         });
     }
 
-    // Lead list / table
-    const resultsSelector = isPro ? '#radar-results-container' : '.ae-radar-page__lead-grid';
-    if (document.querySelector(resultsSelector)) {
+    // 2. ROI / Pipeline
+    if (document.querySelector('.ae-radar-page__roi-box')) {
         steps.push({
-            element: resultsSelector,
+            element: '.ae-radar-page__roi-box',
             popover: {
-                title: '🔥 Oportunidades Detectadas',
-                description: 'Este es tu listado de prospección con las últimas sociedades registradas.',
-                side: "top",
-                align: 'center'
-            }
-        });
-    }
-
-    // AI Analysis (PRO only)
-    if (isPro) {
-        steps.push({
-            element: '.ae-radar-page__nav-link[href*="trends"]',
-            popover: {
-                title: '📈 Análisis de Tendencias',
-                description: 'Descubre qué sectores y zonas están creciendo más para anticiparte al mercado.',
+                title: '💰 Potencial Económico',
+                description: 'Basándonos en los leads detectados, calculamos el valor de negocio que podrías captar. ¡Solo un cliente puede pagar años de suscripción!',
                 side: "right",
                 align: 'center'
             }
         });
+    }
 
-        if (document.querySelector('.ae-radar-page__nav-link[href*="favoritos"]')) {
-            steps.push({
-                element: '.ae-radar-page__nav-link[href*="favoritos"]',
-                popover: {
-                    title: '⭐ Mis Favoritos',
-                    description: 'Guarda las empresas que más te interesen para tenerlas siempre a mano.',
-                    side: "right",
-                    align: 'center'
-                }
-            });
-        }
-
-        if (document.querySelector('.ae-radar-page__nav-link[href*="kanban"]')) {
-            steps.push({
-                element: '.ae-radar-page__nav-link[href*="kanban"]',
-                popover: {
-                    title: '📋 Embudo de Ventas',
-                    description: 'Gestiona tus prospectos favoritos y muévelos a través de tu funnel comercial (Kanban).',
-                    side: "right",
-                    align: 'center'
-                }
-            });
-        }
-
-        if (document.querySelector('.ae-radar-page__nav-link[href*="invoices"]')) {
-            steps.push({
-                element: '.ae-radar-page__nav-link[href*="invoices"]',
-                popover: {
-                    title: '🧾 Mis Facturas',
-                    description: 'Accede rápidamente a tus facturas y gestiona tu suscripción desde este apartado.',
-                    side: "right",
-                    align: 'center'
-                }
-            });
-        }
-    } else if (document.querySelector('.ae-radar-page__territory-grid')) {
+    // 3. CRM Progress
+    if (document.querySelector('.ae-radar-page__crm-progress')) {
         steps.push({
-            element: '.ae-radar-page__territory-grid',
+            element: '.ae-radar-page__crm-progress',
             popover: {
-                title: '📍 Hubs de Actividad',
-                description: 'Identifica qué provincias están liderando el crecimiento empresarial.',
+                title: '📊 Control de tu Embudo',
+                description: 'Visualiza rápidamente cuántas oportunidades has contactado y cuánto valor tienes pendiente de cierre en tu pipeline.',
+                side: "bottom",
+                align: 'center'
+            }
+        });
+    }
+
+    // 4. Strategic Intelligence
+    if (document.querySelector('.ae-radar-page__intel-stats')) {
+        steps.push({
+            element: '.ae-radar-page__intel-stats',
+            popover: {
+                title: '🧠 Inteligencia Predictiva',
+                description: 'Analizamos cada empresa para decirte cuáles están en su mejor momento de contacto. No pierdas tiempo con leads fríos.',
+                side: "top",
+                align: 'center'
+            }
+        });
+    }
+
+    // 5. Top Picks
+    if (document.querySelector('.ae-radar-page__top-picks')) {
+        steps.push({
+            element: '.ae-radar-page__top-picks',
+            popover: {
+                title: '🎯 Empieza por estos 3',
+                description: 'Si tienes poco tiempo, nuestro sistema te recomienda las 3 mejores opciones para contactar de inmediato y maximizar tu éxito.',
+                side: "top",
+                align: 'center'
+            }
+        });
+    }
+
+    // 6. Global Results & Filters
+    if (document.querySelector('.ae-radar-page__filters')) {
+        steps.push({
+            element: '.ae-radar-page__filters',
+            popover: {
+                title: '🔍 Filtros Avanzados',
+                description: 'Segmenta por provincia, sector (CNAE) o capital social para encontrar el cliente ideal para tu producto.',
                 side: "top",
                 align: 'center'
             }

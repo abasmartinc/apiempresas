@@ -2047,44 +2047,6 @@
 }
 
 /* 4. Lead Scores (A+, A, B, C) */
-.ae-radar-page__score {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 900;
-    font-family: 'Outfit', sans-serif;
-    cursor: help;
-    flex-shrink: 0;
-}
-
-.ae-radar-page__score--aplus {
-    background: #dcfce7;
-    color: #166534;
-    border: 1px solid #bbf7d0;
-    box-shadow: 0 0 10px rgba(22, 101, 52, 0.1);
-}
-
-.ae-radar-page__score--a {
-    background: #f0fdf4;
-    color: #166534;
-    border: 1px solid #dcfce7;
-}
-
-.ae-radar-page__score--b {
-    background: #fef9c3;
-    color: #854d0e;
-    border: 1px solid #fef08a;
-}
-
-.ae-radar-page__score--c {
-    background: #f1f5f9;
-    color: #64748b;
-    border: 1px solid #e2e8f0;
-}
 
 /* 5. Scarcity Note (Paywall) */
 .ae-radar-page__scarcity {
@@ -3020,4 +2982,88 @@
     width: 16px;
     height: 16px;
     border-width: 2px;
+}
+
+/* --- Radar Quality & Interest Badges (Unified with Dashboard) --- */
+.ae-radar-page__score {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    line-height: normal;
+    white-space: nowrap;
+    text-align: center;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    width: auto !important;
+    height: auto !important;
+    box-shadow: none !important;
+}
+
+/* Color Variants: Synchronized with dashboard Opportunity Badges (results_table.php) */
+.ae-radar-page__score--hot,
+.ae-radar-page__score--lead-caliente {
+    background: #fee2e2 !important;
+    color: #ef4444 !important;
+    border-color: #fecaca !important;
+}
+
+.ae-radar-page__score--high,
+.ae-radar-page__score--oportunidad-alta,
+.ae-radar-page__score--a-plus,
+.ae-radar-page__score--aplus {
+    background: #fef3c7 !important;
+    color: #d97706 !important;
+    border-color: #fde68a !important;
+}
+
+/* --- CRM Status Badges (Unified with Kanban Headers) --- */
+.ae-status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-block;
+    line-height: normal;
+}
+
+.ae-status-badge--nuevo { background: #eff6ff; color: #3b82f6; }
+.ae-status-badge--contactado { background: #f5f3ff; color: #8b5cf6; }
+.ae-status-badge--negociacion { background: #fffbeb; color: #f59e0b; }
+.ae-status-badge--ganado { background: #f0fdf4; color: #10b981; }
+.ae-status-badge--seguimiento { background: #eff6ff; color: #2563eb; }
+
+.ae-radar-page__score--now,
+.ae-radar-page__score--contactar-ahora,
+.ae-radar-page__score--a {
+    background: #dcfce7 !important;
+    color: #10b981 !important;
+    border-color: #bbf7d0 !important;
+}
+
+.ae-radar-page__score--medium,
+.ae-radar-page__score--potencial-medio,
+.ae-radar-page__score--interes-medio,
+.ae-radar-page__score--interes-media,
+.ae-radar-page__score--b {
+    background: #f1f5f9 !important;
+    color: #64748b !important;
+    border-color: #e2e8f0 !important;
+}
+
+/* Fallback / LOW */
+.ae-radar-page__score--low,
+.ae-radar-page__score--c,
+.ae-radar-page__score:not([class*="--"]) {
+    background: #f8fafc !important;
+    color: #94a3b8 !important;
+    border-color: #f1f5f9 !important;
 }

@@ -58,8 +58,22 @@ class UserFavoriteModel extends Model
     public function getFavoritesWithCompanyData($userId, $params = [])
     {
         $builder = $this->builder();
-        $builder->select('user_favorites.*, companies.company_name, companies.cif, companies.fecha_constitucion, companies.municipality, companies.objeto_social')
+        $builder->select('
+                    user_favorites.*, 
+                    companies.company_name, 
+                    companies.cif, 
+                    companies.fecha_constitucion, 
+                    companies.municipality, 
+                    companies.objeto_social,
+                    companies.cnae_label,
+                    companies.registro_mercantil,
+                    crs.score_total,
+                    crs.priority_level,
+                    crs.main_act_type,
+                    crs.last_borme_date
+                ')
                 ->join('companies', 'companies.id = user_favorites.company_id')
+                ->join('company_radar_scores crs', 'crs.company_id = companies.id', 'left')
                 ->where('user_favorites.user_id', $userId);
 
         // Filtro por Estado

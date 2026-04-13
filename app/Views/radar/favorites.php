@@ -46,19 +46,7 @@
             margin-bottom: 4px;
         }
 
-        .ae-fav-card__status {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .ae-fav-card__status--nuevo { background: #eff6ff; color: #2563eb; }
-        .ae-fav-card__status--contactado { background: #fff7ed; color: #ea580c; }
-        .ae-fav-card__status--negociacion { background: #faf5ff; color: #9333ea; }
-        .ae-fav-card__status--ganado { background: #f0fdf4; color: #16a34a; }
-        .ae-fav-card__status--seguimiento { background: #eff6ff; color: #2563eb; }
+        /* Los estilos de .ae-status-badge están centralizados en radar.css */
 
         .ae-fav-card__company-name {
             font-size: 20px;
@@ -97,27 +85,6 @@
             overflow: hidden;
         }
 
-        /* Score Badges */
-        .ae-radar-page__score {
-            width: 34px !important;
-            height: 34px !important;
-            aspect-ratio: 1 / 1;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 900;
-            flex-shrink: 0;
-            border: 2px solid #fff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            padding: 0;
-            line-height: 1;
-        }
-        .ae-radar-page__score--aplus { background: linear-gradient(135deg, #059669, #10b981); color: #fff; }
-        .ae-radar-page__score--a { background: #10b981; color: #fff; }
-        .ae-radar-page__score--b { background: #f59e0b; color: #fff; }
-        .ae-radar-page__score--c { background: #ef4444; color: #fff; }
 
         /* Sidebar: Notes */
         .ae-fav-card__notes {

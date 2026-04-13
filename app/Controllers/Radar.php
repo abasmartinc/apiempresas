@@ -979,12 +979,15 @@ class Radar extends BaseController
         $dynamicBoosters = ($adjEngagement * 0.4) + ($adjGroupBoost * 0.3) + ($adjUserPref * 0.3);
         $finalScore = max(0, min(100, ($baseScore * 0.8) + ($dynamicBoosters * 0.2)));
 
-        // 5. Proyección a Categorías Visuales (Umbrales 70/40 (Optimización de Interés Radar)
-        $scoreColor = '#94a3b8'; $scoreProb = 'Baja probabilidad'; $scoreIcon = '⚪'; $scoreBg = 'rgba(148, 163, 184, 0.1)';
-        if ($finalScore >= 70) {
-            $scoreColor = '#10b981'; $scoreBg = 'rgba(16, 185, 129, 0.1)'; $scoreProb = 'Alta probabilidad'; $scoreIcon = '🟢';
+        // 5. Proyección a Categorías Visuales (Umbrales 85/70/40 sincronizados con results_table.php)
+        $scoreColor = '#94a3b8'; $scoreProb = 'POTENCIAL MEDIO'; $scoreIcon = '⚪'; $scoreBg = 'rgba(148, 163, 184, 0.1)';
+        
+        if ($finalScore >= 85) {
+            $scoreColor = '#ef4444'; $scoreBg = 'rgba(239, 68, 68, 0.1)'; $scoreProb = 'LEAD CALIENTE'; $scoreIcon = '🔥';
+        } elseif ($finalScore >= 70) {
+            $scoreColor = '#f59e0b'; $scoreBg = 'rgba(245, 158, 11, 0.1)'; $scoreProb = 'OPORTUNIDAD ALTA'; $scoreIcon = '🟡';
         } elseif ($finalScore >= 40) {
-            $scoreColor = '#f59e0b'; $scoreBg = 'rgba(245, 158, 11, 0.1)'; $scoreProb = 'Interés medio'; $scoreIcon = '🟡';
+            $scoreColor = '#10b981'; $scoreBg = 'rgba(16, 185, 129, 0.1)'; $scoreProb = 'CONTACTAR AHORA'; $scoreIcon = '🟢';
         }
         
         return [

@@ -112,8 +112,26 @@
                                                  data-id="<?= $fav['id'] ?>"
                                                  onclick="openQuickView(<?= $fav['company_id'] ?>)">
                                                 <div class="kanban-card__score" style="display: flex; justify-content: space-between; align-items: center;">
-                                                    <span class="ae-radar-page__score ae-radar-page__score--<?= strtolower(substr($fav['lead_score'], 0, 1)) ?>">
-                                                        <?= $fav['lead_score'] ?>
+                                                    <?php 
+                                                        $rawScore = $fav['lead_score'] ?? 'POTENCIAL MEDIO';
+                                                        $displayLabel = $rawScore;
+                                                        $scoreClass = 'medium';
+
+                                                        // Mapeo unificado de etiquetas a clases CSS
+                                                        $classMap = [
+                                                            'LEAD CALIENTE'    => 'hot',
+                                                            'OPORTUNIDAD ALTA' => 'high',
+                                                            'CONTACTAR AHORA'  => 'now',
+                                                            'POTENCIAL MEDIO'  => 'medium',
+                                                            'MÍNIMO INTERÉS'   => 'low',
+                                                        ];
+
+                                                        if (isset($classMap[$rawScore])) {
+                                                            $scoreClass = $classMap[$rawScore];
+                                                        }
+                                                    ?>
+                                                    <span class="ae-radar-page__score ae-radar-page__score--<?= $scoreClass ?>">
+                                                        <?= esc($displayLabel) ?>
                                                     </span>
                                                     <?php if ($fav['is_following'] ?? false): ?>
                                                         <span class="ae-status-pill ae-status-pill--following" style="background:#eff6ff; color:#2563eb; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:800; text-transform:uppercase;">
