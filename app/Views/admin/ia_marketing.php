@@ -152,6 +152,18 @@
             </div>
 
             <div style="flex: 1; min-width: 150px;">
+                <label for="exclude_subject" style="display: block; font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 6px;">Excluir si recibió:</label>
+                <select name="exclude_subject" id="exclude_subject" class="input" style="width: 100%; height: 42px; padding: 0 10px;">
+                    <option value="">(Ninguno)</option>
+                    <?php foreach ($available_subjects as $s): ?>
+                        <option value="<?= esc($s->subject) ?>" <?= $filters['exclude_subject'] == $s->subject ? 'selected' : '' ?>>
+                            <?= esc(mb_strimwidth($s->subject, 0, 40, "...")) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div style="flex: 1; min-width: 150px;">
                 <label for="sort_by" style="display: block; font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 6px;">Ordenar por</label>
                 <select name="sort_by" id="sort_by" class="input" style="width: 100%; height: 42px; padding: 0 10px;">
                     <option value="score" <?= $filters['sort_by'] == 'score' ? 'selected' : '' ?>>Lead Score (Recomendado)</option>
@@ -254,27 +266,24 @@
 
                     <td style="padding: 12px;">
                         <?php if ($l->last_email_at): ?>
-                            <div style="font-size: 0.8rem; margin-bottom: 4px;">
-                                <span style="color: #64748b;">Último:</span> 
-                                <span style="font-weight: 600;"><?= date('d/m/y H:i', strtotime($l->last_email_at)) ?></span>
-                            </div>
-                            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                                <?php if ($l->last_email_clicked): ?>
-                                    <span class="pill" style="background: #ecfdf5; color: #059669; border: 1px solid #10b98140; font-size: 0.65rem; padding: 2px 6px;">Clicado</span>
-                                <?php elseif ($l->last_email_opened): ?>
-                                    <span class="pill" style="background: #eff6ff; color: #2563eb; border: 1px solid #3b82f640; font-size: 0.65rem; padding: 2px 6px;">Leído</span>
-                                <?php elseif ($l->last_email_status === 'success'): ?>
-                                    <span class="pill" style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; font-size: 0.65rem; padding: 2px 6px;">Enviado</span>
-                                <?php else: ?>
-                                    <span class="pill" style="background: #fef2f2; color: #dc2626; border: 1px solid #ef444440; font-size: 0.65rem; padding: 2px 6px;">Error</span>
-                                <?php endif; ?>
-                                
-                                <button onclick="showEmailHistory(<?= $l->id ?>, '<?= esc($l->name) ?>')" style="background: none; border: none; color: #2152ff; font-size: 0.7rem; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 0;">
-                                    (Ver <?= $l->total_emails_sent ?>)
-                                </button>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <div style="font-size: 0.75rem; color: #1e293b; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;" title="<?= esc($l->last_email_subject ?? '') ?>">
+                                    <?= date('d M', strtotime($l->last_email_at)) ?>: <?= esc(mb_strimwidth($l->last_email_subject ?? '', 0, 20, "...")) ?>
+                                </div>
+                                <div style="display: flex; gap: 4px; align-items: center;">
+                                    <?php if ($l->last_email_clicked): ?>
+                                        <span class="pill" style="background: #ecfdf5; color: #059669; border: 1px solid #10b98140; font-size: 0.65rem; padding: 1px 5px;">Clic 🔥</span>
+                                    <?php elseif ($l->last_email_opened): ?>
+                                        <span class="pill" style="background: #eff6ff; color: #2563eb; border: 1px solid #3b82f640; font-size: 0.65rem; padding: 1px 5px;">Leído 👁️</span>
+                                    <?php endif; ?>
+                                    
+                                    <button type="button" onclick="showEmailHistory(<?= $l->id ?>, '<?= esc($l->name) ?>')" style="background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; font-size: 0.65rem; font-weight: 700; cursor: pointer; padding: 1px 6px; border-radius: 4px;">
+                                        Historial (<?= $l->total_emails_sent ?>)
+                                    </button>
+                                </div>
                             </div>
                         <?php else: ?>
-                            <span style="color: #94a3b8; font-size: 0.8rem; font-style: italic;">Sin emails enviados</span>
+                            <span style="color: #94a3b8; font-size: 0.8rem; font-style: italic;">Nunca contactado</span>
                         <?php endif; ?>
                     </td>
                     

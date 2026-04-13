@@ -359,9 +359,12 @@ class Dashboard extends BaseController
             return redirect()->back()->with('error', 'Usuario no encontrado.');
         }
 
+        $marketingConfig = new \Config\MarketingTemplates();
+
         $data = [
             'title' => 'Redactar Email',
             'user' => $user,
+            'templates' => $marketingConfig->templates,
         ];
 
         return view('admin/email_compose', $data);
@@ -625,10 +628,17 @@ class Dashboard extends BaseController
             'created_at' => date('Y-m-d H:i:s')
         ];
 
+        // Reemplazo de variables
+        $finalMessage = str_replace(
+            ['{NOMBRE}', '{EMPRESA}', '{SITE_URL}'], 
+            [$user->name ?: 'cliente', $user->company ?: 'su empresa', site_url()], 
+            $message
+        );
+
         // Usar plantilla HTML
         $body = view('emails/user_notification', [
             'user' => $user,
-            'content' => $message,
+            'content' => nl2br($finalMessage),
             'subject' => $subject,
             'tracking_code' => $trackingCode
         ]);
@@ -691,10 +701,13 @@ class Dashboard extends BaseController
             return redirect()->back()->with('error', 'No has seleccionado ningún usuario.');
         }
 
+        $marketingConfig = new \Config\MarketingTemplates();
+
         $data = [
             'title' => 'Redactar Email Masivo',
             'count' => $count,
             'target_description' => $targetDescription,
+            'templates' => $marketingConfig->templates,
             // Pass hidden inputs to the view
             'hidden_inputs' => [
                 'user_ids' => is_array($ids) ? implode(',', $ids) : $ids,
@@ -772,10 +785,17 @@ class Dashboard extends BaseController
                 'created_at' => date('Y-m-d H:i:s')
             ];
 
+            // Reemplazo de variables
+            $finalMessage = str_replace(
+                ['{NOMBRE}', '{EMPRESA}', '{SITE_URL}'], 
+                [$user->name ?: 'cliente', $user->company ?: 'su empresa', site_url()], 
+                $message
+            );
+
             // Usar plantilla HTML
             $body = view('emails/user_notification', [
                 'user' => $user,
-                'content' => $message,
+                'content' => nl2br($finalMessage),
                 'subject' => $subject,
                 'tracking_code' => $trackingCode
             ]);
@@ -790,6 +810,7 @@ class Dashboard extends BaseController
                 $logData['error_message'] = $emailService->printDebugger(['headers']);
                 $errorCount++;
             }
+            $logData['message'] = $finalMessage; // Guardar el mensaje procesado
             $this->emailLogModel->insert($logData);
         }
 
@@ -1497,6 +1518,8 @@ class Dashboard extends BaseController
         $sortDir = strtoupper($this->request->getGet('sort_dir') ?: 'DESC');
         if (!in_array($sortDir, ['ASC', 'DESC'])) $sortDir = 'DESC';
 
+        $excludeSubject = $this->request->getGet('exclude_subject');
+
         $whereSql = "";
         if ($daysInactive > 0) {
             $cutoffDate = date('Y-m-d H:i:s', strtotime("-$daysInactive days"));
@@ -1523,6 +1546,10 @@ class Dashboard extends BaseController
             $emailWhere = " AND total_emails_sent > 0";
         }
 
+        if ($excludeSubject) {
+            $emailWhere .= " AND u.id NOT IN (SELECT DISTINCT user_id FROM email_logs WHERE subject = " . $db->escape($excludeSubject) . ")";
+        }
+
         $sql = "
             SELECT * FROM (
                 SELECT 
@@ -1534,6 +1561,7 @@ class Dashboard extends BaseController
                     (SELECT plan_id FROM user_subscriptions sub WHERE sub.user_id = u.id AND sub.status = 'active' LIMIT 1) as plan_id,
                     (SELECT created_at FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_at,
                     (SELECT status FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_status,
+                    (SELECT subject FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_subject,
                     (SELECT opened_at FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_opened,
                     (SELECT clicked_at FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_clicked,
                     (SELECT COUNT(id) FROM email_logs el WHERE el.user_id = u.id) as total_emails_sent
@@ -1613,22 +1641,32 @@ class Dashboard extends BaseController
             });
         }
 
+        // Obtener asuntos únicos para el filtro
+        $availableSubjects = $db->table('email_logs')
+                                ->select('subject')
+                                ->distinct()
+                                ->orderBy('subject', 'ASC')
+                                ->get()
+                                ->getResult();
+
         $data = [
             'title' => 'IA Marketing: Lead Scoring | APIEmpresas',
             'leads' => $leads,
             'filters' => [
-                'days_inactive' => $daysInactive ?: '',
-                'min_searches'  => $minSearches ?: '',
-                'min_api'       => $minApiRequests ?: '',
-                'email_status'  => $emailStatus,
-                'sort_by'       => $sortBy,
-                'sort_dir'      => $sortDir,
+                'days_inactive'   => $daysInactive ?: '',
+                'min_searches'    => $minSearches ?: '',
+                'min_api'         => $minApiRequests ?: '',
+                'email_status'    => $emailStatus,
+                'exclude_subject' => $excludeSubject,
+                'sort_by'         => $sortBy,
+                'sort_dir'        => $sortDir,
             ],
             'stats' => [
                 'total_leads' => count($leads),
                 'total_hot_leads' => $totalHotLeads,
                 'average_score' => $scoredUsersCount > 0 ? round($totalScoreSum / $scoredUsersCount) : 0
-            ]
+            ],
+            'available_subjects' => $availableSubjects
         ];
         
         return view('admin/ia_marketing', $data);

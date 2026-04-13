@@ -2,90 +2,86 @@
 <html lang="es">
 <head>
     <?=view('partials/head') ?>
-    <link rel="stylesheet" href="<?= base_url('public/css/login.css') ?>" />
+    <link rel="stylesheet" href="<?= base_url('public/css/login.css?v=' . time()) ?>" />
 </head>
 
 <body>
-<div class="bg-halo" aria-hidden="true"></div>
 
+<div class="auth-split-wrapper">
+    <!-- LEFT SIDE: BRANDING -->
+    <?= view('auth/partials/branding_side') ?>
 
-<div class="auth-wrapper">
-    <!-- HEADER -->
-    <?= view('partials/header') ?>
+    <!-- RIGHT SIDE: FORM -->
+    <div class="auth-form-side">
+        <div class="auth-form-container">
+            <div class="auth-form-header">
+                <div class="auth-form-icon-badge">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="12" x2="12.01" y2="12"></line></svg>
+                </div>
+                <h1>Acceso al panel</h1>
+                <p>Introduce tus credenciales para continuar</p>
+            </div>
 
-    <!-- MAIN -->
-    <main class="auth-main ">
-        <div class="container auth-center ">
-            <div class="auth-card">
-                <h1>Iniciar sesión</h1>
-                <p>Accede a tu panel para ver tu API key, consumo y documentación.</p>
-                <?php if (session('error')): ?>
-                    <div class="auth-alert-error">
-                        <?= esc(session('error')) ?>
-                    </div>
-                <?php endif; ?>
-                <?php if (session('message')): ?>
-                    <div class="auth-alert-success">
-                        <strong><?= esc(session('message')) ?></strong>
-                    </div>
-                <?php endif; ?>
+            <!-- ALERTS -->
+            <?php if (session('error')): ?>
+                <div class="auth-alert-error">
+                    <?= esc(session('error')) ?>
+                </div>
+            <?php endif; ?>
+            <?php if (session('message')): ?>
+                <div class="auth-alert-success">
+                    <?= esc(session('message')) ?>
+                </div>
+            <?php endif; ?>
 
-                <?php if (session('info')): ?>
-                    <div style="background: #eef2ff; border: 1px solid #e0e7ff; color: var(--primary); padding: 12px; border-radius: 8px; margin-bottom: 24px; font-size: 0.9rem; font-weight: 600;">
-                        <?= esc(session('info')) ?>
-                    </div>
-                <?php endif; ?>
-
-                <form class="auth-form" method="post" action="<?=site_url() ?>login">
+            <form class="auth-form" method="post" action="<?=site_url() ?>login">
+                <?= csrf_field() ?>
                 <?php if ($redirect = session('redirect') ?? request()->getGet('redirect')): ?>
                     <input type="hidden" name="redirect" value="<?= esc($redirect) ?>">
                 <?php endif; ?>
-                    <?= csrf_field() ?>
 
-                    <div class="">
-                        <label for="email">Correo electrónico</label>
-                        <input
-                                id="email"
-                                name="email"
-                                type="email"
-                                autocomplete="email"
-                                required
-                                class="input"
-                                placeholder="tu@empresa.com"
-                                value="<?= esc($prefill_email ?? '') ?>"
-                        />
-                    </div>
+                <div class="auth-field-group">
+                    <label for="email">Email profesional</label>
+                    <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        autocomplete="email"
+                        required
+                        class="auth-input"
+                        placeholder="nombre@empresa.com"
+                        value="<?= esc($prefill_email ?? '') ?>"
+                    />
+                </div>
 
-                    <div>
+                <div class="auth-field-group">
+                    <div class="auth-label-row">
                         <label for="password">Contraseña</label>
-                        <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                autocomplete="current-password"
-                                required
-                                class="input"
-                                placeholder="Tu contraseña"
-                        />
-                        <div style="margin-top: 8px; text-align: right;">
-                            <a href="<?= site_url('forgot-password') ?>" class="auth-muted" style="font-size: 0.85rem;">¿Has olvidado tu contraseña?</a>
-                        </div>
+                        <a href="<?= site_url('forgot-password') ?>" class="auth-forgot-link">¿Olvidaste la clave?</a>
                     </div>
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        autocomplete="current-password"
+                        required
+                        class="auth-input"
+                        placeholder="••••••••"
+                    />
+                </div>
 
-                    <div class="auth-submit-row">
-                        <button type="submit" class="btn" id="login-submit">Entrar</button>
-                        <p class="auth-muted">
-                            ¿No tienes cuenta?
-                            <a href="<?=site_url() ?>register">Crear cuenta gratis</a>
-                        </p>
-                    </div>
-                </form>
+                <button type="submit" class="auth-btn-primary" id="login-submit">Entrar en el panel</button>
+            </form>
+
+            <div class="auth-form-footer">
+                ¿No tienes cuenta profesional? <a href="<?=site_url() ?>register">Empezar ahora</a>
             </div>
         </div>
-    </main>
 
-    <!-- FOOTER -->
-    <?=view('partials/footer') ?>
+        <div class="auth-legal-footer">
+            © <?= date('Y') ?> AlertaEmpresas. <a href="#" data-modal-target="modalTerms">Aviso Legal</a> · <a href="#" data-modal-target="modalPrivacy">Privacidad</a>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -95,7 +91,6 @@
 
         if (form && btn) {
             form.addEventListener('submit', function () {
-                // Evitar dobles envíos
                 btn.disabled = true;
                 btn.textContent = 'Iniciando sesión…';
             });
@@ -103,7 +98,8 @@
     });
 </script>
 
-
+<?= view('partials/legal_modals') ?>
+<?= view('scripts') ?>
 
 </body>
 </html>

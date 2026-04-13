@@ -2,177 +2,142 @@
 <html lang="es">
 <head>
     <?=view('partials/head') ?>
-    <link rel="stylesheet" href="<?= base_url('public/css/register.css') ?>" />
+    <link rel="stylesheet" href="<?= base_url('public/css/login.css?v=' . time()) ?>" />
 </head>
+
 <body>
-<div class="bg-halo" aria-hidden="true"></div>
 
-<div class="auth-wrapper">
-    <?= view('partials/header') ?>
+<div class="auth-split-wrapper">
+    <!-- LEFT SIDE: BRANDING -->
+    <?= view('auth/partials/branding_side') ?>
 
+    <!-- RIGHT SIDE: FORM -->
+    <div class="auth-form-side">
+        <div class="auth-form-container" style="max-width: 520px;">
+            <div class="auth-form-header">
+                <div class="auth-form-icon-badge">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                </div>
+                <h1>Crea tu cuenta gratis</h1>
+                <p>Sin tarjeta, sin permanencias. Solo necesitas un correo profesional.</p>
+            </div>
 
-    <!-- MAIN -->
-    <main class="auth-main">
-        <section class="container">
-            <div class="auth-grid">
-                <!-- COLUMNA IZQUIERDA: COPY -->
-                <div class="auth-copy">
-                    <span class="auth-copy-eyebrow">Crear cuenta gratuita</span>
-                    <h1>Empieza a validar empresas españolas en minutos.</h1>
-                    <p>
-                        Crea tu cuenta, consigue tu <strong>API key</strong> y conéctate al
-                        registro mercantil, AEAT, INE y VIES desde tu propio producto.
-                    </p>
-                    <p>
-                        Pensado para <strong>developers</strong>, gestorías y
-                        <strong>departamentos de riesgo/compliance</strong> que necesitan datos fiables,
-                        en tiempo real y con buena documentación.
-                    </p>
+            <!-- ALERTS / ERRORS -->
+            <?php
+            /** @var \CodeIgniter\Validation\Validation $validation */
+            $validation = $validation ?? \Config\Services::validation();
+            ?>
 
-                    <ul class="auth-bullets">
-                        <li>
-                            <span class="bullet-dot"></span>
-                            <span><strong>Plan Free</strong> incluido para pruebas y desarrollo.</span>
-                        </li>
-                        <li>
-                            <span class="bullet-dot"></span>
-                            <span><strong>API REST</strong> sencilla, JSON limpio y ejemplos listos para copiar.</span>
-                        </li>
-                        <li>
-                            <span class="bullet-dot"></span>
-                            <span>Datos procedentes de <strong>BOE/BORME, AEAT, INE y VIES</strong> con enlace a fuente oficial.</span>
-                        </li>
+            <?php if (session('error')): ?>
+                <div class="auth-alert-error">
+                    <?= esc(session('error')) ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($validation->getErrors()): ?>
+                <div class="auth-alert-error">
+                    <ul style="margin:0; padding-left: 20px;">
+                        <?php foreach ($validation->getErrors() as $error): ?>
+                            <li><?= esc($error) ?></li>
+                        <?php endforeach; ?>
                     </ul>
                 </div>
+            <?php endif; ?>
 
-                <!-- COLUMNA DERECHA: FORMULARIO -->
-                <div class="auth-card">
-                    <h2>Crea tu cuenta gratis</h2>
-                    <p>Sin tarjeta, sin permanencias. Solo necesitas un correo profesional.</p>
-                    <?php
-                    /** @var \CodeIgniter\Validation\Validation $validation */
-                    $validation = $validation ?? \Config\Services::validation();
-                    ?>
+            <form id="registerForm" class="auth-form" method="post" action="<?= site_url('signup') ?>">
+                <?= csrf_field() ?>
+                <?php if(!empty($redirectUrl)): ?>
+                    <input type="hidden" name="redirect" value="<?= esc($redirectUrl) ?>">
+                <?php endif; ?>
 
-                    <?php if (session('error')): ?>
-                        <div class="auth-error">
-                            <?= esc(session('error')) ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if ($validation->getErrors()): ?>
-                        <div class="auth-error">
-                            <ul>
-                                <?php foreach ($validation->getErrors() as $error): ?>
-                                    <li><?= esc($error) ?></li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-                    <?php endif; ?>
-
-                    <form id="registerForm" class="auth-form" method="post" action="<?= site_url('signup') ?>">
-                        <?= csrf_field() ?>
-                        <?php if(!empty($redirectUrl)): ?>
-                            <input type="hidden" name="redirect" value="<?= esc($redirectUrl) ?>">
-                        <?php endif; ?>
-
-                        <!-- Nombre + Empresa -->
-                        <div class="auth-row-inline">
-                            <div style="flex:1;">
-                                <label for="name">Nombre y apellidos</label>
-                                <input
-                                        class="input"
-                                        type="text"
-                                        id="name"
-                                        name="name"
-                                        autocomplete="name"
-                                        required
-                                        placeholder="Ej. Ana García López"
-                                        value="<?= esc(old('name')) ?>"
-                                />
-                            </div>
-                            <div style="flex:1;">
-                                <label for="company">Empresa (opcional)</label>
-                                <input
-                                        class="input"
-                                        type="text"
-                                        id="company"
-                                        name="company"
-                                        autocomplete="organization"
-                                        placeholder="Ej. Gestoría Centro SL"
-                                        value="<?= esc(old('company')) ?>"
-                                />
-                            </div>
-                        </div>
-
-                        <!-- Email -->
-                        <div>
-                            <label for="email">Correo electrónico</label>
-                            <input
-                                    class="input"
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    autocomplete="email"
-                                    required
-                                    placeholder="tu@empresa.com"
-                                    value="<?= esc(old('email')) ?>"
-                            />
-                        </div>
-
-                        <!-- Password -->
-                        <div>
-                            <label for="password">Contraseña</label>
-                            <input
-                                    class="input"
-                                    type="password"
-                                    id="password"
-                                    name="password"
-                                    autocomplete="new-password"
-                                    required
-                                    minlength="8"
-                                    placeholder="Mínimo 8 caracteres"
-                            />
-                        </div>
-
-                        <!-- Checkbox legal -->
-                        <div class="auth-checkbox">
-                            <input
-                                    type="checkbox"
-                                    id="terms"
-                                    name="terms"
-                                    value="1"
-                                <?= old('terms') ? 'checked' : '' ?>
-                                    required
-                            />
-                            <label for="terms" style="margin:0; font-weight:400;">
-                                Acepto la <a href="#" data-open-modal="modalPrivacy">Política de privacidad</a>
-                                y los <a href="#" data-open-modal="modalTerms">Términos de servicio</a>.
-                            </label>
-                        </div>
-
-                        <!-- CTA + texto pequeño -->
-                        <div class="auth-submit-row">
-                            <button id="registerSubmit" type="submit" class="btn">
-                                Crear cuenta gratis
-                            </button>
-                            <p class="auth-muted">
-                                Puedes pasar a Pro en cualquier momento desde el panel.
-                            </p>
-                            <p class="auth-muted">
-                                ¿Ya tienes cuenta?
-                                <a href="<?=site_url() ?>enter">Inicia sesión</a>.
-                            </p>
-                        </div>
-                    </form>
-
+                <div class="auth-row-inline" style="display: flex; gap: 20px;">
+                    <div class="auth-field-group" style="flex: 1;">
+                        <label for="name">Nombre y apellidos</label>
+                        <input
+                                class="auth-input"
+                                type="text"
+                                id="name"
+                                name="name"
+                                autocomplete="name"
+                                required
+                                placeholder="Ej. Ana García"
+                                value="<?= esc(old('name')) ?>"
+                        />
+                    </div>
+                    <div class="auth-field-group" style="flex: 1;">
+                        <label for="company">Empresa (opcional)</label>
+                        <input
+                                class="auth-input"
+                                type="text"
+                                id="company"
+                                name="company"
+                                autocomplete="organization"
+                                placeholder="Ej. Tech SL"
+                                value="<?= esc(old('company')) ?>"
+                        />
+                    </div>
                 </div>
-            </div>
-        </section>
-    </main>
 
-    <?=view('partials/footer') ?>
+                <div class="auth-field-group">
+                    <label for="email">Correo electrónico profesional</label>
+                    <input
+                            class="auth-input"
+                            type="email"
+                            id="email"
+                            name="email"
+                            autocomplete="email"
+                            required
+                            placeholder="tu@empresa.com"
+                            value="<?= esc(old('email')) ?>"
+                    />
+                </div>
+
+                <div class="auth-field-group">
+                    <label for="password">Contraseña</label>
+                    <input
+                            class="auth-input"
+                            type="password"
+                            id="password"
+                            name="password"
+                            autocomplete="new-password"
+                            required
+                            minlength="8"
+                            placeholder="Mínimo 8 caracteres"
+                    />
+                </div>
+
+                <div class="auth-checkbox" style="display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #64748b; margin-bottom: 10px;">
+                    <input
+                            type="checkbox"
+                            id="terms"
+                            name="terms"
+                            value="1"
+                        <?= old('terms') ? 'checked' : '' ?>
+                            required
+                            style="margin-top: 3px;"
+                    />
+                    <label for="terms" style="font-weight: 400; margin: 0; line-height: 1.4;">
+                        Acepto la <a href="#" data-modal-target="modalPrivacy" style="color: #2563eb; font-weight: 600; text-decoration: none;">Política de privacidad</a>
+                        y los <a href="#" data-modal-target="modalTerms" style="color: #2563eb; font-weight: 600; text-decoration: none;">Términos de servicio</a>.
+                    </label>
+                </div>
+
+                <button id="registerSubmit" type="submit" class="auth-btn-primary">
+                    Crear cuenta gratis
+                </button>
+            </form>
+
+            <div class="auth-form-footer">
+                ¿Ya tienes cuenta profesional? <a href="<?=site_url() ?>enter">Inicia sesión</a>
+            </div>
+        </div>
+
+        <div class="auth-legal-footer">
+            © <?= date('Y') ?> AlertaEmpresas. <a href="#" data-modal-target="modalTerms">Aviso Legal</a> · <a href="#" data-modal-target="modalPrivacy">Privacidad</a>
+        </div>
+    </div>
 </div>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('registerForm');
@@ -180,21 +145,16 @@
 
         if (!form || !btn) return;
 
-        const originalHTML = btn.innerHTML;
-
         form.addEventListener('submit', () => {
-            // evita doble submit
             if (btn.disabled) return;
-
             btn.disabled = true;
-            btn.setAttribute('aria-disabled', 'true');
-
-            btn.dataset.originalHtml = originalHTML;
-            btn.innerHTML = '<span class="btn-spinner" aria-hidden="true"></span>Creando cuenta...';
+            btn.innerHTML = 'Creando cuenta...';
         });
     });
 </script>
 
+<?= view('partials/legal_modals') ?>
+<?= view('scripts') ?>
 
 </body>
 </html>

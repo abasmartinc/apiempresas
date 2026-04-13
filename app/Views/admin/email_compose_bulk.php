@@ -27,14 +27,29 @@
                     <?php endif; ?>
                 <?php endforeach; ?>
 
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 12px; margin-bottom: 0.5rem;">
+                    <label style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: #1e293b;">Cargar Plantilla</label>
+                    <select id="template-selector" class="input" style="width: 100%; border-color: #cbd5e1;">
+                        <option value="">-- Selecciona una plantilla --</option>
+                        <?php foreach ($templates as $tpl): ?>
+                            <option value="<?= $tpl['slug'] ?>" data-subject="<?= esc($tpl['subject']) ?>" data-body="<?= esc($tpl['body']) ?>">
+                                <?= $tpl['slug'] === 'custom' ? 'Nueva personalizada' : esc($tpl['subject']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <div style="margin-top: 10px; font-size: 0.75rem; color: #64748b; display: flex; gap: 10px;">
+                        <span>Variables: <strong>{NOMBRE}</strong>, <strong>{EMPRESA}</strong>, <strong>{SITE_URL}</strong></span>
+                    </div>
+                </div>
+
                 <div>
                     <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Asunto</label>
-                    <input type="text" name="subject" class="input" style="width: 100%;" required placeholder="Ej: Aviso importante..." autofocus>
+                    <input type="text" id="email-subject" name="subject" class="input" style="width: 100%;" required placeholder="Ej: Aviso importante..." autofocus>
                 </div>
 
                 <div>
                     <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Mensaje</label>
-                    <textarea name="message" class="input" style="width: 100%; min-height: 250px; font-family: sans-serif;" placeholder="Escribe tu mensaje aquí..."></textarea>
+                    <textarea id="email-body" name="message" class="input" style="width: 100%; min-height: 250px; font-family: sans-serif;" placeholder="Escribe tu mensaje aquí..."></textarea>
                     <p style="font-size: 0.8rem; color: #64748b; margin-top: 0.5rem;">Se enviará con la plantilla corporativa.</p>
                 </div>
 
@@ -65,6 +80,23 @@
             editor.on('change', function () {
                 editor.save();
             });
+        }
+    });
+
+    // Template Selection Logic
+    document.getElementById('template-selector').addEventListener('change', function() {
+        const option = this.options[this.selectedIndex];
+        const subject = option.getAttribute('data-subject') || '';
+        const body = option.getAttribute('data-body') || '';
+
+        document.getElementById('email-subject').value = subject;
+        
+        if (tinymce.get('email-body')) {
+            // Replace newlines with <br> for TinyMCE
+            const htmlBody = body.replace(/\n/g, '<br>');
+            tinymce.get('email-body').setContent(htmlBody);
+        } else {
+            document.getElementById('email-body').value = body;
         }
     });
 
