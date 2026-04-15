@@ -658,7 +658,7 @@
 
     <section class="radar-final">
         <div class="container">
-            <div class="radar-final__card">
+            <div class="radar-final__shell">
                 <div class="radar-kicker radar-kicker--dark">Empieza hoy</div>
                 <h2>Empieza a detectar nuevas empresas hoy</h2>
                 <p>

@@ -1254,7 +1254,7 @@ body {
     color: #050816 !important;
 }
 
-.radar-final__card {
+.radar-final__shell {
     position: relative;
     z-index: 1;
     max-width: 940px;
@@ -1268,7 +1268,7 @@ body {
     overflow: hidden;
 }
 
-.radar-final__card::after {
+.radar-final__shell::after {
     content: "";
     position: absolute;
  bottom: -140px;

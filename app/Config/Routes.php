@@ -61,7 +61,7 @@ $routes->get('radar', 'RadarPrices::index');
 $routes->get('plugin-wordpress-buscador-empresas', 'Plugin::index');
 $routes->get('obtener-plugin-wordpress', 'Plugin::get_plugin');
 $routes->get('descargar/plugin-wp', 'Plugin::download');
-$routes->get('leads-empresas-nuevas', 'RadarController::marketing');
+$routes->get('leads-empresas-nuevas', 'RadarPrices::index');
 $routes->get('radar', 'Radar::index', ['filter' => 'subscription:radar']); // Radar PRO
 $routes->get('radar/quickview/(:num)', 'Radar::quickView/$1');
 $routes->get('radar/favoritos', 'Radar::favorites');
