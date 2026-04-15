@@ -43,6 +43,7 @@
                 <h4 class="foot-title">Directorio y API</h4>
                 <ul class="foot-links">
                     <li><a href="<?=site_url('leads-empresas-nuevas') ?>">Beneficios de Radar Pro</a></li>
+                    <li><a href="<?=site_url('plugin-wordpress-buscador-empresas') ?>">Plugin de WordPress</a></li>
                     <li><a href="<?=site_url('search_company') ?>">Buscador de Empresas</a></li>
                     <li><a href="<?=site_url('autocompletado-cif-empresas') ?>">Autocompletado Pro</a></li>
                     <li><a href="<?=site_url('documentation') ?>">Documentación API</a></li>

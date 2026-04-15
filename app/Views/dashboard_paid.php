@@ -258,11 +258,13 @@
                                 });
                             });
                         </script>
-
                         <p class="usage-footnote" style="margin-top:12px;">
                             Sugerencia: rota la key cada X meses (o tras cambios de equipo/repositorio) y revoca la anterior.
                         </p>
                     </section>
+
+                    <!-- WORDPRESS PLUGIN -->
+                    <?= view('partials/dashboard/wordpress_plugin') ?>
 
                     <!-- USAGE -->
                     <section class="dash-card">

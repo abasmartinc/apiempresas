@@ -70,6 +70,13 @@
                                 <span>Nuevas empresas en tiempo real</span>
                             </div>
                         </a>
+                        <a href="<?=site_url('plugin-wordpress-buscador-empresas') ?>">
+                            <div class="nav-item-icon">🧩</div>
+                            <div>
+                                <strong>Plugin WordPress</strong>
+                                <span>Buscador oficial para tu web</span>
+                            </div>
+                        </a>
                     </div>
                 </div>
                 
@@ -110,6 +117,9 @@
                         </a>
                         <a href="<?=site_url('leads-empresas-nuevas') ?>" class="mobile-nav-link">
                             <span>Radar Inteligente</span>
+                        </a>
+                        <a href="<?=site_url('plugin-wordpress-buscador-empresas') ?>" class="mobile-nav-link">
+                            <span>Plugin WordPress</span>
                         </a>
                     </div>
                     

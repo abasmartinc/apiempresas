@@ -203,9 +203,14 @@ class Register extends BaseController
             // Log successful registration
             log_activity('register', ['email' => $email], $user_id);
 
-            // 7) Redirección a Login con mensaje informativo
+            // 7) Redirección a Login con mensaje informativo (pasando redirect si existe)
+            $targetUrl = site_url('enter');
+            if (!empty($redirectUrl)) {
+                $targetUrl .= '?redirect=' . urlencode((string)$redirectUrl);
+            }
+
             return redirect()
-                ->to(site_url('enter'))
+                ->to($targetUrl)
                 ->with('info', '¡Cuenta creada con éxito! Por favor, introduce tus credenciales para acceder.');
         } catch (\Throwable $e) {
 

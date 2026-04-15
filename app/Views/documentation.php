@@ -16,18 +16,77 @@
         <div class="docs-layout">
             <!-- SIDEBAR -->
             <aside class="docs-sidebar">
-                <h2>Índice</h2>
-                <ul class="docs-nav">
-                    <li><a href="#intro">Introducción</a></li>
-                    <li><a href="#auth">Autenticación</a></li>
-                    <li><a href="#endpoint-by-cif">Consulta por CIF</a></li>
-                    <li><a href="#endpoint-search">Búsqueda por Nombre</a></li>
-                    <li><a href="#endpoint-expanded">Capacidades Comerciales</a></li>
-                    <li><a href="#endpoint-radar">Radar de Empresas</a></li>
-                    <li><a href="#endpoint-webhooks">Webhooks</a></li>
-                    <li><a href="#examples">Ejemplos de Código</a></li>
-                    <li><a href="#postman">Postman Collection</a></li>
-                </ul>
+                <div class="docs-sidebar-section">
+                    <h3>General</h3>
+                    <ul class="docs-nav">
+                        <li>
+                            <a href="#intro" class="active">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                Introducción
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#auth">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                Autenticación
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="docs-sidebar-section">
+                    <h3>Endpoints v1</h3>
+                    <ul class="docs-nav">
+                        <li>
+                            <a href="#endpoint-by-cif">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                                Consulta por CIF
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#endpoint-search">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                Búsqueda
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#endpoint-expanded">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                Comercial <span class="sidebar-badge pro">Pro</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#endpoint-radar">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                Radar <span class="sidebar-badge pro">Pro</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#endpoint-webhooks">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+                                Webhooks <span class="sidebar-badge biz">Biz</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="docs-sidebar-section">
+                    <h3>Recursos</h3>
+                    <ul class="docs-nav">
+                        <li>
+                            <a href="#examples">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                                Ejemplos
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#postman">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                Postman
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </aside>
 
             <!-- CONTENIDO -->

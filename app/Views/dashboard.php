@@ -84,6 +84,8 @@
                         </p>
                     </section>
 
+                    <?= view('partials/dashboard/wordpress_plugin') ?>
+
                     <!-- FIRST REQUEST -->
                     <section class="dash-card">
                         <div class="kicker">Primera consulta</div>
