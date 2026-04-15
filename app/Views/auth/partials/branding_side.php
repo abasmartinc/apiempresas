@@ -38,37 +38,27 @@
     </div>
 
     <div class="auth-branding-main">
-        <h1 class="auth-branding-title">La mayor base de datos empresarial <span>en tu API</span></h1>
-        <p class="auth-branding-sub">Conecta tus sistemas a la información mercantil más precisa y actualizada de España en tiempo real.</p>
+        <h1 class="auth-branding-title">Inteligencia de Datos <span>para tu Negocio</span></h1>
+        <p class="auth-branding-sub">Accede a la infraestructura más completa de información empresarial en España y optimiza tus procesos B2B.</p>
 
         <div class="auth-features">
             <div class="auth-feature-item">
-                <div class="auth-feature-icon">
+                <div class="auth-feature-icon" style="background: rgba(33, 82, 255, 0.1); color: #2152ff;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
                 </div>
                 <div class="auth-feature-content">
-                    <h4>API REST Profesional</h4>
-                    <p>Integración sencilla y potente para consultar millones de empresas en segundos.</p>
+                    <h4>API Empresas</h4>
+                    <p>Integra validación de CIF, datos oficiales y scoring en minutos con una infraestructura potente y segura.</p>
                 </div>
             </div>
 
             <div class="auth-feature-item">
-                <div class="auth-feature-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                <div class="auth-feature-icon" style="background: rgba(18, 180, 138, 0.1); color: #12b48a;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
                 </div>
                 <div class="auth-feature-content">
-                    <h4>Datos Enriquecidos</h4>
-                    <p>Acceso a CIF, CNAE, vinculaciones financieras, KRYS y datos de administradores.</p>
-                </div>
-            </div>
-
-            <div class="auth-feature-item">
-                <div class="auth-feature-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                </div>
-                <div class="auth-feature-content">
-                    <h4>Vigilancia Avanzada</h4>
-                    <p>Monitorización automática de cambios en el BORME, subastas y alertas legales diarias.</p>
+                    <h4>Radar de Empresas</h4>
+                    <p>Detecta nuevas empresas, prioriza oportunidades y acelera tu prospección B2B antes que tu competencia.</p>
                 </div>
             </div>
         </div>

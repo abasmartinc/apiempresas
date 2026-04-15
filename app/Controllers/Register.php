@@ -174,7 +174,8 @@ class Register extends BaseController
             // Correo de Bienvenida al usuario
             $this->emailService->sendWelcomeEmail($userData);
 
-            // 6) Auto-Login al usuario
+            // 6) Auto-Login al usuario (DESHABILITADO por solicitud: se requiere login manual tras registro)
+            /*
             $this->userModel->update($user_id, [
                 'last_login_at' => date('Y-m-d H:i:s'),
             ]);
@@ -187,6 +188,7 @@ class Register extends BaseController
                 'is_admin' => 0,
                 'logged_in' => true,
             ]);
+            */
 
             // Track login from email if tracking code exists
             if ($tc = session('email_tracking_code')) {
@@ -201,19 +203,10 @@ class Register extends BaseController
             // Log successful registration
             log_activity('register', ['email' => $email], $user_id);
 
-            // 7) Redirección Contextual
-            if ($redirectUrl) {
-                // Seteamos la intención en sesión para el primer dashboard tras registro
-                session()->set('intended_product', $prefProduct);
-
-                // Ensure it's a relative path or safe local URL
-                $redirectUrl = filter_var($redirectUrl, FILTER_SANITIZE_URL);
-                return redirect()->to(site_url(ltrim($redirectUrl, '/')));
-            }
-
+            // 7) Redirección a Login con mensaje informativo
             return redirect()
-                ->to(site_url('dashboard'))
-                ->with('message', '¡Cuenta creada con éxito! Bienvenid@ a APIEmpresas.');
+                ->to(site_url('enter'))
+                ->with('info', '¡Cuenta creada con éxito! Por favor, introduce tus credenciales para acceder.');
         } catch (\Throwable $e) {
 
             // Log del error real para depuración

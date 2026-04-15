@@ -33,6 +33,11 @@
                     <?= esc(session('message')) ?>
                 </div>
             <?php endif; ?>
+            <?php if (session('info')): ?>
+                <div class="auth-alert-info">
+                    <?= esc(session('info')) ?>
+                </div>
+            <?php endif; ?>
 
             <form class="auth-form" method="post" action="<?=site_url() ?>login">
                 <?= csrf_field() ?>
