@@ -63,9 +63,9 @@
                     <div class="billing-hero__left">
                         <div class="kicker">Planes y facturación</div>
                         <?php if ($plan): ?>
-                            <h1>Gestiona tu suscripción <?= esc($planName) ?></h1>
+                            <h1>👉 Activa tu plan Pro</h1>
                             <p class="sub">
-                                Administra tus límites, descarga facturas o mejora tu plan para escalar tu negocio.
+                                Estás a un paso de escalar tu integración sin limitaciones.
                             </p>
                         <?php else: ?>
                             <h1>Impulsa tu negocio con datos oficiales</h1>
@@ -181,6 +181,10 @@
                             </label>
                         </div>
 
+                        <div style="margin: 20px 0; padding: 12px; background: #f8fafc; border-radius: 12px; font-size: 14px; color: #475569; font-weight: 700; display: flex; align-items: center; gap: 8px; border: 1px solid #e2e8f0;">
+                            <span>⚡ La mayoría de usuarios activan Pro antes de pasar a producción.</span>
+                        </div>
+
                         <div id="checkout-section">
                             <div class="divider"></div>
 
@@ -224,9 +228,18 @@
                                         <div class="pill" style="display:inline-flex; align-items:center; cursor:default;">
                                             Tarjeta de crédito / débito (Stripe)
                                         </div>
+                                        <div style="margin-top: 8px; font-size: 13px; color: #16a34a; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                            Pago seguro con Stripe. Tus datos están protegidos.
+                                        </div>
                                     </div>
                                     
                                     <input type="hidden" name="country" value="ES">
+                                </div>
+
+                                <div class="closing-block" style="margin-top: 32px; padding: 24px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 16px; margin-bottom: 24px;">
+                                    <h3 style="margin: 0 0 8px; font-size: 1.25rem; color: #1e40af; font-weight: 800;">Estás a un paso de activar Pro para producción</h3>
+                                    <p style="margin: 0; color: #1e40af; opacity: 0.9; font-size: 14px; line-height: 1.5;">Evita limitaciones antes de que tu aplicación empiece a recibir tráfico real.</p>
                                 </div>
 
                                 <div class="form-actions">
@@ -235,9 +248,15 @@
                                         <span>Pago seguro con Stripe/PayPal. <br />Cancelas cuando quieras. <strong>Precio + IVA</strong>.</span>
                                     </div>
 
-                                    <div class="action-buttons">
-                                        <a class="btn btn_light" href="<?= site_url() ?>dashboard">Cancelar</a>
-                                        <button class="btn btn_primary js-loading-btn" type="submit" id="btnCheckout">Continuar al pago</button>
+                                    <div class="action-buttons" style="flex-direction: column; gap: 12px; align-items: stretch;">
+                                        <div style="margin-bottom: 8px; font-size: 14px; color: #475569; font-weight: 700; text-align: center;">
+                                            ⚡ La mayoría de usuarios activan Pro antes de lanzar su integración.
+                                        </div>
+                                        <button class="btn btn_primary js-loading-btn" type="submit" id="btnCheckout" style="width: 100%; padding: 18px; font-size: 1.1rem; font-weight: 800;">👉 Activar Pro y usar en producción</button>
+                                        <div style="text-align: center;">
+                                            <div style="font-size: 13px; color: #16a34a; font-weight: 700; margin-bottom: 4px;">Acceso inmediato. Sin permanencia. Cancela cuando quieras.</div>
+                                        </div>
+                                        <a class="btn btn_light" href="<?= site_url() ?>dashboard" style="margin-top: 8px;">Cancelar</a>
                                     </div>
                                 </div>
 
@@ -376,27 +395,29 @@
 
                         <ul class="summary-benefits">
                             <li>
-                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                 <div>
-                                    <strong>Más límite para producción</strong>
-                                    <p>Evita bloqueos por volumen operativo</p>
+                                    <strong>Uso en producción sin límites inesperados</strong>
                                 </div>
                             </li>
                             <li>
-                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                 <div>
-                                    <strong>Métricas de calidad</strong>
-                                    <p>Latencia, errores y consumo en tiempo real</p>
+                                    <strong>Mayor estabilidad y rendimiento</strong>
                                 </div>
                             </li>
                             <li>
-                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                 <div>
                                     <strong>Soporte prioritario</strong>
-                                    <p>Asistencia técnica experta y rápida</p>
                                 </div>
                             </li>
                         </ul>
+
+                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center;">
+                            <div style="font-size: 13px; color: #475569; font-weight: 700;">Sin permanencia. Cancela cuando quieras.</div>
+                            <div style="font-size: 13px; color: #64748b; margin-top: 4px;">Listo para usar en producción desde el primer momento.</div>
+                        </div>
 
                         <div class="summary-tip">
                             <strong>Tip para desarrolladores:</strong>
@@ -517,8 +538,8 @@
 
                 if (btnCheckout) {
                     btnCheckout.textContent = (pm === 'paypal')
-                        ? ((plan === 'business') ? 'Continuar a PayPal (Business)' : 'Continuar a PayPal (Pro)')
-                        : ((plan === 'business') ? 'Continuar al pago (Business)' : 'Continuar al pago (Pro)');
+                        ? ((plan === 'business') ? '👉 Activar Business y usar en producción' : '👉 Activar Pro y usar en producción')
+                        : ((plan === 'business') ? '👉 Activar Business y usar en producción' : '👉 Activar Pro y usar en producción');
                 }
 
                 // Upgrade logic

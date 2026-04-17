@@ -111,6 +111,10 @@ $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function
 });
 // ----------- API ----------- //
 
+// Triggers & Usage API (Session Auth)
+$routes->get('api/user/usage-status', 'Api\UsageStatus::index');
+$routes->post('api/user/log-event', 'Api\EventTracker::log');
+
 // Swagger
 $routes->cli('swagger:generate', 'App\Commands\GenerateSwaggerCommand::run');
 $routes->get('documentation', 'Documentation::index');
@@ -137,6 +141,7 @@ $routes->post('leads/subscribe', 'Leads::subscribe');
 // Admin Routes
 $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('dashboard', 'Admin\Dashboard::index');
+    $routes->get('metrics', 'Admin\MetricsController::index');
     $routes->get('users', 'Admin\Dashboard::index');
     $routes->get('users/create', 'Admin\Dashboard::create');
     $routes->post('users/store', 'Admin\Dashboard::store');

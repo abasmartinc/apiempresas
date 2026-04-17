@@ -13,16 +13,42 @@
 
     <main class="dash-main">
         <div class="container">
+            <?= view('partials/usage_trigger_banner') ?>
             <div class="dash-header">
                 <?php 
                     $userName = 'Cliente';
                     if (is_object($user)) $userName = $user->name ?? 'Cliente';
                     elseif (is_array($user)) $userName = $user['name'] ?? 'Cliente';
+
+                    // Helpers para el dashboard
+                    $get = function($src, $key, $default = null) {
+                        if (is_array($src)) return $src[$key] ?? $default;
+                        if (is_object($src)) return $src->$key ?? $default;
+                        return $default;
+                    };
+                    $planNameRaw = $get($plan, 'plan_name', 'Free');
+                    $currentPlanSlug = strtolower(trim($planNameRaw));
                 ?>
                 <h1>Hola, <?= htmlspecialchars($userName) ?></h1>
-                <p class="dash-sub">
-                    Panel de producción: consumo, calidad del servicio y acciones rápidas de operación (rotación de clave, logs y facturación).
-                </p>
+
+                <?php if($currentPlanSlug !== 'pro' && $currentPlanSlug !== 'business'): ?>
+                <!-- CTA PRINCIPAL ARRIBA -->
+                <div class="dash-upgrade-banner" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #bfdbfe; border-radius: 20px; padding: 24px; margin: 12px 0 16px; display: flex; align-items: center; justify-content: space-between; gap: 24px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);">
+                    <div style="flex: 1;">
+                        <h2 style="margin: 0 0 8px; font-size: 1.4rem; color: #1e40af; font-weight: 800;">🚀 Lleva tu integración a producción</h2>
+                        <p style="margin: 0; color: #1e40af; opacity: 0.9; font-size: 1rem; line-height: 1.5;">Evita bloqueos y limitaciones antes de escalar tu aplicación.</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <a href="<?=site_url() ?>billing" class="btn" style="padding: 14px 28px; font-size: 1rem; font-weight: 700; background: #2563eb; color: #fff; border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">👉 Activar Pro para producción</a>
+                        <div style="margin-top: 8px; font-size: 12px; color: #1e40af; opacity: 0.8; font-weight: 600;">Sin permanencia. Cancela cuando quieras.</div>
+                    </div>
+                </div>
+                
+                <div style="margin: 4px 0 16px 12px; font-size: 14px; color: #475569; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    <span>⚡ Empieza en Free, pero activa Pro antes de lanzar a producción.</span>
+                </div>
+                <?php endif; ?>
+
             </div>
 
             <!-- Onboarding strip (Only if 0 requests) -->
@@ -49,6 +75,10 @@
                     <div class="onb-step">
                         <strong>3. Revisa la respuesta</strong>
                         <p>Si todo es correcto, recibirás un JSON con los datos de la empresa. <a href="<?=site_url() ?>documentation#company">Ver documentación</a></p>
+                    </div>
+                    <div class="onb-step">
+                        <strong>4. Escala a producción</strong>
+                        <p>Activa el plan Pro para eliminar limitaciones y garantizar estabilidad en tu aplicación.</p>
                     </div>
                 </div>
             </section>
@@ -261,6 +291,16 @@
                         <p class="usage-footnote" style="margin-top:12px;">
                             Sugerencia: rota la key cada X meses (o tras cambios de equipo/repositorio) y revoca la anterior.
                         </p>
+
+                        <?php if($currentPlanSlug !== 'pro' && $currentPlanSlug !== 'business'): ?>
+                        <!-- PRODUCCIÓN MESSAGE DEBAJO API KEY -->
+                        <div class="apikey-prod-cta" style="margin-top: 24px; padding: 20px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-weight: 800; color: #0f172a; margin-bottom: 6px; font-size: 1.1rem;">⚡ ¿Vas a usar la API en producción?</div>
+                            <p style="font-size: 14px; color: #475569; margin-bottom: 16px; line-height: 1.5;">El plan Free puede bloquear tu integración al escalar. Activa Pro para evitar interrupciones cuando tu aplicación empiece a recibir tráfico real.</p>
+                            <a href="<?=site_url() ?>billing" class="btn-small primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px;">👉 Activar Pro para producción</a>
+                            <div style="margin-top: 10px; font-size: 11px; color: #64748b;">Sin permanencia. Cancela cuando quieras.</div>
+                        </div>
+                        <?php endif; ?>
                     </section>
 
                     <!-- WORDPRESS PLUGIN -->
@@ -280,7 +320,13 @@
                         ?>
                         <div class="usage-wrap">
                             <div class="usage-top">
-                                <span><span class="usage-strong" id="usage-used-text">...</span> de <?= number_format($quota, 0, ',', '.') ?> consultas usadas</span>
+                                <span>
+                                    <?php if($currentPlanSlug === 'free' || empty($currentPlanSlug)): ?>
+                                        Has usado <span class="usage-strong" id="usage-used-text">...</span> de 100 consultas incluidas en tu plan Free.
+                                    <?php else: ?>
+                                        <span class="usage-strong" id="usage-used-text">...</span> de <?= number_format($quota, 0, ',', '.') ?> consultas usadas
+                                    <?php endif; ?>
+                                </span>
                                 <?php $p_end = $get($plan, 'current_period_end'); ?>
                                 <span>Renueva el <span class="usage-strong"><?= $p_end ? date('d/m', strtotime($p_end)) : '--/--' ?></span></span>
                             </div>
@@ -288,7 +334,12 @@
                                 <div class="usage-fill" id="usage-fill-bar" style="width:0%;"></div>
                             </div>
                             <div class="usage-footnote">
-                                Alertas activas: email al 80% y 100%. Recomendado: caché por CIF y retries con backoff.
+                                <?php if($currentPlanSlug === 'free' || empty($currentPlanSlug)): ?>
+                                    <div style="margin-bottom: 8px; font-weight: 700;">⚠️ Cuando empieces a usar la API en producción, este límite puede bloquear tu servicio en producción.</div>
+                                    <a href="<?=site_url() ?>billing" style="color: var(--primary); text-decoration: none; font-weight: 800;">👉 Activar Pro para producción</a>
+                                <?php else: ?>
+                                    Alertas activas: email al 80% y 100%. Recomendado: caché por CIF y retries con backoff.
+                                <?php endif; ?>
                             </div>
                         </div>
                     </section>
@@ -324,13 +375,6 @@
                 <aside>
                     <!-- PLAN -->
                     <?php 
-                        $get = function($src, $key, $default = null) {
-                            if (is_array($src)) return $src[$key] ?? $default;
-                            if (is_object($src)) return $src->$key ?? $default;
-                            return $default;
-                        };
-                        $planNameRaw = $get($plan, 'plan_name', 'Free');
-                        $currentPlanSlug = strtolower(trim($planNameRaw));
                         $planClass = '';
                         if (strpos($currentPlanSlug, 'business') !== false) $planClass = 'plan-card--business';
                         elseif (strpos($currentPlanSlug, 'pro') !== false) $planClass = 'plan-card--pro';
@@ -362,8 +406,9 @@
                         </div>
 
                         <button class="btn" type="button" onclick="window.location.href='<?=site_url() ?>billing'">
-                            Gestionar plan y facturación
+                            👉 Activar Pro para producción
                         </button>
+                        <div style="text-align: center; margin-top: 12px; font-size: 11px; color: rgba(255,255,255,0.8);">Sin permanencia. Cancela cuando quieras.</div>
                     </section>
 
                     <!-- BILLING / INVOICES -->

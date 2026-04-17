@@ -237,14 +237,14 @@ class ApiKeyFilter implements FilterInterface
             }
 
             if ($db->tableExists('api_usage_daily') && !$skipBilling) {
-                $sql = "
+                $sqlDaily = "
                     INSERT INTO api_usage_daily (user_id, plan_id, date, requests_count, created_at, updated_at)
                     VALUES (?, ?, ?, 1, ?, ?)
                     ON DUPLICATE KEY UPDATE
                       requests_count = requests_count + 1,
                       updated_at = VALUES(updated_at)
                 ";
-                $db->query($sql, [
+                $db->query($sqlDaily, [
                     (int)$meta['user_id'],
                     (int)$meta['plan_id'],
                     $today,
