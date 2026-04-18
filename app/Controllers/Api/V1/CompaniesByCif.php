@@ -98,6 +98,26 @@ class CompaniesByCif extends ResourceController
                 ],
                 ResponseInterface::HTTP_INTERNAL_SERVER_ERROR
             );
+        } finally {
+            // Trigger: Milestone 1st Request Email
+            try {
+                if (isset($company) && $company) {
+                    $userId = $this->request->api_meta['user_id'] ?? null;
+                    if ($userId) {
+                        $automationModel = new \App\Models\EmailAutomationModel();
+                        if (!$automationModel->wasSent($userId, 'first_request')) {
+                            $userModel = new \App\Models\UserModel();
+                            $user = $userModel->asArray()->find($userId);
+                            if ($user && (int)$user['is_admin'] === 0) {
+                                $this->emailService->sendFirstRequestMilestone($user);
+                                $automationModel->markAsSent($userId, 'first_request');
+                            }
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                log_message('error', '[CompaniesByCif::Milestone] ' . $e->getMessage());
+            }
         }
     }
 }

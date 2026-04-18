@@ -90,7 +90,7 @@
                 <!-- LEFT -->
                 <div>
                     <!-- API KEY -->
-                    <section class="dash-card">
+                    <section class="dash-card" id="section-api-key">
                         <div class="kicker">Seguridad</div>
                         <h2>Tu API Key principal</h2>
                         <p>Usa esta clave en tu backend para autenticar las peticiones. No la expongas en frontend.</p>
@@ -111,6 +111,39 @@
                         <p class="usage-footnote" style="margin-top:12px;">
                             Recomendación: guarda la key en variables de entorno y rota la clave cuando termines la fase de pruebas.
                         </p>
+
+                        <!-- Interactive API Test -->
+                        <div class="test-api-card" id="test-api-container">
+                            <div class="test-api-title">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                Probar API ahora
+                            </div>
+                            <p class="test-api-desc">
+                                Ejecuta una consulta real a la API con un clic. Verás la respuesta JSON y cómo se estructuran los datos de una empresa real.
+                            </p>
+                            
+                            <div class="test-api-actions" id="test-api-initial">
+                                <button type="button" class="btn primary" id="btnRunTest" style="padding: 14px 28px; width: 100%; font-weight: 800;">
+                                    👉 Probar API ahora
+                                </button>
+                                <div style="margin-top:10px; font-size: 11px; color: #64748b; text-align: center;">
+                                    Se usará un CIF de ejemplo real. La consulta se descontará de tu cuota mensual.
+                                </div>
+                            </div>
+
+                            <div class="test-api-result" id="test-api-result">
+                                <div class="test-api-success-tag">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                    Has validado una empresa correctamente
+                                </div>
+                                <div class="test-api-json" id="test-api-json-content"></div>
+                                
+                                <div class="test-api-next">👉 Haz más consultas para integrar la API en tu sistema</div>
+                                <button type="button" class="btn-small" id="btnTestAnother" style="width:100%; padding:12px; font-weight:800;">
+                                    Probar otra empresa
+                                </button>
+                            </div>
+                        </div>
 
                         <!-- PRODUCCIÓN MESSAGE DEBAJO API KEY -->
                         <div class="apikey-prod-cta" style="margin-top: 24px; padding: 20px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
@@ -412,6 +445,74 @@
                 alert('No se pudo copiar la clave. Copia el texto manualmente.');
             }
         });
+    })();
+
+    // === Interactive API Test Logic ===
+    (function(){
+        const container = document.getElementById('test-api-container');
+        if(!container) return;
+
+        const btnRun = document.getElementById('btnRunTest');
+        const btnAnother = document.getElementById('btnTestAnother');
+        const initialView = document.getElementById('test-api-initial');
+        const resultView = document.getElementById('test-api-result');
+        const jsonContent = document.getElementById('test-api-json-content');
+        const realKey = document.getElementById('apiKeyBox')?.getAttribute('data-api-key') || '';
+
+        async function runTest() {
+            if(!realKey) {
+                alert('No se ha detectado tu API Key. Por favor, contacta con soporte.');
+                return;
+            }
+
+            const originalBtnText = btnRun.innerHTML;
+            btnRun.disabled = true;
+            btnRun.innerHTML = '<span class="api-loading">Consultando API...</span>';
+
+            try {
+                // 1. Obtener muestra
+                const sampleRes = await fetch('<?= site_url('dashboard/test-sample') ?>');
+                const sampleData = await sampleRes.json();
+                
+                if(!sampleData.success) throw new Error('No se pudo obtener una muestra.');
+                
+                const cif = sampleData.data.cif;
+
+                // 2. Ejecutar consulta real a la API
+                const apiRes = await fetch(`<?= site_url('api/v1/companies') ?>?cif=${cif}`, {
+                    headers: {
+                        'X-API-KEY': realKey,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                const apiData = await apiRes.json();
+
+                // 3. Mostrar resultado
+                jsonContent.textContent = JSON.stringify(apiData, null, 4);
+                initialView.style.display = 'none';
+                resultView.style.display = 'block';
+                
+                // Track activity
+                if(typeof logEvent === 'function') {
+                    logEvent('dashboard_test_api', { cif: cif });
+                }
+
+            } catch (error) {
+                console.error('Test API error:', error);
+                alert('Hubo un error al probar la API. Inténtalo de nuevo en unos segundos.');
+                btnRun.innerHTML = originalBtnText;
+                btnRun.disabled = false;
+            }
+        }
+
+        btnRun.addEventListener('click', runTest);
+        btnAnother.addEventListener('click', () => {
+            resultView.style.display = 'none';
+            initialView.style.display = 'block';
+            runTest(); // Run again immediately for "Probar otra"
+        });
+
     })();
 </script>
 

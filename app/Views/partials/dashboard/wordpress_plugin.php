@@ -18,7 +18,7 @@
         <div class="quick-item" style="border-color: #d0e4f7;">
             <strong>2. Activa con tu API Key</strong>
             <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Copia tu clave principal y pégala en los ajustes del plugin dentro de tu WordPress.</p>
-            <button type="button" class="btn-small ghost" onclick="document.getElementById('apiKeyBox').scrollIntoView({behavior:'smooth'});" style="color: #2271b1; border-color: #2271b1;">Ver mi API Key</button>
+            <button type="button" class="btn-small ghost" onclick="document.getElementById('section-api-key').scrollIntoView({behavior:'smooth', block:'center'});" style="color: #2271b1; border-color: #2271b1;">Ver mi API Key</button>
         </div>
     </div>
 </section>

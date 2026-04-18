@@ -30,7 +30,7 @@ $routes->post('register/quick_store', 'Register::quick_store');
 $routes->get('dashboard', 'Dashboard::index');
 // $routes->get('empresas-nuevas', 'NewCompanies::index'); // Deprecated route interfering with SeoController::newRadarHub (line 194)
 $routes->get('dashboard/kpis', 'Dashboard::kpis_ajax');
-$routes->get('stop-impersonation', 'Dashboard::stopImpersonating');
+$routes->get('dashboard/test-sample', 'Api\V1\DashboardTestApi::getSample');
 $routes->get('search_company', 'Search::search_company');
 $routes->post('search_company', 'Search::search_company_post');
 $routes->get('search', 'Search::index');

@@ -170,6 +170,12 @@
     gap: 12px;
 }
 
+.apikey-box > div {
+    flex: 1;
+    min-width: 0;
+}
+
+
 .apikey-label {
     font-size: 11px;
     text-transform: uppercase;
@@ -181,12 +187,19 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    width: 100%;
 }
 
 .apikey-actions {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+}
+
+.apikey-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
 }
 
 .btn-small {
@@ -810,4 +823,104 @@
 .onb-step:nth-child(2) { background: #f5f3ff; border-color: #ede9fe; }
 .onb-step:nth-child(3) { background: #f0fdfa; border-color: #ccfbf1; }
 .onb-step:nth-child(4) { background: #fefce8; border-color: #fef08a; }
+
+/* Interactive API Test */
+.test-api-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    position: relative;
+    overflow: hidden;
+}
+
+.test-api-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--ve-grad);
+}
+
+.test-api-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.test-api-desc {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.test-api-result {
+    margin-top: 20px;
+    display: none;
+    animation: slideDown 0.3s ease-out;
+}
+
+.test-api-success-tag {
+    background: #ecfdf5;
+    color: #059669;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.test-api-json {
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 16px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 12px;
+    line-height: 1.6;
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.test-api-next {
+    font-size: 14px;
+    color: #0f172a;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-api {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.api-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: #4f46e5;
+    animation: pulse-api 1.5s infinite;
+}
 

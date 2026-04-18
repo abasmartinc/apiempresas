@@ -199,4 +199,91 @@ class EmailService
             return false;
         }
     }
+
+    /**
+     * Send a quick start prompt email (5 min after register).
+     */
+    public function sendQuickStartPrompt(array $userData)
+    {
+        $email = Services::email();
+        $email->clear(true);
+        $fromEmail = env('email.fromEmail', 'soporte@apiempresas.es');
+        $fromName  = env('email.fromName', 'APIEmpresas.es');
+        $email->setFrom($fromEmail, $fromName);
+
+        $userEmail = $userData['email'];
+        $subject = "Prueba la API en menos de 30 segundos ⚡";
+        $email->setTo($userEmail);
+        $email->setSubject($subject);
+
+        $body = view('emails/quick_start', ['name' => $userData['name'] ?? 'Usuario']);
+        $email->setMessage($body);
+        return $email->send();
+    }
+
+    /**
+     * Send an inactivity reminder email (24h without requests).
+     */
+    public function sendInactivityReminder(array $userData)
+    {
+        $email = Services::email();
+        $email->clear(true);
+        $fromEmail = env('email.fromEmail', 'soporte@apiempresas.es');
+        $fromName  = env('email.fromName', 'APIEmpresas.es');
+        $email->setFrom($fromEmail, $fromName);
+
+        $userEmail = $userData['email'];
+        $subject = "Aún no has probado la API - APIEmpresas.es";
+        $email->setTo($userEmail);
+        $email->setSubject($subject);
+
+        $body = view('emails/inactivity_reminder', ['name' => $userData['name'] ?? 'Usuario']);
+        $email->setMessage($body);
+        return $email->send();
+    }
+
+    /**
+     * Send a success email after the first successful request.
+     */
+    public function sendFirstRequestMilestone(array $userData)
+    {
+        $email = Services::email();
+        $email->clear(true);
+        $fromEmail = env('email.fromEmail', 'soporte@apiempresas.es');
+        $fromName  = env('email.fromName', 'APIEmpresas.es');
+        $email->setFrom($fromEmail, $fromName);
+
+        $userEmail = $userData['email'];
+        $subject = "Ya estás usando la API ⚡";
+        $email->setTo($userEmail);
+        $email->setSubject($subject);
+
+        $body = view('emails/first_request_success', ['name' => $userData['name'] ?? 'Usuario']);
+        $email->setMessage($body);
+        return $email->send();
+    }
+
+    /**
+     * Send a warning when quota usage is high (>50%).
+     */
+    public function sendQuotaWarning(array $userData, int $percent)
+    {
+        $email = Services::email();
+        $email->clear(true);
+        $fromEmail = env('email.fromEmail', 'soporte@apiempresas.es');
+        $fromName  = env('email.fromName', 'APIEmpresas.es');
+        $email->setFrom($fromEmail, $fromName);
+
+        $userEmail = $userData['email'];
+        $subject = "Estás cerca del límite - APIEmpresas.es";
+        $email->setTo($userEmail);
+        $email->setSubject($subject);
+
+        $body = view('emails/quota_warning', [
+            'name' => $userData['name'] ?? 'Usuario',
+            'percent' => $percent
+        ]);
+        $email->setMessage($body);
+        return $email->send();
+    }
 }
