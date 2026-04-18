@@ -15,16 +15,41 @@
 
     <main class="dash-main">
         <div class="container">
+            <?= view('partials/usage_trigger_banner') ?>
             <div class="dash-header">
                 <?php 
                     $userName = 'Cliente';
                     if (is_object($user)) $userName = $user->name ?? 'Cliente';
                     elseif (is_array($user)) $userName = $user['name'] ?? 'Cliente';
+
+                    // Definir helpers y slug de plan al inicio para evitar Errores de variable indefinida
+                    $get = function($src, $key, $default = null) {
+                        if (is_array($src)) return $src[$key] ?? $default;
+                        if (is_object($src)) return $src->$key ?? $default;
+                        return $default;
+                    };
+                    $planNameRaw = $get($plan, 'plan_name', 'Free');
+                    $currentPlanSlug = strtolower(trim($planNameRaw));
                 ?>
                 <h1>Bienvenido, <?= htmlspecialchars($userName) ?></h1>
-                <p class="dash-sub">
-                    Tu cuenta está lista. Te recomendamos completar los pasos de inicio para hacer tu primera consulta y dejar la integración funcionando en producción.
-                </p>
+                
+                <?php if($currentPlanSlug === 'free' || empty($currentPlanSlug)): ?>
+                <!-- CTA PRINCIPAL ARRIBA -->
+                <div class="dash-upgrade-banner" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #bfdbfe; border-radius: 20px; padding: 24px; margin: 12px 0 16px; display: flex; align-items: center; justify-content: space-between; gap: 24px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);">
+                    <div style="flex: 1;">
+                        <h2 style="margin: 0 0 8px; font-size: 1.4rem; color: #1e40af; font-weight: 800;">🚀 Lleva tu integración a producción</h2>
+                        <p style="margin: 0; color: #1e40af; opacity: 0.9; font-size: 1rem; line-height: 1.5;">Evita bloqueos y limitaciones antes de escalar tu aplicación.</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <a href="<?=site_url() ?>billing" class="btn" style="padding: 14px 28px; font-size: 1rem; font-weight: 700; background: #2563eb; color: #fff; border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">👉 Activar Pro para producción</a>
+                        <div style="margin-top: 8px; font-size: 12px; color: #1e40af; opacity: 0.8; font-weight: 600;">Sin permanencia. Cancela cuando quieras.</div>
+                    </div>
+                </div>
+                <div style="margin: 4px 0 16px 12px; font-size: 14px; color: #475569; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    <span>⚡ Empieza en Free, pero activa Pro antes de lanzar a producción.</span>
+                </div>
+                <?php endif; ?>
+
             </div>
 
             <!-- Onboarding strip -->
@@ -52,6 +77,10 @@
                     <div class="onb-step">
                         <strong>3. Revisa la respuesta</strong>
                         <p>Si todo es correcto, recibirás un JSON con los datos de la empresa. <a href="<?=site_url() ?>documentation#company">Ver documentación</a></p>
+                    </div>
+                    <div class="onb-step">
+                        <strong>4. Escala a producción</strong>
+                        <p>Activa el plan Pro para eliminar limitaciones y garantizar estabilidad en tu aplicación.</p>
                     </div>
                 </div>
             </section>
@@ -82,6 +111,14 @@
                         <p class="usage-footnote" style="margin-top:12px;">
                             Recomendación: guarda la key en variables de entorno y rota la clave cuando termines la fase de pruebas.
                         </p>
+
+                        <!-- PRODUCCIÓN MESSAGE DEBAJO API KEY -->
+                        <div class="apikey-prod-cta" style="margin-top: 24px; padding: 20px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-weight: 800; color: #0f172a; margin-bottom: 6px; font-size: 1.1rem;">⚡ ¿Vas a usar la API en producción?</div>
+                            <p style="font-size: 14px; color: #475569; margin-bottom: 16px; line-height: 1.5;">El plan Free puede bloquear tu integración al escalar. Activa Pro para evitar interrupciones cuando tu aplicación empiece a recibir tráfico real.</p>
+                            <a href="<?=site_url() ?>billing" class="btn-small primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px;">👉 Activar Pro para producción</a>
+                            <div style="margin-top: 10px; font-size: 11px; color: #64748b;">Sin permanencia. Cancela cuando quieras.</div>
+                        </div>
                     </section>
 
                     <?= view('partials/dashboard/wordpress_plugin') ?>
@@ -146,66 +183,89 @@
                 <aside>
                     <!-- PLAN -->
                     <?php 
-                        $get = function($src, $key, $default = null) {
-                            if (is_array($src)) return $src[$key] ?? $default;
-                            if (is_object($src)) return $src->$key ?? $default;
-                            return $default;
-                        };
-                        $planNameRaw = $get($plan, 'plan_name', 'Free');
-                        $currentPlanSlug = strtolower(trim($planNameRaw));
                         $planClass = '';
                         if (strpos($currentPlanSlug, 'business') !== false) $planClass = 'plan-card--business';
                         elseif (strpos($currentPlanSlug, 'pro') !== false) $planClass = 'plan-card--pro';
                     ?>
                     <!-- Debug: Plan name is "<?= esc($planNameRaw) ?>" -> slug: "<?= esc($currentPlanSlug) ?>" -->
                     <section class="plan-card <?= $planClass ?>">
-                        <div class="plan-pill">
-                            <span>PLAN ACTUAL</span>
-                        </div>
+                        <?php if($currentPlanSlug === 'free' || empty($currentPlanSlug)): ?>
+                            <div class="plan-pill" style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca;">
+                                <span>⚠️ Estás en plan Free</span>
+                            </div>
 
-                        <h2><?= esc($planNameRaw) ?></h2>
-                        <div class="plan-price"><?= esc($get($plan, 'price_monthly', '0')) ?> €/mes</div>
-                        <p style="margin:0 0 12px; color:rgba(239,246,255,.9); font-size:13px;">
-                            <?php if($currentPlanSlug === 'business'): ?>
-                                Plan máximo para empresas con volumen alto y gestión de equipos.
-                            <?php elseif($currentPlanSlug === 'pro'): ?>
-                                Plan ideal para producción: límites ampliados y monitorización.
-                            <?php else: ?>
-                                Plan recomendado para pruebas, desarrollo y entornos de staging.
-                            <?php endif; ?>
-                        </p>
+                            <h2 style="font-size: 1.75rem; margin-top: 12px;">Plan Free</h2>
+                            <p style="margin: 0 0 16px; color: rgba(239,246,255,0.9); font-size: 14px; line-height: 1.6;">
+                                Tu uso actual tiene limitaciones importantes:
+                            </p>
 
-                        <div class="plan-meta">
-                            <?php if($currentPlanSlug === 'business'): ?>
-                                <div>• Límite alto para uso intensivo y masivo.</div>
-                                <div>• SLA avanzado y soporte dedicado.</div>
-                                <div>• Gestión de equipos y roles incluida.</div>
-                            <?php elseif($currentPlanSlug === 'pro'): ?>
-                                <div>• Límite mensual superior para producción.</div>
-                                <div>• Métricas de latencia y errores incluidas.</div>
-                                <div>• Soporte prioritario para integración.</div>
-                            <?php else: ?>
-                                <div>• Límite mensual bajo para validar PoC.</div>
-                                <div>• Ideal para integrar y testear endpoints.</div>
-                                <div>• Cuando pases a producción, cambia a Pro/Business.</div>
-                            <?php endif; ?>
-                        </div>
+                            <div class="plan-meta" style="margin-bottom: 24px; background: rgba(255,255,255,0.1); padding: 16px; border-radius: 12px;">
+                                <div style="margin-bottom: 8px;">• Solo 100 consultas/mes</div>
+                                <div style="margin-bottom: 8px;">• Puede bloquearse al escalar</div>
+                                <div style="margin-bottom: 8px;">• No apto para producción real</div>
+                                <div>• Sin soporte prioritario</div>
+                            </div>
 
-                        <?php if($currentPlanSlug !== 'business'): ?>
-                        <div class="alert-upgrade">
-                            <strong>Consejo para producción</strong>
-                            <span>
-                                <?php if($currentPlanSlug === 'pro'): ?>
-                                    ¿Tu volumen crece? Pasa al plan Business para SLA avanzado y gestión multicuenta.
-                                <?php else: ?>
-                                    Si vas a integrar en producción, te conviene Pro para evitar bloqueos y tener visibilidad.
-                                <?php endif; ?>
-                            </span>
-                            <button class="btn" type="button" onclick="window.location.href='<?=site_url() ?>billing'">
-                                <?= (strpos($currentPlanSlug, 'pro') !== false) ? 'Mejorar a Business' : 'Pasar a Pro' ?>
+                            <div style="margin-bottom: 20px; font-weight: 700; font-size: 15px; color: #ffffff;">
+                                Si tu integración crece, necesitarás Pro. Muchos usuarios cambian a Pro antes de pasar a producción. Evita problemas cuando tu aplicación empiece a crecer.
+                            </div>
+
+                            <button class="btn" type="button" onclick="window.location.href='<?=site_url() ?>billing'" style="width: 100%; background: #ffffff; color: var(--primary); font-weight: 800; font-size: 1.1rem; padding: 16px;">
+                                👉 Activar Pro para producción
                             </button>
-                            <span class="back_to_free">Puedes volver a Free cuando quieras.</span>
-                        </div>
+                            
+                            <div style="text-align: center; margin-top: 12px; font-size: 12px; color: rgba(255,255,255,0.8);">
+                                Sin permanencia. Cancela cuando quieras.
+                            </div>
+                        <?php else: ?>
+                            <div class="plan-pill">
+                                <span>PLAN ACTUAL</span>
+                            </div>
+
+                            <h2><?= esc($planNameRaw) ?></h2>
+                            <div class="plan-price"><?= esc($get($plan, 'price_monthly', '0')) ?> €/mes</div>
+                            <p style="margin:0 0 12px; color:rgba(239,246,255,.9); font-size:13px;">
+                                <?php if($currentPlanSlug === 'business'): ?>
+                                    Plan máximo para empresas con volumen alto y gestión de equipos.
+                                <?php elseif($currentPlanSlug === 'pro'): ?>
+                                    Plan ideal para producción: límites ampliados y monitorización.
+                                <?php else: ?>
+                                    Plan recomendado para pruebas, desarrollo y entornos de staging.
+                                <?php endif; ?>
+                            </p>
+
+                            <div class="plan-meta">
+                                <?php if($currentPlanSlug === 'business'): ?>
+                                    <div>• Límite alto para uso intensivo y masivo.</div>
+                                    <div>• SLA avanzado y soporte dedicado.</div>
+                                    <div>• Gestión de equipos y roles incluida.</div>
+                                <?php elseif($currentPlanSlug === 'pro'): ?>
+                                    <div>• Límite mensual superior para producción.</div>
+                                    <div>• Métricas de latencia y errores incluidas.</div>
+                                    <div>• Soporte prioritario para integración.</div>
+                                <?php else: ?>
+                                    <div>• Límite mensual bajo para validar PoC.</div>
+                                    <div>• Ideal para integrar y testear endpoints.</div>
+                                    <div>• Cuando pases a producción, cambia a Pro/Business.</div>
+                                <?php endif; ?>
+                            </div>
+
+                            <?php if($currentPlanSlug !== 'business'): ?>
+                            <div class="alert-upgrade">
+                                <strong>Consejo para producción</strong>
+                                <span>
+                                    <?php if($currentPlanSlug === 'pro'): ?>
+                                        ¿Tu volumen crece? Pasa al plan Business para SLA avanzado y gestión multicuenta.
+                                    <?php else: ?>
+                                        Si vas a integrar en producción, te conviene Pro para evitar bloqueos y tener visibilidad.
+                                    <?php endif; ?>
+                                </span>
+                                <button class="btn" type="button" onclick="window.location.href='<?=site_url() ?>billing'">
+                                    <?= (strpos($currentPlanSlug, 'pro') !== false) ? '👉 Activar Pro para producción' : '👉 Activar Pro para producción' ?>
+                                </button>
+                                <span class="back_to_free">Puedes volver a Free cuando quieras.</span>
+                            </div>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </section>
 
@@ -228,14 +288,32 @@
                     <!-- ACCOUNT STATUS -->
                     <section class="mini-card">
                         <h3>Estado de tu cuenta</h3>
-                        <p>
-                            Plan: <strong><?= esc($get($plan, 'plan_name', 'Free')) ?></strong><br>
-                            Consultas este mes: <strong id="status-requests-text">...</strong><br>
-                            <?php $p_end = $get($plan, 'current_period_end'); if(!empty($p_end)): ?>
-                                Renovación: <strong><?= date('d-m-Y', strtotime($p_end)) ?></strong>
+                        <div style="font-size: 14px; line-height: 1.6;">
+                            Plan: <strong style="color: var(--primary)"><?= esc($get($plan, 'plan_name', 'Free')) ?></strong><br>
+                            
+                            <?php if($currentPlanSlug === 'free' || empty($currentPlanSlug)): ?>
+                                Has usado <strong id="status-requests-text">...</strong> de 100 consultas incluidas en tu plan Free.<br>
+                                <div style="margin-top: 8px; font-size: 12px; color: #64748b; font-weight: 600;">
+                                    ⚠️ Cuando empieces a usar la API en producción, este límite puede bloquear tu servicio en producción.
+                                </div>
+                                <a href="<?=site_url() ?>billing" style="display: block; margin-top: 10px; font-weight: 800; color: var(--primary); text-decoration: none; font-size: 13px;">👉 Activar Pro para producción</a>
+                            <?php else: ?>
+                                Consultas este mes: <strong id="status-requests-text">...</strong> de <?= number_format($get($plan, 'monthly_quota', 0), 0, ',', '.') ?><br>
+                                <a href="<?=site_url() ?>billing" style="display: block; margin-top: 10px; font-weight: 800; color: var(--primary); text-decoration: none; font-size: 13px;">👉 Activar Pro para producción</a>
                             <?php endif; ?>
-                        </p>
+
+                            <?php $p_end = $get($plan, 'current_period_end'); if(!empty($p_end)): ?>
+                                <div style="margin-top: 8px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
+                                    Renovación: <strong><?= date('d-m-Y', strtotime($p_end)) ?></strong>
+                                </div>
+                            <?php endif; ?>
+                        </div>
                     </section>
+
+                    <!-- GLOBAL MICROCOPY -->
+                    <div style="padding: 0 12px; margin-bottom: 24px; font-size: 13px; color: #64748b; font-style: italic; text-align: center; font-weight: 600;">
+                        "La mayoría de integraciones activas usan Pro para evitar limitaciones en producción"
+                    </div>
 
                     <!-- NEXT ACTIONS -->
                     <section class="mini-card">
