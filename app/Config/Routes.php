@@ -108,6 +108,7 @@ $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function
     // Dedicated Professional Plan routes
     $routes->get('api/v1/professional/search', 'Api\V1\Professional::search');
     $routes->get('api/v1/professional/details', 'Api\V1\Professional::details');
+    $routes->get('api/v1/usage', 'Api\V1\UsageController::index');
 });
 // ----------- API ----------- //
 
