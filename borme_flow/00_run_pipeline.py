@@ -37,7 +37,6 @@ PIPELINE = [
     "06_extract_from_borme_text.py",  # Extrae administradores y fecha de constitución
     "10_ai_cnae_classifier.py",       # Clasifica sector por IA si no viene en el BORME
     "fill_radar_scores.py --all",
-    "08_enrich_contacts.py",           # Descubre CIF, Web y Email para los mejores leads
     "07_linkedin_post.py",           # Publica resumen diario en LinkedIn
 ]
 

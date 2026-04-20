@@ -12,7 +12,7 @@
         
         <div style="display: flex; align-items: center; gap: 16px;">
             <a id="usage-trigger-cta" href="<?= site_url('billing') ?>" class="btn" style="white-space: nowrap; font-weight: 800; padding: 10px 24px; border-radius: 12px; font-size: 0.9rem; transition: all 0.2s ease; border: none;">
-                👉 Activar Pro para producción
+                🔥 Activar Radar + API
             </a>
             <button id="usage-trigger-close" style="background: transparent; border: none; cursor: pointer; padding: 4px; opacity: 0.6; transition: opacity 0.2s ease;" title="Cerrar">
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -34,9 +34,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mapeo de triggers
     const triggers = {
         'first_use': {
-            icon: '⚡',
+            icon: '🔥',
             title: 'Ya estás usando la API',
-            desc: 'Activa Pro antes de pasar a producción',
+            desc: 'Ahora puedes automatizar tus leads con Radar',
             bg: '#eff6ff',
             border: '#bfdbfe',
             text: '#1e40af',
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
         '20_percent': {
             icon: '📊',
             title: 'Has usado el 20% del plan Free',
-            desc: 'Evita quedarte sin servicio en producción',
+            desc: 'Activa Radar para recibir leads ilimitados',
             bg: '#f0f9ff',
             border: '#bae6fd',
             text: '#0369a1',
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
         '50_percent': {
             icon: '⚠️',
             title: 'Estás cerca del límite',
-            desc: 'Activa Pro para evitar bloqueos',
+            desc: 'Tu competencia ya está usando Radar',
             bg: '#fff7ed',
             border: '#fed7aa',
             text: '#9a3412',
@@ -65,8 +65,8 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         '80_percent': {
             icon: '🚨',
-            title: 'Estás a punto de quedarte sin servicio',
-            desc: 'Activa Pro ahora',
+            title: 'Límite casi alcanzado',
+            desc: 'Activa acceso completo para no perder leads',
             bg: '#fef2f2',
             border: '#fecaca',
             text: '#991b1b',

@@ -94,6 +94,36 @@
                 <h1>Documentación de la API</h1>
                 <p>Bienvenido a la documentación oficial de <strong>APIEmpresas.es</strong>. Nuestra API te permite consultar datos mercantiles actualizados de empresas españolas de forma rápida y sencilla.</p>
 
+                <?php if (session('logged_in') && isset($user) && ($user->requests_count ?? 0) > 3 && !($user->hasRadar())): ?>
+                    <div class="conditional-banner" style="background: #fef2f2; border-color: #fecaca; border-left: 5px solid #ef4444;">
+                        <div class="conditional-banner-text">
+                            <h4 style="color: #991b1b;">⚠️ Ya has hecho <?= $user->requests_count ?> búsquedas manuales</h4>
+                            <p style="color: #b91c1c; font-weight: 700;">Podrías haber recibido estas empresas automáticamente.</p>
+                        </div>
+                        <a href="<?= site_url('radar') ?>" class="btn-radar-strong" style="padding: 12px 24px; font-size: 1rem;">Ver Radar</a>
+                    </div>
+                <?php endif; ?>
+
+                <!-- USE CASES -->
+                <div class="use-case-box">
+                    <h3>💡 ¿Qué puedes hacer con esta API?</h3>
+                    <div class="use-case-grid">
+                        <div class="use-case-card">
+                            <h4>🔍 Validar empresas</h4>
+                            <p>Consulta datos por CIF en tiempo real de forma automatizada.</p>
+                        </div>
+                        <div class="use-case-card">
+                            <h4>💎 Enriquecer datos</h4>
+                            <p>Obtén información completa de empresas para tus sistemas de gestión.</p>
+                        </div>
+                        <div class="use-case-card">
+                            <h4>📈 Generar leads</h4>
+                            <p>Detecta nuevas empresas y oportunidades de negocio automáticamente.</p>
+                            <a href="<?= site_url('radar') ?>" class="btn-link">Ver Radar &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- INTRO -->
                 <section class="docs-section" id="intro">
                     <h2>1. Introducción</h2>
@@ -157,6 +187,11 @@ Accept: application/json</code></pre>
     "cnae_label": "Actividades de programación informática"
   }
 }</code></pre>
+
+                    <!-- MONEY BLOCK -->
+                    <?= view('components/money_block') ?>
+
+                    <?= view('components/radar_strong_cta', ['user' => $user ?? null]) ?>
                 </section>
 
                 <!-- SEARCH -->
@@ -186,6 +221,10 @@ Accept: application/json</code></pre>
                             </tr>
                         </tbody>
                     </table>
+
+                    </table>
+
+                    <?= view('components/binary_decision') ?>
                 </section>
 
                 <!-- EXPANDED -->
@@ -401,6 +440,12 @@ print(response.json())</code></pre>
                             <span>📥 Descargar Colección Postman</span>
                         </a>
                     </div>
+
+                    <div style="margin-top: 80px; text-align: center; background: #0f172a; color: white; padding: 60px 40px; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
+                        <h2 style="color: white; font-size: 2rem; font-weight: 900; margin-bottom: 16px;">🔥 Cada día se crean nuevas empresas</h2>
+                        <p style="font-size: 1.2rem; color: #94a3b8; margin-bottom: 32px;">La diferencia es quién llega primero.</p>
+                        <a href="<?= site_url('radar') ?>" class="btn-radar-strong" style="max-width: 400px; margin: 0 auto;">Ver oportunidades ahora</a>
+                    </div>
                 </section>
             </div>
         </div>
@@ -421,6 +466,204 @@ print(response.json())</code></pre>
     .api-info-card { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 15px 0; border-radius: 0 8px 8px 0; }
     .code-tabs h3 { font-size: 16px; margin-top: 25px; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
     code.inline { background: #f1f5f9; padding: 2px 5px; border-radius: 4px; color: #e11d48; font-family: monospace; }
+
+    /* --- UX Conversion Styles --- */
+    .use-case-box {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 40px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .use-case-box h3 { margin-bottom: 24px; color: #1e293b; font-size: 1.25rem; font-weight: 800; }
+    .use-case-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; }
+    .use-case-card { padding: 20px; border-radius: 12px; background: #f8fafc; border: 1px solid #f1f5f9; transition: transform 0.2s; }
+    .use-case-card:hover { transform: translateY(-2px); border-color: #cbd5e1; }
+    .use-case-card h4 { margin-bottom: 12px; color: #334155; display: flex; align-items: center; gap: 8px; font-weight: 700; }
+    .use-case-card p { font-size: 0.9rem; color: #64748b; margin-bottom: 16px; line-height: 1.5; }
+    .use-case-card .btn-link { color: #2563eb; font-weight: 700; text-decoration: none; font-size: 0.9rem; }
+
+    .radar-upsell {
+        background: linear-gradient(135deg, #133a82 0%, #1e40af 100%);
+        color: white;
+        padding: 24px;
+        border-radius: 16px;
+        margin: 32px 0;
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    .radar-upsell-icon { font-size: 32px; flex-shrink: 0; }
+    .radar-upsell-body { flex: 1; }
+    .radar-upsell-body h4 { color: white; margin-bottom: 8px; font-size: 1.1rem; font-weight: 700; }
+    .radar-upsell-body p { color: rgba(255,255,255,0.9); font-size: 0.95rem; margin: 0; line-height: 1.5; }
+    .btn-radar {
+        background: #10b981;
+        color: white !important;
+        padding: 12px 20px;
+        border-radius: 10px;
+        text-decoration: none !important;
+        font-weight: 800;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .btn-radar:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4); }
+
+    .money-block {
+        background: #fffbeb;
+        border: 1px solid #fef3c7;
+        border-left: 5px solid #f59e0b;
+        padding: 24px;
+        border-radius: 12px;
+        margin: 32px 0;
+    }
+    .money-block h4 { color: #92400e; margin-bottom: 8px; font-weight: 800; font-size: 1.1rem; }
+    .money-block p { color: #b45309; margin-bottom: 0; font-size: 0.95rem; }
+    .money-result {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #fef3c7;
+        color: #92400e;
+        padding: 10px 20px;
+        border-radius: 99px;
+        font-weight: 800;
+        margin-top: 16px;
+        border: 1px solid #fcd34d;
+        font-size: 1rem;
+    }
+
+    .conditional-banner {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        padding: 24px;
+        border-radius: 16px;
+        margin-bottom: 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 24px;
+        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.05);
+    }
+    .conditional-banner-text h4 { color: #166534; margin-bottom: 6px; font-weight: 800; font-size: 1.15rem; }
+    .conditional-banner-text p { color: #15803d; margin: 0; font-size: 1rem; opacity: 0.9; }
+
+    @media (max-width: 768px) {
+        .radar-upsell { flex-direction: column; text-align: center; padding: 32px 24px; }
+        .conditional-banner { flex-direction: column; text-align: center; }
+        .use-case-grid { grid-template-columns: 1fr; }
+    }
+
+    /* --- CRO Optimization Styles --- */
+    .radar-cta-strong {
+        background: #fff;
+        border: 2px solid #ff4d00;
+        border-radius: 20px;
+        padding: 32px;
+        margin: 40px 0;
+        position: relative;
+        box-shadow: 0 20px 25px -5px rgba(255, 77, 0, 0.1), 0 10px 10px -5px rgba(255, 77, 0, 0.04);
+        text-align: left;
+    }
+    .radar-cta-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .radar-cta-header h4 { margin: 0; color: #0f172a; font-size: 1.4rem; font-weight: 900; text-transform: uppercase; line-height: 1.2; }
+    .pulse-icon { font-size: 24px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+    .radar-features { list-style: none; padding: 0; margin: 24px 0; display: flex; flex-wrap: wrap; gap: 12px; }
+    .radar-features li { background: #f8fafc; padding: 8px 16px; border-radius: 99px; font-weight: 800; color: #334155; font-size: 0.85rem; border: 1px solid #e2e8f0; }
+    .btn-radar-strong {
+        display: block;
+        background: #ff4d00;
+        color: white !important;
+        padding: 18px 32px;
+        border-radius: 14px;
+        text-decoration: none !important;
+        font-weight: 900;
+        font-size: 1.2rem;
+        text-align: center;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 10px 15px -3px rgba(255, 77, 0, 0.4);
+    }
+    .btn-radar-strong:hover { background: #e64500; transform: translateY(-3px) scale(1.02); box-shadow: 0 20px 25px -5px rgba(255, 77, 0, 0.5); }
+
+    .money-block-v2 {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 32px;
+        margin: 40px 0;
+        text-align: left;
+    }
+    .money-block-v2 h4 { color: #0f172a; font-weight: 900; font-size: 1.6rem; margin-bottom: 12px; }
+    .money-block-v2 p { color: #475569; font-size: 1.1rem; line-height: 1.5; }
+    .money-results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 24px 0; }
+    .money-result-item { background: #ffffff; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    .money-result-item .label { display: block; color: #64748b; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.05em; }
+    .money-result-item .value { display: block; color: #16a34a; font-size: 1.3rem; font-weight: 900; }
+    .btn-money {
+        display: inline-block;
+        background: #0f172a;
+        color: white !important;
+        padding: 14px 28px;
+        border-radius: 12px;
+        text-decoration: none !important;
+        font-weight: 800;
+        transition: all 0.2s;
+    }
+    .btn-money:hover { background: #1e293b; transform: translateX(4px); }
+
+    .binary-choice {
+        background: #ffffff;
+        border: 2px solid #f1f5f9;
+        border-radius: 32px;
+        padding: 48px;
+        margin: 64px 0;
+        text-align: center;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    }
+    .choice-title { font-size: 1.6rem; font-weight: 900; color: #0f172a; margin-bottom: 40px; }
+    .choice-container { display: flex; align-items: stretch; gap: 24px; }
+    .choice-item { flex: 1; padding: 32px; border-radius: 24px; transition: all 0.3s; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .choice-item.manual { border: 2px solid #f1f5f9; }
+    .choice-item.manual:hover { border-color: #e2e8f0; background: #fafafa; }
+    .choice-item.auto { background: #f0fdf4; border: 2px solid #bbf7d0; }
+    .choice-item.auto:hover { border-color: #86efac; transform: translateY(-4px); }
+    .choice-icon { font-size: 48px; margin-bottom: 20px; }
+    .choice-item p { font-weight: 700; color: #334155; margin-bottom: 24px; font-size: 1.1rem; }
+    .choice-divider { font-weight: 900; color: #cbd5e1; font-style: italic; font-size: 1.2rem; display: flex; align-items: center; }
+    .btn-secondary { color: #64748b; text-decoration: underline !important; font-weight: 800; font-size: 0.95rem; }
+
+    @media (max-width: 992px) {
+        .choice-container { flex-direction: column; }
+        .choice-divider { padding: 12px 0; justify-content: center; }
+    }
+
+    /* --- FOMO & Loss Aversion --- */
+    .radar-fomo-badge {
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 800;
+        margin-bottom: 12px;
+        display: inline-block;
+        border: 1px solid #fecaca;
+    }
+    .radar-loss-message {
+        color: #b91c1c;
+        font-weight: 900;
+        font-size: 1rem;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
 </style>
 
 <?=view('partials/footer') ?>
