@@ -57,12 +57,12 @@ $routes->get('billing/paypal/return', 'Billing::paypalReturn');
 
 $routes->get('consumption', 'Usage::index');
 $routes->get('api-empresas', 'ApiPrices::index');
-$routes->get('radar', 'RadarPrices::index');
+// $routes->get('radar', 'RadarPrices::index'); // Movido a Radar::index para manejar invitados vs usuarios logueados
 $routes->get('plugin-wordpress-buscador-empresas', 'Plugin::index');
 $routes->get('obtener-plugin-wordpress', 'Plugin::get_plugin');
 $routes->get('descargar/plugin-wp', 'Plugin::download');
 $routes->get('leads-empresas-nuevas', 'RadarPrices::index');
-$routes->get('radar', 'Radar::index', ['filter' => 'subscription:radar']); // Radar PRO
+$routes->get('radar', 'Radar::index'); // Radar Dashboard (Handles login/guest internally)
 $routes->get('radar/quickview/(:num)', 'Radar::quickView/$1');
 $routes->get('radar/favoritos', 'Radar::favorites');
 $routes->get('radar/exportar', 'Radar::export');
