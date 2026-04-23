@@ -228,5 +228,23 @@
     </main>
 
     <?= view('partials/footer') ?>
+
+    <script>
+        // TRACKING: Quick register view
+        trackEvent('quick_register_view', { 
+            context: '<?= (isset($redirect) && strpos($redirect, 'radar') !== false) ? 'radar' : 'checkout' ?>' 
+        });
+
+        document.querySelector('form').addEventListener('submit', (e) => {
+            const email = document.getElementById('email_input').value;
+            const domain = email.split('@')[1] || 'unknown';
+            
+            // TRACKING: Quick register submit
+            trackEvent('quick_register_submit', { 
+                email_domain: domain,
+                context: '<?= (isset($redirect) && strpos($redirect, 'radar') !== false) ? 'radar' : 'checkout' ?>'
+            });
+        });
+    </script>
 </body>
 </html>

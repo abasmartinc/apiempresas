@@ -204,3 +204,10 @@
 <?= view('partials/legal_modals') ?>
 
 <?=view('scripts') ?>
+
+<!-- Global Tracking System -->
+<script>
+    window.ae_base_url = '<?= site_url() ?>';
+    window.ae_user_id = <?= session()->get('user_id') ? session()->get('user_id') : 'null' ?>;
+</script>
+<script src="<?= base_url('public/js/tracking.js') ?>?v=<?= time() ?>"></script>

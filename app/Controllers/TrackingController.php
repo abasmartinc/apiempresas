@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\RadarDemoEventModel;
+use App\Models\TrackingEventModel;
 use CodeIgniter\API\ResponseTrait;
 
 class TrackingController extends BaseController
@@ -78,6 +79,47 @@ class TrackingController extends BaseController
         } catch (\Throwable $e) {
             log_message('error', '[TrackingDebug] EXCEPCIÓN: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             return $this->response->setJSON(['success' => false, 'error' => 'Exception occurred'])->setStatusCode(500);
+        }
+    }
+
+    /**
+     * Sistema de tracking global
+     * POST /api/tracking/event
+     */
+    public function logEvent()
+    {
+        try {
+            $json = $this->request->getJSON(true);
+            
+            // Debug log
+            log_message('error', '[TrackingGlobal] Hit: ' . json_encode($json));
+            
+            if (!$json || empty($json['event_name'])) {
+                return $this->response->setJSON(['success' => false, 'error' => 'Missing event_name'])->setStatusCode(400);
+            }
+
+            $trackingModel = new TrackingEventModel();
+
+            $data = [
+                'event_name'   => substr($json['event_name'], 0, 100),
+                'page'         => substr($json['page'] ?? '', 0, 255),
+                'user_id'      => $json['user_id'] ?? null,
+                'session_id'   => substr($json['session_id'] ?? '', 0, 100),
+                'anonymous_id' => substr($json['anonymous_id'] ?? '', 0, 100),
+                'element'      => substr($json['element'] ?? '', 0, 255),
+                'metadata'     => isset($json['metadata']) ? json_encode($json['metadata']) : null,
+                'created_at'   => date('Y-m-d H:i:s'),
+            ];
+
+            if ($trackingModel->insert($data)) {
+                return $this->response->setJSON(['success' => true]);
+            }
+
+            return $this->response->setJSON(['success' => false, 'error' => 'Insert failed'])->setStatusCode(500);
+
+        } catch (\Throwable $e) {
+            log_message('error', '[TrackingGlobal] Exception: ' . $e->getMessage());
+            return $this->response->setJSON(['success' => false, 'error' => 'Server error'])->setStatusCode(500);
         }
     }
 }

@@ -1479,6 +1479,12 @@
                 dropdown.innerHTML = result.data.map(renderItem).join('');
                 dropdown.classList.add('active');
                 document.getElementById('selection-hint').classList.remove('is-hidden');
+                
+                // TRACKING: Results shown
+                trackEvent('demo_results_shown', { 
+                    query: query, 
+                    count: result.data.length 
+                });
             } else {
                 dropdown.innerHTML = '<div style="padding:22px; text-align:center; color:#64748b; font-style:italic; font-size:14px;">No hemos encontrado empresas oficiales para esta búsqueda.</div>';
                 dropdown.classList.add('active');
@@ -1500,6 +1506,12 @@
         if (value.length >= 2) {
             statusEl.innerHTML = "🔍 Buscando empresas en tiempo real...";
             statusEl.style.color = "var(--primary)";
+            
+            // TRACKING: Input started
+            if (!this.tracked_start) {
+                trackEvent('demo_input_started', { first_chars: value });
+                this.tracked_start = true;
+            }
         } else {
             statusEl.innerHTML = "⚡ Resultados en <250ms — como en un CRM profesional";
             statusEl.style.color = "#64748b";
@@ -1544,6 +1556,12 @@
             const data = JSON.parse(jsonString);
             input.value = data.name;
             
+            // TRACKING: Company selected
+            trackEvent('demo_company_selected', {
+                company_name: data.name,
+                cif: data.cif
+            });
+
             // Interaction complete: Wow moment
             setTimeout(() => {
                 dropdown.classList.remove('active');

@@ -527,13 +527,13 @@ $strategiesJson = json_encode(array_map(function ($co) {
                 <div class="radar-hero__actions">
                     <a href="#demo-table"
                        class="radar-btn radar-btn--primary"
-                       onclick="trackEvent({event_type:'click_cta', source:'hero', cta_label:'Ver clientes disponibles ahora', url:'#demo-table'}); document.getElementById('demo-table').scrollIntoView({behavior:'smooth'}); return false;">
+                       onclick="trackRadarEvent({event_type:'click_cta', source:'hero', cta_label:'Ver clientes disponibles ahora', url:'#demo-table'}); document.getElementById('demo-table').scrollIntoView({behavior:'smooth'}); return false;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         Ver clientes disponibles ahora
                     </a>
                     <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=hero_secondary') ?>" 
                        class="radar-btn radar-btn--ghost"
-                       onclick="trackEvent({event_type:'click_cta', source:'hero_secondary', cta_label:'Empezar hoy — 79€/mes', url:'/checkout/radar-export?type=subscription&plan=radar&source=hero_secondary'})">
+                       onclick="trackRadarEvent({event_type:'click_cta', source:'hero_secondary', cta_label:'Empezar hoy — 79€/mes', url:'/checkout/radar-export?type=subscription&plan=radar&source=hero_secondary'})">
                         Empezar hoy — 79€/mes
                     </a>
                 </div>
@@ -615,7 +615,7 @@ $strategiesJson = json_encode(array_map(function ($co) {
                 </span>
                 <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=pipeline') ?>" 
                    class="pipeline-roi__cta"
-                   onclick="trackEvent({event_type:'click_cta', source:'pipeline', cta_label:'Empezar hoy — 79€/mes', url:'/checkout/radar-export?type=subscription&plan=radar&source=pipeline'})">
+                   onclick="trackRadarEvent({event_type:'click_cta', source:'pipeline', cta_label:'Empezar hoy — 79€/mes', url:'/checkout/radar-export?type=subscription&plan=radar&source=pipeline'})">
                     Empezar hoy — 79€/mes
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </a>
@@ -700,7 +700,7 @@ $strategiesJson = json_encode(array_map(function ($co) {
                     </p>
                     <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=tabla') ?>" 
                        class="radar-btn radar-btn--primary"
-                       onclick="trackEvent({event_type:'click_cta', source:'tabla_bottom', cta_label:'Ver clientes disponibles ahora', url:'/checkout/radar-export?type=subscription&plan=radar&source=tabla'})">
+                       onclick="trackRadarEvent({event_type:'click_cta', source:'tabla_bottom', cta_label:'Ver clientes disponibles ahora', url:'/checkout/radar-export?type=subscription&plan=radar&source=tabla'})">
                         Ver clientes disponibles ahora →
                     </a>
                 </div>
@@ -757,7 +757,7 @@ $strategiesJson = json_encode(array_map(function ($co) {
                                 <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=estrategia') ?>" 
                                    class="radar-btn radar-btn--primary" 
                                    style="font-size:.85rem;padding:10px 20px;"
-                                   onclick="trackEvent({event_type:'click_cta', source:'estrategia', cta_label:'Ver clientes disponibles ahora', url:'/checkout/radar-export?type=subscription&plan=radar&source=estrategia'})">
+                                   onclick="trackRadarEvent({event_type:'click_cta', source:'estrategia', cta_label:'Ver clientes disponibles ahora', url:'/checkout/radar-export?type=subscription&plan=radar&source=estrategia'})">
                                     Ver clientes disponibles ahora →
                                 </a>
                             </div>
@@ -1028,6 +1028,14 @@ const STRATEGIES = <?= $strategiesJson ?>;
 function openStrategy(i, btn) {
     const s = STRATEGIES[i];
     if (!s) return;
+    
+    // TRACKING: Modal opened
+    trackRadarEvent({
+        event_type: 'radar_modal_opened',
+        source: 'demo_table',
+        metadata: { company_id: s.id, company_name: s.name }
+    });
+
     const modal = document.getElementById('ae-ai-modal');
     const body  = document.getElementById('modal-body');
     const tag   = document.getElementById('modal-company-tag');
@@ -1125,7 +1133,7 @@ function openStrategy(i, btn) {
                 <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=modal_estrategia') ?>" 
                    class="radar-btn radar-btn--primary" 
                    style="width:100%;display:flex;justify-content:center;"
-                   onclick="trackEvent({event_type:'click_cta', source:'estrategia', cta_label:'Activar Radar y obtener datos de contacto', url:'/checkout/radar-export?type=subscription&plan=radar&source=modal_estrategia'})">
+                   onclick="trackRadarEvent({event_type:'click_cta', source:'estrategia', cta_label:'Activar Radar y obtener datos de contacto', url:'/checkout/radar-export?type=subscription&plan=radar&source=modal_estrategia'})">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     Activar Radar y obtener datos de contacto
                 </a>
@@ -1144,7 +1152,17 @@ function closeModal() {
 /**
  * Sistema de Tracking Personalizado
  */
-function trackEvent(data) {
+function trackRadarEvent(data) {
+    // 1. Call Global Tracking System (if available)
+    if (window.trackEvent) {
+        window.trackEvent(data.event_type || 'radar_event', {
+            source: data.source,
+            cta_label: data.cta_label,
+            url: data.url,
+            ...data.metadata
+        });
+    }
+
     const payload = {
         event_type: data.event_type,
         source: data.source,
@@ -1154,27 +1172,23 @@ function trackEvent(data) {
         metadata: data.metadata || {}
     };
     
-    console.log('[Tracking Request]', payload);
+    console.log('[Radar Tracking]', payload);
     
     const endpoint = '<?= site_url("tracking/radar-demo-event") ?>';
     
     try {
         if (navigator.sendBeacon) {
             const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-            const success = navigator.sendBeacon(endpoint, blob);
-            console.log('[Tracking sendBeacon]', success ? 'Enqueued' : 'Failed to enqueue');
+            navigator.sendBeacon(endpoint, blob);
         } else {
             fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
                 keepalive: true
-            }).then(r => console.log('[Tracking fetch]', r.ok ? 'Sent' : 'Server error: ' + r.status))
-              .catch(err => console.error('[Tracking fetch error]', err));
+            });
         }
-    } catch (e) {
-        console.error('[Tracking catastrophic error]', e);
-    }
+    } catch (e) {}
 }
 
 
