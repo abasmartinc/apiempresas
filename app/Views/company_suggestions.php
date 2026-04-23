@@ -1,6 +1,6 @@
 <?php
-  $title = "API Autocompletado de Empresas por CIF y Nombre | API Empresas";
-  $excerptText = "API profesional de autocompletado de empresas en España. Busca por CIF o Nombre y obtén sugerencias en tiempo real con datos oficiales (BOE, BORME, AEAT). Ideal para onboarding B2B.";
+  $title = "Buscador de empresas con autocompletado en tiempo real | APIEmpresas";
+  $excerptText = "Encuentra empresas por nombre o CIF y autocompleta sus datos automáticamente. API de autocompletado en tiempo real para formularios, CRM y sistemas.";
 ?>
 <!doctype html>
 <html lang="es">
@@ -303,6 +303,26 @@
         .suggestion-item:hover{
             background: rgba(33,82,255,.06);
             transform: translateY(-1px);
+            position: relative;
+        }
+        .suggestion-item:hover:after{
+            content: "Click para seleccionar →";
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+            background: #fff;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(33,82,255,.1);
+            box-shadow: 0 4px 12px rgba(33,82,255,.1);
+        }
+        .suggestion-item.is-selected{
+            background: rgba(18,180,138,.08) !important;
+            border-left: 4px solid #12b48a;
         }
         .company-name{
             font-weight: 900;
@@ -981,13 +1001,20 @@
         </span>
 
         <h1 class="hero-top-title">
-          Autocompleta empresas por CIF
-          <span class="grad">con datos oficiales</span>.
+          Buscador inteligente de empresas <span class="grad">con autocompletado</span>
         </h1>
 
         <p class="hero-top-subtitle">
-          Evita registros erróneos, facturas fallidas y duplicados. Conecta tu formulario o CRM y obtén datos fiscales listos para usar en segundos.
+          Encuentra empresas por nombre o CIF y autocompleta sus datos automáticamente en tus formularios, CRM o sistemas en segundos.
         </p>
+
+        <div class="hero-bullets" style="margin-bottom: 30px;">
+          <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+             <span style="font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;"><span style="color: #10b981;">✔</span> Sin errores en formularios</span>
+             <span style="font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;"><span style="color: #10b981;">✔</span> Sin duplicados en tu CRM</span>
+             <span style="font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;"><span style="color: #10b981;">✔</span> Datos oficiales en milisegundos</span>
+          </div>
+        </div>
 
         <div class="hero-kpis">
           <div class="kpi">
@@ -1020,14 +1047,14 @@
         </div>
 
         <div class="hero-cta-row">
-          <a href="#demo" class="btn primary hero-cta-primary">👇 Ver demo</a>
+          <a href="<?=site_url('register') ?>" class="btn primary hero-cta-primary">Empieza gratis con la API</a>
           <a href="<?=site_url('documentation') ?>" class="btn ghost hero-cta-ghost">Ver documentación</a>
         </div>
 
         <div class="hero-trust">
-          <span>✔ Sin llamadas comerciales</span>
-          <span>✔ Sin contratos</span>
-          <span>✔ Sin demos obligatorias</span>
+          <span>✔ Sin tarjeta</span>
+          <span>✔ Activación inmediata</span>
+          <span>✔ Sandbox incluido</span>
         </div>
       </div>
 
@@ -1100,12 +1127,12 @@
     
     <div class="container" style="position: relative; z-index: 1;">
         <div style="text-align:center; margin-bottom: 46px;" class="animate-up delay-1">
-            <span class="eyebrow">Demo en vivo</span>
+            <span class="eyebrow">Demo interactiva</span>
             <h2 style="font-size: clamp(30px, 4.2vw, 46px); font-weight: 950; margin: 12px 0 10px; letter-spacing: -0.03em;">
-                Siéntelo en tus <span class="grad">propias manos</span>.
+                Prueba el autocompletado <span class="grad">en tiempo real</span>
             </h2>
-            <p class="muted" style="font-size: clamp(16px, 2vw, 19px); margin-top: 10px;">
-                Escribe un CIF o nombre: autocompleta, elige, y mira la respuesta JSON.
+            <p class="muted" style="font-size: clamp(16px, 2 vw, 19px); margin-top: 10px;">
+                Empieza a escribir un CIF o nombre de empresa y selecciona una sugerencia.
             </p>
         </div>
 
@@ -1120,7 +1147,7 @@
                         <div style="position: absolute; top: 10px; right: 10px; width: 6px; height: 6px; background: #10b981; border-radius: 50%; box-shadow: 0 0 6px #10b981; animation: pulse-green 2s infinite;"></div>
                     </div>
 
-                    <input type="text" id="company-search" placeholder="Escribe el nombre de una empresa o un CIF…" autocomplete="off">
+                    <input type="text" id="company-search" placeholder="Escribe un CIF o nombre de empresa..." autocomplete="off">
 
                     <div class="search-hints" aria-hidden="true">
                         <span class="kbd">↵</span><span class="hint-text">Selecciona</span>
@@ -1131,6 +1158,27 @@
                 <div class="loader" id="loading-spinner"></div>
                 <div class="suggestions-dropdown" id="suggestions"></div>
             </div>
+
+            <div style="margin-top: 12px; height: 24px; text-align: center;" class="animate-up">
+                <span id="demo-status" style="font-size: 13px; font-weight: 700; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s ease;">
+                    ⚡ Resultados en <250ms — como en un CRM profesional
+                </span>
+            </div>
+
+            <div id="selection-hint" class="animate-up is-hidden" style="margin-top: 20px; text-align: center; background: #eff6ff; padding: 12px; border-radius: 14px; border: 1px solid #dbeafe; box-shadow: 0 4px 12px rgba(33, 82, 255, 0.05);">
+                <span style="font-size: 14px; font-weight: 800; color: #1e40af; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span style="display: inline-block; width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; animation: pulse-blue 2s infinite;"></span>
+                    Selecciona una empresa para ver los datos listos para usar
+                </span>
+            </div>
+
+            <style>
+                @keyframes pulse-blue {
+                    0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6); }
+                    70% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); }
+                    100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+                }
+            </style>
 
             <!-- RESULT PREVIEW -->
             <div id="json-result" class="animate-up is-hidden" style="margin-top: 36px;">
@@ -1151,11 +1199,59 @@
                         <pre style="padding: 34px; margin: 0; font-size: 15px; color: #334155; font-family: 'JetBrains Mono', monospace; overflow-x:auto; line-height: 1.8; background: transparent; position: relative; z-index: 1;"><code id="json-code"></code></pre>
                     </div>
                 </div>
+                <div style="margin-top: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                    <div style="background: #f8fafc; padding: 16px; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center;">
+                        <span style="color: #10b981; font-weight: 900; display: block; margin-bottom: 4px;">✔ Datos listos en JSON</span>
+                        <span style="font-size: 12px; color: #64748b;">Estructura limpia para desarrollo</span>
+                    </div>
+                    <div style="background: #f8fafc; padding: 16px; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center;">
+                        <span style="color: #10b981; font-weight: 900; display: block; margin-bottom: 4px;">✔ Integrable en cualquier sistema</span>
+                        <span style="font-size: 12px; color: #64748b;">CRM, ERP o formularios web</span>
+                    </div>
+                    <div style="background: #f8fafc; padding: 16px; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center;">
+                        <span style="color: #10b981; font-weight: 900; display: block; margin-bottom: 4px;">✔ Reduce errores humanos</span>
+                        <span style="font-size: 12px; color: #64748b;">Automatización total de datos</span>
+                    </div>
+                </div>
+
                 <div style="margin-top: 20px; display: flex; justify-content: center; gap: 16px;">
                     <span style="font-size: 13px; font-weight: 800; color: #12b48a; display: flex; align-items: center; gap: 6px;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        Datos Directos de Fuente Oficial
+                        API de autocompletado de empresas oficial
                     </span>
+                </div>
+            </div>
+
+            <!-- MOMENTO WOW BLOCK -->
+            <div id="wow-conversion" class="is-hidden" style="margin-top: 32px; padding: 36px; border-radius: 28px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.08); text-align: center; transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; margin-bottom: 24px;">
+                    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px;">
+                        <span style="font-weight: 800; color: #10b981; display: flex; align-items: center; gap: 6px; font-size: 15px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            1 llamada API → datos completos
+                        </span>
+                        <span style="font-weight: 800; color: #10b981; display: flex; align-items: center; gap: 6px; font-size: 15px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            Sin errores manuales
+                        </span>
+                        <span style="font-weight: 800; color: #10b981; display: flex; align-items: center; gap: 6px; font-size: 15px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            Listo en milisegundos
+                        </span>
+                    </div>
+                    
+                    <p style="color: #475569; font-size: 18px; font-weight: 700; margin: 10px 0; line-height: 1.5; max-width: 600px;">
+                        "Esto evita errores en facturación, duplicados en CRM y pérdida de leads."
+                    </p>
+                </div>
+
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 14px;">
+                    <a href="<?=site_url('register') ?>" class="btn primary" style="padding: 16px 32px; font-size: 16px; font-weight: 950; border-radius: 14px; box-shadow: 0 15px 30px rgba(33, 82, 255, 0.2);">
+                        Empieza gratis con la API
+                    </a>
+                    <a href="<?=site_url('documentation') ?>" class="btn ghost" style="padding: 16px 32px; font-size: 16px; font-weight: 950; border-radius: 14px; border: 2px solid #e2e8f0; background: white; color: var(--primary);">
+                        Ver documentación
+                    </a>
                 </div>
             </div>
         </div>
@@ -1167,22 +1263,42 @@
     <div style="position: absolute; inset: 0; background: linear-gradient(180deg, #ffffff 0%, transparent 15%, transparent 85%, #ffffff 100%); pointer-events: none;"></div>
     <div class="container" style="position: relative; z-index: 1;">
     <div style="text-align:center; margin-bottom: 64px;" class="animate-up">
-        <span class="eyebrow">Aplica la automatización</span>
+        <span class="eyebrow">Soluciones de negocio</span>
         <h3 style="font-size: clamp(28px, 4vw, 46px); font-weight: 950; margin-top: 12px; letter-spacing: -0.03em;">
-            Casos reales <span class="grad">de uso</span>
+            Evita errores que <span class="grad">cuestan dinero</span>
         </h3>
         <p class="muted" style="max-width: 820px; margin: 14px auto 0; font-size: 18px; line-height: 1.6;">
-            Diseñado para flujos B2B donde los datos fiscales correctos no son “nice to have”, sino requisito.
+            Automatiza la entrada de datos y elimina la fricción en tus procesos internos con una sola llamada API.
         </p>
     </div>
 
     <div class="grid animate-up delay-1" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 22px;">
         <div class="use-case-card">
             <div style="display:flex; gap: 12px; align-items:flex-start;">
-                <span style="font-size: 26px; line-height: 1;">✅</span>
+                <span style="font-size: 26px; line-height: 1;">❌</span>
                 <div>
-                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Autocompletar formularios B2B</h3>
-                    <p class="muted" style="line-height: 1.6; margin:0;">Reduce abandono: con el CIF rellenamos razón social, dirección y datos fiscales.</p>
+                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Datos incorrectos en facturas</h3>
+                    <p class="muted" style="line-height: 1.6; margin:0;">Evita rectificativas y problemas con Hacienda automatizando los datos fiscales desde el primer segundo.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="use-case-card">
+            <div style="display:flex; gap: 12px; align-items:flex-start;">
+                <span style="font-size: 26px; line-height: 1;">❌</span>
+                <div>
+                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Duplicados en CRM</h3>
+                    <p class="muted" style="line-height: 1.6; margin:0;">Elimina la fragmentación de datos usando el CIF como identificador único validado automáticamente.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="use-case-card">
+            <div style="display:flex; gap: 12px; align-items:flex-start;">
+                <span style="font-size: 26px; line-height: 1;">❌</span>
+                <div>
+                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Formularios incompletos</h3>
+                    <p class="muted" style="line-height: 1.6; margin:0;">Aumenta la tasa de conversión en tus flujos B2B permitiendo que el usuario autocomplete sus datos en un clic.</p>
                 </div>
             </div>
         </div>
@@ -1191,8 +1307,8 @@
             <div style="display:flex; gap: 12px; align-items:flex-start;">
                 <span style="font-size: 26px; line-height: 1;">✅</span>
                 <div>
-                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Evitar altas falsas</h3>
-                    <p class="muted" style="line-height: 1.6; margin:0;">Verifica existencia mercantil antes de permitir acceso o activar funcionalidades.</p>
+                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Validar datos antes de guardar</h3>
+                    <p class="muted" style="line-height: 1.6; margin:0;">Asegura la integridad de tu base de datos empresarial en tiempo real.</p>
                 </div>
             </div>
         </div>
@@ -1201,8 +1317,8 @@
             <div style="display:flex; gap: 12px; align-items:flex-start;">
                 <span style="font-size: 26px; line-height: 1;">✅</span>
                 <div>
-                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Dedupe automático</h3>
-                    <p class="muted" style="line-height: 1.6; margin:0;">El CIF como ID único: evita duplicados aunque el nombre llegue distinto.</p>
+                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Enriquecer leads automáticamente</h3>
+                    <p class="muted" style="line-height: 1.6; margin:0;">Añade CNAE, dirección y estado oficial a tus leads B2B sin intervención humana.</p>
                 </div>
             </div>
         </div>
@@ -1211,28 +1327,8 @@
             <div style="display:flex; gap: 12px; align-items:flex-start;">
                 <span style="font-size: 26px; line-height: 1;">✅</span>
                 <div>
-                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Limpieza de CRM por CSV</h3>
-                    <p class="muted" style="line-height: 1.6; margin:0;">Sube listados de CIF y obtén datos actualizados para normalizar registros.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="use-case-card">
-            <div style="display:flex; gap: 12px; align-items:flex-start;">
-                <span style="font-size: 26px; line-height: 1;">✅</span>
-                <div>
-                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Validación KYB</h3>
-                    <p class="muted" style="line-height: 1.6; margin:0;">Trazabilidad y señales oficiales para procesos de onboarding B2B.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="use-case-card">
-            <div style="display:flex; gap: 12px; align-items:flex-start;">
-                <span style="font-size: 26px; line-height: 1;">✅</span>
-                <div>
-                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Prevención pre-factura</h3>
-                    <p class="muted" style="line-height: 1.6; margin:0;">Valida datos fiscales antes de emitir: menos rectificativas y menos soporte.</p>
+                    <h3 style="font-weight: 950; margin: 0 0 8px; font-size: 18px;">Normalizar bases de datos</h3>
+                    <p class="muted" style="line-height: 1.6; margin:0;">Estandariza los nombres y datos fiscales de miles de empresas mediante nuestra API.</p>
                 </div>
             </div>
         </div>
@@ -1308,7 +1404,7 @@
             <a href="<?=site_url('register') ?>" class="btn primary"
                 style="padding: 22px 50px; font-size: 18px; font-weight: 950; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(33, 82, 255, 0.35); display: flex; align-items: center; gap: 12px;">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 1 9 22 2"></polygon></svg>
-                <span>Empieza gratis ahora</span>
+                <span>Empieza gratis con la API</span>
             </a>
             <a href="<?=site_url('documentation') ?>" class="btn ghost"
                 style="padding: 22px 50px; font-size: 18px; font-weight: 950; border-radius: 20px; color: var(--primary); background: #ffffff; border: 2px solid rgba(33, 82, 255, 0.1); display: flex; align-items: center; gap: 12px;">
@@ -1320,15 +1416,15 @@
         <div style="margin-top: 40px; display:flex; flex-wrap:wrap; justify-content:center; gap: 30px;">
             <span style="font-weight: 850; color: #64748b; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                Sin contratos
+                Sin tarjeta
             </span>
             <span style="font-weight: 850; color: #64748b; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                Sin demos
+                Activación inmediata
             </span>
             <span style="font-weight: 850; color: #64748b; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                Sandbox Gratis
+                Sandbox incluido
             </span>
         </div>
     </div>
@@ -1382,6 +1478,7 @@
             if (result.success && result.data && result.data.length > 0) {
                 dropdown.innerHTML = result.data.map(renderItem).join('');
                 dropdown.classList.add('active');
+                document.getElementById('selection-hint').classList.remove('is-hidden');
             } else {
                 dropdown.innerHTML = '<div style="padding:22px; text-align:center; color:#64748b; font-style:italic; font-size:14px;">No hemos encontrado empresas oficiales para esta búsqueda.</div>';
                 dropdown.classList.add('active');
@@ -1393,14 +1490,36 @@
 
     input.addEventListener('input', (e) => {
         const value = e.target.value.trim();
+        const statusEl = document.getElementById('demo-status');
+        const hintEl = document.getElementById('selection-hint');
+        const wowEl = document.getElementById('wow-conversion');
+        
         jsonResult.classList.add('is-hidden');
+        wowEl.classList.add('is-hidden');
+
+        if (value.length >= 2) {
+            statusEl.innerHTML = "🔍 Buscando empresas en tiempo real...";
+            statusEl.style.color = "var(--primary)";
+        } else {
+            statusEl.innerHTML = "⚡ Resultados en <250ms — como en un CRM profesional";
+            statusEl.style.color = "#64748b";
+        }
 
         clearTimeout(debounceTimer);
         if (value.length < 3) {
             dropdown.classList.remove('active');
+            hintEl.classList.add('is-hidden');
             return;
         }
-        debounceTimer = setTimeout(() => fetchSuggestions(value), 260);
+        
+        debounceTimer = setTimeout(() => {
+            fetchSuggestions(value);
+            // After search finishes (even if mocked), update status
+            setTimeout(() => {
+                statusEl.innerHTML = "⚡ Resultados en <250ms — como en un CRM profesional";
+                statusEl.style.color = "#64748b";
+            }, 400);
+        }, 260);
     });
 
     document.addEventListener('click', (e) => {
@@ -1417,14 +1536,29 @@
     dropdown.addEventListener('click', (e) => {
         const item = e.target.closest('.suggestion-item');
         if (item) {
+            // Visual feedback: Highlight selection
+            document.querySelectorAll('.suggestion-item').forEach(i => i.classList.remove('is-selected'));
+            item.classList.add('is-selected');
+
             const jsonString = decodeURIComponent(item.dataset.json);
             const data = JSON.parse(jsonString);
             input.value = data.name;
-            dropdown.classList.remove('active');
+            
+            // Interaction complete: Wow moment
+            setTimeout(() => {
+                dropdown.classList.remove('active');
+                document.getElementById('selection-hint').classList.add('is-hidden');
 
-            jsonCode.innerHTML = syntaxHighlight(data);
-            jsonResult.classList.remove('is-hidden');
-            jsonResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                jsonCode.innerHTML = syntaxHighlight(data);
+                jsonResult.classList.remove('is-hidden');
+                
+                // Trigger Wow Block
+                const wowEl = document.getElementById('wow-conversion');
+                wowEl.classList.remove('is-hidden');
+                wowEl.style.animation = "fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards";
+
+                jsonResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 200);
         }
     });
 

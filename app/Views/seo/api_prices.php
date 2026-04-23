@@ -23,6 +23,24 @@
             box-shadow: 0 0 10px rgba(59, 130, 246, 0.35) !important;
         }
 
+        .radar-hero {
+            border-bottom: none !important;
+        }
+
+        @keyframes mesh-glow-3 {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(1) translate(0, 0);
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: scale(1.1) translate(20px, -20px);
+            }
+        }
+
         .api-code-block {
             background: #0f172a;
             border-radius: 16px;
@@ -705,21 +723,24 @@
         <!-- HERO SECTION -->
         <section class="radar-hero">
             <div class="container">
-                <div class="radar-hero__shell">
+                <div class="radar-hero__shell" style="margin-bottom: 60px;">
                     <div class="radar-hero__badge api-hero__badge">
                         <span class="radar-hero__badge-dot api-hero__badge-dot"></span>
                         INFRAESTRUCTURA DE DATOS A ESCALA
                     </div>
 
                     <h1 class="radar-hero__title">
-                        API de empresas en España para <span>validar CIF, consultar datos y automatizar integraciones</span>
+                        API de empresas en España para <span>validar CIF, consultar datos y automatizar
+                            integraciones</span>
                     </h1>
 
                     <p class="radar-hero__subtitle">
-                        Accede a datos del Registro Mercantil y BORME en tiempo real vía API REST. Diseñada para desarrolladores y sistemas de alta disponibilidad.
+                        Accede a datos del Registro Mercantil y BORME en tiempo real vía API REST. Diseñada para
+                        desarrolladores y sistemas de alta disponibilidad.
                     </p>
                     <p style="margin-top: -10px; font-weight: 700; color: #1e40af; opacity: 0.8; font-size: 1rem;">
-                        API REST con respuesta en milisegundos, endpoints listos para producción y datos oficiales del Registro Mercantil.
+                        API REST con respuesta en milisegundos, endpoints listos para producción y datos oficiales del
+                        Registro Mercantil.
                     </p>
 
                     <div class="radar-hero__proof">
@@ -747,13 +768,16 @@
                     </div>
 
                     <!-- API HERO TWO-COLUMN PANEL -->
-                <div class="radar-hero__feature-panel" style="max-width: 1040px; margin-top: 40px;">
+                    <div class="radar-hero__feature-panel" style="max-width: 1040px; margin-top: 40px;">
                         <div class="radar-hero__feature-copy">
                             <h2>Impulsa tu prospección con datos en tiempo real</h2>
                             <ul style="display: grid; gap: 16px;">
-                                <li><strong>Infraestructura API Nativa:</strong> Integración simple con JSON de alto rendimiento para validar cada oportunidad técnica.</li>
-                                <li><strong>Webhooks del Registro Mercantil:</strong> Notificaciones HTTP directas del BORME para automatizar tu CRM o ERP.</li>
-                                <li><strong>Enriquecimiento de Leads:</strong> Ingesta masiva de datos societarios, cargos y capital social para scoring avanzado.</li>
+                                <li><strong>Infraestructura API Nativa:</strong> Integración simple con JSON de alto
+                                    rendimiento para validar cada oportunidad técnica.</li>
+                                <li><strong>Webhooks del Registro Mercantil:</strong> Notificaciones HTTP directas del
+                                    BORME para automatizar tu CRM o ERP.</li>
+                                <li><strong>Enriquecimiento de Leads:</strong> Ingesta masiva de datos societarios,
+                                    cargos y capital social para scoring avanzado.</li>
                             </ul>
                         </div>
 
@@ -794,20 +818,84 @@
         </section>
 
         <!-- SEO BLOCK: CÓMO FUNCIONA -->
-        <section class="radar-section radar-section--soft" style="padding-bottom: 0;">
+        <section class="radar-section" style="padding: 120px 0; background: #fbfcfe;">
             <div class="container">
-                <div class="radar-heading">
-                    <div class="radar-kicker">Integración Técnica</div>
-                    <h2 class="radar-title">API de empresas en España: cómo funciona</h2>
-                    <p class="radar-text" style="max-width: 900px; margin-left: 0;">
-                        Nuestra <strong>API de empresas en España</strong> permite consultar información corporativa mediante endpoints REST estándar, devolviendo datos fiscales, actividad económica, estado societario y otra información oficial del <strong>Registro Mercantil</strong> en tiempo real. 
-                    </p>
-                    <p class="radar-text" style="max-width: 900px; margin-left: 0; margin-top: 10px;">
-                        Mediante una simple petición GET usando tu <strong>API CIF España</strong>, puedes automatizar la validación de clientes y la ingesta de datos del <strong>API BORME</strong> sin procesos manuales.
-                    </p>
-                    <div style="display: flex; gap: 20px; margin-top: 24px;">
-                        <a href="<?= site_url() ?>" style="font-size: 0.9rem; font-weight: 800; color: #2563eb; text-decoration: none;">Ver herramienta Validar CIF →</a>
-                        <a href="<?= site_url('documentation') ?>" style="font-size: 0.9rem; font-weight: 800; color: #2563eb; text-decoration: none;">Ejemplos de uso →</a>
+                <div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 80px; align-items: center;">
+                    <div>
+                        <div class="radar-kicker">Infraestructura de Datos</div>
+                        <h2 class="radar-title"
+                            style="margin-top: 12px; margin-bottom: 32px; font-size: 2.75rem; letter-spacing: -0.03em;">
+                            API de empresas en España: cómo funciona</h2>
+
+                        <p class="radar-text"
+                            style="font-size: 1.2rem; line-height: 1.7; color: #334155; margin-bottom: 40px; max-width: 600px;">
+                            Nuestra infraestructura conecta directamente con los nodos del <strong>Registro
+                                Mercantil</strong> para ofrecerte una interfaz REST de baja latencia diseñada para
+                            automatización masiva.
+                        </p>
+
+                        <div style="display: grid; gap: 32px; margin-bottom: 48px;">
+                            <div style="display: flex; gap: 20px; align-items: flex-start;">
+                                <div
+                                    style="background: #2563eb; color: #fff; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; flex-shrink: 0; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.25);">
+                                    1</div>
+                                <div>
+                                    <h4 style="margin: 0 0 4px; font-weight: 800; color: #0f172a;">Consulta Masiva</h4>
+                                    <p style="margin: 0; font-size: 1rem; color: #64748b; line-height: 1.5;">Peticiones
+                                        por <strong>CIF o NIF</strong> con payloads JSON estructurados.</p>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 20px; align-items: flex-start;">
+                                <div
+                                    style="background: #2563eb; color: #fff; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; flex-shrink: 0; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.25);">
+                                    2</div>
+                                <div>
+                                    <h4 style="margin: 0 0 4px; font-weight: 800; color: #0f172a;">Respuesta en Tiempo
+                                        Real</h4>
+                                    <p style="margin: 0; font-size: 1rem; color: #64748b; line-height: 1.5;">Datos
+                                        oficiales, CNAE y estado mercantil en menos de 200ms.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: center;">
+                            <a href="<?= site_url() ?>" class="radar-btn radar-btn--ghost"
+                                style="border: 2px solid #e2e8f0; padding: 14px 32px; border-radius: 16px; font-size: 1rem;">
+                                Herramienta Validar CIF
+                            </a>
+                            <a href="<?= site_url('documentation') ?>"
+                                style="font-weight: 800; color: #2563eb; text-decoration: none; display: flex; align-items: center; gap: 8px; font-size: 1.05rem;">
+                                Explorar documentación técnica →
+                            </a>
+                        </div>
+                    </div>
+
+                    <div style="position: relative;">
+                        <!-- Subtle background glow for the terminal -->
+                        <div
+                            style="position: absolute; inset: -40px; background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 70%); pointer-events: none;">
+                        </div>
+
+                        <div
+                            style="background: #0f172a; border-radius: 24px; padding: 32px; box-shadow: 0 50px 100px -20px rgba(15, 23, 42, 0.4); border: 1px solid rgba(255,255,255,0.05); position: relative; z-index: 2;">
+                            <div style="display: flex; gap: 8px; margin-bottom: 24px;">
+                                <span
+                                    style="width: 10px; height: 10px; background: #ff5f57; border-radius: 50%;"></span>
+                                <span
+                                    style="width: 10px; height: 10px; background: #febc2e; border-radius: 50%;"></span>
+                                <span
+                                    style="width: 10px; height: 10px; background: #28c840; border-radius: 50%;"></span>
+                            </div>
+                            <pre
+                                style="margin: 0; font-family: 'Fira Code', monospace; font-size: 14px; line-height: 1.8;">
+<span style="color: #c678dd;">GET</span> <span style="color: #98c379;">/v1/companies/B12345678</span>
+<span style="color: #abb2bf;">{</span>
+  <span style="color: #d19a66;">"name"</span>: <span style="color: #98c379;">"TECH FLOW SL"</span>,
+  <span style="color: #d19a66;">"cif"</span>: <span style="color: #98c379;">"B12345678"</span>,
+  <span style="color: #d19a66;">"status"</span>: <span style="color: #98c379;">"ACTIVA"</span>,
+  <span style="color: #d19a66;">"score"</span>: <span style="color: #d19a66;">92</span>
+<span style="color: #abb2bf;">}</span></pre>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -820,21 +908,27 @@
                     <div class="radar-split__content">
                         <div class="radar-kicker">Capacidades técnicas</div>
                         <h2 class="radar-title">¿Qué puedes hacer con la API de empresas?</h2>
-                        <p class="radar-text">Nuestra infraestructura te permite abstraer la complejidad de los registros oficiales en una interfaz programática simple y potente.</p>
+                        <p class="radar-text">Nuestra infraestructura te permite abstraer la complejidad de los
+                            registros oficiales en una interfaz programática simple y potente.</p>
                         <ul style="display: grid; gap: 12px; margin-top: 24px;">
-                            <li style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
+                            <li
+                                style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
                                 <span style="color: #3b82f6;">✓</span> Validar CIF automáticamente
                             </li>
-                            <li style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
+                            <li
+                                style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
                                 <span style="color: #3b82f6;">✓</span> Consultar empresas por nombre o NIF
                             </li>
-                            <li style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
+                            <li
+                                style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
                                 <span style="color: #3b82f6;">✓</span> Acceder a datos del Registro Mercantil
                             </li>
-                            <li style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
+                            <li
+                                style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
                                 <span style="color: #3b82f6;">✓</span> Integrar datos empresariales en CRM o ERP
                             </li>
-                            <li style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
+                            <li
+                                style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
                                 <span style="color: #3b82f6;">✓</span> Automatizar procesos KYC y validación
                             </li>
                         </ul>
@@ -847,7 +941,9 @@
                             <span class="api-terminal__title">bash — curl</span>
                         </div>
                         <div class="api-terminal__body">
-                            <span style="color: #98c379;">$</span> curl -X GET <span class="api-code-string">"https://apiempresas.es/api/v1/companies?cif=B12345678"</span> \<br>
+                            <span style="color: #98c379;">$</span> curl -X GET <span
+                                class="api-code-string">"https://apiempresas.es/api/v1/companies?cif=B12345678"</span>
+                            \<br>
                             &nbsp;&nbsp;-H <span class="api-code-string">"X-API-KEY: tu_clave"</span>
                         </div>
                     </div>
@@ -862,24 +958,30 @@
                     <div class="radar-kicker">Soluciones B2B</div>
                     <h2 class="radar-title">Casos de uso de la API de empresas</h2>
                 </div>
-                <div class="radar-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-top: 40px;">
-                    <div style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
+                <div class="radar-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-top: 40px;">
+                    <div
+                        style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
                         <div style="font-size: 2rem; margin-bottom: 16px;">🛡️</div>
                         <h4 style="margin: 0; font-weight: 800;">Validación de clientes (KYC)</h4>
                     </div>
-                    <div style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
+                    <div
+                        style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
                         <div style="font-size: 2rem; margin-bottom: 16px;">📈</div>
                         <h4 style="margin: 0; font-weight: 800;">Enriquecimiento de leads</h4>
                     </div>
-                    <div style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
+                    <div
+                        style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
                         <div style="font-size: 2rem; margin-bottom: 16px;">🔄</div>
                         <h4 style="margin: 0; font-weight: 800;">Integración en CRM</h4>
                     </div>
-                    <div style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
+                    <div
+                        style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
                         <div style="font-size: 2rem; margin-bottom: 16px;">💳</div>
                         <h4 style="margin: 0; font-weight: 800;">Fintech y scoring</h4>
                     </div>
-                    <div style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
+                    <div
+                        style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
                         <div style="font-size: 2rem; margin-bottom: 16px;">🚀</div>
                         <h4 style="margin: 0; font-weight: 800;">SaaS B2B</h4>
                     </div>
@@ -931,7 +1033,8 @@
                     <div class="radar-kicker">Documentación rápida</div>
                     <h2 class="radar-title">Capacidades de la API</h2>
                     <p class="radar-subtitle" style="text-align: left; max-width: 800px; margin-left: 0;">
-                        Consulta empresas en España mediante endpoints API REST. Accede a datos fiscales, actividad, estado y otra información oficial del Registro Mercantil en tiempo real.
+                        Consulta empresas en España mediante endpoints API REST. Accede a datos fiscales, actividad,
+                        estado y otra información oficial del Registro Mercantil en tiempo real.
                     </p>
                 </div>
 
@@ -1274,7 +1377,8 @@
                 <div class="radar-heading radar-heading--center">
                     <div class="radar-kicker">Developer First</div>
                     <h2 class="radar-title">Cómo integrar la API de empresas</h2>
-                    <p class="radar-subtitle">Autenticación simple, Endpoints REST, ejemplos JSON y tiempos de respuesta optimizados para producción.</p>
+                    <p class="radar-subtitle">Autenticación simple, Endpoints REST, ejemplos JSON y tiempos de respuesta
+                        optimizados para producción.</p>
                 </div>
 
                 <!-- Language tabs -->
@@ -1410,7 +1514,8 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                 <div class="radar-heading radar-heading--center">
                     <div class="radar-kicker">Respuesta a dudas técnicas</div>
                     <h2 class="radar-title">Preguntas Frecuentes sobre la API</h2>
-                    <p class="radar-subtitle">Todo lo que necesitas saber para integrar nuestra infraestructura en tu producto.</p>
+                    <p class="radar-subtitle">Todo lo que necesitas saber para integrar nuestra infraestructura en tu
+                        producto.</p>
                 </div>
 
                 <div class="api-faq">
@@ -1421,7 +1526,9 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         </button>
                         <div class="api-faq-answer">
                             <div class="api-faq-answer-inner">
-                                La integración es sencilla mediante una API REST estándar. Solo necesitas tu API Key para realizar peticiones GET a nuestros endpoints. Disponemos de ejemplos listos para usar en Python, PHP, Node.js y cURL en nuestra documentación oficial.
+                                La integración es sencilla mediante una API REST estándar. Solo necesitas tu API Key
+                                para realizar peticiones GET a nuestros endpoints. Disponemos de ejemplos listos para
+                                usar en Python, PHP, Node.js y cURL en nuestra documentación oficial.
                             </div>
                         </div>
                     </div>
@@ -1433,7 +1540,9 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         </button>
                         <div class="api-faq-answer">
                             <div class="api-faq-answer-inner">
-                                Nuestro motor monitoriza el BORME (Boletín Oficial del Registro Mercantil) diariamente. Las nuevas constituciones, ceses, nombramientos y ampliaciones de capital suelen estar disponibles en la API pocas horas después de su publicación oficial.
+                                Nuestro motor monitoriza el BORME (Boletín Oficial del Registro Mercantil) diariamente.
+                                Las nuevas constituciones, ceses, nombramientos y ampliaciones de capital suelen estar
+                                disponibles en la API pocas horas después de su publicación oficial.
                             </div>
                         </div>
                     </div>
@@ -1445,7 +1554,9 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         </button>
                         <div class="api-faq-answer">
                             <div class="api-faq-answer-inner">
-                                Sí, el plan Business permite configurar Webhooks. Puedes registrar una URL de callback para recibir notificaciones PUSH cada vez que detectemos una nueva empresa que cumpla tus filtros de sector o provincia, evitando el polling constante.
+                                Sí, el plan Business permite configurar Webhooks. Puedes registrar una URL de callback
+                                para recibir notificaciones PUSH cada vez que detectemos una nueva empresa que cumpla
+                                tus filtros de sector o provincia, evitando el polling constante.
                             </div>
                         </div>
                     </div>
@@ -1457,7 +1568,9 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         </button>
                         <div class="api-faq-answer">
                             <div class="api-faq-answer-inner">
-                                Devolvemos un JSON estructurado con: Datos legales (CIF, Razón Social), CNAE, Capital Social, Localización (Dirección, Provincia), Estado (Activa/Extinguida), Cargos Directivos y Scoring de propensión comercial basado en IA.
+                                Devolvemos un JSON estructurado con: Datos legales (CIF, Razón Social), CNAE, Capital
+                                Social, Localización (Dirección, Provincia), Estado (Activa/Extinguida), Cargos
+                                Directivos y Scoring de propensión comercial basado en IA.
                             </div>
                         </div>
                     </div>
@@ -1469,7 +1582,9 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         </button>
                         <div class="api-faq-answer">
                             <div class="api-faq-answer-inner">
-                                Nuestra infraestructura está diseñada para ser escalable. Por defecto, permitimos ráfagas de hasta 10 peticiones por segundo en planes estándar, pero podemos habilitar cuotas personalizadas para ingestas masivas de datos en planes Enterprise.
+                                Nuestra infraestructura está diseñada para ser escalable. Por defecto, permitimos
+                                ráfagas de hasta 10 peticiones por segundo en planes estándar, pero podemos habilitar
+                                cuotas personalizadas para ingestas masivas de datos en planes Enterprise.
                             </div>
                         </div>
                     </div>
