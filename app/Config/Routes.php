@@ -322,6 +322,7 @@ $routes->group('api', function($routes) {
 
 // Admin Tracking de Eventos
 $routes->get('admin/event-tracking', 'Admin\MetricsController::index');
+$routes->get('admin/event-tracking/table', 'Admin\MetricsController::getTable');
 $routes->get('admin/event-tracking/ai-analyze', 'Admin\MetricsController::getAiAnalysis');
 
 // Company pages: CIF-based and Slug-based URLs (must be last)
