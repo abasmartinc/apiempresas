@@ -23,46 +23,26 @@
                 </div>
 
                 <h1 class="radar-hero__title">
-                    Detecta nuevas empresas
-                    <span>antes que tu competencia</span>
+                    +94 empresas detectadas <span>HOY listas para ser contactadas</span> antes que tu competencia
                 </h1>
 
                 <p class="radar-hero__subtitle">
-                    Accede cada día a nuevas sociedades registradas en el BORME, analízalas con nuestro <strong>Algoritmo de Scoring</strong> y conviértelas en leads cualificados con <strong>IA</strong>.
+                    Algunas ya están siendo contactadas por otros equipos comerciales. No esperes a que otros lleguen antes.
                 </p>
 
-                <div class="radar-hero__proof">
-                    <div class="radar-hero__proof-item">
-                        <strong>+200</strong>
-                        <span>nuevas empresas diarias</span>
-                    </div>
-                    <div class="radar-hero__proof-item">
-                        <strong>100 Puntos</strong>
-                        <span>Algoritmo de cualificación</span>
-                    </div>
-                    <div class="radar-hero__proof-item">
-                        <strong>CRM Integrado</strong>
-                        <span>Gestión de embudo comercial</span>
-                    </div>
-                </div>
-
-                <div class="radar-hero__actions">
-                    <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="radar-btn radar-btn--primary">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                        Activar Radar PRO
-                    </a>
-                </div>
-
-                <div class="radar-freshness-bar" style="max-width: 600px; margin: 24px auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 99px; padding: 10px 24px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.875rem; font-weight: 700; color: #475569; position: relative; overflow: hidden;">
-                   <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: block; animation: pulse-dot 2s infinite;"></span>
-                        Última actualización: <strong><?= date('H:i', strtotime('-12 minutes')) ?></strong>
+                <div class="radar-hero__counter-bar" style="max-width: 700px; margin: 32px auto; background: #f0fdf4; border: 1px solid #bdf4d4; border-radius: 99px; padding: 14px 28px; display: flex; align-items: center; justify-content: center; gap: 14px; box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.1); position: relative; overflow: hidden;">
+                   <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="width: 10px; height: 10px; background: #10b981; border-radius: 50%; display: block; animation: pulse-dot 2s infinite;"></span>
+                        <span style="font-size: 1.05rem; font-weight: 800; color: #065f46; letter-spacing: -0.01em;">
+                            <strong>+94 empresas</strong> detectadas <strong>HOY</strong> — otras empresas ya están contactando estas oportunidades
+                        </span>
                    </div>
-                   <span style="color: #cbd5e1;">|</span>
-                   <div>Hoy: <strong>+218</strong> empresas detectadas</div>
+                </div>
+
+                <div class="radar-hero__actions" style="margin-top: 40px;">
+                    <a href="<?= site_url('register/quick?redirect=radar') ?>" class="radar-btn radar-btn--primary" style="padding: 22px 60px; font-size: 1.35rem; border-radius: 18px; box-shadow: 0 25px 50px -12px rgba(43, 86, 222, 0.35);">
+                        Acceder a estas empresas ahora
+                    </a>
                 </div>
 
                 <div class="radar-hero__feature-panel">
@@ -92,109 +72,84 @@
         </div>
     </section>
 
-    <section class="radar-section">
+    <!-- PREVIEW VISUAL (CRÍTICO) -->
+    <section class="radar-section radar-section--preview" style="padding-top: 0; margin-top: -40px;">
         <div class="container">
-            <div class="radar-split">
-                <div class="radar-split__content">
-                    <div class="radar-kicker">Oportunidad comercial</div>
-                    <h2 class="radar-title">Las empresas nuevas son las mejores oportunidades comerciales</h2>
-                    <p class="radar-text">
-                        Durante sus primeros meses de actividad, las empresas recién constituidas suelen contratar proveedores, asesoría, software, seguros, marketing y servicios especializados.
-                    </p>
-                    <p class="radar-text">
-                        Si llegas antes que otros proveedores, tu probabilidad de cerrar una primera venta aumenta significativamente. Radar te permite detectar esas empresas justo en el momento adecuado.
-                    </p>
-                    <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="radar-btn radar-btn--primary radar-btn--inline" style="margin-bottom: 40px;">
-                        Activar Radar
+            <div class="radar-heading radar-heading--center" style="margin-bottom: 32px;">
+                <div class="radar-kicker">Oportunidades reales</div>
+                <h2 class="radar-title" style="font-size: 1.8rem;">Estas empresas ya están generando oportunidades reales</h2>
+                <p style="font-weight: 700; color: #475569; font-size: 1.1rem; margin-top: -10px;">Accede ahora antes de que otras empresas las contacten</p>
+            </div>
+
+            <div class="radar-preview" style="background: white; border: 2px solid #e2e8f0; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.05);">
+                <div class="radar-table-scroll">
+                    <table class="radar-table" style="margin-bottom: 0;">
+                        <thead>
+                            <tr>
+                                <th>Empresa</th>
+                                <th>Provincia</th>
+                                <th>Sector</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: #f8fafc;">
+                                <td>
+                                    <div style="font-weight: 850; color: #0f172a; filter: blur(4px);">TECH FLOW SOLUTIONS SL</div>
+                                    <div style="display: flex; gap: 8px; margin-top: 4px;">
+                                        <span style="font-size: 10px; background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-weight: 800;">OPORTUNIDAD ACTIVA</span>
+                                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Hace 2h</span>
+                                    </div>
+                                </td>
+                                <td>Barcelona</td>
+                                <td style="color: #059669; font-weight: 800; font-size: 0.9rem;">Alta probabilidad de compra</td>
+                                <td>
+                                    <button disabled style="background: #e2e8f0; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 800; font-size: 0.8rem; cursor: not-allowed;">Contactar ahora</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 850; color: #0f172a; filter: blur(4px);">LOGISTIC AI GROUP SL</div>
+                                    <div style="display: flex; gap: 8px; margin-top: 4px;">
+                                        <span style="font-size: 10px; background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-weight: 800;">CONTACTANDO AHORA</span>
+                                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Hace 2h</span>
+                                    </div>
+                                </td>
+                                <td>Madrid</td>
+                                <td style="color: #059669; font-weight: 800; font-size: 0.9rem;">Alta probabilidad de compra</td>
+                                <td>
+                                    <button disabled style="background: #e2e8f0; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 800; font-size: 0.8rem; cursor: not-allowed;">Contactar ahora</button>
+                                </td>
+                            </tr>
+                            <tr style="background: #f8fafc;">
+                                <td>
+                                    <div style="font-weight: 850; color: #0f172a; filter: blur(4px);">CONSTRUCCIONES VALENCIA 2026 SL</div>
+                                    <div style="display: flex; gap: 8px; margin-top: 4px;">
+                                        <span style="font-size: 10px; background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-weight: 800;">OPORTUNIDAD ACTIVA</span>
+                                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Hace 2h</span>
+                                    </div>
+                                </td>
+                                <td>Valencia</td>
+                                <td style="color: #059669; font-weight: 800; font-size: 0.9rem;">Alta probabilidad de compra</td>
+                                <td>
+                                    <button disabled style="background: #e2e8f0; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 800; font-size: 0.8rem; cursor: not-allowed;">Contactar ahora</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="padding: 24px; text-align: center; background: #fffbeb; border-top: 1px solid #fef3c7;">
+                    <p style="margin: 0 0 16px; font-weight: 800; color: #92400e; font-size: 1rem;">Accede ahora antes de que otras empresas las contacten</p>
+                    <a href="<?= site_url('register/quick?redirect=radar') ?>" class="radar-btn radar-btn--primary" style="max-width: 400px; margin: 0 auto; display: block;">
+                        Acceder a estas empresas ahora
                     </a>
-                </div>
-
-                <div class="radar-timeline">
-                    <div class="radar-timeline__item">
-                        <div class="radar-timeline__num">1</div>
-                        <div>
-                            <h3>Nace una nueva empresa</h3>
-                            <p>Radar detecta automáticamente la constitución desde fuentes oficiales mercantiles.</p>
-                        </div>
-                    </div>
-                    <div class="radar-timeline__item">
-                        <div class="radar-timeline__num">2</div>
-                        <div>
-                            <h3>Tú la ves antes que otros</h3>
-                            <p>Filtras tu nicho por provincia, actividad o fecha y encuentras oportunidades activas.</p>
-                        </div>
-                    </div>
-                    <div class="radar-timeline__item">
-                        <div class="radar-timeline__num">3</div>
-                        <div>
-                            <h3>Exportas y contactas</h3>
-                            <p>Descargas los leads en Excel o CSV y empiezas tu prospección comercial ese mismo día.</p>
-                        </div>
-                    </div>
+                    <small style="display: block; margin-top: 16px; font-weight: 700; color: #94a3b8; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Accede ahora antes de que estas oportunidades se saturen</small>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="radar-section radar-section--scoring" style="background: #0f172a; color: white; padding: 80px 0;">
-        <div class="container">
-            <div class="radar-split">
-                <div class="radar-split__content">
-                    <div class="radar-kicker radar-kicker--dark">Cualificación Proactiva</div>
-                    <h2 class="radar-title" style="color: white;">Algoritmo de Scoring de 100 Puntos</h2>
-                    <p class="radar-text" style="color: rgba(255,255,255,0.7);">
-                        No todos los leads son iguales. Nuestro algoritmo analiza cada nueva empresa en tiempo real basándose en múltiples señales de mercado para que te centres en las que tienen mayor ROI potencial.
-                    </p>
-                    <div class="radar-scoring-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 32px;">
-                        <div class="radar-scoring-item" style="display: flex; align-items: flex-start; gap: 12px;">
-                            <div style="font-size: 20px;">⚖️</div>
-                            <div>
-                                <h4 style="margin: 0; font-size: 14px; font-weight: 800;">Tipo de Acto</h4>
-                                <p style="margin: 4px 0 0; font-size: 13px; color: rgba(255,255,255,0.5);">Constitución vs Ampliación de Capital.</p>
-                            </div>
-                        </div>
-                        <div class="radar-scoring-item" style="display: flex; align-items: flex-start; gap: 12px;">
-                            <div style="font-size: 20px;">💰</div>
-                            <div>
-                                <h4 style="margin: 0; font-size: 14px; font-weight: 800;">Fuerza Financiera</h4>
-                                <p style="margin: 4px 0 0; font-size: 13px; color: rgba(255,255,255,0.5);">Puntuación basada en Capital Social inicial.</p>
-                            </div>
-                        </div>
-                        <div class="radar-scoring-item" style="display: flex; align-items: flex-start; gap: 12px;">
-                            <div style="font-size: 20px;">🏢</div>
-                            <div>
-                                <h4 style="margin: 0; font-size: 14px; font-weight: 800;">Sector de Valor</h4>
-                                <p style="margin: 4px 0 0; font-size: 13px; color: rgba(255,255,255,0.5);">Pesaje superior para sectores B2B estrátegicos.</p>
-                            </div>
-                        </div>
-                        <div class="radar-scoring-item" style="display: flex; align-items: flex-start; gap: 12px;">
-                            <div style="font-size: 20px;">👤</div>
-                            <div>
-                                <h4 style="margin: 0; font-size: 14px; font-weight: 800;">Señales Admin</h4>
-                                <p style="margin: 4px 0 0; font-size: 13px; color: rgba(255,255,255,0.5);">Detección de administradores clave.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="radar-scoring-visual" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;">
-                    <div style="position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center;">
-                        <svg viewBox="0 0 36 36" style="width: 140px; height: 140px; transform: rotate(-90deg);">
-                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2.5" />
-                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10b981" stroke-width="2.8" stroke-dasharray="92, 100" stroke-linecap="round" />
-                        </svg>
-                        <div style="position: absolute; text-align: center;">
-                            <span style="font-size: 32px; font-weight: 900; line-height: 1;">92</span>
-                            <span style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 800; opacity: 0.6; margin-top: -4px;">Score</span>
-                        </div>
-                    </div>
-                    <div style="background: #10b981; color: white; padding: 6px 16px; border-radius: 99px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
-                        🔥 PRIORIDAD MUY ALTA
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <section class="radar-section radar-section--kanban">
         <div class="container">
@@ -370,45 +325,14 @@
                 </div>
 
                 <div class="radar-preview__cta">
-                    <a href="<?= site_url('radar') ?>" class="radar-btn radar-btn--ghost">
-                        Ver Dashboard Completo
+                    <a href="<?= site_url('register/quick?redirect=radar') ?>" class="radar-btn radar-btn--ghost">
+                        Acceder al Dashboard ahora
                     </a>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="radar-section">
-        <div class="container">
-            <div class="radar-heading radar-heading--center">
-                <div class="radar-kicker">Proceso</div>
-                <h2 class="radar-title">Cómo funciona Radar</h2>
-                <p class="radar-subtitle">
-                    Un flujo simple para detectar oportunidades reales, filtrarlas y convertirlas en prospección accionable.
-                </p>
-            </div>
-
-            <div class="radar-steps">
-                <article class="radar-step">
-                    <div class="radar-step__num">1</div>
-                    <h3>Detección automática</h3>
-                    <p>Radar monitoriza nuevas constituciones mercantiles y las incorpora a tu entorno de trabajo.</p>
-                </article>
-
-                <article class="radar-step">
-                    <div class="radar-step__num">2</div>
-                    <h3>Segmentación inteligente</h3>
-                    <p>Filtra por sector CNAE, provincia o fecha para centrarte solo en el tipo de empresa que te interesa.</p>
-                </article>
-
-                <article class="radar-step">
-                    <div class="radar-step__num">3</div>
-                    <h3>Exportación y prospección</h3>
-                    <p>Descarga los leads en Excel o CSV y empieza a trabajar campañas comerciales inmediatamente.</p>
-                </article>
-            </div>
-        </div>
-    </section>
 
     <section class="radar-section radar-section--soft">
         <div class="container">
@@ -502,8 +426,8 @@
                             <li>Sin permanencia</li>
                         </ul>
 
-                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="radar-btn radar-btn--primary radar-btn--full">
-                            Activar Radar
+                        <a href="<?= site_url('register/quick?redirect=radar') ?>" class="radar-btn radar-btn--primary radar-btn--full">
+                            Acceder ahora
                         </a>
 
                         <div class="radar-pricing-card__footnote">
@@ -613,12 +537,72 @@
                 </div>
 
                 <div class="radar-comparison__cta">
-                    <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="radar-btn radar-btn--primary">
-                        Activar Radar
+                    <a href="<?= site_url('register/quick?redirect=radar') ?>" class="radar-btn radar-btn--primary">
+                        Acceder ahora
                     </a>
                     <p>
                         O <a href="<?= site_url('billing/single_checkout?period=30days') ?>">descarga un listado puntual</a>
                     </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="radar-section radar-section--scoring" style="background: #0f172a; color: white; padding: 80px 0;">
+        <div class="container">
+            <div class="radar-split">
+                <div class="radar-split__content">
+                    <div class="radar-kicker radar-kicker--dark">Cualificación Proactiva</div>
+                    <h2 class="radar-title" style="color: white;">Algoritmo de Scoring de 100 Puntos</h2>
+                    <p class="radar-text" style="color: rgba(255,255,255,0.7);">
+                        No todos los leads son iguales. Nuestro algoritmo analiza cada nueva empresa en tiempo real basándose en múltiples señales de mercado para que te centres en las que tienen mayor ROI potencial.
+                    </p>
+                    <div class="radar-scoring-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 32px;">
+                        <div class="radar-scoring-item" style="display: flex; align-items: flex-start; gap: 12px;">
+                            <div style="font-size: 20px;">⚖️</div>
+                            <div>
+                                <h4 style="margin: 0; font-size: 14px; font-weight: 800;">Tipo de Acto</h4>
+                                <p style="margin: 4px 0 0; font-size: 13px; color: rgba(255,255,255,0.5);">Constitución vs Ampliación de Capital.</p>
+                            </div>
+                        </div>
+                        <div class="radar-scoring-item" style="display: flex; align-items: flex-start; gap: 12px;">
+                            <div style="font-size: 20px;">💰</div>
+                            <div>
+                                <h4 style="margin: 0; font-size: 14px; font-weight: 800;">Fuerza Financiera</h4>
+                                <p style="margin: 4px 0 0; font-size: 13px; color: rgba(255,255,255,0.5);">Puntuación basada en Capital Social inicial.</p>
+                            </div>
+                        </div>
+                        <div class="radar-scoring-item" style="display: flex; align-items: flex-start; gap: 12px;">
+                            <div style="font-size: 20px;">🏢</div>
+                            <div>
+                                <h4 style="margin: 0; font-size: 14px; font-weight: 800;">Sector de Valor</h4>
+                                <p style="margin: 4px 0 0; font-size: 13px; color: rgba(255,255,255,0.5);">Pesaje superior para sectores B2B estrátegicos.</p>
+                            </div>
+                        </div>
+                        <div class="radar-scoring-item" style="display: flex; align-items: flex-start; gap: 12px;">
+                            <div style="font-size: 20px;">👤</div>
+                            <div>
+                                <h4 style="margin: 0; font-size: 14px; font-weight: 800;">Señales Admin</h4>
+                                <p style="margin: 4px 0 0; font-size: 13px; color: rgba(255,255,255,0.5);">Detección de administradores clave.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="radar-scoring-visual" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;">
+                    <div style="position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center;">
+                        <svg viewBox="0 0 36 36" style="width: 140px; height: 140px; transform: rotate(-90deg);">
+                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2.5" />
+                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10b981" stroke-width="2.8" stroke-dasharray="92, 100" stroke-linecap="round" />
+                        </svg>
+                        <div style="position: absolute; text-align: center;">
+                            <span style="font-size: 32px; font-weight: 900; line-height: 1;">92</span>
+                            <span style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 800; opacity: 0.6; margin-top: -4px;">Score</span>
+                        </div>
+                    </div>
+                    <div style="background: #10b981; color: white; padding: 6px 16px; border-radius: 99px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+                        🔥 PRIORIDAD MUY ALTA
+                    </div>
                 </div>
             </div>
         </div>
@@ -660,12 +644,12 @@
         <div class="container">
             <div class="radar-final__shell">
                 <div class="radar-kicker radar-kicker--dark">Empieza hoy</div>
-                <h2>Empieza a detectar nuevas empresas hoy</h2>
+                <h2>Accede a empresas antes que tu competencia ahora</h2>
                 <p>
                     Accede al Radar y convierte nuevas constituciones mercantiles en oportunidades comerciales reales cada día.
                 </p>
-                <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="radar-btn radar-btn--yellow">
-                    Activar Radar
+                <a href="<?= site_url('register/quick?redirect=radar') ?>" class="radar-btn radar-btn--yellow">
+                    Acceder a estas empresas ahora
                 </a>
                 <small>Sin permanencia · Cancela cuando quieras</small>
             </div>

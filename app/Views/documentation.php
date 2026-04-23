@@ -441,10 +441,10 @@ print(response.json())</code></pre>
                         </a>
                     </div>
 
-                    <div style="margin-top: 80px; text-align: center; background: #0f172a; color: white; padding: 60px 40px; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
-                        <h2 style="color: white; font-size: 2rem; font-weight: 900; margin-bottom: 16px;">🔥 Cada día se crean nuevas empresas</h2>
-                        <p style="font-size: 1.2rem; color: #94a3b8; margin-bottom: 32px;">La diferencia es quién llega primero.</p>
-                        <a href="<?= site_url('radar') ?>" class="btn-radar-strong" style="max-width: 400px; margin: 0 auto;">Ver oportunidades ahora</a>
+                    <div style="margin-top: 80px; text-align: center; background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%); color: white; padding: 60px 40px; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(30, 58, 138, 0.25);">
+                        <h2 style="color: white; font-size: 2.3rem; font-weight: 900; margin-bottom: 16px; letter-spacing: -0.02em;">💎 Cada día se crean nuevas empresas</h2>
+                        <p style="font-size: 1.25rem; color: rgba(255,255,255,0.7); margin-bottom: 32px; font-weight: 500;">La diferencia es quién llega primero.</p>
+                        <a href="<?= site_url('radar') ?>" class="btn-radar-strong" style="max-width: 400px; margin: 0 auto; padding: 20px 40px;">Ver oportunidades ahora</a>
                     </div>
                 </section>
             </div>
@@ -563,12 +563,12 @@ print(response.json())</code></pre>
     /* --- CRO Optimization Styles --- */
     .radar-cta-strong {
         background: #fff;
-        border: 2px solid #ff4d00;
+        border: 2px solid #2563EB;
         border-radius: 20px;
         padding: 32px;
         margin: 40px 0;
         position: relative;
-        box-shadow: 0 20px 25px -5px rgba(255, 77, 0, 0.1), 0 10px 10px -5px rgba(255, 77, 0, 0.04);
+        box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.1), 0 10px 10px -5px rgba(37, 99, 235, 0.04);
         text-align: left;
     }
     .radar-cta-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
@@ -579,7 +579,7 @@ print(response.json())</code></pre>
     .radar-features li { background: #f8fafc; padding: 8px 16px; border-radius: 99px; font-weight: 800; color: #334155; font-size: 0.85rem; border: 1px solid #e2e8f0; }
     .btn-radar-strong {
         display: block;
-        background: #ff4d00;
+        background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
         color: white !important;
         padding: 18px 32px;
         border-radius: 14px;
@@ -588,9 +588,9 @@ print(response.json())</code></pre>
         font-size: 1.2rem;
         text-align: center;
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        box-shadow: 0 10px 15px -3px rgba(255, 77, 0, 0.4);
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
     }
-    .btn-radar-strong:hover { background: #e64500; transform: translateY(-3px) scale(1.02); box-shadow: 0 20px 25px -5px rgba(255, 77, 0, 0.5); }
+    .btn-radar-strong:hover { background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); transform: translateY(-3px) scale(1.02); box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.5); }
 
     .money-block-v2 {
         background: #f8fafc;

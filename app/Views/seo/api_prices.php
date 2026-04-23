@@ -712,12 +712,14 @@
                     </div>
 
                     <h1 class="radar-hero__title">
-                        Infraestructura API para el<br>
-                        <span>Registro Mercantil y BORME.</span>
+                        API de empresas en España para <span>validar CIF, consultar datos y automatizar integraciones</span>
                     </h1>
 
                     <p class="radar-hero__subtitle">
-                        Integra datos oficiales de empresas, procesos de scoring IA y monitorización del BORME directamente en tu stack. Diseñada para ingesta masiva y alta disponibilidad.
+                        Accede a datos del Registro Mercantil y BORME en tiempo real vía API REST. Diseñada para desarrolladores y sistemas de alta disponibilidad.
+                    </p>
+                    <p style="margin-top: -10px; font-weight: 700; color: #1e40af; opacity: 0.8; font-size: 1rem;">
+                        API REST con respuesta en milisegundos, endpoints listos para producción y datos oficiales del Registro Mercantil.
                     </p>
 
                     <div class="radar-hero__proof">
@@ -737,10 +739,10 @@
 
                     <div class="radar-hero__actions">
                         <a href="<?= site_url('register') ?>" class="radar-btn radar-btn--primary">
-                            Empezar gratis hoy
+                            Probar API gratis
                         </a>
                         <a href="<?= site_url('documentation') ?>" class="radar-btn radar-btn--ghost">
-                            Explorar documentación
+                            Ver documentación
                         </a>
                     </div>
 
@@ -791,6 +793,100 @@
             </div>
         </section>
 
+        <!-- SEO BLOCK: CÓMO FUNCIONA -->
+        <section class="radar-section radar-section--soft" style="padding-bottom: 0;">
+            <div class="container">
+                <div class="radar-heading">
+                    <div class="radar-kicker">Integración Técnica</div>
+                    <h2 class="radar-title">API de empresas en España: cómo funciona</h2>
+                    <p class="radar-text" style="max-width: 900px; margin-left: 0;">
+                        Nuestra <strong>API de empresas en España</strong> permite consultar información corporativa mediante endpoints REST estándar, devolviendo datos fiscales, actividad económica, estado societario y otra información oficial del <strong>Registro Mercantil</strong> en tiempo real. 
+                    </p>
+                    <p class="radar-text" style="max-width: 900px; margin-left: 0; margin-top: 10px;">
+                        Mediante una simple petición GET usando tu <strong>API CIF España</strong>, puedes automatizar la validación de clientes y la ingesta de datos del <strong>API BORME</strong> sin procesos manuales.
+                    </p>
+                    <div style="display: flex; gap: 20px; margin-top: 24px;">
+                        <a href="<?= site_url() ?>" style="font-size: 0.9rem; font-weight: 800; color: #2563eb; text-decoration: none;">Ver herramienta Validar CIF →</a>
+                        <a href="<?= site_url('documentation') ?>" style="font-size: 0.9rem; font-weight: 800; color: #2563eb; text-decoration: none;">Ejemplos de uso →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEO BLOCK: QUÉ PUEDES HACER -->
+        <section class="radar-section">
+            <div class="container">
+                <div class="radar-split">
+                    <div class="radar-split__content">
+                        <div class="radar-kicker">Capacidades técnicas</div>
+                        <h2 class="radar-title">¿Qué puedes hacer con la API de empresas?</h2>
+                        <p class="radar-text">Nuestra infraestructura te permite abstraer la complejidad de los registros oficiales en una interfaz programática simple y potente.</p>
+                        <ul style="display: grid; gap: 12px; margin-top: 24px;">
+                            <li style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
+                                <span style="color: #3b82f6;">✓</span> Validar CIF automáticamente
+                            </li>
+                            <li style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
+                                <span style="color: #3b82f6;">✓</span> Consultar empresas por nombre o NIF
+                            </li>
+                            <li style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
+                                <span style="color: #3b82f6;">✓</span> Acceder a datos del Registro Mercantil
+                            </li>
+                            <li style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
+                                <span style="color: #3b82f6;">✓</span> Integrar datos empresariales en CRM o ERP
+                            </li>
+                            <li style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
+                                <span style="color: #3b82f6;">✓</span> Automatizar procesos KYC y validación
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="api-terminal" style="max-width: 500px;">
+                        <div class="api-terminal__bar">
+                            <span class="api-terminal__dot api-terminal__dot--red"></span>
+                            <span class="api-terminal__dot api-terminal__dot--amber"></span>
+                            <span class="api-terminal__dot api-terminal__dot--green"></span>
+                            <span class="api-terminal__title">bash — curl</span>
+                        </div>
+                        <div class="api-terminal__body">
+                            <span style="color: #98c379;">$</span> curl -X GET <span class="api-code-string">"https://apiempresas.es/api/v1/companies?cif=B12345678"</span> \<br>
+                            &nbsp;&nbsp;-H <span class="api-code-string">"X-API-KEY: tu_clave"</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CASOS DE USO -->
+        <section class="radar-section radar-section--soft">
+            <div class="container">
+                <div class="radar-heading radar-heading--center">
+                    <div class="radar-kicker">Soluciones B2B</div>
+                    <h2 class="radar-title">Casos de uso de la API de empresas</h2>
+                </div>
+                <div class="radar-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-top: 40px;">
+                    <div style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 16px;">🛡️</div>
+                        <h4 style="margin: 0; font-weight: 800;">Validación de clientes (KYC)</h4>
+                    </div>
+                    <div style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 16px;">📈</div>
+                        <h4 style="margin: 0; font-weight: 800;">Enriquecimiento de leads</h4>
+                    </div>
+                    <div style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 16px;">🔄</div>
+                        <h4 style="margin: 0; font-weight: 800;">Integración en CRM</h4>
+                    </div>
+                    <div style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 16px;">💳</div>
+                        <h4 style="margin: 0; font-weight: 800;">Fintech y scoring</h4>
+                    </div>
+                    <div style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 16px;">🚀</div>
+                        <h4 style="margin: 0; font-weight: 800;">SaaS B2B</h4>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- VALUE HOOKS -->
         <section class="radar-section">
             <div class="container">
@@ -834,6 +930,9 @@
                 <div class="radar-heading">
                     <div class="radar-kicker">Documentación rápida</div>
                     <h2 class="radar-title">Capacidades de la API</h2>
+                    <p class="radar-subtitle" style="text-align: left; max-width: 800px; margin-left: 0;">
+                        Consulta empresas en España mediante endpoints API REST. Accede a datos fiscales, actividad, estado y otra información oficial del Registro Mercantil en tiempo real.
+                    </p>
                 </div>
 
                 <div
@@ -1092,7 +1191,7 @@
                                 </svg> Acceso a /companies</li>
                         </ul>
 
-                        <a href="<?= site_url('register') ?>" class="api-pricing-btn">Empezar Gratis</a>
+                        <a href="<?= site_url('register') ?>" class="api-pricing-btn">Obtener API Key</a>
                     </div>
 
                     <!-- PRO -->
@@ -1174,9 +1273,8 @@
             <div class="container">
                 <div class="radar-heading radar-heading--center">
                     <div class="radar-kicker">Developer First</div>
-                    <h2 class="radar-title">Integra en minutos, escala sin límites</h2>
-                    <p class="radar-subtitle">Una llamada REST. Sin SDKs complicados. Soporte oficial para los lenguajes
-                        más populares.</p>
+                    <h2 class="radar-title">Cómo integrar la API de empresas</h2>
+                    <p class="radar-subtitle">Autenticación simple, Endpoints REST, ejemplos JSON y tiempos de respuesta optimizados para producción.</p>
                 </div>
 
                 <!-- Language tabs -->
@@ -1418,7 +1516,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         <!-- Headline -->
                         <h2
                             style="color: #ffffff; font-size: 2.75rem; font-weight: 950; margin: 0 0 16px; letter-spacing: -0.04em; line-height: 1.1;">
-                            Empieza a construir el<br>futuro de tu negocio</h2>
+                            Empieza a usar la API de empresas ahora</h2>
                         <p
                             style="color: rgba(255,255,255,0.65); font-size: 1.1rem; font-weight: 500; margin: 0 0 48px; max-width: 480px; margin-left: auto; margin-right: auto; line-height: 1.6;">
                             Únete a las empresas que ya automatizan su validación mercantil y captan clientes antes que
@@ -1459,7 +1557,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         <div style="display: flex; flex-direction: column; align-items: center; gap: 14px;">
                             <a href="<?= site_url('register') ?>"
                                 style="display: inline-block; background: linear-gradient(135deg, #facc15 0%, #f97316 100%); color: #0b1020; font-weight: 900; font-size: 1.05rem; padding: 18px 48px; border-radius: 16px; text-decoration: none; box-shadow: 0 10px 30px -5px rgba(15,23,42,0.45); transition: all 0.3s ease; letter-spacing: 0.01em;">
-                                Crear cuenta gratuita
+                                Obtener API Key gratis
                             </a>
                             <span style="color: rgba(255,255,255,0.45); font-size: 0.82rem; font-weight: 600;">No
                                 requiere tarjeta de crédito para empezar</span>
