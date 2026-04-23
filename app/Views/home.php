@@ -1731,7 +1731,7 @@
                                 Escalabilidad para grandes volúmenes
                             </li>
                         </ul>
-                        <a href="<?= site_url('api-empresas') ?>" class="btn-ae" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0F172A; font-weight: 800; border: none; width: 100%; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);">Documentación API</a>
+                        <a href="<?= site_url('documentation') ?>" class="btn-ae" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0F172A; font-weight: 800; border: none; width: 100%; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);">Documentación API</a>
                     </div>
                 </div>
                 <p style="text-align: center; margin-top: 40px; color: var(--ae-slate); font-weight: 600;">Si tu objetivo es vender o prospectar directamente, utiliza Radar B2B. <br>Si necesitas integrar datos en tu sistema, utiliza la API.</p>
@@ -1965,7 +1965,7 @@
                         <div class="tag-premium">Para Desarrolladores</div>
                         <h3>API REST</h3>
                         <p>Endpoints JSON para automatizar la validación de CIFs e integrar datos de empresas directamente en tu propio software o CRM.</p>
-                        <a href="<?= site_url('api-empresas') ?>" class="btn-ae" style="width: 100%; padding: 20px; font-size: 1.1rem; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease;">Ver Documentación API</a>
+                        <a href="<?= site_url('documentation') ?>" class="btn-ae" style="width: 100%; padding: 20px; font-size: 1.1rem; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease;">Ver Documentación API</a>
                     </div>
                 </div>
             </div>
