@@ -672,6 +672,9 @@ class Services extends BaseService
 
         $driverName = $config->driver;
 
+
+
+
         if ($driverName === DatabaseHandler::class) {
             $DBGroup = $config->DBGroup ?? config(Database::class)->defaultGroup;
             $db      = Database::connect($DBGroup);

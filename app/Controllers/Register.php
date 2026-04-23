@@ -228,9 +228,12 @@ class Register extends BaseController
     public function quick()
     {
         if (session('logged_in')) {
-            return redirect()->to(site_url('billing/checkout'));
+            $redirect = $this->request->getGet('redirect') ?? 'billing/checkout';
+            return redirect()->to(site_url(ltrim($redirect, '/')));
         }
-        return view('auth/quick_register');
+        return view('auth/quick_register', [
+            'redirect' => $this->request->getGet('redirect') ?? 'billing/checkout'
+        ]);
     }
 
     public function quick_store()
@@ -315,8 +318,9 @@ class Register extends BaseController
                 'logged_in' => true,
             ]);
 
-            // Redirect back to billing/checkout with original POST data preserved in session
-            return redirect()->to(site_url('billing/checkout'));
+            // Redirect back to intended target or billing/checkout
+            $redirect = $this->request->getPost('redirect') ?: 'billing/checkout';
+            return redirect()->to(site_url(ltrim($redirect, '/')));
 
         } catch (\Throwable $e) {
             log_message('error', 'Quick Register failed: ' . $e->getMessage());

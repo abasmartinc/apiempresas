@@ -32,8 +32,9 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
 };
 
 $allCompanies = $companies ?? [];
-$visibleCompanies = $isFree ? array_slice($allCompanies, 0, 10) : $allCompanies;
-$lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
+$limitFree = 3; // Limitado a 3 empresas visibles para usuarios gratis
+$visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCompanies;
+$lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
 ?>
 
 <div class="ae-radar-page">
@@ -164,21 +165,21 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                         Hoy: <strong>+<?= number_format($freshness['todayCount']) ?></strong> empresas
                     </div>
 
-                    <?php if ($isFree): ?>
+                    <?php if ($isFree) { ?>
                         <div class="ae-radar-page__pill ae-radar-page__pill--free">
                             Plan Free · Vista limitada
                         </div>
 
-                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__cta-top">
-                            Activar Radar PRO (79€)
+                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__cta-top" style="background: #2563eb; color: #ffffff; border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
+                            Activar Radar PRO (79€/mes)
                         </a>
-                    <?php else: ?>
-                        <?php if (isset($userPlan['status']) && $userPlan['status'] === 'canceled'): ?>
+                    <?php } else { ?>
+                        <?php if (isset($userPlan['status']) && $userPlan['status'] === 'canceled') { ?>
                             <a href="<?= site_url('billing') ?>" class="ae-radar-page__pill ae-radar-page__pill--live" style="text-decoration:none; background:#fef2f2; border:1px solid #fee2e2; color:#ef4444;" title="Gestionar facturación">
                                 <span class="ae-radar-page__pulse" style="background:#ef4444;"></span>
                                 Cancelada (Acceso hasta <?= date('d/m/Y', strtotime($userPlan['period_end'])) ?>)
                             </a>
-                        <?php else: ?>
+                        <?php } else { ?>
                             <a href="<?= site_url('billing') ?>" class="ae-radar-page__pill ae-radar-page__pill--live" style="text-decoration:none;" title="Gestionar facturación">
                                 <span class="ae-radar-page__pulse"></span>
                                 Suscripción activa
@@ -186,8 +187,8 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                             <button type="button" class="ae-radar-page__cta-top" style="background:transparent; border:1px solid #ef4444; color:#ef4444; cursor:pointer;" onclick="cancelRadarSubscription()">
                                 Cancelar PRO
                             </button>
-                        <?php endif; ?>
-                    <?php endif; ?>
+                        <?php } ?>
+                    <?php } ?>
                 </div>
             </header>
 
@@ -200,27 +201,55 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
             <div class="ae-radar-page__content">
                 <div class="ae-radar-page__container">
                     
+                    <!-- ⚡ CONTADOR DE USO (MANDATORIO) -->
+                    <div class="ae-usage-counter" style="margin-bottom: 24px; background: #ffffff; border-radius: 16px; padding: 20px 32px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <div style="width: 48px; height: 48px; background: #eff6ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">📊</div>
+                            <div>
+                                <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1e293b;">
+                                    <?php if ($isFree) { ?>
+                                        Solo estás viendo <?= count($visibleCompanies) ?> de <?= number_format($pagination['total']) ?> oportunidades disponibles · <span style="color: #ef4444;">Has alcanzado el límite gratuito</span>
+                                    <?php } else { ?>
+                                        Acceso completo ilimitado a las <?= number_format($pagination['total']) ?> oportunidades
+                                    <?php } ?>
+                                </h3>
+                                <p style="margin: 4px 0 0; font-size: 13px; color: #64748b; font-weight: 500;">
+                                    <?php if ($isFree) { ?>
+                                        <span style="color: #ef4444; font-weight: 700;">Has alcanzado el límite gratuito.</span> Activa Radar PRO para ver el resto.
+                                    <?php } else { ?>
+                                        Explora todos los leads detectados hoy en tiempo real.
+                                    <?php } ?>
+                                </p>
+                            </div>
+                        </div>
+                        <?php if ($isFree) { ?>
+                            <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__cta-top" style="margin: 0; background: #0f172a; color: #ffffff;">
+                                Activar Radar PRO (79€/mes)
+                            </a>
+                        <?php } ?>
+                    </div>
+                    
                     <!-- INICIO SECCION SUPERIOR (KPIs) -->
                     <div class="ae-radar-page-top-section" style="width: 100%;">
 
                     <!-- BLOQUE: ACTIVIDAD DEL DÍA (NUDGE DIARIO) -->
                     <div class="ae-radar-page__daily-nudge" style="margin-bottom: 20px; background: linear-gradient(90deg, #eff6ff 0%, #ffffff 100%); border: 1px solid #dbeafe; border-radius: 12px; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.05);">
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            <span style="font-size: 20px; animation: pulse 2s infinite;">🔔</span>
+                            <span style="font-size: 20px; animation: pulse 2s infinite;">🔥</span>
                             <div>
                                 <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: #1e40af;">
-                                    ¡Buenos días! Hoy tienes nuevas oportunidades listas
+                                    Las empresas detectadas hoy suelen ser las más valiosas (+<?= number_format($stats['hoy']) ?> detectadas hoy)
                                 </h4>
                                 <div style="display: flex; gap: 12px; margin-top: 2px;">
-                                    <span style="font-size: 12px; color: #60a5fa; font-weight: 700;">• <?= number_format($stats['hoy']) ?> nuevas empresas detectadas</span>
-                                    <span style="font-size: 12px; color: #10b981; font-weight: 700;">• <?= max(1, round($stats['hoy'] * 0.7)) ?> están en su mejor momento de contacto</span>
+                                    <span style="font-size: 12px; color: #60a5fa; font-weight: 700;">• <?= max(1, round($stats['hoy'] * 0.7)) ?> leads de alta prioridad detectados</span>
+                                    <span style="font-size: 12px; color: #10b981; font-weight: 700;">• Otros equipos comerciales ya están trabajando estas oportunidades</span>
                                 </div>
                             </div>
                         </div>
                         <div style="flex-shrink: 0;">
                             <span style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; background: white; padding: 4px 10px; border-radius: 20px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 6px;">
                                 <span style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: block;"></span>
-                                Sistema activo
+                                Sistema en vivo
                             </span>
                         </div>
                     </div>
@@ -279,7 +308,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                                 <span style="font-size: 14px; font-weight: 700; color: #1e293b;"><?= $pipelineMetrics['clients_label'] ?> clientes reales <span style="font-weight: 500; color: #64748b; font-size: 12px;">(según conv. media)</span></span>
                                             </div>
                                             <div style="margin-top: 4px; font-size: 12px; font-weight: 600; color: #64748b; display: flex; align-items: center; gap: 6px;">
-                                                🚀 Equipos comerciales ya están usando este radar para generar nuevos clientes
+                                                🚀 Otros equipos comerciales ya están trabajando estas oportunidades
                                             </div>
                                         </div>
 
@@ -302,7 +331,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                     <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             <span style="font-size: 14px;">✅</span>
-                                            <span style="font-size: 13px; font-weight: 700; color: #10b981;"><?= $pipelineMetrics['roi_message'] ?></span>
+                                            <span style="font-size: 13px; font-weight: 700; color: #10b981;"><?= $pipelineMetrics['roi_message'] ?> · Con 1 cliente cubres el coste mensual</span>
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: #ea580c; text-transform: uppercase;">
                                             <span style="width: 6px; height: 6px; background: #ea580c; border-radius: 50%; display: block; animation: pulse 2s infinite;"></span>
@@ -311,13 +340,16 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                     </div>
                                 </div>
 
-                                <?php if ($isFree): ?>
-                                    <div class="ae-radar-page__hero-actions" style="margin-top: 20px;">
-                                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__hero-btn ae-radar-page__hero-btn--primary" style="height: 42px; padding: 0 24px; font-size: 13px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);">
-                                            Desbloquear Radar PRO
-                                        </a>
+                            <?php if ($isFree) { ?>
+                                <div class="ae-radar-page__hero-actions" style="margin-top: 20px;">
+                                    <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__hero-btn ae-radar-page__hero-btn--primary" style="height: 42px; padding: 0 24px; font-size: 13px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);">
+                                        Desbloquear Radar PRO (79€/mes)
+                                    </a>
+                                    <div style="margin-top: 10px; font-size: 11px; font-weight: 600; color: #64748b;">
+                                        Sin permanencia. Activación inmediata.
                                     </div>
-                                <?php endif; ?>
+                                </div>
+                            <?php } ?>
                             </div>
 
                             <!-- Lado Derecho: Actividad Realtime -->
@@ -441,17 +473,17 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                 <p style="margin: 0; font-size: 13px; font-weight: 700; color: #2563eb;">
                                     💡 Empieza por las empresas con mayor score para maximizar probabilidad de cierre.
                                 </p>
-                                <?php if (isset($_GET['intel']) && $_GET['intel'] === 'active'): ?>
+                                <?php if (isset($_GET['intel']) && $_GET['intel'] === 'active') { ?>
                                     <div style="background: #2563eb; color: white; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 999px; display: flex; align-items: center; gap: 6px;">
                                         <span style="width: 6px; height: 6px; background: white; border-radius: 50%; display: block;"></span>
                                         Filtro activo: Mejores oportunidades
                                     </div>
-                                <?php endif; ?>
+                                <?php } ?>
                             </div>
                         </div>
 
                     <!-- BLOQUE: TOP OPORTUNIDADES -->
-                    <?php if (!empty($visibleCompanies)): ?>
+                    <?php if (!empty($visibleCompanies)) { ?>
                         <div class="ae-radar-page__top-picks" style="margin-top: 40px; margin-bottom: 32px;">
                             <h4 style="margin: 0 0 8px 0; font-size: 15px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
                                 <span>🎯</span> Empieza por estas empresas hoy
@@ -483,14 +515,9 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
 
                                         $isFirst = ($index === 0);
                                         
-                                        // Timing vinculado al score (Sincronizado con tabla)
-                                        if ($scoreTotal >= 60) {
-                                            $days = rand(1, 2);
-                                        } elseif ($scoreTotal >= 30) {
-                                            $days = rand(3, 7);
-                                        } else {
-                                            $days = rand(8, 15);
-                                        }
+                                        // Micro-urgencia: Detectada hoy o hace X días
+                                        $days = ($scoreTotal >= 70) ? 0 : (($scoreTotal >= 40) ? rand(1, 2) : rand(3, 5));
+                                        $timingLabel = ($days == 0) ? 'Detectada hoy' : "Hace $days días";
 
                                         $timingText = ($days <= 2) ? '🚀 Contactar de inmediato' : "⏱ Contactar en $days días";
                                         $btnText = "🚀 Contactar ahora";
@@ -500,15 +527,20 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                             : "background: rgba(255, 255, 255, 0.6); border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; transition: all 0.2s; position: relative; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; height: 100%;";
                                 ?>
                                     <div style="<?= $containerStyle ?>">
-                                        <?php if ($isFirst): ?>
+                                        <?php if ($isFirst) { ?>
                                             <div style="position: absolute; top: -14px; left: 20px; background: #2563eb; color: white; padding: 4px 12px; border-radius: 999px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);">
                                                 🔥 Mejor oportunidad del día
                                             </div>
-                                        <?php endif; ?>
-                                        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                                            <span style="width: 6px; height: 6px; background: <?= $scoreColor ?>; border-radius: 50%; display: block;"></span>
-                                            Sugerencia #<?= $index + 1 ?>
-                                        </div>
+                                        <?php } ?>
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                                <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; display: flex; align-items: center; gap: 6px;">
+                                                    <span style="width: 6px; height: 6px; background: <?= $scoreColor ?>; border-radius: 50%; display: block;"></span>
+                                                    Sugerencia #<?= $index + 1 ?>
+                                                </div>
+                                                <div style="font-size: 10px; font-weight: 800; color: #10b981; background: #f0fdf4; padding: 2px 8px; border-radius: 4px; border: 1px solid #dcfce7;">
+                                                    <?= $timingLabel ?>
+                                                </div>
+                                            </div>
                                         
                                         <h5 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 800; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.4;" title="<?= esc($co['company_name']) ?>">
                                             <?= esc($co['company_name']) ?>
@@ -530,16 +562,64 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                                             </div>
                                         </div>
                                         
-                                        <button type="button" 
-                                                onclick="analyzeAI('<?= $co['id'] ?>', this, '<?= esc($co['company_name']) ?>')"
-                                                style="width: 100%; background: #2563eb; border: none; border-radius: 10px; padding: 12px; font-size: 11px; font-weight: 900; color: white; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); letter-spacing: 0.02em;">
-                                            <?= $btnText ?>
-                                        </button>
+                                        <?php if ($isFree) { ?>
+                                            <button type="button" 
+                                                    onclick="showConversionNudge()"
+                                                    style="width: 100%; background: #2563eb; border: none; border-radius: 10px; padding: 12px; font-size: 11px; font-weight: 900; color: white; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); letter-spacing: 0.02em;">
+                                                <?= $btnText ?>
+                                            </button>
+                                        <?php } else { ?>
+                                            <button type="button" 
+                                                    onclick="analyzeAI('<?= $co['id'] ?>', this, '<?= esc($co['company_name']) ?>')"
+                                                    style="width: 100%; background: #2563eb; border: none; border-radius: 10px; padding: 12px; font-size: 11px; font-weight: 900; color: white; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); letter-spacing: 0.02em;">
+                                                <?= $btnText ?>
+                                            </button>
+                                        <?php } ?>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
+
+                            <?php if ($isFree) { ?>
+                                <div class="radar-paywall-main" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; padding: 64px 32px; border-radius: 28px; text-align: center; margin: 40px 0; box-shadow: 0 25px 70px rgba(0,0,0,0.5); position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); min-height: 420px; display: flex; align-items: center; justify-content: center;">
+                                    <!-- Decorative Glow -->
+                                    <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(37,99,235,0.2) 0%, transparent 60%); pointer-events: none;"></div>
+                                    
+                                    <div style="position: relative; z-index: 1; width: 100%;">
+                                        <div style="display: inline-block; background: rgba(37,99,235,0.2); color: #60a5fa; padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 800; margin-bottom: 20px; border: 1px solid rgba(37,99,235,0.3);">
+                                            📈 +<?= number_format($freshness['todayCount'] ?? 94) ?> empresas detectadas hoy
+                                        </div>
+
+                                        <h2 style="font-size: 38px; font-weight: 900; margin-bottom: 16px; color: white !important; letter-spacing: -1.5px; line-height: 1.1;">Desbloquea el resto de oportunidades</h2>
+                                        
+                                        <p style="font-size: 18px; color: rgba(255,255,255,0.8); margin-bottom: 32px; max-width: 650px; margin-left: auto; margin-right: auto; line-height: 1.6; font-weight: 500;">
+                                            Las empresas detectadas hoy suelen ser las primeras en contratar.<br>
+                                            <span style="color: #60a5fa; font-weight: 800;">Si no actúas ahora, otro lo hará.</span>
+                                        </p>
+
+                                        <div style="margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                                            <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="display: inline-block; background: #2563eb; color: white; padding: 20px 56px; border-radius: 18px; font-size: 20px; font-weight: 900; text-decoration: none; box-shadow: 0 10px 30px rgba(37,99,235,0.5); transition: all 0.3s; transform-origin: center;" onmouseover="this.style.transform='scale(1.05) translateY(-2px)'; this.style.boxShadow='0 15px 40px rgba(37,99,235,0.6)';" onmouseout="this.style.transform='scale(1) translateY(0)'; this.style.boxShadow='0 10px 30px rgba(37,99,235,0.5)';">
+                                                Activar Radar PRO (79€/mes)
+                                            </a>
+                                            <div style="font-size: 14px; color: #fbbf24; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;">
+                                                💰 Con 1 cliente cubres el coste mensual
+                                            </div>
+                                        </div>
+
+                                        <div class="paywall-benefits" style="display: flex; justify-content: center; gap: 32px; margin: 0 auto; opacity: 0.7;">
+                                            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700;"><span style="color: #10b981;">✔</span> Acceso completo</div>
+                                            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700;"><span style="color: #10b981;">✔</span> Filtros avanzados</div>
+                                            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700;"><span style="color: #10b981;">✔</span> Exportación leads</div>
+                                            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700;"><span style="color: #10b981;">✔</span> Ventaja competitiva</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Overlay para frustración visual del contenido inferior -->
+                                    <div class="paywall-overlay" style="position: absolute; bottom: -200px; left: 0; width: 100%; height: 400px; background: linear-gradient(transparent, rgba(15, 23, 42, 0.9)); pointer-events: none; z-index: 2;"></div>
+                                </div>
+                            <?php } ?>
                         </div>
-<?php endif; ?>
+                        </div>
+<?php } ?>
                     </div> <!-- FIN CARD SUPERIOR (KPIs) -->
 
                     <!-- SEPARADOR VISUAL PREMIUM -->
@@ -553,7 +633,10 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                     </div> <!-- FIN SEPARADOR VISUAL PREMIUM -->
 
                     <!-- INICIO FONDO BUSCADOR Y TABLA -->
-                    <div style="background: #ffffff; padding: 40px; border-radius: 32px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); border: 1px solid #e1e7f0; margin-bottom: 40px;">
+                    <div style="<?= $isFree ? 'filter: blur(8px); opacity: 0.4; pointer-events: none; user-select: none; position: relative;' : '' ?> background: #ffffff; padding: 40px; border-radius: 32px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); border: 1px solid #e1e7f0; margin-bottom: 40px;">
+                        <?php if ($isFree) { ?>
+                            <div style="position: absolute; inset: 0; z-index: 100; cursor: not-allowed;" onclick="showConversionNudge('Buscador bloqueado', 'Activa Radar PRO para filtrar y explorar toda la base de datos de empresas.')"></div>
+                        <?php } ?>
 
                     <form action="<?= site_url('radar') ?>" method="GET" class="ae-radar-page__filters <?= $isFree ? 'is-locked' : '' ?>" style="padding: 16px 24px; margin-bottom: 20px;">
                         <div class="ae-radar-page__filters-grid" style="grid-template-columns: 1fr 1fr 1fr auto; gap: 20px; align-items: flex-end;">
@@ -590,15 +673,15 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                             </div>
 
                             <div class="ae-radar-page__field">
-                                <?php if ($isFree): ?>
+                                <?php if ($isFree) { ?>
                                     <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__filters-cta ae-radar-page__filters-cta--locked" style="height: 38px; font-size: 12px; padding: 0 16px;">
                                         Activar PRO
                                     </a>
-                                <?php else: ?>
+                                <?php } else { ?>
                                     <button type="submit" class="ae-radar-page__filters-cta" style="height: 38px; font-size: 13px; padding: 0 16px;">
                                         Ver oportunidades
                                     </button>
-                                <?php endif; ?>
+                                <?php } ?>
                             </div>
                         </div>
                     </form>
@@ -678,129 +761,6 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
                             <div id="radar-map-view" style="display:none;">
                                 <div id="radar-leaflet-map" style="height:600px; width:100%; border-radius:20px; border:1px solid #e2e8f0; background:#f8fafc; z-index:1;"></div>
                             </div>
-
-                        <?php if ($isFree && !empty($lockedCompanies)): ?>
-                            <div class="ae-radar-page__locked-zone">
-                                <div class="ae-radar-page__locked-zone-table">
-                                    <div class="ae-radar-page__table-scroll ae-radar-page__table-scroll--locked">
-                                        <table class="ae-radar-page__table">
-                                            <tbody>
-                                                <?php foreach ($lockedCompanies as $co): ?>
-                                                    <tr class="ae-radar-page__row-locked">
-                                                        <td>
-                                                            <div class="ae-radar-page__company">
-                                                                <span class="ae-radar-page__company-name"><?= esc($co['company_name']) ?></span>
-                                                                <span class="ae-radar-page__company-cif">B********</span>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <span class="ae-radar-page__date"><?= $formatEsDate($co['fecha_constitucion']) ?></span>
-                                                        </td>
-                                                        <td>
-                                                            <span class="ae-radar-page__badge ae-radar-page__badge--province">
-                                                                <?= esc($co['registro_mercantil'] ?? 'N/D') ?>
-                                                            </span>
-                                                        </td>
-                                                        <td>
-                                                            <span class="ae-radar-page__badge ae-radar-page__badge--sector">
-                                                                <?= esc(mb_strimwidth($co['cnae_label'] ?? 'N/D', 0, 40, '...')) ?>
-                                                            </span>
-                                                        </td>
-                                                        <td style="text-align:right;">
-                                                            <span class="ae-radar-page__row-link">🔒</span>
-                                                        </td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <div class="ae-radar-page__paywall">
-                                    <div class="ae-radar-page__paywall-card">
-                                        <div class="ae-radar-page__paywall-band"></div>
-
-                                        <div class="ae-radar-page__paywall-inner">
-                                            <div class="ae-radar-page__paywall-icon">🚀</div>
-
-                                            <h3 class="ae-radar-page__paywall-title">
-                                                Desbloquea el resto del radar y empieza a prospectar con ventaja
-                                            </h3>
-
-                                            <div class="ae-radar-page__scarcity">
-                                                <span class="ae-radar-page__scarcity-fire">🔥</span>
-                                                <div class="ae-radar-page__scarcity-text">
-                                                    Solo quedan <strong>12 plazas PRO</strong> disponibles para este sector este mes.
-                                                </div>
-                                            </div>
-
-                                            <p class="ae-radar-page__paywall-text">
-                                                Ya has visto una muestra real del radar. Activa Radar PRO para consultar todas las empresas detectadas, aplicar filtros estratégicos y exportar leads a Excel para tu proceso comercial.
-                                            </p>
-
-                                            <div class="ae-radar-page__paywall-kpis">
-                                                <div class="ae-radar-page__paywall-kpi">
-                                                    <strong><?= number_format($stats['mes']) ?></strong>
-                                                    <span>Empresas este mes</span>
-                                                </div>
-                                                <div class="ae-radar-page__paywall-kpi">
-                                                    <strong>100%</strong>
-                                                    <span>Listado desbloqueado</span>
-                                                </div>
-                                                <div class="ae-radar-page__paywall-kpi">
-                                                    <strong>XLSX</strong>
-                                                    <span>Exportación incluida</span>
-                                                </div>
-                                            </div>
-
-                                            <div class="ae-radar-page__paywall-benefits">
-                                                <div class="ae-radar-page__paywall-benefit">
-                                                    <div class="ae-radar-page__paywall-check">✓</div>
-                                                    <div>
-                                                        <strong>Listado completo</strong>
-                                                        <span>Consulta todas las empresas registradas según tus criterios comerciales.</span>
-                                                    </div>
-                                                </div>
-
-                                                <div class="ae-radar-page__paywall-benefit">
-                                                    <div class="ae-radar-page__paywall-check">✓</div>
-                                                    <div>
-                                                        <strong>Exportación a Excel</strong>
-                                                        <span>Lleva los leads a tu CRM, campañas o equipo de ventas.</span>
-                                                    </div>
-                                                </div>
-
-                                                <div class="ae-radar-page__paywall-benefit">
-                                                    <div class="ae-radar-page__paywall-check">✓</div>
-                                                    <div>
-                                                        <strong>Filtros estratégicos</strong>
-                                                        <span>Segmenta por provincia, actividad y rango temporal.</span>
-                                                    </div>
-                                                </div>
-
-                                                <div class="ae-radar-page__paywall-benefit">
-                                                    <div class="ae-radar-page__paywall-check">✓</div>
-                                                    <div>
-                                                        <strong>Ventaja competitiva</strong>
-                                                        <span>Llega antes que otros proveedores a empresas recién constituidas.</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="ae-radar-page__paywall-actions">
-                                                <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--primary">
-                                                    Activar Radar PRO (79€) ahora
-                                                </a>
-                                            </div>
-
-                                            <div class="ae-radar-page__paywall-meta">
-                                                Sin permanencia · Activación inmediata · Acceso completo al radar
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endif; ?>
                     </section>
 
                     </div> <!-- FIN FONDO BUSCADOR Y TABLA -->
@@ -1159,8 +1119,72 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
     }
 
     /**
-     * Actualiza los resultados cambiando solo el per_page (AJAX)
+     * Modal de conversión proactivo con tracking y refuerzo de ROI
      */
+    window.showConversionNudge = function(title, text) {
+        // Tracking de intención real
+        if (typeof dataLayer !== 'undefined') {
+            dataLayer.push({
+                'event': 'contact_attempt_blocked',
+                'nudge_title': title,
+                'nudge_text': text
+            });
+        }
+        console.log('Event Tracked: contact_attempt_blocked', {title, text});
+
+        const defaultTitle = 'Esta oportunidad está bloqueada';
+        const defaultText = 'Otros equipos comerciales ya están contactando esta empresa AHORA. Activa Radar PRO y accede a sus datos antes que tu competencia.';
+
+        Swal.fire({
+            title: title || defaultTitle,
+            icon: 'warning',
+            iconHtml: '⚡',
+            html: `
+                <div style="text-align: center; padding: 10px;">
+                    <p style="font-size: 17px; color: #1e293b; line-height: 1.6; margin-bottom: 32px; font-weight: 600;">
+                        ${text || defaultText}
+                    </p>
+                    
+                    <div style="margin-bottom: 32px;">
+                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="display: block; background: #2563eb; color: #ffffff; padding: 20px; border-radius: 14px; font-weight: 900; text-decoration: none; font-size: 19px; box-shadow: 0 12px 24px rgba(37,99,235,0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';" id="ae-modal-cta">
+                            Activar Radar PRO (79€/mes)
+                        </a>
+                        <p style="margin-top: 14px; font-size: 15px; color: #2563eb; font-weight: 700;">
+                            Contacta antes que tu competencia
+                        </p>
+                        <p style="margin-top: 8px; font-size: 14px; color: #f59e0b; font-weight: 800;">
+                            🚀 +<?= number_format($freshness['todayCount'] ?? 94) ?> empresas hoy esperando contacto
+                        </p>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
+                        <p style="margin: 0; font-size: 14px; color: #10b981; font-weight: 800;">
+                            💰 Con 1 cliente cubres el coste mensual
+                        </p>
+                        <p style="margin: 0; font-size: 14px; color: #1e293b; font-weight: 600;">
+                            Las primeras empresas en ser contactadas son las que convierten
+                        </p>
+                        <p style="margin: 0; font-size: 12px; color: #94a3b8; font-weight: 600;">
+                            Sin permanencia · Activación inmediata
+                        </p>
+                    </div>
+                </div>
+            `,
+            showConfirmButton: false, 
+            showCancelButton: true,
+            cancelButtonText: 'Seguir sin desbloquear oportunidades',
+            showCloseButton: true,
+            focusCancel: true,
+            customClass: {
+                popup: 've-swal',
+                title: 've-swal-title',
+                htmlContainer: 've-swal-text',
+                cancelButton: 'btn btn_header--ghost ve-swal-cancel',
+            },
+            buttonsStyling: false
+        });
+    }
+
     window.updateResultsWithPerPage = function(perPage) {
         const filterForm = document.querySelector('.ae-radar-page__filters');
         const formData = new FormData(filterForm);
@@ -1326,5 +1350,66 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, 10, 4) : [];
     <!-- Radar Web Tour -->
     <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
     <script src="<?= base_url('public/js/radar-tour.js?v=' . time()) ?>"></script>
+    <!-- Modal de Intención (Trigger de Scroll Profundo) -->
+    <?php if ($isFree) { ?>
+    <div id="ae-intent-modal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.8); z-index:9999; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(4px);">
+        <div style="background:#ffffff; border-radius:24px; max-width:500px; width:100%; padding:40px; text-align:center; position:relative; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
+            <button onclick="document.getElementById('ae-intent-modal').style.display='none'" style="position:absolute; top:20px; right:20px; background:none; border:none; font-size:24px; color:#94a3b8; cursor:pointer;">&times;</button>
+            <div style="font-size:48px; margin-bottom:20px;">🎯</div>
+            <h3 style="font-size:24px; font-weight:800; color:#0f172a; margin-bottom:16px;">Estás explorando oportunidades reales</h3>
+            <p style="font-size:16px; color:#475569; line-height:1.6; margin-bottom:32px;">Activa Radar PRO para acceder a todas y empezar a trabajar leads desde hoy.</p>
+            <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="display:block; background:#2563eb; color:#ffffff; padding:18px; border-radius:12px; font-weight:800; text-decoration:none; font-size:16px; box-shadow:0 10px 20px rgba(37,99,235,0.2);">Activar Radar PRO (79€/mes)</a>
+            <p style="margin-top:20px; font-size:13px; color:#94a3b8; font-weight:600;">Sin permanencia · Cancela cuando quieras</p>
+        </div>
+    </div>
+
+    <!-- Banner Flotante (Trigger por Scroll) -->
+    <div id="ae-floating-banner" style="position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #0f172a; color: white; padding: 16px 32px; border-radius: 100px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 20px; z-index: 9999; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); width: fit-content; border: 1px solid rgba(255,255,255,0.1);">
+        <div style="font-size: 14px; font-weight: 700; white-space: nowrap;">
+            ⚡ Estás viendo oportunidades reales ahora mismo.
+        </div>
+        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="background: #2563eb; color: white; padding: 8px 20px; border-radius: 50px; text-decoration: none; font-size: 13px; font-weight: 900; white-space: nowrap;">
+            Activar Radar PRO (79€/mes)
+        </a>
+    </div>
+
+    <script>
+        // Trigger de Intención: Mostrar banner flotante al llegar al paywall
+        window.addEventListener('scroll', function() {
+            const banner = document.getElementById('ae-floating-banner');
+            if (window.scrollY > 500 && !sessionStorage.getItem('floating_banner_dismissed')) {
+                banner.style.bottom = '40px';
+            } else {
+                banner.style.bottom = '-100px';
+            }
+        });
+
+        // Trigger por interacción: Al intentar usar elementos bloqueados
+        let interactionCount = 0;
+        document.addEventListener('click', function(e) {
+            const blockedBtn = e.target.closest('button[onclick*="showConversionNudge"]');
+            const blurredRow = e.target.closest('.ae-radar-row-blurred');
+            
+            if (blockedBtn || blurredRow) {
+                interactionCount++;
+                
+                // Si es el segundo intento, forzamos un mensaje más agresivo que sobrescriba el onclick individual si fuera necesario
+                if (interactionCount >= 2 && !sessionStorage.getItem('intent_modal_shown_aggressive')) {
+                    // Detenemos la propagación para que el onclick del botón no dispare el nudge normal
+                    if (blockedBtn) e.stopImmediatePropagation();
+                    
+                    showConversionNudge('Otros equipos ya están trabajando estas empresas', 'Activa Radar PRO ahora para no perder estas oportunidades. La velocidad es clave en la captación B2B. Con 1 cliente cubres el coste mensual.');
+                    sessionStorage.setItem('intent_modal_shown_aggressive', 'true');
+                    
+                    // Ocultar banner flotante si salta el modal
+                    const banner = document.getElementById('ae-floating-banner');
+                    if (banner) banner.style.display = 'none';
+                    sessionStorage.setItem('floating_banner_dismissed', 'true');
+                }
+            }
+        }, true); // Capturing phase para interceptar antes del onclick
+
+    </script>
+    <?php } ?>
 </body>
 </html>

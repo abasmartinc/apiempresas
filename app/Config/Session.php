@@ -8,6 +8,8 @@ use CodeIgniter\Session\Handlers\FileHandler;
 
 class Session extends BaseConfig
 {
+    public static bool $override = false;
+
     /**
      * --------------------------------------------------------------------------
      * Session Driver
@@ -22,6 +24,8 @@ class Session extends BaseConfig
      * @var class-string<BaseHandler>
      */
     public string $driver = \CodeIgniter\Session\Handlers\DatabaseHandler::class;
+
+
 
     /**
      * --------------------------------------------------------------------------

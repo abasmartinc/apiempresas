@@ -38,6 +38,7 @@
                 });
             });
         }
+        let searchCount = 0;
 
         function renderResult(data) {
             const jsonOutput = document.getElementById('json-output');
@@ -53,6 +54,7 @@
                 return;
             }
 
+            searchCount++;
             const company = data.data;
             const jsonPretty = JSON.stringify(data, null, 2);
             if (jsonOutput) jsonOutput.textContent = jsonPretty;
@@ -60,53 +62,108 @@
             const province = company.province || company.provincia || 'España';
             const status = (company.status || '').toLowerCase() === 'activa' ? 'activa' : 'inactiva';
 
+            // 1. DETECTAR ANTIGÜEDAD
+            let año_constitucion = null;
+            if (company.founded) {
+                const match = company.founded.toString().match(/\d{4}/);
+                if (match) año_constitucion = parseInt(match[0]);
+            }
+            const currentYear = new Date().getFullYear();
+            const años = año_constitucion ? currentYear - año_constitucion : null;
+
+            // 2. BLOQUE PRINCIPAL DINÁMICO
+            let radarTitle = "";
+            let radarText = "Además de consultar esta empresa, puedes detectar nuevas sociedades con potencial de negocio y trabajarlas antes que la competencia.";
+            let radarCTA = "Ver empresas nuevas hoy";
+
+            if (años === null) {
+                radarTitle = "Accede a nuevas oportunidades comerciales";
+            } else if (años <= 1) {
+                radarTitle = "Empresa de reciente creación";
+            } else if (años <= 5) {
+                radarTitle = "Empresa en fase de actividad";
+            } else {
+                radarTitle = "Empresa consolidada";
+            }
+
             searchResultContainer.innerHTML = `
-<div class="search-result-card">
-  <div class="result-header">
-    <div class="result-title-group">
-      <h2 class="result-company-name">${company.name || 'N/A'}</h2>
-      <span class="result-cif-pill">${company.cif || company.nif || 'Sin CIF'}</span>
+<div class="search-result-card reveal" style="background: #ffffff; border-radius: 24px; padding: 40px; box-shadow: 0 20px 50px -10px rgba(0,0,0,0.08); border: 1px solid #f1f5f9;">
+  
+  <div class="result-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div style="display: flex; gap: 20px; align-items: center;">
+      <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #2563eb, #10b981); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.8rem; font-weight: 800; box-shadow: 0 8px 16px rgba(37,99,235,0.2);">
+        ${(company.name || 'N').charAt(0).toUpperCase()}
+      </div>
+      <div>
+        <h2 style="margin: 0; font-size: 1.75rem; font-weight: 900; color: #0f172a; letter-spacing: -0.02em;">${company.name || 'N/A'}</h2>
+        <div style="display: flex; gap: 12px; margin-top: 6px; align-items: center;">
+          <span style="background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 8px; font-weight: 800; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;">${company.cif || company.nif || 'Sin CIF'}</span>
+          <span style="font-size: 0.9rem; color: #94a3b8;">•</span>
+          <span style="font-size: 0.9rem; color: #64748b; font-weight: 600;">${province}</span>
+        </div>
+      </div>
     </div>
-    <span class="status-badge ${status}">${company.status || 'N/A'}</span>
+    <span class="status-badge ${status}" style="padding: 8px 16px; border-radius: 100px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; ${status === 'activa' ? 'background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7;' : 'background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2;'}">
+      ${company.status || 'N/A'}
+    </span>
   </div>
 
-  <div class="result-info-grid">
+  <div class="result-info-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-bottom: 40px; padding: 24px; background: #f8fafc; border-radius: 20px; border: 1px solid #f1f5f9;">
     <div class="info-item">
-      <span class="info-label">Sector (CNAE)</span>
-      <span class="info-value bold">${company.cnae || 'N/A'} - ${company.cnae_label || 'Sin sector'}</span>
+      <span style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Actividad</span>
+      <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700; line-height: 1.4;">${company.cnae_label || 'Sin sector'}</span>
     </div>
     <div class="info-item">
-      <span class="info-label">Provincia</span>
-      <span class="info-value">${province}</span>
+      <span style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Constitución</span>
+      <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700;">${company.founded || 'N/A'}</span>
     </div>
     <div class="info-item">
-      <span class="info-label">Fecha de constitución</span>
-      <span class="info-value">${company.founded || 'N/A'}</span>
+      <span style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Capital Social</span>
+      <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700;">${company.capital || 'Consultar'}</span>
     </div>
   </div>
 
-  <div class="info-item" style="margin-bottom: 32px;">
-    <span class="info-label">Objeto social</span>
-    <span class="info-value" style="font-size: 0.9rem; font-weight: 400;">${company.corporate_purpose || 'N/A'}</span>
+  <!-- Bridge to Radar Dinámico -->
+  <div class="radar-bridge" style="background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); border: 1px solid #dcfce7; border-radius: 24px; padding: 32px; display: flex; gap: 28px; align-items: center; margin-bottom: 24px; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);"></div>
+    
+    <div style="width: 56px; height: 56px; background: #ffffff; color: #16a34a; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4M12 16V8"/></svg>
+    </div>
+    
+    <div style="flex-grow: 1;">
+      <div class="radar-badge" style="background: #ffffff; border: 1px solid #dcfce7;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        +1.400 empresas nuevas esta semana
+      </div>
+      <h4 style="margin: 0 0 8px 0; font-size: 1.25rem; color: #0f172a; font-weight: 900;">${radarTitle}</h4>
+      <p style="margin: 0; font-size: 1rem; color: #475569; line-height: 1.6; max-width: 480px;">${radarText}</p>
+    </div>
+    
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 1;">
+        <a href="${BASE_URL}leads-empresas-nuevas" class="btn-radar" style="padding: 16px 32px; font-size: 1.1rem; border-radius: 16px; box-shadow: 0 15px 30px rgba(18, 180, 138, 0.25); margin: 0;">${radarCTA}</a>
+        <span style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-align: center; opacity: 0.8;">Oportunidades limitadas en el tiempo</span>
+    </div>
   </div>
 
-  <!-- Radar PRO Integration (Integrated as Insight) -->
-  <div class="radar-insight-nudge">
-    <div class="radar-insight-icon">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-    </div>
-    <div class="radar-insight-content">
-      <h4>Oportunidad comercial detectada</h4>
-      <p>Monitorizamos el BORME para entregarte leads de <strong>${province}</strong> antes que nadie. ¿Quieres ver quién más ha nacido hoy?</p>
-    </div>
-    <a href="${BASE_URL}leads-empresas-nuevas" class="btn-radar-insight">Descubrir en Radar PRO →</a>
+  <div style="text-align: center; margin-bottom: 40px;">
+    <span class="radar-context-text" style="font-size: 0.95rem; font-weight: 500;">“La detección temprana de empresas puede marcar la diferencia en procesos comerciales.”</span>
   </div>
 
-  <div class="result-actions">
-    <a href="${BASE_URL}${company.cif || company.nif}" class="btn" style="text-decoration:none; padding: 12px 24px;">Ver ficha completa</a>
+  <div class="result-actions" style="display: flex; gap: 16px;">
+    <a href="${BASE_URL}${company.cif || company.nif}" class="btn" style="text-decoration:none; padding: 20px 32px; font-weight: 800; flex-grow: 1; text-align: center; background: #ffffff; color: #0f172a; border: 2px solid #e2e8f0; border-radius: 16px; transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--ae-blue)'; this.style.color='var(--ae-blue)'" onmouseout="this.style.borderColor='#e2e8f0'; this.style.color='#0f172a'">Ver ficha completa detallada</a>
+    <a href="<?= site_url('documentation') ?>" class="btn secondary" style="text-decoration:none; padding: 20px 32px; font-weight: 800; text-align: center; border-radius: 16px;">Integrar vía API</a>
   </div>
+
+  ${searchCount === 2 ? `
+  <div class="radar-trigger-second reveal" style="animation-delay: 0.3s; background: #f0f9ff; border: 1px solid #bae6fd; padding: 32px; margin-top: 32px;">
+    <h4 style="color: #0369a1;">🚀 Ya estás analizando empresas</h4>
+    <p style="color: #0c4a6e; font-size: 1.05rem;">Accede a nuevas sociedades antes que tu competencia y trabaja oportunidades listas para contacto.</p>
+    <a href="${BASE_URL}leads-empresas-nuevas" class="btn-radar" style="background: #0284c7;">Ver Radar B2B Ahora</a>
+  </div>
+  ` : ''}
 </div>`;
-            
+
             if (resultContainer) resultContainer.style.display = 'block';
         }
 

@@ -181,7 +181,7 @@ class Radar extends BaseController
     public function index()
     {
         if (!session('logged_in')) {
-            return view('seo/radar_prices');
+            return redirect()->to(site_url('register/quick?redirect=radar'));
         }
 
         $userId = session('user_id');
