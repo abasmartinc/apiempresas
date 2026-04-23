@@ -4,34 +4,58 @@ namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Models\TrackingEventModel;
+use App\Services\MetricsService;
 use App\Services\OpenAiService;
 
 class MetricsController extends BaseController
 {
+    protected $metricsService;
+
+    public function __construct()
+    {
+        $this->metricsService = new MetricsService();
+    }
+
+    /**
+     * Muestra las métricas originales de Monetización (Funnel, MRR, ARPU)
+     */
     public function index()
     {
-        $model = new TrackingEventModel();
-
-        // Capturar filtros
-        $filters = $this->getFilters();
+        $metrics = $this->metricsService->getAllMetrics();
 
         $data = [
-            'title'          => 'Métricas de Comportamiento',
-            'summary'        => $model->getEventsSummary($filters),
-            'timeline'       => $model->getTimelineStats($filters),
-            'topPages'       => $model->getTopPages($filters),
-            'totalEvents'    => $model->getTotalEvents($filters),
-            'uniqueVisitors' => $model->getUniqueVisitors($filters),
-            'activeUsers'    => $model->getActiveUsersCount(), // Dato en vivo
-            'eventNames'     => $model->select('DISTINCT(event_name)')->findAll(),
-            'filters'        => $filters
+            'title'   => 'Métricas de Monetización API',
+            'metrics' => $metrics,
         ];
 
         return view('admin/metrics', $data);
     }
 
     /**
-     * Devuelve solo el fragmento de la tabla (para AJAX)
+     * Muestra el nuevo dashboard de Tracking de Comportamiento
+     */
+    public function eventTracking()
+    {
+        $model = new TrackingEventModel();
+        $filters = $this->getFilters();
+
+        $data = [
+            'title'          => 'Tracking de Comportamiento',
+            'summary'        => $model->getEventsSummary($filters),
+            'timeline'       => $model->getTimelineStats($filters),
+            'topPages'       => $model->getTopPages($filters),
+            'totalEvents'    => $model->getTotalEvents($filters),
+            'uniqueVisitors' => $model->getUniqueVisitors($filters),
+            'activeUsers'    => $model->getActiveUsersCount(),
+            'eventNames'     => $model->select('DISTINCT(event_name)')->findAll(),
+            'filters'        => $filters
+        ];
+
+        return view('admin/event_tracking', $data);
+    }
+
+    /**
+     * Endpoint AJAX para la tabla de eventos
      */
     public function getTable()
     {
@@ -52,16 +76,9 @@ class MetricsController extends BaseController
         return view('admin/metrics_table_partial', $data);
     }
 
-    private function getFilters()
-    {
-        return [
-            'event_name' => $this->request->getGet('event_name'),
-            'from_date'  => $this->request->getGet('from_date'),
-            'to_date'    => $this->request->getGet('to_date'),
-            'user_id'    => $this->request->getGet('user_id'),
-        ];
-    }
-
+    /**
+     * Análisis IA del comportamiento
+     */
     public function getAiAnalysis()
     {
         $model = new TrackingEventModel();
@@ -71,13 +88,23 @@ class MetricsController extends BaseController
         $topPages = $model->getTopPages();
         $total = $model->getTotalEvents();
 
-        $dataContext = "Total de eventos registrados: $total\n\nResumen de Eventos:\n" . json_encode($summary, JSON_PRETTY_PRINT) . "\n\nPáginas más activas:\n" . json_encode($topPages, JSON_PRETTY_PRINT);
+        $dataContext = "Total de eventos: $total\n\nEventos:\n" . json_encode($summary) . "\n\nTop Páginas:\n" . json_encode($topPages);
 
         $prompt = [
-            ['role' => 'system', 'content' => 'Eres un consultor experto en CRO para APIEmpresas.es.'],
-            ['role' => 'user', 'content' => "Analiza estos datos y dame 3 conclusiones y 3 pautas para mejorar la conversión:\n\n$dataContext"]
+            ['role' => 'system', 'content' => 'Eres un experto en CRO para APIEmpresas.'],
+            ['role' => 'user', 'content' => "Analiza estos datos de comportamiento y dame pautas de mejora:\n\n$dataContext"]
         ];
 
-        return $this->response->setJSON(['analysis' => $aiService->getChatResponse($prompt, ['temperature' => 0.5])]);
+        return $this->response->setJSON(['analysis' => $aiService->getChatResponse($prompt)]);
+    }
+
+    private function getFilters()
+    {
+        return [
+            'event_name' => $this->request->getGet('event_name'),
+            'from_date'  => $this->request->getGet('from_date'),
+            'to_date'    => $this->request->getGet('to_date'),
+            'user_id'    => $this->request->getGet('user_id'),
+        ];
     }
 }

@@ -1,192 +1,256 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title ?> | Admin APIEmpresas</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <?= view('partials/head', ['title' => $title]) ?>
     <style>
-        :root {
-            --bg-main: #f1f5f9;
-            --card-bg: #ffffff;
-            --accent: #2152ff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border-color: rgba(0, 0, 0, 0.05);
-            --ai-glow: rgba(33, 82, 255, 0.15);
-            --live-color: #10b981;
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
         }
 
-        body { background-color: var(--bg-main); color: var(--text-main); font-family: 'Inter', system-ui, -apple-system, sans-serif; padding: 2rem 0; }
-        .metric-card { background: var(--card-bg); border-radius: 20px; padding: 1.5rem; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); height: 100%; position: relative; overflow: hidden; }
-        .metric-value { font-size: 2.2rem; font-weight: 800; color: var(--text-main); }
-        .metric-label { color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-size: 0.7rem; font-weight: 700; margin-bottom: 0.25rem; }
+        .metric-card {
+            background: white;
+            border-radius: 20px;
+            padding: 28px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
 
-        .live-pulse {
-            width: 10px;
-            height: 10px;
-            background: var(--live-color);
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.08);
+        }
+
+        .metric-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .metric-value {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #1e293b;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .metric-desc {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .section-separator {
+            margin: 60px 0 32px;
             position: relative;
-            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        }
+
+        .section-separator::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 1px;
+            background: #e2e8f0;
+            z-index: 1;
+        }
+
+        .section-separator span {
+            position: relative;
+            background: #f8fafc;
+            /* Match background halo if possible */
+            padding-right: 20px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #1e293b;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-separator span::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: #2152ff;
+            border-radius: 4px;
+        }
+
+        .update-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: #f1f5f9;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 32px;
+        }
+
+        .update-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
             animation: pulse-green 2s infinite;
         }
 
         @keyframes pulse-green {
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
-
-        .ai-card { background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%); border: 2px solid var(--accent); border-radius: 20px; padding: 2rem; position: relative; overflow: hidden; box-shadow: 0 10px 30px var(--ai-glow); margin-bottom: 2.5rem; }
-        .ai-response { font-size: 1rem; line-height: 1.7; color: #334155; display: none; margin-top: 1.5rem; padding: 1.5rem; background: white; border-radius: 14px; border: 1px solid rgba(33, 82, 255, 0.1); }
-        
-        .filter-bar { background: var(--card-bg); border-radius: 16px; padding: 1.25rem; margin-bottom: 2rem; border: 1px solid var(--border-color); }
-        .form-control, .form-select { border-radius: 10px; border: 1px solid #e2e8f0; padding: 0.6rem 1rem; font-size: 0.9rem; }
-        .btn-filter { background: var(--accent); color: white; border: none; border-radius: 10px; padding: 0.6rem 1.5rem; font-weight: 600; }
-        .btn-reset { background: #f1f5f9; color: var(--text-muted); border: none; border-radius: 10px; padding: 0.6rem 1rem; font-weight: 600; }
-
-        .badge-event { background: rgba(33, 82, 255, 0.1); color: var(--accent); padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; }
-        .section-title { font-weight: 800; color: var(--text-main); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; }
-        .section-title::before { content: ''; width: 4px; height: 20px; background: var(--accent); border-radius: 4px; }
-
-        .chart-container { position: relative; height: 300px; width: 100%; }
     </style>
 </head>
-<body>
 
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <a href="<?= site_url('admin/dashboard') ?>" class="text-muted text-decoration-none small fw-bold"><i class="fas fa-arrow-left me-2"></i> Dashboard</a>
-        <button id="btn-ai-analyze" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold shadow-sm">
-            <i class="fas fa-brain me-2"></i> Consultor IA
-        </button>
-    </div>
+<body class="admin-body">
+    <div class="bg-halo" aria-hidden="true"></div>
 
-    <h1 class="fw-bold mb-4">Event <span style="color:var(--accent)">Tracking</span></h1>
+    <?= view('partials/header_admin') ?>
 
-    <div id="ai-container" class="ai-card" style="display: none;">
-        <h4 class="fw-bold mb-3"><i class="fas fa-magic me-2"></i> IA Insights</h4>
-        <div id="ai-loader" style="display:none;" class="text-center py-3"><div class="spinner-border text-primary"></div></div>
-        <div id="ai-response" class="ai-response"></div>
-    </div>
+    <main class="container-admin" style="padding: 40px 0 80px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <div>
+                <h1 class="title" style="font-size: 2.8rem; margin-bottom: 8px;">Métricas <span class="grad">Monetización</span></h1>
+                <p style="color: #64748b; font-size: 1.1rem;">Visión interna del funnel, revenue y activación de la API.</p>
+            </div>
+            <a href="<?= site_url('dashboard') ?>" class="btn ghost" style="margin-top: 10px;">Volver al Dashboard</a>
+        </div>
 
-    <div class="filter-bar">
-        <form id="filter-form" class="row g-3 align-items-end">
-            <div class="col-md-3">
-                <label class="form-label small fw-bold text-muted">Evento</label>
-                <select name="event_name" class="form-select">
-                    <option value="">Todos</option>
-                    <?php foreach($eventNames as $en): ?>
-                        <option value="<?= $en['event_name'] ?>" <?= $filters['event_name'] == $en['event_name'] ? 'selected' : '' ?>><?= $en['event_name'] ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small fw-bold text-muted">Desde</label>
-                <input type="date" name="from_date" class="form-control" value="<?= $filters['from_date'] ?>">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small fw-bold text-muted">Hasta</label>
-                <input type="date" name="to_date" class="form-control" value="<?= $filters['to_date'] ?>">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small fw-bold text-muted">ID Usuario</label>
-                <input type="text" name="user_id" class="form-control" placeholder="ID..." value="<?= $filters['user_id'] ?>">
-            </div>
-            <div class="col-md-3 d-flex gap-2">
-                <button type="submit" class="btn-filter flex-grow-1">Filtrar</button>
-                <a href="<?= site_url('admin/event-tracking') ?>" class="btn-reset"><i class="fas fa-redo"></i></a>
-            </div>
-        </form>
-    </div>
+        <div class="update-badge">
+            <span class="update-dot"></span>
+            Última actualización: <?= date('d/m/Y H:i', strtotime($metrics['updated_at'])) ?> (Caché 10 min)
+        </div>
 
-    <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <div class="metric-card" style="border-left: 5px solid var(--live-color);">
-                <div class="metric-label"><span class="live-pulse"></span> Usuarios en Vivo</div>
-                <div class="metric-value" style="color: var(--live-color);"><?= number_format($activeUsers) ?></div>
-                <div class="text-muted small mt-2">Actividad en los últimos 5 min</div>
+        <!-- BLOQUE IA: CONSULTORÍA ESTRATÉGICA -->
+        <?php if (isset($metrics['ai_analysis']) && !empty($metrics['ai_analysis']['summary'])): ?>
+            <div class="metric-card" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; border: none; margin-bottom: 40px;">
+                <div style="display: flex; gap: 20px; align-items: flex-start;">
+                    <div style="width: 50px; height: 50px; background: rgba(255, 255, 255, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.5rem;">
+                        ✨
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <h3 style="margin: 0 0 4px; font-weight: 800; font-size: 1.25rem;">Consultoría Estratégica IA</h3>
+                        <p style="margin: 0 0 20px; opacity: 0.9; font-size: 1rem; line-height: 1.5; font-weight: 500;">
+                            <?= esc($metrics['ai_analysis']['summary']) ?>
+                        </p>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+                            <div>
+                                <h4 style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                    🎯 Conclusiones Clave
+                                </h4>
+                                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
+                                    <?php foreach ($metrics['ai_analysis']['conclusions'] as $conclusion): ?>
+                                        <li style="background: rgba(255, 255, 255, 0.1); padding: 10px 14px; border-radius: 10px; font-size: 0.85rem; line-height: 1.4;">
+                                            <?= esc($conclusion) ?>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                    🚀 Plan de Acción
+                                </h4>
+                                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
+                                    <?php foreach ($metrics['ai_analysis']['action_plan'] as $action): ?>
+                                        <li style="background: rgba(255, 255, 255, 0.1); padding: 10px 14px; border-radius: 10px; font-size: 0.85rem; line-height: 1.4; display: flex; align-items: center; gap: 10px;">
+                                            <span style="opacity: 0.7;">✅</span> <?= esc($action) ?>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <!-- BLOQUE 1: FUNNEL -->
+        <div class="section-separator">
+            <span>FUNNEL DE CONVERSIÓN</span>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <p class="metric-title">Signup → 1ª request</p>
+                <div class="metric-value"><?= number_format($metrics['funnel']['signup_to_request_pct'], 2, ',', '.') ?>%</div>
+                <p class="metric-desc">Usuarios registrados que han probado la API</p>
+            </div>
+
+            <div class="metric-card">
+                <p class="metric-title">1ª request → pago</p>
+                <div class="metric-value"><?= number_format($metrics['funnel']['request_to_paid_pct'], 2, ',', '.') ?>%</div>
+                <p class="metric-desc">Usuarios activos que terminaron contratando un plan</p>
+            </div>
+
+            <div class="metric-card">
+                <p class="metric-title">Tiempo medio hasta pago</p>
+                <div class="metric-value"><?= number_format($metrics['funnel']['avg_time_to_paid'], 1, ',', '.') ?> <small style="font-size: 1.1rem; color: #64748b;">h</small></div>
+                <p class="metric-desc">Tiempo medio desde el registro hasta la conversión</p>
             </div>
         </div>
-        <div class="col-md-3"><div class="metric-card"><div class="metric-label">Visitantes Únicos</div><div class="metric-value"><?= number_format($uniqueVisitors) ?></div></div></div>
-        <div class="col-md-3"><div class="metric-card"><div class="metric-label">Total de Eventos</div><div class="metric-value"><?= number_format($totalEvents) ?></div></div></div>
-        <div class="col-md-3"><div class="metric-card"><div class="metric-label">Eventos / Visitante</div><div class="metric-value"><?= $uniqueVisitors > 0 ? round($totalEvents / $uniqueVisitors, 1) : 0 ?></div></div></div>
-    </div>
 
-    <div class="row g-4 mb-5">
-        <div class="col-lg-8"><div class="metric-card"><h5 class="section-title">Tendencia de Actividad</h5><div class="chart-container"><canvas id="timelineChart"></canvas></div></div></div>
-        <div class="col-lg-4"><div class="metric-card"><h5 class="section-title">Distribución por Tipo</h5><div class="chart-container"><canvas id="eventsChart"></canvas></div></div></div>
-    </div>
-
-    <div class="metric-card mb-5">
-        <h5 class="section-title">Actividad Detallada</h5>
-        <div id="table-container">
-            <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+        <!-- BLOQUE 2: REVENUE -->
+        <div class="section-separator">
+            <span>REVENUE & MONETIZACIÓN</span>
         </div>
-    </div>
-</div>
 
-<script>
-    function loadTable(page = 1) {
-        const container = document.getElementById('table-container');
-        const formData = new FormData(document.getElementById('filter-form'));
-        const params = new URLSearchParams(formData);
-        params.append('page_events', page);
-        fetch('<?= site_url('admin/event-tracking/table') ?>?' + params.toString())
-            .then(res => res.text())
-            .then(html => {
-                container.innerHTML = html;
-                container.querySelectorAll('.pagination a').forEach(link => {
-                    link.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const url = new URL(this.href);
-                        loadTable(url.searchParams.get('page_events'));
-                    });
-                });
-            });
-    }
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <p class="metric-title">ARPU</p>
+                <div class="metric-value"><?= number_format($metrics['revenue']['arpu'], 2, ',', '.') ?>€</div>
+                <p class="metric-desc">Ingreso medio por usuario de pago</p>
+            </div>
 
-    document.getElementById('filter-form').addEventListener('submit', function(e) { e.preventDefault(); loadTable(1); });
-    document.addEventListener('DOMContentLoaded', () => loadTable(1));
+            <div class="metric-card">
+                <p class="metric-title">MRR</p>
+                <div class="metric-value"><?= number_format($metrics['revenue']['mrr'], 2, ',', '.') ?>€</div>
+                <p class="metric-desc">Ingreso mensual recurrente actual</p>
+            </div>
 
-    document.getElementById('btn-ai-analyze').addEventListener('click', function() {
-        const container = document.getElementById('ai-container');
-        const loader = document.getElementById('ai-loader');
-        const responseDiv = document.getElementById('ai-response');
-        container.style.display = 'block'; loader.style.display = 'block'; responseDiv.style.display = 'none';
-        fetch('<?= site_url('admin/event-tracking/ai-analyze') ?>')
-            .then(res => res.json())
-            .then(data => {
-                loader.style.display = 'none'; responseDiv.style.display = 'block';
-                responseDiv.innerHTML = marked.parse(data.analysis);
-            });
-    });
+            <div class="metric-card">
+                <p class="metric-title">Upsells Pro → Business</p>
+                <div class="metric-value"><?= $metrics['revenue']['expansion_count'] ?></div>
+                <p class="metric-desc">Usuarios que expandieron a un plan superior</p>
+            </div>
+        </div>
 
-    Chart.defaults.color = '#64748b';
-    new Chart(document.getElementById('timelineChart').getContext('2d'), {
-        type: 'line',
-        data: {
-            labels: <?= json_encode(array_column($timeline, 'date')) ?>,
-            datasets: [{ label: 'Eventos', data: <?= json_encode(array_column($timeline, 'total')) ?>, borderColor: '#2152ff', backgroundColor: 'rgba(33, 82, 255, 0.05)', fill: true, tension: 0.4 }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-    });
+        <!-- BLOQUE 3: ACTIVACIÓN -->
+        <div class="section-separator">
+            <span>ACTIVACIÓN DE USUARIOS</span>
+        </div>
 
-    new Chart(document.getElementById('eventsChart').getContext('2d'), {
-        type: 'doughnut',
-        data: {
-            labels: <?= json_encode(array_column($summary, 'event_name')) ?>,
-            datasets: [{ data: <?= json_encode(array_column($summary, 'total')) ?>, backgroundColor: ['#2152ff', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'], borderWidth: 2 }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-    });
-</script>
+        <div class="metrics-grid">
+            <div class="metric-card" style="border-left: 4px solid #2152ff;">
+                <p class="metric-title">Usuarios que usan la API</p>
+                <div class="metric-value"><?= number_format($metrics['activation']['active_users_pct'], 2, ',', '.') ?>%</div>
+                <p class="metric-desc">Usuarios registrados con al menos una request</p>
+            </div>
 
+            <div class="metric-card" style="border-left: 4px solid #10b981;">
+                <p class="metric-title">Usuarios que llegan al 20% del Free</p>
+                <div class="metric-value"><?= number_format($metrics['activation']['threshold_20_pct'], 2, ',', '.') ?>%</div>
+                <p class="metric-desc">Usuarios con señales reales de activación</p>
+            </div>
+        </div>
+
+    </main>
+
+    <?= view('partials/footer') ?>
 </body>
+
 </html>
