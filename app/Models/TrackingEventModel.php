@@ -70,4 +70,17 @@ class TrackingEventModel extends Model
         $res = $builder->get()->getRowArray();
         return $res['total'] ?? 0;
     }
+
+    /**
+     * Cuenta usuarios con actividad en los últimos 5 minutos.
+     */
+    public function getActiveUsersCount()
+    {
+        $fiveMinsAgo = date('Y-m-d H:i:s', strtotime('-5 minutes'));
+        $builder = $this->db->table($this->table);
+        $builder->select('COUNT(DISTINCT(anonymous_id)) as total');
+        $builder->where('created_at >=', $fiveMinsAgo);
+        $res = $builder->get()->getRowArray();
+        return $res['total'] ?? 0;
+    }
 }

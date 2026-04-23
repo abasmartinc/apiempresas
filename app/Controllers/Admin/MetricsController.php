@@ -22,6 +22,7 @@ class MetricsController extends BaseController
             'topPages'       => $model->getTopPages($filters),
             'totalEvents'    => $model->getTotalEvents($filters),
             'uniqueVisitors' => $model->getUniqueVisitors($filters),
+            'activeUsers'    => $model->getActiveUsersCount(), // Dato en vivo
             'eventNames'     => $model->select('DISTINCT(event_name)')->findAll(),
             'filters'        => $filters
         ];
