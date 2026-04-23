@@ -521,6 +521,21 @@
                     <p>Visión interna del funnel, revenue y activación.</p>
                 </div>
             </a>
+            <a href="<?= site_url('admin/event-tracking') ?>" class="admin-card"
+                style="border-color: rgba(245, 158, 11, 0.3);">
+                <div class="admin-icon-wrapper icon-sub-amber">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M18.757 14.743l-1.591-1.591m-14.166-8.318 1.591 1.591M3.75 10.5H6m.743 4.243 1.591-1.591" />
+                    </svg>
+                </div>
+                <div class="admin-card-content">
+                    <span>Event Tracking</span>
+                    <p>Análisis de clics y comportamiento real de usuarios.</p>
+                </div>
+            </a>
+
         </div>
 
         <!-- Herramientas del Sistema Section -->
