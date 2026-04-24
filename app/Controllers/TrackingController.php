@@ -18,12 +18,32 @@ class TrackingController extends BaseController
     }
 
     /**
+     * Verifica si la IP actual debe ser ignorada para el tracking
+     */
+    private function isIpIgnored(?string $ip): bool
+    {
+        if (!$ip) return false;
+        
+        $ignoredIpsStr = env('TRACKING_IGNORE_IPS', '127.0.0.1,::1');
+        if (empty(trim($ignoredIpsStr))) {
+            return false;
+        }
+        $ignoredIps = array_filter(array_map('trim', explode(',', $ignoredIpsStr)));
+        return in_array($ip, $ignoredIps);
+    }
+
+    /**
      * Procesa y guarda un evento de la demo del Radar
      * POST /tracking/radar-demo-event
      */
     public function processRadarEvent()
     {
         try {
+            $clientIp = $this->request->getIPAddress();
+            if ($this->isIpIgnored($clientIp)) {
+                return $this->response->setJSON(['success' => true, 'ignored' => true]);
+            }
+
             $json = $this->request->getJSON(true);
             
             // Log de entrada para ver qué llega exactamente
@@ -89,6 +109,11 @@ class TrackingController extends BaseController
     public function logEvent()
     {
         try {
+            $clientIp = $this->request->getIPAddress();
+            if ($this->isIpIgnored($clientIp)) {
+                return $this->response->setJSON(['success' => true, 'ignored' => true]);
+            }
+
             $json = $this->request->getJSON(true);
             
             // Debug log
