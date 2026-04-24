@@ -114,27 +114,40 @@ class TrackingController extends BaseController
                 return $this->response->setJSON(['success' => true, 'ignored' => true]);
             }
 
-            $json = $this->request->getJSON(true);
-            
-            // Debug log
-            log_message('error', '[TrackingGlobal] Hit: ' . json_encode($json));
-            
-            if (!$json || empty($json['event_name'])) {
-                return $this->response->setJSON(['success' => false, 'error' => 'Missing event_name'])->setStatusCode(400);
+            // Aceptar tanto JSON como POST estándar para máxima compatibilidad
+            $data_raw = $this->request->getJSON(true);
+            if (!$data_raw) {
+                $data_raw = $this->request->getPost();
             }
+            
+            // Normalizar nombres de campos (soporte para event_type y event_name)
+            $eventName = $data_raw['event_name'] ?? $data_raw['event_type'] ?? null;
+            
+            if (!$eventName) {
+                return $this->response->setJSON(['success' => false, 'error' => 'Missing event name'])->setStatusCode(400);
+            }
+
+            // Gestionar IDs de sesión/visitante si no vienen
+            $sessionId = $data_raw['session_id'] ?? session_id();
+            $anonymousId = $data_raw['anonymous_id'] ?? session('radar_visitor_id') ?? md5($clientIp . $this->request->getUserAgent()->getAgentString());
 
             $trackingModel = new TrackingEventModel();
 
             $data = [
-                'event_name'   => substr($json['event_name'], 0, 100),
-                'page'         => substr($json['page'] ?? '', 0, 255),
-                'user_id'      => $json['user_id'] ?? null,
-                'session_id'   => substr($json['session_id'] ?? '', 0, 100),
-                'anonymous_id' => substr($json['anonymous_id'] ?? '', 0, 100),
-                'element'      => substr($json['element'] ?? '', 0, 255),
-                'metadata'     => isset($json['metadata']) ? json_encode($json['metadata']) : null,
+                'event_name'   => substr($eventName, 0, 100),
+                'page'         => substr($data_raw['page'] ?? $this->request->getServer('HTTP_REFERER') ?? '', 0, 255),
+                'user_id'      => $data_raw['user_id'] ?? session('user_id'),
+                'session_id'   => substr($sessionId, 0, 100),
+                'anonymous_id' => substr($anonymousId, 0, 100),
+                'element'      => substr($data_raw['element'] ?? $data_raw['source'] ?? '', 0, 255),
+                'metadata'     => isset($data_raw['metadata']) ? (is_array($data_raw['metadata']) ? json_encode($data_raw['metadata']) : $data_raw['metadata']) : null,
                 'created_at'   => date('Y-m-d H:i:s'),
             ];
+
+            // Si no hay metadata pero hay source, lo guardamos en metadata si element está ocupado o viceversa
+            if (!$data['metadata'] && isset($data_raw['source'])) {
+                $data['metadata'] = json_encode(['source' => $data_raw['source']]);
+            }
 
             if ($trackingModel->insert($data)) {
                 return $this->response->setJSON(['success' => true]);

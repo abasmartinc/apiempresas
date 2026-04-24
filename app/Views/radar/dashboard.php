@@ -101,6 +101,16 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                         Mis favoritos
                     </a>
 
+                    <a href="<?= site_url('leads-empresas-nuevas') ?>" class="ae-radar-page__nav-link" id="radar_to_excel_cross_sell">
+                        <span class="ae-radar-page__nav-icon">📥</span>
+                        Descargar listado puntual
+                    </a>
+
+                    <a href="<?= site_url('api-empresas') ?>" class="ae-radar-page__nav-link" id="radar_to_api_cross_sell">
+                        <span class="ae-radar-page__nav-icon">🔌</span>
+                        API para desarrolladores
+                    </a>
+
                     <a href="<?= site_url('radar/kanban') ?>" class="ae-radar-page__nav-link">
                         <span class="ae-radar-page__nav-icon">📋</span>
                         Embudo (Kanban)
@@ -128,7 +138,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
 
                 <div class="ae-radar-page__roi-box">
                     <div class="ae-radar-page__roi-title">Calculadora ROI</div>
-                    <div class="ae-radar-page__roi-text">Solo 1 cliente conseguido con este radar paga <strong>5 años</strong> de suscripción.</div>
+                    <div class="ae-radar-page__roi-text">La mayoría de usuarios recupera la inversión con su primer cliente. Solo 1 cierre paga <strong>5 años</strong> de Radar PRO.</div>
                     <div class="ae-radar-page__roi-stat">
                         <span>Rentabilidad estimada</span>
                         <strong>+450%</strong>
@@ -150,6 +160,33 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
         </aside>
 
         <main class="ae-radar-page__main">
+            
+            <?php 
+            $source = service('request')->getGet('source');
+            if (session('just_bought_excel') || $source === 'excel'): 
+            ?>
+            <div class="radar-welcome-banner" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 24px; border-radius: 16px; margin-bottom: 32px; border: 1px solid rgba(255,255,255,0.1); position: relative; overflow: hidden;">
+                <div style="position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 24px;">
+                    <div>
+                        <h2 style="color: #fff; font-size: 1.4rem; font-weight: 800; margin-bottom: 8px;">¡Bienvenido al Radar PRO!</h2>
+                        <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.5; margin: 0;">
+                            <?php if ($source === 'excel'): ?>
+                                Estas oportunidades son <strong>nuevas</strong> respecto al listado que descargaste. <br>
+                                Monitoriza el mercado en tiempo real para no llegar tarde.
+                            <?php else: ?>
+                                Ya tienes tu listado, pero el mercado no se detiene. <br>
+                                Aquí puedes ver las empresas que se han creado <strong>hoy mismo</strong> en tu sector.
+                            <?php endif; ?>
+                        </p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.style.display='none'; trackGlobalEvent('radar_banner_close');" style="background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 700; white-space: nowrap;"> Entendido </button>
+                </div>
+                <div style="position: absolute; right: -20px; top: -20px; opacity: 0.1; transform: rotate(-15deg);">
+                    <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+                </div>
+            </div>
+            <?php session()->remove('just_bought_excel'); ?>
+            <?php endif; ?>
             <header class="ae-radar-page__topbar">
                 <div class="ae-radar-page__breadcrumb">
                     <span>APIEmpresas</span>
@@ -170,8 +207,8 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                             Plan Free · Vista limitada
                         </div>
 
-                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__cta-top" style="background: #2563eb; color: #ffffff; border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
-                            Activar Radar PRO (79€/mes)
+                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=' . esc($source)) ?>" class="ae-radar-page__cta-top" style="background: #2563eb; color: #ffffff; border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
+                            Desbloquear todas las oportunidades ahora
                         </a>
                     <?php } else { ?>
                         <?php if (isset($userPlan['status']) && $userPlan['status'] === 'canceled') { ?>
@@ -208,14 +245,14 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                             <div>
                                 <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1e293b;">
                                     <?php if ($isFree) { ?>
-                                        Solo estás viendo <?= count($visibleCompanies) ?> de <?= number_format($pagination['total']) ?> oportunidades disponibles · <span style="color: #ef4444;">Has alcanzado el límite gratuito</span>
+                                        Estás viendo solo una parte — las oportunidades más valiosas están bloqueadas
                                     <?php } else { ?>
                                         Acceso completo ilimitado a las <?= number_format($pagination['total']) ?> oportunidades
                                     <?php } ?>
                                 </h3>
                                 <p style="margin: 4px 0 0; font-size: 13px; color: #64748b; font-weight: 500;">
                                     <?php if ($isFree) { ?>
-                                        <span style="color: #ef4444; font-weight: 700;">Has alcanzado el límite gratuito.</span> Activa Radar PRO para ver el resto.
+                                        <span style="color: #ef4444; font-weight: 700;">Estás viendo <?= count($visibleCompanies) ?> de <?= number_format($pagination['total']) ?> oportunidades disponibles.</span> Estas empresas están activas ahora mismo y ya están siendo contactadas.
                                     <?php } else { ?>
                                         Explora todos los leads detectados hoy en tiempo real.
                                     <?php } ?>
@@ -223,8 +260,8 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                             </div>
                         </div>
                         <?php if ($isFree) { ?>
-                            <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__cta-top" style="margin: 0; background: #0f172a; color: #ffffff;">
-                                Activar Radar PRO (79€/mes)
+                            <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=' . esc($source)) ?>" class="ae-radar-page__cta-top" style="margin: 0; background: #0f172a; color: #ffffff;">
+                                Desbloquear todas las oportunidades ahora
                             </a>
                         <?php } ?>
                     </div>
@@ -316,7 +353,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                                             <div>
                                                 <span style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Potencial económico</span>
                                                 <div style="font-size: 22px; font-weight: 900; color: #2563eb; letter-spacing: -0.5px; margin-top: 2px;">
-                                                    💰 Hasta <?= $metricsService->formatCurrency($pipelineMetrics['pipeline_max']) ?> <span style="font-size: 12px; font-weight: 700; color: #64748b; display: block; margin-top: -2px;">en pipeline potencial detectado</span>
+                                                    💰 Estas oportunidades pueden generar entre 300.000€ y <?= $metricsService->formatCurrency($pipelineMetrics['pipeline_max']) ?> <span style="font-size: 12px; font-weight: 700; color: #64748b; display: block; margin-top: -2px;">en pipeline comercial potencial detectado</span>
                                                 </div>
                                             </div>
                                             
@@ -343,10 +380,10 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                             <?php if ($isFree) { ?>
                                 <div class="ae-radar-page__hero-actions" style="margin-top: 20px;">
                                     <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__hero-btn ae-radar-page__hero-btn--primary" style="height: 42px; padding: 0 24px; font-size: 13px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);">
-                                        Desbloquear Radar PRO (79€/mes)
+                                        Desbloquear todas las oportunidades ahora
                                     </a>
                                     <div style="margin-top: 10px; font-size: 11px; font-weight: 600; color: #64748b;">
-                                        Sin permanencia. Activación inmediata.
+                                        ✔ Acceso inmediato · ✔ Sin permanencia · ✔ Recupera la inversión con 1 cliente
                                     </div>
                                 </div>
                             <?php } ?>
@@ -428,7 +465,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                                     👉 Sigue con las oportunidades recomendadas para avanzar hoy
                                 </div>
                                 <div style="font-size: 12px; font-weight: 800; color: #10b981;">
-                                    🔥 Hoy tienes nuevas oportunidades listas para contactar
+                                    🔥 Varias de estas empresas dejarán de estar disponibles hoy. Actúa rápido.
                                 </div>
                             </div>
                         </div>
@@ -589,20 +626,21 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                                             📈 +<?= number_format($freshness['todayCount'] ?? 94) ?> empresas detectadas hoy
                                         </div>
 
-                                        <h2 style="font-size: 38px; font-weight: 900; margin-bottom: 16px; color: white !important; letter-spacing: -1.5px; line-height: 1.1;">Desbloquea el resto de oportunidades</h2>
+                                        <h2 style="font-size: 38px; font-weight: 900; margin-bottom: 16px; color: white !important; letter-spacing: -1.5px; line-height: 1.1;">Estas empresas están siendo contactadas ahora mismo</h2>
                                         
                                         <p style="font-size: 18px; color: rgba(255,255,255,0.8); margin-bottom: 32px; max-width: 650px; margin-left: auto; margin-right: auto; line-height: 1.6; font-weight: 500;">
                                             Las empresas detectadas hoy suelen ser las primeras en contratar.<br>
-                                            <span style="color: #60a5fa; font-weight: 800;">Si no actúas ahora, otro lo hará.</span>
+                                            <span style="color: #60a5fa; font-weight: 800;">Estas oportunidades desaparecen cuando otro proveedor las contacta.</span>
                                         </p>
 
                                         <div style="margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
                                             <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="display: inline-block; background: #2563eb; color: white; padding: 20px 56px; border-radius: 18px; font-size: 20px; font-weight: 900; text-decoration: none; box-shadow: 0 10px 30px rgba(37,99,235,0.5); transition: all 0.3s; transform-origin: center;" onmouseover="this.style.transform='scale(1.05) translateY(-2px)'; this.style.boxShadow='0 15px 40px rgba(37,99,235,0.6)';" onmouseout="this.style.transform='scale(1) translateY(0)'; this.style.boxShadow='0 10px 30px rgba(37,99,235,0.5)';">
-                                                Activar Radar PRO (79€/mes)
+                                                Acceder ahora antes que tu competencia
                                             </a>
                                             <div style="font-size: 14px; color: #fbbf24; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;">
-                                                💰 Con 1 cliente cubres el coste mensual
+                                                💰 La mayoría de usuarios recupera la inversión con su primer cliente
                                             </div>
+                                        </div>
                                         </div>
 
                                         <div class="paywall-benefits" style="display: flex; justify-content: center; gap: 32px; margin: 0 auto; opacity: 0.7;">
@@ -1121,67 +1159,117 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
     /**
      * Modal de conversión proactivo con tracking y refuerzo de ROI
      */
-    window.showConversionNudge = function(title, text) {
+    window.showConversionNudge = function(title, text, metadata = {}) {
+        // Permitir UNA acción gratuita (QuickView o Contacto) para demostrar valor
+        if (!localStorage.getItem('radar_free_action_used')) {
+            const actionType = metadata.action || 'view';
+            const companyId = metadata.id;
+            
+            if (companyId) {
+                localStorage.setItem('radar_free_action_used', 'true');
+                if (actionType === 'contact') {
+                    // Si intentaba contactar, disparamos el modal real de contacto
+                    if (typeof handleContactClick === 'function') {
+                        handleContactClick(null, companyId, metadata.name || 'Empresa');
+                        return;
+                    }
+                } else {
+                    // Si intentaba ver, abrimos el QuickView real
+                    if (typeof openQuickView === 'function') {
+                        openQuickView(companyId);
+                        return;
+                    }
+                }
+            }
+        }
+
         // Tracking de intención real
         if (typeof dataLayer !== 'undefined') {
             dataLayer.push({
                 'event': 'contact_attempt_blocked',
                 'nudge_title': title,
-                'nudge_text': text
+                'nudge_text': text,
+                'metadata': metadata
             });
         }
-        console.log('Event Tracked: contact_attempt_blocked', {title, text});
+        
+        // Ocultar banner flotante si está visible para evitar solapamiento
+        const banner = document.getElementById('ae-floating-banner');
+        if (banner) banner.style.bottom = '-100px';
 
-        const defaultTitle = 'Esta oportunidad está bloqueada';
-        const defaultText = 'Otros equipos comerciales ya están contactando esta empresa AHORA. Activa Radar PRO y accede a sus datos antes que tu competencia.';
+        // Log event to server for CRM tracking
+        fetch('<?= site_url('radar/log-event') ?>', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+            body: `lead_id=${metadata.id || ''}&action=blocked_click&<?= csrf_token() ?>=<?= csrf_hash() ?>`
+        });
+
+        const defaultTitle = 'Esta empresa puede cerrarse con otro proveedor ahora mismo';
+        const defaultText = 'Accede ahora y contacta antes que otros proveedores.<br>Esta empresa está en proceso de decisión.';
+        
+        // Generar ticket estimado aleatorio para el copy (simulando IA)
+        const minTicket = Math.floor(Math.random() * (15000 - 3000 + 1)) + 3000;
+        const maxTicket = minTicket * (Math.floor(Math.random() * 3) + 2);
+        const formatMoney = (val) => new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
 
         Swal.fire({
             title: title || defaultTitle,
             icon: 'warning',
             iconHtml: '⚡',
+            showClass: {
+                popup: 'animate__animated animate__zoomIn animate__faster'
+            },
             html: `
-                <div style="text-align: center; padding: 10px;">
-                    <p style="font-size: 17px; color: #1e293b; line-height: 1.6; margin-bottom: 32px; font-weight: 600;">
+                <div style="text-align: center; padding: 0 10px;">
+                    <p style="font-size: 13px; color: #ef4444; font-weight: 800; margin: -5px 0 16px; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Si no actúas ahora, perderás esta oportunidad frente a tu competencia
+                    </p>
+
+                    <div style="background: #f0fdf4; border: 2px solid #16a34a; padding: 14px; border-radius: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.1);">
+                        <span style="font-size: 24px;">💰</span>
+                        <div style="text-align: left;">
+                            <div style="font-size: 11px; font-weight: 800; color: #16a34a; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 1px;">Valor estimado que puedes perder ahora mismo</div>
+                            <div style="font-size: 19px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px;">${formatMoney(minTicket)} - ${formatMoney(maxTicket)}</div>
+                        </div>
+                    </div>
+
+                    <p style="font-size: 16px; color: #334155; line-height: 1.5; margin-bottom: 24px; font-weight: 600;">
                         ${text || defaultText}
                     </p>
                     
-                    <div style="margin-bottom: 32px;">
-                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="display: block; background: #2563eb; color: #ffffff; padding: 20px; border-radius: 14px; font-weight: 900; text-decoration: none; font-size: 19px; box-shadow: 0 12px 24px rgba(37,99,235,0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';" id="ae-modal-cta">
-                            Activar Radar PRO (79€/mes)
+                    <div style="margin-bottom: 24px;">
+                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=modal_nudge') ?>" style="display: block; background: #2563eb; color: #ffffff; padding: 18px; border-radius: 16px; font-weight: 950; text-decoration: none; font-size: 19px; box-shadow: 0 10px 25px rgba(37,99,235,0.4); transition: all 0.3s; opacity: 0; transform: translateY(10px); animation: ae-fade-up 0.4s forwards 0.2s;" onmouseover="this.style.transform='translateY(-2px) scale(1.02)';" onmouseout="this.style.transform='translateY(0) scale(1)';" id="ae-modal-cta">
+                            Contactar antes que otros proveedores
                         </a>
-                        <p style="margin-top: 14px; font-size: 15px; color: #2563eb; font-weight: 700;">
-                            Contacta antes que tu competencia
-                        </p>
-                        <p style="margin-top: 8px; font-size: 14px; color: #f59e0b; font-weight: 800;">
-                            🚀 +<?= number_format($freshness['todayCount'] ?? 94) ?> empresas hoy esperando contacto
+                        <p style="margin-top: 12px; font-size: 12px; color: #64748b; font-weight: 800; letter-spacing: 0.2px;">
+                            ⚡ Acceso inmediato · Sin tarjeta · Empieza en menos de 10 segundos
                         </p>
                     </div>
 
-                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
-                        <p style="margin: 0; font-size: 14px; color: #10b981; font-weight: 800;">
-                            💰 Con 1 cliente cubres el coste mensual
+                    <div style="border-top: 1px solid #f1f5f9; padding-top: 18px; display: flex; flex-direction: column; gap: 8px;">
+                        <p style="margin: 0; font-size: 13px; color: #f97316; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px;">
+                            🔥 Varias oportunidades detectadas hoy dejarán de estar disponibles en horas
                         </p>
-                        <p style="margin: 0; font-size: 14px; color: #1e293b; font-weight: 600;">
-                            Las primeras empresas en ser contactadas son las que convierten
-                        </p>
-                        <p style="margin: 0; font-size: 12px; color: #94a3b8; font-weight: 600;">
-                            Sin permanencia · Activación inmediata
+                        <p style="margin: 0; font-size: 12px; color: #475569; font-weight: 700;">
+                            La mayoría de usuarios recupera la inversión con su primer cliente
                         </p>
                     </div>
                 </div>
+                <style>
+                    @keyframes ae-fade-up {
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                </style>
             `,
             showConfirmButton: false, 
             showCancelButton: true,
-            cancelButtonText: 'Seguir sin desbloquear oportunidades',
+            cancelButtonText: 'Seguir viendo solo 3 oportunidades',
             showCloseButton: true,
             focusCancel: true,
             customClass: {
-                popup: 've-swal',
-                title: 've-swal-title',
-                htmlContainer: 've-swal-text',
-                cancelButton: 'btn btn_header--ghost ve-swal-cancel',
-            },
-            buttonsStyling: false
+                popup: 'ae-premium-modal',
+                cancelButton: 'ae-modal-cancel-btn'
+            }
         });
     }
 
@@ -1358,7 +1446,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
             <div style="font-size:48px; margin-bottom:20px;">🎯</div>
             <h3 style="font-size:24px; font-weight:800; color:#0f172a; margin-bottom:16px;">Estás explorando oportunidades reales</h3>
             <p style="font-size:16px; color:#475569; line-height:1.6; margin-bottom:32px;">Activa Radar PRO para acceder a todas y empezar a trabajar leads desde hoy.</p>
-            <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="display:block; background:#2563eb; color:#ffffff; padding:18px; border-radius:12px; font-weight:800; text-decoration:none; font-size:16px; box-shadow:0 10px 20px rgba(37,99,235,0.2);">Activar Radar PRO (79€/mes)</a>
+            <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=' . esc($source)) ?>" style="display:block; background:#2563eb; color:#ffffff; padding:18px; border-radius:12px; font-weight:800; text-decoration:none; font-size:16px; box-shadow:0 10px 20px rgba(37,99,235,0.2);" onclick="trackUpgradeClick('intent_modal')">Activar acceso completo (79€/mes)</a>
             <p style="margin-top:20px; font-size:13px; color:#94a3b8; font-weight:600;">Sin permanencia · Cancela cuando quieras</p>
         </div>
     </div>
@@ -1368,16 +1456,38 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
         <div style="font-size: 14px; font-weight: 700; white-space: nowrap;">
             ⚡ Estás viendo oportunidades reales ahora mismo.
         </div>
-        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="background: #2563eb; color: white; padding: 8px 20px; border-radius: 50px; text-decoration: none; font-size: 13px; font-weight: 900; white-space: nowrap;">
-            Activar Radar PRO (79€/mes)
+        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=' . esc($source)) ?>" style="background: #2563eb; color: white; padding: 8px 20px; border-radius: 50px; text-decoration: none; font-size: 13px; font-weight: 900; white-space: nowrap;" onclick="trackUpgradeClick('floating_banner')">
+            Activar acceso completo (79€/mes)
         </a>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        // Track View
+        $(document).ready(function() {
+            // No mostrar banner si ya hay un modal abierto (prevención)
+            const isModalOpen = () => document.querySelector('.swal2-shown');
+
+            $.post('<?= site_url("api/tracking/event") ?>', {
+                event_type: 'radar_view',
+                source: '<?= esc($source) ?>'
+            });
+        });
+
+        function trackUpgradeClick(location) {
+            $.post('<?= site_url("api/tracking/event") ?>', {
+                event_type: 'upgrade_click',
+                source: '<?= esc($source) ?>',
+                metadata: JSON.stringify({ location: location })
+            });
+        }
+
         // Trigger de Intención: Mostrar banner flotante al llegar al paywall
         window.addEventListener('scroll', function() {
             const banner = document.getElementById('ae-floating-banner');
-            if (window.scrollY > 500 && !sessionStorage.getItem('floating_banner_dismissed')) {
+            const isSwalOpen = document.body.classList.contains('swal2-shown');
+            
+            if (window.scrollY > 500 && !sessionStorage.getItem('floating_banner_dismissed') && !isSwalOpen) {
                 banner.style.bottom = '40px';
             } else {
                 banner.style.bottom = '-100px';
@@ -1410,6 +1520,54 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
         }, true); // Capturing phase para interceptar antes del onclick
 
     </script>
+    <style>
+        .ae-premium-modal {
+            border-radius: 32px !important;
+            padding: 24px !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.3) !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        .ae-premium-modal .swal2-title {
+            font-family: 'Outfit', sans-serif !important;
+            font-weight: 900 !important;
+            font-size: 26px !important;
+            letter-spacing: -0.03em !important;
+            color: #0f172a !important;
+            padding-top: 10px !important;
+        }
+        .ae-modal-cancel-btn {
+            background: transparent !important;
+            color: #64748b !important;
+            font-weight: 700 !important;
+            font-size: 14px !important;
+            text-decoration: underline !important;
+            border: none !important;
+            box-shadow: none !important;
+            margin-top: 10px !important;
+        }
+        .ae-modal-cancel-btn:hover {
+            color: #1e293b !important;
+        }
+    </style>
     <?php } ?>
+    <script>
+        $(document).ready(function() {
+            $('#radar_to_excel_cross_sell').on('click', function() {
+                trackGlobalEvent('radar_to_excel_click');
+            });
+            $('#radar_to_api_cross_sell').on('click', function() {
+                trackGlobalEvent('radar_to_api_click');
+            });
+
+            function trackGlobalEvent(type, metadata = {}) {
+                $.post('<?= site_url("api/tracking/event") ?>', {
+                    event_type: type,
+                    source: 'radar_dashboard',
+                    metadata: JSON.stringify(metadata)
+                });
+            }
+        });
+    </script>
 </body>
 </html>

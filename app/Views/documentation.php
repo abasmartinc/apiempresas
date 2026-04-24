@@ -442,9 +442,9 @@ print(response.json())</code></pre>
                     </div>
 
                     <div style="margin-top: 80px; text-align: center; background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%); color: white; padding: 60px 40px; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(30, 58, 138, 0.25);">
-                        <h2 style="color: white; font-size: 2.3rem; font-weight: 900; margin-bottom: 16px; letter-spacing: -0.02em;">💎 Cada día se crean nuevas empresas</h2>
-                        <p style="font-size: 1.25rem; color: rgba(255,255,255,0.7); margin-bottom: 32px; font-weight: 500;">La diferencia es quién llega primero.</p>
-                        <a href="<?= site_url('radar') ?>" class="btn-radar-strong" style="max-width: 400px; margin: 0 auto; padding: 20px 40px;">Ver oportunidades ahora</a>
+                        <h2 style="color: white; font-size: 2.3rem; font-weight: 900; margin-bottom: 16px; letter-spacing: -0.02em;">💎 Prueba tu integración con datos reales</h2>
+                        <p style="font-size: 1.25rem; color: rgba(255,255,255,0.7); margin-bottom: 32px; font-weight: 500;">No uses datos de prueba. Accede al Radar y mira qué está pasando ahora mismo.</p>
+                        <a href="<?= site_url('radar?source=api_docs') ?>" id="api_to_radar_cta" class="btn-radar-strong" style="max-width: 400px; margin: 0 auto; padding: 20px 40px;">Ver empresas activas ahora</a>
                     </div>
                 </section>
             </div>
@@ -666,7 +666,17 @@ print(response.json())</code></pre>
     }
 </style>
 
-<?=view('partials/footer') ?>
-
+    <?=view('partials/footer') ?>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#api_to_radar_cta').on('click', function() {
+                $.post('<?= site_url("api/tracking/event") ?>', {
+                    event_type: 'api_to_radar_click',
+                    source: 'api_docs'
+                });
+            });
+        });
+    </script>
 </body>
 </html>

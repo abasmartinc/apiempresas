@@ -146,11 +146,15 @@
                         </div>
 
                         <h1 style="font-size: 1.8rem; font-weight: 900; color: #1e293b; margin-bottom: 8px; letter-spacing: -0.03em; line-height: 1.15;">
-                            Radar PRO: Acceso ilimitado a nuevas empresas
+                            Desbloquea ahora las empresas que están contratando proveedor
                         </h1>
 
-                        <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5; margin-bottom: 14px;">
-                            La herramienta definitiva para detectar leads B2B antes que nadie. Activa tu acceso hoy mismo.
+                        <p style="font-size: 1.05rem; color: #1e293b; line-height: 1.5; margin-bottom: 8px; font-weight: 700;">
+                            Estás a un paso de acceder a oportunidades activas en este momento
+                        </p>
+
+                        <p style="font-size: 0.95rem; color: #64748b; line-height: 1.5; margin-bottom: 20px; border-left: 3px solid #2563eb; padding-left: 14px; font-style: italic;">
+                            Estas son las mismas oportunidades que acabas de ver — desbloquea el acceso completo para contactar antes que otros proveedores
                         </p>
 
                         <div class="stat-grid">
@@ -169,12 +173,16 @@
                         <div>
                             <h3 style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 10px;">Ventajas incluidas en tu suscripción:</h3>
                             <ul class="cols-grid" style="list-style: none; padding: 0; margin: 0;">
-                                <?php foreach (['Acceso total al Radar', 'Todos los filtros (Sector/Prov)', 'Exportación ilimitada', 'Detección diaria de leads', 'Sin permanencia', 'Soporte prioritario'] as $item): ?>
+                                <?php foreach (['Acceso total al Radar', 'Todos los filtros (Sector/Prov)', 'Exportación ilimitada', 'Detección diaria de leads', 'Sin permanencia', 'Cancelación en cualquier momento', 'Soporte prioritario', 'Acceso inmediato tras pago'] as $item): ?>
                                 <li class="col-item">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#12b48a" stroke-width="4"><polyline points="20 6 9 17 4 12"></polyline></svg> <?= $item ?>
                                 </li>
                                 <?php endforeach; ?>
                             </ul>
+                        </div>
+
+                        <div style="margin-top: 24px; padding: 16px; background: #fff1f2; border-radius: 12px; border: 1px solid #ffe4e6; color: #e11d48; font-size: 0.9rem; font-weight: 700;">
+                            ⚠️ Estás viendo solo una parte — el resto de oportunidades siguen activas ahora mismo
                         </div>
                     <?php else: ?>
                         <div class="product-badge">
@@ -194,9 +202,17 @@
                             Listado oficial BORME procesado y listo para descargar en Excel.
                         </p>
 
-                        <div class="alert-box">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="vertical-align: -3px; margin-right: 5px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                            Las empresas recién creadas suelen contratar proveedores durante sus primeros meses de actividad.
+                        <div class="alert-box" style="background: #f0fdf4; border-color: #bbf7d0; color: #166534; display: flex; flex-direction: column; gap: 8px; padding: 16px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                <span style="font-weight: 800; font-size: 1rem;">Oportunidad de Negocio Estimada</span>
+                            </div>
+                            <p style="margin: 0; font-size: 1.25rem; font-weight: 900; letter-spacing: -0.01em;">
+                                <?= number_format($total_count * 500, 0, ',', '.') ?>€ – <?= number_format($total_count * 2000, 0, ',', '.') ?>€
+                            </p>
+                            <p style="margin: 0; font-size: 0.8rem; opacity: 0.8; font-weight: 600;">
+                                Valor potencial en ventas para estas <?= number_format($total_count, 0, ',', '.') ?> empresas.
+                            </p>
                         </div>
 
                         <div class="stat-grid">
@@ -219,15 +235,24 @@
                             </div>
                         </div>
 
-                        <div>
-                            <h3 style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 10px;">Columnas incluidas en el listado:</h3>
-                            <ul class="cols-grid" style="list-style: none; padding: 0; margin: 0;">
-                                <?php foreach (['Nombre empresa', 'CIF', 'Sector CNAE', 'Provincia', 'Municipio', 'Fecha reg.', 'Objeto social'] as $item): ?>
-                                <li class="col-item">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#12b48a" stroke-width="4"><polyline points="20 6 9 17 4 12"></polyline></svg> <?= $item ?>
-                                </li>
-                                <?php endforeach; ?>
-                            </ul>
+                        <div style="background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; margin-top: 20px;">
+                            <h3 style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Excel vs Radar PRO</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div style="font-size: 0.8rem;">
+                                    <span style="display: block; font-weight: 800; color: #64748b; margin-bottom: 4px;">Tu Excel</span>
+                                    <ul style="list-style: none; padding: 0; margin: 0; color: #64748b;">
+                                        <li>✔ Descarga única</li>
+                                        <li>✔ Datos estáticos</li>
+                                    </ul>
+                                </div>
+                                <div style="font-size: 0.8rem; border-left: 1px solid #e2e8f0; padding-left: 16px;">
+                                    <span style="display: block; font-weight: 800; color: #2563eb; margin-bottom: 4px;">Radar PRO</span>
+                                    <ul style="list-style: none; padding: 0; margin: 0; color: #2563eb;">
+                                        <li>✔ Nuevas cada día</li>
+                                        <li>✔ Acceso ilimitado</li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     <?php endif; ?>
 
@@ -239,7 +264,7 @@
 
                 <!-- DERECHA: RESUMEN DE PAGO -->
                 <div class="order-card">
-                    <h2 style="font-size: 1.1rem; font-weight: 900; margin-bottom: 16px; color: #0f172a;">Resumen del pedido</h2>
+                    <h2 style="font-size: 1.1rem; font-weight: 900; margin-bottom: 16px; color: #0f172a;">Tu acceso comienza ahora</h2>
 
                     <?php if ($type === 'subscription'): ?>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #64748b; font-size: 0.88rem;">
@@ -263,7 +288,16 @@
                         <span style="color: var(--primary);"><?= number_format($price + $tax, 2, ',', '.') ?> €</span>
                     </div>
 
-                    <form action="<?= site_url('billing/checkout') ?>" method="POST" style="margin-top: 20px;">
+                    <?php if ($type === 'subscription'): ?>
+                    <div style="background: #f0fdf4; border-radius: 8px; padding: 8px 12px; margin-top: 10px; display: flex; align-items: center; gap: 8px; border: 1px solid #dcfce7;">
+                        <span style="font-size: 14px;">💡</span>
+                        <p style="font-size: 0.75rem; color: #166534; font-weight: 800; margin: 0; line-height: 1.2;">
+                            Con 1 cliente cubres el coste mensual
+                        </p>
+                    </div>
+                    <?php endif; ?>
+
+                    <form action="<?= site_url('billing/checkout') ?>" method="POST" style="margin-top: 24px;">
                         <?= csrf_field() ?>
                         <input type="hidden" name="plan" value="radar">
                         <input type="hidden" name="period" value="<?= $type === 'subscription' ? 'monthly' : 'single' ?>">
@@ -272,14 +306,37 @@
                         <input type="hidden" name="cnae" value="<?= esc($cnae ?? '') ?>">
                         <input type="hidden" name="period_radar" value="<?= esc($period) ?>">
 
-                        <button type="submit" class="btn js-loading-btn" style="width: 100%; padding: 17px; font-size: 1.05rem; font-weight: 900; background: var(--primary); color: white; border-radius: 14px; border: none; cursor: pointer; box-shadow: 0 8px 16px -4px rgba(33, 82, 255, 0.4); text-transform: uppercase; letter-spacing: 0.02em; transition: transform 0.15s; display: flex; align-items: center; justify-content: center; gap: 10px;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="opacity: 0.9;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                            <?= $type === 'subscription' ? 'Suscribirse Ahora' : 'Confirmar y Pagar' ?>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="opacity: 0.8;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                        </button>
+                        <div style="position: relative;">
+                            <?php if ($type === 'subscription'): ?>
+                                <div style="position: absolute; top: -12px; right: 12px; background: #ef4444; color: white; font-size: 10px; padding: 3px 10px; border-radius: 20px; font-weight: 900; z-index: 20; box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2); text-transform: uppercase; pointer-events: none; white-space: nowrap;">
+                                    Acceso en &lt; 10s
+                                </div>
+                            <?php endif; ?>
+                            <button type="submit" class="btn js-loading-btn" style="width: 100%; padding: 18px; font-size: 1rem; font-weight: 950; background: #2563eb; color: white; border-radius: 16px; border: none; cursor: pointer; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4); text-transform: uppercase; letter-spacing: 0.01em; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 30px rgba(37, 99, 235, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(37, 99, 235, 0.4)';">
+                                <span style="font-size: 0.95rem; pointer-events: none;">Contactar antes que</span>
+                                <span style="font-size: 1.1rem; letter-spacing: -0.01em; pointer-events: none;">otros proveedores</span>
+                            </button>
+                        </div>
                     </form>
 
-                    <p style="font-size: 0.72rem; color: #94a3b8; text-align: center; margin-top: 10px; line-height: 1.4;">
+                    <?php if ($type === 'subscription'): ?>
+                    <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
+                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                            <span style="font-size: 16px;">⚠️</span>
+                            <p style="font-size: 0.8rem; color: #b91c1c; font-weight: 800; margin: 0; line-height: 1.4;">
+                                Varias de estas empresas pueden cerrar proveedor en las próximas horas
+                            </p>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                            <span style="font-size: 16px; color: #10b981;">✔</span>
+                            <p style="font-size: 0.8rem; color: #475569; font-weight: 700; margin: 0; line-height: 1.4;">
+                                +1.200 profesionales ya usan este sistema cada semana
+                            </p>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
+                    <p style="font-size: 0.72rem; color: #94a3b8; text-align: center; margin-top: 24px; line-height: 1.5; font-weight: 500;">
                         Al confirmar, serás redirigido a la pasarela segura de Stripe.
                         <?php if ($type === 'subscription'): ?>
                             <br>Suscripción mensual, cancela cuando quieras.

@@ -1294,7 +1294,19 @@
                                 </svg> Acceso a /companies</li>
                         </ul>
 
-                        <a href="<?= site_url('register') ?>" class="api-pricing-btn">Obtener API Key</a>
+                        <div class="api-price-cta" style="margin-top: 32px;">
+                            <form id="api_quick_unlock_form" style="display: flex; flex-direction: column; gap: 12px;">
+                                <input type="email" name="email" placeholder="Tu email corporativo" required 
+                                       style="padding: 14px 20px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1rem; width: 100%; outline: none; transition: border-color 0.2s;"
+                                       onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">
+                                <button type="submit" class="api-pricing-btn" style="width: 100%; justify-content: center; background: #0f172a; color: white; border: none; cursor: pointer;">
+                                    Obtener API Key Gratis
+                                </button>
+                            </form>
+                            <p style="font-size: 0.75rem; color: #64748b; margin-top: 12px; text-align: center;">
+                                Acceso instantáneo. Sin tarjeta de crédito.
+                            </p>
+                        </div>
                     </div>
 
                     <!-- PRO -->
@@ -1720,6 +1732,53 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
     </main>
 
     <?= view('partials/footer') ?>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function() {
+            // Tracking Inicial
+            trackEvent('api_prices_view');
+
+            $('#api_quick_unlock_form').on('submit', function(e) {
+                e.preventDefault();
+                const $btn = $(this).find('button');
+                const $input = $(this).find('input');
+                const email = $input.val();
+                
+                $btn.prop('disabled', true).text('Generando...');
+
+                $.post('<?= site_url("api/quick-unlock") ?>', { email: email }, function(res) {
+                    if (res.status === 'success') {
+                        trackEvent('api_quick_unlock_success', { email: email });
+                        Swal.fire({
+                            title: '¡API Key Generada!',
+                            text: 'Tu llave es: ' + res.api_key + '. Te redirigimos a la documentación.',
+                            icon: 'success',
+                            confirmButtonText: 'Ir a Documentación'
+                        }).then(() => {
+                            window.location.href = res.redirect;
+                        });
+                    } else if (res.status === 'exists') {
+                        window.location.href = res.redirect;
+                    } else {
+                        Swal.fire('Error', res.message || 'Error al generar la llave', 'error');
+                        $btn.prop('disabled', false).text('Obtener API Key Gratis');
+                    }
+                }).fail(function() {
+                    Swal.fire('Error', 'Error de conexión', 'error');
+                    $btn.prop('disabled', false).text('Obtener API Key Gratis');
+                });
+            });
+
+            function trackEvent(type, metadata = {}) {
+                $.post('<?= site_url("api/tracking/event") ?>', {
+                    event_type: type,
+                    source: 'api_landing',
+                    metadata: JSON.stringify(metadata)
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

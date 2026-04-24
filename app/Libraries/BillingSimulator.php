@@ -39,6 +39,15 @@ class BillingSimulator
         $planModel = new ApiPlanModel();
         $plan = $planModel->where('slug', $planSlug)->first();
 
+        if (!$plan && $planSlug === 'radar') {
+            // Mock a plan object for the Radar plan if it's not in the DB
+            $plan = (object)[
+                'id' => 999, // A symbolic ID or handle specially if needed
+                'name' => 'Radar B2B',
+                'slug' => 'radar'
+            ];
+        }
+
         if (!$plan) {
             return false;
         }

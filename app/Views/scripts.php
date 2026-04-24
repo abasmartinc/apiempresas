@@ -248,9 +248,11 @@
             
             el.classList.add('btn-loading');
             
-            // For buttons, disable them
+            // For buttons, disable them after a tiny delay to allow the form submission to trigger in all browsers
             if (el.tagName === 'BUTTON') {
-                el.disabled = true;
+                setTimeout(() => {
+                    el.disabled = true;
+                }, 10);
             }
 
             // Add spinner if not present

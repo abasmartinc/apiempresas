@@ -63,13 +63,13 @@
                                 <span>Verificación y datos oficiales</span>
                             </div>
                         </a>
-                        <a href="<?=site_url('leads-empresas-nuevas') ?>">
-                            <div class="nav-item-icon">📡</div>
-                            <div>
-                                <strong>Radar Inteligente</strong>
-                                <span>Nuevas empresas en tiempo real</span>
-                            </div>
-                        </a>
+                        <a href="<?= getRadarRedirect('header') ?>">
+    <div class="nav-item-icon">📡</div>
+    <div>
+        <strong>Radar Inteligente</strong>
+        <span>Nuevas empresas en tiempo real</span>
+    </div>
+</a>
                         <a href="<?=site_url('plugin-wordpress-buscador-empresas') ?>">
                             <div class="nav-item-icon">🧩</div>
                             <div>
@@ -115,7 +115,7 @@
                         <a href="<?=site_url('api-empresas') ?>" class="mobile-nav-link">
                             <span>API Empresas</span>
                         </a>
-                        <a href="<?=site_url('leads-empresas-nuevas') ?>" class="mobile-nav-link">
+                        <a href="<?= getRadarRedirect('mobile_header') ?>" class="mobile-nav-link">
                             <span>Radar Inteligente</span>
                         </a>
                         <a href="<?=site_url('plugin-wordpress-buscador-empresas') ?>" class="mobile-nav-link">

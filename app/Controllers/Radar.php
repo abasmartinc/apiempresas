@@ -100,11 +100,24 @@ class Radar extends BaseController
      */
     public function demo()
     {
+        // Redirecting demo to preview to unify the flow
+        return redirect()->to(site_url('radar/preview'));
+    }
+
+    /**
+     * Nueva página de Preview (Pre-registro)
+     * Muestra valor real antes de pedir el email.
+     */
+    public function preview()
+    {
+        if (session('logged_in')) {
+            return redirect()->to(site_url('radar'));
+        }
+
         $db = \Config\Database::connect();
         $metricsService = new \App\Libraries\RadarMetricsService();
 
         // 1. Selección de Empresas Curadas (Top Oportunidades B2B)
-        // Buscamos empresas con Score > 80 y sectores B2B
         $builder = $this->companyModel->builder();
         $builder->select('
             companies.id, 
@@ -120,11 +133,9 @@ class Radar extends BaseController
         ');
         $builder->join('company_radar_scores crs', 'crs.company_id = companies.id', 'inner');
         
-        // Filtro de "Elite" para la demo
-        $builder->where('crs.score_total >=', 82);
+        $builder->where('crs.score_total >=', 80);
         $builder->whereIn('crs.priority_level', ['alta', 'muy_alta']);
         
-        // Priorizar sectores B2B para mayor credibilidad de venta
         $builder->groupStart()
             ->like('companies.cnae_label', 'Tecnolog')
             ->orLike('companies.cnae_label', 'Consult')
@@ -135,28 +146,140 @@ class Radar extends BaseController
         ->groupEnd();
 
         $builder->orderBy('crs.score_total', 'DESC');
-        $builder->limit(12);
+        $builder->limit(5); // 5 empresas como pide el spec
         
         $companies = $builder->get()->getResultArray();
 
-        // 2. Cálculos de Pipeline Dinámicos (basados en el volumen total del día para dar escala)
-        $todayCount = $this->countNewCompanies('hoy');
-        $pipelineVolume = $todayCount > 100 ? $todayCount : 206; // Usar 206 como default si hay pocos datos (según request)
-        $pipelineMetrics = $metricsService->getMetrics($pipelineVolume);
-
-        // 3. Preparar estrategias para la demo (reutilizando lógica de score_reasons)
+        // Procesar estrategias para el JS de la demo
         foreach ($companies as &$co) {
             $co['strategy'] = $this->generateDemoStrategy($co);
+            $co['lead_score_data'] = ['numeric' => $co['score_total'], 'base' => $co['score_total']];
         }
 
+        // 2. Métricas de Escala
+        $realCount = $this->countNewCompanies('hoy');
+        $todayCount = $realCount > 100 ? $realCount : 206; // Fallback to 206 as per user's earlier copy
+        $pipelineMetrics = $metricsService->getMetrics($todayCount);
+
+        return view('radar/preview', [
+            'companies'       => $companies,
+            'opps_count'      => $todayCount,
+            'pipelineMetrics' => $pipelineMetrics
+        ]);
+    }
+
+    /**
+     * Procesa la captura de email desde /radar/preview
+     */
+    public function preview_store()
+    {
+        $email = strtolower(trim((string) $this->request->getPost('email')));
+        
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Por favor, introduce un email válido.']);
+        }
+
+        $userModel = new \App\Models\UserModel();
+        $user = $userModel->where('email', $email)->first();
+
+        if ($user) {
+            // Autologin para usuarios existentes para maximizar conversión en el funnel Radar,
+            // excepto para administradores por seguridad.
+            if (($user->is_admin ?? 0) == 1) {
+                return $this->response->setJSON([
+                    'status' => 'exists', 
+                    'message' => 'Por seguridad, inicia sesión con tu cuenta de administrador.',
+                    'redirect' => site_url('enter?redirect=radar&prefill_email=' . urlencode($email))
+                ]);
+            }
+
+            // Auto-Login
+            session()->regenerate();
+            session()->set([
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'user_name' => $user->name,
+                'logged_in' => true,
+            ]);
+
+            $userModel->update($user->id, ['last_login_at' => date('Y-m-d H:i:s')]);
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'redirect' => site_url('radar')
+            ]);
+        }
+
+        // Crear nuevo usuario (Quick Register Flow)
+        $password = bin2hex(random_bytes(8));
+        $token = bin2hex(random_bytes(32));
+        $expires = date('Y-m-d H:i:s', strtotime('+48 hours'));
+
         $data = [
-            'companies' => $companies,
-            'metrics'   => $pipelineMetrics,
-            'opps_count' => $pipelineVolume,
-            'title'     => 'Radar Demo - Oportunidades de Negocio en Tiempo Real'
+            'name' => explode('@', $email)[0],
+            'email' => $email,
+            'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+            'reset_token' => $token,
+            'reset_expires' => $expires,
+            'is_active' => 1,
+            'api_access' => 1,
+            'source_app' => 'apiempresas',
+            'preferred_product' => 'radar',
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
         ];
 
-        return view('radar/demo', $data);
+        try {
+            $user_id = $userModel->insert($data);
+            
+            // API key and Subscription (Free)
+            (new \App\Models\ApikeysModel())->insert([
+                'user_id' => $user_id,
+                'name' => 'Default API Key',
+                'api_key' => bin2hex(random_bytes(32)),
+                'is_active' => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            (new \App\Models\UsersuscriptionsModel())->insert([
+                'user_id' => $user_id,
+                'plan_id' => 1,
+                'status' => 'active',
+                'current_period_start' => date('Y-m-d H:i:s'),
+                'current_period_end' => date('Y-m-d H:i:s', strtotime('+1 month')),
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            // Notifications
+            $emailService = new \App\Services\EmailService();
+            $emailService->sendRegistrationAdminNotification([
+                'user_id' => $user_id,
+                'name'    => $data['name'],
+                'email'   => $email,
+                'company' => 'N/A (Radar Preview)'
+            ]);
+            $emailService->sendSetPasswordEmail($email, $token);
+
+            // Auto-Login
+            session()->regenerate();
+            session()->set([
+                'user_id' => $user_id,
+                'user_email' => $email,
+                'user_name' => $data['name'],
+                'logged_in' => true,
+            ]);
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'redirect' => site_url('radar')
+            ]);
+
+        } catch (\Throwable $e) {
+            log_message('error', 'Preview Register failed: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Error al crear la cuenta. Inténtalo de nuevo.']);
+        }
     }
 
     /**
@@ -181,10 +304,11 @@ class Radar extends BaseController
     public function index()
     {
         if (!session('logged_in')) {
-            return redirect()->to(site_url('register/quick?redirect=radar'));
+            return redirect()->to(site_url('radar/preview?source=direct_radar'));
         }
 
         $userId = session('user_id');
+        $source = $this->request->getGet('source') ?? 'direct';
         
         // Verificación de suscripción activa
         $activePlan = $this->subscriptionModel->getActivePlanByUserId($userId);
@@ -395,6 +519,7 @@ class Radar extends BaseController
         $provinces = $db->query("SELECT province as name FROM seo_stats ORDER BY total_companies DESC LIMIT 52")->getResultArray();
         
         $data = [
+            'source' => $source,
             'stats' => $stats,
             'crmStats' => $crmStats,
             'metricsService' => $metricsService,

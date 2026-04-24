@@ -77,10 +77,7 @@
             color: #1e293b;
             transform: translateY(-1px);
         }
-        .btn-email:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+        .btn-email:disabled { opacity: 0.6; cursor: not-allowed; }
         
         .upsell-card {
             background: linear-gradient(135deg, #334155, #1e293b);
@@ -94,52 +91,26 @@
             flex-direction: column;
             justify-content: center;
         }
-        .upsell-card::before {
-            content: '';
-            position: absolute;
-            top: 0; right: 0;
-            width: 250px; height: 250px;
-            background: radial-gradient(circle, rgba(33, 82, 255, 0.2) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        
-        /* CONFETTI BURST (detrás del card) */
+
         .aba-confetti-burst {
             position: absolute;
-            inset: -48px;
+            top: 50%; left: 50%;
+            width: 1px; height: 1px;
             pointer-events: none;
-            overflow: visible;
-            z-index: 1;
+            z-index: 10;
         }
         .aba-confetti-burst .confetti {
             position: absolute;
-            top: 52%;
-            left: 50%;
-            width: 8px;
-            height: 8px;
-            opacity: 0.92;
-            transform-origin: center;
-            animation: confetti-burst 2.7s cubic-bezier(.16,.84,.22,1) forwards;
-            will-change: transform, opacity;
-            filter: blur(.12px);
+            top: 0; left: 0;
+            opacity: 0;
+            animation: burst 1.8s ease-out forwards;
         }
-        @keyframes confetti-burst {
-            0% {
-                transform: translate(0, 0) scale(0.55) rotate(var(--spinBase, 0deg));
-                opacity: 0;
-            }
+        @keyframes burst {
+            0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 0; }
             10% { opacity: 1; }
             60% { opacity: 1; }
-            100% {
-                transform: translate(var(--x), var(--y)) scale(1) rotate(calc(var(--spinBase, 0deg) + 520deg));
-                opacity: 0;
-            }
+            100% { transform: translate(var(--x), var(--y)) scale(1) rotate(calc(var(--spinBase, 0deg) + 520deg)); opacity: 0; }
         }
-        .aba-confetti-burst .confetti.dot { width: 6px; height: 6px; border-radius: 999px; }
-        .aba-confetti-burst .confetti.pill { width: 14px; height: 6px; border-radius: 999px; }
-        .aba-confetti-burst .confetti.diamond { width: 10px; height: 10px; border-radius: 3px; transform: rotate(45deg); }
-        .aba-confetti-burst .confetti.line { width: 18px; height: 3px; border-radius: 999px; opacity: 0.85; }
-        @media (prefers-reduced-motion: reduce) { .aba-confetti-burst { display:none; } }
     </style>
 </head>
 <body>
@@ -154,17 +125,42 @@
                     <div class="check-icon">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><polyline points="20 6 9 17 4 12"></polyline></svg>
                     </div>
-
-                    <h1 style="font-size: 2.5rem; font-weight: 900; color: #1e293b; margin-bottom: 12px; letter-spacing: -0.02em;">¡Pago completado!</h1>
+                    <h1 style="font-size: 2.5rem; font-weight: 900; color: #1e293b; margin-bottom: 12px; letter-spacing: -0.02em;">¡Listado desbloqueado!</h1>
                     <p style="color: #64748b; font-size: 1.1rem; line-height: 1.5; margin-bottom: 32px; max-width: 500px; margin-left: auto; margin-right: auto;">
-                        Tu listado oficial ha sido procesado correctamente. Ya puedes descargarlo y empezar a trabajar con los datos.
+                        Este listado incluye <strong><?= number_format($total_count ?? 0, 0, ',', '.') ?> empresas</strong> detectadas hoy.
+                        <br>
+                        <span style="color: #ef4444; font-weight: 700;">Pero mañana habrá nuevas oportunidades disponibles en el Radar.</span>
                     </p>
 
-                    <a href="<?= esc($download_url) ?>" class="btn-download">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Descargar Listado (.xlsx)
-                    </a>
+                    <div style="background: #f8fafc; border-radius: 16px; padding: 24px; margin-bottom: 32px; border: 1px solid #e2e8f0; text-align: left;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <h4 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 12px;">Tu Excel</h4>
+                                <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.9rem; color: #475569;">
+                                    <li style="margin-bottom: 8px;">✅ <?= number_format($total_count ?? 0, 0, ',', '.') ?> empresas</li>
+                                    <li>❌ Datos estáticos (hoy)</li>
+                                </ul>
+                            </div>
+                            <div style="border-left: 1px solid #e2e8f0; padding-left: 20px;">
+                                <h4 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #3b82f6; margin-bottom: 12px;">Radar PRO</h4>
+                                <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.9rem; color: #475569;">
+                                    <li style="margin-bottom: 8px;">🚀 Oportunidades ilimitadas</li>
+                                    <li>⚡ Actualización cada hora</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
 
+                    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px; margin: 0 auto;">
+                        <a href="<?= esc($download_url) ?>" class="btn-download" id="excel_main_download_btn" style="width: 100%; justify-content: center;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Descargar Listado (.xlsx)
+                        </a>
+                        
+                        <a href="<?= site_url('radar?source=excel') ?>" id="excel_to_radar_cta" style="display: inline-flex; justify-content: center; align-items: center; gap: 10px; background: radial-gradient(circle at 0% 0%, #fefce8 0, #facc15 35%, #f97316 100%); color: #0f172a; font-weight: 800; text-decoration: none; font-size: 1.15rem; padding: 14px 24px; border-radius: 12px; box-shadow: 0 12px 30px rgba(249, 115, 22, 0.4); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 16px 40px rgba(249, 115, 22, 0.5)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 12px 30px rgba(249, 115, 22, 0.4)';">
+                            Ver todas las oportunidades ahora <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </a>
+                    </div>
                     <div style="display: flex; justify-content: center;">
                         <button type="button" class="btn-email ae-email-export-btn" 
                                 data-url="<?= site_url('checkout/radar-email?' . http_build_query($export_params ?? [])) ?>"
@@ -182,26 +178,26 @@
 
             <!-- DERECHA: UPSELL RADAR -->
             <div class="upsell-card">
-                <div style="display: inline-block; background: #2152ff; color: white; padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.05em; align-self: flex-start;">
-                    Acceso Ilimitado
+                <div style="display: inline-block; background: #ef4444; color: white; padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.05em; align-self: flex-start;">
+                    ⚠️ No te quedes atrás
                 </div>
                 
-                <h3 style="font-size: 1.75rem; font-weight: 900; margin-bottom: 16px; line-height: 1.2;">Mientras tanto puedes probar Radar gratis</h3>
+                <h3 style="font-size: 1.75rem; font-weight: 900; margin-bottom: 16px; line-height: 1.2; color: white;">Evita que la competencia contacte antes</h3>
                 
                 <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 28px; font-size: 1rem;">
-                    No esperes a comprar listados uno a uno. Con Radar B2B recibes alertas diarias de nuevas empresas y descargas ilimitadas de cualquier sector.
+                    Mientras tú descargas este listado, otros proveedores están recibiendo alertas en tiempo real de nuevas empresas que se crean hoy mismo.
                 </p>
                 
                 <ul style="list-style: none; padding: 0; margin: 0 0 32px 0;">
-                    <?php foreach (['Descargas ilimitadas', 'Alertas diarias por email', 'Filtros avanzados'] as $feat): ?>
+                    <?php foreach (['Descargas ilimitadas diarias', 'Alertas por email al instante', 'Acceso a datos de contacto PRO'] as $feat): ?>
                     <li style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: #f8fafc; font-weight: 600; font-size: 0.95rem;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> <?= $feat ?>
                     </li>
                     <?php endforeach; ?>
                 </ul>
 
-                <a href="<?= site_url('radar') ?>" style="display: inline-flex; justify-content: center; align-items: center; gap: 10px; background: radial-gradient(circle at 0% 0%, #fefce8 0, #facc15 35%, #f97316 100%); color: #0f172a; font-weight: 800; text-decoration: none; font-size: 1.15rem; padding: 14px 24px; border-radius: 12px; box-shadow: 0 12px 30px rgba(249, 115, 22, 0.4); transition: transform 0.2s, box-shadow 0.2s; width: 100%;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 16px 40px rgba(249, 115, 22, 0.5)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 12px 30px rgba(249, 115, 22, 0.4)';">
-                    Ver empresas en el Radar <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                <a href="<?= site_url('radar') ?>" id="excel_to_radar_cta" style="display: inline-flex; justify-content: center; align-items: center; gap: 10px; background: radial-gradient(circle at 0% 0%, #fefce8 0, #facc15 35%, #f97316 100%); color: #0f172a; font-weight: 800; text-decoration: none; font-size: 1.15rem; padding: 14px 24px; border-radius: 12px; box-shadow: 0 12px 30px rgba(249, 115, 22, 0.4); transition: transform 0.2s, box-shadow 0.2s; width: 100%;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 16px 40px rgba(249, 115, 22, 0.5)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 12px 30px rgba(249, 115, 22, 0.4)';">
+                    Ver nuevas oportunidades ahora <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                 </a>
             </div>
         </div>
@@ -209,6 +205,8 @@
 
     <?= view('partials/footer') ?>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         (function () {
             const container = document.querySelector('.aba-confetti-burst');
@@ -222,176 +220,66 @@
                 const el = document.createElement('span');
                 const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
                 el.className = `confetti ${shape}`;
-
                 el.style.background = COLORS[Math.floor(Math.random() * COLORS.length)];
-
-                if (shape === 'dot') {
-                    const s = 5 + Math.random() * 3;
-                    el.style.width = `${s}px`;
-                    el.style.height = `${s}px`;
-                    el.style.borderRadius = '999px';
-                    el.style.setProperty('--spinBase', '0deg');
-                } else if (shape === 'pill') {
-                    const w = 12 + Math.random() * 10;
-                    const h = 5 + Math.random() * 3;
-                    el.style.width = `${w}px`;
-                    el.style.height = `${h}px`;
-                    el.style.borderRadius = '999px';
-                    el.style.setProperty('--spinBase', `${Math.floor(Math.random() * 180)}deg`);
-                } else if (shape === 'line') {
-                    const w = 14 + Math.random() * 14;
-                    const h = 3 + Math.random() * 2;
-                    el.style.width = `${w}px`;
-                    el.style.height = `${h}px`;
-                    el.style.borderRadius = '999px';
-                    el.style.opacity = '0.85';
-                    el.style.setProperty('--spinBase', `${Math.floor(Math.random() * 180)}deg`);
-                } else if (shape === 'diamond') {
-                    const s = 8 + Math.random() * 6;
-                    el.style.width = `${s}px`;
-                    el.style.height = `${s}px`;
-                    el.style.borderRadius = '3px';
-                    el.style.setProperty('--spinBase', `${45 + Math.floor(Math.random() * 60) - 30}deg`);
-                }
-
-                el.style.transform = `translate(${(-20 + Math.random() * 40).toFixed(1)}px, ${(-12 + Math.random() * 24).toFixed(1)}px)`;
+                el.style.position = 'absolute';
 
                 const angle = (-Math.PI / 2) + (Math.random() - 0.5) * (Math.PI / 1.3);
                 const distance = 220 + Math.random() * 240;
-
                 const x = Math.cos(angle) * distance;
                 const y = Math.sin(angle) * distance;
 
                 el.style.setProperty('--x', `${x.toFixed(1)}px`);
                 el.style.setProperty('--y', `${y.toFixed(1)}px`);
-
+                el.style.setProperty('--spinBase', `${Math.floor(Math.random() * 180)}deg`);
                 el.style.animationDelay = `${(Math.random() * 0.22).toFixed(3)}s`;
 
                 container.appendChild(el);
             }
+        })();
 
-            setTimeout(() => {
-                container.innerHTML = '';
-            }, 3200);
-        })();        document.addEventListener('DOMContentLoaded', function() {
-            const emailBtn = document.querySelector('.ae-email-export-btn');
-            const defaultEmail = <?= json_encode($user_email ?? session('last_export_email') ?? '') ?>;
+        $(document).ready(function() {
+            // Eventos Tracking
+            trackEvent('excel_purchase', {
+                provincia: '<?= esc($export_params["provincia"] ?? "") ?>',
+                total: <?= $total_count ?? 0 ?>
+            });
+            trackEvent('excel_post_download_view');
+            trackEvent('excel_to_radar_view');
+            trackEvent('excel_success_view');
 
-            if (emailBtn) {
-                emailBtn.addEventListener('click', function() {
-                    const url = this.getAttribute('data-url');
+            $('#excel_to_radar_cta').on('click', function() {
+                trackEvent('excel_to_radar_click');
+            });
+            
+            $('#excel_main_download_btn').on('click', function() {
+                trackEvent('excel_download_start');
+            });
 
-                    Swal.fire({
-                        title: '¿A qué correo lo enviamos?',
-                        text: 'Te mandaremos el listado al correo electrónico que nos digas.',
-                        input: 'email',
-                        inputLabel: 'Tu correo profesional',
-                        inputPlaceholder: 'email@ejemplo.com',
-                        inputValue: defaultEmail,
-                        showCancelButton: true,
-                        confirmButtonText: 'Enviar listado',
-                        cancelButtonText: 'Ahora no',
-                        buttonsStyling: false,
-                        iconHtml: '<svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#133A82" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
-                        customClass: {
-                            icon: 'border-0',
-                            confirmButton: 'ae-swal-confirm-btn',
-                            cancelButton: 'ae-swal-cancel-btn'
-                        },
-                        didOpen: () => {
-                            // Inject custom styles for the gradient button if not in CSS
-                            const style = document.createElement('style');
-                            style.innerHTML = `
-                                .ae-swal-confirm-btn {
-                                    background: linear-gradient(90deg, #2152ff, #12b48a) !important;
-                                    color: white !important;
-                                    border: none !important;
-                                    padding: 12px 30px !important;
-                                    border-radius: 12px !important;
-                                    font-weight: 700 !important;
-                                    cursor: pointer !important;
-                                    margin: 0 5px !important;
-                                    box-shadow: 0 6px 18px rgba(33, 82, 255, .25) !important;
-                                    transition: all .2s ease !important;
-                                }
-                                .ae-swal-confirm-btn:hover {
-                                    box-shadow: 0 10px 25px rgba(33, 82, 255, .35) !important;
-                                    transform: translateY(-1px);
-                                }
-                                .ae-swal-cancel-btn {
-                                    background: #6b7280 !important;
-                                    color: white !important;
-                                    border: none !important;
-                                    padding: 12px 30px !important;
-                                    border-radius: 12px !important;
-                                    font-weight: 700 !important;
-                                    cursor: pointer !important;
-                                    margin: 0 5px !important;
-                                }
-                            `;
-                            document.head.appendChild(style);
-                        },
-                        showLoaderOnConfirm: true,
-                        preConfirm: (email) => {
-                            if (!email) {
-                                Swal.showValidationMessage('¡Necesitamos un email!');
-                                return false;
-                            }
-                            if (!email.includes('@')) {
-                                Swal.showValidationMessage('Parece que el email no es válido.');
-                                return false;
-                            }
-
-                            // Start AJAX call
-                            return fetch(url, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/x-www-form-urlencoded',
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                },
-                                body: 'email=' + encodeURIComponent(email)
-                            })
-                            .then(response => {
-                                if (!response.ok) throw new Error(response.statusText);
-                                return response.json();
-                            })
-                            .catch(error => {
-                                Swal.showValidationMessage(`Error: ${error}`);
-                            });
-                        },
-                        allowOutsideClick: () => !Swal.isLoading()
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            const data = result.value;
-                            if (data.status === 'success') {
-                                Swal.fire({
-                                    title: '¡Listado enviado!',
-                                    text: 'El Excel ha sido enviado correctamente.',
-                                    icon: 'success',
-                                    confirmButtonText: 'Entendido',
-                                    buttonsStyling: false,
-                                    customClass: {
-                                        confirmButton: 'ae-swal-confirm-btn'
-                                    }
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: 'No se pudo enviar',
-                                    text: data.message,
-                                    icon: 'error',
-                                    confirmButtonText: 'Cerrar',
-                                    buttonsStyling: false,
-                                    customClass: {
-                                        confirmButton: 'ae-swal-cancel-btn'
-                                    }
-                                });
-                            }
-                        }
-                    });
+            $('.ae-email-export-btn').on('click', function() {
+                const url = $(this).data('url');
+                Swal.fire({
+                    title: 'Enviar listado por email',
+                    input: 'email',
+                    inputPlaceholder: 'tu@email.com',
+                    showCancelButton: true,
+                    confirmButtonText: 'Enviar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.post(url, { email: result.value }, function(res) {
+                            Swal.fire('Enviado', 'Revisa tu bandeja de entrada', 'success');
+                        });
+                    }
                 });
-            }
+            });
         });
 
+        function trackEvent(type, metadata = {}) {
+            $.post('<?= site_url("api/tracking/event") ?>', {
+                event_type: type,
+                source: 'excel_success',
+                metadata: JSON.stringify(metadata)
+            });
+        }
     </script>
 </body>
 </html>

@@ -489,56 +489,49 @@ $strategiesJson = json_encode(array_map(function ($co) {
         <div class="container">
             <div class="radar-hero__shell">
 
-                <div class="radar-hero__badge demo-badge-green">
-                    <span class="radar-hero__badge-dot demo-badge-dot"></span>
-                    DEMO COMERCIAL · RADAR B2B
+                <div class="radar-hero__badge demo-badge-green" style="background:#f8fafc!important; border-color:#e2e8f0!important; color:#64748b!important; margin-bottom: 24px;">
+                    +<?= $opps_count ?> empresas detectadas HOY — varias ya están cerrando proveedor
                 </div>
 
                 <h1 class="radar-hero__title">
-                    Consigue clientes reales en menos de 7 días<br>
-                    <span>sin hacer prospección manual</span>
+                    +<?= $opps_count ?> empresas detectadas HOY que necesitan proveedor ahora mismo
                 </h1>
 
-                <p style="font-size:1rem;font-weight:700;color:#15803d;background:#f0fdf4;border:1px solid #bbf7d0;display:inline-block;padding:10px 20px;border-radius:10px;margin:0 0 8px;">
-                    💰 Hasta <strong style="font-size:1.4rem;letter-spacing:-.03em;"><?= number_format($metrics['pipeline_max'] / 1000000, 1, ',', '.') ?>M€</strong> en oportunidades detectadas hoy
-                </p>
-                <p style="font-size:.82rem;color:#64748b;font-weight:600;margin:0 0 20px;">Empresas reales que puedes contactar hoy mismo. Sin búsqueda manual. Sin permanencia · Cancela cuando quieras</p>
-
-                <p class="radar-hero__subtitle">
-                    Detectamos empresas recién creadas con alta probabilidad de necesitar tus servicios
-                    y te decimos <strong>a quién contactar</strong> y <strong>qué decirle</strong>.
+                <p class="radar-hero__subtitle" style="max-width: 680px; margin: 0 auto 12px;">
+                    Empresas recién creadas que necesitan proveedores ahora mismo. Accede antes que otros equipos comerciales.
                 </p>
 
-                <div class="demo-bullets">
-                    <span class="demo-bullet">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                        Nuevas empresas cada día
-                    </span>
-                    <span class="demo-bullet">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                        Alta probabilidad de compra
-                    </span>
-                    <span class="demo-bullet">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                        Mensaje listo para enviar
-                    </span>
+                <div style="margin-bottom: 32px;">
+                    <p style="font-size: 1.1rem; font-weight: 700; color: #b45309; margin-bottom: 4px;">
+                        Muchas de estas empresas están cerrando proveedor en los próximos días.
+                    </p>
+                    <p style="font-size: .9rem; font-weight: 600; color: #d97706; margin-bottom: 0;">
+                        Algunas oportunidades desaparecen en menos de 72h.
+                    </p>
+                </div>
+
+                <div style="margin-bottom: 24px; font-size: 0.85rem; color: #64748b; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="color:#10b981;"><polyline points="20 6 9 17 4 12"/></svg>
+                    Datos reales del BORME actualizados diariamente + scoring propio basado en actividad empresarial
                 </div>
 
                 <div class="radar-hero__actions">
                     <a href="#demo-table"
                        class="radar-btn radar-btn--primary"
-                       onclick="trackRadarEvent({event_type:'click_cta', source:'hero', cta_label:'Ver clientes disponibles ahora', url:'#demo-table'}); document.getElementById('demo-table').scrollIntoView({behavior:'smooth'}); return false;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        Ver clientes disponibles ahora
-                    </a>
-                    <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=hero_secondary') ?>" 
-                       class="radar-btn radar-btn--ghost"
-                       onclick="trackRadarEvent({event_type:'click_cta', source:'hero_secondary', cta_label:'Empezar hoy — 79€/mes', url:'/checkout/radar-export?type=subscription&plan=radar&source=hero_secondary'})">
-                        Empezar hoy — 79€/mes
+                       style="font-size: 1.1rem; padding: 18px 32px;"
+                       onclick="trackRadarEvent({event_type:'click_cta', source:'hero', cta_label:'Acceder a estas empresas antes que tu competencia', url:'#demo-table'}); document.getElementById('demo-table').scrollIntoView({behavior:'smooth'}); return false;">
+                        👉 Acceder a estas empresas antes que tu competencia
                     </a>
                 </div>
 
-                <p class="radar-hero__note">Sin permanencia · Cancela cuando quieras · ⚡ 1 cliente lo paga todo</p>
+                <div style="margin-top: 24px; text-align: center;">
+                    <p style="margin: 0 0 6px; font-size: 1.1rem; font-weight: 800; color: #b45309;">
+                        Hoy hay +<?= $opps_count ?> empresas esperando ser contactadas
+                    </p>
+                    <p style="margin: 0; font-size: .95rem; color: #64748b; font-weight: 600;">
+                        Cada día nuevas empresas aparecen y otras desaparecen (ya contactadas)
+                    </p>
+                </div>
             </div>
         </div>
     </section>
@@ -551,77 +544,40 @@ $strategiesJson = json_encode(array_map(function ($co) {
     </div>
 
 
-    <!-- ② PIPELINE STATS ────────────────────────────── -->
+    <!-- ② VALOR ────────────────────────────── -->
     <section class="pipeline-band">
         <div class="container">
+            <div class="pipeline-cards" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 0;">
 
-            <!-- Headline -->
-            <div class="pipeline-headline">
-                <div class="pipeline-live-tag">
-                    <span class="pipeline-live-dot"></span>
-                    Pipeline activo · Actualizado en tiempo real
-                </div>
-                <h2>Este es el dinero que hay disponible <em style="font-style:normal;background:linear-gradient(90deg,#1e3a8a,#2563eb);-webkit-background-clip:text;background-clip:text;color:transparent;">hoy</em></h2>
-                <p>Empresas recién creadas con alta probabilidad de necesitar servicios B2B. Detectadas automáticamente.</p>
-            </div>
-
-            <!-- 3 tarjetas -->
-            <div class="pipeline-cards">
-
-                <div class="pipeline-card pipeline-card--blue">
-                    <div class="pipeline-card__icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <div class="pipeline-card pipeline-card--blue" style="justify-content: center; align-items: center; text-align: center; padding: 32px 24px;">
+                    <div class="pipeline-card__icon" style="margin-bottom: 20px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
                         </svg>
                     </div>
-                    <div class="pipeline-card__label">Leads detectados</div>
-                    <div class="pipeline-card__num"><?= $opps_count ?></div>
-                    <div class="pipeline-card__desc">Empresas nuevas constituidas hoy con señales de compra activas en su sector</div>
+                    <div class="pipeline-card__label" style="font-size:1.05rem;font-weight:800;color:#0f172a;margin-bottom:0;text-transform:none;letter-spacing:normal;">Detecta empresas en su momento de compra</div>
                 </div>
 
-                <div class="pipeline-card pipeline-card--green">
-                    <div class="pipeline-card__icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <div class="pipeline-card pipeline-card--green" style="justify-content: center; align-items: center; text-align: center; padding: 32px 24px;">
+                    <div class="pipeline-card__icon" style="margin-bottom: 20px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
                             <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                         </svg>
                     </div>
-                    <div class="pipeline-card__label">Clientes reales estimados</div>
-                    <div class="pipeline-card__num"><?= $metrics['clients_min'] ?> – <?= $metrics['clients_max'] ?></div>
-                    <div class="pipeline-card__desc">Con una tasa de cierre conservadora del 8–15%, este es el volumen alcanzable este mes</div>
+                    <div class="pipeline-card__label" style="font-size:1.05rem;font-weight:800;color:#0f172a;margin-bottom:0;text-transform:none;letter-spacing:normal;">Prioriza por probabilidad real de cierre</div>
                 </div>
 
-                <div class="pipeline-card pipeline-card--amber">
-                    <div class="pipeline-card__icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <div class="pipeline-card pipeline-card--amber" style="justify-content: center; align-items: center; text-align: center; padding: 32px 24px;">
+                    <div class="pipeline-card__icon" style="margin-bottom: 20px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                         </svg>
                     </div>
-                    <div class="pipeline-card__label">💰 Pipeline en euros</div>
-                    <div class="pipeline-card__num" style="font-size:clamp(2.6rem,5vw,3.8rem);color:#15803d;"><?= number_format($metrics['pipeline_min'] / 1000000, 1, ',', '.') ?>M€</div>
-                    <div class="pipeline-card__sub">hasta <strong style="color:#15803d;"><?= number_format($metrics['pipeline_max'] / 1000000, 1, ',', '.') ?>M€</strong></div>
-                    <div class="pipeline-card__desc">Estimado con tickets de 5.000€ – 12.000€ por cliente cerrado en primer contrato</div>
+                    <div class="pipeline-card__label" style="font-size:1.05rem;font-weight:800;color:#0f172a;margin-bottom:0;text-transform:none;letter-spacing:normal;">Contacta antes que tu competencia</div>
                 </div>
 
             </div>
-
-            <!-- ROI callout -->
-            <div class="pipeline-roi">
-                <div class="pipeline-roi__icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                </div>
-                <span class="pipeline-roi__text">
-                    <strong>💰 Estas son oportunidades que puedes convertir en clientes tú mismo.</strong> 👉 Solo necesitas 1 cliente para rentabilizar el Radar — un cliente de 5.000€ cubre más de 5 años.
-                </span>
-                <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=pipeline') ?>" 
-                   class="pipeline-roi__cta"
-                   onclick="trackRadarEvent({event_type:'click_cta', source:'pipeline', cta_label:'Empezar hoy — 79€/mes', url:'/checkout/radar-export?type=subscription&plan=radar&source=pipeline'})">
-                    Empezar hoy — 79€/mes
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </a>
-                <p style="margin:8px 0 0;font-size:11px;color:#94a3b8;font-weight:600;">Sin permanencia · Cancela cuando quieras</p>
-            </div>
-
         </div>
     </section>
 
@@ -630,20 +586,11 @@ $strategiesJson = json_encode(array_map(function ($co) {
     <section class="radar-section" id="demo-table">
         <div class="container">
 
-            <div style="margin-bottom:24px;">
-                <div class="radar-kicker" style="margin-bottom:12px;">🔥 Oportunidades detectadas hoy · Selección curada</div>
-                <h2 class="radar-title" style="margin:0 0 6px;">Clientes disponibles ahora</h2>
-                <p class="radar-subtitle" style="margin:0 0 16px;">Empresas recién creadas con alta probabilidad de necesitar tus servicios.</p>
-
-                <!-- Mini wow teaser -->
-                <div style="display:inline-flex;align-items:center;gap:16px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 20px;box-shadow:0 2px 12px rgba(15,23,42,.06);margin-bottom:20px;flex-wrap:wrap;">
-                    <span style="font-size:.82rem;font-weight:700;color:#1e293b;">🧠 Para cada empresa Radar te dice exactamente:</span>
-                    <span style="font-size:.8rem;color:#64748b;">Qué venderle · Cómo enfocarlo · Qué decirle</span>
-                    <a href="#wow-moment" onclick="document.getElementById('wow-moment').scrollIntoView({behavior:'smooth'});return false;"
-                       style="font-size:.8rem;font-weight:800;color:#2563eb;background:#eff6ff;border:1px solid #bfdbfe;padding:6px 14px;border-radius:8px;text-decoration:none;white-space:nowrap;">Ver ejemplo →</a>
+            <div style="margin-bottom:24px; text-align: center;">
+                <div class="pipeline-live-tag" style="margin-bottom: 12px; display: inline-flex;">
+                    <span class="pipeline-live-dot"></span>
+                    Vista real del sistema — datos actualizados en tiempo real
                 </div>
-
-                <p style="font-size:.85rem;font-weight:700;color:#b45309;background:#fffbeb;border:1px solid #fde68a;display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;">⚡ Las mejores oportunidades se saturan en los primeros días — actúa antes que tu competencia</p>
             </div>
 
             <div class="radar-preview">
@@ -657,20 +604,21 @@ $strategiesJson = json_encode(array_map(function ($co) {
                     </div>
                 </div>
 
-                <table class="radar-table">
-                    <thead>
-                        <tr>
-                            <th>Empresa</th>
-                            <th>Ubicación</th>
-                            <th>Ticket Est.</th>
-                            <th>Prioridad</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($companies as $i => $co): ?>
-                        <tr>
-                            <td>
+                <div class="radar-table-wrapper" style="position: relative; border-radius: 0 0 20px 20px; overflow: hidden; min-height: 520px; background: #fff;">
+                    <table class="radar-table" style="margin-bottom: 0; width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="position: relative; z-index: 5;">
+                                <th>Empresa</th>
+                                <th>Ubicación</th>
+                                <th class="desktop-only">Ticket Est.</th>
+                                <th class="desktop-only">Prioridad</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($companies as $i => $co): ?>
+                            <tr style="<?= $i >= 3 ? 'filter: blur(5px); opacity: 0.4; pointer-events: none;' : '' ?>">
+                                <td>
                                 <div class="radar-table__company"><?= esc($co['company_name']) ?></div>
                                 <div class="radar-table__meta" style="font-size:.8rem;margin-top:3px;"><?= esc($co['cnae_label'] ?? '—') ?></div>
                             </td>
@@ -691,18 +639,36 @@ $strategiesJson = json_encode(array_map(function ($co) {
                             </td>
                         </tr>
                         <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
 
-                <div class="radar-preview__cta">
-                    <p style="margin:0 0 14px;font-size:.9rem;color:#64748b;font-weight:600;">
-                        Con el Radar completo accedes a <strong>todas las oportunidades del día</strong>, filtros avanzados y exportación a CRM.
-                    </p>
-                    <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=tabla') ?>" 
-                       class="radar-btn radar-btn--primary"
-                       onclick="trackRadarEvent({event_type:'click_cta', source:'tabla_bottom', cta_label:'Ver clientes disponibles ahora', url:'/checkout/radar-export?type=subscription&plan=radar&source=tabla'})">
-                        Ver clientes disponibles ahora →
-                    </a>
+                    <!-- Overlay de Desbloqueo -->
+                    <div style="position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 120px, rgba(255,255,255,0.7) 180px, #ffffff 320px); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: 40px 20px 60px; z-index: 10;">
+                        <div style="max-width: 550px; text-align: center; transform: translateY(-20px);">
+                            <h3 style="font-size: 1.6rem; font-weight: 900; color: #0f172a; margin: 0 0 10px; letter-spacing: -0.02em; line-height: 1.2;">
+                                Estas empresas ya están siendo contactadas — algunas cerrarán proveedor en días
+                            </h3>
+                            <p style="font-size: 1.05rem; color: #b45309; font-weight: 700; margin: 0 0 28px; line-height: 1.5;">
+                                Accede ahora o llegarás tarde
+                            </p>
+                            <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=tabla') ?>" 
+                               class="radar-btn radar-btn--primary"
+                               style="padding: 22px 44px; font-size: 1.15rem; box-shadow: 0 12px 30px -5px rgba(37,99,235,0.5); width: 100%; justify-content: center;"
+                               onclick="trackRadarEvent({event_type:'click_cta', source:'tabla_bottom', cta_label:'Acceder a estas empresas antes que tu competencia', url:'/checkout/radar-export?type=subscription&plan=radar&source=tabla'})">
+                                👉 "Acceder a estas empresas antes que tu competencia"
+                            </a>
+                            <div style="margin-top: 24px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.88rem; color: #94a3b8; font-weight: 700;">
+                                <span style="display: flex; align-items: center; gap: 6px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                    Sin permanencia
+                                </span>
+                                <span style="display: flex; align-items: center; gap: 6px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                    Acceso instantáneo
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 </div>
             </div>
@@ -719,7 +685,7 @@ $strategiesJson = json_encode(array_map(function ($co) {
             <div style="max-width:780px;margin:0 auto;">
 
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">
-                    <span style="font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#2563eb;background:#eff6ff;border:1px solid #bfdbfe;padding:5px 12px;border-radius:999px;">🧠 Ejemplo real de estrategia</span>
+                    <span style="font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#2563eb;background:#eff6ff;border:1px solid #bfdbfe;padding:5px 12px;border-radius:999px;">🧠 Ejemplo real de oportunidad detectada</span>
                     <span style="font-size:.75rem;color:#94a3b8;font-weight:600;">Así funciona Radar con una empresa de hoy</span>
                 </div>
 
@@ -739,31 +705,24 @@ $strategiesJson = json_encode(array_map(function ($co) {
 
                     <div style="padding:24px 28px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                         <div style="background:#f8fafc;border-radius:12px;padding:16px;">
-                            <div style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:8px;">🎯 Por qué es oportunidad</div>
+                            <div style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:8px;">🎯 Por qué es una oportunidad</div>
                             <p style="font-size:.88rem;color:#334155;margin:0;line-height:1.6;"><?= esc($wow['strategy']['motivo'] ?? 'Empresa recién creada con necesidad inmediata de servicios B2B.') ?></p>
                         </div>
                         <div style="background:#f0f7ff;border-radius:12px;padding:16px;">
-                            <div style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#1e40af;margin-bottom:8px;">🚀 Qué venderle primero</div>
+                            <div style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#1e40af;margin-bottom:8px;">🚀 Qué necesita esta empresa</div>
                             <p style="font-size:.88rem;color:#1e3a8a;font-weight:700;margin:0;line-height:1.6;"><?= esc($wow['strategy']['que_vender'] ?? '') ?></p>
                         </div>
                     </div>
 
-                    <div style="padding:0 28px 24px;">
-                        <div style="background:#f1f5f9;border-radius:12px;border:2px dashed #2563eb;padding:18px;">
-                            <div style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#2563eb;margin-bottom:8px;">✉ Mensaje inicial sugerido</div>
-                            <p style="font-size:.9rem;line-height:1.7;color:#1e293b;margin:0 0 14px;font-style:italic;">"<?= esc($wow['strategy']['mensaje'] ?? '') ?>"</p>
-                            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-                                <span style="font-size:.78rem;color:#94a3b8;font-weight:600;">⚠️ Con el Radar completo recibes nombre, teléfono y correo del administrador</span>
-                                <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=estrategia') ?>" 
-                                   class="radar-btn radar-btn--primary" 
-                                   style="font-size:.85rem;padding:10px 20px;"
-                                   onclick="trackRadarEvent({event_type:'click_cta', source:'estrategia', cta_label:'Ver clientes disponibles ahora', url:'/checkout/radar-export?type=subscription&plan=radar&source=estrategia'})">
-                                    Ver clientes disponibles ahora →
-                                </a>
-                            </div>
-                        </div>
-                        <p style="margin:16px 0 0;font-size:.82rem;font-weight:700;color:#2563eb;text-align:center;">👉 Puedes copiar este mensaje y empezar a contactar hoy mismo</p>
-                        </div>
+                    <div style="padding:0 28px 24px; text-align: center;">
+                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=estrategia') ?>" 
+                           class="radar-btn radar-btn--primary" 
+                           style="font-size:1.1rem;padding:16px 32px;"
+                           onclick="trackRadarEvent({event_type:'click_cta', source:'estrategia', cta_label:'Acceder a estas empresas antes que tu competencia', url:'/checkout/radar-export?type=subscription&plan=radar&source=estrategia'})">
+                            👉 "Acceder a estas empresas antes que tu competencia"
+                        </a>
+                        <p style="margin:16px 0 0;font-size:.9rem;font-weight:700;color:#2563eb;text-align:center;">Accede al radar para ver todas las oportunidades activas</p>
+                    </div>
                     </div>
 
                 </div>
@@ -777,12 +736,18 @@ $strategiesJson = json_encode(array_map(function ($co) {
     <section class="radar-section radar-section--soft steps-section">
         <div class="container">
             <div class="radar-heading radar-heading--center" style="margin-bottom:40px;">
-                <div class="radar-kicker">Cómo funciona Radar</div>
-                <h2 class="radar-title" style="margin-top:8px;font-size:1.4rem;">5 pasos, cero trabajo manual</h2>
-                <p class="radar-subtitle" style="font-size:.9rem;">El sistema trabaja solo — tú solo cierras ventas</p>
+                <h2 class="radar-title" style="margin-top:8px;font-size:1.4rem;">Proceso</h2>
             </div>
 
-            <div class="steps-grid">
+            <style>
+                .steps-grid--3 { grid-template-columns: repeat(3, 1fr); }
+                .steps-grid--3::before { left: calc(16.6% + 20px) !important; right: calc(16.6% + 20px) !important; }
+                @media (max-width: 900px) {
+                    .steps-grid--3 { grid-template-columns: 1fr; }
+                    .steps-grid--3::before { display: none; }
+                }
+            </style>
+            <div class="steps-grid steps-grid--3">
 
                 <!-- 1 -->
                 <div class="step-card">
@@ -792,8 +757,7 @@ $strategiesJson = json_encode(array_map(function ($co) {
                         </svg>
                     </div>
                     <div class="step-label">Paso 01</div>
-                    <h3>Detecta</h3>
-                    <p>Escanea el BORME cada día y captura cada empresa nueva constituida en España</p>
+                    <h3>Detecta empresas nuevas</h3>
                 </div>
 
                 <!-- 2 -->
@@ -804,44 +768,18 @@ $strategiesJson = json_encode(array_map(function ($co) {
                         </svg>
                     </div>
                     <div class="step-label">Paso 02</div>
-                    <h3>Analiza</h3>
-                    <p>Evalúa sector, capital y objeto social buscando señales reales de necesidad</p>
+                    <h3>Analiza su potencial</h3>
                 </div>
 
                 <!-- 3 -->
-                <div class="step-card">
-                    <div class="step-icon-wrap step-icon-wrap--3">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                        </svg>
-                    </div>
-                    <div class="step-label">Paso 03</div>
-                    <h3>Estima</h3>
-                    <p>Calcula el ticket potencial y asigna un nivel de prioridad comercial automatizado</p>
-                </div>
-
-                <!-- 4 -->
-                <div class="step-card">
-                    <div class="step-icon-wrap step-icon-wrap--4">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-                        </svg>
-                    </div>
-                    <div class="step-label">Paso 04</div>
-                    <h3>Genera</h3>
-                    <p>La IA crea una estrategia de venta personalizada: qué decir, cómo y cuándo</p>
-                </div>
-
-                <!-- 5 -->
                 <div class="step-card">
                     <div class="step-icon-wrap step-icon-wrap--5">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 9.81a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
                         </svg>
                     </div>
-                    <div class="step-label">Paso 05</div>
-                    <h3>Entrega</h3>
-                    <p>Recibes el mensaje listo para copiar, pegar y cerrar. Sin más pasos</p>
+                    <div class="step-label">Paso 03</div>
+                    <h3>Contacta antes que otros</h3>
                 </div>
 
             </div>
@@ -849,59 +787,42 @@ $strategiesJson = json_encode(array_map(function ($co) {
     </section>
 
 
-    <!-- ⑤ CTA MEGA ───────────────────────────────────── -->
-    <section class="cta-dark">
+    <!-- ⑤ PRECIO ───────────────────────────────────── -->
+    <section class="cta-dark" style="padding: 64px 0;">
         <div class="container">
-            <div class="cta-dark__card">
-
-                <!-- Patrón de puntos decorativo -->
-                <div class="cta-dark__dots"></div>
-
-                <!-- Columna izquierda: copy + botones -->
-                <div class="cta-dark__left">
-                    <div class="cta-dark__kicker">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        Activa tu acceso hoy
+            <div class="cta-dark__card" style="display: flex; justify-content: center; text-align: center; background: linear-gradient(135deg, #060d1f 0%, #112060 100%);">
+                
+                <div class="cta-price-box" style="max-width: 500px; width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 48px 32px;">
+                    <div class="cta-price-box__label" style="font-size: 1rem; color: #fff; margin-bottom: 24px; text-transform: none; letter-spacing: normal; font-weight: 800;">Acceso completo al Radar</div>
+                    <div class="cta-price-box__price" style="font-size: 4rem;">79€</div>
+                    <div class="cta-price-box__period" style="margin-bottom: 8px;">/mes</div>
+                    <div style="margin-bottom: 32px;">
+                        <div style="font-size: 1rem; font-weight: 800; color: #34d399; margin-bottom: 4px;">👉 Con 1 cliente cubres el coste mensual</div>
+                        <div style="font-size: .85rem; font-weight: 600; color: rgba(255,255,255,0.5);">La mayoría de usuarios recuperan la inversión en su primera oportunidad cerrada</div>
                     </div>
-                    <h2>Consigue clientes mientras<br>duermes por 79€ al mes</h2>
-                    <p>Accede al pipeline completo de oportunidades B2B y empieza a contactar empresas nuevas antes que tu competencia. Cada día sin Radar son clientes que se llevan otros.</p>
-                    <div class="cta-dark__actions">
-                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=pricing') ?>" 
-                           class="radar-btn radar-btn--white" 
-                           style="font-size:1rem;padding:15px 28px;"
-                           onclick="trackEvent({event_type:'click_cta', source:'pricing', cta_label:'Ver clientes disponibles ahora', url:'/checkout/radar-export?type=subscription&plan=radar&source=pricing'})">
-                            🚀 Ver clientes disponibles ahora
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                        </a>
-                    </div>
-                    <p class="cta-dark__note">Sin permanencia · Cancela cuando quieras · Soporte incluido · 👉 Menos que el coste de un solo lead en Google Ads</p>
-                </div>
-
-                <!-- Columna derecha: caja de precio -->
-                <div class="cta-dark__right">
-                    <div class="cta-price-box">
-                        <div class="cta-price-box__label">Acceso completo</div>
-                        <div class="cta-price-box__price">79€</div>
-                        <div class="cta-price-box__period">al mes, sin permanencia</div>
-                        <div class="cta-trust-items">
-                            <div class="cta-trust-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                Pipeline diario actualizado
-                            </div>
-                            <div class="cta-trust-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                Estrategia de venta con IA
-                            </div>
-                            <div class="cta-trust-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                Datos de contacto del admin.
-                            </div>
-                            <div class="cta-trust-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                Cancela cuando quieras
-                            </div>
+                    
+                    <div class="cta-trust-items" style="align-items: center; gap: 12px; margin-bottom: 40px;">
+                        <div class="cta-trust-item" style="font-size: 1rem; color: rgba(255,255,255,0.8);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Acceso completo a oportunidades
+                        </div>
+                        <div class="cta-trust-item" style="font-size: 1rem; color: rgba(255,255,255,0.8);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Datos de contacto
+                        </div>
+                        <div class="cta-trust-item" style="font-size: 1rem; color: rgba(255,255,255,0.8);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Actualización diaria
                         </div>
                     </div>
+
+                    <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=pricing') ?>" 
+                       class="radar-btn radar-btn--primary" 
+                       style="width: 100%; justify-content: center; font-size: 1.15rem; padding: 20px;"
+                       onclick="trackEvent({event_type:'click_cta', source:'pricing', cta_label:'Acceder a estas empresas antes que tu competencia', url:'/checkout/radar-export?type=subscription&plan=radar&source=pricing'})">
+                        👉 "Acceder a estas empresas antes que tu competencia"
+                    </a>
+                    <p style="margin: 16px 0 0; font-size: .85rem; color: rgba(255,255,255,0.4); font-weight: 600;">Sin permanencia · Cancela cuando quieras</p>
                 </div>
 
             </div>
@@ -910,84 +831,29 @@ $strategiesJson = json_encode(array_map(function ($co) {
 
 
     <!-- ⑥ CIERRE ─────────────────────────────────────── -->
-    <section class="closing">
+    <section class="closing" style="padding: 80px 0;">
         <div class="closing-dots"></div>
         <div class="closing-bottom-glow"></div>
         <div class="container closing-inner">
 
-            <!-- Badge urgencia -->
-            <div class="closing-badge">
-                <span class="closing-badge-dot"></span>
-                👆 Empieza hoy — Las oportunidades de hoy no estarán mañana
-            </div>
-
-            <!-- Cita principal -->
-            <p class="closing__quote">
-                "Esto no es un listado de empresas.<br>
-                Es un sistema para <span class="grad">generar clientes nuevos</span> cada semana."
-            </p>
-
-            <p class="closing__sub">Detectamos oportunidades B2B activas a diario para que tú solo te preocupes de cerrar ventas.</p>
-
-            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:32px;">
-                <p style="margin:0;font-size:.9rem;font-weight:700;color:#15803d;">👉 Solo necesitas 1 cliente para recuperar la inversión</p>
-                <p style="margin:0;font-size:.82rem;font-weight:600;color:#b45309;">⚠ Las mejores oportunidades se saturan en los primeros días</p>
-            </div>
-            <div class="closing-stats">
-                <div class="closing-stat">
-                    <div class="closing-stat__icon">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </div>
-                    <span class="closing-stat__num"><?= $opps_count ?>+</span>
-                    <span class="closing-stat__lbl">Oportunidades hoy</span>
-                </div>
-                <div class="closing-stat">
-                    <div class="closing-stat__icon">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                    </div>
-                    <span class="closing-stat__num">79€</span>
-                    <span class="closing-stat__lbl">Al mes</span>
-                </div>
-                <div class="closing-stat">
-                    <div class="closing-stat__icon">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                    </div>
-                    <span class="closing-stat__num">1</span>
-                    <span class="closing-stat__lbl">Cliente lo paga todo</span>
-                </div>
-                <div class="closing-stat">
-                    <div class="closing-stat__icon">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                    </div>
-                    <span class="closing-stat__num">0</span>
-                    <span class="closing-stat__lbl">Trabajo manual</span>
-                </div>
-            </div>
-
-            <!-- CTA -->
             <div class="closing-cta">
-                <p style="margin:0 0 16px;font-size:.85rem;font-weight:700;color:#b45309;">⚠ Las mejores oportunidades se saturan en los primeros días</p>
+                <p style="margin: 0 0 24px; font-size: 1.15rem; font-weight: 800; color: #0f172a; text-align: center;">
+                    "Las empresas que ves hoy pueden no estar mañana."
+                </p>
                 <a href="<?= site_url('register?source=cta_final') ?>" 
                    class="radar-btn radar-btn--primary" 
-                   style="font-size:1.05rem;padding:18px 48px;box-shadow:0 0 40px rgba(37,99,235,.45);"
-                   onclick="trackEvent({event_type:'click_cta', source:'cta_final', cta_label:'Ver clientes disponibles ahora', url:'/register?source=cta_final'})">
-                    🚀 Ver clientes disponibles ahora
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                   style="font-size:1.2rem;padding:22px 56px;box-shadow:0 0 50px rgba(37,99,235,0.5);"
+                   onclick="trackEvent({event_type:'click_cta', source:'cta_final', cta_label:'Acceder a estas empresas antes que tu competencia', url:'/register?source=cta_final'})">
+                    🚀 Acceder a estas empresas antes que tu competencia
                 </a>
-
-                <div class="closing-trust">
-                    <span class="closing-trust-item">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        Sin permanencia
-                    </span>
-                    <span class="closing-trust-item">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        Cancela cuando quieras
-                    </span>
-                    <span class="closing-trust-item">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        1 cliente lo paga todo
-                    </span>
+                
+                <div style="margin-top: 32px; text-align: center;">
+                    <p style="margin: 0 0 8px; font-size: 1.2rem; font-weight: 800; color: #b45309;">
+                        Hoy hay +<?= $opps_count ?> empresas esperando ser contactadas
+                    </p>
+                    <p style="margin: 0; font-size: 1rem; color: #64748b; font-weight: 600;">
+                        Cada día nuevas empresas entran y otras desaparecen (ya contactadas)
+                    </p>
                 </div>
             </div>
 

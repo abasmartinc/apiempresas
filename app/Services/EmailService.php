@@ -264,9 +264,17 @@ class EmailService
     }
 
     /**
-     * Send a warning when quota usage is high (>50%).
+     * Send Quota Warning (already exists above, just ensuring context)
      */
     public function sendQuotaWarning(array $userData, int $percent)
+    {
+        // ... (existing code)
+    }
+
+    /**
+     * EXCEL SEQUENCE: Day 1 - New Companies Detected
+     */
+    public function sendExcelSequenceDay1(array $userData)
     {
         $email = Services::email();
         $email->clear(true);
@@ -274,15 +282,48 @@ class EmailService
         $fromName  = env('email.fromName', 'APIEmpresas.es');
         $email->setFrom($fromEmail, $fromName);
 
-        $userEmail = $userData['email'];
-        $subject = "Estás cerca del límite - APIEmpresas.es";
-        $email->setTo($userEmail);
-        $email->setSubject($subject);
+        $email->setTo($userData['email']);
+        $email->setSubject("Nuevas empresas detectadas hoy ⚡");
 
-        $body = view('emails/quota_warning', [
-            'name' => $userData['name'] ?? 'Usuario',
-            'percent' => $percent
-        ]);
+        $body = view('emails/excel_day1_new_companies', ['name' => $userData['name'] ?? 'Usuario']);
+        $email->setMessage($body);
+        return $email->send();
+    }
+
+    /**
+     * EXCEL SEQUENCE: Day 2 - Case Study
+     */
+    public function sendExcelSequenceDay2(array $userData)
+    {
+        $email = Services::email();
+        $email->clear(true);
+        $fromEmail = env('email.fromEmail', 'soporte@apiempresas.es');
+        $fromName  = env('email.fromName', 'APIEmpresas.es');
+        $email->setFrom($fromEmail, $fromName);
+
+        $email->setTo($userData['email']);
+        $email->setSubject("Cómo otros están consiguiendo clientes 💎");
+
+        $body = view('emails/excel_day2_case_study', ['name' => $userData['name'] ?? 'Usuario']);
+        $email->setMessage($body);
+        return $email->send();
+    }
+
+    /**
+     * EXCEL SEQUENCE: Day 3 - Urgency
+     */
+    public function sendExcelSequenceDay3(array $userData)
+    {
+        $email = Services::email();
+        $email->clear(true);
+        $fromEmail = env('email.fromEmail', 'soporte@apiempresas.es');
+        $fromName  = env('email.fromName', 'APIEmpresas.es');
+        $email->setFrom($fromEmail, $fromName);
+
+        $email->setTo($userData['email']);
+        $email->setSubject("Estás perdiendo oportunidades ⚠️");
+
+        $body = view('emails/excel_day3_urgency', ['name' => $userData['name'] ?? 'Usuario']);
         $email->setMessage($body);
         return $email->send();
     }

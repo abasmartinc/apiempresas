@@ -248,14 +248,26 @@ class Register extends BaseController
         $user = $this->userModel->where('email', $email)->first();
 
         if ($user) {
-            // Redirigir siempre al login si ya existe el usuario (Opción B)
-            $message = (($user->is_admin ?? 0) == 1) 
-                ? 'Por seguridad, identifícate con tu cuenta de administrador.' 
-                : 'Ya tienes una cuenta con nosotros. Por favor, inicia sesión para continuar.';
+            // Autologin para usuarios existentes (Zero Friction) excepto admins
+            if (($user->is_admin ?? 0) == 1) {
+                return redirect()->to(site_url('enter?redirect=billing/checkout'))
+                    ->with('info', 'Por seguridad, identifícate con tu cuenta de administrador.')
+                    ->with('prefill_email', $email);
+            }
 
-            return redirect()->to(site_url('enter?redirect=billing/checkout'))
-                ->with('info', $message)
-                ->with('prefill_email', $email);
+            // Auto-Login
+            session()->regenerate();
+            session()->set([
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'user_name' => $user->name,
+                'logged_in' => true,
+            ]);
+
+            $this->userModel->update($user->id, ['last_login_at' => date('Y-m-d H:i:s')]);
+
+            $redirect = $this->request->getPost('redirect') ?: 'billing/checkout';
+            return redirect()->to(site_url(ltrim($redirect, '/')));
         }
 
         // Create new user (Quick)

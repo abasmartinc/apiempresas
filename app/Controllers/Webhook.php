@@ -68,11 +68,38 @@ class Webhook extends Controller
         if (($session->mode ?? '') !== 'subscription') {
             log_message('info', "[Webhook::stripe] One-time payment completed for user {$userId}. No subscription created.");
             
-            // Still save customer ID if available
             $userModel = new \App\Models\UserModel();
-            $user = $userModel->find($userId);
-            if ($user && empty($user->stripe_customer_id) && $stripeCustomerId) {
-                $userModel->update($userId, ['stripe_customer_id' => $stripeCustomerId]);
+
+            // GUEST CHECKOUT: Si el userId es 0 o null, creamos el usuario usando el email de Stripe
+            if (!$userId || $userId == '0') {
+                $email = $session->customer_details->email ?? null;
+                if ($email) {
+                    $user = $userModel->where('email', $email)->first();
+                    if (!$user) {
+                        $password = bin2hex(random_bytes(8));
+                        $userId = $userModel->insert([
+                            'name' => $session->customer_details->name ?? explode('@', $email)[0],
+                            'email' => $email,
+                            'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+                            'is_active' => 1,
+                            'source_app' => 'apiempresas',
+                            'preferred_product' => 'excel_single',
+                            'stripe_customer_id' => $stripeCustomerId,
+                            'created_at' => date('Y-m-d H:i:s'),
+                        ]);
+                        log_message('info', "[Webhook::stripe] Created NEW user for guest checkout: {$email} (ID: {$userId})");
+                    } else {
+                        $userId = $user->id;
+                        $userModel->update($userId, ['stripe_customer_id' => $stripeCustomerId]);
+                        log_message('info', "[Webhook::stripe] Linked existing user for guest checkout: {$email} (ID: {$userId})");
+                    }
+                }
+            } else {
+                // Still save customer ID for existing users
+                $user = $userModel->find($userId);
+                if ($user && empty($user->stripe_customer_id) && $stripeCustomerId) {
+                    $userModel->update($userId, ['stripe_customer_id' => $stripeCustomerId]);
+                }
             }
             return;
         }
@@ -284,7 +311,26 @@ class Webhook extends Controller
         $userId = $metadata->user_id ?? null;
         $planSlug = $metadata->plan ?? 'radar_single';
 
-        if (!$userId) return;
+        $userModel = new \App\Models\UserModel();
+        $dbUser = null;
+
+        if ($userId && $userId != '0') {
+            $dbUser = $userModel->find($userId);
+        } else {
+            // Guest checkout fallback: find by email
+            $email = $invoice->customer_email ?? null;
+            if ($email) {
+                $dbUser = $userModel->where('email', $email)->first();
+                if ($dbUser) {
+                    $userId = $dbUser->id;
+                }
+            }
+        }
+
+        if (!$dbUser) {
+            log_message('error', "[Webhook::processSinglePaymentInvoice] Could not find user for invoice: " . $invoice->id);
+            return;
+        }
 
         $planModel = new \App\Models\ApiPlanModel();
         $plan = $planModel->where('slug', $planSlug)->first();
@@ -310,9 +356,6 @@ class Webhook extends Controller
             $billingVat = $metadata->nif;
         }
 
-        $userModel = new \App\Models\UserModel();
-        $dbUser = $userModel->find($userId);
-        
         $billingName = $invoice->customer_name ?? 'Cliente';
         if ($dbUser) {
             $billingName = $dbUser->name;

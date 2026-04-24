@@ -68,17 +68,24 @@ class Billing extends BaseController
             return redirect()->to(site_url('checkout/radar-export' . $queryString));
         }
 
+        $postData = $this->request->getVar();
+        $period = strtolower(trim((string) ($postData['period'] ?? 'single')));
+
         if (!session('logged_in')) {
-            // Store purchase context in session (Support GET/POST)
-            session()->set('pending_checkout', $this->request->getVar());
-            return redirect()->to(site_url('register/quick'));
+            if ($period === 'single') {
+                $userId = 0; // Guest User
+            } else {
+                // Subscription mode still requires login
+                session()->set('pending_checkout', $postData);
+                return redirect()->to(site_url('register/quick'));
+            }
+        } else {
+            $userId = (int) session('user_id');
         }
 
-        $userId = (int) session('user_id');
-        $user = $this->userModel->find($userId);
+        $user = $userId > 0 ? $this->userModel->find($userId) : null;
 
         // Check for pending context in session (after quick register) or direct params
-        $postData = $this->request->getVar();
         if (empty($postData) || !isset($postData['plan'])) {
             $postData = session('pending_checkout') ?? [];
             session()->remove('pending_checkout');
@@ -111,12 +118,21 @@ class Billing extends BaseController
             
             // Set context for simulator too if it's an excel download
             if ($period === 'single') {
+                $prov = $postData['provincia'] ?? 'España';
+                $sect = $postData['sector'] ?? 'General';
+                $per  = $postData['period_radar'] ?? '30days';
+                
+                $radar = new \App\Controllers\RadarController();
+                $radarData = $radar->getRadarData($prov, $sect, $per, 1);
+                $count = $radarData['total_context_count'] ?? 0;
+
                 session()->set('checkout_context', [
-                    'type'      => 'excel',
-                    'sector'    => $postData['sector'] ?? 'General',
-                    'cnae'      => $postData['cnae'] ?? '',
-                    'provincia' => $postData['provincia'] ?? 'España',
-                    'period'    => $postData['period_radar'] ?? '30days'
+                    'type'        => 'excel',
+                    'sector'      => $sect,
+                    'cnae'        => $postData['cnae'] ?? '',
+                    'provincia'   => $prov,
+                    'period'      => $per,
+                    'total_count' => $count
                 ]);
             }
 
@@ -222,7 +238,6 @@ class Billing extends BaseController
                 'line_items' => [$lineItem],
                 'success_url' => $successUrl,
                 'cancel_url' => $cancelUrl,
-                'client_reference_id' => (string) $userId,
                 'invoice_creation' => [
                     'enabled' => true,
                     'invoice_data' => [
@@ -239,6 +254,13 @@ class Billing extends BaseController
                     'period' => 'single',
                 ],
             ];
+
+            if ($userId > 0) {
+                $sessionParams['client_reference_id'] = (string) $userId;
+                if ($email) {
+                    $sessionParams['customer_email'] = $email;
+                }
+            }
         } else {
             // Subscription mode
             // Determinar precio según periodicidad
@@ -440,6 +462,7 @@ class Billing extends BaseController
                     'cnae'          => $checkoutData['cnae'] ?? ''
                 ];
                 session()->set('last_purchase_info', $lastInfo);
+                session()->set('just_bought_excel', true);
                 
                 // Limpiamos el contexto tras la compra (pero mantenemos last_purchase_info para refresh)
                 session()->remove('checkout_context');

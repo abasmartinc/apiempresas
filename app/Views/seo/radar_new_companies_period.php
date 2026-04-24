@@ -65,8 +65,8 @@ $getCommercialSignals = function($sector, $object) {
 
 $sector_label = $sector_label ?? ($sector['label'] ?? '');
 
-$buildCheckoutUrl = site_url('checkout/radar-export') .
-    '?type=single&period=' . urlencode($period === 'general' ? '30days' : ($period ?? ''));
+$buildCheckoutUrl = site_url('excel/preview') .
+    '?period=' . urlencode($period === 'general' ? '30days' : ($period ?? ''));
 
 $companies = $companies ?? [];
 $paywall_level = $paywall_level ?? 'strong';
@@ -198,13 +198,13 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     <div class="ae-radar-page__hero-alt-downloads">
                         <span>O prefieres descargar:</span>
                         <?php if ($period !== 'hoy' && ($stats['hoy'] ?? 0) > 0): ?>
-                            <a href="<?= site_url('checkout/radar-export?period=hoy') ?>" class="js-loading-btn">Nacional Hoy (<?= number_format($stats['hoy'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['hoy'] ?? 2, 0) ?>€</a>
+                            <a href="<?= site_url('excel/preview?period=hoy') ?>" class="js-loading-btn">Nacional Hoy (<?= number_format($stats['hoy'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['hoy'] ?? 2, 0) ?>€</a>
                         <?php endif; ?>
                         <?php if ($period !== 'semana' && ($stats['semana'] ?? 0) > 0): ?>
-                            <a href="<?= site_url('checkout/radar-export?period=semana') ?>" class="js-loading-btn">Nacional Semana (<?= number_format($stats['semana'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['semana'] ?? 4, 0) ?>€</a>
+                            <a href="<?= site_url('excel/preview?period=semana') ?>" class="js-loading-btn">Nacional Semana (<?= number_format($stats['semana'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['semana'] ?? 4, 0) ?>€</a>
                         <?php endif; ?>
                         <?php if ($period !== 'mes' && $period !== 'general' && ($stats['30days'] ?? 0) > 0): ?>
-                            <a href="<?= site_url('checkout/radar-export?period=30days') ?>" class="js-loading-btn">Nacional Mes (<?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['mes'] ?? 9, 0) ?>€</a>
+                            <a href="<?= site_url('excel/preview?period=30days') ?>" class="js-loading-btn">Nacional Mes (<?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['mes'] ?? 9, 0) ?>€</a>
                         <?php endif; ?>
                     </div>
 
@@ -728,8 +728,8 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
 
                     <div class="ae-radar-page__excel-actions">
                             <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 400px;">
-                                <a href="<?= site_url('checkout/radar-export?period=' . urlencode($period) . ($sector_label ? '&sector=' . urlencode($sector_label) : '')) ?>" class="ae-radar-page__excel-btn js-loading-btn">
-                                    Descargar listado (<?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€
+                                <a href="<?= site_url('excel/preview?period=' . urlencode($period) . ($sector_label ? '&sector=' . urlencode($sector_label) : '')) ?>" class="ae-radar-page__excel-btn js-loading-btn">
+                                    Descargar listado <?= esc($heading_time) ?> (<?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€
                                 </a>
                                 <button type="button" class="ae-radar-page__excel-btn ae-radar-page__excel-btn--alt ae-email-export-btn" 
                                         style="background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #ffffff;"
@@ -742,13 +742,13 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                         <div class="ae-radar-page__excel-alt-links">
                             <span class="ae-radar-page__excel-alt-label">Otras opciones:</span>
                             <?php if ($period !== 'hoy' && ($stats['hoy'] ?? 0) > 0): ?>
-                                <a href="<?= site_url('checkout/radar-export?period=hoy') ?>" class="js-loading-btn">Nacional Hoy (<?= number_format($stats['hoy'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['hoy'] ?? 2, 0) ?>€</a>
+                                <a href="<?= site_url('excel/preview?period=hoy') ?>" class="js-loading-btn">Nacional Hoy (<?= number_format($stats['hoy'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['hoy'] ?? 2, 0) ?>€</a>
                             <?php endif; ?>
                             <?php if ($period !== 'semana' && ($stats['semana'] ?? 0) > 0): ?>
-                                <a href="<?= site_url('checkout/radar-export?period=semana') ?>" class="js-loading-btn">Nacional Semana (<?= number_format($stats['semana'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['semana'] ?? 4, 0) ?>€</a>
+                                <a href="<?= site_url('excel/preview?period=semana') ?>" class="js-loading-btn">Nacional Semana (<?= number_format($stats['semana'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['semana'] ?? 4, 0) ?>€</a>
                             <?php endif; ?>
                             <?php if ($period !== 'mes' && $period !== 'general' && ($stats['30days'] ?? 0) > 0): ?>
-                                <a href="<?= site_url('checkout/radar-export?period=30days') ?>" class="js-loading-btn">Nacional Mes (<?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['mes'] ?? 9, 0) ?>€</a>
+                                <a href="<?= site_url('excel/preview?period=30days') ?>" class="js-loading-btn">Nacional Mes (<?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['mes'] ?? 9, 0) ?>€</a>
                             <?php endif; ?>
                         </div>
                     </div>

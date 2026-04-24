@@ -108,6 +108,7 @@ $googlebot = $googlebot ?? ($robots . ',max-snippet:-1,max-image-preview:large,m
 />
 
 <!-- Styles -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 <link rel="stylesheet" href="<?= base_url('public/css/styles.css?v=' . (file_exists(FCPATH . 'public/css/styles.css') ? filemtime(FCPATH . 'public/css/styles.css') : time())) ?>" /><!-- Sentry Error Tracking -->
 <script src="<?= base_url('public/js/sentry-8.54.0.min.js') ?>" crossorigin="anonymous"></script>
 <script>

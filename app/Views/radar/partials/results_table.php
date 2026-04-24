@@ -375,7 +375,7 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
                     </div>
                 </div>
             <?php } else { ?>
-                <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__export-btn" style="background:#0f172a; padding: 11px 18px; border-radius:12px; color:#fff; text-decoration:none; font-size:13px; font-weight:800;">Activar Radar PRO (79€/mes)</a>
+                <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__export-btn" style="background:#0f172a; padding: 11px 18px; border-radius:12px; color:#fff; text-decoration:none; font-size:13px; font-weight:800;">Desbloquear todas las oportunidades ahora</a>
             <?php } ?>
         </div>
     </div>
@@ -458,7 +458,7 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
                             <td class="ae-radar-page__td-identity" style="padding: 24px 20px;">
                                 <div style="display: flex; flex-direction: column;">
                                     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
-                                        <a href="javascript:void(0)" onclick="openQuickView('<?= $co['id'] ?>')" style="text-decoration: none;">
+                                        <a href="javascript:void(0)" onclick="<?= $isFree ? "showConversionNudge('Oportunidad real bloqueada', 'Activa Radar PRO para ver los detalles de esta empresa y del resto de oportunidades detectadas hoy.', {id: '".$co['id']."', action: 'view'})" : "openQuickView('".$co['id']."')" ?>" style="text-decoration: none;">
                                             <span style="font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.2; letter-spacing: -0.01em;"><?= esc($co['company_name']) ?></span>
                                         </a>
                                         <div style="background: white; border: 1.5px solid <?= $scoreColor ?>; padding: 2px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;">
@@ -516,12 +516,13 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
                                         <!-- Acción Primaria -->
                                         <?php if ($isFree) { ?>
                                             <button type="button" 
-                                                    onclick="showConversionNudge()"
+                                                    onclick="showConversionNudge('Acceso bloqueado', 'Esta empresa está activa ahora mismo. Otros proveedores ya están contactando esta oportunidad. Desbloquea el acceso completo para ver los detalles.', {id: '<?= $co['id'] ?>', name: '<?= esc($co['company_name']) ?>', action: 'contact'})"
                                                     title="Contactar ahora"
                                                     style="background: #2563eb; color: white; width: 100%; height: 42px; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);">
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width: 14px; height: 14px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
                                                 Contactar ahora
                                             </button>
+                                            <div style="text-align: center; font-size: 9px; color: #64748b; font-weight: 700; margin-top: 4px;">Requiere acceso completo</div>
                                         <?php } else { ?>
                                             <button type="button" class="ae-btn-hover" onclick="handleContactClick(this, '<?= $co['id'] ?>', '<?= esc($co['company_name']) ?>')" 
                                                     style="background: #2563eb; color: white; width: 100%; height: 42px; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);">
@@ -574,31 +575,31 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
                                 <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 60%); pointer-events: none;"></div>
                                 
                                 <div style="max-width: 650px; margin: 0 auto; position: relative; z-index: 1;">
-                                    <h2 style="font-size: 32px; font-weight: 900; margin-bottom: 16px; letter-spacing: -1px;">Desbloquea el resto de oportunidades</h2>
-                                    <p style="font-size: 16px; color: rgba(255,255,255,0.8); margin-bottom: 32px; line-height: 1.6;">Solo estás viendo una parte del radar. Accede a todas las empresas detectadas hoy y trabaja oportunidades reales antes que tu competencia.</p>
+                                    <h2 style="font-size: 32px; font-weight: 900; margin-bottom: 16px; letter-spacing: -1px;">Estas empresas están siendo contactadas ahora mismo</h2>
+                                    <p style="font-size: 16px; color: rgba(255,255,255,0.8); margin-bottom: 32px; line-height: 1.6;">Estas oportunidades desaparecen cuando otro proveedor las contacta. Desbloquea el acceso completo antes que tu competencia.</p>
                                     
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 40px; text-align: left;">
                                         <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9);">
-                                            <span style="color: #10b981; font-size: 18px;">✔</span> Acceso completo a todas las empresas nuevas
+                                            <span style="color: #10b981; font-size: 18px;">✔</span> Acceso inmediato
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9);">
-                                            <span style="color: #10b981; font-size: 18px;">✔</span> Filtros avanzados por sector y provincia
+                                            <span style="color: #10b981; font-size: 18px;">✔</span> Sin permanencia
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9);">
-                                            <span style="color: #10b981; font-size: 18px;">✔</span> Exportación de leads
+                                            <span style="color: #10b981; font-size: 18px;">✔</span> Recupera la inversión con 1 cliente
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9);">
-                                            <span style="color: #10b981; font-size: 18px;">✔</span> Ventaja frente a otros equipos
+                                            <span style="color: #10b981; font-size: 18px;">✔</span> Ventaja competitiva real
                                         </div>
                                     </div>
 
                                     <div style="margin-bottom: 24px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-                                        <div style="font-size: 14px; color: #fbbf24; font-weight: 800; margin-bottom: 4px;">🚀 Urgencia Máxima</div>
-                                        <div style="font-size: 13px; color: rgba(255,255,255,0.7);">"Las oportunidades más recientes suelen ser las más valiosas. Otros equipos comerciales ya están trabajando estas empresas."</div>
+                                        <div style="font-size: 14px; color: #fbbf24; font-weight: 800; margin-bottom: 4px;">🚀 Urgencia Real</div>
+                                        <div style="font-size: 13px; color: rgba(255,255,255,0.7);">"Varias de estas empresas dejarán de estar disponibles hoy. Otros proveedores ya están contactando estas oportunidades."</div>
                                     </div>
 
                                     <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="display: inline-block; background: #2563eb; color: white; padding: 18px 48px; border-radius: 16px; font-size: 18px; font-weight: 900; text-decoration: none; box-shadow: 0 10px 30px rgba(37,99,235,0.4); transition: transform 0.2s; transform-origin: center;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                                        Activar Radar PRO (79€/mes)
+                                        Desbloquear todas las oportunidades ahora
                                     </a>
                                     
                                     <div style="margin-top: 20px; font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 600;">
@@ -608,7 +609,7 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
                             </td>
                         </tr>
                         <?php foreach ($lockedCompanies as $co): ?>
-                            <tr class="ae-radar-row ae-locked-overlay" onclick="showConversionNudge('Oportunidad real bloqueada', 'Activa Radar PRO para ver los detalles de esta empresa y del resto de oportunidades detectadas hoy.')">
+                            <tr class="ae-radar-row ae-locked-overlay" onclick="showConversionNudge('Oportunidad real bloqueada', 'Activa Radar PRO para ver los detalles de esta empresa y del resto de oportunidades detectadas hoy.', {id: '<?= $co['id'] ?>', action: 'view'})">
                                 <td class="ae-radar-page__td-identity" style="padding: 24px 20px;">
                                     <div class="ae-radar-row-blurred" style="filter: blur(12px); pointer-events: none; opacity: 0.4;">
                                         <span style="font-size: 17px; font-weight: 800; color: #0f172a;"><?= esc($co['company_name']) ?></span>

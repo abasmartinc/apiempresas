@@ -40,8 +40,8 @@
                 </div>
 
                 <div class="radar-hero__actions" style="margin-top: 40px;">
-                    <a href="<?= site_url('register/quick?redirect=radar') ?>" class="radar-btn radar-btn--primary" style="padding: 22px 60px; font-size: 1.35rem; border-radius: 18px; box-shadow: 0 25px 50px -12px rgba(43, 86, 222, 0.35);">
-                        Acceder a estas empresas ahora
+                    <a href="<?= getRadarRedirect('landing_hero') ?>" class="radar-btn radar-btn--primary" style="padding: 22px 60px; font-size: 1.35rem; border-radius: 18px; box-shadow: 0 25px 50px -12px rgba(43, 86, 222, 0.35);" data-cta="radar_landing" data-source="landing_hero">
+                        Acceder a empresas ahora
                     </a>
                 </div>
 
@@ -140,8 +140,8 @@
                 </div>
                 <div style="padding: 24px; text-align: center; background: #fffbeb; border-top: 1px solid #fef3c7;">
                     <p style="margin: 0 0 16px; font-weight: 800; color: #92400e; font-size: 1rem;">Accede ahora antes de que otras empresas las contacten</p>
-                    <a href="<?= site_url('register/quick?redirect=radar') ?>" class="radar-btn radar-btn--primary" style="max-width: 400px; margin: 0 auto; display: block;">
-                        Acceder a estas empresas ahora
+                    <a href="<?= getRadarRedirect('landing_table') ?>" class="radar-btn radar-btn--primary" style="max-width: 400px; margin: 0 auto; display: block;" data-cta="radar_landing" data-source="landing_table">
+                        Acceder a empresas ahora
                     </a>
                     <small style="display: block; margin-top: 16px; font-weight: 700; color: #94a3b8; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Accede ahora antes de que estas oportunidades se saturen</small>
                 </div>
@@ -325,7 +325,7 @@
                 </div>
 
                 <div class="radar-preview__cta">
-                    <a href="<?= site_url('register/quick?redirect=radar') ?>" class="radar-btn radar-btn--ghost">
+                    <a href="<?= getRadarRedirect('landing_preview_secondary') ?>" class="radar-btn radar-btn--ghost" data-cta="radar_landing" data-source="landing_preview_secondary">
                         Acceder al Dashboard ahora
                     </a>
                 </div>
@@ -426,7 +426,7 @@
                             <li>Sin permanencia</li>
                         </ul>
 
-                        <a href="<?= site_url('register/quick?redirect=radar') ?>" class="radar-btn radar-btn--primary radar-btn--full">
+                        <a href="<?= getRadarRedirect('landing_pricing') ?>" class="radar-btn radar-btn--primary radar-btn--full" data-cta="radar_landing" data-source="landing_pricing">
                             Acceder ahora
                         </a>
 
@@ -537,7 +537,7 @@
                 </div>
 
                 <div class="radar-comparison__cta">
-                    <a href="<?= site_url('register/quick?redirect=radar') ?>" class="radar-btn radar-btn--primary">
+                    <a href="<?= getRadarRedirect('landing_comparison') ?>" class="radar-btn radar-btn--primary" data-cta="radar_landing" data-source="landing_comparison">
                         Acceder ahora
                     </a>
                     <p>
@@ -648,8 +648,8 @@
                 <p>
                     Accede al Radar y convierte nuevas constituciones mercantiles en oportunidades comerciales reales cada día.
                 </p>
-                <a href="<?= site_url('register/quick?redirect=radar') ?>" class="radar-btn radar-btn--yellow">
-                    Acceder a estas empresas ahora
+                <a href="<?= getRadarRedirect('landing_final') ?>" class="radar-btn radar-btn--yellow" data-cta="radar_landing" data-source="landing_final">
+                    Acceder a empresas ahora
                 </a>
                 <small>Sin permanencia · Cancela cuando quieras</small>
             </div>
@@ -659,5 +659,16 @@
 </main>
 
 <?= view('partials/footer') ?>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // CTA Click Tracking
+        $(document).on('click', '[data-cta="radar_landing"]', function(e) {
+            const source = $(this).data('source') || 'landing_generic';
+            $.post('<?= site_url("api/tracking/event") ?>', {
+                event_type: 'cta_click',
+                source: source
+            });
+        });
+    </script>
 </body>
 </html>

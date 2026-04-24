@@ -63,7 +63,7 @@ $getCommercialSignals = function($sector, $object) {
     return 'asesoría · software · marketing';
 };
 
-$buildCheckoutUrl = site_url('checkout/radar-export') . '?type=single&provincia=España&period=30days';
+$buildCheckoutUrl = site_url('excel/preview') . '?provincia=España&period=30days';
 
 $companies = $companies ?? [];
 $freeCount = 10; // More leads for the national hub
@@ -133,7 +133,8 @@ $province = 'España';
                 </div>
 
                 <div class="ae-radar-page__stats">
-                    <a href="<?= site_url('empresas-nuevas-hoy') ?>" class="ae-radar-page__stat-card ae-radar-page__stat-card--today" style="text-decoration: none; color: inherit;">
+                    <a href="<?= site_url('empresas-nuevas-hoy') ?>" class="ae-radar-page__stat-card ae-radar-page__stat-card--today" style="text-decoration: none; color: inherit; position: relative;">
+                        <div style="position: absolute; top: -10px; right: 10px; background: #ef4444; color: white; font-size: 0.65rem; padding: 2px 8px; border-radius: 99px; font-weight: 800; text-transform: uppercase;">🔥 Más reciente</div>
                         <div class="ae-radar-page__stat-icon">
                             <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                                 <circle cx="12" cy="12" r="10"></circle>
@@ -141,12 +142,14 @@ $province = 'España';
                             </svg>
                         </div>
                         <div>
-                            <div class="ae-radar-page__stat-label" style="color: var(--ae-accent, #4f46e5); font-weight: 600;">Ver Hoy</div>
+                            <div class="ae-radar-page__stat-label" style="color: #ef4444; font-weight: 800;">Últimas 24h</div>
                             <div class="ae-radar-page__stat-value"><?= number_format($stats['hoy'] ?? 0, 0, ',', '.') ?></div>
+                            <p style="font-size: 0.7rem; color: #64748b; margin-top: 4px; line-height: 1.2;">Máxima oportunidad — menor competencia</p>
                         </div>
                     </a>
 
-                    <a href="<?= site_url('empresas-nuevas-semana') ?>" class="ae-radar-page__stat-card ae-radar-page__stat-card--week" style="text-decoration: none; color: inherit;">
+                    <a href="<?= site_url('empresas-nuevas-semana') ?>" class="ae-radar-page__stat-card ae-radar-page__stat-card--week" style="text-decoration: none; color: inherit; position: relative; border: 2px solid #3b82f6;">
+                        <div style="position: absolute; top: -10px; right: 10px; background: #3b82f6; color: white; font-size: 0.65rem; padding: 2px 8px; border-radius: 99px; font-weight: 800; text-transform: uppercase;">⭐ Recomendado</div>
                         <div class="ae-radar-page__stat-icon">
                             <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                                 <rect x="3" y="4" width="18" height="18" rx="2"></rect>
@@ -156,8 +159,9 @@ $province = 'España';
                             </svg>
                         </div>
                         <div>
-                            <div class="ae-radar-page__stat-label" style="color: var(--ae-accent, #4f46e5); font-weight: 600;">Ver Semana</div>
+                            <div class="ae-radar-page__stat-label" style="color: #3b82f6; font-weight: 800;">Últimos 7 días</div>
                             <div class="ae-radar-page__stat-value"><?= number_format($stats['semana'] ?? 0, 0, ',', '.') ?></div>
+                            <p style="font-size: 0.7rem; color: #64748b; margin-top: 4px; line-height: 1.2;">Equilibrio volumen y calidad</p>
                         </div>
                     </a>
 
@@ -169,8 +173,9 @@ $province = 'España';
                             </svg>
                         </div>
                         <div>
-                            <div class="ae-radar-page__stat-label" style="color: var(--ae-accent, #4f46e5); font-weight: 600;">Ver Mes</div>
+                            <div class="ae-radar-page__stat-label" style="color: #64748b; font-weight: 800;">Últimos 30 días</div>
                             <div class="ae-radar-page__stat-value"><?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?></div>
+                            <p style="font-size: 0.7rem; color: #64748b; margin-top: 4px; line-height: 1.2;">Mayor volumen — más competencia</p>
                         </div>
                     </a>
                 </div>
@@ -306,8 +311,8 @@ $province = 'España';
                                         Impulsar mis ventas con Radar
                                     </a>
                                     <div style="display: flex; flex-direction: column; gap: 8px;">
-                                        <a href="<?= site_url('billing/single_checkout?period=30days') ?>" class="ae-radar-page__premium-btn ae-radar-page__premium-btn--dark js-loading-btn">
-                                            Descargar Nacional · <?= number_format($dynamic_price['base_price'] ?? 15, 0) ?>€
+                                        <a href="<?= site_url('excel/preview?period=30days') ?>" class="ae-radar-page__premium-btn ae-radar-page__premium-btn--dark js-loading-btn">
+                                            Descargar listado Nacional (<?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 15, 0) ?>€
                                         </a>
                                     </div>
                                 </div>
@@ -367,8 +372,8 @@ $province = 'España';
                                     </a>
 
                                     <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
-                                        <a href="<?= site_url('checkout/radar-export?type=single&provincia=España&period=30days') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--secondary js-loading-btn">
-                                            <span>Descargar Excel Nacional</span>
+                                        <a href="<?= site_url('excel/preview?provincia=España&period=30days') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--secondary js-loading-btn">
+                                            <span>Descargar listado Nacional (<?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?> empresas)</span>
                                             <span class="ae-radar-page__paywall-secondary-price"><?= number_format($dynamic_price['base_price'] ?? 15, 0) ?>€</span>
                                         </a>
                                     </div>

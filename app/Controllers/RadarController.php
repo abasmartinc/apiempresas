@@ -163,6 +163,86 @@ class RadarController extends BaseController
         return view($viewFile, $data);
     }
 
+    public function excel_preview()
+    {
+        $province = $this->request->getGet('provincia') ?? 'España';
+        $sector   = $this->request->getGet('sector') ?? '';
+        $period   = $this->request->getGet('period') ?? '30days';
+        $cnae     = $this->request->getGet('cnae') ?? '';
+
+        $data = $this->getRadarData($province, $sector, $period, 15);
+        if (!$data) return redirect()->to(site_url('empresas-nuevas'));
+
+        $data['cnae'] = $cnae;
+        $data['source'] = $this->request->getGet('source') ?? 'direct';
+
+        return view('radar/excel_preview', $data);
+    }
+
+    public function excel_unlock()
+    {
+        $email = strtolower(trim((string) $this->request->getPost('email')));
+        
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Por favor, introduce un email válido.']);
+        }
+
+        $userModel = new \App\Models\UserModel();
+        $user = $userModel->where('email', $email)->first();
+
+        // Lógica de Registro Rápido / Login
+        if ($user) {
+            if (($user->is_admin ?? 0) == 1) {
+                return $this->response->setJSON([
+                    'status' => 'exists', 
+                    'message' => 'Por seguridad, inicia sesión con tu cuenta de administrador.',
+                    'redirect' => site_url('enter?redirect=checkout/radar-export&' . http_build_query($this->request->getPost()))
+                ]);
+            }
+
+            session()->regenerate();
+            session()->set([
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'user_name' => $user->name,
+                'logged_in' => true,
+            ]);
+        } else {
+            // Crear nuevo usuario
+            $password = bin2hex(random_bytes(8));
+            $token = bin2hex(random_bytes(32));
+            $user_id = $userModel->insert([
+                'name' => explode('@', $email)[0],
+                'email' => $email,
+                'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+                'reset_token' => $token,
+                'reset_expires' => date('Y-m-d H:i:s', strtotime('+48 hours')),
+                'is_active' => 1,
+                'source_app' => 'apiempresas',
+                'preferred_product' => 'excel_single',
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            session()->regenerate();
+            session()->set([
+                'user_id' => $user_id,
+                'user_email' => $email,
+                'user_name' => explode('@', $email)[0],
+                'logged_in' => true,
+            ]);
+        }
+
+        // Construir redirect al checkout final
+        $params = $this->request->getPost();
+        unset($params['email']);
+        $params['type'] = 'single';
+        
+        return $this->response->setJSON([
+            'status' => 'success',
+            'redirect' => site_url('checkout/radar-export?' . http_build_query($params))
+        ]);
+    }
+
 
     public function getRadarData($province, $sectorInput, $period, $limit = 100)
     {

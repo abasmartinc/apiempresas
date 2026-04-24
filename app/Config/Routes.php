@@ -250,7 +250,9 @@ $routes->get('cron/seo-sync/(:any)', 'RadarController::syncStatsWebhook/$1');
 $routes->get('cron/radar-cache-clear/(:any)', 'RadarController::clearRadarCache/$1');
 
 // --- Export Routes ---
-$routes->get('checkout/radar-export', 'RadarController::exportExcel');
+$routes->get('excel/preview', 'RadarController::excel_preview');
+$routes->post('excel/unlock', 'RadarController::excel_unlock');
+$routes->post('api/quick-unlock', 'Api\QuickUnlock::index');
 $routes->post('checkout/radar-email', 'RadarController::sendExportEmail');
 
 // --- Programmatic SEO Routes ---
@@ -258,6 +260,8 @@ $routes->get('empresas/(:any)', 'RadarController::provinceCatalog/$1');
 
 // Radar Demo (Conversion Page)
 $routes->get('radar-demo', 'Radar::demo');
+$routes->get('radar/preview', 'Radar::preview');
+$routes->post('radar/preview', 'Radar::preview_store');
 $routes->post('tracking/radar-demo-event', 'TrackingController::processRadarEvent');
 
 // Radar Hub (New Companies Strategy)

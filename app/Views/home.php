@@ -1583,7 +1583,7 @@
             
             <div class="hero-btns reveal delay-3">
                 <a href="#buscar" class="btn-ae btn-ae-primary">Validar CIF gratis</a>
-                <a href="<?= site_url('radar') ?>" class="btn-ae btn-ae-outline">Ver Radar en acción</a>
+                <a href="<?= getRadarRedirect('home_hero') ?>" class="btn-ae btn-ae-outline" data-cta="radar_home" data-source="home_hero">Ver Radar en acción</a>
             </div>
             
             <span class="trust-tag reveal delay-3">Datos empresariales oficiales · Registro Mercantil · BORME</span>
@@ -1608,7 +1608,7 @@
                     </div>
                 </div>
 
-                <p style="text-align: center; font-size: 0.9rem; color: #64748b; margin-top: 8px; font-weight: 500;">¿Prefieres ver empresas nuevas directamente? → <a href="<?= site_url('leads-empresas-nuevas') ?>" style="color: var(--ae-blue); text-decoration: none; font-weight: 800;">Ver Radar B2B</a></p>
+                <p style="text-align: center; font-size: 0.9rem; color: #64748b; margin-top: 8px; font-weight: 500;">¿Prefieres ver oportunidades directamente? → <a href="<?= getRadarRedirect('home_search') ?>" style="color: var(--ae-blue); text-decoration: none; font-weight: 800;" data-cta="radar_home" data-source="home_search">Ver Radar B2B</a></p>
 
                 <div id="resultado_container" style="display:none; margin-top: 24px;">
                     <div id="resultado"></div>
@@ -1634,7 +1634,7 @@
                         <span>Datos para prospección</span>
                     </div>
                 </div>
-                <p style="text-align: center; font-size: 1rem; color: var(--ae-slate); margin-top: 16px; font-weight: 600;">¿Buscas empresas nuevas para prospectar? <a href="<?= site_url('leads-empresas-nuevas') ?>" style="color: var(--ae-blue); font-weight: 800; text-decoration: none; border-bottom: 2px solid rgba(37, 99, 235, 0.2); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--ae-blue)'" onmouseout="this.style.borderColor='rgba(37, 99, 235, 0.2)'">Descubre Radar B2B.</a></p>
+                <p style="text-align: center; font-size: 1rem; color: var(--ae-slate); margin-top: 16px; font-weight: 600;">¿Buscas oportunidades para prospectar? <a href="<?= getRadarRedirect('home_search') ?>" style="color: var(--ae-blue); font-weight: 800; text-decoration: none; border-bottom: 2px solid rgba(37, 99, 235, 0.2); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--ae-blue)'" onmouseout="this.style.borderColor='rgba(37, 99, 235, 0.2)'" data-cta="radar_home" data-source="home_search">Ver Radar B2B.</a></p>
             </div>
         </section>
 
@@ -1707,7 +1707,7 @@
                                 Exportación de leads comerciales
                             </li>
                         </ul>
-                        <a href="<?= site_url('radar') ?>" class="btn-ae" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0F172A; font-weight: 800; border: none; width: 100%; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);">Entrar al Radar</a>
+                        <a href="<?= getRadarRedirect('home_dual_block') ?>" class="btn-ae" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0F172A; font-weight: 800; border: none; width: 100%; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);" data-cta="radar_home" data-source="home_dual_block">Ver Radar</a>
                     </div>
                     <div class="path-card reveal delay-2">
                         <h3 style="display: flex; align-items: center; gap: 12px;">
@@ -1769,8 +1769,8 @@
                     </div>
 
                     <div style="display: flex; align-items: center; gap: 20px;" class="reveal delay-3">
-                        <a href="<?= site_url('radar') ?>" class="btn-ae btn-ae-primary">Probar Radar ahora</a>
-                        <a href="<?= site_url('leads-empresas-nuevas') ?>" style="color: var(--ae-slate); font-weight: 700; font-size: 0.95rem; text-decoration: none; border-bottom: 2px solid transparent; transition: all 0.3s ease;" onmouseover="this.style.color='var(--ae-blue)'; this.style.borderColor='var(--ae-blue)';" onmouseout="this.style.color='var(--ae-slate)'; this.style.borderColor='transparent';">Cómo funciona</a>
+                        <a href="<?= getRadarRedirect('home_product') ?>" class="btn-ae btn-ae-primary" data-cta="radar_home" data-source="home_product">Ver oportunidades</a>
+                        <a href="<?= site_url('leads-empresas-nuevas') ?>" style="color: var(--ae-slate); font-weight: 700; font-size: 0.95rem; text-decoration: none; border-bottom: 2px solid transparent; transition: all 0.3s ease;" onmouseover="this.style.color='var(--ae-blue)'; this.style.borderColor='var(--ae-blue)';" onmouseout="this.style.color='var(--ae-slate)'; this.style.borderColor='transparent';" data-cta="radar_home" data-location="radar_block">Cómo funciona</a>
                     </div>
                 </div>
 
@@ -1958,7 +1958,7 @@
                         <div class="tag-premium">Para Equipos Comerciales</div>
                         <h3>Radar B2B</h3>
                         <p>Interfaz web lista para usar. Filtra, descubre y exporta nuevas oportunidades comerciales diariamente sin necesidad de programación.</p>
-                        <a href="<?= site_url('radar') ?>" class="btn-ae btn-ae-primary" style="width: 100%; padding: 20px; font-size: 1.1rem; box-shadow: 0 10px 20px rgba(37,99,235,0.2);">Usar Radar ahora</a>
+                        <a href="<?= getRadarRedirect('home_product') ?>" class="btn-ae btn-ae-primary" style="width: 100%; padding: 20px; font-size: 1.1rem; box-shadow: 0 10px 20px rgba(37,99,235,0.2);" data-cta="radar_home" data-source="home_product">Ver oportunidades</a>
                     </div>
                     <div class="comp-card-premium card-api reveal delay-2">
                         <svg class="comp-bg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
@@ -2030,7 +2030,7 @@
                     </div>
                 </div>
                 <div style="text-align: center; margin-top: 48px;">
-                    <a href="<?= site_url('leads-empresas-nuevas') ?>" class="btn-ae" style="background: #12b48a; color: white; padding: 18px 36px; font-size: 1.1rem; border-radius: 14px; box-shadow: 0 10px 20px rgba(18, 180, 138, 0.2); font-weight: 800;">Ver Radar B2B (79€/mes)</a>
+                    <a href="<?= getRadarRedirect('home_pricing') ?>" class="btn-ae" style="background: #12b48a; color: white; padding: 18px 36px; font-size: 1.1rem; border-radius: 14px; box-shadow: 0 10px 20px rgba(18, 180, 138, 0.2); font-weight: 800;" data-cta="radar_home" data-source="home_pricing">Ver Radar B2B (79€/mes)</a>
                 </div>
             </div>
         </section>
@@ -2170,7 +2170,7 @@
                         
                         <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
                             <a href="#buscar" class="btn-ae" style="background: #ffffff; color: #0F172A; padding: 18px 32px; font-size: 1.1rem; border: none; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); font-weight: 800;">Validar CIF gratis</a>
-                            <a href="<?= site_url('radar') ?>" class="btn-ae" style="background: #12b48a; color: #ffffff; padding: 18px 32px; font-size: 1.1rem; border: none; box-shadow: 0 10px 20px rgba(18, 180, 138, 0.3); font-weight: 800;">Entrar al Radar y ver oportunidades</a>
+                            <a href="<?= getRadarRedirect('home_final') ?>" class="btn-ae" style="background: #12b48a; color: #ffffff; padding: 18px 32px; font-size: 1.1rem; border: none; box-shadow: 0 10px 20px rgba(18, 180, 138, 0.3); font-weight: 800;" data-cta="radar_home" data-source="home_final">Ver oportunidades</a>
                         </div>
                     </div>
                 </div>
@@ -2211,6 +2211,19 @@
                     }
                 });
             });
+        });
+
+        // CTA Click Tracking
+        $(document).on('click', '[data-cta="radar_home"]', function(e) {
+            const source = $(this).data('source') || 'home_generic';
+            if (typeof trackRadarEvent === 'function') {
+                trackRadarEvent({ event_type: 'cta_click', source: source });
+            } else {
+                $.post('<?= site_url("api/tracking/event") ?>', {
+                    event_type: 'cta_click',
+                    source: source
+                });
+            }
         });
     </script>
 </body>

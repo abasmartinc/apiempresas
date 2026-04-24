@@ -57,114 +57,64 @@
 
     <main class="success-main">
         <div class="container">
-
             <!-- HERO -->
-            <div class="success-hero">
-                <div class="success-hero__left">
-                    <div class="kicker">Suscripción Activada</div>
-
-                    <div class="title-row">
-                        <h1>¡Bienvenido a Radar PRO! Ya puedes acceder a todas las oportunidades.</h1>
-                        <span class="status-badge status-badge--ok">
-                            <span class="status-ic" aria-hidden="true"></span>
-                            PRO Activo
-                        </span>
+            <div class="success-hero" style="min-height: 60vh; display: flex; align-items: center; justify-content: center; text-align: center; flex-direction: column;">
+                <div class="success-hero__center">
+                    <!-- Animación de Check -->
+                    <div class="animate__animated animate__fadeInDown" style="margin-bottom: 30px;">
+                        <div style="width: 80px; height: 80px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
                     </div>
 
-                    <p class="sub">
-                        Has desbloqueado el acceso completo. Ahora puedes ver datos de contacto, administradores y filtrar todas las empresas recién constituidas en España.
+                    <div class="kicker animate__animated animate__fadeIn" style="animation-delay: 0.2s;">Suscripción Activada</div>
+
+                    <div class="title-row animate__animated animate__fadeIn" style="animation-delay: 0.4s; justify-content: center;">
+                        <h1 style="font-size: 2.5rem; max-width: 800px; margin: 0 auto 20px;">Acceso activado — ya puedes empezar a contactar empresas ahora mismo</h1>
+                    </div>
+
+                    <p class="sub animate__animated animate__fadeIn" style="animation-delay: 0.6s; font-size: 1.1rem; max-width: 600px; margin: 0 auto 32px; color: #475569;">
+                        Has desbloqueado el acceso completo. Te estamos redirigiendo para que no pierdas ni un segundo.
                     </p>
 
-                    <div class="hero-actions">
-                        <a class="btn btn_primary" href="<?=site_url('radar')?>" style="background: linear-gradient(135deg, #2152ff 0%, #123c85 100%);">Acceder al Radar ahora</a>
-                        <a class="btn btn_light" href="<?=site_url('billing/invoices')?>">Descargar factura</a>
+                    <div class="hero-actions animate__animated animate__fadeIn" style="animation-delay: 0.8s; flex-direction: column; gap: 15px;">
+                        <a class="btn btn_primary" href="<?=site_url('radar')?>" style="background: #2563eb; padding: 20px 40px; font-size: 1.2rem; font-weight: 900; border-radius: 18px; box-shadow: 0 12px 30px rgba(37,99,235,0.4);">Ver oportunidades activas ahora</a>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <p style="margin: 0; font-size: 0.9rem; color: #e11d48; font-weight: 700;">⚡ Algunas de estas empresas pueden estar siendo contactadas ahora mismo</p>
+                            <p id="redirect-timer" style="margin: 0; font-size: 0.85rem; color: #94a3b8; font-weight: 600;">Te estamos llevando a tus oportunidades en 3...</p>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Resumen compra -->
-                <aside class="purchase-card" aria-label="Resumen de la compra">
-                    <div class="purchase-head">
-                        <div>
-                            <div class="purchase-title">Resumen de suscripción</div>
-                            <div class="purchase-sub">Referencia: <strong>#<?= htmlspecialchars($order_ref) ?></strong></div>
-                        </div>
-                        <span class="pill-badge pill-badge--ok">
-                            <span class="pill-dot" aria-hidden="true"></span>
-                            Activa
-                        </span>
-                    </div>
-
-                    <div class="purchase-lines">
-                        <div class="line"><span>Plan</span><strong>Radar PRO (Ilimitado)</strong></div>
-                        <div class="line"><span>Periodicidad</span><strong>Mensual</strong></div>
-                        <div class="line"><span>Precio</span><strong>79.00 € <span class="muted">+ IVA</span></strong></div>
-                    </div>
-
-                    <div class="purchase-foot">
-                        Método de pago: <strong>Tarjeta (Stripe Checkout)</strong>
-                    </div>
-                </aside>
             </div>
 
-            <!-- NEXT STEPS -->
-            <section class="next-steps">
-                <div class="section-head">
-                    <h2>Consejos para tu Prospección (Paso a paso)</h2>
-                    <p class="muted">
-                        Saca el máximo partido a tu suscripción PRO con estos tres pasos clave.
-                    </p>
-                </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    let seconds = 3;
+                    const timerEl = document.getElementById('redirect-timer');
+                    
+                    const interval = setInterval(() => {
+                        seconds--;
+                        if (seconds > 0) {
+                            timerEl.textContent = `Te estamos llevando a tus oportunidades en ${seconds}...`;
+                        } else {
+                            timerEl.textContent = 'Redirigiendo...';
+                            clearInterval(interval);
+                            window.location.href = '<?= site_url('radar') ?>';
+                        }
+                    }, 1000);
+                });
+            </script>
 
-                <div class="step-list">
-                    <article class="step-card">
-                        <div class="step-rail" aria-hidden="true">
-                            <div class="step-orb step-orb--radar"><span class="orb-ic">1</span></div>
-                            <div class="step-line"></div>
-                        </div>
-                        <div class="step-body">
-                            <h3>Filtra por tu zona y sector</h3>
-                            <p class="muted">
-                                Ve al Radar y utiliza los filtros de provincia y CNAE para encontrar empresas que encajen exactamente con tu cliente ideal.
-                            </p>
-                            <div class="step-actions">
-                                <a class="btn btn_light" href="<?=site_url('radar')?>">Ir a los filtros</a>
-                            </div>
-                        </div>
-                    </article>
-
-                    <article class="step-card">
-                        <div class="step-rail" aria-hidden="true">
-                            <div class="step-orb step-orb--radar"><span class="orb-ic">2</span></div>
-                            <div class="step-line"></div>
-                        </div>
-                        <div class="step-body">
-                            <h3>Identifica al Administrador</h3>
-                            <p class="muted">
-                                Usa la "Vista Rápida" para ver quién figura como administrador y usa el botón de LinkedIn para contactar con ellos directamente.
-                            </p>
-                            <div class="step-actions">
-                                <span class="mini-hint">Disponible visualmente en cada fila</span>
-                            </div>
-                        </div>
-                    </article>
-
-                    <article class="step-card">
-                        <div class="step-rail" aria-hidden="true">
-                            <div class="step-orb step-orb--radar"><span class="orb-ic">3</span></div>
-                            <div class="step-line step-line--fade"></div>
-                        </div>
-                        <div class="step-body">
-                            <h3>Exporta a Excel</h3>
-                            <p class="muted">
-                                Si tienes un equipo de ventas o un CRM, descarga el listado completo para que tus comerciales empiecen a llamar hoy mismo.
-                            </p>
-                            <div class="step-actions">
-                                <span class="mini-hint">Botones de exportación en la tabla</span>
-                            </div>
-                        </div>
-                    </article>
-                </div>
-            </section>
+            <style>
+                .success-hero__center h1 {
+                    line-height: 1.1;
+                    letter-spacing: -0.02em;
+                }
+                @media (max-width: 768px) {
+                    .success-hero__center h1 { font-size: 1.8rem; }
+                }
+            </style>
         </div>
     </main>
 
