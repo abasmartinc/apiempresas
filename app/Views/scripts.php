@@ -1,63 +1,66 @@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const BASE_URL = '<?= site_url() ?>';
+    $(document).ready(function() {
+        // We use the 'search' route which is now configured for both GET and POST
+        const SEARCH_ENDPOINT = '<?= site_url("search") ?>';
+        const RADAR_BASE_URL = '<?= site_url("leads-empresas-nuevas") ?>';
+        const COMPANY_BASE_URL = '<?= site_url() ?>'.replace(/\/$/, '') + '/';
 
-        const btnBuscar = document.getElementById('btnBuscar');
-        const inputQ = document.getElementById('q');
-        const searchResultContainer = document.getElementById('resultado');
+        $('#btnBuscar').on('click', function(e) {
+            e.preventDefault();
+            const $btn = $(this);
+            const query = $('#q').val().trim();
+            
+            if (!query) return;
 
-        if (btnBuscar) {
-            btnBuscar.addEventListener('click', () => {
-                const query = inputQ.value.trim();
-                if (!query) return;
+            $btn.prop('disabled', true).text('Buscando...');
+            $('#resultado').html('<div class="card"><p class="muted">Buscando datos oficiales...</p></div>');
+            $('#resultado_container').show();
 
-                btnBuscar.disabled = true;
-                btnBuscar.innerText = 'Buscando...';
-                searchResultContainer.innerHTML = '<div class="card"><p class="muted">Buscando datos oficiales...</p></div>';
-
-                const formData = new FormData();
-                formData.append('q', query);
-
-                fetch(`${BASE_URL}search_company`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    renderResult(data);
-                })
-                .catch(err => {
-                    searchResultContainer.innerHTML = '<div class="card"><p style="color:red">Error al consultar la API. Inténtalo de nuevo.</p></div>';
-                })
-                .finally(() => {
-                    btnBuscar.disabled = false;
-                    btnBuscar.innerText = 'Validar CIF / Buscar empresa';
-                });
+            $.ajax({
+                url: SEARCH_ENDPOINT,
+                method: 'POST', // Switched to POST for higher reliability in local environments
+                data: { q: query },
+                dataType: 'json',
+                success: function(data) {
+                    console.log('Search response:', data);
+                    renderResult(data, COMPANY_BASE_URL, RADAR_BASE_URL);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Ajax Error Detail:', {
+                        status: status,
+                        error: error,
+                        response: xhr.responseText,
+                        url: SEARCH_ENDPOINT
+                    });
+                    $('#resultado').html('<div class="card"><p style="color:red">Error al consultar la API. Inténtalo de nuevo.</p></div>');
+                },
+                complete: function() {
+                    $btn.prop('disabled', false).text('Validar ahora');
+                }
             });
-        }
+        });
+
         let searchCount = 0;
 
-        function renderResult(data) {
-            const jsonOutput = document.getElementById('json-output');
-            const resultContainer = document.getElementById('resultado_container');
+        function renderResult(data, baseUrl, radarUrl) {
+            const $resultado = $('#resultado');
+            const $container = $('#resultado_container');
+            const $jsonOutput = $('#json-output');
 
             if (!data.success) {
-                searchResultContainer.innerHTML = `
+                $resultado.html(`
                     <div class="search-result-card" style="text-align: center; padding: 48px;">
                         <p style="color: #64748b; font-size: 1.1rem;">${data.message || 'No se han encontrado resultados.'}</p>
-                    </div>`;
-                if (jsonOutput) jsonOutput.textContent = JSON.stringify(data, null, 2);
-                if (resultContainer) resultContainer.style.display = 'block';
+                    </div>`);
+                if ($jsonOutput.length) $jsonOutput.text(JSON.stringify(data, null, 2));
+                $container.show();
                 return;
             }
 
             searchCount++;
             const company = data.data;
-            const jsonPretty = JSON.stringify(data, null, 2);
-            if (jsonOutput) jsonOutput.textContent = jsonPretty;
+            if ($jsonOutput.length) $jsonOutput.text(JSON.stringify(data, null, 2));
 
             const province = company.province || company.provincia || 'España';
             const status = (company.status || '').toLowerCase() === 'activa' ? 'activa' : 'inactiva';
@@ -86,7 +89,7 @@
                 radarTitle = "Empresa consolidada";
             }
 
-            searchResultContainer.innerHTML = `
+            $resultado.html(`
 <div class="search-result-card reveal" style="background: #ffffff; border-radius: 24px; padding: 40px; box-shadow: 0 20px 50px -10px rgba(0,0,0,0.08); border: 1px solid #f1f5f9;">
   
   <div class="result-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
@@ -141,7 +144,7 @@
     </div>
     
     <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 1;">
-        <a href="${BASE_URL}leads-empresas-nuevas" class="btn-radar" style="padding: 16px 32px; font-size: 1.1rem; border-radius: 16px; box-shadow: 0 15px 30px rgba(18, 180, 138, 0.25); margin: 0;">${radarCTA}</a>
+        <a href="${radarUrl}" class="btn-radar" style="padding: 16px 32px; font-size: 1.1rem; border-radius: 16px; box-shadow: 0 15px 30px rgba(18, 180, 138, 0.25); margin: 0;">${radarCTA}</a>
         <span style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-align: center; opacity: 0.8;">Oportunidades limitadas en el tiempo</span>
     </div>
   </div>
@@ -151,7 +154,7 @@
   </div>
 
   <div class="result-actions" style="display: flex; gap: 16px;">
-    <a href="${BASE_URL}${company.cif || company.nif}" class="btn" style="text-decoration:none; padding: 20px 32px; font-weight: 800; flex-grow: 1; text-align: center; background: #ffffff; color: #0f172a; border: 2px solid #e2e8f0; border-radius: 16px; transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--ae-blue)'; this.style.color='var(--ae-blue)'" onmouseout="this.style.borderColor='#e2e8f0'; this.style.color='#0f172a'">Ver ficha completa detallada</a>
+    <a href="${baseUrl}${company.cif || company.nif}" class="btn" style="text-decoration:none; padding: 20px 32px; font-weight: 800; flex-grow: 1; text-align: center; background: #ffffff; color: #0f172a; border: 2px solid #e2e8f0; border-radius: 16px; transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--ae-blue)'; this.style.color='var(--ae-blue)'" onmouseout="this.style.borderColor='#e2e8f0'; this.style.color='#0f172a'">Ver ficha completa detallada</a>
     <a href="<?= site_url('documentation') ?>" class="btn secondary" style="text-decoration:none; padding: 20px 32px; font-weight: 800; text-align: center; border-radius: 16px;">Integrar vía API</a>
   </div>
 
@@ -159,116 +162,65 @@
   <div class="radar-trigger-second reveal" style="animation-delay: 0.3s; background: #f0f9ff; border: 1px solid #bae6fd; padding: 32px; margin-top: 32px;">
     <h4 style="color: #0369a1;">🚀 Ya estás analizando empresas</h4>
     <p style="color: #0c4a6e; font-size: 1.05rem;">Accede a nuevas sociedades antes que tu competencia y trabaja oportunidades listas para contacto.</p>
-    <a href="${BASE_URL}leads-empresas-nuevas" class="btn-radar" style="background: #0284c7;">Ver Radar B2B Ahora</a>
+    <a href="${radarUrl}" class="btn-radar" style="background: #0284c7;">Ver Radar B2B Ahora</a>
   </div>
   ` : ''}
-</div>`;
+</div>`);
 
-            if (resultContainer) resultContainer.style.display = 'block';
-        }
-
-        function bindJsonButtons(container) {
-            const buttons = container.querySelectorAll('.btn-json-api');
-            buttons.forEach((b) => {
-                if (b.dataset.bound === '1') return;
-                b.dataset.bound = '1';
-
-                b.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    const card = b.closest('.company-card');
-                    const pre = card?.querySelector('.company-card__json');
-                    if (!pre) return;
-
-                    const nowHidden = pre.classList.toggle('is-hidden');
-                    b.textContent = nowHidden ? 'Ver JSON de la API' : 'Ocultar JSON de la API';
-                });
-            });
+            $container.show();
         }
 
         // Modal triggers
-        document.addEventListener('click', (e) => {
-            const trigger = e.target.closest('[data-modal-target]');
-            if (trigger) {
-                e.preventDefault();
-                const targetId = trigger.getAttribute('data-modal-target');
-                const modal = document.getElementById(targetId);
-                if (modal) modal.classList.add('active');
-                return;
-            }
-
-            const closer = e.target.closest('[data-close-modal]');
-            if (closer) {
-                e.preventDefault();
-                const modal = closer.closest('.modal-overlay');
-                if (modal) modal.classList.remove('active');
-                return;
-            }
-
-            if (e.target.classList.contains('modal-overlay')) {
-                e.target.classList.remove('active');
-            }
+        $(document).on('click', '[data-modal-target]', function(e) {
+            e.preventDefault();
+            const targetId = $(this).attr('data-modal-target');
+            $('#' + targetId).addClass('active');
         });
 
-        document.addEventListener('keydown', (e) => {
+        $(document).on('click', '[data-close-modal], .modal-overlay', function(e) {
+            if (e.target !== this && !$(e.target).closest('[data-close-modal]').length) return;
+            e.preventDefault();
+            $(this).closest('.modal-overlay').removeClass('active');
+        });
+
+        $(document).on('keydown', function(e) {
             if (e.key === 'Escape') {
-                const activeModal = document.querySelector('.modal-overlay.active');
-                if (activeModal) activeModal.classList.remove('active');
+                $('.modal-overlay.active').removeClass('active');
             }
         });
 
         // Global Loading Button Handler
-        document.addEventListener('click', (e) => {
-            const btn = e.target.closest('.js-loading-btn');
-            if (!btn) return;
-
-            // If it's a link and it's already loading, prevent default
-            if (btn.tagName === 'A' && btn.classList.contains('btn-loading')) {
+        $(document).on('click', '.js-loading-btn', function(e) {
+            const $btn = $(this);
+            if ($btn.hasClass('btn-loading')) {
                 e.preventDefault();
                 return;
             }
-
-            // If it's not a submit button (handled below), apply loading state immediately
-            if (btn.tagName === 'A' || (btn.tagName === 'BUTTON' && btn.type !== 'submit')) {
-                showLoadingState(btn);
+            if ($btn.is('a') || ($btn.is('button') && $btn.attr('type') !== 'submit')) {
+                showLoadingState($btn[0]);
             }
         });
 
-        // Handle form submissions for loading buttons
-        document.addEventListener('submit', (e) => {
-            const btn = e.target.querySelector('.js-loading-btn[type="submit"]');
-            if (btn) {
-                showLoadingState(btn);
+        $(document).on('submit', 'form', function(e) {
+            const $btn = $(this).find('.js-loading-btn[type="submit"]');
+            if ($btn.length) {
+                showLoadingState($btn[0]);
             }
         });
 
         function showLoadingState(el) {
-            if (el.classList.contains('btn-loading')) return;
+            const $el = $(el);
+            if ($el.hasClass('btn-loading')) return;
             
-            el.classList.add('btn-loading');
+            $el.addClass('btn-loading');
             
-            // For buttons, disable them after a tiny delay to allow the form submission to trigger in all browsers
-            if (el.tagName === 'BUTTON') {
-                setTimeout(() => {
-                    el.disabled = true;
-                }, 10);
+            if ($el.is('button')) {
+                setTimeout(() => { $el.prop('disabled', true); }, 10);
             }
 
-            // Add spinner if not present
-            if (!el.querySelector('.btn-spinner')) {
-                const spinner = document.createElement('span');
-                spinner.className = 'btn-spinner';
-                el.prepend(spinner);
-            }
-
-            // Optional: change text if it's a "Confirmar y Pagar" type
-            if (el.textContent.includes('Pagar') || el.textContent.includes('Descargar')) {
-                // Keep the spinner and just slightly change text or keep it
-                // For now, just adding the spinner is enough as requested.
-            }
+            if (!$el.find('.btn-spinner').length) {
+                $el.prepend('<span class="btn-spinner"></span>');
             }
         }
-
     });
 </script>

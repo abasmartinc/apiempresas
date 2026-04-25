@@ -406,7 +406,7 @@
         }
 
         .feature-card {
-            padding: 56px 48px;
+            padding: 40px 32px;
             background: #ffffff;
             border: 1px solid var(--ae-border);
             border-radius: 32px;
@@ -442,13 +442,13 @@
         }
 
         .feature-card .icon-box {
-            width: 72px;
-            height: 72px;
-            border-radius: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 36px;
+            margin-bottom: 24px;
             position: relative;
             z-index: 1;
             transition: all 0.4s ease;
@@ -476,9 +476,9 @@
         }
 
         .feature-card h4 {
-            font-size: 1.5rem;
-            font-weight: 800;
-            margin-bottom: 18px;
+            font-size: 1.2rem;
+            font-weight: 850;
+            margin-bottom: 0;
             color: var(--ae-dark);
             letter-spacing: -0.01em;
         }
@@ -1443,13 +1443,31 @@
 
         /* --- RESPONSIVE --- */
         @media (max-width: 900px) {
-            .hero h1 { font-size: 2.8rem; }
+            .hero h1 { font-size: 2.5rem; }
             .grid-3, .path-grid, .tier-grid, .comp-grid, .comp-grid-premium, .faq-grid { grid-template-columns: 1fr; }
-            .product-flex { flex-direction: column; text-align: center; gap: 60px; }
-            .product-info h2 { font-size: 2.5rem; }
+            .product-flex { flex-direction: column !important; text-align: center; gap: 40px; padding: 20px 0; }
+            .product-info h2 { font-size: 2.2rem; }
+            .feature-card { padding: 30px 24px; }
+            .feature-card .icon-box { margin-bottom: 16px; }
+            .product-visual { display: none; } /* Ocultar mockup en móvil por legibilidad */
             .stat-1, .stat-2, .integration-icon { display: none; }
-            .search-form { flex-direction: column; }
-            .search-benefits { gap: 24px; flex-wrap: wrap; }
+            .search-form { flex-direction: column; gap: 12px; }
+            .search-panel { padding: 32px 20px; border-radius: 24px; }
+            .search-panel h2 { font-size: 2.1rem; margin-bottom: 16px; line-height: 1.2; }
+            .search-panel h2 span.highlight { padding: 2px 10px; }
+            .search-panel .subtitle { font-size: 1.1rem; margin-bottom: 32px; line-height: 1.5; }
+            .search-input { height: 64px !important; text-align: center; font-size: 1.1rem !important; border-radius: 14px !important; }
+            #btnBuscar { height: 64px !important; width: 100% !important; padding: 0 !important; border-radius: 14px !important; }
+            .search-benefits { display: flex; flex-direction: column; gap: 12px; align-items: center; margin-top: 32px; }
+            .benefit-tag { background: #f8fafc; width: 100%; justify-content: center; padding: 14px; border-radius: 14px; border: 1px solid #e2e8f0; }
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 2.2rem; }
+            .product-info h2 { font-size: 1.8rem; }
+            .db-sidebar { width: 50px; }
+            .db-main { padding: 15px; }
+            .floating-alert { display: none; }
         }
 
         /* --- OPTIMIZACIÓN RADAR B2B --- */
@@ -1652,24 +1670,30 @@
 
                 <div class="grid-3">
                     <div class="feature-card card-blue reveal delay-1">
-                        <div class="icon-box">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
+                            <div class="icon-box" style="margin-bottom: 0;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            </div>
+                            <h4 style="margin-bottom: 0;">Validación y consulta</h4>
                         </div>
-                        <h4>Validación y consulta</h4>
                         <p>Compruebe la existencia de sociedades, verifique CIFs y acceda a los datos de registro básicos con total rapidez.</p>
                     </div>
                     <div class="feature-card card-teal reveal delay-2">
-                        <div class="icon-box">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
+                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
+                            <div class="icon-box" style="margin-bottom: 0;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
+                            </div>
+                            <h4 style="margin-bottom: 0;">Prospección comercial</h4>
                         </div>
-                        <h4>Prospección comercial</h4>
                         <p>Identifique empresas recién creadas antes que su competencia y priorice sus esfuerzos comerciales con precisión.</p>
                     </div>
                     <div class="feature-card card-indigo reveal delay-3">
-                        <div class="icon-box">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
+                            <div class="icon-box" style="margin-bottom: 0;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                            </div>
+                            <h4 style="margin-bottom: 0;">Integración vía API</h4>
                         </div>
-                        <h4>Integración vía API</h4>
                         <p>Automatice sus flujos internos conectando su CRM o ERP directamente a nuestra base de datos oficial.</p>
                     </div>
                 </div>

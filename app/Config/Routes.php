@@ -33,7 +33,7 @@ $routes->get('dashboard/kpis', 'Dashboard::kpis_ajax');
 $routes->get('dashboard/test-sample', 'Api\V1\DashboardTestApi::getSample');
 $routes->get('search_company', 'Search::search_company');
 $routes->post('search_company', 'Search::search_company_post');
-$routes->get('search', 'Search::index');
+$routes->match(['get', 'post'], 'search', 'Search::index');
 // Billing
 $routes->get('billing', 'Billing::index');
 $routes->get('billing/purchase_success', 'Billing::purchase_success');
