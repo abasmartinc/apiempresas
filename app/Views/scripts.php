@@ -28,12 +28,20 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('Ajax Error Detail:', {
-                        status: status,
+                        status: xhr.status,
                         error: error,
                         response: xhr.responseText,
                         url: SEARCH_ENDPOINT
                     });
-                    $('#resultado').html('<div class="card"><p style="color:red">Error al consultar la API. Inténtalo de nuevo.</p></div>');
+                    
+                    let msg = 'Error al consultar la API. Inténtalo de nuevo.';
+                    if (xhr.status === 404) {
+                        msg = 'No se ha encontrado ninguna empresa con ese nombre o CIF.';
+                    } else if (xhr.status === 429) {
+                        msg = 'Demasiadas solicitudes. Por favor espera un minuto.';
+                    }
+
+                    $('#resultado').html(`<div class="card" style="padding: 30px; border-radius: 16px; border: 1px solid #fee2e2; background: #fff5f5;"><p style="color:#dc2626; font-weight:700; margin:0;">${msg}</p></div>`);
                 },
                 complete: function() {
                     $btn.prop('disabled', false).text('Validar ahora');

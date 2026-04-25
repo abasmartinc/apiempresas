@@ -133,8 +133,8 @@ class Search extends BaseController
             ], 429);
         }
 
-        // 3. Protección de acceso directo: Si no es AJAX, redirigir a la web pasando la query
-        if (!$this->request->isAJAX()) {
+        // 3. Protección de acceso directo: Si no es AJAX (y no es POST), redirigir a la web
+        if (!$this->request->isAJAX() && $this->request->getMethod() !== 'post') {
             $q = trim((string)($this->request->getVar('q') ?: $this->request->getVar('cif')));
             return redirect()->to(site_url('search_company' . ($q ? '?q=' . rawurlencode($q) : '')));
         }

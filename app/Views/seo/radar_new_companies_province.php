@@ -178,7 +178,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                 <!-- Bloque Económico (Conversion Tier) -->
                 <div class="ae-radar-page__economic-block" style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 2.5rem; border-radius: 1.25rem; color: white; margin: 3rem 0; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);">
                     <p style="font-size: 1.25rem; margin-bottom: 0.75rem; opacity: 0.9; font-weight: 500;">Se han detectado <strong style="color: #4ade80;"><?= number_format($conversion_count ?? 0, 0, ',', '.') ?></strong> empresas nuevas <?= $conversion_label ?? 'recientemente' ?> con potencial comercial</p>
-                    <h3 style="font-size: 1.85rem; font-weight: 900; line-height: 1.2; background: linear-gradient(to right, #4ade80, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Estas empresas pueden generarte entre <?= $potential_revenue_min ?>€ y <?= $potential_revenue_max ?>€ en ventas reales en los próximos días</h3>
+                    <h3 style="font-size: 1.85rem; font-weight: 900; line-height: 1.2; background: linear-gradient(to right, #4ade80, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Estas empresas pueden generarte entre <?= $potential_revenue_min ?? '900' ?>€ y <?= $potential_revenue_max ?? '4.500' ?>€ en ventas reales en los próximos días</h3>
                     <p style="color: #94a3b8; font-size: 1.1rem; margin-top: 1rem; font-weight: 500;">Con 1 cliente cubres el coste mensual</p>
                 </div>
 
