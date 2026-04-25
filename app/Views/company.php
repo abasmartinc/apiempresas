@@ -136,7 +136,7 @@
                         $adminNames[] = $adm['name'];
                     }
                 }
-                $adminResponse = !empty($adminNames) 
+                $adminResponse = !empty($adminNames)
                     ? "Entre los administradores y cargos actuales de **{$companyName}** se encuentran: **" . implode(', ', $adminNames) . "**. Puede consultar el listado completo y sus funciones en la sección de Cargos Directivos de esta misma ficha."
                     : "Para conocer a los administradores y cargos de la empresa, consulte la sección específica de **Cargos Directivos** en este perfil.";
 
@@ -248,7 +248,8 @@
                         <div>
                             <div class="company-card__eyebrow">Ficha registral</div>
                             <h1 class="company-card__name" style="font-size: 1.5rem; margin: 0;">Información de empresa:
-                                <?= esc($company['name'] ?? '-') ?></h1>
+                                <?= esc($company['name'] ?? '-') ?>
+                            </h1>
                             <div class="company-card__meta">
                                 <?= esc(($company['cif'] ?? $company['nif'] ?? '-') . ' · ' . ($company['province'] ?? $company['provincia'] ?? '-')) ?>
                             </div>
@@ -373,7 +374,7 @@
                         </p>
                     </div>
                     <div style="min-width: 200px;">
-                        <a href="<?= site_url() ?>leads-empresas-nuevas" class="btn">
+                        <a href="<?= site_url() ?>radar" class="btn">
                             Activar Radar PRO →
                         </a>
                     </div>
@@ -490,7 +491,8 @@
                             style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 2rem; display: flex; align-items: center; gap: 12px;">
                             <span
                                 style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color: #fff; padding: 8px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
                                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                                     <circle cx="9" cy="7" r="4"></circle>
                                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -500,18 +502,26 @@
                             Administradores y Cargos Directivos
                         </h2>
 
-                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+                        <div
+                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
                             <?php foreach ($administrators as $admin): ?>
-                                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.25rem; display: flex; align-items: center; gap: 1rem; transition: all 0.2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.05)'; this.style.borderColor='var(--primary)'" onmouseout="this.style.boxShadow='none'; this.style.borderColor='#e2e8f0'">
-                                    <div style="width: 40px; height: 40px; background: #f8fafc; color: #64748b; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; flex-shrink: 0;">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.25rem; display: flex; align-items: center; gap: 1rem; transition: all 0.2s;"
+                                    onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.05)'; this.style.borderColor='var(--primary)'"
+                                    onmouseout="this.style.boxShadow='none'; this.style.borderColor='#e2e8f0'">
+                                    <div
+                                        style="width: 40px; height: 40px; background: #f8fafc; color: #64748b; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; flex-shrink: 0;">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
                                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                             <circle cx="12" cy="7" r="4"></circle>
                                         </svg>
                                     </div>
                                     <div>
-                                        <div style="font-weight: 700; color: #1e293b; font-size: 1rem; line-height: 1.2;"><?= esc($admin['name']) ?></div>
-                                        <div style="color: #64748b; font-size: 0.85rem; margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;"><?= esc($admin['position']) ?></div>
+                                        <div style="font-weight: 700; color: #1e293b; font-size: 1rem; line-height: 1.2;">
+                                            <?= esc($admin['name']) ?></div>
+                                        <div
+                                            style="color: #64748b; font-size: 0.85rem; margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
+                                            <?= esc($admin['position']) ?></div>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -609,12 +619,14 @@
                 <!-- FAQ Section HTML -->
                 <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee;">
                     <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: #444;">Preguntas Frecuentes sobre
-                        <?= esc($companyName) ?></h3>
+                        <?= esc($companyName) ?>
+                    </h3>
                     <div style="display: grid; gap: 1.5rem;">
                         <?php foreach ($faqs as $faq): ?>
                             <div>
                                 <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; color: #111;">
-                                    <?= esc($faq['q']) ?></h4>
+                                    <?= esc($faq['q']) ?>
+                                </h4>
                                 <div style="font-size: 0.9rem; color: #555; line-height: 1.5;">
                                     <?= strip_tags(str_replace('**', '', $faq['a'])) // Limpieza básica para HTML visual ?>
                                 </div>
@@ -762,24 +774,35 @@
                 <?php endif; ?>
 
                 <!-- SECCIÓN PARA DESARROLLADORES (Premium Design) -->
-                <section class="api-dev-section" style="margin-top: 5rem; padding-top: 3rem; border-top: 1px solid #eef2f6;">
-                    <div class="api-dev-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center; background: #ffffff; padding: 2.5rem; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);">
-                        
+                <section class="api-dev-section"
+                    style="margin-top: 5rem; padding-top: 3rem; border-top: 1px solid #eef2f6;">
+                    <div class="api-dev-grid"
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center; background: #ffffff; padding: 2.5rem; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);">
+
                         <!-- Columna Izquierda: Mensaje y CTA -->
                         <div class="api-dev-info">
-                            <div style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: #eff6ff; color: #3b82f6; border-radius: 12px; margin-bottom: 1.5rem;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <div
+                                style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: #eff6ff; color: #3b82f6; border-radius: 12px; margin-bottom: 1.5rem;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="16 18 22 12 16 6"></polyline>
                                     <polyline points="8 6 2 12 8 18"></polyline>
                                 </svg>
                             </div>
-                            <h3 style="margin: 0 0 1rem; font-size: 1.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.025em;">¿Eres desarrollador?</h3>
+                            <h3
+                                style="margin: 0 0 1rem; font-size: 1.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.025em;">
+                                ¿Eres desarrollador?</h3>
                             <p style="margin: 0 0 2rem; color: #64748b; line-height: 1.6; font-size: 1.05rem;">
-                                Integra la información oficial de <strong><?= esc($companyName) ?></strong> directamente en tu software mediante nuestra API REST robusta y documentada.
+                                Integra la información oficial de <strong><?= esc($companyName) ?></strong> directamente
+                                en tu software mediante nuestra API REST robusta y documentada.
                             </p>
-                            <a href="<?= site_url('register') ?>" class="btn secondary" style="display: inline-flex; align-items: center; padding: 0.875rem 2rem; font-weight: 700; border-radius: 12px; transition: all 0.2s; background: linear-gradient(90deg, #2152ff, #12b48a); color: white; border: none; box-shadow: 0 10px 25px rgba(33, 82, 255, 0.25);">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 10px;">
-                                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+                            <a href="<?= site_url('register') ?>" class="btn secondary"
+                                style="display: inline-flex; align-items: center; padding: 0.875rem 2rem; font-weight: 700; border-radius: 12px; transition: all 0.2s; background: linear-gradient(90deg, #2152ff, #12b48a); color: white; border: none; box-shadow: 0 10px 25px rgba(33, 82, 255, 0.25);">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" style="margin-right: 10px;">
+                                    <path
+                                        d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4">
+                                    </path>
                                 </svg>
                                 Obtener API Key Gratuitamente
                             </a>
@@ -787,27 +810,41 @@
 
                         <!-- Columna Derecha: Bloque de Código -->
                         <div class="api-dev-code-wrap">
-                            <div class="company-code-card" style="background: #0f172a; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
-                                <div class="company-code-header" style="background: rgba(255,255,255,0.03); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.07);">
+                            <div class="company-code-card"
+                                style="background: #0f172a; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
+                                <div class="company-code-header"
+                                    style="background: rgba(255,255,255,0.03); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.07);">
                                     <div style="display: flex; gap: 6px;">
-                                        <div style="width: 10px; height: 10px; border-radius: 50%; background: #ff5f56;"></div>
-                                        <div style="width: 10px; height: 10px; border-radius: 50%; background: #ffbd2e;"></div>
-                                        <div style="width: 10px; height: 10px; border-radius: 50%; background: #27c93f;"></div>
+                                        <div
+                                            style="width: 10px; height: 10px; border-radius: 50%; background: #ff5f56;">
+                                        </div>
+                                        <div
+                                            style="width: 10px; height: 10px; border-radius: 50%; background: #ffbd2e;">
+                                        </div>
+                                        <div
+                                            style="width: 10px; height: 10px; border-radius: 50%; background: #27c93f;">
+                                        </div>
                                     </div>
-                                    <button type="button" id="btnToggleJson" style="background: rgba(255,255,255,0.1); border: none; color: #cbd5e1; padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                                    <button type="button" id="btnToggleJson"
+                                        style="background: rgba(255,255,255,0.1); border: none; color: #cbd5e1; padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: background 0.2s;"
+                                        onmouseover="this.style.background='rgba(255,255,255,0.15)'"
+                                        onmouseout="this.style.background='rgba(255,255,255,0.1)'">
                                         Ver respuesta JSON
                                     </button>
                                 </div>
                                 <div style="padding: 24px; overflow-x: auto;">
-                                    <pre style="margin: 0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.9rem; line-height: 1.7;">
+                                    <pre
+                                        style="margin: 0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.9rem; line-height: 1.7;">
 <span style="color: #94a3b8;"># Petición cURL para <?= esc($companyCif) ?></span>
 <span style="color: #ff79c6;">curl</span> -X GET <span style="color: #f1fa8c;">"<?= site_url("api/v1/companies?cif=" . esc($companyCif)) ?>"</span> \
      -H <span style="color: #f1fa8c;">"Authorization: Bearer TU_API_KEY"</span></pre>
                                 </div>
                             </div>
 
-                            <div id="jsonBlock" class="is-hidden" style="margin-top: 1rem; background: #1e293b; border-radius: 12px; padding: 1rem; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease;">
-                                <pre style="margin: 0; color: #94a3b8; font-size: 0.8rem; max-height: 250px; overflow: auto; font-family: 'JetBrains Mono', monospace;"><code><?= esc($jsonPretty) ?></code></pre>
+                            <div id="jsonBlock" class="is-hidden"
+                                style="margin-top: 1rem; background: #1e293b; border-radius: 12px; padding: 1rem; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease;">
+                                <pre
+                                    style="margin: 0; color: #94a3b8; font-size: 0.8rem; max-height: 250px; overflow: auto; font-family: 'JetBrains Mono', monospace;"><code><?= esc($jsonPretty) ?></code></pre>
                             </div>
                         </div>
 
@@ -881,14 +918,14 @@
                     const mapContainer = document.getElementById('company-map');
                     const fullAddress = `${rawAddress}, ${province}, España`;
                     const iframe = document.createElement('iframe');
-                    
+
                     iframe.width = "100%";
                     iframe.height = "100%";
                     iframe.frameBorder = "0";
                     iframe.style.border = "0";
                     iframe.style.borderRadius = "12px";
                     iframe.src = `https://maps.google.com/maps?q=${encodeURIComponent(fullAddress)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
-                    
+
                     mapContainer.innerHTML = ''; // Clear Leaflet placeholders if any
                     mapContainer.appendChild(iframe);
                 }
