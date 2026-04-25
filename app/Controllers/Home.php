@@ -155,10 +155,42 @@ class Home extends BaseController
             }
         }
 
+        // Dynamic Social Proof Counter (with short cache)
+        $cache = \Config\Services::cache();
+        $cacheKey = 'home_social_proof_text';
+        $socialProofText = $cache->get($cacheKey);
+
+        if ($socialProofText === null) {
+            $apiRequestsModel = new \App\Models\ApiRequestsModel();
+            $searchLogModel   = new \App\Models\SearchLogModel();
+            $today            = date('Y-m-d');
+            
+            $apiValidationsToday = $apiRequestsModel->countRequestsForDay($today);
+            
+            if ($apiValidationsToday >= 50) {
+                $formattedCount  = number_format($apiValidationsToday, 0, ',', '.');
+                $socialProofText = "Hoy se han validado {$formattedCount} empresas automáticamente";
+            } else {
+                $webValidationsToday = $searchLogModel->countLogsForDay($today);
+                $totalValidations    = $apiValidationsToday + $webValidationsToday;
+                
+                if ($totalValidations > 0) {
+                    $formattedCount  = number_format($totalValidations, 0, ',', '.');
+                    $socialProofText = "Hoy se han validado {$formattedCount} empresas en la plataforma";
+                } else {
+                    $socialProofText = ''; // No data, hide block
+                }
+            }
+            
+            // Save to cache for 5 minutes (short cache)
+            $cache->save($cacheKey, $socialProofText, 300);
+        }
+
         return view('home', [
-            'latest_posts' => $posts,
-            'provinces'    => $provinces,
-            'showReviewModal' => $showReviewModal
+            'latest_posts'    => $posts,
+            'provinces'       => $provinces,
+            'showReviewModal' => $showReviewModal,
+            'socialProofText' => $socialProofText
         ]);
     }
 

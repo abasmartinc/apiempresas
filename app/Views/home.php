@@ -48,6 +48,15 @@
                         <button id="btnBuscar" class="btn-ae btn-ae-primary" style="height: 72px; padding: 0 48px; border-radius: 14px; font-size: 1.15rem;">Validar ahora</button>
                     </div>
                 </div>
+                
+                <?php if (!empty($socialProofText)): ?>
+                    <div class="social-proof-wrapper">
+                        <span class="social-proof-tag">
+                            <span class="pulse-dot-green"></span>
+                            <?= $socialProofText ?>
+                        </span>
+                    </div>
+                <?php endif; ?>
 
                 <p style="text-align: center; font-size: 0.9rem; color: #64748b; margin-top: 8px; font-weight: 500;">¿Prefieres ver oportunidades directamente? → <a href="<?= getRadarRedirect('home_search') ?>" style="color: var(--ae-blue); text-decoration: none; font-weight: 800;" data-cta="radar_home" data-source="home_search">Ver Radar B2B</a></p>
 

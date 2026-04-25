@@ -4347,3 +4347,44 @@ section.container .search-panel h2::after,
         max-width: 300px;
     }
 }
+/* --- PRUEBA SOCIAL DINÁMICA --- */
+.social-proof-wrapper {
+    text-align: center;
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+
+.social-proof-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+    background: rgba(241, 245, 249, 0.5);
+    padding: 4px 12px;
+    border-radius: 100px;
+}
+
+.pulse-dot-green {
+    width: 6px;
+    height: 6px;
+    background: #10B981;
+    border-radius: 50%;
+    position: relative;
+}
+
+.pulse-dot-green::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: #10B981;
+    opacity: 0.4;
+    animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+    0% { transform: scale(0.5); opacity: 0.8; }
+    100% { transform: scale(2.5); opacity: 0; }
+}

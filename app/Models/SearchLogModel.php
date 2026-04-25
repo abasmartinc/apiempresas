@@ -36,6 +36,24 @@ class SearchLogModel extends Model
         'event_hash',
         'included'
     ];
+    public function countLogsForDay(string $ymd, array $where = []): int
+    {
+        $startDate = $ymd . ' 00:00:00';
+        $endDate   = date('Y-m-d H:i:s', strtotime("$startDate +1 day"));
+
+        $builder = $this->db->table($this->table)
+            ->select('COUNT(*) AS total', false)
+            ->where('created_at >=', $startDate)
+            ->where('created_at <', $endDate);
+
+        foreach ($where as $k => $v) {
+            $builder->where($k, $v);
+        }
+
+        $row = $builder->get()->getRowArray();
+        return (int)($row['total'] ?? 0);
+    }
+
     public function countZeroResults($ymd = null)
     {
         $builder = $this->where('result_count', 0);
