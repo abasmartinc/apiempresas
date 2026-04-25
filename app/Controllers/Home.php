@@ -157,7 +157,7 @@ class Home extends BaseController
 
         // Dynamic Social Proof Counter (with short cache)
         $cache = \Config\Services::cache();
-        $cacheKey = 'home_social_proof_text';
+        $cacheKey = 'home_social_proof_text_v3';
         $socialProofText = $cache->get($cacheKey);
 
         if ($socialProofText === null) {
@@ -166,20 +166,18 @@ class Home extends BaseController
             $today            = date('Y-m-d');
             
             $apiValidationsToday = $apiRequestsModel->countRequestsForDay($today);
-            
-            if ($apiValidationsToday >= 50) {
-                $formattedCount  = number_format($apiValidationsToday, 0, ',', '.');
-                $socialProofText = "Hoy se han validado {$formattedCount} empresas automáticamente";
+            $webValidationsToday = $searchLogModel->countLogsForDay($today);
+            $totalReal           = $apiValidationsToday + $webValidationsToday;
+
+            if ($totalReal <= 0) {
+                $socialProofText = ''; // No data, hide block
+            } elseif ($totalReal < 50) {
+                $socialProofText = "Más de 100 empresas validadas hoy automáticamente";
+            } elseif ($totalReal < 200) {
+                $roundedTotal = ceil($totalReal / 50) * 50;
+                $socialProofText = "Más de " . number_format($roundedTotal, 0, ',', '.') . " empresas validadas hoy automáticamente";
             } else {
-                $webValidationsToday = $searchLogModel->countLogsForDay($today);
-                $totalValidations    = $apiValidationsToday + $webValidationsToday;
-                
-                if ($totalValidations > 0) {
-                    $formattedCount  = number_format($totalValidations, 0, ',', '.');
-                    $socialProofText = "Hoy se han validado {$formattedCount} empresas en la plataforma";
-                } else {
-                    $socialProofText = ''; // No data, hide block
-                }
+                $socialProofText = "Hoy se han validado " . number_format($totalReal, 0, ',', '.') . " empresas automáticamente";
             }
             
             // Save to cache for 5 minutes (short cache)

@@ -51,10 +51,10 @@
                 
                 <?php if (!empty($socialProofText)): ?>
                     <div class="social-proof-wrapper">
-                        <span class="social-proof-tag">
-                            <span class="pulse-dot-green"></span>
-                            <?= $socialProofText ?>
-                        </span>
+                        <div class="social-proof-counter">
+                            <span class="social-proof-dot"></span>
+                            <span><?= esc($socialProofText) ?></span>
+                        </div>
                     </div>
                 <?php endif; ?>
 

@@ -1,4 +1,4 @@
-/* =========================
+﻿/* =========================
             HERO SOLO
         ========================= */
 
@@ -306,7 +306,7 @@
         ========================= */
 
 /* =========================
-            SECTION: UNA ÚNICA PLATAFORMA
+            SECTION: UNA ÃšNICA PLATAFORMA
         ========================= */
 
 .growth-section {
@@ -511,7 +511,7 @@
 }
 
 /* =========================
-            SECTION: UNA ÚNICA PLATAFORMA
+            SECTION: UNA ÃšNICA PLATAFORMA
         ========================= */
 
 
@@ -806,7 +806,7 @@
 }
 
 .usecase-dot::after {
-    content: "✓";
+    content: "âœ“";
     font-size: 11px;
     font-weight: 800;
     line-height: 1;
@@ -875,7 +875,7 @@
     overflow: hidden;
 }
 
-/* Mejora jerarquía texto */
+/* Mejora jerarquÃ­a texto */
 .radar-conversion h2 {
     font-size: clamp(2.4rem, 4vw, 3.2rem);
     line-height: 1.05;
@@ -1626,7 +1626,7 @@
 }
 
 .pricing .tier__list li::before {
-    content: "✓";
+    content: "âœ“";
     position: absolute;
     left: 0;
     top: 0;
@@ -2293,7 +2293,7 @@
 
 
 /* ==========================================================================
-   NUEVOS ESTILOS PREMIUM (MIGRACIÓN DESDE HOME.PHP)
+   NUEVOS ESTILOS PREMIUM (MIGRACIÃ“N DESDE HOME.PHP)
    ========================================================================== */
 
 :root {
@@ -2391,7 +2391,7 @@ body {
     padding: 0 32px;
 }
 
-/* --- SECCIÓN HERO --- */
+/* --- SECCIÃ“N HERO --- */
 .hero {
     padding: 80px 0 60px;
     background:
@@ -4145,7 +4145,7 @@ section.container .search-panel h2::after,
         display: none;
     }
 
-    /* Ocultar mockup en móvil por legibilidad */
+    /* Ocultar mockup en mÃ³vil por legibilidad */
     .stat-1,
     .stat-2,
     .integration-icon {
@@ -4232,7 +4232,7 @@ section.container .search-panel h2::after,
     }
 }
 
-/* --- OPTIMIZACIÓN RADAR B2B --- */
+/* --- OPTIMIZACIÃ“N RADAR B2B --- */
 .radar-extra,
 .radar-trigger-second {
     background: #ffffff;
@@ -4347,44 +4347,67 @@ section.container .search-panel h2::after,
         max-width: 300px;
     }
 }
-/* --- PRUEBA SOCIAL DIN�MICA --- */
+/* --- PRUEBA SOCIAL DINÁMICA --- */
 .social-proof-wrapper {
     text-align: center;
     margin-top: 12px;
     margin-bottom: 4px;
 }
 
-.social-proof-tag {
+.social-proof-counter {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.85rem;
-    color: #64748b;
-    font-weight: 500;
-    background: rgba(241, 245, 249, 0.5);
-    padding: 4px 12px;
-    border-radius: 100px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: rgba(248, 250, 252, 0.95);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    color: #5f6f8f;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
 }
 
-.pulse-dot-green {
-    width: 6px;
-    height: 6px;
-    background: #10B981;
-    border-radius: 50%;
+.social-proof-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: #42b883;
     position: relative;
+    flex: 0 0 auto;
 }
 
-.pulse-dot-green::after {
-    content: '';
+.social-proof-dot::after {
+    content: "";
     position: absolute;
-    inset: -2px;
-    border-radius: 50%;
-    background: #10B981;
-    opacity: 0.4;
-    animation: pulse-ring 2s infinite;
+    inset: -5px;
+    border-radius: 999px;
+    background: rgba(66, 184, 131, 0.25);
+    animation: socialProofPulse 1.6s ease-out infinite;
 }
 
-@keyframes pulse-ring {
-    0% { transform: scale(0.5); opacity: 0.8; }
-    100% { transform: scale(2.5); opacity: 0; }
+@keyframes socialProofPulse {
+    0% {
+        transform: scale(0.65);
+        opacity: 0.8;
+    }
+    70% {
+        transform: scale(1.7);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1.7);
+        opacity: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .social-proof-counter {
+        font-size: 13px;
+        padding: 7px 12px;
+        max-width: calc(100% - 32px);
+        text-align: center;
+        justify-content: center;
+    }
 }
