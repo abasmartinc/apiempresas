@@ -1583,6 +1583,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="<?= base_url('public/css/home-mobile.css') ?>?v=<?= time() ?>" media="screen and (max-width: 768px)">
 </head>
 
 <body>

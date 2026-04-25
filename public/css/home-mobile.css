@@ -1,0 +1,596 @@
+/* 
+ * Home Page Mobile Optimizations (Premium UX/UI)
+ * Exclusive UX/UI styles for screens <= 768px
+ * This file guarantees no impact on desktop resolutions.
+ */
+
+@media (max-width: 768px) {
+    /* 1. Global Container Spacing */
+    .container {
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+    }
+
+    /* 2. Typography Fluidity & Premium Readability */
+    .hero {
+        padding: 60px 0 50px !important;
+        background: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.08) 0%, transparent 60%) !important;
+    }
+    
+    .hero h1 {
+        font-size: 1.95rem !important;
+        line-height: 1.2 !important;
+        margin-bottom: 16px !important;
+        letter-spacing: -0.03em !important;
+        font-weight: 900 !important;
+    }
+
+    .hero p {
+        font-size: 1.05rem !important;
+        line-height: 1.6 !important;
+        margin-bottom: 32px !important;
+        color: #475569 !important;
+        padding: 0 5px !important;
+        font-weight: 500 !important;
+    }
+
+    /* 3. Hero Buttons (Touch Targets & Premium Shadows) */
+    .hero-btns {
+        flex-direction: column !important;
+        gap: 14px !important;
+    }
+
+    .hero-btns .btn-ae {
+        width: 100% !important;
+        max-width: none !important;
+        height: 60px !important;
+        padding: 0 !important;
+        font-size: 1.15rem !important;
+        justify-content: center !important;
+        border-radius: 16px !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.01em !important;
+    }
+
+    .hero-btns .btn-ae-primary {
+        box-shadow: 0 12px 24px -8px rgba(37, 99, 235, 0.5) !important;
+    }
+
+    .hero-btns .btn-ae-outline {
+        border: 2px solid #e2e8f0 !important;
+        color: #0f172a !important;
+        background: #f8fafc !important;
+    }
+
+    /* 4. Floating Search Panel */
+    .search-section {
+        padding: 10px 0 40px !important;
+    }
+
+    .search-panel {
+        padding: 32px 24px !important;
+        border-radius: 28px !important;
+        margin: 0 !important;
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.05) !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+    }
+
+    .search-panel h2 {
+        font-size: 1.9rem !important;
+        line-height: 1.2 !important;
+        margin-bottom: 12px !important;
+        letter-spacing: -0.03em !important;
+    }
+
+    .search-panel .subtitle {
+        font-size: 1rem !important;
+        margin-bottom: 28px !important;
+        color: #64748b !important;
+    }
+
+    .search-form-wrapper {
+        padding: 0 !important;
+    }
+
+    .search-form {
+        flex-direction: column !important;
+        gap: 14px !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+
+    .search-input {
+        min-height: 64px !important;
+        padding: 20px 16px !important;
+        font-size: 1rem !important;
+        border-radius: 16px !important;
+        text-align: center !important;
+        background: #f8fafc !important;
+        border: 2px solid #e2e8f0 !important;
+        box-shadow: none !important;
+        color: #0f172a !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .search-input:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
+    }
+
+    #btnBuscar {
+        height: 60px !important;
+        font-size: 1.15rem !important;
+        border-radius: 16px !important;
+        width: 100% !important;
+        font-weight: 800 !important;
+        box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4) !important;
+    }
+
+    /* 5. Modern Benefit Tags */
+    .search-benefits {
+        margin-top: 28px !important;
+        gap: 12px !important;
+        flex-direction: column !important;
+    }
+
+    .benefit-tag {
+        width: 100% !important;
+        padding: 12px 16px !important;
+        font-size: 0.95rem !important;
+        border-radius: 14px !important;
+        background: linear-gradient(145deg, #f8fafc, #f1f5f9) !important;
+        border: 1px solid rgba(226, 232, 240, 0.8) !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 12px !important;
+        font-weight: 600 !important;
+        color: #334155 !important;
+    }
+
+    .benefit-icon {
+        background: #e0f2fe !important;
+        color: #0ea5e9 !important;
+        padding: 8px !important;
+        border-radius: 10px !important;
+    }
+
+    /* 6. Radar Promo Block */
+    .radar-extra, .radar-trigger-second {
+        padding: 24px !important;
+        border-radius: 20px !important;
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%) !important;
+        border: 1px solid #bbf7d0 !important;
+        margin-top: 20px !important;
+        box-shadow: 0 10px 25px -5px rgba(34, 197, 94, 0.15) !important;
+        text-align: left !important;
+    }
+
+    .radar-extra h4 {
+        font-size: 1.25rem !important;
+        color: #166534 !important;
+        letter-spacing: -0.02em !important;
+        margin-bottom: 10px !important;
+    }
+
+    .radar-extra p {
+        font-size: 1rem !important;
+        color: #15803d !important;
+        margin-bottom: 20px !important;
+    }
+
+    .radar-extra a {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        height: 56px !important;
+        border-radius: 14px !important;
+        background: #16a34a !important;
+        color: white !important;
+        font-size: 1.1rem !important;
+        font-weight: 800 !important;
+        box-shadow: 0 8px 16px -4px rgba(22, 163, 74, 0.4) !important;
+        text-decoration: none !important;
+    }
+
+    /* 7. Grids & Path Cards (Soluciones) */
+    .grid-3, .path-grid, .tier-grid, .comp-grid, .comp-grid-premium, .faq-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+    }
+
+    .path-card {
+        padding: 32px 24px !important;
+        border-radius: 24px !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .path-card h3 {
+        font-size: 1.4rem !important;
+        margin-bottom: 12px !important;
+    }
+
+    .path-card p {
+        font-size: 1rem !important;
+        margin-bottom: 24px !important;
+    }
+
+    /* 8. Product Mockups Hidden to save screen real estate */
+    .product-visual {
+        display: none !important;
+    }
+
+    /* 9. Feature Cards & Typography */
+    .product-flex {
+        flex-direction: column !important;
+        gap: 24px !important;
+        padding: 20px 0 !important;
+    }
+
+    .product-info h2, .band-header h2 {
+        font-size: 1.75rem !important;
+        line-height: 1.15 !important;
+        letter-spacing: -0.03em !important;
+        text-align: left !important;
+    }
+
+    /* 9b. Radar Section — Full Mobile Redesign */
+    .product-info {
+        text-align: left !important;
+    }
+
+    .product-info > p {
+        font-size: 0.95rem !important;
+        line-height: 1.6 !important;
+        color: #64748b !important;
+        text-align: left !important;
+        margin-bottom: 20px !important;
+    }
+
+    .product-info h2 br {
+        display: none !important;
+    }
+
+    /* Feature tag grid: 2x2 compact chips */
+    .feature-grid-simple {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+        margin-bottom: 24px !important;
+    }
+
+    .feature-tag {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        background: #f0f9ff !important;
+        border: 1px solid #bae6fd !important;
+        border-radius: 12px !important;
+        padding: 10px 12px !important;
+        font-size: 0.85rem !important;
+        font-weight: 700 !important;
+        color: #0369a1 !important;
+        white-space: nowrap !important;
+    }
+
+    .feature-tag svg {
+        width: 15px !important;
+        height: 15px !important;
+        flex-shrink: 0 !important;
+        stroke: #0ea5e9 !important;
+    }
+
+    /* Radar CTA buttons: stacked full-width */
+    .product-info > div[style*="display: flex"] {
+        flex-direction: column !important;
+        gap: 12px !important;
+        align-items: stretch !important;
+    }
+
+    .product-info .btn-ae {
+        width: 100% !important;
+        height: 56px !important;
+        justify-content: center !important;
+        text-align: center !important;
+        border-radius: 14px !important;
+        font-size: 1rem !important;
+        font-weight: 800 !important;
+    }
+
+    .product-info a[style*="color: var(--ae-slate)"] {
+        text-align: center !important;
+        padding: 14px !important;
+        border-radius: 14px !important;
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        font-size: 0.95rem !important;
+        font-weight: 700 !important;
+        color: #334155 !important;
+        text-decoration: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* 9c. API Section — Mobile Redesign */
+    .band-light .product-info h2 {
+        font-size: 1.6rem !important;
+    }
+
+    .path-list {
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 0 24px 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    .path-list li {
+        display: flex !important;
+        align-items: flex-start !important;
+        gap: 10px !important;
+        background: #f0fdf4 !important;
+        border: 1px solid #bbf7d0 !important;
+        border-radius: 12px !important;
+        padding: 12px 14px !important;
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+        color: #134e3a !important;
+        line-height: 1.4 !important;
+        border-bottom: 1px solid #bbf7d0 !important;
+    }
+
+    .path-list li svg {
+        flex-shrink: 0 !important;
+        margin-top: 2px !important;
+    }
+
+    .band-light .btn-ae-primary {
+        width: 100% !important;
+        height: 56px !important;
+        justify-content: center !important;
+        border-radius: 14px !important;
+        font-size: 1rem !important;
+        font-weight: 800 !important;
+    }
+
+    .feature-card {
+        padding: 28px 24px !important;
+        border-radius: 20px !important;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05) !important;
+        border: 1px solid rgba(0, 0, 0, 0.03) !important;
+    }
+
+    .feature-card h3 {
+        font-size: 1.3rem !important;
+        margin-bottom: 8px !important;
+    }
+
+    .feature-card p {
+        font-size: 1rem !important;
+        color: #475569 !important;
+    }
+
+    /* 10. Pricing & Tiers */
+    .tier-card {
+        padding: 32px 24px !important;
+        border-radius: 24px !important;
+        box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    .tier-card.featured {
+        transform: none !important;
+        box-shadow: 0 20px 40px -10px rgba(37, 99, 235, 0.15) !important;
+        border-width: 2px !important;
+    }
+
+    .tier-header h3 {
+        font-size: 1.5rem !important;
+    }
+
+    .tier-price {
+        font-size: 3rem !important;
+        letter-spacing: -0.04em !important;
+    }
+
+    .tier-features li {
+        font-size: 1rem !important;
+        padding: 10px 0 !important;
+    }
+
+    /* 10b. Dual Path Section ("Una plataforma, dos formas de crecer") */
+    .dual-path .band-header {
+        text-align: left !important;
+        margin: 0 0 24px 0 !important;
+    }
+
+    .dual-path .band-header h2 {
+        font-size: 1.75rem !important;
+        text-align: left !important;
+        margin-bottom: 12px !important;
+    }
+
+    .dual-path .band-header h2 br {
+        display: none !important;
+    }
+
+    .dual-path .band-header p {
+        font-size: 0.9rem !important;
+        color: rgba(255,255,255,0.65) !important;
+        text-align: left !important;
+        line-height: 1.55 !important;
+    }
+
+    .dual-path .band-header p br {
+        display: none !important;
+    }
+
+    /* 10c. "¿Radar o API?" Comparison Section */
+    .band .band-header[style*="text-align: center"] {
+        text-align: left !important;
+        max-width: none !important;
+        margin: 0 0 24px 0 !important;
+    }
+
+    .band .band-header[style*="text-align: center"] h2 {
+        font-size: 1.65rem !important;
+        text-align: left !important;
+        letter-spacing: -0.03em !important;
+        line-height: 1.2 !important;
+    }
+
+    .band .band-header[style*="text-align: center"] p {
+        font-size: 0.9rem !important;
+        text-align: left !important;
+        color: #64748b !important;
+        line-height: 1.6 !important;
+    }
+
+    .band .band-header[style*="text-align: center"] p br {
+        display: none !important;
+    }
+
+    .band .band-header[style*="text-align: center"] .pro-badge {
+        margin-left: 0 !important;
+        margin-right: auto !important;
+    }
+
+
+
+    /* 11. FAQ / Support Section */
+    .faq-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 24px !important;
+    }
+
+    /* Reduce top padding of the section container */
+    .faq-grid > div[style*="sticky"] {
+        position: relative !important;
+        top: auto !important;
+        padding-top: 0 !important;
+    }
+
+    /* Section wrapper: cut top whitespace */
+    section:has(.faq-grid) {
+        padding-top: 40px !important;
+    }
+
+    /* Override the giant inline font-size: 3rem */
+    .faq-grid h2 {
+        font-size: 1.6rem !important;
+        line-height: 1.15 !important;
+        letter-spacing: -0.03em !important;
+        margin-top: 6px !important;
+        margin-bottom: 14px !important;
+    }
+
+    .faq-grid h2 br {
+        display: none !important;
+    }
+
+    .faq-grid > div > p {
+        font-size: 0.9rem !important;
+        line-height: 1.6 !important;
+        margin-bottom: 20px !important;
+        color: #64748b !important;
+    }
+
+    /* Avatar trust block: compact horizontal strip */
+    .faq-grid > div > div[style*="display: flex"][style*="gap: 16px"] {
+        padding: 10px 16px !important;
+        border-radius: 14px !important;
+        gap: 12px !important;
+        max-width: 100% !important;
+        width: fit-content !important;
+        margin-bottom: 20px !important;
+    }
+
+    /* Contact button: full width */
+    .faq-grid > div > a.btn-ae {
+        width: 100% !important;
+        justify-content: center !important;
+        border-radius: 14px !important;
+        padding: 16px !important;
+        font-size: 1rem !important;
+        box-sizing: border-box !important;
+    }
+
+    /* FAQ Accordion items */
+    .faq-item {
+        border-radius: 14px !important;
+    }
+
+    .faq-header {
+        padding: 14px 16px !important;
+    }
+
+    .faq-header h4 {
+        font-size: 0.9rem !important;
+        line-height: 1.4 !important;
+    }
+
+    .faq-body {
+        font-size: 0.875rem !important;
+        line-height: 1.6 !important;
+        padding: 0 16px 14px !important;
+    }
+
+    /* 13. Final CTA Block */
+    div[style*="background: linear-gradient(135deg, #1E3A8A"] {
+        padding: 40px 24px !important;
+        border-radius: 24px !important;
+    }
+
+    div[style*="background: linear-gradient(135deg, #1E3A8A"] h2 {
+        font-size: 1.7rem !important;
+        line-height: 1.2 !important;
+        margin-bottom: 16px !important;
+        letter-spacing: -0.03em !important;
+    }
+
+    div[style*="background: linear-gradient(135deg, #1E3A8A"] p {
+        font-size: 0.95rem !important;
+        margin-bottom: 28px !important;
+        line-height: 1.6 !important;
+    }
+
+    div[style*="background: linear-gradient(135deg, #1E3A8A"] > div > div[style*="display: flex"] {
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+
+    div[style*="background: linear-gradient(135deg, #1E3A8A"] .btn-ae {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 16px !important;
+        font-size: 1rem !important;
+        border-radius: 14px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 12. Footer Adjustments */
+
+    .footer-grid {
+        grid-template-columns: 1fr !important;
+        gap: 32px !important;
+        text-align: left !important;
+    }
+
+    .footer-brand {
+        align-items: flex-start !important;
+    }
+
+    .footer-socials {
+        justify-content: flex-start !important;
+    }
+}
