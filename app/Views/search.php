@@ -27,7 +27,7 @@
                     </p>
                 </div>
 
-                <form class="search-row" method="POST" action="<?= site_url('search_company') ?>" id="searchForm">
+                <form class="search-row" method="GET" action="<?= site_url('search_company') ?>" id="searchForm">
                     <?= csrf_field() ?>
                     <input class="input" id="q" name="q" value="<?= esc($q ?? '') ?>"
                         placeholder="Ej. Gestiones López o B12345678" aria-label="Buscar empresa por nombre o CIF"

@@ -216,7 +216,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 28px;
-    max-width: 860px;
+    max-width: none !important;
     margin: 0 auto 26px;
     padding: 24px 26px;
     border-radius: 24px;
@@ -265,12 +265,11 @@
     box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
 }
 
-.ae-radar-page__stats-wrap {
-    max-width: 860px;
-    margin: 0 auto;
-}
+
 
 .ae-radar-page__stats {
+    width: 100% !important;
+    max-width: none !important;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 18px;
@@ -985,7 +984,7 @@
 .ae-radar-page__excel-content {
     position: relative;
     z-index: 1;
-    max-width: 860px;
+    max-width: none !important;
     margin: 0 auto;
     padding: 62px 34px 58px;
     text-align: center;
@@ -1252,13 +1251,11 @@
         text-align: left;
     }
 
-    .ae-radar-page__stats-wrap {
-        padding: 0;
-        background: transparent;
-        border: none;
-    }
+    
 
     .ae-radar-page__stats {
+    width: 100% !important;
+    max-width: none !important;
         grid-template-columns: 1fr;
         gap: 12px;
     }

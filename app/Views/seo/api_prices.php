@@ -224,7 +224,19 @@
             border-top-color: rgba(255, 255, 255, 0.1);
         }
 
-        .api-pricing-card.free-plan .api-pricing-btn,
+        .api-pricing-card.free-plan .api-pricing-btn {
+            background: #2563eb !important;
+            color: #ffffff !important;
+            border: none !important;
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4) !important;
+        }
+
+        .api-pricing-card.free-plan .api-pricing-btn:hover {
+            background: #1d4ed8 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.5) !important;
+        }
+
         .api-pricing-card.business-plan .api-pricing-btn {
             background: #ffffff !important;
             color: #1f2937 !important;
@@ -1303,7 +1315,7 @@
                                     Obtener API Key Gratis
                                 </button>
                             </form>
-                            <p style="font-size: 0.75rem; color: #64748b; margin-top: 12px; text-align: center;">
+                            <p style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.7); margin-top: 12px; text-align: center;">
                                 Acceso instantáneo. Sin tarjeta de crédito.
                             </p>
                         </div>

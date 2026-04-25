@@ -130,8 +130,9 @@ class RadarController extends BaseController
             return redirect()->to(site_url('empresas-nuevas'));
         }
 
-        $data['title'] = "Empresas en {$province} | Listado y Estadísticas | APIEmpresas";
-        $data['meta_description'] = "Descubre las " . number_format($data['total_context_count'], 0, ',', '.') . " empresas en {$province}. Análisis de sectores y empresas de reciente creación.";
+        $data['title'] = "Empresas en {$province} hoy | +120 oportunidades activas";
+        $data['excerptText'] = "Descubre " . number_format($data['total_context_count'], 0, ',', '.') . " empresas en {$province} detectadas hoy. Oportunidades reales listas para contactar antes que tu competencia.";
+        $data['meta_description'] = $data['excerptText'];
         $data['canonical'] = site_url(uri_string());
         
         // SEO Headings
@@ -153,6 +154,9 @@ class RadarController extends BaseController
         $data = $this->getRadarData($province, $sector, $period);
         if (!$data) return redirect()->to(site_url('empresas-nuevas'));
 
+        // Tracking (Runs every visit, even if data is cached)
+        $this->logSeoVariant($data);
+
         if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
             $viewFile = 'seo/radar_new_companies_province';
         } elseif ($sector) {
@@ -161,6 +165,22 @@ class RadarController extends BaseController
             $viewFile = ($period === 'general' || $period === 'mes') ? 'seo/radar_new_companies' : 'seo/radar_new_companies_period';
         }
         return view($viewFile, $data);
+    }
+
+    private function logSeoVariant($data)
+    {
+        if (!isset($data['variant_id'])) return;
+        
+        $db = \Config\Database::connect();
+        try {
+            $db->table('seo_variant_performance')->insert([
+                'url'           => uri_string(),
+                'variant_id'    => $data['variant_id'],
+                'variant_title' => $data['title'] ?? '',
+                'variant_meta'  => $data['excerptText'] ?? '',
+                'created_at'    => date('Y-m-d H:i:s')
+            ]);
+        } catch (\Exception $e) { /* Fail silently */ }
     }
 
     public function excel_preview()
@@ -174,7 +194,26 @@ class RadarController extends BaseController
         if (!$data) return redirect()->to(site_url('empresas-nuevas'));
 
         $data['cnae'] = $cnae;
-        $data['source'] = $this->request->getGet('source') ?? 'direct';
+        // Deterministic Rotation for Excel
+        $hash = crc32(uri_string());
+        $tVariants = [
+            "Descargar listado de clientes potenciales | Excel listo ahora",
+            "Listado de empresas contratando en Excel | Descarga inmediata",
+            "Oportunidades B2B en Excel: Descarga leads activos",
+            "Descarga base de datos de empresas con necesidad activa"
+        ];
+        $mVariants = [
+            "Descarga un listado de empresas activas que necesitan proveedores ahora mismo. Ideal para prospección comercial inmediata y generación de ventas.",
+            "Listado completo de empresas de reciente creación en formato Excel. Empieza a captar clientes hoy con datos actualizados y reales.",
+            "Accede a los datos de contacto de nuevas empresas en España. Descarga tu Excel y adelántate a tu competencia cerrando ventas.",
+            "Bases de datos de empresas recién constituidas listas para tu CRM. Aumenta tus ventas con leads B2B de alta intención comercial."
+        ];
+
+        $data['title'] = $tVariants[$hash % count($tVariants)];
+        $data['excerptText'] = $mVariants[$hash % count($mVariants)];
+        $data['variant_id'] = 'excel-rotation-' . ($hash % count($tVariants));
+
+        $this->logSeoVariant($data);
 
         return view('radar/excel_preview', $data);
     }
@@ -341,7 +380,7 @@ class RadarController extends BaseController
         $headingTime = "";
         if ($period === 'hoy') $headingTime = " hoy";
         elseif ($period === 'semana') $headingTime = " esta semana";
-        elseif ($period === 'mes' || $period === '30days') $headingTime = " este mes";
+        elseif ($period === 'mes' || $period === '30days') $headingTime = " en los últimos 30 días";
 
         if ($sector) {
             $headingPrefix = "Empresas nuevas";
@@ -363,9 +402,99 @@ class RadarController extends BaseController
             $headingLocation = "España";
         }
 
-        $title = trim($headingPrefix . $headingTime . $headingSuffix . $headingHighlight . $headingMiddle . $headingLocation);
-        $statKey = ($period === 'general' || $period === 'mes') ? 'mes' : $period;
+        // --- SEO OPTIMIZATION: WEIGHTED ROTATION & INTENT SEGMENTATION (CRO FOR SEO) ---
+        $statKey = ($period === 'general' || $period === 'mes' || $period === '30days') ? 'mes' : $period;
         $totalCount = $stats[$statKey] ?? $stats['mes'];
+        
+        $periodLabel = "ahora";
+        if ($period === 'hoy') $periodLabel = "hoy";
+        if ($period === 'semana') $periodLabel = "esta semana";
+        if ($period === 'mes' || $period === '30days') $periodLabel = "últimos 30 días";
+
+        $displayCount = ($totalCount > 0) ? "+{$totalCount} " : "";
+        // Rule: hoy < semana < mes. If not strictly lower, we remove the number for 'hoy' to avoid looking fake
+        if ($period === 'hoy' && $stats['hoy'] >= $stats['mes'] && $stats['mes'] > 0) {
+            $displayCount = "";
+        }
+
+        $context = $sector ? $sector['label'] : ($province && mb_strtolower($province, 'UTF-8') !== 'españa' ? ucfirst(mb_strtolower($province, 'UTF-8')) : "España");
+        
+        // SEO-friendly short labels for long sectors (to avoid title truncation)
+        $seoContext = $context;
+        if ($sector) {
+            $shortLabels = [
+                'Restaurantes y Puestos de Comidas' => 'Restauración',
+                'Construcción de Edificios Residenciales' => 'Construcción Residencial',
+                'Comercio al por menor en establecimientos no especializados' => 'Gran Consumo',
+            ];
+            $seoContext = $shortLabels[$context] ?? $context;
+        }
+        
+        $type = 'national';
+        if ($sector) $type = 'sector';
+        elseif ($province && mb_strtolower($province, 'UTF-8') !== 'españa') $type = 'province';
+
+        // Intent-based weights (Balanced)
+        $weights = [
+            'A' => 20, 'B' => 20, 'C' => 20, 'D' => 20, 'E' => 20
+        ];
+
+        // Deterministic Hash based on URI
+        $uri = uri_string();
+        $hash = crc32($uri);
+
+        // Weighted Selection
+        $sum = array_sum($weights);
+        $point = $hash % $sum;
+        $current = 0;
+        $variantId = 'A';
+        foreach ($weights as $id => $w) {
+            $current += $w;
+            if ($point < $current) {
+                $variantId = $id;
+                break;
+            }
+        }
+
+        // Titles (A-D Variants - Optimized for length < 60 chars)
+        $tVariants = [
+            'A' => "{$displayCount}Empresas en {$seoContext} buscando proveedores {$periodLabel}",
+            'B' => "{$displayCount}Empresas en {$seoContext} contratando proveedores {$periodLabel}",
+            'C' => "{$displayCount}Empresas en {$seoContext} necesitan proveedores {$periodLabel}",
+            'D' => "{$displayCount}Empresas en {$seoContext} buscan proveedores {$periodLabel}",
+        ];
+        $seoTitle = $tVariants[$variantId] ?? $tVariants['A'];
+
+        // Metas (Balanced Rotation)
+        $mWeights = ['V1' => 34, 'V2' => 33, 'V3' => 33];
+        $mSum = array_sum($mWeights);
+        $mPoint = $hash % $mSum;
+        $mCurrent = 0;
+        $mVariantId = 'action';
+        foreach ($mWeights as $mid => $mw) {
+            $mCurrent += $mw;
+            if ($mPoint < $mCurrent) {
+                $mVariantId = $mid;
+                break;
+            }
+        }
+
+        $mVariants = [
+            'V1' => "Accede a {$displayCount}empresas en {$context} que están buscando proveedores {$periodLabel}. Las primeras en contactar son las que consiguen el cliente.",
+            'V2' => "Accede a {$displayCount}empresas en {$context} que buscan proveedores {$periodLabel} de forma activa. Las primeras en contactar son las que consiguen el cliente.",
+            'V3' => "Accede a {$displayCount}empresas en {$context} con necesidad de proveedores {$periodLabel}. Las primeras en contactar son las que consiguen el cliente.",
+        ];
+
+        if ($period === 'hoy') {
+            $mVariants = [
+                'V1' => "Accede a {$displayCount}empresas en {$context} que están buscando proveedores hoy. Cada día aparecen nuevas oportunidades — las primeras en contactar son las que consiguen el cliente.",
+                'V2' => "Accede a {$displayCount}empresas en {$context} que buscan proveedores hoy. Cada día aparecen nuevas oportunidades — las primeras en contactar son las que consiguen el cliente.",
+                'V3' => "Accede a {$displayCount}empresas en {$context} con necesidad de proveedores hoy. Cada día aparecen nuevas oportunidades — las primeras en contactar son las que consiguen el cliente.",
+            ];
+        }
+        $seoDesc = $mVariants[$mVariantId];
+
+        // --- RESTORE MISSING CALCULATIONS ---
         $dynamicPrice = calculate_radar_price($totalCount);
         $isLowResults = $totalCount === 0;
 
@@ -377,8 +506,8 @@ class RadarController extends BaseController
             '30days' => calculate_radar_price($stats['30days'])['base_price'],
         ];
 
-        // National stats and prices for cross-context links (e.g. "Nacional Hoy" on a province page)
-        $nationalStats = $stats; // Default to current if already national
+        // National stats and prices for cross-context links
+        $nationalStats = $stats;
         $nationalPrices = $prices;
 
         if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
@@ -411,7 +540,7 @@ class RadarController extends BaseController
             ];
         }
 
-        // Sectors / Provinces Top - Optimization: Group by indexed code instead of text label
+        // Sectors / Provinces Top
         if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
             $topData = $db->table('companies')
                 ->select('MAX(cnae_label) as cnae_label, COUNT(id) as total')
@@ -429,9 +558,20 @@ class RadarController extends BaseController
 
         $relatedSectors = $db->query("SELECT cnae_label as label FROM seo_stats_cnae WHERE LENGTH(cnae_label) < 100 ORDER BY total_companies DESC LIMIT 12")->getResultArray();
 
+        // Final Title Sanitization: Aggressive length management for SEO (Max 60 chars)
+        if (mb_strlen($seoTitle) > 60) {
+            $seoTitle = mb_substr($seoTitle, 0, 57) . '...';
+        }
+
+        // Dynamic Subtitle for H1 reinforcement
+        $dynamicSubtitle = "{$displayCount}empresas en {$context} están contratando proveedores ahora mismo";
+
         $data = [
-            'title' => $title,
-            'meta_description' => "Descubre las " . number_format($totalCount, 0, ',', '.') . " empresas recién constituidas en " . ($province ?: "España") . " detectadas hoy en el BORME. Listado actualizado para prospección B2B.",
+            'variant_id' => $variantId . '-' . $mVariantId,
+            'title' => $seoTitle,
+            'excerptText' => $seoDesc,
+            'meta_description' => $seoDesc,
+            'dynamic_subtitle' => $dynamicSubtitle,
             'companies' => $companies,
             'stats' => $stats,
             'prices' => $prices,
@@ -443,6 +583,10 @@ class RadarController extends BaseController
             'sector' => $sector,
             'sector_label' => $sectorLabel,
             'total_context_count' => $totalCount,
+            'potential_revenue_min' => number_format(($totalCount > 0 ? $totalCount : ($stats['30days'] ?? 100)) * 300, 0, ',', '.'),
+            'potential_revenue_max' => number_format(($totalCount > 0 ? $totalCount : ($stats['30days'] ?? 100)) * 1500, 0, ',', '.'),
+            'conversion_count' => $totalCount > 0 ? $totalCount : ($stats['30days'] ?? 100),
+            'conversion_label' => $totalCount > 0 ? ($period === 'hoy' ? 'hoy' : 'en este periodo') : 'en el último mes',
             'dynamic_price' => $dynamicPrice,
             'period' => $period,
             'is_low_results' => $isLowResults,
@@ -456,7 +600,6 @@ class RadarController extends BaseController
             'heading_time' => $headingTime,
             'paywall_level' => 'strong'
         ];
-
         if ($isLowResults) {
             if ($province && $sectorLabel) {
                 $data['national_sector_url'] = site_url("empresas-nuevas-sector/" . url_title($sectorLabel, '-', true));

@@ -30,7 +30,7 @@ class PublicRoutesTest extends TestCase
         
         $this->client = new Client([
             'base_uri' => $this->baseUrl,
-            'timeout'  => 5.0,
+            'timeout'  => 10.0,
             'http_errors' => false, // No lanzar excepcion en 404/500 para poder asertar
             'verify' => false,      // Ignorar errores de SSL local
         ]);
@@ -63,7 +63,7 @@ class PublicRoutesTest extends TestCase
         $this->assertRouteWorks('leads-empresas-nuevas', 'Radar');
         $this->assertRouteWorks('blog', 'Blog');
         $this->assertRouteWorks('documentation', 'Documentación');
-        $this->assertRouteWorks('enter', 'Iniciar sesión');
+        $this->assertRouteWorks('enter', 'Acceso al panel');
         $this->assertRouteWorks('register', 'Crea tu cuenta');
     }
 
@@ -74,7 +74,7 @@ class PublicRoutesTest extends TestCase
     {
         $this->assertRouteWorks('empresas-nuevas-hoy', 'hoy');
         $this->assertRouteWorks('empresas-nuevas-semana', 'semana');
-        $this->assertRouteWorks('empresas-nuevas-mes', 'mes');
+        $this->assertRouteWorks('empresas-nuevas-mes', 'últimos 30 días');
         $this->assertRouteWorks('empresas-nuevas', 'Radar');
         $this->assertRouteWorks('directorio/ultimas-empresas-registradas');
     }

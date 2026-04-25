@@ -63,8 +63,9 @@ class Directory extends BaseController
             'provinces' => $data['provinces'],
             'cnaes'     => $data['cnaes'],
             'latest'    => $data['latest'] ?? [],
-            'title'     => 'Directorio de empresas en España | APIEmpresas.es',
-            'meta_description' => 'Explore el directorio completo de empresas españolas agrupadas por provincia y sector de actividad (CNAE).'
+            'title'     => 'Listado de empresas nuevas hoy | Leads listos para contactar',
+            'excerptText' => 'Descubre empresas recién creadas en España detectadas hoy. Oportunidades reales de negocio listas para contactar antes que tu competencia.',
+            'meta_description' => 'Descubre empresas recién creadas en España detectadas hoy. Oportunidades reales de negocio listas para contactar antes que tu competencia.'
         ]);
     }
 
@@ -118,9 +119,10 @@ class Directory extends BaseController
 
         return view('directory/list', [
             'items'     => $companies,
-            'title'     => "Empresas en {$provinceName} | Página {$page} | APIEmpresas.es",
+            'title'     => "Empresas en {$provinceName} hoy | +120 oportunidades activas",
+            'excerptText' => "Descubre las empresas situadas en {$provinceName} hoy. Oportunidades reales listas para contactar antes que tu competencia.",
             'header'    => "Directorio de empresas en {$provinceName}",
-            'meta_description' => "Listado de las principales empresas situadas en {$provinceName} (Página {$page}). Consulte CIF, razón social y datos registrales.",
+            'meta_description' => "Descubre las empresas situadas en {$provinceName} hoy. Oportunidades reales listas para contactar antes que tu competencia.",
             'cross_links' => [
                 'type' => 'cnae',
                 'title' => "Principales sectores en {$provinceName}",
@@ -180,9 +182,10 @@ class Directory extends BaseController
 
         return view('directory/list', [
             'items'     => $companies,
-            'title'     => "Empresas de {$cnaeLabel} | Página {$page} | APIEmpresas.es",
+            'title'     => "Empresas de {$cnaeLabel} hoy | Leads listos para contactar",
+            'excerptText' => "Accede al listado de empresas del sector {$cnaeLabel} hoy. Detectadas en tiempo real y listas para contactar antes que otros proveedores.",
             'header'    => "Empresas en el sector: {$cnaeLabel}",
-            'meta_description' => "Listado de empresas dedicadas a {$cnaeLabel} (Página {$page}). Consulte información comercial y validación de CIF.",
+            'meta_description' => "Accede al listado de empresas del sector {$cnaeLabel} hoy. Detectadas en tiempo real y listas para contactar antes que otros proveedores.",
             'cross_links' => [
                 'type' => 'province',
                 'title' => "Ver {$cnaeLabel} por provincias",
@@ -222,9 +225,10 @@ class Directory extends BaseController
         return view('directory/list', [
             'items'     => $companies,
             'paywall_level' => 'soft',
-            'title'     => "Últimas empresas registradas en España | Página {$page} | APIEmpresas.es",
+            'title'     => "Empresas nuevas hoy en España | +200 oportunidades activas",
+            'excerptText' => "Explora empresas recién creadas en España con necesidades activas. Leads listos para contactar con alto potencial comercial hoy mismo.",
             'header'    => "Últimas Empresas Registradas",
-            'meta_description' => "Consulte el listado de las sociedades de reciente creación en España. Datos actualizados del BORME y Registro Mercantil.",
+            'meta_description' => "Explora empresas recién creadas en España con necesidades activas. Leads listos para contactar con alto potencial comercial hoy mismo.",
             'pagination' => [
                 'current' => $page,
                 'next'    => site_url("directorio/ultimas-empresas-registradas/" . ($page + 1)),
@@ -262,9 +266,10 @@ class Directory extends BaseController
 
         return view('directory/list', [
             'items'     => $companies,
-            'title'     => "Empresas de {$cnaeLabel} en {$provinceName} | Página {$page}",
+            'title'     => "Empresas de {$cnaeLabel} en {$provinceName} hoy | +50 oportunidades",
+            'excerptText' => "Descubre empresas de {$cnaeLabel} en {$provinceName} detectadas hoy. Oportunidades reales listas para contactar antes que tu competencia.",
             'header'    => "{$cnaeLabel} en {$provinceName}",
-            'meta_description' => "Listado de empresas en el sector {$cnaeLabel} ubicadas en {$provinceName} (Página {$page}). Datos de contacto y CIF.",
+            'meta_description' => "Descubre empresas de {$cnaeLabel} en {$provinceName} detectadas hoy. Oportunidades reales listas para contactar antes que tu competencia.",
             'pagination' => [
                 'current' => $page,
                 'next'    => site_url("directorio/provincia/" . urlencode($provinceName) . "/cnae/{$cnaeCode}/" . ($page + 1)),

@@ -267,6 +267,8 @@
                 // Keep the spinner and just slightly change text or keep it
                 // For now, just adding the spinner is enough as requested.
             }
+            }
         }
+
     });
 </script>

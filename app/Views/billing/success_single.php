@@ -254,23 +254,6 @@
             $('#excel_main_download_btn').on('click', function() {
                 trackEvent('excel_download_start');
             });
-
-            $('.ae-email-export-btn').on('click', function() {
-                const url = $(this).data('url');
-                Swal.fire({
-                    title: 'Enviar listado por email',
-                    input: 'email',
-                    inputPlaceholder: 'tu@email.com',
-                    showCancelButton: true,
-                    confirmButtonText: 'Enviar'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.post(url, { email: result.value }, function(res) {
-                            Swal.fire('Enviado', 'Revisa tu bandeja de entrada', 'success');
-                        });
-                    }
-                });
-            });
         });
 
         function trackEvent(type, metadata = {}) {

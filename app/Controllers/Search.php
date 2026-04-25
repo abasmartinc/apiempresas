@@ -133,10 +133,10 @@ class Search extends BaseController
             ], 429);
         }
 
-        // 3. Protección de acceso directo: Si no es AJAX, redirigir a la web
-        // No bloquear la IP, simplemente llevar al usuario al sitio correcto
+        // 3. Protección de acceso directo: Si no es AJAX, redirigir a la web pasando la query
         if (!$this->request->isAJAX()) {
-            return redirect()->to('search_company');
+            $q = trim((string)($this->request->getVar('q') ?: $this->request->getVar('cif')));
+            return redirect()->to(site_url('search_company' . ($q ? '?q=' . rawurlencode($q) : '')));
         }
 
         $q = trim((string) $this->request->getVar('q'));
@@ -319,7 +319,8 @@ class Search extends BaseController
              return "Demasiadas solicitudes. Por favor, espera un momento.";
         }
 
-        $q = trim((string) $this->request->getGet('q'));
+        $q = trim((string)($this->request->getGet('q') ?: $this->request->getPost('q') ?: $this->request->getGet('cif')));
+        if (!$q) $q = trim((string) $this->request->getVar('q'));
 
         $data = [
             'q'           => $q,
@@ -373,9 +374,7 @@ class Search extends BaseController
         // Reuse index() logic by injecting the POST value into the GET parameters
         // to avoid duplicating the complex rate-limiting and logging logic.
         $q = $this->request->getPost('q');
-        $_GET['q'] = $q;
-        
-        return $this->index();
+        return redirect()->to(site_url('search_company?q=' . urlencode((string)$q)));
     }
 }
 

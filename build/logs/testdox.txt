@@ -1,5 +1,5 @@
 Public Routes (Tests\Feature\PublicRoutes)
- [ ] Header navigation
+ [x] Header navigation
  [x] Footer radar routes
  [x] Utilities routes
  [x] Province routes

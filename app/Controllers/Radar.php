@@ -161,10 +161,27 @@ class Radar extends BaseController
         $todayCount = $realCount > 100 ? $realCount : 206; // Fallback to 206 as per user's earlier copy
         $pipelineMetrics = $metricsService->getMetrics($todayCount);
 
+        // Deterministic Rotation for Preview
+        $hash = crc32(uri_string());
+        $tVariants = [
+            "Consigue clientes B2B antes que tu competencia | Radar",
+            "Empresas activas contratando ahora mismo | Radar B2B",
+            "Oportunidades de venta en tiempo real | Radar",
+            "Accede antes que tu competencia a nuevos clientes | Radar"
+        ];
+        $mVariants = [
+            "Accede a empresas recién creadas con necesidades activas ahora mismo. Contacta antes que otros proveedores y cierra ventas B2B.",
+            "Descubre empresas con potencial de compra inmediato. Leads B2B frescos detectados hoy en el BORME para tu equipo comercial.",
+            "Contacta con empresas nuevas que buscan proveedores en este momento. Adelántate a tu competencia y consigue clientes hoy.",
+            "Listado de empresas con necesidades de contratación activas. Ideal para prospección comercial de alto impacto."
+        ];
+
         return view('radar/preview', [
             'companies'       => $companies,
             'opps_count'      => $todayCount,
-            'pipelineMetrics' => $pipelineMetrics
+            'pipelineMetrics' => $pipelineMetrics,
+            'title'           => $tVariants[$hash % count($tVariants)],
+            'excerptText'     => $mVariants[$hash % count($mVariants)]
         ]);
     }
 
