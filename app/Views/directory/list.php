@@ -230,7 +230,7 @@
 <header class="dir-hero">
     <div class="container">
         <h1><?= esc($header) ?></h1>
-        <p>Listado actualizado de sociedades vinculadas. Seleccione una empresa para consultar su validación de CIF, datos registrales y scoring en tiempo real.</p>
+        <p><?= esc($excerptText) ?></p>
     </div>
 </header>
 
@@ -245,69 +245,66 @@
             <span style="color: var(--dir-slate-900)"><?= esc($header) ?></span>
         </nav>
 
-        <div class="table-container" style="background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow-x: auto; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
-            <table style="width: 100%; min-width: 600px; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
-                <thead>
-                    <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-                        <th style="padding: 1rem 1.5rem; color: #64748b; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Empresa</th>
-                        <th style="padding: 1rem 1.5rem; color: #64748b; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">CIF</th>
-                        <th style="padding: 1rem 1.5rem; color: #64748b; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Ubicación</th>
-                        <th style="padding: 1rem 1.5rem; color: #64748b; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; text-align: right;">Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php 
-                        helper('company');
-                        foreach($items as $company): 
-                        $url = company_url($company);
-                    ?>
-                    <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
-                        <td style="padding: 1rem 1.5rem;">
-                            <a href="<?= esc($url) ?>" style="font-weight: 600; color: #0f172a; text-decoration: none; display: block;">
-                                <?= esc($company['name']) ?>
-                            </a>
-                        </td>
-                        <td style="padding: 1rem 1.5rem; color: #475569; font-family: monospace; font-size: 0.9rem;">
-                            <?= esc($company['cif'] ?? '-') ?>
-                        </td>
-                        <td style="padding: 1rem 1.5rem; color: #475569;">
-                            <?= esc($company['province'] ?? 'España') ?>
-                        </td>
-                        <td style="padding: 1rem 1.5rem; text-align: right;">
-                            <a href="<?= esc($url) ?>" style="display: inline-flex; align-items: center; gap: 4px; color: #2152FF; font-weight: 600; font-size: 0.85rem; text-decoration: none;">
-                                Ver Ficha
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-                            </a>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
+        <div class="company-grid" style="position: relative;">
+            <?php 
+                helper('company');
+                foreach($items as $company): 
+                $url = company_url($company);
+            ?>
+            <a href="<?= esc($url) ?>" class="company-card">
+                <div class="company-card__top">
+                    <span class="company-card__cif"><?= esc($company['cif'] ?? '-') ?></span>
+                    <span class="badge-official">Oficial</span>
+                </div>
+                
+                <h2 class="company-card__name" title="<?= esc($company['name']) ?>">
+                    <?= esc($company['name']) ?>
+                </h2>
+                
+                <div class="company-card__footer">
+                    <div class="company-card__location">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        <?= esc($company['province'] ?? 'España') ?>
+                    </div>
+                    
+                    <div class="company-card__view">
+                        Ver ficha
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                </div>
+            </a>
+            <?php endforeach; ?>
 
-                    <?php if (isset($paywall_level) && $paywall_level === 'soft'): ?>
-                        <?php for ($i = 0; $i < 5; $i++): ?>
-                        <tr class="blurred-row" style="border-bottom: 1px solid #f1f5f9;">
-                            <td style="padding: 1rem 1.5rem;">Empresa Restringida</td>
-                            <td style="padding: 1rem 1.5rem; font-family: monospace;">A00******</td>
-                            <td style="padding: 1rem 1.5rem;">Cargando...</td>
-                            <td style="padding: 1rem 1.5rem; text-align: right;">-</td>
-                        </tr>
-                        <?php endfor; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-
+            <?php if (isset($paywall_level) && $paywall_level === 'soft'): ?>
+                <?php for ($i = 0; $i < 6; $i++): ?>
+                <div class="company-card blurred-row">
+                    <div class="company-card__top">
+                        <span class="company-card__cif">A00******</span>
+                        <span class="badge-official">Oculto</span>
+                    </div>
+                    <h2 class="company-card__name">Empresa Restringida S.L.</h2>
+                    <div class="company-card__footer">
+                        <div class="company-card__location">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                            Cargando...
+                        </div>
+                    </div>
+                </div>
+                <?php endfor; ?>
+            <?php endif; ?>
             <?php if (isset($paywall_level) && $paywall_level === 'soft'): ?>
                 <div class="paywall-overlay">
                     <div class="paywall-card">
                         <div style="width: 56px; height: 56px; background: #eef2ff; color: var(--dir-primary); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 24px;">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                         </div>
-                        <h3 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 12px;">Acceso Restringido</h3>
+                        <h3 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 12px;">Solo estás viendo una muestra de empresas recientes</h3>
                         <p style="color: #475569; margin-bottom: 24px; line-height: 1.6;">
-                            Estás visualizando la muestra gratuita de las últimas empresas. Desbloquea el Radar para acceder a todas las nuevas constituciones diarias.
+                            Desbloquea acceso completo para ver todas las nuevas constituciones y detectar oportunidades comerciales antes que otros.
                         </p>
                         <div style="display: flex; flex-direction: column; gap: 12px;">
                             <a href="<?= site_url('leads-empresas-nuevas') ?>" style="background: var(--dir-primary); color: white; padding: 16px 24px; border-radius: 12px; font-weight: 800; text-decoration: none; box-shadow: 0 8px 16px rgba(33, 82, 255, 0.2);">
-                                Activar Radar PRO ahora
+                                Desbloquear acceso completo
                             </a>
                             <a href="<?= site_url('billing/single_checkout?provincia=España&period=30days') ?>" style="background: white; color: #0f172a; border: 1px solid #cbd5e1; padding: 14px 24px; border-radius: 12px; font-weight: 700; text-decoration: none;">
                                 Descargar Últimas 30 Días (Excel) · 9€
@@ -394,7 +391,12 @@
         <script type="application/ld+json">
             <?= json_encode($itemListSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
         </script>
-        
+        <div class="radar-cross-promo" style="margin-top: 4rem; padding: 3rem; background: linear-gradient(135deg, #f0fdf4, #ffffff); border-radius: 24px; border: 1px solid #dcfce7; text-align: center; box-shadow: 0 10px 25px -5px rgba(22, 163, 74, 0.1);">
+            <h2 style="font-size: 1.8rem; font-weight: 800; color: #16a34a; margin-bottom: 1rem;">¿Buscas empresas que están activamente buscando proveedores?</h2>
+            <p style="color: #475569; font-size: 1.1rem; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">Nuestro Radar detecta en tiempo real qué sociedades tienen mayor probabilidad de necesitar tus servicios.</p>
+            <a href="<?= site_url('radar') ?>" class="btn" style="background: #16a34a; color: white; padding: 1rem 2.5rem; border-radius: 12px; font-weight: 800; font-size: 1.1rem; text-decoration: none; display: inline-block; box-shadow: 0 8px 16px rgba(22, 163, 74, 0.25);">Ver oportunidades activas</a>
+        </div>
+
         <div class="cta-bottom">
             <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--dir-slate-900); margin-bottom: 1rem;">¿No encuentra la empresa que busca?</h2>
             <p style="color: var(--dir-slate-600); font-size: 1.1rem; margin-bottom: 2.5rem; max-width: 600px; margin-left: auto; margin-right: auto;">Nuestro buscador avanzado permite encontrar cualquier sociedad en España por nombre, CIF o ubicación.</p>

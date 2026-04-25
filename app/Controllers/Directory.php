@@ -225,10 +225,10 @@ class Directory extends BaseController
         return view('directory/list', [
             'items'     => $companies,
             'paywall_level' => 'soft',
-            'title'     => "Empresas nuevas hoy en España | +200 oportunidades activas",
-            'excerptText' => "Explora empresas recién creadas en España con necesidades activas. Leads listos para contactar con alto potencial comercial hoy mismo.",
-            'header'    => "Últimas Empresas Registradas",
-            'meta_description' => "Explora empresas recién creadas en España con necesidades activas. Leads listos para contactar con alto potencial comercial hoy mismo.",
+            'title'     => "Explora las últimas empresas creadas en España",
+            'excerptText' => "Consulta nuevas sociedades registradas recientemente y accede a información básica de cada empresa.",
+            'header'    => "Explora las últimas empresas creadas en España",
+            'meta_description' => "Consulta nuevas sociedades registradas recientemente y accede a información básica de cada empresa.",
             'pagination' => [
                 'current' => $page,
                 'next'    => site_url("directorio/ultimas-empresas-registradas/" . ($page + 1)),
