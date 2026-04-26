@@ -12,7 +12,7 @@ class Webhook extends Controller
     {
         $payload = @file_get_contents('php://input');
         $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'] ?? '';
-        $endpoint_secret = getenv('STRIPE_WEBHOOK_SECRET');
+        $endpoint_secret = env('STRIPE_WEBHOOK_SECRET');
 
         try {
             $event = \Stripe\Webhook::constructEvent(
@@ -130,7 +130,7 @@ class Webhook extends Controller
             // Si es una suscripción de Stripe diferente a la actual, cancelarla en Stripe
             if (!empty($oldSub->stripe_subscription_id) && $oldSub->stripe_subscription_id !== $stripeSubscriptionId) {
                 try {
-                    $stripe = new \Stripe\StripeClient(getenv('STRIPE_SECRET_KEY'));
+                    $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));
                     $stripe->subscriptions->cancel($oldSub->stripe_subscription_id);
                     log_message('info', "[Webhook::stripe] Cancelada suscripción anterior en Stripe: {$oldSub->stripe_subscription_id}");
                 } catch (\Exception $e) {
@@ -181,7 +181,7 @@ class Webhook extends Controller
         if (!$sub) {
             log_message('info', "[Webhook::handleInvoicePaid] Suscripción no encontrada localmente ({$stripeSubscriptionId}). Intentando recuperación desde Stripe API...");
             try {
-                $stripe = new \Stripe\StripeClient(getenv('STRIPE_SECRET_KEY'));
+                $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));
                 $stripeSub = $stripe->subscriptions->retrieve($stripeSubscriptionId);
                 
                 if ($stripeSub && isset($stripeSub->metadata->user_id)) {

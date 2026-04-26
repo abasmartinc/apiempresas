@@ -77,6 +77,7 @@ $routes->get('radar/ai-analyze/(:num)', 'Radar::aiAnalyze/$1', ['filter' => 'sub
 $routes->post('radar/prepare-contact/(:num)', 'Radar::prepareContact/$1', ['filter' => 'subscription:radar']);
 $routes->post('radar/log-event', 'Radar::logEvent', ['filter' => 'subscription:radar']);
 $routes->get('contact', 'Contact::index');
+$routes->post('contact/send', 'Contact::send');
 $routes->get('blog', 'Blog::index');
 $routes->get('blog/post', 'Blog::post');
 $routes->get('blog/get_posts', 'Blog::get_posts');

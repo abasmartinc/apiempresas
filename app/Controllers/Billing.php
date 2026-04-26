@@ -39,6 +39,14 @@ class Billing extends BaseController
 
         // Tu método ya existente
         $data['plan'] = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
+        $data['all_subscriptions'] = $this->UsersuscriptionsModel
+            ->select('user_subscriptions.*, api_plans.name as plan_name')
+            ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id')
+            ->where('user_subscriptions.user_id', $userId)
+            ->whereIn('user_subscriptions.status', ['active', 'canceled'])
+            ->orderBy('FIELD(user_subscriptions.status, "active", "canceled")', 'ASC', false)
+            ->orderBy('user_subscriptions.current_period_end', 'DESC')
+            ->findAll();
 
         $data['api_request_total_month'] = $this->ApiRequestsModel->countRequestsForMonth(date('Y-m'), ['user_id' => $userId]);
 
@@ -109,11 +117,11 @@ class Billing extends BaseController
         $billEmail = trim((string) $this->request->getPost('email')) ?: (string) ($user->email ?? '');
         $billName = trim((string) $this->request->getPost('name'));
 
-        if ($pm === 'paypal' && getenv('BILLING_MODE') !== 'simulator') {
+        if ($pm === 'paypal' && env('BILLING_MODE') !== 'simulator') {
             return $this->startPaypalSubscription($userId, $plan, $period);
         }
 
-        if (getenv('BILLING_MODE') === 'simulator') {
+        if (env('BILLING_MODE') === 'simulator') {
             $simulator = new \App\Libraries\BillingSimulator();
             
             // Set context for simulator too if it's an excel download
@@ -163,7 +171,7 @@ class Billing extends BaseController
             }
         }
 
-        $secretKey = getenv('STRIPE_SECRET_KEY');
+        $secretKey = env('STRIPE_SECRET_KEY');
         if (!$secretKey) {
             return redirect()->back()->with('error', 'Stripe no está configurado (STRIPE_SECRET_KEY).');
         }
@@ -176,7 +184,7 @@ class Billing extends BaseController
             $cancelUrl = site_url('billing/cancel');
 
             // Tax Rate for IVA
-            $taxRateId = getenv('STRIPE_TAX_RATE_ID');
+            $taxRateId = env('STRIPE_TAX_RATE_ID');
 
         if ($period === 'single' || ($plan === 'radar' && $period === 'single')) {
             // Recalculate count for security to determine price
@@ -545,11 +553,11 @@ class Billing extends BaseController
             return redirect()->back()->with('error', 'PayPal no está configurado (plan_id faltante).');
         }
 
-        $mode = getenv('PAYPAL_MODE') ?: 'sandbox';
+        $mode = env('PAYPAL_MODE') ?: 'sandbox';
         $base = ($mode === 'live') ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
 
-        $clientId = getenv('PAYPAL_CLIENT_ID');
-        $secret = getenv('PAYPAL_SECRET');
+        $clientId = env('PAYPAL_CLIENT_ID');
+        $secret = env('PAYPAL_SECRET');
 
         if (!$clientId || !$secret) {
             return redirect()->back()->with('error', 'PayPal no está configurado (PAYPAL_CLIENT_ID/SECRET).');
@@ -782,7 +790,13 @@ class Billing extends BaseController
         }
 
         $userId = (int) session('user_id');
-        $plan = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
+        $specificSubId = $this->request->getPost('sub_id');
+
+        if ($specificSubId) {
+            $plan = $this->UsersuscriptionsModel->where('user_id', $userId)->find($specificSubId);
+        } else {
+            $plan = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
+        }
 
         if (!$plan) {
             if ($this->request->isAJAX() || $this->request->getPost('ajax')) {
@@ -794,7 +808,7 @@ class Billing extends BaseController
         // 1. Si es Stripe, cancelar en Stripe (al final del periodo)
         if (!empty($plan->stripe_subscription_id)) {
             try {
-                $secretKey = getenv('STRIPE_SECRET_KEY');
+                $secretKey = env('STRIPE_SECRET_KEY');
                 if ($secretKey) {
                     \Stripe\Stripe::setApiKey($secretKey);
                     \Stripe\Subscription::update($plan->stripe_subscription_id, [
@@ -859,9 +873,9 @@ class Billing extends BaseController
             return redirect()->to(site_url('billing'))->with('error', 'No tienes un historial de facturación en Stripe todavía o no tienes suscripciones activas.');
         }
 
-        $secretKey = getenv('STRIPE_SECRET_KEY');
+        $secretKey = env('STRIPE_SECRET_KEY');
         if (!$secretKey) {
-            return redirect()->back()->with('error', 'Stripe no está configurado.');
+            return redirect()->back()->with('error', 'Stripe no está configurado (STRIPE_SECRET_KEY).');
         }
 
         \Stripe\Stripe::setApiKey($secretKey);

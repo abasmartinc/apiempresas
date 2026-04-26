@@ -129,7 +129,7 @@ $googlebot = $googlebot ?? ($robots . ',max-snippet:-1,max-image-preview:large,m
 
 
 <!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
 <!-- Favicons -->

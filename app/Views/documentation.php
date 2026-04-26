@@ -188,9 +188,6 @@ Accept: application/json</code></pre>
   }
 }</code></pre>
 
-                    <!-- MONEY BLOCK -->
-                    <?= view('components/money_block') ?>
-
                     <?= view('components/radar_strong_cta', ['user' => $user ?? null]) ?>
                 </section>
 

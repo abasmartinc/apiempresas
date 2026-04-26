@@ -34,10 +34,9 @@ class Dashboard extends BaseController
         $userId = session('user_id');
         $user   = $userModel->find($userId);
         $data['user'] = $user;
-        // Log dashboard visit
-        log_activity('dashboard_visit');
 
-        if ($user->is_admin ?? false) {
+        // Allow admins to view the client dashboard with ?view=client
+        if (($user->is_admin ?? false) && $this->request->getGet('view') !== 'client') {
             $data['title'] = 'Panel de Administración';
 
             // --- Online Users Logic ---
@@ -70,10 +69,71 @@ class Dashboard extends BaseController
 
         // --- Personalization stats for non-admins ---
         $data['api_key'] = $this->ApikeysModel->where(['user_id' => $userId, 'is_active' => 1])->first();
-        $data['plan'] = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
         
+        // --- API Usage & Activation Metrics ---
+        $requestsUsedThisMonth = $this->ApiRequestsModel->countRequestsForMonth(date('Y-m'), ['user_id' => $userId]);
+        
+        $plan = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
+        $isPaid = false;
+        if ($plan) {
+            $planNameRaw = $plan->plan_name ?? 'Free';
+            $currentPlanSlug = strtolower(trim($planNameRaw));
+            $isPaid = ($currentPlanSlug !== 'free' && !empty($currentPlanSlug));
+        }
+
+        // Obtener límites dinámicos de la base de datos
+        $apiPlanModel = new \App\Models\ApiPlanModel();
+        if ($isPaid && $plan) {
+            $maxLimit = (int)($plan->monthly_quota ?? 3000);
+        } else {
+            $freePlan = $apiPlanModel->where('slug', 'free')->first();
+            $maxLimit = (int)($freePlan->monthly_quota ?? 15);
+        }
+        
+        $remainingRequests = max(0, $maxLimit - $requestsUsedThisMonth);
+        
+        $data['requestsUsedThisMonth'] = $requestsUsedThisMonth;
+        $data['freeLimit'] = $maxLimit; // Alias para compatibilidad con la vista
+        $data['remainingRequests'] = $remainingRequests;
+        $data['plan'] = $plan;
+        $data['isPaid'] = $isPaid;
+        $data['maxLimit'] = $maxLimit;
+
+        // Dynamic Usage Message
+        $data['usageMessage'] = null;
+        if (!$isPaid) {
+            if ($requestsUsedThisMonth == 0) {
+                $data['usageMessage'] = [
+                    'title' => '¡Bienvenido!',
+                    'text'  => 'Empieza validando una empresa para ver cómo funciona la API en tiempo real.'
+                ];
+            } elseif ($requestsUsedThisMonth >= 1 && $requestsUsedThisMonth <= 4) {
+                $data['usageMessage'] = [
+                    'title' => '⚡ Ya has probado la API',
+                    'text'  => 'Haz 2–3 validaciones más para comprobar la calidad real de los datos.'
+                ];
+            } elseif ($requestsUsedThisMonth >= 5 && $requestsUsedThisMonth <= 9) {
+                $data['usageMessage'] = [
+                    'title' => 'Estás viendo el valor',
+                    'text'  => 'El siguiente paso es integrarlo en tu sistema para automatizar procesos.'
+                ];
+            } elseif ($requestsUsedThisMonth >= 10 && $requestsUsedThisMonth <= 14) {
+                $data['usageMessage'] = [
+                    'title' => 'Límite casi alcanzado',
+                    'text'  => 'Te quedan pocas consultas gratuitas. Activa Pro para evitar interrupciones.'
+                ];
+            } else {
+                $data['usageMessage'] = [
+                    'title' => 'Has alcanzado el límite gratuito',
+                    'text'  => 'Activa Pro para seguir validando empresas automáticamente.'
+                ];
+            }
+        }
+        $data['dashboardUsageMessage'] = $data['usageMessage']['text'] ?? '';
+
         // Fast query just to know whether to show onboarding strip or not
-        $data['has_first_request'] = $this->ApiRequestsModel->hasFirstRequest(['user_id' => $userId]);
+        $data['has_first_request'] = $requestsUsedThisMonth > 0;
+        $data['requestsUsed'] = $requestsUsedThisMonth; // Alias for convenience in view
 
         // Si tiene plan activo, va al dashboard correspondiente
         if ($data['plan']) {
@@ -103,12 +163,14 @@ class Dashboard extends BaseController
                 return redirect()->to(site_url('radar'));
             }
 
-            // Si es de tipo 'api', mostramos el dashboard de la API (actual dashboard_paid)
-            return view('dashboard_paid', $data);
+            // Si es un plan de pago real, vamos al dashboard avanzado
+            if ($isPaid) {
+                return view('dashboard_paid', $data);
+            }
         }
 
-        // Si tiene acceso API habilitado manualmente (gradual access)
-        if (($user->api_access ?? 0) == 1) {
+        // Si tiene acceso API (Free o activado manualmente)
+        if (($user->api_access ?? 0) == 1 || (!$isPaid)) {
             return view('dashboard', $data);
         }
 
@@ -138,8 +200,8 @@ class Dashboard extends BaseController
                 'avg_latency' => $this->ApiRequestsModel->getAverageLatency(['user_id' => $userId]),
                 'error_rate' => $this->ApiRequestsModel->getErrorRate(['user_id' => $userId])
             ];
-            // Cachear 15 minutos (900 segundos) para mitigar stress
-            cache()->save($cacheKey, $kpis, 900);
+            // Deshabilitado caché temporalmente para depuración de discrepancias
+            // cache()->save($cacheKey, $kpis, 30);
         }
 
         return $this->response->setJSON($kpis);

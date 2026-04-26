@@ -781,9 +781,18 @@ footer_old {
 }
 
 .btn.primary {
-    background: #111827;
+    background: #2152ff;
     color: #fff;
-    border-color: #111827
+    border-color: #2152ff;
+    box-shadow: 0 8px 20px rgba(33, 82, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn.primary:hover {
+    background: #1a44e6;
+    border-color: #1a44e6;
+    box-shadow: 0 12px 28px rgba(33, 82, 255, 0.3);
+    transform: translateY(-2px);
 }
 
 

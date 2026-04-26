@@ -9,8 +9,8 @@ class Webhooks extends BaseController
 {
     public function stripe()
     {
-        $secretKey = getenv('STRIPE_SECRET_KEY');
-        $whSecret = getenv('STRIPE_WEBHOOK_SECRET');
+        $secretKey = env('STRIPE_SECRET_KEY');
+        $whSecret = env('STRIPE_WEBHOOK_SECRET');
 
         if (!$secretKey || !$whSecret) {
             return $this->response->setStatusCode(500)->setBody('Stripe not configured');

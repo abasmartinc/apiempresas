@@ -298,7 +298,7 @@
             <h1 class="title" style="font-size: 2.8rem; margin-bottom: 8px;">Dashboard <span class="grad">Admin</span>
             </h1>
             <p style="color: #64748b; font-size: 1.1rem;">Bienvenido de nuevo, <?= esc(session('user_name')) ?>. Aquí
-                tienes el resumen de hoy.</p>
+                tienes el resumen de hoy. <a href="<?= site_url('dashboard?view=client') ?>" style="color: #2152ff; font-weight: 700; text-decoration: none; margin-left: 10px;">Ver mi Dashboard como Cliente &rarr;</a></p>
         </div>
 
         <!-- KPIs Section Removed for Performance -->

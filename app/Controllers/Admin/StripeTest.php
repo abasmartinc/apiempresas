@@ -61,7 +61,7 @@ class StripeTest extends BaseController
             return redirect()->back()->with('error', 'El plan de prueba no existe.');
         }
 
-        $secretKey = getenv('STRIPE_SECRET_KEY');
+        $secretKey = env('STRIPE_SECRET_KEY');
         if (!$secretKey) {
             return redirect()->back()->with('error', 'Stripe no está configurado (STRIPE_SECRET_KEY).');
         }

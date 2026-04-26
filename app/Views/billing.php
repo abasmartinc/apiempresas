@@ -62,29 +62,33 @@
                 <div class="billing-hero">
                     <div class="billing-hero__left">
                         <div class="kicker">Planes y facturación</div>
-                        <?php if ($plan): ?>
+                        <?php if ($planName === 'Pro'): ?>
+                            <h1>🚀 Mejora a tu plan Business</h1>
+                            <p class="sub">
+                                Escala tu integración con gestión de equipos, mayor volumen de consultas y soporte avanzado.
+                            </p>
+                        <?php elseif ($planName === 'Business'): ?>
+                            <h1>Gestiona tu suscripción Business</h1>
+                            <p class="sub">
+                                Aquí puedes ver tus facturas, cambiar el método de pago o gestionar tu plan actual.
+                            </p>
+                        <?php else: ?>
                             <h1>👉 Activa tu plan Pro</h1>
                             <p class="sub">
                                 Estás a un paso de escalar tu integración sin limitaciones.
-                            </p>
-                        <?php else: ?>
-                            <h1>Impulsa tu negocio con datos oficiales</h1>
-                            <p class="sub">
-                                Pasa a un plan Pro o Business para trabajar sin límites: más consultas, métricas avanzadas 
-                                de calidad (latencia/errores) y SLA garantizado.
                             </p>
                         <?php endif; ?>
 
                         <div class="hero-meta">
                             <span class="pill <?= $plan ? 'pill--active' : '' ?>">Plan actual:
-                                <strong><?= esc($planName) ?></strong></span>
+                                <strong><?= esc($planName) ?><?= ($plan && $get($plan, 'status') === 'canceled') ? ' (Cancelado)' : '' ?></strong></span>
                             <span class="dot-sep">•</span>
                             <span class="pill">Consultas este mes:
                                 <strong><?= esc($fmt($api_request_total_month ?? 0)) ?></strong></span>
                             <?php if ($periodEnd): ?>
                                 <span class="dot-sep">•</span>
                                 <span class="pill">
-                                    Renovación:
+                                    <?= ($get($plan, 'status') === 'canceled') ? 'Vence:' : 'Renovación:' ?>
                                     <strong><?= esc(date('d/m/Y', strtotime((string) $periodEnd))) ?></strong>
                                 </span>
                             <?php endif; ?>
@@ -96,6 +100,12 @@
                         <?php if (session('error')): ?>
                             <div class="auth-error" style="margin-top:14px;">
                                 <?= esc(session('error')) ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (session('message')): ?>
+                            <div class="auth-error" style="margin-top:14px; background: #ecfdf5; color: #065f46; border-color: #34d399;">
+                                <?= esc(session('message')) ?>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -151,8 +161,8 @@
                                 </ul>
                             </label>
 
-                            <label class="plan-card <?= ($planName === 'Business') ? 'is-current' : '' ?>" for="plan_business" data-plan="business">
-                                <input id="plan_business" name="plan_ui" type="radio" value="business" <?= ($planName === 'Business') ? 'checked' : '' ?> />
+                            <label class="plan-card <?= ($planName === 'Business') ? 'is-current' : '' ?> <?= ($planName === 'Pro') ? 'is-selected' : '' ?>" for="plan_business" data-plan="business">
+                                <input id="plan_business" name="plan_ui" type="radio" value="business" <?= ($planName === 'Pro' || $planName === 'Business') ? 'checked' : '' ?> />
 
                                 <div class="plan-top">
                                     <div>
@@ -277,7 +287,13 @@
                                         <div class="kicker">Gestión</div>
                                         <h2>Estado de tu suscripción</h2>
                                     </div>
-                                    <div class="status-badge status-badge--active">Activa</div>
+                                    <?php 
+                                        $status = $get($plan, 'status', 'active');
+                                        $isCanceled = ($status === 'canceled');
+                                    ?>
+                                    <div class="status-badge <?= $isCanceled ? 'status-badge--warning' : 'status-badge--active' ?>">
+                                        <?= $isCanceled ? 'Cancelada' : 'Activa' ?>
+                                    </div>
                                 </div>
 
                                 <div class="manage-info">
@@ -295,6 +311,49 @@
                                     </div>
                                 </div>
 
+                                <div class="manage-box" style="margin-top: 32px; padding: 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+                                    <div class="manage-head" style="margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+                                        <div class="kicker" style="color: #64748b; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">Estado Detallado</div>
+                                        <h3 style="font-size: 1.1rem; font-weight: 800; color: #1e293b;">Tus Planes</h3>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                                            <thead>
+                                                <tr style="text-align: left; color: #64748b; border-bottom: 1px solid #e2e8f0;">
+                                                    <th style="padding: 10px 5px;">Plan</th>
+                                                    <th style="padding: 10px 5px;">Estado</th>
+                                                    <th style="padding: 10px 5px;">Fin Periodo</th>
+                                                    <th style="padding: 10px 5px;">Acción</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($all_subscriptions ?? [] as $sub): ?>
+                                                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                                                        <td style="padding: 10px 5px; font-weight: 700; color: #334155;"><?= esc($sub->plan_name) ?></td>
+                                                        <td style="padding: 10px 5px;">
+                                                            <span style="display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; background: <?= ($sub->status === 'canceled') ? '#fef3c7; color: #92400e;' : '#dcfce7; color: #166534;' ?>">
+                                                                <?= ($sub->status === 'canceled') ? 'Cancelada' : 'Activa' ?>
+                                                            </span>
+                                                        </td>
+                                                        <td style="padding: 10px 5px; color: #64748b;"><?= date('d/m/Y', strtotime((string)$sub->current_period_end)) ?></td>
+                                                        <td style="padding: 10px 5px;">
+                                                            <?php if ($sub->status === 'active'): ?>
+                                                                <form class="form-cancel-sub-item" action="<?= site_url('billing/cancel-subscription') ?>" method="POST">
+                                                                    <input type="hidden" name="sub_id" value="<?= $sub->id ?>">
+                                                                    <input type="hidden" name="plan_name" value="<?= esc($sub->plan_name) ?>">
+                                                                    <button type="submit" class="btn danger" style="padding: 4px 8px; font-size: 0.7rem; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">Cancelar</button>
+                                                                </form>
+                                                            <?php else: ?>
+                                                                <span style="color: #94a3b8;">-</span>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
                                 <div class="manage-actions">
                                     <?php if (!empty($stripe_customer_id)): ?>
                                         <a href="<?= site_url('billing/portal') ?>" class="btn btn_primary">
@@ -307,44 +366,68 @@
 
                                     <a href="<?= site_url('billing/invoices') ?>" class="btn btn_light">Ver mis facturas</a>
 
-                                    <form id="formCancelSubscription" action="<?= site_url('billing/cancel-subscription') ?>" method="POST" style="display:inline;">
-                                        <?= csrf_field() ?>
-                                        <button type="submit" class="btn btn_outline_danger">Cancelar suscripción</button>
-                                    </form>
+                                    <?php if (!$isCanceled): ?>
+                                        <form id="formCancelSubscription" action="<?= site_url('billing/cancel-subscription') ?>" method="POST" style="display:inline;">
+                                            <?= csrf_field() ?>
+                                            <button type="submit" class="btn btn_outline_danger">Cancelar suscripción</button>
+                                        </form>
+                                    <?php else: ?>
+                                        <div style="margin-left: 12px; font-size: 0.85rem; color: #94a3b8; font-weight: 700;">
+                                            Tu suscripción finalizará el <?= esc(date('d/m/Y', strtotime((string) $periodEnd))) ?>. No se realizarán más cobros.
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
 
                                 <script>
-                                    document.addEventListener('DOMContentLoaded', function () {
-                                        const formCancel = document.getElementById('formCancelSubscription');
-                                        if (!formCancel) return;
+                                    (function() {
+                                        function initCancelForm() {
+                                            const cancelForms = document.querySelectorAll('#formCancelSubscription, .form-cancel-sub-item');
+                                            
+                                            cancelForms.forEach(form => {
+                                                form.addEventListener('submit', function (e) {
+                                                    e.preventDefault();
 
-                                        formCancel.addEventListener('submit', function (e) {
-                                            e.preventDefault();
+                                                    const planNameAttr = form.querySelector('input[name="plan_name"]')?.value || '<?= esc($planName) ?>';
 
-                                            Swal.fire({
-                                                title: '¿Cancelar suscripción?',
-                                                html: 'Lamentamos que te vayas. Seguirás teniendo acceso a las funciones de <strong>' + '<?= esc($planName) ?>' + '</strong> hasta el final de tu periodo de facturación actual.',
-                                                icon: 'warning',
-                                                showCancelButton: true,
-                                                confirmButtonText: 'Sí, cancelar suscripción',
-                                                cancelButtonText: 'Mantener plan',
-                                                reverseButtons: true,
-                                                focusCancel: true,
-                                                customClass: {
-                                                    popup: 've-swal',
-                                                    title: 've-swal-title',
-                                                    htmlContainer: 've-swal-text',
-                                                    confirmButton: 'btn danger ve-swal-confirm',
-                                                    cancelButton: 'btn btn_header--ghost ve-swal-cancel',
-                                                },
-                                                buttonsStyling: false
-                                            }).then((result) => {
-                                                if (result.isConfirmed) {
-                                                    formCancel.submit();
-                                                }
+                                                    if (typeof Swal === 'undefined') {
+                                                        if (confirm('¿Estás seguro de que deseas cancelar tu suscripción a ' + planNameAttr + '?')) {
+                                                            form.submit();
+                                                        }
+                                                        return;
+                                                    }
+
+                                                    Swal.fire({
+                                                        title: '¿Cancelar suscripción?',
+                                                        html: 'Lamentamos que te vayas. Seguirás teniendo acceso a las funciones de <strong>' + planNameAttr + '</strong> hasta el final de tu periodo de facturación actual.',
+                                                        icon: 'warning',
+                                                        showCancelButton: true,
+                                                        confirmButtonText: 'Sí, cancelar suscripción',
+                                                        cancelButtonText: 'Mantener plan',
+                                                        reverseButtons: true,
+                                                        focusCancel: true,
+                                                        customClass: {
+                                                            popup: 've-swal',
+                                                            title: 've-swal-title',
+                                                            htmlContainer: 've-swal-text',
+                                                            confirmButton: 'btn danger ve-swal-confirm',
+                                                            cancelButton: 'btn btn_header--ghost ve-swal-cancel',
+                                                        },
+                                                        buttonsStyling: false
+                                                    }).then((result) => {
+                                                        if (result.isConfirmed) {
+                                                            form.submit();
+                                                        }
+                                                    });
+                                                });
                                             });
-                                        });
-                                    });
+                                        }
+
+                                        if (document.readyState === 'loading') {
+                                            document.addEventListener('DOMContentLoaded', initCancelForm);
+                                        } else {
+                                            initCancelForm();
+                                        }
+                                    })();
                                 </script>
 
                                 <?php if ($planName === 'Pro'): ?>
@@ -571,16 +654,15 @@
                 });
             }
 
-            // Initial state
+        // Initial state logic for auto-selection
         if (currentPlan === 'pro') {
-            // Si es pro, seleccionamos pro para que el formulario se oculte
-            setSelectedPlan('pro');
+            // Si el usuario ya es Pro, le pre-seleccionamos el Business para facilitar el upgrade
+            setSelectedPlan('business');
         } else if (currentPlan === 'business') {
             setSelectedPlan('business');
         } else {
-            // Si es free/ninguno, seleccionamos pro por defecto y mostramos
+            // Para usuarios Free o sin plan, pre-seleccionamos el Pro (nuestro plan más popular)
             setSelectedPlan('pro');
-            setPeriod('monthly');
         }
     })();
 </script>

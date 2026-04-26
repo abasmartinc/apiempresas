@@ -39,6 +39,9 @@ class UsersuscriptionsModel extends Model
                             ->where('user_subscriptions.current_period_end >', date('Y-m-d H:i:s'))
                         ->groupEnd()
                     ->groupEnd()
+                    // Priorizamos 'active' sobre 'canceled', y luego por la fecha de fin más lejana
+                    // Usamos false para evitar que CI escape erróneamente la función FIELD
+                    ->orderBy('FIELD(user_subscriptions.status, "active", "canceled")', '', false)
                     ->orderBy('user_subscriptions.current_period_end', 'DESC')
                     ->first();
     }
