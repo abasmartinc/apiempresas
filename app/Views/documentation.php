@@ -94,32 +94,38 @@
                 <h1>Documentación de la API</h1>
                 <p>Bienvenido a la documentación oficial de <strong>APIEmpresas.es</strong>. Nuestra API te permite consultar datos mercantiles actualizados de empresas españolas de forma rápida y sencilla.</p>
 
-                <?php if (session('logged_in') && isset($user) && ($user->requests_count ?? 0) > 3 && !($user->hasRadar())): ?>
-                    <div class="conditional-banner" style="background: #fef2f2; border-color: #fecaca; border-left: 5px solid #ef4444;">
-                        <div class="conditional-banner-text">
-                            <h4 style="color: #991b1b;">⚠️ Ya has hecho <?= $user->requests_count ?> búsquedas manuales</h4>
-                            <p style="color: #b91c1c; font-weight: 700;">Podrías haber recibido estas empresas automáticamente.</p>
-                        </div>
-                        <a href="<?= site_url('radar') ?>" class="btn-radar-strong" style="padding: 12px 24px; font-size: 1rem;">Ver Radar</a>
-                    </div>
-                <?php endif; ?>
-
                 <!-- USE CASES -->
-                <div class="use-case-box">
-                    <h3>💡 ¿Qué puedes hacer con esta API?</h3>
+                <div class="use-case-box" style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border: 1px solid #e2e8f0; padding: 40px; border-radius: 24px; margin: 40px 0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 32px;">
+                        <div style="width: 40px; height: 40px; background: #eff6ff; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #2563eb;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                        </div>
+                        <h3 style="margin: 0; color: #0f172a; font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em;">Casos de Uso Principales</h3>
+                    </div>
+                    
                     <div class="use-case-grid">
-                        <div class="use-case-card">
-                            <h4>🔍 Validar empresas</h4>
-                            <p>Consulta datos por CIF en tiempo real de forma automatizada.</p>
+                        <div class="use-case-card" style="background: white; border: 1px solid #f1f5f9; padding: 24px; border-radius: 18px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
+                            <div style="margin-bottom: 16px; color: #2563eb; background: #f0f7ff; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            </div>
+                            <h4 style="margin: 0 0 12px 0; color: #1e293b; font-size: 1.1rem; font-weight: 800;">Validación de Empresas</h4>
+                            <p style="margin: 0; color: #64748b; font-size: 0.95rem; line-height: 1.6; font-weight: 500;">Automatiza la verificación de datos mercantiles por CIF/NIF en tiempo real para tus procesos de onboarding y KYC.</p>
                         </div>
-                        <div class="use-case-card">
-                            <h4>💎 Enriquecer datos</h4>
-                            <p>Obtén información completa de empresas para tus sistemas de gestión.</p>
+
+                        <div class="use-case-card" style="background: white; border: 1px solid #f1f5f9; padding: 24px; border-radius: 18px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
+                            <div style="margin-bottom: 16px; color: #8b5cf6; background: #f5f3ff; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                            </div>
+                            <h4 style="margin: 0 0 12px 0; color: #1e293b; font-size: 1.1rem; font-weight: 800;">Enriquecimiento de CRM</h4>
+                            <p style="margin: 0; color: #64748b; font-size: 0.95rem; line-height: 1.6; font-weight: 500;">Mantén tu base de datos siempre actualizada con información oficial: CNAE, provincias, estados mercantiles y más.</p>
                         </div>
-                        <div class="use-case-card">
-                            <h4>📈 Generar leads</h4>
-                            <p>Detecta nuevas empresas y oportunidades de negocio automáticamente.</p>
-                            <a href="<?= site_url('radar') ?>" class="btn-link">Ver Radar &rarr;</a>
+
+                        <div class="use-case-card" style="background: white; border: 1px solid #f1f5f9; padding: 24px; border-radius: 18px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
+                            <div style="margin-bottom: 16px; color: #10b981; background: #ecfdf5; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                            </div>
+                            <h4 style="margin: 0 0 12px 0; color: #1e293b; font-size: 1.1rem; font-weight: 800;">Generación de Leads</h4>
+                            <p style="margin: 0; color: #64748b; font-size: 0.95rem; line-height: 1.6; font-weight: 500;">Utiliza el endpoint de Radar para recibir alertas de nuevas empresas constituidas y actuar antes que tu competencia.</p>
                         </div>
                     </div>
                 </div>
@@ -188,7 +194,7 @@ Accept: application/json</code></pre>
   }
 }</code></pre>
 
-                    <?= view('components/radar_strong_cta', ['user' => $user ?? null]) ?>
+
                 </section>
 
                 <!-- SEARCH -->
@@ -221,7 +227,7 @@ Accept: application/json</code></pre>
 
                     </table>
 
-                    <?= view('components/binary_decision') ?>
+
                 </section>
 
                 <!-- EXPANDED -->
@@ -439,9 +445,9 @@ print(response.json())</code></pre>
                     </div>
 
                     <div style="margin-top: 80px; text-align: center; background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%); color: white; padding: 60px 40px; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(30, 58, 138, 0.25);">
-                        <h2 style="color: white; font-size: 2.3rem; font-weight: 900; margin-bottom: 16px; letter-spacing: -0.02em;">💎 Prueba tu integración con datos reales</h2>
-                        <p style="font-size: 1.25rem; color: rgba(255,255,255,0.7); margin-bottom: 32px; font-weight: 500;">No uses datos de prueba. Accede al Radar y mira qué está pasando ahora mismo.</p>
-                        <a href="<?= site_url('radar?source=api_docs') ?>" id="api_to_radar_cta" class="btn-radar-strong" style="max-width: 400px; margin: 0 auto; padding: 20px 40px;">Ver empresas activas ahora</a>
+                        <h2 style="color: white; font-size: 2.3rem; font-weight: 900; margin-bottom: 16px; letter-spacing: -0.02em;">🚀 ¿Listo para empezar?</h2>
+                        <p style="font-size: 1.25rem; color: rgba(255,255,255,0.7); margin-bottom: 32px; font-weight: 500;">Obtén tu API Key en segundos y empieza a integrar datos reales en tus aplicaciones.</p>
+                        <a href="<?= site_url('dashboard') ?>" class="btn-radar-strong" style="max-width: 400px; margin: 0 auto; padding: 20px 40px;">Ir al Panel de Control</a>
                     </div>
                 </section>
             </div>
@@ -474,9 +480,9 @@ print(response.json())</code></pre>
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
     .use-case-box h3 { margin-bottom: 24px; color: #1e293b; font-size: 1.25rem; font-weight: 800; }
-    .use-case-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; }
-    .use-case-card { padding: 20px; border-radius: 12px; background: #f8fafc; border: 1px solid #f1f5f9; transition: transform 0.2s; }
-    .use-case-card:hover { transform: translateY(-2px); border-color: #cbd5e1; }
+    .use-case-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .use-case-card { padding: 24px; border-radius: 18px; background: white; border: 1px solid #f1f5f9; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+    .use-case-card:hover { transform: translateY(-4px); border-color: #cbd5e1; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
     .use-case-card h4 { margin-bottom: 12px; color: #334155; display: flex; align-items: center; gap: 8px; font-weight: 700; }
     .use-case-card p { font-size: 0.9rem; color: #64748b; margin-bottom: 16px; line-height: 1.5; }
     .use-case-card .btn-link { color: #2563eb; font-weight: 700; text-decoration: none; font-size: 0.9rem; }
@@ -554,7 +560,7 @@ print(response.json())</code></pre>
     @media (max-width: 768px) {
         .radar-upsell { flex-direction: column; text-align: center; padding: 32px 24px; }
         .conditional-banner { flex-direction: column; text-align: center; }
-        .use-case-grid { grid-template-columns: 1fr; }
+        .use-case-grid { grid-template-columns: 1fr !important; }
     }
 
     /* --- CRO Optimization Styles --- */
