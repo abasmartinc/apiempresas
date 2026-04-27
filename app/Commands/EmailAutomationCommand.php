@@ -27,118 +27,129 @@ class EmailAutomationCommand extends BaseCommand
         $this->usageModel      = new ApiUsageDailyModel();
         $this->emailService    = new EmailService();
 
-        CLI::write('Iniciando proceso de automatización de emails...', 'cyan');
+        CLI::write('🚀 Iniciando proceso de automatización de emails...', 'cyan');
 
-        $this->processQuickStart();
-        $this->processInactivityReminder();
-        $this->processQuotaWarning();
-
-        CLI::write('Proceso finalizado.', 'green');
-    }
-
-    /**
-     * Email 1: Quick Start (5 min tras registro)
-     */
-    protected function processQuickStart()
-    {
-        CLI::write('- Comprobando activaciones Flash (5 min)...');
-        
-        $fiveMinsAgo = date('Y-m-d H:i:s', strtotime('-5 minutes'));
-        
-        $users = $this->userModel->asArray()
-            ->where('created_at <=', $fiveMinsAgo)
-            ->where('is_admin', 0)
-            ->findAll();
-
-        foreach ($users as $user) {
-            $userId = (int)$user['id'];
-            
-            // Si ya se envió, saltar
-            if ($this->automationModel->wasSent($userId, 'quick_start')) continue;
-
-            // Si ya tiene requests, no enviar este email (ya se activó solo)
-            if ($this->hasRequests($userId)) continue;
-
-            if ($this->emailService->sendQuickStartPrompt($user)) {
-                $this->automationModel->markAsSent($userId, 'quick_start');
-                CLI::write("  [SENT] Quick Start -> {$user['email']}", 'yellow');
-            }
-        }
-    }
-
-    /**
-     * Email 2: Inactivity (24h sin requests)
-     */
-    protected function processInactivityReminder()
-    {
-        CLI::write('- Comprobando recordatorios de inactividad (24h)...');
-        
-        $oneDayAgo = date('Y-m-d H:i:s', strtotime('-24 hours'));
-        
-        $users = $this->userModel->asArray()
-            ->where('created_at <=', $oneDayAgo)
-            ->where('is_admin', 0)
-            ->findAll();
-
-        foreach ($users as $user) {
-            $userId = (int)$user['id'];
-            
-            if ($this->automationModel->wasSent($userId, 'inactivity_reminder')) continue;
-            if ($this->hasRequests($userId)) continue;
-
-            if ($this->emailService->sendInactivityReminder($user)) {
-                $this->automationModel->markAsSent($userId, 'inactivity_reminder');
-                CLI::write("  [SENT] Inactivity -> {$user['email']}", 'yellow');
-            }
-        }
-    }
-
-    /**
-     * Email 4: Quota Warning (>50%)
-     */
-    protected function processQuotaWarning()
-    {
-        CLI::write('- Comprobando límites de cuota (>50%)...');
-        
-        $currentMonth = date('Y-m');
-        
-        // Obtenemos usuarios en plan FREE (ID 1)
-        // Nota: asumo que Free es ID 1 por la lógica del Register.php
+        // Solo procesamos usuarios FREE activos
         $db = \Config\Database::connect();
         $usersToCheck = $db->table('users')
             ->select('users.*, usersuscriptions.plan_id')
             ->join('usersuscriptions', 'usersuscriptions.user_id = users.id')
             ->where('usersuscriptions.status', 'active')
-            ->where('usersuscriptions.plan_id', 1) 
+            ->where('usersuscriptions.plan_id', 1) // 1 = FREE
+            ->where('users.is_admin', 0)
             ->get()->getResultArray();
 
+        CLI::write('- Usuarios Free detectados: ' . count($usersToCheck));
+
         foreach ($usersToCheck as $user) {
-            $userId = (int)$user['id'];
-            
-            // El tracking de quota lo hacemos por mes
-            $trackingKey = 'quota_50_' . $currentMonth;
-            if ($this->automationModel->wasSent($userId, $trackingKey)) continue;
+            $this->processTriggersForUser($user);
+        }
 
-            $usage = $this->usageModel->selectSum('requests_count')
-                ->where('user_id', $userId)
-                ->like('date', $currentMonth, 'after')
-                ->get()->getRowArray();
-            
-            $count = (int)($usage['requests_count'] ?? 0);
-            $limit = 100; // Free limit
+        CLI::write('✅ Proceso de automatización finalizado.', 'green');
+    }
 
-            if ($count >= ($limit * 0.5)) {
-                if ($this->emailService->sendQuotaWarning($user, 50)) {
-                    $this->automationModel->markAsSent($userId, $trackingKey);
-                    CLI::write("  [SENT] Quota Warning (50%) -> {$user['email']}", 'yellow');
-                }
+    protected function processTriggersForUser(array $user)
+    {
+        $userId = (int)$user['id'];
+        $totalRequests = $this->getTotalRequests($userId);
+        $lastRequestTime = $this->getLastRequestTime($userId);
+        $createdAt = $user['created_at'];
+
+        // 1. TRIGGER: reached_12_requests
+        if ($totalRequests >= 12) {
+            $this->checkAndSend($user, 'reached_12_requests', 'email_sent_limit_warning');
+            return; // No enviamos más de uno en la misma ejecución
+        }
+
+        // 2. TRIGGER: reached_5_requests
+        if ($totalRequests >= 5) {
+            $this->checkAndSend($user, 'reached_5_requests', 'email_sent_engaged');
+            return;
+        }
+
+        // 3. TRIGGER: one_request_inactive_1h
+        if ($totalRequests === 1 && $lastRequestTime) {
+            $diffSeconds = time() - strtotime($lastRequestTime);
+            if ($diffSeconds >= 3600) { // 1 hour
+                $this->checkAndSend($user, 'one_request_inactive_1h', 'email_sent_first_usage');
+                return;
+            }
+        }
+
+        // 4. TRIGGER: no_requests_15min
+        if ($totalRequests === 0) {
+            $diffSeconds = time() - strtotime($createdAt);
+            if ($diffSeconds >= 900) { // 15 minutes
+                $this->checkAndSend($user, 'no_requests_15min', 'email_sent_no_usage');
+                return;
             }
         }
     }
 
-    protected function hasRequests(int $userId): bool
+    protected function checkAndSend(array $user, string $triggerType, string $trackingEvent)
     {
-        $res = $this->usageModel->where('user_id', $userId)->limit(1)->find();
-        return !empty($res);
+        $userId = (int)$user['id'];
+
+        // Usamos email_type como nombre real del campo en la tabla
+        if ($this->automationModel->wasSent($userId, $triggerType)) {
+            return;
+        }
+
+        CLI::write("  -> Intentando enviar '{$triggerType}' a {$user['email']}...");
+
+        $result = ['success' => false, 'body' => ''];
+        switch ($triggerType) {
+            case 'no_requests_15min':
+                $result = $this->emailService->sendNoUsage15Min($user);
+                break;
+            case 'one_request_inactive_1h':
+                $result = $this->emailService->sendOneUsageInactive1H($user);
+                break;
+            case 'reached_5_requests':
+                $result = $this->emailService->sendReached5Requests($user);
+                break;
+            case 'reached_12_requests':
+                $result = $this->emailService->sendReached12Requests($user);
+                break;
+        }
+
+        if ($result['success']) {
+            $this->automationModel->markAsSent($userId, $triggerType, $result['body']);
+            $this->recordTracking($userId, $trackingEvent);
+            CLI::write("     [SENT] {$triggerType} OK", 'yellow');
+        }
+    }
+
+    protected function getTotalRequests(int $userId): int
+    {
+        $res = $this->usageModel->selectSum('requests_count')
+            ->where('user_id', $userId)
+            ->get()->getRowArray();
+        return (int)($res['requests_count'] ?? 0);
+    }
+
+    protected function getLastRequestTime(int $userId): ?string
+    {
+        $res = $this->usageModel->select('updated_at')
+            ->where('user_id', $userId)
+            ->orderBy('updated_at', 'DESC')
+            ->first();
+        return $res['updated_at'] ?? null;
+    }
+
+    protected function recordTracking(int $userId, string $eventName)
+    {
+        $db = \Config\Database::connect();
+        // Solo si existe la tabla (aunque el usuario dice que existe)
+        try {
+            $db->table('tracking_events')->insert([
+                'event_name' => $eventName,
+                'user_id'    => $userId,
+                'page'       => 'automation_email',
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+        } catch (\Exception $e) {
+            // Ignorar si falla el tracking
+        }
     }
 }

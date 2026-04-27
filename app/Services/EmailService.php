@@ -325,6 +325,101 @@ class EmailService
 
         $body = view('emails/excel_day3_urgency', ['name' => $userData['name'] ?? 'Usuario']);
         $email->setMessage($body);
-        return $email->send();
+    }
+
+    /**
+     * TRIGGER: no_requests_15min
+     */
+    public function sendNoUsage15Min(array $userData)
+    {
+        $email = Services::email();
+        $email->clear(true);
+        $fromEmail = env('email.fromEmail', 'soporte@apiempresas.es');
+        $fromName  = env('email.fromName', 'APIEmpresas.es');
+        $email->setFrom($fromEmail, $fromName);
+
+        $email->setTo($userData['email']);
+        $email->setSubject("¿Probaste ya tu primera validación?");
+
+        $body = view('emails/automation_generic', [
+            'name' => $userData['name'] ?? 'Usuario',
+            'content' => 'Puedes validar una empresa desde tu panel sin integrar nada.<br><br>Introduce un CIF o nombre y verás qué datos puedes automatizar con la API.',
+            'button_text' => 'Probar ahora',
+            'button_url' => base_url('dashboard')
+        ]);
+        $email->setMessage($body);
+        return ['success' => $email->send(), 'body' => $body];
+    }
+
+    /**
+     * TRIGGER: one_request_inactive_1h
+     */
+    public function sendOneUsageInactive1H(array $userData)
+    {
+        $email = Services::email();
+        $email->clear(true);
+        $fromEmail = env('email.fromEmail', 'soporte@apiempresas.es');
+        $fromName  = env('email.fromName', 'APIEmpresas.es');
+        $email->setFrom($fromEmail, $fromName);
+
+        $email->setTo($userData['email']);
+        $email->setSubject("Haz 2–3 validaciones más antes de decidir");
+
+        $body = view('emails/automation_generic', [
+            'name' => $userData['name'] ?? 'Usuario',
+            'content' => 'Ya has probado APIEmpresas.<br><br>Te recomendamos validar 2–3 empresas más para comprobar la calidad de los datos y ver si encaja con tu caso.',
+            'button_text' => 'Seguir probando',
+            'button_url' => base_url('dashboard')
+        ]);
+        $email->setMessage($body);
+        return ['success' => $email->send(), 'body' => $body];
+    }
+
+    /**
+     * TRIGGER: reached_5_requests
+     */
+    public function sendReached5Requests(array $userData)
+    {
+        $email = Services::email();
+        $email->clear(true);
+        $fromEmail = env('email.fromEmail', 'soporte@apiempresas.es');
+        $fromName  = env('email.fromName', 'APIEmpresas.es');
+        $email->setFrom($fromEmail, $fromName);
+
+        $email->setTo($userData['email']);
+        $email->setSubject("Ya estás viendo el valor real de la API");
+
+        $body = view('emails/automation_generic', [
+            'name' => $userData['name'] ?? 'Usuario',
+            'content' => 'Has empezado a usar APIEmpresas en condiciones reales.<br><br>El siguiente paso es activar Pro para validar empresas sin restricciones y evitar interrupciones cuando lo integres en tu sistema.',
+            'button_text' => 'Activar Pro',
+            'button_url' => base_url('billing')
+        ]);
+        $email->setMessage($body);
+        return ['success' => $email->send(), 'body' => $body];
+    }
+
+    /**
+     * TRIGGER: reached_12_requests
+     */
+    public function sendReached12Requests(array $userData)
+    {
+        $email = Services::email();
+        $email->clear(true);
+        $fromEmail = env('email.fromEmail', 'soporte@apiempresas.es');
+        $fromName  = env('email.fromName', 'APIEmpresas.es');
+        $email->setFrom($fromEmail, $fromName);
+
+        $email->setTo($userData['email']);
+        $email->setSubject("Estás cerca del límite gratuito");
+
+        $body = view('emails/automation_generic', [
+            'name' => $userData['name'] ?? 'Usuario',
+            'content' => 'Te quedan pocas consultas gratuitas.<br><br>Activa Pro antes de quedarte sin acceso y sigue validando empresas sin restricciones.',
+            'button_text' => 'Activar Pro ahora',
+            'button_url' => base_url('billing')
+        ]);
+        $email->setMessage($body);
+        return ['success' => $email->send(), 'body' => $body];
     }
 }
