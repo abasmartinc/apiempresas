@@ -9,7 +9,11 @@ class Plugin extends BaseController
      */
     public function index()
     {
-        return view('seo/plugin_wordpress');
+        $apiPlanModel = new \App\Models\ApiPlanModel();
+        $freePlan = $apiPlanModel->where('slug', 'free')->first();
+        $freeLimit = $freePlan ? (int)$freePlan->monthly_quota : 15;
+
+        return view('seo/plugin_wordpress', ['freeLimit' => $freeLimit]);
     }
 
     /**

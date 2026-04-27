@@ -224,24 +224,24 @@
                     $requestsUsed = (int)$requestsUsedThisMonth;
                     $kpiClass = '';
                     if (!$isPaid) {
-                        if ($requestsUsed >= 15) $kpiClass = 'kpi-card--cta';
-                        elseif ($requestsUsed >= 10) $kpiClass = 'kpi-card--warning';
+                        if ($requestsUsed >= $freeLimit) $kpiClass = 'kpi-card--cta';
+                        elseif ($requestsUsed >= ($freeLimit * 0.7)) $kpiClass = 'kpi-card--warning';
                     }
                 ?>
-                <div class="kpi-card-pro <?= $kpiClass ?>" <?= (!$isPaid && $requestsUsed >= 15) ? 'onclick="window.location.href=\''.site_url('billing').'\'"' : '' ?>>
+                <div class="kpi-card-pro <?= $kpiClass ?>" <?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'onclick="window.location.href=\''.site_url('billing').'\'"' : '' ?>>
                     <div class="kpi-icon-box">
-                        <?php if (!$isPaid && $requestsUsed >= 15): ?>
+                        <?php if (!$isPaid && $requestsUsed >= $freeLimit): ?>
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                         <?php else: ?>
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M2 12h20M12 2l4.5 4.5M12 22l-4.5-4.5M2 12l4.5 4.5M22 12l-4.5-4.5"/></svg>
                         <?php endif; ?>
                     </div>
                     <div class="kpi-content">
-                        <span class="label"><?= (!$isPaid && $requestsUsed >= 15) ? 'Límite alcanzado' : 'Consultas Mes' ?></span>
+                        <span class="label"><?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'Límite alcanzado' : 'Consultas Mes' ?></span>
                         <div class="value">
                             <span id="kpi-requests"><?= $requestsUsed ?></span>
                         </div>
-                        <div class="meta"><?= (!$isPaid && $requestsUsed >= 15) ? '<strong>Activar Pro ahora &rarr;</strong>' : 'Límite: ' . ($isPaid ? number_format($maxLimit, 0, ',', '.') : $freeLimit) ?></div>
+                        <div class="meta"><?= (!$isPaid && $requestsUsed >= $freeLimit) ? '<strong>Activar Pro ahora &rarr;</strong>' : 'Límite: ' . ($isPaid ? number_format($maxLimit, 0, ',', '.') : $freeLimit) ?></div>
                     </div>
                 </div>
                 
@@ -301,10 +301,10 @@
             <div class="dash-grid">
                 <div>
                     <!-- 1. BLOQUE PRINCIPAL ACTIVACIÓN -->
-                    <section class="activation-main-card" style="<?= (!$isPaid && $requestsUsed >= 15) ? 'border: 2px solid #e11d48; background: #fff1f2;' : '' ?>">
+                    <section class="activation-main-card" style="<?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'border: 2px solid #e11d48; background: #fff1f2;' : '' ?>">
                         <div class="activation-header">
-                            <h2><?= (!$isPaid && $requestsUsed >= 15) ? 'Límite mensual alcanzado' : 'Valida empresas en segundos' ?></h2>
-                            <p><?= (!$isPaid && $requestsUsed >= 15) ? 'Has agotado tus 15 consultas gratuitas. Activa el Plan Pro para seguir validando.' : 'Introduce un CIF o nombre y valida una empresa real.' ?></p>
+                            <h2><?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'Límite mensual alcanzado' : 'Valida empresas en segundos' ?></h2>
+                            <p><?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'Has agotado tus ' . $freeLimit . ' consultas gratuitas. Activa el Plan Pro para seguir validando.' : 'Introduce un CIF o nombre y valida una empresa real.' ?></p>
                         </div>
                         
                         <div class="search-form-dash" style="position: relative;">
@@ -708,7 +708,7 @@ function showPluginComingSoon() {
 function showUpgradeModal() {
     Swal.fire({
         title: '¡Límite alcanzado!',
-        text: 'Has completado tus 15 consultas gratuitas de este mes. Activa el Plan Pro para tener acceso ilimitado y automatizar tus procesos.',
+        text: 'Has completado tus <?= $freeLimit ?> consultas gratuitas de este mes. Activa el Plan Pro para tener acceso ilimitado y automatizar tus procesos.',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Activar Plan Pro',
@@ -725,6 +725,22 @@ function showUpgradeModal() {
         }
     });
 }
+
+<?php if (!empty($showMigrationNotice)): ?>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            title: '¡Actualización del Plan!',
+            text: 'Hemos simplificado el plan gratuito para mejorar la experiencia. Ahora tienes <?= $freeLimit ?> nuevas consultas para seguir probando la API.',
+            icon: 'info',
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#2152ff',
+            background: '#ffffff',
+            customClass: {
+                popup: 'premium-swal-popup'
+            }
+        });
+    });
+<?php endif; ?>
 </script>
 
 </body>

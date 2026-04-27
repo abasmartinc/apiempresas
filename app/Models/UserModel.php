@@ -28,6 +28,8 @@ class UserModel extends Model
         'updated_at',
         'last_login_at',
         'last_active_at',
+        'migration_notice_shown',
+        'migration_reset_done',
     ];
 
     protected $useTimestamps = false;

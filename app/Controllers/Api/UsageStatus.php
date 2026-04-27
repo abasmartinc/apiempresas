@@ -53,7 +53,12 @@ class UsageStatus extends BaseController
             ->get()->getRowArray();
         
         $count = (int)($usage['requests_count'] ?? 0);
-        $limit = 100; // FREE_LIMIT
+        
+        // Obtener límite del plan free dinámicamente
+        $apiPlanModel = new \App\Models\ApiPlanModel();
+        $freePlan = $apiPlanModel->where('slug', 'free')->first();
+        $limit = $freePlan ? (int)$freePlan->monthly_quota : 15;
+        
         $percentage = ($count / $limit) * 100;
 
         // 3. Detectar trigger

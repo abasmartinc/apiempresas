@@ -588,7 +588,7 @@
                         </button>
                         <div class="api-faq-answer">
                             <div class="api-faq-answer-inner">
-                                No, el plugin es gratuito. El uso se rige por el plan de suscripción que tengas en APIEmpresas (incluido el plan gratuito de 100 consultas).
+                                No, el plugin es gratuito. El uso se rige por el plan de suscripción que tengas en APIEmpresas (incluido el plan gratuito de <?= $freeLimit ?> consultas).
                             </div>
                         </div>
                     </div>

@@ -184,11 +184,17 @@ class Home extends BaseController
             $cache->save($cacheKey, $socialProofText, 300);
         }
 
+        // Fetch Free Plan Limit
+        $apiPlanModel = new \App\Models\ApiPlanModel();
+        $freePlan = $apiPlanModel->where('slug', 'free')->first();
+        $freeLimit = $freePlan ? (int)$freePlan->monthly_quota : 15;
+
         return view('home', [
             'latest_posts'    => $posts,
             'provinces'       => $provinces,
             'showReviewModal' => $showReviewModal,
-            'socialProofText' => $socialProofText
+            'socialProofText' => $socialProofText,
+            'freeLimit'       => $freeLimit
         ]);
     }
 

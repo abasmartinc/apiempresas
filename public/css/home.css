@@ -2405,7 +2405,7 @@ body {
     font-size: 3.5rem;
     font-weight: 900;
     letter-spacing: -0.04em;
-    line-height: 1;
+    line-height: 1.2;
     margin-bottom: 28px;
     max-width: 1000px;
     margin-left: auto;
@@ -4347,6 +4347,7 @@ section.container .search-panel h2::after,
         max-width: 300px;
     }
 }
+
 /* --- PRUEBA SOCIAL DINÁMICA --- */
 .social-proof-wrapper {
     text-align: center;
@@ -4392,10 +4393,12 @@ section.container .search-panel h2::after,
         transform: scale(0.65);
         opacity: 0.8;
     }
+
     70% {
         transform: scale(1.7);
         opacity: 0;
     }
+
     100% {
         transform: scale(1.7);
         opacity: 0;

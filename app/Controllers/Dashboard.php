@@ -35,6 +35,38 @@ class Dashboard extends BaseController
         $user   = $userModel->find($userId);
         $data['user'] = $user;
 
+        // --- MIGRACIÓN SEGURA PLAN FREE (100 -> 15) ---
+        $migrationDate = '2026-04-26 00:00:00';
+        $isLegacyUser  = ($user->created_at < $migrationDate);
+        $data['showMigrationNotice'] = false;
+
+        // 1. Reset controlado para usuarios legacy (solo una vez)
+        if ($isLegacyUser && (int)$user->migration_reset_done === 0) {
+            $db = \Config\Database::connect();
+            
+            // "Reset" de consumo del mes actual para darles las 15 nuevas consultas
+            // Nota: api_requests (historial real) NO se toca.
+            $db->table('api_usage_daily')
+               ->where('user_id', $userId)
+               ->where('date >=', date('Y-m-01'))
+               ->delete();
+
+            $userModel->update($userId, [
+                'migration_reset_done' => 1,
+                'migration_notice_shown' => 0 // Forzamos mostrar el mensaje tras el reset
+            ]);
+
+            // Actualizamos objeto en memoria para la ejecución actual
+            $user->migration_reset_done = 1;
+            $user->migration_notice_shown = 0;
+        }
+
+        // 2. Preparar aviso de migración (solo una vez)
+        if ($isLegacyUser && (int)$user->migration_notice_shown === 0) {
+            $data['showMigrationNotice'] = true;
+            $userModel->update($userId, ['migration_notice_shown' => 1]);
+        }
+
         // Allow admins to view the client dashboard with ?view=client
         if (($user->is_admin ?? false) && $this->request->getGet('view') !== 'client') {
             $data['title'] = 'Panel de Administración';
@@ -71,7 +103,13 @@ class Dashboard extends BaseController
         $data['api_key'] = $this->ApikeysModel->where(['user_id' => $userId, 'is_active' => 1])->first();
         
         // --- API Usage & Activation Metrics ---
-        $requestsUsedThisMonth = $this->ApiRequestsModel->countRequestsForMonth(date('Y-m'), ['user_id' => $userId]);
+        $db = \Config\Database::connect();
+        $usageSum = $db->table('api_usage_daily')
+            ->selectSum('requests_count', 'total')
+            ->where('user_id', $userId)
+            ->where('date >=', date('Y-m-01'))
+            ->get()->getRow();
+        $requestsUsedThisMonth = (int)($usageSum->total ?? 0);
         
         $plan = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
         $isPaid = false;
@@ -117,7 +155,7 @@ class Dashboard extends BaseController
                     'title' => 'Estás viendo el valor',
                     'text'  => 'El siguiente paso es integrarlo en tu sistema para automatizar procesos.'
                 ];
-            } elseif ($requestsUsedThisMonth >= 10 && $requestsUsedThisMonth <= 14) {
+            } elseif ($requestsUsedThisMonth >= ($maxLimit * 0.6) && $requestsUsedThisMonth < $maxLimit) {
                 $data['usageMessage'] = [
                     'title' => 'Límite casi alcanzado',
                     'text'  => 'Te quedan pocas consultas gratuitas. Activa Pro para evitar interrupciones.'
@@ -195,8 +233,16 @@ class Dashboard extends BaseController
         $kpis = cache($cacheKey);
 
         if (!$kpis) {
+            $db = \Config\Database::connect();
+            $usageSum = $db->table('api_usage_daily')
+                ->selectSum('requests_count', 'total')
+                ->where('user_id', $userId)
+                ->where('date >=', date('Y-m-01'))
+                ->get()->getRow();
+            $requestCount = (int)($usageSum->total ?? 0);
+
             $kpis = [
-                'api_request_total_month' => $this->ApiRequestsModel->countRequestsForMonth(date('Y-m'), ['user_id' => $userId]),
+                'api_request_total_month' => $requestCount,
                 'avg_latency' => $this->ApiRequestsModel->getAverageLatency(['user_id' => $userId]),
                 'error_rate' => $this->ApiRequestsModel->getErrorRate(['user_id' => $userId])
             ];

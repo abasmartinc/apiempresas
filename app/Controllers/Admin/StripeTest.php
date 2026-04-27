@@ -24,7 +24,7 @@ class StripeTest extends BaseController
             $planModel->insert([
                 'slug' => 'test_1euro',
                 'name' => 'Test 1 Euro',
-                'monthly_quota' => 100,
+                'monthly_quota' => 15,
                 'rate_limit_per_min' => 10,
                 'price_monthly' => 1.00,
                 'price_annual' => 10.00,

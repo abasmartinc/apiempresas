@@ -35,7 +35,7 @@ class ApiKeyFilter implements FilterInterface
         $db = \Config\Database::connect('default');
 
         $row = $db->table('api_keys')
-            ->select('api_keys.id AS api_key_id, api_keys.user_id, api_keys.is_active, users.is_active as user_active')
+            ->select('api_keys.id AS api_key_id, api_keys.user_id, api_keys.is_active, users.is_active as user_active, users.created_at, users.migration_reset_done')
             ->join('users', 'users.id = api_keys.user_id', 'left')
             ->where('api_keys.api_key', $apiKey)
             ->get()
@@ -120,14 +120,32 @@ class ApiKeyFilter implements FilterInterface
             $monthlyQuota = $planRow ? (int)$planRow->monthly_quota : 100;
 
             $currentMonth = date('Y-m');
-            $usageRow = $db->table('api_usage_daily')
-                ->selectSum('requests_count')
-                ->where('user_id', (int)$row->user_id)
-                ->like('date', $currentMonth, 'after')
-                ->get()
-                ->getRow();
+            // --- LÓGICA DE MIGRACIÓN SEGURA (100 -> 15) ---
+            $migrationDate = '2026-04-26 00:00:00';
+            $isLegacy = ($row->created_at < $migrationDate);
+            
+            if ($isLegacy && (int)$planId === 1 && (int)($row->migration_reset_done ?? 0) === 0) {
+                // Reset controlado: permitimos 15 nuevas consultas desde este momento
+                $db->table('api_usage_daily')
+                   ->where('user_id', (int)$row->user_id)
+                   ->where('date >=', date('Y-m-01'))
+                   ->delete();
+                
+                $db->table('users')
+                   ->where('id', (int)$row->user_id)
+                   ->update(['migration_reset_done' => 1]);
+                
+                $currentUsage = 0;
+            } else {
+                $usageRow = $db->table('api_usage_daily')
+                    ->selectSum('requests_count')
+                    ->where('user_id', (int)$row->user_id)
+                    ->like('date', $currentMonth, 'after')
+                    ->get()
+                    ->getRow();
 
-            $currentUsage = $usageRow ? (int)$usageRow->requests_count : 0;
+                $currentUsage = $usageRow ? (int)$usageRow->requests_count : 0;
+            }
 
             if ($currentUsage >= $monthlyQuota && (int)$planId !== 7) {
                 return service('response')
