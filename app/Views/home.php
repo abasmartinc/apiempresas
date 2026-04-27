@@ -15,7 +15,7 @@
     <main>
 
         <!-- 1. HERO PROFESIONAL -->
-        <section class="hero container">
+        <section class="hero container" data-track-section="hero">
             <h1 class="reveal">
                 API de empresas para validar CIF y 
                 <span class="gradient-text">verificar datos oficiales en España</span>
@@ -31,7 +31,7 @@
         </section>
 
         <!-- 2. BLOQUE DE BÚSQUEDA -->
-        <section id="buscar" class="search-section container">
+        <section id="buscar" class="search-section container" data-track-section="search_block">
             <div class="search-panel reveal delay-3">
                 <div style="text-align: center;">
                     <div class="badge-intro">
@@ -428,7 +428,7 @@
         </section>
 
         <!-- 8. PRICING -->
-        <section id="precios" class="band band-light">
+        <section id="precios" class="band band-light" data-track-section="pricing_cta">
             <div class="container">
                 <div class="band-header" style="text-align: left; max-width: 800px;">
                     <h2 class="reveal delay-1">Planes transparentes para cualquier volumen</h2>
@@ -450,7 +450,7 @@
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Datos oficiales para comprobar resultados</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Sin tarjeta de crédito</li>
                         </ul>
-                        <a href="<?= site_url('register?plan=free') ?>" class="btn-tier">Empezar gratis</a>
+                        <a href="<?= site_url('register?plan=free') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar gratis", "plan": "free", "source_block": "pricing_cta", "page_type": "home"}'>Empezar gratis</a>
                     </div>
                     
                     <!-- PRO -->
@@ -466,7 +466,7 @@
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Tiempo real para automatización</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Ideal para facturación y scoring</li>
                         </ul>
-                        <a href="<?= site_url('register?plan=pro') ?>" class="btn-tier">Empezar con Pro</a>
+                        <a href="<?= site_url('register?plan=pro') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Pro", "plan": "pro", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Pro</a>
                     </div>
                     
                     <!-- BUSINESS -->
@@ -482,11 +482,11 @@
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> SLA y alta disponibilidad</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Soporte prioritario</li>
                         </ul>
-                        <a href="<?= site_url('register?plan=business') ?>" class="btn-tier">Empezar con Business</a>
+                        <a href="<?= site_url('register?plan=business') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Business", "plan": "business", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Business</a>
                     </div>
                 </div>
                 <div style="text-align: center; margin-top: 48px;">
-                    <a href="<?= getRadarRedirect('home_pricing') ?>" class="btn-ae" style="background: #12b48a; color: white; padding: 18px 36px; font-size: 1.1rem; border-radius: 14px; box-shadow: 0 10px 20px rgba(18, 180, 138, 0.2); font-weight: 800;" data-cta="radar_home" data-source="home_pricing">Ver Radar B2B (79€/mes)</a>
+                    <a href="<?= getRadarRedirect('home_pricing') ?>" class="btn-ae" style="background: #12b48a; color: white; padding: 18px 36px; font-size: 1.1rem; border-radius: 14px; box-shadow: 0 10px 20px rgba(18, 180, 138, 0.2); font-weight: 800;" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Ver Radar B2B (79€/mes)", "plan": "radar", "source_block": "pricing_cta", "page_type": "home"}'>Ver Radar B2B (79€/mes)</a>
                 </div>
             </div>
         </section>
@@ -612,7 +612,7 @@
         </section>
 
         <!-- 10. CTA FINAL -->
-        <section class="band" style="background: #ffffff;">
+        <section class="band" style="background: #ffffff;" data-track-section="final_cta">
             <div class="container">
                 <div style="background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%); border-radius: 32px; padding: 56px 32px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 40px 100px -20px rgba(37, 99, 235, 0.4);">
                     <!-- Decorative Glows -->
@@ -626,7 +626,10 @@
                         
                         <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
                             <a href="#buscar" class="btn-ae" style="background: #ffffff; color: #0F172A; padding: 18px 32px; font-size: 1.1rem; border: none; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); font-weight: 800;">Validar CIF gratis</a>
-                            <a href="<?= getRadarRedirect('home_final') ?>" class="btn-ae" style="background: #12b48a; color: #ffffff; padding: 18px 32px; font-size: 1.1rem; border: none; box-shadow: 0 10px 20px rgba(18, 180, 138, 0.3); font-weight: 800;" data-cta="radar_home" data-source="home_final">Ver oportunidades</a>
+                            <a href="<?= getRadarRedirect('home_final') ?>" class="btn-ae" style="background: #12b48a; color: #ffffff; padding: 18px 32px; font-size: 1.1rem; border: none; box-shadow: 0 10px 20px rgba(18, 180, 138, 0.3); font-weight: 800;" 
+                               data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Ver oportunidades", "plan": "radar", "source_block": "final_cta", "page_type": "home"}'>
+                               Ver oportunidades
+                            </a>
                         </div>
                     </div>
                 </div>

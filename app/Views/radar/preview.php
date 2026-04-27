@@ -470,7 +470,7 @@
             <div class="ae-radar-page__content">
                 
                 <!-- ① HERO SECTION -->
-                <section class="preview-hero">
+                <section class="preview-hero" data-track-section="hero">
                     <div class="preview-hero__badge">
                         <span class="preview-hero__dot"></span>
                         +<?= $opps_count ?> empresas detectadas HOY — varias ya están siendo contactadas
@@ -486,7 +486,7 @@
                     </div>
                     
                     <!-- Versión compacta del formulario debajo del Hero -->
-                    <div class="capture-form-wrap inline-capture" id="email-section" style="max-width: 900px; margin-bottom: 32px;">
+                    <div class="capture-form-wrap inline-capture" id="email-section" data-track-section="capture_inline" style="max-width: 900px; margin-bottom: 32px;">
                         <div style="font-size: 1.1rem; color: #475569; font-weight: 700; margin-bottom: 24px; text-align: center;">Introduce tu email para desbloquear las <?= $opps_count ?> oportunidades activas ahora mismo</div>
                         <form class="preview-form-handler" style="display: flex; flex-direction: column; gap: 12px;">
                             <div style="display: flex; gap: 16px; width: 100%;">
@@ -522,7 +522,7 @@
                     </div>
 
                     <!-- ② PREVIEW DASHBOARD (TABLE) -->
-                    <div class="radar-table-wrapper radar-table-loading" id="radar-table-container">
+                    <div class="radar-table-wrapper radar-table-loading" id="radar-table-container" data-track-section="preview_table">
                         <table class="radar-table">
                             <thead>
                                 <tr>
@@ -603,7 +603,7 @@
                     </div>
 
                     <!-- ④ FINAL CONVERSION BLOCK (Restored) -->
-                    <section class="final-cta-block" style="background: white; border-radius: 24px; padding: 60px 40px; text-align: center; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.03); margin-top: 40px;">
+                    <section class="final-cta-block" data-track-section="capture_bottom" style="background: white; border-radius: 24px; padding: 60px 40px; text-align: center; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.03); margin-top: 40px;">
                         <h2 style="font-size: 2rem; font-weight: 900; color: #0f172a; margin-bottom: 16px;">¿Listo para conseguir clientes reales hoy mismo?</h2>
                         <p style="font-size: 1.1rem; color: #64748b; margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto;">
                             No dejes que tu competencia se adelante. Accede ahora al Radar B2B y empieza a recibir oportunidades de negocio filtradas cada mañana.
@@ -667,19 +667,13 @@
     // Utility for tracking
     function trackPreviewEvent(type, metadata = {}) {
         const source = metadata.source || '<?= esc($source ?? "direct") ?>';
-        if (typeof window.trackRadarEvent === 'function') {
-            window.trackRadarEvent({ event_type: type, source: source, ...metadata });
-        } else {
-            $.post('<?= site_url("api/tracking/event") ?>', {
-                event_type: type,
-                source: source,
-                metadata: JSON.stringify(metadata)
-            });
+        if (window.trackEvent) {
+            window.trackEvent(type, { source: source, page_type: 'radar_preview', ...metadata });
         }
     }
 
     $(document).ready(function() {
-        // view_radar_preview
+        // preview_view
         trackPreviewEvent('preview_view', { source: '<?= esc($source ?? "direct") ?>' });
 
         // Recurring user logic
@@ -782,7 +776,7 @@
             // submit_email_preview
             trackPreviewEvent('preview_email_submit', { 
                 email: email, 
-                form_type: $form.closest('.ae-modal').length ? 'modal' : 'inline',
+                form_type: $form.closest('.ae-modal').length ? 'modal' : ($form.closest('.final-cta-block').length ? 'bottom' : 'inline'),
                 source: '<?= esc($source ?? "direct") ?>'
             });
 

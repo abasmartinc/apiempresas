@@ -11,7 +11,6 @@
     const getAnonymousId = () => {
         let anonId = localStorage.getItem(STORAGE_KEY_ANON);
         if (!anonId) {
-            // Fallback for non-secure contexts (http) where crypto.randomUUID might be missing
             anonId = 'anon_' + (typeof crypto.randomUUID === 'function' 
                 ? crypto.randomUUID() 
                 : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
@@ -35,7 +34,7 @@
 
     // 2. Global trackEvent Function
     window.trackEvent = async (eventName, metadata = {}, element = null) => {
-        // Backward compatibility for object-based signature
+        // Backward compatibility for different signatures
         if (typeof eventName === 'object' && eventName !== null) {
             const obj = eventName;
             eventName = obj.event_name || obj.event_type || 'unknown';
@@ -50,7 +49,7 @@
             user_id: userId,
             session_id: sessId,
             anonymous_id: anonId,
-            element: element,
+            element: element || 'document',
             metadata: metadata
         };
 
@@ -62,7 +61,7 @@
             if (navigator.sendBeacon && (eventName === 'time_on_page' || eventName === 'page_unload')) {
                 navigator.sendBeacon(endpoint, JSON.stringify(payload));
             } else {
-                await fetch(endpoint, {
+                fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload),
@@ -70,44 +69,67 @@
                 });
             }
         } catch (e) {
-            console.warn('Tracking failed', e);
+            // Silently fail to not interrupt UX
         }
     };
 
     // 3. Base Events
     // 3.1 Page View
-    trackEvent('page_view');
+    trackEvent('page_view', { referrer: document.referrer });
 
-    // 3.2 Scroll Depth
-    let scrollDepths = [25, 50, 75, 100];
+    // 3.2 Scroll Depth (Optimized)
     let triggeredDepths = new Set();
-    window.addEventListener('scroll', () => {
+    const handleScroll = () => {
         const scrollTop = window.scrollY;
         const docHeight = document.documentElement.scrollHeight;
         const winHeight = window.innerHeight;
         const scrollPercent = Math.round((scrollTop / (docHeight - winHeight)) * 100);
 
-        scrollDepths.forEach(depth => {
+        [25, 50, 75, 100].forEach(depth => {
             if (scrollPercent >= depth && !triggeredDepths.has(depth)) {
                 triggeredDepths.add(depth);
                 trackEvent('scroll_depth', { depth: depth + '%' });
             }
         });
-    }, { passive: true });
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
-    // 3.3 Time on Page
-    let startTime = Date.now();
-    setInterval(() => {
-        const timeSpent = Math.round((Date.now() - startTime) / 1000);
-        if (timeSpent % 30 === 0) { // Every 30 seconds
-            trackEvent('time_on_page', { seconds: timeSpent });
-        }
-    }, 1000);
+    // 3.3 Section View (IntersectionObserver)
+    const trackedSections = new Set();
+    const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const sectionId = entry.target.getAttribute('data-track-section');
+                if (sectionId && !trackedSections.has(sectionId)) {
+                    trackedSections.add(sectionId);
+                    trackEvent('section_view', { 
+                        section: sectionId,
+                        percent_visible: Math.round(entry.intersectionRatio * 100)
+                    });
+                }
+            }
+        });
+    }, { threshold: [0.5] }); // Trigger when 50% visible
 
-    // 3.4 Click CTA
+    document.querySelectorAll('[data-track-section]').forEach(el => sectionObserver.observe(el));
+
+    // 3.4 Global Click Listener (Data Attributes)
     document.addEventListener('click', (e) => {
-        const cta = e.target.closest('.btn, .cta-link, a[href*="register"], a[href*="pricing"]');
-        if (cta) {
+        const target = e.target.closest('[data-track-event]');
+        if (target) {
+            const eventName = target.getAttribute('data-track-event');
+            let metadata = {};
+            try {
+                const metaAttr = target.getAttribute('data-track-metadata');
+                if (metaAttr) metadata = JSON.parse(metaAttr);
+            } catch (err) {}
+
+            trackEvent(eventName, metadata, target.tagName + (target.id ? '#' + target.id : ''));
+        }
+
+        // Automatic CTA tracking (backward compatibility)
+        const cta = e.target.closest('.btn, .cta-link, a[href*="register"], a[href*="pricing"], a[href*="radar"]');
+        if (cta && !cta.hasAttribute('data-track-event')) {
             trackEvent('click_cta', {
                 text: cta.innerText.trim(),
                 href: cta.getAttribute('href'),
@@ -115,5 +137,14 @@
             }, cta.tagName + (cta.id ? '#' + cta.id : ''));
         }
     }, { capture: true });
+
+    // 3.5 Time on Page
+    let startTime = Date.now();
+    setInterval(() => {
+        const timeSpent = Math.round((Date.now() - startTime) / 1000);
+        if (timeSpent > 0 && (timeSpent === 10 || timeSpent === 30 || timeSpent === 60 || timeSpent % 120 === 0)) {
+            trackEvent('time_on_page', { seconds: timeSpent });
+        }
+    }, 1000);
 
 })();

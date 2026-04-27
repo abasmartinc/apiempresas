@@ -101,9 +101,20 @@
     // --- Buscar: SOLO llama a la API y pinta lo que venga ---
     btn?.addEventListener('click', async () => {
         const v = (q?.value || '').trim();
+        const source = document.body.classList.contains('dashboard') ? 'dashboard' : 'homepage';
+        const pageType = document.body.classList.contains('dashboard') ? 'dashboard' : 'home';
+
         if (!v) {
             out.innerHTML = '<div class="muted">Escribe un CIF (ej. B12345678).</div>';
             return;
+        }
+
+        // Tracking: Validation Started
+        if (window.trackEvent) {
+            window.trackEvent('api_validation_started', {
+                query: v,
+                source: source
+            });
         }
 
         out.innerHTML = '<div class="muted">Buscando empresa en la base de datos...</div>';
@@ -122,6 +133,16 @@
             try {
                 json = await res.json();
             } catch(_){}
+
+            // Tracking: Search Performed
+            if (window.trackEvent) {
+                window.trackEvent('search_performed', {
+                    query: v,
+                    results_count: (json && json.success && json.data) ? 1 : 0,
+                    source: source,
+                    page_type: pageType
+                });
+            }
 
             // errores HTTP
             if (!res.ok) {
@@ -154,8 +175,13 @@
             const company = json.data || {};
             out.innerHTML = sectionRegistro(company, json);
 
-            if (typeof track === 'function') {
-                track('search_by_cif', { cif: v });
+            // Tracking: Validation Success
+            if (window.trackEvent) {
+                window.trackEvent('api_validation_success', {
+                    company_name: company.name || 'unknown',
+                    company_cif: company.cif || company.nif || v,
+                    source: source
+                });
             }
 
         } catch (e) {
@@ -164,10 +190,3 @@
         }
     });
 })();
-
-
-
-
-
-
-

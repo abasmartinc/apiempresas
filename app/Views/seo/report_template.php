@@ -758,7 +758,7 @@
         $totalCompanies = $radar_data['total_context_count'] ?? 0;
         $displayTotal = ($totalCompanies > 0) ? "+$totalCompanies" : "Decenas de";
     ?>
-    <header class="report-hero">
+    <header class="report-hero" data-track-section="hero">
         <div class="container">
             <span class="report-hero__badge">Oportunidad Comercial</span>
             <h1 class="report-hero__title"><?= $displayTotal ?> empresas nuevas de <?= esc($sectorName) ?> en <?= esc($cityName) ?> listas para ser detectadas antes que tu competencia</h1>
@@ -771,7 +771,8 @@
                 </div>
             </div>
             <div style="margin-top: 10px;">
-                <a href="<?= site_url('radar/preview') ?>" class="btn-ae" style="background: #fff; color: var(--ae-primary); box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                <a href="<?= site_url('radar/preview') ?>" class="btn-ae" style="background: #fff; color: var(--ae-primary); box-shadow: 0 10px 30px rgba(0,0,0,0.2);" 
+                   data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Acceder ahora y detectar antes que otros", "plan": "radar", "source_block": "hero", "page_type": "seo"}'>
                     Acceder ahora y detectar antes que otros →
                 </a>
             </div>
@@ -786,7 +787,7 @@
                 
                 <!-- PREMIUM PREVIEW BLOCK -->
                 <?php if (!empty($radar_data['companies'])): ?>
-                    <section class="premium-preview">
+                    <section class="premium-preview" data-track-section="preview_companies">
                         <div class="preview-header">
                             <div class="preview-header__kicker">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -797,8 +798,11 @@
                         </div>
 
                         <div class="premium-grid">
-                            <?php foreach (array_slice($radar_data['companies'], 0, 4) as $comp): ?>
-                                <div class="premium-card" onclick="openOpportunityModal(event, '<?= esc($comp['name'] ?? '') ?>')">
+                            <?php $pos = 1; foreach (array_slice($radar_data['companies'], 0, 4) as $comp): ?>
+                                <div class="premium-card" 
+                                     data-track-event="company_card_opportunity_click" 
+                                     data-track-metadata='{"company_name": "<?= esc($comp['name'] ?? '') ?>", "company_cif": "<?= esc($comp['cif'] ?? '') ?>", "sector": "<?= esc($sectorName) ?>", "provincia": "<?= esc($cityName) ?>", "position": <?= $pos ?>, "page_type": "seo", "source_block": "preview_companies"}'
+                                     onclick="openOpportunityModal(event, '<?= esc($comp['name'] ?? '') ?>', '<?= esc($comp['cif'] ?? '') ?>', '<?= esc($sectorName) ?>', '<?= esc($cityName) ?>')">
                                     <div class="premium-card__head">
                                         <div class="premium-card__name"><?= esc($comp['name'] ?? 'Empresa Registrada') ?></div>
                                         <span class="premium-card__badge">Nueva</span>
@@ -825,7 +829,7 @@
                                         </button>
                                     </div>
                                 </div>
-                            <?php endforeach; ?>
+                            <?php $pos++; endforeach; ?>
                         </div>
 
                         <div class="preview-footer">
@@ -842,9 +846,10 @@
                 </div>
 
                 <!-- SECONDARY CTA -->
-                <div class="secondary-cta-block">
+                <div class="secondary-cta-block" data-track-section="opportunity_block">
                     <p class="secondary-cta-block__text">¿Quieres desbloquear el acceso completo con información estratégica y ganar la carrera hoy mismo?</p>
-                    <a href="<?= site_url('radar/preview') ?>" class="btn-ae" style="padding: 18px 40px; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(18, 180, 138, 0.3);">
+                    <a href="<?= site_url('radar/preview') ?>" class="btn-ae" style="padding: 18px 40px; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(18, 180, 138, 0.3);"
+                       data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Ver oportunidades y empezar ahora", "plan": "radar", "source_block": "opportunity_block", "page_type": "seo"}'>
                         Ver oportunidades y empezar ahora →
                     </a>
                 </div>
@@ -902,7 +907,7 @@
                 </section>
 
                 <!-- SEO CONTENT (EXISTING) -->
-                <div class="report-body" style="margin-top: 60px; padding-top: 60px; border-top: 1px solid var(--ae-border);">
+                <div class="report-body" style="margin-top: 60px; padding-top: 60px; border-top: 1px solid var(--ae-border);" data-track-section="seo_content">
                     <div style="background: #f8fafc; padding: 10px 20px; border-radius: 8px; font-size: 0.8rem; color: var(--ae-muted); margin-bottom: 30px; display: inline-block;">
                         Análisis detallado y contexto histórico
                     </div>
@@ -998,11 +1003,12 @@
                 <?php endif; ?>
 
                 <!-- FINAL CTA -->
-                <div class="report-cta">
+                <div class="report-cta" data-track-section="final_cta">
                     <div style="position: relative; z-index: 2;">
                         <h2 style="color: #fff; font-size: 2.2rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 20px;">Si no accedes ahora, estas empresas desaparecerán en horas</h2>
                         <p style="font-weight: 600; opacity: 0.9; font-size: 1.15rem; color: #fff; margin-bottom: 40px; max-width: 600px; margin-inline: auto; line-height: 1.5;">Estás a un clic de detectar oportunidades críticas y ganar la carrera comercial hoy mismo.</p>
-                        <a href="<?= site_url('radar/preview') ?>" class="btn-ae" style="background: #ffffff; color: #1e3a8a; padding: 18px 45px; font-size: 1.1rem; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: none;">
+                        <a href="<?= site_url('radar/preview') ?>" class="btn-ae" style="background: #ffffff; color: #1e3a8a; padding: 18px 45px; font-size: 1.1rem; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: none;"
+                           data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Acceder al Radar B2B y ganar tiempo", "plan": "radar", "source_block": "final_cta", "page_type": "seo"}'>
                             Acceder al Radar B2B y ganar tiempo →
                         </a>
                     </div>
@@ -1152,7 +1158,8 @@
                     Información estratégica para vender
                 </li>
             </ul>
-            <a id="modalCta" href="<?= site_url('radar/preview') ?>" class="btn-ae" style="width: 100%; justify-content: center; padding: 16px; font-size: 1.1rem; box-shadow: 0 10px 20px rgba(18, 180, 138, 0.2);">
+            <a id="modalCta" href="<?= site_url('radar/preview') ?>" class="btn-ae" style="width: 100%; justify-content: center; padding: 16px; font-size: 1.1rem; box-shadow: 0 10px 20px rgba(18, 180, 138, 0.2);"
+               data-track-event="company_modal_radar_click" data-track-metadata='{"cta_text": "Acceder al Radar B2B", "page_type": "seo"}'>
                 Acceder al Radar B2B
             </a>
             <div style="text-align: center; margin-top: 15px;">
@@ -1164,14 +1171,22 @@
     </div>
 
     <script>
-        let currentModalCompany = '';
+        let currentModalContext = {};
 
-        function openOpportunityModal(e, companyName) {
+        function openOpportunityModal(e, companyName, companyCif, sector, provincia) {
             if (e) e.stopPropagation();
             
-            currentModalCompany = companyName;
+            currentModalContext = {
+                company_name: companyName,
+                company_cif: companyCif,
+                sector: sector,
+                provincia: provincia,
+                page_type: 'seo'
+            };
+
             const modal = document.getElementById('opportunityModal');
             const subtext = document.getElementById('modalSubtext');
+            const modalCta = document.getElementById('modalCta');
 
             if (companyName) {
                 subtext.innerHTML = `Accede para ver más empresas como <span style="font-weight: 800; color: var(--ae-primary);">${companyName}</span> y detectar oportunidades antes que tu competencia.`;
@@ -1179,17 +1194,18 @@
                 subtext.innerText = "Accede al listado completo y detecta oportunidades antes que tu competencia.";
             }
 
+            // Update modal CTA metadata dynamically
+            modalCta.setAttribute('data-track-metadata', JSON.stringify({
+                ...currentModalContext,
+                cta_text: "Acceder al Radar B2B"
+            }));
+
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
 
-            // Tracking
+            // Tracking for modal open
             if (window.trackEvent) {
-                trackEvent('seo_company_card_opportunity_click', {
-                    company_name: companyName || 'unknown',
-                    sector: '<?= esc($sectorName) ?>',
-                    provincia: '<?= esc($cityName) ?>',
-                    timestamp: new Date().toISOString()
-                });
+                trackEvent('company_modal_open', currentModalContext);
             }
         }
 
@@ -1201,17 +1217,6 @@
 
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeOpportunityModal();
-        });
-
-        document.getElementById('modalCta').addEventListener('click', function() {
-            if (window.trackEvent) {
-                trackEvent('seo_company_modal_radar_click', {
-                    company_name: currentModalCompany || 'unknown',
-                    sector: '<?= esc($sectorName) ?>',
-                    provincia: '<?= esc($cityName) ?>',
-                    timestamp: new Date().toISOString()
-                });
-            }
         });
     </script>
 </body>

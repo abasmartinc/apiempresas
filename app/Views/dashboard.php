@@ -219,7 +219,7 @@
                 <?php endif; ?>
             </div>
 
-            <div class="kpi-grid-4">
+            <div class="kpi-grid-4" data-track-section="kpis">
                 <?php 
                     $requestsUsed = (int)$requestsUsedThisMonth;
                     $kpiClass = '';
@@ -301,7 +301,7 @@
             <div class="dash-grid">
                 <div>
                     <!-- 1. BLOQUE PRINCIPAL ACTIVACIÓN -->
-                    <section class="activation-main-card" style="<?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'border: 2px solid #e11d48; background: #fff1f2;' : '' ?>">
+                    <section class="activation-main-card" data-track-section="activation_search" style="<?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'border: 2px solid #e11d48; background: #fff1f2;' : '' ?>">
                         <div class="activation-header">
                             <h2><?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'Límite mensual alcanzado' : 'Valida empresas en segundos' ?></h2>
                             <p><?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'Has agotado tus ' . $freeLimit . ' consultas gratuitas. Activa el Plan Pro para seguir validando.' : 'Introduce un CIF o nombre y valida una empresa real.' ?></p>
@@ -381,7 +381,7 @@
                     </section>
 
                     <!-- API KEY SECTION (Prominent after first request) -->
-                    <section class="dash-card" id="section-api-key" style="margin-top: 32px; <?= $requestsUsedThisMonth == 0 ? 'opacity: 0.6; filter: grayscale(1); pointer-events: none;' : 'border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);' ?>">
+                    <section class="dash-card" id="section-api-key" data-track-section="api_key_block" style="margin-top: 32px; <?= $requestsUsedThisMonth == 0 ? 'opacity: 0.6; filter: grayscale(1); pointer-events: none;' : 'border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);' ?>">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                             <div class="kicker" style="margin: 0; <?= $requestsUsedThisMonth > 0 ? 'background: #eef2ff; color: #4f46e5; border: 1px solid #e0e7ff;' : '' ?>">
                                 <?= $requestsUsedThisMonth > 0 ? 'EMPIEZA A INTEGRAR LA API AHORA' : 'Seguridad' ?>
@@ -537,6 +537,15 @@
             try{
                 await navigator.clipboard.writeText(realKey);
                 btnCopy.textContent = 'Copiado ✓';
+                
+                // Tracking: API Key Copied
+                if (window.trackEvent) {
+                    window.trackEvent('api_key_copied', {
+                        source: 'dashboard',
+                        page_type: 'dashboard'
+                    });
+                }
+                
                 setTimeout(() => btnCopy.textContent = 'Copiar', 1800);
             }catch(e){ alert('Error al copiar.'); }
         });
@@ -706,6 +715,15 @@ function showPluginComingSoon() {
 }
 
 function showUpgradeModal() {
+    // Tracking: Upgrade Limit Reached View
+    if (window.trackEvent) {
+        window.trackEvent('upgrade_limit_reached_view', {
+            source: 'dashboard_search',
+            limit_type: 'free_quota',
+            page_type: 'dashboard'
+        });
+    }
+
     Swal.fire({
         title: '¡Límite alcanzado!',
         text: 'Has completado tus <?= $freeLimit ?> consultas gratuitas de este mes. Activa el Plan Pro para tener acceso ilimitado y automatizar tus procesos.',
