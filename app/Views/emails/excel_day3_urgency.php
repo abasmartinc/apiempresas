@@ -15,7 +15,7 @@
         <p>Hola <?= esc($name) ?>,</p>
         <p>Te escribo porque he visto que aún no has activado tu acceso al Radar PRO tras tu compra del listado.</p>
         <p>Cada hora que pasa, nuevas empresas en tu sector están siendo contactadas por competidores que ya usan nuestra tecnología. El listado que compraste ya tiene 3 días... y en el mundo B2B, 3 días es mucho tiempo.</p>
-        <p><strong>No dejes que se enfríen los leads.</strong> Activa el Radar ahora y recupera el control de tu prospección.</p>
+        <p><strong>No dejes escapar las oportunidades.</strong> Activa el Radar ahora y recupera el control de tu prospección.</p>
         <div style="text-align: center;">
             <a href="<?= site_url('radar?source=email_day3') ?>" class="btn">Activar Radar PRO ahora</a>
         </div>

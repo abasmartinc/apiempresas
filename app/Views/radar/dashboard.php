@@ -254,7 +254,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                                     <?php if ($isFree) { ?>
                                         <span style="color: #ef4444; font-weight: 700;">Estás viendo <?= count($visibleCompanies) ?> de <?= number_format($pagination['total']) ?> oportunidades disponibles.</span> Estas empresas están activas ahora mismo y ya están siendo contactadas.
                                     <?php } else { ?>
-                                        Explora todos los leads detectados hoy en tiempo real.
+                                        Explora todas las empresas detectadas hoy en tiempo real.
                                     <?php } ?>
                                 </p>
                             </div>
@@ -278,7 +278,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                                     Las empresas detectadas hoy suelen ser las más valiosas (+<?= number_format($stats['hoy']) ?> detectadas hoy)
                                 </h4>
                                 <div style="display: flex; gap: 12px; margin-top: 2px;">
-                                    <span style="font-size: 12px; color: #60a5fa; font-weight: 700;">• <?= max(1, round($stats['hoy'] * 0.7)) ?> leads de alta prioridad detectados</span>
+                                    <span style="font-size: 12px; color: #60a5fa; font-weight: 700;">• <?= max(1, round($stats['hoy'] * 0.7)) ?> oportunidades de alta prioridad detectadas</span>
                                     <span style="font-size: 12px; color: #10b981; font-weight: 700;">• Otros equipos comerciales ya están trabajando estas oportunidades</span>
                                 </div>
                             </div>
@@ -325,7 +325,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                                 </div>
 
                                 <h1 class="ae-radar-page__hero-title" style="font-size: 32px; margin-bottom: 8px; line-height: 1.1; color: #0f172a !important; font-weight: 800;">
-                                    Consigue clientes nuevos antes que tu competencia
+                                    Detecta oportunidades nuevas antes que tu competencia
                                 </h1>
 
                                 <p class="ae-radar-page__hero-text" style="font-size: 14px; margin-bottom: 24px; max-width: 600px; color: #64748b; font-weight: 500; line-height: 1.4;">
@@ -342,7 +342,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                                             </div>
                                             <div style="display: flex; align-items: center; gap: 10px;">
                                                 <span style="font-size: 18px;">🎯</span>
-                                                <span style="font-size: 14px; font-weight: 700; color: #1e293b;"><?= $pipelineMetrics['clients_label'] ?> clientes reales <span style="font-weight: 500; color: #64748b; font-size: 12px;">(según conv. media)</span></span>
+                                                <span style="font-size: 14px; font-weight: 700; color: #1e293b;"><?= $pipelineMetrics['clients_label'] ?> oportunidades reales <span style="font-weight: 500; color: #64748b; font-size: 12px;">(según conv. media)</span></span>
                                             </div>
                                             <div style="margin-top: 4px; font-size: 12px; font-weight: 600; color: #64748b; display: flex; align-items: center; gap: 6px;">
                                                 🚀 Otros equipos comerciales ya están trabajando estas oportunidades
@@ -399,7 +399,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
                                     <div style="display: flex; align-items: center; gap: 10px;">
                                         <span style="font-size: 18px;">✨</span>
-                                        <span style="font-size: 13px; font-weight: 700; color: #475569;">nuevos clientes potenciales hoy</span>
+                                        <span style="font-size: 13px; font-weight: 700; color: #475569;">nuevas oportunidades hoy</span>
                                     </div>
                                     <div style="font-size: 20px; font-weight: 800; color: #0f172a;"><?= number_format($stats['hoy']) ?></div>
                                 </div>
@@ -431,7 +431,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <div style="flex: 1;">
                                     <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 10px;">
-                                        <span>📊</span> Estás trabajando sobre clientes detectados hoy
+                                        <span>📊</span> Estás trabajando sobre oportunidades detectadas hoy
                                     </h3>
                                     <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 500;">
                                         Gestiona tu embudo de ventas y asegura el cierre de cada oportunidad.
@@ -443,7 +443,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                                     <!-- Contactados -->
                                     <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 12px 20px; border-radius: 14px; text-align: center; min-width: 140px;">
                                         <div style="font-size: 24px; font-weight: 900; color: #10b981; line-height: 1;"><?= number_format($crmStats['contactado'] ?? 0) ?></div>
-                                        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; color: rgba(16, 185, 129, 0.8);">clientes contactados</div>
+                                        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; color: rgba(16, 185, 129, 0.8);">oportunidades contactadas</div>
                                     </div>
                                     
                                     <!-- Seguimiento -->
@@ -556,8 +556,8 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                                         $days = ($scoreTotal >= 70) ? 0 : (($scoreTotal >= 40) ? rand(1, 2) : rand(3, 5));
                                         $timingLabel = ($days == 0) ? 'Detectada hoy' : "Hace $days días";
 
-                                        $timingText = ($days <= 2) ? '🚀 Contactar de inmediato' : "⏱ Contactar en $days días";
-                                        $btnText = "🚀 Contactar ahora";
+                                        $timingText = ($days <= 2) ? '🚀 Detectar de inmediato' : "⏱ Detectar en $days días";
+                                        $btnText = "🚀 Ver radar ahora";
                                         
                                         $containerStyle = $isFirst 
                                             ? "background: #ffffff; border: 2px solid #2563eb; border-radius: 16px; padding: 20px; transition: all 0.2s; position: relative; box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.15); display: flex; flex-direction: column; height: 100%; transform: scale(1.02); z-index: 5;"
@@ -646,7 +646,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                                         <div class="paywall-benefits" style="display: flex; justify-content: center; gap: 32px; margin: 0 auto; opacity: 0.7;">
                                             <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700;"><span style="color: #10b981;">✔</span> Acceso completo</div>
                                             <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700;"><span style="color: #10b981;">✔</span> Filtros avanzados</div>
-                                            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700;"><span style="color: #10b981;">✔</span> Exportación leads</div>
+                                            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700;"><span style="color: #10b981;">✔</span> Detección temprana</div>
                                             <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700;"><span style="color: #10b981;">✔</span> Ventaja competitiva</div>
                                         </div>
                                     </div>
@@ -735,13 +735,13 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                                 $filterLabel = '🔥 Mostrando oportunidades prioritarias (Score > 80)';
                             } elseif (isset($_GET['status']) && $_GET['status'] === 'nuevo') {
                                 $activeFilter = 'sin_ver';
-                                $filterLabel = '🆕 Mostrando clientes potenciales sin contactar';
+                                $filterLabel = '🆕 Mostrando oportunidades sin contactar';
                             } elseif (($filters['priority_level'] ?? '') === 'muy_alta') {
                                 $activeFilter = 'alta';
                                 $filterLabel = '🟢 Mostrando empresas con alta probabilidad de cierre';
                             } elseif (($filters['rango'] ?? '') === '7') {
                                 $activeFilter = 'ventana';
-                                $filterLabel = '⏱ Mostrando leads en momento óptimo de contacto';
+                                $filterLabel = '⏱ Mostrando oportunidades en momento óptimo';
                             } elseif (isset($_GET['ai']) && $_GET['ai'] === 'active') {
                                 $activeFilter = 'ai';
                                 $filterLabel = '🎯 Mostrando recomendaciones inteligentes del sistema';

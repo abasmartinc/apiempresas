@@ -451,7 +451,7 @@
                     <div class="radar-secondary-card" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px dashed #cbd5e1; border-radius: 20px; padding: 24px; margin-top: 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px;">
                         <div class="radar-sec-info">
                             <h3 style="font-size: 1.1rem; font-weight: 900; color: #0f172a; margin-bottom: 8px;">¿Buscas clientes en vez de validar datos?</h3>
-                            <p style="font-size: 0.9rem; color: #64748b; font-weight: 600;">Descubre nuevas empresas y encuentra oportunidades antes que tu competencia.</p>
+                            <p style="font-size: 0.9rem; color: #64748b; font-weight: 600;">Detecta nuevas empresas y accede a oportunidades antes que tu competencia.</p>
                         </div>
                         <a href="<?= site_url('radar') ?>" class="trigger-cta" style="white-space: nowrap; display: inline-block; background: #2152ff; color: white !important; text-decoration: none !important; padding: 12px 24px; border-radius: 10px; font-weight: 800; font-size: 0.9rem; transition: all 0.2s;">Ver Radar B2B</a>
                     </div>

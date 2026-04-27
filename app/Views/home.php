@@ -20,7 +20,7 @@
                 API de empresas para validar CIF y 
                 <span class="gradient-text">verificar datos oficiales en España</span>
             </h1>
-            <p class="reveal delay-1">Consulta datos oficiales de empresas españolas y accede a nuevas oportunidades de negocio con información basada en Registro Mercantil y BORME. También puedes detectar empresas nuevas en España listas para prospección con Radar B2B.</p>
+            <p class="reveal delay-1">Consulta datos oficiales de empresas españolas y accede a nuevas oportunidades de negocio con información basada en Registro Mercantil y BORME. También puedes detectar empresas recién creadas en España antes que tu competencia con el Radar B2B.</p>
             
             <div class="hero-btns reveal delay-3">
                 <a href="#buscar" class="btn-ae btn-ae-primary">Validar CIF gratis</a>
@@ -160,7 +160,7 @@
                             </li>
                             <li>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                Exportación de leads comerciales
+                                Identificación de oportunidades estratégicas
                             </li>
                         </ul>
                         <a href="<?= getRadarRedirect('home_dual_block') ?>" class="btn-ae" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0F172A; font-weight: 800; border: none; width: 100%; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);" data-cta="radar_home" data-source="home_dual_block">Ver Radar</a>
@@ -172,7 +172,7 @@
                             </div>
                             Equipos técnicos
                         </h3>
-                        <p>Integre nuestra API para automatizar la validación de empresas y el enriquecimiento de datos en sus sistemas.</p>
+                        <p>Integre nuestra API para automatizar la validación de empresas y el enriquecimiento de información de oportunidades en sus sistemas.</p>
                         <ul class="path-list">
                             <li>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -300,7 +300,7 @@
                                                 </div>
                                                 <div class="db-meta">Madrid • Hace 2h</div>
                                             </div>
-                                            <div class="db-btn-action" style="padding: 8px 14px; background: #2563EB; font-size: 0.7rem;">Contactar ahora</div>
+                                            <div class="db-btn-action" style="padding: 8px 14px; background: #2563EB; font-size: 0.7rem;">Detectar ahora</div>
                                         </div>
                                         
                                         <div class="db-row" style="margin-bottom: 8px;">
@@ -311,7 +311,7 @@
                                                 </div>
                                                 <div class="db-meta">Barcelona • Hace 5h</div>
                                             </div>
-                                            <div class="db-btn-action" style="padding: 8px 14px; background: #2563EB; font-size: 0.7rem;">Contactar ahora</div>
+                                            <div class="db-btn-action" style="padding: 8px 14px; background: #2563EB; font-size: 0.7rem;">Detectar ahora</div>
                                         </div>
                                         
                                         <div class="db-row">
@@ -322,7 +322,7 @@
                                                 </div>
                                                 <div class="db-meta">Sevilla • Hace 1d</div>
                                             </div>
-                                            <div class="db-btn-action" style="padding: 8px 14px; background: #2563EB; font-size: 0.7rem;">Contactar ahora</div>
+                                            <div class="db-btn-action" style="padding: 8px 14px; background: #2563EB; font-size: 0.7rem;">Detectar ahora</div>
                                         </div>
                                     </div>
                                 </div>
@@ -351,7 +351,7 @@
                         </li>
                         <li style="color: var(--ae-dark); border-bottom: none; padding: 6px 0;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            Enriquecimiento de datos de prospectos
+                            Información estratégica de nuevas empresas
                         </li>
                         <li style="color: var(--ae-dark); border-bottom: none; padding: 6px 0;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -413,7 +413,7 @@
                         <svg class="comp-bg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
                         <div class="tag-premium">Para Equipos Comerciales</div>
                         <h3>Radar B2B</h3>
-                        <p>Interfaz web lista para usar. Filtra, descubre y exporta nuevas oportunidades comerciales diariamente sin necesidad de programación.</p>
+                        <p>Interfaz web lista para usar. Filtra, identifica y detecta nuevas oportunidades estratégicas diariamente antes que otros proveedores.</p>
                         <a href="<?= getRadarRedirect('home_product') ?>" class="btn-ae btn-ae-primary" style="width: 100%; padding: 20px; font-size: 1.1rem; box-shadow: 0 10px 20px rgba(37,99,235,0.2);" data-cta="radar_home" data-source="home_product">Ver oportunidades</a>
                     </div>
                     <div class="comp-card-premium card-api reveal delay-2">
@@ -575,7 +575,7 @@
                             </div>
                             <div class="faq-content">
                                 <div class="faq-body">
-                                    Radar B2B es una plataforma visual lista para usar, ideal para equipos comerciales que buscan prospectos. La API es un servicio técnico (endpoints JSON) pensado para que los desarrolladores integren los datos directamente en su propio software (CRM, ERP, procesos de alta).
+                                    Radar B2B es una plataforma visual lista para usar, ideal para equipos comerciales que buscan detectar oportunidades temprano. La API es un servicio técnico (endpoints JSON) pensado para que los desarrolladores integren los datos directamente en su propio software (CRM, ERP, procesos de alta).
                                 </div>
                             </div>
                         </div>

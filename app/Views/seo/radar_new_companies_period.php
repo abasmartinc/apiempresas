@@ -105,7 +105,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
             <div class="ae-radar-page__hero-inner">
                 <div class="ae-radar-page__hero-shell">
                     <span class="ae-radar-page__pill">
-                        LEADS B2B • ÚLTIMAS CONSTITUCIONES
+                        OPORTUNIDADES B2B • ÚLTIMAS CONSTITUCIONES
                     </span>
 
                     <style>
@@ -159,7 +159,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     </h1>
 
                     <p class="ae-radar-page__subtitle" style="font-size: 1.25rem; font-weight: 600; margin-top: 1rem; color: #1e293b;">
-                    +<?= number_format($conversion_count ?? 0, 0, ',', '.') ?> empresas en <?= esc($heading_location ?? 'España') ?> listas para convertirse en clientes ahora mismo
+                    +<?= number_format($conversion_count ?? 0, 0, ',', '.') ?> empresas en <?= esc($heading_location ?? 'España') ?> listas para ser contactadas antes que tu competencia
                 </p>
 
                     <p class="ae-radar-page__hero-copy" style="margin-top: 1rem; opacity: 0.8; font-size: 1.1rem; color: #64748b;">
@@ -168,7 +168,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
 
                     <div class="ae-radar-page__hero-actions">
                     <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary">
-                        Acceder ahora y contactar estas empresas antes que otros
+                        Acceder ahora y detectar estas oportunidades antes que otros
                     </a>
                 </div>
                 <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.75rem; font-weight: 500; text-align: center;">La mayoría de usuarios consigue su primer cliente en días</p>
@@ -222,7 +222,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                 </div>
                 <h2 style="font-size: 2rem; font-weight: 900; color: #0f172a; margin: 0 0 0.6rem; letter-spacing: -0.025em; line-height: 1.15;">
                     
-                    Leads B2B <span style="background: linear-gradient(135deg, #3b82f6, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Recientes</span>
+                    Empresas recién creadas <span style="background: linear-gradient(135deg, #3b82f6, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Recientes</span>
                 
                 </h2>
                 <p style="color: #64748b; font-size: 1rem; margin: 0; line-height: 1.65; max-width: 680px;">
@@ -233,7 +233,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
         <div style="background: #fef2f2; border: 1px solid #fecaca; border-left: 5px solid #ef4444; padding: 1.25rem 1.5rem; border-radius: 0.5rem; color: #991b1b; margin: 0 0 2rem 0; display: flex; align-items: center; gap: 1rem; box-shadow: none;">
             <span style="font-size: 2rem;">⚠️</span>
             <div>
-                <strong style="font-size: 1.2rem; display: block; margin-bottom: 0.25rem;">Varias de estas empresas dejarán de estar disponibles en las próximas horas</strong>
+                <strong style="font-size: 1.2rem; display: block; margin-bottom: 0.25rem;">Varias de estas oportunidades serán detectadas por otros en las próximas horas</strong>
                 <p style="margin: 0; opacity: 0.9;">Algunas ya están siendo asignadas a otros proveedores</p>
             </div>
         </div>
@@ -290,7 +290,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                             $coUrl = company_url($co);
                             ?>
                             <a href="<?= $coUrl ?>" class="ae-radar-page__lead-btn">
-                                Ver empresa
+                                Ver oportunidad
                             </a>
                         </article>
 
@@ -300,7 +300,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                                     <div class="ae-radar-page__premium-strip-copy">
                                         <h3>Desbloquea el listado completo de <?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas nuevas</h3>
                                         <p>
-                                            Accede a todas las sociedades detectadas en este periodo, filtra por provincia y sector, y exporta leads preparados para prospección comercial.
+                                            Accede a todas las sociedades detectadas en este periodo, filtra por provincia y sector, e identifica oportunidades preparadas para prospección comercial.
                                         </p>
 
                                         <div class="ae-radar-page__premium-points">
@@ -324,7 +324,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     <?php if (empty($premiumLeads)): ?>
                 <div class="ae-radar-page__lead-overlay-cta" style="position: absolute; bottom: 0; left: 0; right: 0; height: 350px; background: linear-gradient(to top, rgba(245,248,255,1) 30%, rgba(245,248,255,0.9) 60%, transparent); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 2rem; z-index: 10;">
         <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary" style="padding: 1.1rem 3rem; font-size: 1.15rem; font-weight: 800; border-radius: 100px; background: linear-gradient(135deg, #3b82f6, #6366f1); border: none; box-shadow: 0 8px 24px rgba(99,102,241,0.45), 0 2px 8px rgba(59,130,246,0.3); color: white; text-decoration: none; display: inline-block; transition: all 0.25s ease;">
-            Ver estas empresas antes que tu competencia
+            Detectar estas oportunidades antes que tu competencia
         </a>
         <p style="font-weight: 700; color: #1e293b; margin-top: 1rem; margin-bottom: 0; font-size: 1rem; text-align: center;">Estas empresas están activas ahora mismo — accede antes de que otros proveedores las contacten</p>
     </div>
@@ -383,7 +383,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     </h3>
 
                     <p class="ae-radar-page__paywall-subtitle">
-                        Accede al resto de empresas detectadas en este periodo, filtra por sector y provincia, y exporta leads preparados para prospección comercial.
+                        Accede al resto de empresas detectadas en este periodo, filtra por sector y provincia, e identifica oportunidades preparadas para prospección comercial.
                     </p>
 
                     <div class="ae-radar-page__paywall-stats">
@@ -406,7 +406,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     <div class="ae-radar-page__paywall-benefits">
                         <span>Filtros por sector y provincia</span>
                         <span>Exportación Excel / CSV</span>
-                        <span>Leads listos para prospección</span>
+                        <span>Oportunidades listas para prospección</span>
                     </div>
 
                     <div class="ae-radar-page__paywall-actions" style="display: flex; justify-content: center; margin-top: 0.5rem;">
@@ -652,7 +652,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                                         class="ae-radar-page__sector-row-link"
                                         title="<?= esc($rs['label']) ?>"
                                     >
-                                        Contactar
+                                        Ver radar
                                     </a>
                                 </div>
                             </article>
@@ -669,7 +669,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     <h3 class="ae-radar-page__excel-title">¿Necesitas el listado en formato Excel?</h3>
 
                     <p class="ae-radar-page__excel-subtitle">
-                        Descarga el directorio completo de nuevas empresas en España en formato XLSX, listo para prospección comercial, análisis y carga en tu CRM.
+                        Descarga el directorio completo de nuevas empresas en España en formato XLSX, listo para identificar oportunidades comerciales, análisis y carga en tu CRM.
                     </p>
 
                     <div class="ae-radar-page__excel-actions">
@@ -700,7 +700,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                 <span class="ae-radar-page__section-kicker">Cierre rápido</span>
                 <h3 class="ae-radar-page__section-title">Directorios estratégicos de empresas nuevas</h3>
                 <p class="ae-radar-page__section-subtitle">
-                    Accede a rutas clave por provincia, periodo y sector para contactar nuevas oportunidades de prospección.
+                    Accede a rutas clave por provincia, periodo y sector para detectar nuevas oportunidades antes que otros.
                 </p>
             </div>
 
@@ -771,10 +771,10 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
     <section class="ae-radar-page__section container" style="background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; margin-top: 3rem !important;" style="margin-top: 4rem; padding-bottom: 6rem;">
             <div style="background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 1.5rem; padding: 4rem 2rem; text-align: center; color: white; position: relative; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
                 <div style="position: relative; z-index: 2;">
-                    <h2 style="font-size: 2.5rem; font-weight: 900; margin-bottom: 1.5rem; letter-spacing: -0.02em; color: white;">Si no accedes ahora, estos clientes desaparecerán en horas</h2>
-                    <p style="font-size: 1.25rem; opacity: 0.8; max-width: 700px; margin: 0 auto 1.5rem; color: white;">Más de 40 empresas nuevas aparecen cada día — las primeras en contactar son las que cierran</p>
+                    <h2 style="font-size: 2.5rem; font-weight: 900; margin-bottom: 1.5rem; letter-spacing: -0.02em; color: white;">Si no accedes ahora, estas oportunidades desaparecerán en horas</h2>
+                    <p style="font-size: 1.25rem; opacity: 0.8; max-width: 700px; margin: 0 auto 1.5rem; color: white;">Más de 40 empresas nuevas aparecen cada día — quienes detectan primero son quienes cierran</p>
                     <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary" style="padding: 1.25rem 3.5rem; font-size: 1.25rem; font-weight: 700; border-radius: 100px; background: white; color: #0f172a; box-shadow: 0 0 30px rgba(255,255,255,0.2);">
-                        Acceder ahora y contactar estas empresas antes que otros
+                        Acceder ahora y detectar estas oportunidades antes que otros
                     </a>
                     <p style="font-size: 0.95rem; color: rgba(255,255,255,0.7); margin-top: 1.25rem; font-weight: 500;">La mayoría de usuarios consigue su primer cliente en días</p>
                 </div>
@@ -835,10 +835,10 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
             
             <p style="font-weight: 800; color: #0f172a; margin-bottom: 0.5rem; font-size: 1.5rem; letter-spacing: -0.02em;">Estas empresas están activas ahora mismo</p>
             <p style="color: #475569; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 500;">Otros proveedores ya están cerrando estas oportunidades</p>
-            <p style="color: #dc2626; margin-bottom: 0.75rem; font-size: 1.1rem; font-weight: 700;">Si no actúas ahora, perderás estos clientes</p>
-            <p style="color: #dc2626; margin-bottom: 2rem; font-size: 1.05rem; font-weight: 600;">Cada minuto que pasa, aumenta la probabilidad de perder estos clientes</p>
+            <p style="color: #dc2626; margin-bottom: 0.75rem; font-size: 1.1rem; font-weight: 700;">Si no actúas ahora, perderás estas oportunidades</p>
+            <p style="color: #dc2626; margin-bottom: 2rem; font-size: 1.05rem; font-weight: 600;">Cada minuto que pasa, aumenta la probabilidad de perder estas oportunidades</p>
             <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary" style="width: 100%; justify-content: center; padding: 1.15rem; font-size: 1.2rem; box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4); border-radius: 0.75rem;">
-                Acceder ahora y contactar antes que otros proveedores
+                Acceder ahora y detectar antes que otros proveedores
             </a>
             
             <p style="font-size: 0.95rem; color: #64748b; margin-top: 1.25rem; font-weight: 500;">La mayoría de usuarios consigue su primer cliente en días</p>

@@ -1,14 +1,25 @@
 <?php
-
 namespace App\Services;
+
+use Config\SectorContent;
 
 class SeoTemplateService
 {
-    /**
-     * Reemplaza los placeholders en el contenido HTML.
-     */
+    protected $sectorConfig;
+
+    public function __construct()
+    {
+        $this->sectorConfig = new SectorContent();
+    }
+
     public function replacePlaceholders(string $content, array $variables): string
     {
+        // 1. Enriquecer contenido si no tiene los nuevos tags
+        if (strpos($content, '{{sector_needs}}') === false) {
+            $content = $this->enrichContent($content, $variables);
+        }
+
+        // 2. Reemplazo estándar
         $search = [];
         $replace = [];
 
@@ -17,8 +28,46 @@ class SeoTemplateService
             $replace[] = $value ?? '';
         }
 
-        return str_replace($search, $replace, $content);
+        $content = str_replace($search, $replace, $content);
+        
+        // 3. Segunda pasada para placeholders anidados (ej: intro_variant que contiene {{sector_label}})
+        $content = str_replace($search, $replace, $content);
+
+        return $content;
     }
+
+    /**
+     * Inserta un bloque dinámico automáticamente.
+     */
+    protected function enrichContent(string $content, array $variables): string
+    {
+        $intro = '<p>{{intro_variant}}</p>' . "\n";
+        
+        $block = "\n" . '<h2>Qué necesitan las nuevas empresas de {{sector_label}} en {{provincia}}</h2>' . "\n" .
+                 '<p>Las nuevas empresas de {{sector_label}} en {{provincia}} suelen necesitar {{sector_needs}}. Esto representa una oportunidad estratégica para proveedores que buscan detectar negocios en fase inicial.</p>' . "\n";
+
+        if (!empty($variables['total_empresas']) && $variables['total_empresas'] !== '0') {
+            $block .= '<p>Actualmente se han detectado {{total_empresas}} nuevas empresas de {{sector_label}} en {{provincia}}.</p>' . "\n";
+        }
+
+        $block .= '<p>Entre los servicios más demandados en este sector destacan {{sector_services}}.</p>' . "\n" .
+                  '<p>Uno de los principales retos de estas empresas es {{sector_pain}}. Por eso, detectar en una etapa temprana puede marcar la diferencia frente a la competencia.</p>' . "\n" .
+                  '<p>{{province_context}}</p>' . "\n";
+
+        // Prepend intro
+        $content = $intro . $content;
+
+        // Intentamos insertar el bloque después del primer párrafo (que ahora es el intro si no existía)
+        $pos = strpos($content, '</p>');
+        if ($pos !== false) {
+            return substr_replace($content, $block, $pos + 4, 0);
+        }
+
+        return $block . $content;
+    }
+
+
+
 
     /**
      * Resuelve todas las variables dinámicas necesarias para el SEO.
@@ -57,6 +106,28 @@ class SeoTemplateService
             'keyword_principal'  => $this->generateKeyword($province, $sector, $period),
             'cta_radar'          => '<a href="' . $urlRadar . '" class="btn btn-primary">Ver todas las nuevas empresas de ' . $province . '</a>',
         ];
+
+        // --- ENRIQUECIMIENTO POR SECTOR ---
+        $sectorKey = $sectorSlug ?? 'default';
+        $sectorData = $this->sectorConfig->sectors[$sectorKey] ?? $this->sectorConfig->sectors['default'];
+
+        $vars['sector_label']       = $sectorData['label'] === '{{sector}}' ? $sector : $sectorData['label'];
+        $vars['sector_needs']       = $sectorData['needs'];
+        $vars['sector_services']    = $sectorData['services'];
+        $vars['sector_pain']        = $sectorData['pain'];
+        $vars['sector_opportunity'] = $sectorData['opportunity'];
+        $vars['sector_buyer_intent']= $sectorData['buyer_intent'];
+
+        // --- CONTEXTO PROVINCIAL ---
+        $provinceUpper = mb_strtoupper($province, 'UTF-8');
+        $provinceCtx = $this->sectorConfig->provinceContext[$provinceUpper] ?? $this->sectorConfig->provinceContext['default'];
+        $vars['province_context'] = str_replace('{{provincia}}', $province, $provinceCtx);
+
+        // --- VARIACIÓN SEMÁNTICA ESTABLE ---
+        $slugForHash = ($sectorSlug ?? '') . '-' . ($provinceSlug ?? '');
+        $index = abs(crc32($slugForHash)) % count($this->sectorConfig->introVariants);
+        $vars['intro_variant'] = $this->sectorConfig->introVariants[$index];
+
 
         // Top 3 sectores (si es página de provincia)
         if (!empty($data['top_sectors'])) {
