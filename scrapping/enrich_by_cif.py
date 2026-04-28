@@ -9,12 +9,19 @@ import urllib.parse
 import logging
 from datetime import datetime
 
+import os
+from dotenv import load_dotenv
+
+# Load .env
+_env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+load_dotenv(dotenv_path=_env_path)
+
 # --- CONFIGURATION ---
 DB_CONFIG = {
-    'host': '217.61.210.127',
-    'user': 'apiempresas_user',
-    'password': 'WONwyjpsmx3h3$@2',
-    'database': 'reseller3537_apiempresas'
+    'host': os.getenv("DB_HOST", "217.61.210.127"),
+    'user': os.getenv("DB_USER", "apiempresas_user"),
+    'password': os.getenv("DB_PASS", "WONwyjpsmx3h3$@2"),
+    'database': os.getenv("DB_NAME", "reseller3537_apiempresas")
 }
 
 CSRF_TOKEN = "EDD5814A8797230F6ED48C03E35D2F932D4FD18591943DBE"
