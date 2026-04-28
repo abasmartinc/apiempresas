@@ -785,7 +785,8 @@
                 method: 'POST',
                 data: { 
                     email: email,
-                    source: '<?= esc($source ?? "direct") ?>'
+                    source: '<?= esc($source ?? "direct") ?>',
+                    <?= csrf_token() ?>: '<?= csrf_hash() ?>'
                 },
                 dataType: 'json',
                 success: function(res) {

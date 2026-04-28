@@ -20,7 +20,10 @@
             $.ajax({
                 url: SEARCH_ENDPOINT,
                 method: 'POST', // Switched to POST for higher reliability in local environments
-                data: { q: query },
+                data: { 
+                    q: query,
+                    <?= csrf_token() ?>: '<?= csrf_hash() ?>'
+                },
                 dataType: 'json',
                 success: function(data) {
                     console.log('Search response:', data);

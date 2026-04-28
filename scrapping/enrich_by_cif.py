@@ -20,9 +20,9 @@ DB_CONFIG = {
 CSRF_TOKEN = "EDD5814A8797230F6ED48C03E35D2F932D4FD18591943DBE"
 BASE_URL = "https://infonif.economia3.com/api/buscador/buscar.asp"
 
-MAX_WORKERS = 15
-SLEEP_MIN = 0.1
-SLEEP_MAX = 0.5
+MAX_WORKERS = 5
+SLEEP_MIN = 1.0
+SLEEP_MAX = 3.0
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
@@ -81,7 +81,15 @@ def log_to_db(conn, company_id, identifier, status, message):
     except Exception as e:
         logger.error(f"Error writing to scraping_logs: {e}")
 
+# Global cooldown control
+GLOBAL_COOLDOWN_UNTIL = 0
+
 def process_company(company):
+    global GLOBAL_COOLDOWN_UNTIL
+    
+    if time.time() < GLOBAL_COOLDOWN_UNTIL:
+        return
+
     company_id = company['id']
     cif = company['cif']
     
@@ -103,7 +111,7 @@ def process_company(company):
         
         time.sleep(random.uniform(SLEEP_MIN, SLEEP_MAX))
         
-        response = requests.get(url, headers=get_headers(), timeout=10)
+        response = requests.get(url, headers=get_headers(), timeout=25)
         
         if response.status_code == 200:
             try:
@@ -129,18 +137,22 @@ def process_company(company):
                         params.append(val)
                 
                 if updates:
+                    updated_fields = [u.split(' =')[0] for u in updates]
                     params.append(company_id)
                     update_sql = f"UPDATE companies SET {', '.join(updates)} WHERE id = %s"
                     cursor.execute(update_sql, tuple(params))
                     conn.commit()
-                    log_to_db(conn, company_id, cif, "success", f"Updated fields")
-                    logger.info(f"✅ SUCCESS CIF: {cif}")
+                    log_to_db(conn, company_id, cif, "success", f"Updated: {', '.join(updated_fields)}")
+                    logger.info(f"✅ SUCCESS CIF: {cif} -> New Fields: {', '.join(updated_fields)}")
                 else:
                     log_to_db(conn, company_id, cif, "no_update_needed", "Already complete")
                     logger.info(f"ℹ️ NO UPDATE: {cif}")
             else:
                 log_to_db(conn, company_id, cif, "not_found", "No results")
                 logger.info(f"❓ NOT FOUND CIF: {cif}")
+        elif response.status_code == 503:
+            logger.warning(f"⚠️ 503 Service Unavailable for CIF {cif}. Cooling down for 5 minutes.")
+            GLOBAL_COOLDOWN_UNTIL = time.time() + 300
         else:
             logger.error(f"❌ ERROR: HTTP {response.status_code} for CIF {cif}")
             
@@ -151,56 +163,59 @@ def process_company(company):
             conn.close()
 
 def main():
-    logger.info("--- Starting CIF Enrichment (Smart Filtering) ---")
+    logger.info("--- Starting CIF Enrichment (Continuous Batch Mode) ---")
     check_columns()
     
-    try:
-        conn = db_pool.get_connection()
-        cursor = conn.cursor(dictionary=True)
-        
-        where_parts = [
-            "(registro_mercantil IS NULL OR registro_mercantil = '')",
-            "(municipality IS NULL OR municipality = '')",
-            "(address IS NULL OR address = '')"
-        ]
-        if HAS_POSTAL_CODE:
-            where_parts.append("(postal_code IS NULL OR postal_code = '')")
-        
-        where_clause = " OR ".join(where_parts)
-        
-        # SMART QUERY: 
-        # 1. Focus on societies (Starts with letter)
-        # 2. Exclude already SUCCEEDED in this process
-        # 3. Exclude NOT_FOUND in the last 30 days
-        sql = f"""
-            SELECT c.id, c.cif FROM companies c
-            LEFT JOIN scraping_logs l ON c.id = l.entity_id 
-                AND l.process_name = 'enrich_by_cif' 
-                AND (l.status = 'success' OR (l.status = 'not_found' AND l.created_at > NOW() - INTERVAL 30 DAY))
-            WHERE c.cif REGEXP '^[A-Z]' 
-            AND ({where_clause}) 
-            AND l.id IS NULL
-            ORDER BY RAND()
-            LIMIT 5000
-        """
-        cursor.execute(sql)
-        companies = cursor.fetchall()
-        cursor.close()
-        conn.close()
-    except Exception as e:
-        logger.error(f"Initial DB fetch failed: {e}")
-        return
-    
-    if not companies:
-        logger.info("No records to process (either all complete or recently tried).")
-        return
+    while True:
+        try:
+            conn = db_pool.get_connection()
+            cursor = conn.cursor(dictionary=True)
+            
+            where_parts = [
+                "(registro_mercantil IS NULL OR registro_mercantil = '')",
+                "(municipality IS NULL OR municipality = '')",
+                "(address IS NULL OR address = '')"
+            ]
+            if HAS_POSTAL_CODE:
+                where_parts.append("(postal_code IS NULL OR postal_code = '')")
+            
+            where_clause = " OR ".join(where_parts)
+            
+            # SMART QUERY: 
+            # 1. Focus on societies (Starts with letter)
+            # 2. Exclude already SUCCEEDED in this process
+            # 3. Exclude NOT_FOUND in the last 30 days
+            sql = f"""
+                SELECT c.id, c.cif FROM companies c
+                LEFT JOIN scraping_logs l ON c.id = l.entity_id 
+                    AND l.process_name = 'enrich_by_cif' 
+                    AND (l.status = 'success' OR (l.status = 'not_found' AND l.created_at > NOW() - INTERVAL 30 DAY))
+                WHERE c.cif REGEXP '^[A-Z]' 
+                AND ({where_clause}) 
+                AND l.id IS NULL
+                LIMIT 5000
+            """
+            cursor.execute(sql)
+            companies = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            
+            if not companies:
+                logger.info("No records left to process. Sleeping 5 minutes...")
+                time.sleep(300)
+                continue
 
-    logger.info(f"Processing {len(companies)} records...")
-    
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        executor.map(process_company, companies)
-    
-    logger.info(f"--- Process Finished ---")
+            logger.info(f"🚀 Processing new batch of {len(companies)} records...")
+            
+            with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+                executor.map(process_company, companies)
+            
+            logger.info("✅ Batch finished. Starting next one...")
+            time.sleep(5) # Delay to avoid hammering the DB/CPU
+            
+        except Exception as e:
+            logger.error(f"💥 Main Loop Error: {e}")
+            time.sleep(60) # Wait before retry
 
 if __name__ == "__main__":
     main()

@@ -688,7 +688,7 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
         fetch('<?= site_url('radar/log-event') ?>', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
-            body: `lead_id=${id}&action=click_contact`
+            body: `lead_id=${id}&action=click_contact&<?= csrf_token() ?>=<?= csrf_hash() ?>`
         }).catch(err => console.warn('Tracking error:', err));
         
         // Llamada a la lógica original (analyzeAI debe estar definida en el padre)

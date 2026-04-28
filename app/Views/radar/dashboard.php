@@ -1056,6 +1056,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
         const formData = new FormData();
         formData.append('company_id', companyId);
         formData.append('status', status);
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
         // Actualizar clase visual inmediatamente para feedback instantáneo
         select.className = 'ae-status-select-chip status-bg-' + status;
@@ -1131,6 +1132,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
 
         const formData = new FormData();
         formData.append('company_id', companyId);
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
         fetch('<?= site_url('radar/toggle-favorite') ?>', {
             method: 'POST',

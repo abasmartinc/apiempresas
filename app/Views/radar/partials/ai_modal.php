@@ -286,6 +286,7 @@
         const formData = new FormData();
         formData.append('company_id', companyId);
         formData.append('status', 'contactado');
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
         fetch('<?= site_url('radar/update-favorite-status') ?>', {
             method: 'POST',
@@ -362,6 +363,7 @@
         const formData = new FormData();
         formData.append('message', message);
         formData.append('notes', 'Lead preparado desde Modal IA - Plan de acción activado.');
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
         fetch('<?= site_url('radar/prepare-contact/') ?>' + companyId, {
             method: 'POST',
