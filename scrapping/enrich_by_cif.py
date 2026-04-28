@@ -145,7 +145,7 @@ def process_company(company):
                     log_to_db(conn, company_id, cif, "success", f"Updated: {', '.join(updated_fields)}")
                     logger.info(f"✅ SUCCESS CIF: {cif} -> New Fields: {', '.join(updated_fields)}")
                 else:
-                    log_to_db(conn, company_id, cif, "no_update_needed", "Already complete")
+                    log_to_db(conn, company_id, cif, "already_filled", "Already complete")
                     logger.info(f"ℹ️ NO UPDATE: {cif}")
             else:
                 log_to_db(conn, company_id, cif, "not_found", "No results")
@@ -189,10 +189,11 @@ def main():
                 SELECT c.id, c.cif FROM companies c
                 LEFT JOIN scraping_logs l ON c.id = l.entity_id 
                     AND l.process_name = 'enrich_by_cif' 
-                    AND (l.status = 'success' OR (l.status = 'not_found' AND l.created_at > NOW() - INTERVAL 30 DAY))
+                    AND (l.status IN ('success', 'already_filled') OR (l.status = 'not_found' AND l.created_at > NOW() - INTERVAL 30 DAY))
                 WHERE c.cif REGEXP '^[A-Z]' 
                 AND ({where_clause}) 
                 AND l.id IS NULL
+                ORDER BY c.id DESC
                 LIMIT 5000
             """
             cursor.execute(sql)

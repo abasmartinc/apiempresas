@@ -211,10 +211,11 @@ def main():
                 SELECT c.id, c.cif FROM companies c
                 LEFT JOIN scraping_logs l ON c.id = l.entity_id 
                     AND l.process_name = 'enrich_empresia' 
-                    AND (l.status = 'success' OR (l.status = 'not_found' AND l.created_at > NOW() - INTERVAL 30 DAY))
+                    AND (l.status IN ('success', 'already_filled') OR (l.status = 'not_found' AND l.created_at > NOW() - INTERVAL 30 DAY))
                 WHERE c.cif REGEXP '^[A-Z]'
                 AND (c.fecha_constitucion IS NULL OR c.ventas_raw IS NULL OR c.objeto_social IS NULL)
                 AND l.id IS NULL
+                ORDER BY c.id DESC
                 LIMIT 500
             """
             cursor.execute(sql)

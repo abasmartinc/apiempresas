@@ -229,6 +229,9 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('search-console/kpis', 'Admin\Dashboard::search_console_kpis');
     $routes->get('search-console/sitemaps', 'Admin\Dashboard::search_console_sitemaps');
     $routes->post('search-console/inspect', 'Admin\Dashboard::search_console_inspect');
+
+    // Email Sender (Manual Assisted)
+    $routes->post('send-message', 'Admin\MetricsController::sendMessage');
 });
 
 // Webhooks & AI API
