@@ -326,6 +326,20 @@
                     <span style="color: #64748b;">Calculando tendencia...</span>
                 </div>
             </div>
+
+            <!-- Tasa de Indexación -->
+            <div class="kpi-card" style="color: #0ea5e9;">
+                <div>
+                    <div class="kpi-label">
+                        <i class="fas fa-link" style="width: 16px;"></i>
+                        Indexación (Sitemaps)
+                    </div>
+                    <div class="kpi-value" id="gscIndexRate"><span class="skeleton"></span></div>
+                </div>
+                <div class="kpi-footer" id="gscIndexSummary">
+                    <span style="color: #64748b;">Analizando sitemaps...</span>
+                </div>
+            </div>
         </div>
 
         <!-- Chart Section -->
@@ -493,12 +507,13 @@
                         <thead>
                             <tr>
                                 <th>Ruta</th>
-                                <th>Descarga</th>
-                                <th class="text-right">Errores</th>
+                                <th class="text-right">Enviadas</th>
+                                <th class="text-right">Indexadas</th>
+                                <th class="text-right">Estado</th>
                             </tr>
                         </thead>
                         <tbody id="gscSitemapsBody">
-                            <tr><td colspan="3" class="text-center text-muted">Cargando sitemaps...</td></tr>
+                            <tr><td colspan="4" class="text-center text-muted">Cargando sitemaps...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -761,17 +776,40 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             let html = '';
+            let totalSubmitted = 0;
+            let totalIndexed = 0;
+
             if (data.sitemaps && data.sitemaps.length > 0) {
                 data.sitemaps.forEach(s => {
                     const date = s.lastDownloaded ? new Date(s.lastDownloaded).toLocaleDateString('es-ES') : 'Nunca';
                     const errorColor = s.errors > 0 ? '#dc2626' : '#16a34a';
+                    const indexColor = s.indexRate < 80 ? '#f59e0b' : '#16a34a';
+                    
+                    totalSubmitted += s.submitted;
+                    totalIndexed += s.indexed;
+
                     html += `<tr>
-                        <td><span class="gsc-url" style="font-size: 0.8rem;">${s.path}</span></td>
-                        <td style="font-size: 0.8rem; color: #64748b;">${date}</td>
-                        <td class="text-right"><span style="color: ${errorColor}; font-weight: 700;">${s.errors}</span></td>
+                        <td>
+                            <div class="gsc-url" style="font-size: 0.8rem; font-weight: 600;">${s.path.split('/').pop()}</div>
+                            <div style="font-size: 0.7rem; color: #94a3b8;">Descarga: ${date}</div>
+                        </td>
+                        <td class="text-right gsc-metric">${formatNumber(s.submitted)}</td>
+                        <td class="text-right gsc-metric" style="color: ${indexColor};">${formatNumber(s.indexed)}</td>
+                        <td class="text-right">
+                            <span style="color: ${errorColor}; font-weight: 700;">${s.errors > 0 ? 'Error' : 'OK'}</span>
+                        </td>
                     </tr>`;
                 });
-            } else { html = '<tr><td colspan="3" class="text-center text-muted">No se encontraron sitemaps</td></tr>'; }
+
+                // Update Indexing KPI
+                const avgRate = totalSubmitted > 0 ? ((totalIndexed / totalSubmitted) * 100).toFixed(1) : 0;
+                document.getElementById('gscIndexRate').innerHTML = avgRate + '<span style="font-size: 1.5rem; color: #94a3b8; font-weight: 700; margin-left: 2px;">%</span>';
+                document.getElementById('gscIndexSummary').innerHTML = `<span style="color: #64748b;">${formatNumber(totalIndexed)} de ${formatNumber(totalSubmitted)} URLs</span>`;
+
+            } else { 
+                html = '<tr><td colspan="4" class="text-center text-muted">No se encontraron sitemaps</td></tr>';
+                document.getElementById('gscIndexRate').innerText = '0%';
+            }
             body.innerHTML = html;
         })
         .catch(err => {

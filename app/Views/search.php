@@ -9,6 +9,7 @@
         'canonical' => site_url('search_company') . (!empty($q) ? ('?q=' . rawurlencode($q)) : ''),
         'robots' => 'noindex,follow',
     ]) ?>
+    <link rel="stylesheet" href="<?= base_url('public/css/home.css?v=' . time()) ?>" />
 </head>
 
 <body>
@@ -18,24 +19,29 @@
 
     <main style="padding:40px 0 70px;">
         <section class="container search-section">
-            <div class="search-card">
-                <div>
-                    <h2>Prueba el buscador — mismo motor que la API</h2>
-                    <p class="muted">
-                        Introduce un <strong>CIF</strong> o nombre comercial. Verás el resultado en tarjetas limpias
-                        y puedes consultar el JSON que devuelve la API.
+            <div class="search-panel">
+                <div style="text-align: center; margin-bottom: 34px;">
+                    <span class="badge-intro">
+                        <span class="dot-live"></span>
+                        Buscador oficial en tiempo real
+                    </span>
+                    <h2 style="font-size: 2.5rem; font-weight: 950; letter-spacing: -0.04em;">Validación de <span class="highlight">empresas</span></h2>
+                    <p class="subtitle" style="font-size: 1.15rem; color: #64748b; margin-top: 10px;">
+                        Introduce un <strong>CIF</strong> o nombre comercial. Resultados oficiales con trazabilidad mercantil completa.
                     </p>
                 </div>
 
-                <form class="search-row" method="GET" action="<?= site_url('search_company') ?>" id="searchForm">
-                    <?= csrf_field() ?>
-                    <input class="input" id="q" name="q" value="<?= esc($q ?? '') ?>"
-                        placeholder="Ej. Gestiones López o B12345678" aria-label="Buscar empresa por nombre o CIF"
-                        autocomplete="off" />
-                    <button class="btn" id="btnBuscar" type="submit" aria-label="Buscar">Buscar empresa</button>
-                </form>
+                <div class="search-form-wrapper">
+                    <form class="search-form" method="GET" action="<?= site_url('search_company') ?>" id="searchForm">
+                        <?= csrf_field() ?>
+                        <input class="search-input" id="q" name="q" value="<?= esc($q ?? '') ?>"
+                            placeholder="Ej. Gestiones López o B12345678" aria-label="Buscar empresa por nombre o CIF"
+                            autocomplete="off" />
+                        <button class="btn secondary" id="btnBuscar" type="submit" style="padding: 0 40px; font-size: 1.1rem; height: 72px; border-radius: 14px; min-width: 200px;">Validar ahora</button>
+                    </form>
+                </div>
 
-                <div id="resultado" class="result">
+                <div id="resultado" class="result" style="margin-top: 40px;">
                     <?php if (!empty($errorMsg)): ?>
                         <div class="muted"><?= esc($errorMsg) ?></div>
                     <?php endif; ?>
@@ -44,83 +50,124 @@
                         <?php
                         $statusRaw = (string) ($company['status'] ?? '');
                         $isActive = strtoupper($statusRaw) === 'ACTIVA';
-                        $statusClass = $isActive ? 'company-status company-status--active' : 'company-status company-status--inactive';
+                        $statusClass = $isActive ? 'activa' : 'inactiva';
+                        $statusStyle = $isActive ? 'background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7;' : 'background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2;';
 
-                        $cnaeFull = (!empty($company['cnae']) && !empty($company['cnae_label']))
-                            ? ($company['cnae'] . ' · ' . $company['cnae_label'])
-                            : ($company['cnae_label'] ?? ($company['cnae'] ?? '-'));
-
+                        $province = $company['province'] ?? $company['provincia'] ?? 'España';
+                        $cnaeFull = (!empty($company['cnae_label'])) ? $company['cnae_label'] : ($company['cnae'] ?? '-');
+                        
                         $jsonForCode = ['success' => true, 'data' => $company];
                         $jsonPretty = json_encode($jsonForCode, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+                        // Radar Logic (Simplified for SSR)
+                        $radarUrl = site_url('leads-empresas-nuevas');
+                        $radarTitle = "Accede a nuevas oportunidades comerciales";
                         ?>
-                        <article class="company-card">
-                            <header class="company-card__header">
-                                <div>
-                                    <div class="company-card__eyebrow">Ficha registral</div>
-                                    <h3 class="company-card__name"><?= esc($company['name'] ?? '-') ?></h3>
-                                    <div class="company-card__meta">
-                                        <?= esc(($company['cif'] ?? $company['nif'] ?? '-') . ' · ' . ($company['province'] ?? $company['provincia'] ?? '-')) ?>
-                                    </div>
+                        <div class="search-result-card reveal" style="background: #ffffff; border-radius: 24px; padding: 40px; box-shadow: 0 20px 50px -10px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; text-align: left;">
+                          
+                          <div class="result-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+                            <div style="display: flex; gap: 20px; align-items: center;">
+                              <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #2563eb, #10b981); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.8rem; font-weight: 800; box-shadow: 0 8px 16px rgba(37,99,235,0.2);">
+                                <?= esc(mb_substr($company['name'] ?? 'N', 0, 1, 'UTF-8')) ?>
+                              </div>
+                              <div>
+                                <h2 style="margin: 0; font-size: 1.75rem; font-weight: 900; color: #0f172a; letter-spacing: -0.02em;"><?= esc($company['name'] ?? 'N/A') ?></h2>
+                                <div style="display: flex; gap: 12px; margin-top: 6px; align-items: center;">
+                                  <span style="background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 8px; font-weight: 800; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;"><?= esc($company['cif'] ?? $company['nif'] ?? 'Sin CIF') ?></span>
+                                  <span style="font-size: 0.9rem; color: #94a3b8;">•</span>
+                                  <span style="font-size: 0.9rem; color: #64748b; font-weight: 600;"><?= esc($province) ?></span>
                                 </div>
-                                <div class="<?= esc($statusClass) ?>">
-                                    <span class="company-status__dot"></span>
-                                    <span><?= esc($statusRaw ?: '-') ?></span>
-                                </div>
-                            </header>
-
-                            <section class="company-card__body">
-                                <dl class="company-card__grid">
-                                    <div>
-                                        <dt>CIF</dt>
-                                        <dd><?= esc($company['cif'] ?? $company['nif'] ?? '-') ?></dd>
-                                    </div>
-                                    <div>
-                                        <dt>CNAE</dt>
-                                        <dd><?= esc($cnaeFull ?: '-') ?></dd>
-                                    </div>
-                                    <div>
-                                        <dt>Provincia</dt>
-                                        <dd><?= esc($company['province'] ?? $company['provincia'] ?? '-') ?></dd>
-                                    </div>
-                                    <div>
-                                        <dt>Fecha de constitución</dt>
-                                        <dd><?= esc($company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '-') ?>
-                                        </dd>
-                                    </div>
-                                    <div class="company-card__purpose">
-                                        <dt>Objeto social</dt>
-                                        <dd><?= esc($company['corporate_purpose'] ?? $company['objeto_social'] ?? '-') ?>
-                                        </dd>
-                                    </div>
-                                </dl>
-                            </section>
-
-                            <div class="company-card__footer">
-                                <button type="button" class="btn-json-api">Ver JSON de la API</button>
+                              </div>
                             </div>
+                            <span class="status-badge <?= esc($statusClass) ?>" style="padding: 8px 16px; border-radius: 100px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; <?= $statusStyle ?>">
+                              <?= esc($statusRaw ?: 'N/A') ?>
+                            </span>
+                          </div>
 
-                            <pre class="company-card__json is-hidden"><code><?= esc($jsonPretty) ?></code></pre>
-                        </article>
+                          <div class="result-info-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-bottom: 40px; padding: 24px; background: #f8fafc; border-radius: 20px; border: 1px solid #f1f5f9;">
+                            <div class="info-item">
+                              <span style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Actividad</span>
+                              <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700; line-height: 1.4;"><?= esc($cnaeFull) ?></span>
+                            </div>
+                            <div class="info-item">
+                              <span style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Constitución</span>
+                              <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700;"><?= esc($company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? 'N/A') ?></span>
+                            </div>
+                            <div class="info-item">
+                              <span style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Capital Social</span>
+                              <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700;"><?= esc($company['capital'] ?? 'Consultar') ?></span>
+                            </div>
+                          </div>
+
+                          <!-- Bridge to Radar Dinámico -->
+                          <div class="radar-bridge" style="background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); border: 1px solid #dcfce7; border-radius: 24px; padding: 32px; display: flex; gap: 28px; align-items: center; margin-bottom: 24px; position: relative; overflow: hidden;">
+                            <div style="position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);"></div>
+                            
+                            <div style="width: 56px; height: 56px; background: #ffffff; color: #16a34a; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
+                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4M12 16V8"/></svg>
+                            </div>
+                            
+                            <div style="flex-grow: 1;">
+                              <div class="radar-badge" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; border: 1px solid #dcfce7; padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 700; color: #16a34a; margin-bottom: 12px;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                +1.400 empresas nuevas esta semana
+                              </div>
+                              <h4 style="margin: 0 0 8px 0; font-size: 1.25rem; color: #0f172a; font-weight: 900;"><?= $radarTitle ?></h4>
+                              <p style="margin: 0; font-size: 1rem; color: #475569; line-height: 1.6; max-width: 480px;">Además de consultar esta empresa, puedes detectar nuevas sociedades con potencial de negocio y trabajarlas antes que la competencia.</p>
+                            </div>
+                            
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 1;">
+                                <a href="<?= $radarUrl ?>" class="btn secondary" style="padding: 16px 32px; font-size: 1.1rem; border-radius: 16px; box-shadow: 0 15px 30px rgba(18, 180, 138, 0.25); margin: 0; min-width: 200px; text-align: center;">Ver empresas nuevas hoy</a>
+                                <span style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-align: center; opacity: 0.8;">Oportunidades limitadas en el tiempo</span>
+                            </div>
+                          </div>
+
+                          <div style="text-align: center; margin-bottom: 40px;">
+                            <span style="font-size: 0.95rem; font-weight: 500; color: #64748b; font-style: italic;">“La detección temprana de empresas puede marcar la diferencia en procesos comerciales.”</span>
+                          </div>
+
+                          <div class="result-actions" style="display: flex; gap: 16px;">
+                            <a href="<?= company_url($company) ?>" class="btn" style="text-decoration:none; padding: 20px 32px; font-weight: 800; flex-grow: 1; text-align: center; background: #ffffff; color: #0f172a; border: 2px solid #e2e8f0; border-radius: 16px; transition: all 0.3s ease;">Ver ficha completa detallada</a>
+                            <a href="<?= site_url('documentation') ?>" class="btn secondary" style="text-decoration:none; padding: 20px 32px; font-weight: 800; text-align: center; border-radius: 16px; flex-grow: 1; background: #2563eb;">Integrar vía API</a>
+                          </div>
+
+                          <div class="company-card__footer" style="margin-top: 24px; text-align: center;">
+                              <button type="button" class="btn-json-api" style="background: none; border: none; color: #2563eb; font-weight: 700; cursor: pointer; text-decoration: underline;">Ver JSON de la API</button>
+                          </div>
+
+                          <pre class="company-card__json is-hidden" style="margin-top: 20px; text-align: left;"><code><?= esc($jsonPretty) ?></code></pre>
+                        </div>
+
                     <?php elseif (!empty($companies) && is_array($companies)): ?>
                         <div
-                            style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+                            style="display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
                             <?php
                             helper('company');
                             foreach ($companies as $co):
                                 $coUrl = company_url($co);
                                 ?>
                                 <a href="<?= esc($coUrl) ?>"
-                                    style="text-decoration: none; color: inherit; display: block; padding: 1.5rem; background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s;"
-                                    onmouseover="this.style.borderColor='#2152FF'; this.style.transform='translateY(-2px)'"
-                                    onmouseout="this.style.borderColor='#e5e7eb'; this.style.transform='none'">
-                                    <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem; color: #111;">
-                                        <?= esc($co['name'] ?? 'Empresa') ?></div>
-                                    <div style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">
-                                        <?= esc($co['cif'] ?? '-') ?> · <?= esc($co['province'] ?? $co['provincia'] ?? '-') ?>
+                                    style="text-decoration: none; color: inherit; display: flex; flex-direction: column; padding: 24px; background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: all 0.3s ease; position: relative; overflow: hidden;"
+                                    onmouseover="this.style.borderColor='var(--ae-blue)'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 20px 25px -5px rgba(0, 0, 0, 0.1)'"
+                                    onmouseout="this.style.borderColor='#e2e8f0'; this.style.transform='none'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.05)'">
+                                    
+                                    <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 16px;">
+                                        <div style="width: 44px; height: 44px; background: #f1f5f9; color: #475569; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem;">
+                                            <?= esc(mb_substr($co['name'] ?? 'E', 0, 1, 'UTF-8')) ?>
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <div style="font-weight: 800; font-size: 1.05rem; color: #0f172a; line-height: 1.3; margin-bottom: 2px;">
+                                                <?= esc($co['name'] ?? 'Empresa') ?>
+                                            </div>
+                                            <div style="font-size: 0.85rem; color: #64748b; font-weight: 600; font-family: 'JetBrains Mono', monospace;">
+                                                <?= esc($co['cif'] ?? '-') ?>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div
-                                        style="font-size: 0.85rem; color: #555; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; display: inline-block;">
-                                        <?= esc($co['cnae_label'] ?? $co['cnae'] ?? 'Actividad no disponible') ?>
+
+                                    <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid #f1f5f9;">
+                                        <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;"><?= esc($co['province'] ?? $co['provincia'] ?? 'España') ?></span>
+                                        <span style="font-size: 0.75rem; background: #f0fdf4; color: #16a34a; padding: 4px 10px; border-radius: 100px; font-weight: 800; text-transform: uppercase;">Activa</span>
                                     </div>
                                 </a>
                             <?php endforeach; ?>
@@ -206,14 +253,11 @@
                 function sectionRegistro(company, apiJson) {
                     const statusRaw = (company.status || '').toString();
                     const isActive = statusRaw.toUpperCase() === 'ACTIVA';
+                    const statusClass = isActive ? 'activa' : 'inactiva';
+                    const statusStyle = isActive ? 'background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7;' : 'background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2;';
 
-                    const statusClass = isActive
-                        ? 'company-status company-status--active'
-                        : 'company-status company-status--inactive';
-
-                    const cnaeFull = company.cnae && company.cnae_label
-                        ? `${company.cnae} · ${company.cnae_label}`
-                        : (company.cnae_label || company.cnae || '-');
+                    const province = company.province || company.provincia || 'España';
+                    const cnaeFull = (company.cnae_label) ? company.cnae_label : (company.cnae || '-');
 
                     const jsonForCode = (apiJson && typeof apiJson === 'object')
                         ? apiJson
@@ -224,38 +268,84 @@
                         .replace(/</g, '&lt;')
                         .replace(/>/g, '&gt;');
 
+                    const radarUrl = '<?= site_url('leads-empresas-nuevas') ?>';
+                    const baseUrl = '<?= site_url() ?>'.replace(/\/$/, '') + '/';
+                    const companyUrl = baseUrl + (company.cif || company.nif);
+
                     return `
-<article class="company-card">
-  <header class="company-card__header">
-    <div>
-      <div class="company-card__eyebrow">Ficha registral</div>
-      <h3 class="company-card__name">${company.name || '-'}</h3>
-      <div class="company-card__meta">
-        ${(company.cif || company.nif || '-')} · ${(company.province || company.provincia || '-')}
+<div class="search-result-card reveal" style="background: #ffffff; border-radius: 24px; padding: 40px; box-shadow: 0 20px 50px -10px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; text-align: left;">
+  
+  <div class="result-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div style="display: flex; gap: 20px; align-items: center;">
+      <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #2563eb, #10b981); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.8rem; font-weight: 800; box-shadow: 0 8px 16px rgba(37,99,235,0.2);">
+        ${(company.name || 'N').charAt(0).toUpperCase()}
+      </div>
+      <div>
+        <h2 style="margin: 0; font-size: 1.75rem; font-weight: 900; color: #0f172a; letter-spacing: -0.02em;">${company.name || 'N/A'}</h2>
+        <div style="display: flex; gap: 12px; margin-top: 6px; align-items: center;">
+          <span style="background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 8px; font-weight: 800; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;">${company.cif || company.nif || 'Sin CIF'}</span>
+          <span style="font-size: 0.9rem; color: #94a3b8;">•</span>
+          <span style="font-size: 0.9rem; color: #64748b; font-weight: 600;">${province}</span>
+        </div>
       </div>
     </div>
-    <div class="${statusClass}">
-      <span class="company-status__dot"></span>
-      <span>${statusRaw || '-'}</span>
-    </div>
-  </header>
-
-  <section class="company-card__body">
-    <dl class="company-card__grid">
-      <div><dt>CIF</dt><dd>${company.cif || company.nif || '-'}</dd></div>
-      <div><dt>CNAE</dt><dd>${cnaeFull}</dd></div>
-      <div><dt>Provincia</dt><dd>${company.province || company.provincia || '-'}</dd></div>
-      <div><dt>Fecha de constitución</dt><dd>${company.incorporation_date || company.founded || company.fecha_constitucion || '-'}</dd></div>
-      <div class="company-card__purpose"><dt>Objeto social</dt><dd>${company.corporate_purpose || company.objeto_social || '-'}</dd></div>
-    </dl>
-  </section>
-
-  <div class="company-card__footer">
-    <button type="button" class="btn-json-api">Ver JSON de la API</button>
+    <span class="status-badge ${statusClass}" style="padding: 8px 16px; border-radius: 100px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; ${statusStyle}">
+      ${statusRaw || 'N/A'}
+    </span>
   </div>
 
-  <pre class="company-card__json is-hidden"><code>${jsonPretty}</code></pre>
-</article>`;
+  <div class="result-info-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-bottom: 40px; padding: 24px; background: #f8fafc; border-radius: 20px; border: 1px solid #f1f5f9;">
+    <div class="info-item">
+      <span style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Actividad</span>
+      <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700; line-height: 1.4;">${cnaeFull}</span>
+    </div>
+    <div class="info-item">
+      <span style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Constitución</span>
+      <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700;">${company.incorporation_date || company.founded || company.fecha_constitucion || 'N/A'}</span>
+    </div>
+    <div class="info-item">
+      <span style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Capital Social</span>
+      <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700;">${company.capital || 'Consultar'}</span>
+    </div>
+  </div>
+
+  <div class="radar-bridge" style="background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); border: 1px solid #dcfce7; border-radius: 24px; padding: 32px; display: flex; gap: 28px; align-items: center; margin-bottom: 24px; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);"></div>
+    
+    <div style="width: 56px; height: 56px; background: #ffffff; color: #16a34a; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4M12 16V8"/></svg>
+    </div>
+    
+    <div style="flex-grow: 1;">
+      <div class="radar-badge" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; border: 1px solid #dcfce7; padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 700; color: #16a34a; margin-bottom: 12px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        +1.400 empresas nuevas esta semana
+      </div>
+      <h4 style="margin: 0 0 8px 0; font-size: 1.25rem; color: #0f172a; font-weight: 900;">Accede a nuevas oportunidades comerciales</h4>
+      <p style="margin: 0; font-size: 1rem; color: #475569; line-height: 1.6; max-width: 480px;">Además de consultar esta empresa, puedes detectar nuevas sociedades con potencial de negocio y trabajarlas antes que la competencia.</p>
+    </div>
+    
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 1;">
+        <a href="${radarUrl}" class="btn secondary" style="padding: 16px 32px; font-size: 1.1rem; border-radius: 16px; box-shadow: 0 15px 30px rgba(18, 180, 138, 0.25); margin: 0; min-width: 200px; text-align: center;">Ver empresas nuevas hoy</a>
+        <span style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-align: center; opacity: 0.8;">Oportunidades limitadas en el tiempo</span>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-bottom: 40px;">
+    <span style="font-size: 0.95rem; font-weight: 500; color: #64748b; font-style: italic;">“La detección temprana de empresas puede marcar la diferencia en procesos comerciales.”</span>
+  </div>
+
+  <div class="result-actions" style="display: flex; gap: 16px;">
+    <a href="${companyUrl}" class="btn" style="text-decoration:none; padding: 20px 32px; font-weight: 800; flex-grow: 1; text-align: center; background: #ffffff; color: #0f172a; border: 2px solid #e2e8f0; border-radius: 16px; transition: all 0.3s ease;">Ver ficha completa detallada</a>
+    <a href="<?= site_url('documentation') ?>" class="btn secondary" style="text-decoration:none; padding: 20px 32px; font-weight: 800; text-align: center; border-radius: 16px; flex-grow: 1; background: #2563eb;">Integrar vía API</a>
+  </div>
+
+  <div class="company-card__footer" style="margin-top: 24px; text-align: center;">
+      <button type="button" class="btn-json-api" style="background: none; border: none; color: #2563eb; font-weight: 700; cursor: pointer; text-decoration: underline;">Ver JSON de la API</button>
+  </div>
+
+  <pre class="company-card__json is-hidden" style="margin-top: 20px; text-align: left;"><code>${jsonPretty}</code></pre>
+</div>`;
                 }
 
                 function bindJsonButtons(container) {
@@ -265,7 +355,7 @@
                         b.dataset.bound = '1';
                         b.addEventListener('click', (e) => {
                             e.preventDefault();
-                            const card = b.closest('.company-card');
+                            const card = b.closest('.search-result-card');
                             const pre = card?.querySelector('.company-card__json');
                             if (!pre) return;
                             const nowHidden = pre.classList.toggle('is-hidden');

@@ -10,43 +10,54 @@ import re
 import datetime
 from config import mysql_connect
 
-# Configuración de categorías y patrones
+# Configuración de categorías y patrones (Más estrictos para evitar falsos positivos)
+# Usamos \b para límites de palabra y anclajes donde sea posible
 ALERT_CATEGORIES = {
-    'Nueva constitución': r'Constituci',
-    'Ampliación de capital': r'Ampliaci.n de capital',
-    'Inversión recibida': r'Ampliaci.n de capital', # A menudo se solapan
-    'Nuevo administrador': r'Nombramiento',
-    'Cambio de objeto social': r'Cambio de objeto social',
-    'Fusiones y absorciones': r'Fusi.n|Absorci.n|Escisi.n',
-    'Cambio de domicilio social': r'Cambio de domicilio social',
-    'Reducción de capital': r'Reducci.n de capital',
-    'Declaración de insolvencia': r'Declaraci.n de insolvencia|Concurso|Insolvencia',
-    'Proceso de disolución': r'Disoluci.n|Liquidaci.n',
-    'Incidencias registrales': r'Otros conceptos|Incidencia|Anotaci.n preventiva'
+    'Nueva constitución': r'^Constituci.n\b',
+    'Ampliación de capital': r'\bAmpliaci.n de capital\b|\bResultante Suscrito\b',
+    'Inversión recibida': r'\bPrima de emisi.n\b', # Más específico que solo ampliación
+    'Nuevo administrador': r'^Nombramientos\b',
+    'Cambio de objeto social': r'\bCambio de objeto social\b|\bModificaci.n del objeto\b',
+    'Fusiones y absorciones': r'\bFusi.n por absorci.n\b|\bProyecto de fusi.n\b|\bEscisi.n\b',
+    'Cambio de domicilio social': r'\bCambio de domicilio social\b|\bTraslado de domicilio\b',
+    'Reducción de capital': r'\bReducci.n de capital\b',
+    'Declaración de insolvencia': r'\bSituaci.n concursal\b|\bInsolvencia\b|\bConcurso de acreedores\b|\bDecreto de insolvencia\b',
+    'Proceso de disolución': r'\bDisoluci.n\b|\bLiquidaci.n\b|\bExtinci.n\b',
+    'Incidencias registrales': r'\bAnotaci.n preventiva\b|\bEmbargo\b'
 }
 
-# Patrones extra para la descripción
+# Patrones extra para la descripción (Búsqueda en el cuerpo del texto)
 EXTRA_PATTERNS = {
-    'Centros de trabajo': r'sucursal|centro de trabajo|apertura de centro|domicilio social.*fuera'
+    'Centros de trabajo': r'\bApertura de sucursal\b|\bCentro de trabajo\b|\bEstablecimiento\b'
 }
 
 def detect_alerts(act_types, description):
     alerts = []
-    text_to_search = (act_types or "") + " " + (description or "")
     
-    # 1. Por act_types (y descripción combinada)
+    # Normalizamos para búsqueda
+    act_types_str = (act_types or "").strip()
+    description_str = (description or "").strip()
+    
+    # 1. Análisis de act_types (Suele ser lo más preciso)
+    # Separamos los actos por coma para analizar cada uno individualmente
+    acts = [a.strip() for a in act_types_str.split(',')]
+    
     for category, pattern in ALERT_CATEGORIES.items():
-        if re.search(pattern, text_to_search, re.IGNORECASE):
-            alerts.append(category)
+        # Primero buscamos en los tipos de acto individuales (anclados al inicio si es necesario)
+        for act in acts:
+            if re.search(pattern, act, re.IGNORECASE):
+                alerts.append(category)
+                break
             
-    # 2. Patrones específicos de descripción
+    # 2. Análisis de descripción (Para categorías que no tienen act_type específico)
     for category, pattern in EXTRA_PATTERNS.items():
-        if re.search(pattern, description or "", re.IGNORECASE):
+        if re.search(pattern, description_str, re.IGNORECASE):
             alerts.append(category)
-            
-    # Especial: Nuevo administrador solo si hay nombres detectados (opcional, pero ayuda)
-    # Si 'Nombramiento' está en act_types, ya lo capturamos arriba.
-    
+
+    # 3. Lógica de "Inversión recibida" vs "Ampliación"
+    # Si detectamos Inversión (Prima de emisión), mantenemos ambas o priorizamos.
+    # El usuario pidió ambas, así que las dejamos.
+
     return list(set(alerts))
 
 def run():

@@ -170,8 +170,21 @@ class MetricsController extends BaseController
         $email = \Config\Services::email();
         $email->setTo($user->email);
         $email->setFrom('info@apiempresas.com', 'API Empresas Team');
-        $email->setSubject('Novedades sobre tu acceso a la API');
-        $email->setMessage(nl2br($message));
+        
+        $subject = 'Novedades sobre tu acceso a la API';
+        $email->setSubject($subject);
+
+        $trackingCode = bin2hex(random_bytes(16));
+
+        // Usar plantilla HTML oficial
+        $body = view('emails/user_notification', [
+            'user' => $user,
+            'content' => nl2br($message),
+            'subject' => $subject,
+            'tracking_code' => $trackingCode
+        ]);
+
+        $email->setMessage($body);
 
         $status = 'success';
         $errorMsg = null;
@@ -187,6 +200,7 @@ class MetricsController extends BaseController
             'subject' => 'Contacto Manual: Dashboard Conversión',
             'message' => $message,
             'status'  => $status,
+            'tracking_code' => $trackingCode,
             'error_message' => $errorMsg,
             'created_at' => date('Y-m-d H:i:s')
         ]);

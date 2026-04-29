@@ -216,13 +216,27 @@ class GoogleSearchConsoleService
             $results = [];
             if ($sitemaps) {
                 foreach ($sitemaps as $sitemap) {
+                    $contents = $sitemap->getContents();
+                    $indexed = 0;
+                    $submitted = 0;
+                    
+                    if ($contents) {
+                        foreach ($contents as $content) {
+                            $indexed += $content->getIndexed();
+                            $submitted += $content->getSubmitted();
+                        }
+                    }
+
                     $results[] = [
                         'path'            => $sitemap->getPath(),
                         'lastDownloaded'  => $sitemap->getLastDownloaded(),
                         'lastSubmitted'   => $sitemap->getLastSubmitted(),
                         'errors'          => $sitemap->getErrors(),
                         'warnings'        => $sitemap->getWarnings(),
-                        'type'            => $sitemap->getType()
+                        'type'            => $sitemap->getType(),
+                        'submitted'       => $submitted,
+                        'indexed'         => $indexed,
+                        'indexRate'       => ($submitted > 0) ? round(($indexed / $submitted) * 100, 1) : 0
                     ];
                 }
             }
