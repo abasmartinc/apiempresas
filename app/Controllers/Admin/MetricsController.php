@@ -49,8 +49,10 @@ class MetricsController extends BaseController
             WHERE (s.plan_id IS NULL OR s.plan_id = 1)
             AND u.id NOT IN (
                 SELECT user_id FROM email_logs 
-                WHERE subject = 'Novedades sobre tu acceso a la API' 
-                AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                AND subject NOT LIKE '¡Bienvenido%' 
+                AND subject NOT LIKE '🆕 Nuevo registro%'
+                AND subject NOT LIKE 'Establece tu contraseña%'
             )
             ORDER BY req_24h DESC, total_requests DESC
             LIMIT 250
@@ -161,9 +163,11 @@ class MetricsController extends BaseController
         if ($json) {
             $userId = $json->user_id ?? null;
             $message = $json->message ?? null;
+            $subject = $json->subject ?? 'Novedades sobre tu acceso a la API';
         } else {
             $userId = $this->request->getPost('user_id');
             $message = $this->request->getPost('message');
+            $subject = $this->request->getPost('subject') ?? 'Novedades sobre tu acceso a la API';
         }
         
         $db = \Config\Database::connect();
@@ -181,7 +185,6 @@ class MetricsController extends BaseController
         $emailConfig = config('Email');
         $email->setFrom($emailConfig->fromEmail, $emailConfig->fromName);
         
-        $subject = 'Novedades sobre tu acceso a la API';
         $email->setSubject($subject);
 
         $trackingCode = bin2hex(random_bytes(16));

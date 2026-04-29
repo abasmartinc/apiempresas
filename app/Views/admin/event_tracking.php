@@ -240,6 +240,7 @@
             <p><strong>Email:</strong> <span id="modalUserEmail"></span></p>
             <p><strong>Motivo:</strong> <span id="modalReason"></span></p>
 
+            <input type="text" id="modalSubject" placeholder="Asunto del correo" style="width:100%; padding:10px; border-radius:10px; border:1px solid #e2e8f0; margin-top:10px;" value="Novedades sobre tu acceso a la API">
             <textarea id="modalMessage" style="width:100%; height:150px; padding:10px; border-radius:10px; border:1px solid #e2e8f0; margin-top:10px;"></textarea>
 
             <br><br>
@@ -288,6 +289,7 @@
             const modal = document.getElementById('contactModal');
             const userId = modal.dataset.userId;
             const message = document.getElementById('modalMessage').value;
+            const subject = document.getElementById('modalSubject').value;
             const btn = document.getElementById('btnSend');
 
             btn.disabled = true;
@@ -300,7 +302,7 @@
                     'X-Requested-With': 'XMLHttpRequest',
                     '<?= csrf_header() ?>': '<?= csrf_hash() ?>'
                 },
-                body: JSON.stringify({ user_id: userId, message: message })
+                body: JSON.stringify({ user_id: userId, message: message, subject: subject })
             })
             .then(res => res.json())
             .then(data => {
