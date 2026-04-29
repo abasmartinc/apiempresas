@@ -63,7 +63,7 @@
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.5);
-            z-index: 9999;
+            z-index: 1000;
             display: none;
             align-items: center;
             justify-content: center;
@@ -297,22 +297,26 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    '<?= csrf_header() ?>': '<?= csrf_hash() ?>'
                 },
                 body: JSON.stringify({ user_id: userId, message: message })
             })
             .then(res => res.json())
             .then(data => {
+                if (data.status === 'success') {
+                    closeModal();
+                }
+                
                 Swal.fire({
                     icon: data.status === 'success' ? 'success' : 'error',
                     title: data.status === 'success' ? '¡Enviado!' : 'Error',
                     text: data.message || (data.status === 'success' ? 'Mensaje enviado correctamente' : 'Error al enviar mensaje'),
                     confirmButtonColor: '#6366f1'
                 });
+
                 if (data.status === 'success') {
-                    closeModal();
-                    // Opcional: Recargar la tabla o eliminar la fila si quieres que desaparezca visualmente sin refrescar
-                    setTimeout(() => location.reload(), 1500);
+                    setTimeout(() => location.reload(), 2000);
                 }
             })
             .catch(err => {

@@ -173,6 +173,8 @@ class MetricsController extends BaseController
 
         // Enviar Email
         $email = \Config\Services::email();
+        $email->clear(true);
+        
         $email->setTo($user->email);
         $email->setBCC('papelo.amh@gmail.com');
         
