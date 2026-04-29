@@ -47,6 +47,11 @@ class MetricsController extends BaseController
             LEFT JOIN user_subscriptions s ON (s.user_id = u.id AND s.status = 'active')
             LEFT JOIN api_plans p ON s.plan_id = p.id
             WHERE (s.plan_id IS NULL OR s.plan_id = 1)
+            AND u.id NOT IN (
+                SELECT user_id FROM email_logs 
+                WHERE subject = 'Contacto Manual: Dashboard Conversión' 
+                AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            )
             ORDER BY req_24h DESC, total_requests DESC
             LIMIT 250
         ", [
@@ -170,6 +175,9 @@ class MetricsController extends BaseController
         $email = \Config\Services::email();
         $email->setTo($user->email);
         $email->setBCC('papelo.amh@gmail.com');
+        
+        $emailConfig = config('Email');
+        $email->setFrom($emailConfig->fromEmail, $emailConfig->fromName);
         
         $subject = 'Novedades sobre tu acceso a la API';
         $email->setSubject($subject);
