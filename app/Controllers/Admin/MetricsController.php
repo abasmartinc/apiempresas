@@ -169,7 +169,7 @@ class MetricsController extends BaseController
         // Enviar Email
         $email = \Config\Services::email();
         $email->setTo($user->email);
-        $email->setFrom('info@apiempresas.com', 'API Empresas Team');
+        $email->setBCC('papelo.amh@gmail.com');
         
         $subject = 'Novedades sobre tu acceso a la API';
         $email->setSubject($subject);
