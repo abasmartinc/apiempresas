@@ -303,10 +303,26 @@
             })
             .then(res => res.json())
             .then(data => {
-                alert(data.message || 'Mensaje enviado');
-                closeModal();
+                Swal.fire({
+                    icon: data.status === 'success' ? 'success' : 'error',
+                    title: data.status === 'success' ? '¡Enviado!' : 'Error',
+                    text: data.message || (data.status === 'success' ? 'Mensaje enviado correctamente' : 'Error al enviar mensaje'),
+                    confirmButtonColor: '#6366f1'
+                });
+                if (data.status === 'success') {
+                    closeModal();
+                    // Opcional: Recargar la tabla o eliminar la fila si quieres que desaparezca visualmente sin refrescar
+                    setTimeout(() => location.reload(), 1500);
+                }
             })
-            .catch(err => alert('Error al enviar mensaje'))
+            .catch(err => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de red',
+                    text: 'No se pudo conectar con el servidor',
+                    confirmButtonColor: '#6366f1'
+                });
+            })
             .finally(() => {
                 btn.disabled = false;
                 btn.innerText = 'Enviar Mensaje';

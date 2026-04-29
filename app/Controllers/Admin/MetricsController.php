@@ -202,10 +202,11 @@ class MetricsController extends BaseController
             $errorMsg = $email->printDebugger(['headers']);
         }
 
-        // Logging
-        $db->table('email_logs')->insert([
+        // Logging con el Modelo Oficial
+        $emailLogModel = new \App\Models\EmailLogModel();
+        $emailLogModel->insert([
             'user_id' => $userId,
-            'subject' => 'Contacto Manual: Dashboard Conversión',
+            'subject' => $subject,
             'message' => $message,
             'status'  => $status,
             'tracking_code' => $trackingCode,
@@ -213,7 +214,10 @@ class MetricsController extends BaseController
             'created_at' => date('Y-m-d H:i:s')
         ]);
 
-        return $this->response->setJSON(['status' => $status, 'message' => ($status == 'success' ? 'Mensaje enviado correctamente' : 'Error al enviar')]);
+        return $this->response->setJSON([
+            'status' => $status, 
+            'message' => ($status == 'success' ? 'Mensaje enviado correctamente' : 'Error al enviar: ' . $errorMsg)
+        ]);
     }
 
     private function determineCaseType($u)
