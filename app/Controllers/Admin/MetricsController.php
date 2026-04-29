@@ -49,7 +49,7 @@ class MetricsController extends BaseController
             WHERE (s.plan_id IS NULL OR s.plan_id = 1)
             AND u.id NOT IN (
                 SELECT user_id FROM email_logs 
-                WHERE subject = 'Contacto Manual: Dashboard Conversión' 
+                WHERE subject = 'Novedades sobre tu acceso a la API' 
                 AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
             )
             ORDER BY req_24h DESC, total_requests DESC
