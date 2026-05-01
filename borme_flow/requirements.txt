@@ -1,8 +1,0 @@
-pymysql
-requests
-pdfplumber
-beautifulsoup4
-cryptography
-python-dotenv
-sentry-sdk
-Pillow

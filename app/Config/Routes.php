@@ -232,6 +232,14 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
 
     // Email Sender (Manual Assisted)
     $routes->post('send-message', 'Admin\MetricsController::sendMessage');
+
+    // SEO Auto Posts
+    $routes->get('seo-auto-posts', 'Admin\SeoAutoPostsController::index');
+    $routes->post('seo-auto-posts/store', 'Admin\SeoAutoPostsController::storeKeyword');
+    $routes->post('seo-auto-posts/generate-one/(:num)', 'Admin\SeoAutoPostsController::generateOne/$1');
+    $routes->post('seo-auto-posts/generate-pending', 'Admin\SeoAutoPostsController::generatePending');
+    $routes->post('seo-auto-posts/generate-batch', 'Admin\SeoAutoPostsController::generateBatch');
+    $routes->post('seo-auto-posts/retry/(:num)', 'Admin\SeoAutoPostsController::retry/$1');
 });
 
 // Webhooks & AI API
