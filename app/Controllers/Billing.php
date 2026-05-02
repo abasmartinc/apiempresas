@@ -76,6 +76,15 @@ class Billing extends BaseController
             return redirect()->to(site_url('checkout/radar-export' . $queryString));
         }
 
+        $session = session();
+        $lastCheckout = $session->get('last_checkout_time');
+        $currentTime = time();
+        
+        if ($lastCheckout && ($currentTime - $lastCheckout) < 10) { // 10 seconds limit
+            return redirect()->back()->with('error', 'Demasiadas solicitudes. Por favor, espera unos segundos.');
+        }
+        $session->set('last_checkout_time', $currentTime);
+
         $postData = $this->request->getVar();
         $period = strtolower(trim((string) ($postData['period'] ?? 'single')));
 
@@ -246,6 +255,7 @@ class Billing extends BaseController
                 'line_items' => [$lineItem],
                 'success_url' => $successUrl,
                 'cancel_url' => $cancelUrl,
+                'customer_creation' => 'if_required',
                 'invoice_creation' => [
                     'enabled' => true,
                     'invoice_data' => [
