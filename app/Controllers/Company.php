@@ -219,11 +219,16 @@ class Company extends BaseController
             return redirect()->to(site_url($expectedSegment), 301);
         }
 
-        // Usar el helper común
+        // Forzar la URL canónica siempre al formato oficial: CIF-slug
         $data = $this->prepareViewData($company);
         $data['canonical'] = site_url($expectedSegment);
 
-        return view('company', $data);
+        // Si el sistema ha decidido que NO es indexable, nos aseguramos de que el Header sea explícito
+        if (isset($company['seo_indexable']) && $company['seo_indexable'] === false) {
+            $this->response->setHeader('X-Robots-Tag', 'noindex, follow');
+        }
+
+        return $this->response->setBody(view('company', $data));
     }
     
     /**
@@ -268,7 +273,12 @@ class Company extends BaseController
         $data = $this->prepareViewData($company);
         $data['canonical'] = site_url($correctSlug);
         
-        return view('company', $data);
+        // Si no tiene CIF, suele ser de menor calidad SEO, reforzamos el noindex si el score es bajo
+        if (isset($company['seo_indexable']) && $company['seo_indexable'] === false) {
+            $this->response->setHeader('X-Robots-Tag', 'noindex, follow');
+        }
+
+        return $this->response->setBody(view('company', $data));
     }
     
     /**
@@ -279,14 +289,18 @@ class Company extends BaseController
         // Decodificar URL
         $segment = urldecode($segment);
         
-        // Dividir por guiones
+        // Si el slug es literalmente "no-disponible" o similar, lo limpiamos
+        $invalidFullSlugs = ['no-disponible', 'nodisponible', 'n-a'];
+        if (in_array(strtolower(trim($segment)), $invalidFullSlugs)) {
+            return null;
+        }
+
+        // Dividir por guiones para una limpieza selectiva de placeholders
         $parts = explode('-', $segment);
-        
-        // Filtrar partes que parecen "no disponible" o similares
-        $invalidPatterns = ['no', 'disponible', 'nodisponible'];
-        $cleanParts = array_filter($parts, function($part) use ($invalidPatterns) {
+        $cleanParts = array_filter($parts, function($part) {
             $part = strtolower(trim($part));
-            return !in_array($part, $invalidPatterns) && strlen($part) > 0;
+            // Solo eliminamos si es un placeholder de base de datos vacío
+            return $part !== '' && $part !== 'null' && $part !== 'undefined';
         });
         
         if (empty($cleanParts)) {
