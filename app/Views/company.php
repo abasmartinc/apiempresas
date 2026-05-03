@@ -353,32 +353,6 @@
 
                 </article>
 
-                <!-- RADAR PRO CTA -->
-                <div class="dash-cta-card"
-                    style="margin-top: 30px; display: grid; grid-template-columns: 1fr auto; gap: 30px; align-items: center;">
-                    <div>
-                        <h3>
-                            <div class="dash-cta-icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2.5">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <path
-                                        d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-                                </svg>
-                            </div>
-                            ¿Te interesa recibir leads como <?= esc($company['name'] ?? 'esta') ?>?
-                        </h3>
-                        <p style="margin-bottom: 0;">
-                            Monitorizamos el <strong>BORME</strong> en tiempo real. Configura tu Radar para recibir
-                            alertas de nuevas empresas en tu sector y provincia antes que nadie.
-                        </p>
-                    </div>
-                    <div style="min-width: 200px;">
-                        <a href="<?= site_url() ?>radar" class="btn">
-                            Activar Radar PRO →
-                        </a>
-                    </div>
-                </div>
 
                 <?php if ((!empty($company['lat']) && !empty($company['lng'])) || !empty($company['address'])): ?>
                     <div id="map-area" class="map-card">
@@ -616,6 +590,85 @@
                     </div>
                 <?php endif; ?>
 
+                <!-- SECCIÓN PARA DESARROLLADORES (Premium Design) -->
+                <section class="api-dev-section"
+                    style="margin-top: 5rem; padding-bottom: 3rem; border-top: 1px solid #eef2f6;">
+                    <div class="api-dev-grid"
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center; background: #ffffff; padding: 2.5rem; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);">
+
+                        <!-- Columna Izquierda: Mensaje y CTA -->
+                        <div class="api-dev-info">
+                            <div
+                                style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: #eff6ff; color: #3b82f6; border-radius: 12px; margin-bottom: 1.5rem;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="16 18 22 12 16 6"></polyline>
+                                    <polyline points="8 6 2 12 8 18"></polyline>
+                                </svg>
+                            </div>
+                            <h3
+                                style="margin: 0 0 1rem; font-size: 1.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.025em;">
+                                ¿Eres desarrollador?</h3>
+                            <p style="margin: 0 0 2rem; color: #64748b; line-height: 1.6; font-size: 1.05rem;">
+                                Integra la información oficial de <strong><?= esc($companyName) ?></strong> directamente
+                                en tu software mediante nuestra API REST robusta y documentada.
+                            </p>
+                            <a href="<?= site_url('register') ?>" class="btn secondary"
+                                style="display: inline-flex; align-items: center; padding: 0.875rem 2rem; font-weight: 700; border-radius: 12px; transition: all 0.2s; background: linear-gradient(90deg, #2152ff, #12b48a); color: white; border: none; box-shadow: 0 10px 25px rgba(33, 82, 255, 0.25);">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" style="margin-right: 10px;">
+                                    <path
+                                        d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4">
+                                    </path>
+                                </svg>
+                                Obtener API Key Gratuitamente
+                            </a>
+                        </div>
+
+                        <!-- Columna Derecha: Bloque de Código -->
+                        <div class="api-dev-code-wrap">
+                            <div class="company-code-card"
+                                style="background: #0f172a; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
+                                <div class="company-code-header"
+                                    style="background: rgba(255,255,255,0.03); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.07);">
+                                    <div style="display: flex; gap: 6px;">
+                                        <div
+                                            style="width: 10px; height: 10px; border-radius: 50%; background: #ff5f56;">
+                                        </div>
+                                        <div
+                                            style="width: 10px; height: 10px; border-radius: 50%; background: #ffbd2e;">
+                                        </div>
+                                        <div
+                                            style="width: 10px; height: 10px; border-radius: 50%; background: #27c93f;">
+                                        </div>
+                                    </div>
+                                    <button type="button" id="btnToggleJson"
+                                        style="background: rgba(255,255,255,0.1); border: none; color: #cbd5e1; padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: background 0.2s;"
+                                        onmouseover="this.style.background='rgba(255,255,255,0.15)'"
+                                        onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                                        Ver respuesta JSON
+                                    </button>
+                                </div>
+                                <div style="padding: 24px; overflow-x: auto;">
+                                    <pre
+                                        style="margin: 0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.9rem; line-height: 1.7;">
+<span style="color: #94a3b8;"># Petición cURL para <?= esc($companyCif) ?></span>
+<span style="color: #ff79c6;">curl</span> -X GET <span style="color: #f1fa8c;">"<?= site_url("api/v1/companies?cif=" . esc($companyCif)) ?>"</span> \
+     -H <span style="color: #f1fa8c;">"Authorization: Bearer TU_API_KEY"</span></pre>
+                                </div>
+                            </div>
+
+                            <div id="jsonBlock" class="is-hidden"
+                                style="margin-top: 1rem; background: #1e293b; border-radius: 12px; padding: 1rem; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease;">
+                                <pre
+                                    style="margin: 0; color: #94a3b8; font-size: 0.8rem; max-height: 250px; overflow: auto; font-family: 'JetBrains Mono', monospace;"><code><?= esc($jsonPretty) ?></code></pre>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+                <!-- FIN SECCIÓN PARA DESARROLLADORES -->
+
                 <!-- FAQ Section HTML -->
                 <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee;">
                     <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: #444;">Preguntas Frecuentes sobre
@@ -773,84 +826,32 @@
                     </div>
                 <?php endif; ?>
 
-                <!-- SECCIÓN PARA DESARROLLADORES (Premium Design) -->
-                <section class="api-dev-section"
-                    style="margin-top: 5rem; padding-top: 3rem; border-top: 1px solid #eef2f6;">
-                    <div class="api-dev-grid"
-                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center; background: #ffffff; padding: 2.5rem; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);">
-
-                        <!-- Columna Izquierda: Mensaje y CTA -->
-                        <div class="api-dev-info">
-                            <div
-                                style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: #eff6ff; color: #3b82f6; border-radius: 12px; margin-bottom: 1.5rem;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="16 18 22 12 16 6"></polyline>
-                                    <polyline points="8 6 2 12 8 18"></polyline>
-                                </svg>
-                            </div>
-                            <h3
-                                style="margin: 0 0 1rem; font-size: 1.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.025em;">
-                                ¿Eres desarrollador?</h3>
-                            <p style="margin: 0 0 2rem; color: #64748b; line-height: 1.6; font-size: 1.05rem;">
-                                Integra la información oficial de <strong><?= esc($companyName) ?></strong> directamente
-                                en tu software mediante nuestra API REST robusta y documentada.
-                            </p>
-                            <a href="<?= site_url('register') ?>" class="btn secondary"
-                                style="display: inline-flex; align-items: center; padding: 0.875rem 2rem; font-weight: 700; border-radius: 12px; transition: all 0.2s; background: linear-gradient(90deg, #2152ff, #12b48a); color: white; border: none; box-shadow: 0 10px 25px rgba(33, 82, 255, 0.25);">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2.5" style="margin-right: 10px;">
+                <!-- RADAR PRO CTA -->
+                <div class="dash-cta-card"
+                    style="margin-top: 5rem; display: grid; grid-template-columns: 1fr auto; gap: 30px; align-items: center;">
+                    <div>
+                        <h3>
+                            <div class="dash-cta-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <circle cx="12" cy="12" r="10" />
                                     <path
-                                        d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4">
-                                    </path>
+                                        d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
                                 </svg>
-                                Obtener API Key Gratuitamente
-                            </a>
-                        </div>
-
-                        <!-- Columna Derecha: Bloque de Código -->
-                        <div class="api-dev-code-wrap">
-                            <div class="company-code-card"
-                                style="background: #0f172a; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
-                                <div class="company-code-header"
-                                    style="background: rgba(255,255,255,0.03); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.07);">
-                                    <div style="display: flex; gap: 6px;">
-                                        <div
-                                            style="width: 10px; height: 10px; border-radius: 50%; background: #ff5f56;">
-                                        </div>
-                                        <div
-                                            style="width: 10px; height: 10px; border-radius: 50%; background: #ffbd2e;">
-                                        </div>
-                                        <div
-                                            style="width: 10px; height: 10px; border-radius: 50%; background: #27c93f;">
-                                        </div>
-                                    </div>
-                                    <button type="button" id="btnToggleJson"
-                                        style="background: rgba(255,255,255,0.1); border: none; color: #cbd5e1; padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: background 0.2s;"
-                                        onmouseover="this.style.background='rgba(255,255,255,0.15)'"
-                                        onmouseout="this.style.background='rgba(255,255,255,0.1)'">
-                                        Ver respuesta JSON
-                                    </button>
-                                </div>
-                                <div style="padding: 24px; overflow-x: auto;">
-                                    <pre
-                                        style="margin: 0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.9rem; line-height: 1.7;">
-<span style="color: #94a3b8;"># Petición cURL para <?= esc($companyCif) ?></span>
-<span style="color: #ff79c6;">curl</span> -X GET <span style="color: #f1fa8c;">"<?= site_url("api/v1/companies?cif=" . esc($companyCif)) ?>"</span> \
-     -H <span style="color: #f1fa8c;">"Authorization: Bearer TU_API_KEY"</span></pre>
-                                </div>
                             </div>
-
-                            <div id="jsonBlock" class="is-hidden"
-                                style="margin-top: 1rem; background: #1e293b; border-radius: 12px; padding: 1rem; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease;">
-                                <pre
-                                    style="margin: 0; color: #94a3b8; font-size: 0.8rem; max-height: 250px; overflow: auto; font-family: 'JetBrains Mono', monospace;"><code><?= esc($jsonPretty) ?></code></pre>
-                            </div>
-                        </div>
-
+                            ¿Te interesa recibir leads como <?= esc($company['name'] ?? 'esta') ?>?
+                        </h3>
+                        <p style="margin-bottom: 0;">
+                            Monitorizamos el <strong>BORME</strong> en tiempo real. Configura tu Radar para recibir
+                            alertas de nuevas empresas en tu sector y provincia antes que nadie.
+                        </p>
                     </div>
-                </section>
-                <!-- FIN SECCIÓN PARA DESARROLLADORES -->
+                    <div style="min-width: 200px;">
+                        <a href="<?= site_url() ?>radar" class="btn">
+                            Activar Radar PRO →
+                        </a>
+                    </div>
+                </div>
 
             </div>
         </section>

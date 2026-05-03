@@ -58,7 +58,6 @@
                     </div>
                 <?php endif; ?>
 
-                <p style="text-align: center; font-size: 0.9rem; color: #64748b; margin-top: 8px; font-weight: 500;">¿Prefieres ver oportunidades directamente? → <a href="<?= getRadarRedirect('home_search') ?>" style="color: var(--ae-blue); text-decoration: none; font-weight: 800;" data-cta="radar_home" data-source="home_search">Ver Radar B2B</a></p>
 
                 <div id="resultado_container" style="display:none; margin-top: 24px;">
                     <div id="resultado"></div>
@@ -142,7 +141,8 @@
 
                 <div class="path-grid">
                     <div class="path-card reveal delay-1">
-                        <h3 style="display: flex; align-items: center; gap: 12px;">
+                        <div style="font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: #2563eb; margin-bottom: 8px; filter: drop-shadow(0 0 10px rgba(37, 99, 235, 0.1));">RADAR PARA:</div>
+                        <h3 style="display: flex; align-items: center; gap: 12px; margin-top: 0;">
                             <div style="background: rgba(37,99,235,0.1); padding: 10px; border-radius: 10px; color: #3B82F6; display: flex; align-items: center; justify-content: center;">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                             </div>
@@ -166,7 +166,8 @@
                         <a href="<?= getRadarRedirect('home_dual_block') ?>" class="btn-ae" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0F172A; font-weight: 800; border: none; width: 100%; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);" data-cta="radar_home" data-source="home_dual_block">Ver Radar</a>
                     </div>
                     <div class="path-card reveal delay-2">
-                        <h3 style="display: flex; align-items: center; gap: 12px;">
+                        <div style="font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: #10B981; margin-bottom: 8px; filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.1));">API PARA:</div>
+                        <h3 style="display: flex; align-items: center; gap: 12px; margin-top: 0;">
                             <div style="background: rgba(16,185,129,0.1); padding: 10px; border-radius: 10px; color: #10B981; display: flex; align-items: center; justify-content: center;">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
                             </div>

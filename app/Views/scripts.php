@@ -137,6 +137,11 @@
     </div>
   </div>
 
+  <div class="result-actions" style="display: flex; gap: 16px; margin-bottom: 32px;">
+    <a href="${baseUrl}${company.cif || company.nif}" class="btn" style="text-decoration:none; padding: 20px 32px; font-weight: 800; flex-grow: 1; text-align: center; background: #ffffff; color: #475569; border: 2px solid #e2e8f0; border-radius: 16px; transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--ae-blue)'; this.style.color='var(--ae-blue)'" onmouseout="this.style.borderColor='#e2e8f0'; this.style.color='#475569'">Ver ficha detallada completa</a>
+    <a href="<?= site_url('documentation') ?>" class="btn secondary" style="text-decoration:none; padding: 20px 32px; font-weight: 900; text-align: center; border-radius: 16px; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.15);">🚀 Integrar vía API Ahora</a>
+  </div>
+
   <!-- Bridge to Radar Dinámico -->
   <div class="radar-bridge" style="background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); border: 1px solid #dcfce7; border-radius: 24px; padding: 32px; display: flex; gap: 28px; align-items: center; margin-bottom: 24px; position: relative; overflow: hidden;">
     <div style="position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);"></div>
@@ -155,18 +160,16 @@
     </div>
     
     <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 1;">
-        <a href="${radarUrl}" class="btn-radar" style="padding: 16px 32px; font-size: 1.1rem; border-radius: 16px; box-shadow: 0 15px 30px rgba(18, 180, 138, 0.25); margin: 0;">${radarCTA}</a>
+        <a href="${radarUrl}" class="btn-radar" style="padding: 12px 24px; font-size: 0.95rem; border-radius: 14px; background: #ecfdf5; color: #059669 !important; border: 1px solid #10b981; box-shadow: none; margin: 0; font-weight: 800; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: all 0.2s ease;" onmouseover="this.style.background='#d1fae5'" onmouseout="this.style.background='#ecfdf5'">
+            ${radarCTA}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </a>
         <span style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-align: center; opacity: 0.8;">Oportunidades limitadas en el tiempo</span>
     </div>
   </div>
 
-  <div style="text-align: center; margin-bottom: 40px;">
+  <div style="text-align: center; margin-bottom: 20px;">
     <span class="radar-context-text" style="font-size: 0.95rem; font-weight: 500;">“La detección temprana de empresas puede marcar la diferencia en procesos comerciales.”</span>
-  </div>
-
-  <div class="result-actions" style="display: flex; gap: 16px;">
-    <a href="${baseUrl}${company.cif || company.nif}" class="btn" style="text-decoration:none; padding: 20px 32px; font-weight: 800; flex-grow: 1; text-align: center; background: #ffffff; color: #0f172a; border: 2px solid #e2e8f0; border-radius: 16px; transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--ae-blue)'; this.style.color='var(--ae-blue)'" onmouseout="this.style.borderColor='#e2e8f0'; this.style.color='#0f172a'">Ver ficha completa detallada</a>
-    <a href="<?= site_url('documentation') ?>" class="btn secondary" style="text-decoration:none; padding: 20px 32px; font-weight: 800; text-align: center; border-radius: 16px;">Integrar vía API</a>
   </div>
 
   ${searchCount === 2 ? `
