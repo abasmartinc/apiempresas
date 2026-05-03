@@ -40,124 +40,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
 <div class="ae-radar-page">
     <div class="ae-radar-page__shell">
 
-        <aside class="ae-radar-page__sidebar">
-
-            <div class="ae-radar-page__brand">
-                <a href="<?=site_url() ?>" class="ae-radar-page__brand-header">
-                    <svg class="ve-logo" width="32" height="32" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="ve-g" x1="10" y1="54" x2="54" y2="10" gradientUnits="userSpaceOnUse">
-                                <stop stop-color="#2152FF"/>
-                                <stop offset=".65" stop-color="#5C7CFF"/>
-                                <stop offset="1" stop-color="#12B48A"/>
-                            </linearGradient>
-                            <filter id="ve-cardShadow" x="-20%" y="-20%" width="140%" height="140%">
-                                <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity=".20"/>
-                            </filter>
-                            <filter id="ve-checkShadow" x="-30%" y="-30%" width="160%" height="160%">
-                                <feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#0B1A36" flood-opacity=".22"/>
-                            </filter>
-                            <radialGradient id="ve-gloss" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
-                                            gradientTransform="translate(20 16) rotate(45) scale(28)">
-                                <stop stop-color="#FFFFFF" stop-opacity=".32"/>
-                                <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
-                            </radialGradient>
-                            <linearGradient id="ve-rim" x1="12" y1="52" x2="52" y2="12">
-                                <stop stop-color="#FFFFFF" stop-opacity=".6"/>
-                                <stop offset="1" stop-color="#FFFFFF" stop-opacity=".35"/>
-                            </linearGradient>
-                        </defs>
-                        <g filter="url(#ve-cardShadow)">
-                            <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#ve-g)"/>
-                            <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#ve-gloss)"/>
-                            <rect x="6.5" y="6.5" width="51" height="51" rx="13.5" fill="none" stroke="url(#ve-rim)"/>
-                        </g>
-                        <path d="M18 33 L28 43 L46 22"
-                               stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"
-                               fill="none" filter="url(#ve-checkShadow)"/>
-                    </svg>
-                    <div class="brand-text">
-                        <span class="brand-name">API<span class="grad">Empresas</span>.es</span>
-                        <span class="brand-tag">Verificación empresarial</span>
-                    </div>
-                </a>
-
-                <small class="ae-radar-page__brand-note">
-                    Inteligencia comercial en tiempo real
-                </small>
-            </div>
-
-            <div class="ae-radar-page__sidebar-body">
-                <div class="ae-radar-page__nav-group">
-                    <span class="ae-radar-page__nav-label">Radar</span>
-
-                    <a href="<?= site_url('radar') ?>" class="ae-radar-page__nav-link is-active">
-                        <span class="ae-radar-page__nav-icon">📊</span>
-                        Dashboard principal
-                    </a>
-
-                    <a href="<?= site_url('radar/favoritos') ?>" class="ae-radar-page__nav-link">
-                        <span class="ae-radar-page__nav-icon">⭐</span>
-                        Mis favoritos
-                    </a>
-
-                    <a href="<?= site_url('leads-empresas-nuevas') ?>" class="ae-radar-page__nav-link" id="radar_to_excel_cross_sell">
-                        <span class="ae-radar-page__nav-icon">📥</span>
-                        Descargar listado puntual
-                    </a>
-
-                    <a href="<?= site_url('api-empresas') ?>" class="ae-radar-page__nav-link" id="radar_to_api_cross_sell">
-                        <span class="ae-radar-page__nav-icon">🔌</span>
-                        API para desarrolladores
-                    </a>
-
-                    <a href="<?= site_url('radar/kanban') ?>" class="ae-radar-page__nav-link">
-                        <span class="ae-radar-page__nav-icon">📋</span>
-                        Embudo (Kanban)
-                    </a>
-
-                    <a href="<?= site_url('radar/trends') ?>" class="ae-radar-page__nav-link">
-                        <span class="ae-radar-page__nav-icon">📈</span>
-                        Análisis de Tendencias
-                    </a>
-                    
-                    <a href="<?= site_url('billing/invoices') ?>" class="ae-radar-page__nav-link">
-                        <span class="ae-radar-page__nav-icon">🧾</span>
-                        Mis facturas
-                    </a>
-                </div>
-
-                <div class="ae-radar-page__nav-group">
-                    <span class="ae-radar-page__nav-label">Alertas</span>
-                    <div class="ae-radar-page__nav-teaser">
-                        <span class="ae-radar-page__nav-icon">🔔</span>
-                        <span>Alertas email</span>
-                        <span class="ae-radar-page__mini-badge">Próximamente</span>
-                    </div>
-                </div>
-
-                <div class="ae-radar-page__roi-box">
-                    <div class="ae-radar-page__roi-title">Calculadora ROI</div>
-                    <div class="ae-radar-page__roi-text">La mayoría de usuarios recupera la inversión con su primer cliente. Solo 1 cierre paga <strong>5 años</strong> de Radar PRO.</div>
-                    <div class="ae-radar-page__roi-stat">
-                        <span>Rentabilidad estimada</span>
-                        <strong>+450%</strong>
-                    </div>
-                </div>
-            </div>
-
-            <div class="ae-radar-page__sidebar-footer">
-                <a href="<?= site_url('dashboard') ?>" class="ae-radar-page__nav-link">
-                    <span class="ae-radar-page__nav-icon">🏠</span>
-                    Volver al portal
-                </a>
-
-                <a href="<?= site_url('logout') ?>" class="ae-radar-page__nav-link">
-                    <span class="ae-radar-page__nav-icon">🚪</span>
-                    Cerrar sesión
-                </a>
-            </div>
-        </aside>
+        <?= view('radar/partials/sidebar') ?>
 
         <main class="ae-radar-page__main">
             
@@ -302,6 +185,25 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                         .ae-status-select-chip.status-bg-seguimiento { background-color: #eff6ff; color: #2563eb; border-color: #dbeafe; }
                         .ae-status-select-chip.status-bg-negociacion { background-color: #faf5ff; color: #9333ea; border-color: #f3e8ff; }
                         .ae-status-select-chip.status-bg-ganado { background-color: #f0fdf4; color: #16a34a; border-color: #dcfce7; }
+
+                        /* Paywall Responsive Styles */
+                        @media (max-width: 991px) {
+                            .paywall-grid {
+                                grid-template-columns: 1fr !important;
+                                gap: 32px !important;
+                                text-align: center !important;
+                            }
+                            .paywall-content {
+                                text-align: center !important;
+                            }
+                            .paywall-content div {
+                                align-items: center !important;
+                                justify-content: center !important;
+                            }
+                            .paywall-features {
+                                padding: 24px !important;
+                            }
+                        }
                     </style>
                     <section class="ae-radar-page__hero <?= !$isFree ? 'ae-radar-page__hero--pro' : '' ?>" style="padding: 24px 32px; min-height: auto; margin-bottom: 20px; position: relative;">
                         <div class="ae-radar-page__hero-glass"></div>
@@ -357,7 +259,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                                                 </div>
                                             </div>
                                             
-                                            <button type="button" onclick="document.getElementById('radar-results-container').scrollIntoView({behavior:'smooth'})" 
+                                            <button type="button" onclick="document.getElementById('seccion-top-leads').scrollIntoView({behavior:'smooth'})" 
                                                     style="background: #2563eb; color: white; height: 42px; width: 100%; border-radius: 12px; font-weight: 800; font-size: 12px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); display: flex; align-items: center; justify-content: center; gap: 8px;">
                                                 Ir a las mejores oportunidades
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width: 14px; height: 14px;"><path d="M7 13l5 5 5-5M7 6l5 5 5-5"></path></svg>
@@ -368,7 +270,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                                     <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             <span style="font-size: 14px;">✅</span>
-                                            <span style="font-size: 13px; font-weight: 700; color: #10b981;"><?= $pipelineMetrics['roi_message'] ?> · Con 1 cliente cubres el coste mensual</span>
+                                            <span style="font-size: 13px; font-weight: 700; color: #10b981;"><?= $pipelineMetrics['roi_message'] ?></span>
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: #ea580c; text-transform: uppercase;">
                                             <span style="width: 6px; height: 6px; background: #ea580c; border-radius: 50%; display: block; animation: pulse 2s infinite;"></span>
@@ -484,7 +386,7 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                                         <span style="display: block; margin-top: 4px; color: #2563eb; font-weight: 700; font-size: 13px;">💰 Valor estimado de estas oportunidades: <?= $intelMetrics['pipeline_label'] ?></span>
                                     </p>
                                 </div>
-                                <a href="<?= site_url('radar?' . http_build_query(array_merge($filters, ['priority_level' => 'muy_alta', 'rango' => '7', 'intel' => 'active']))) ?>#radar-results-container" 
+                                <a href="<?= site_url('radar?' . http_build_query(array_merge($filters, ['priority_level' => 'muy_alta', 'rango' => '7', 'intel' => 'active']))) ?>#seccion-top-leads" 
                                    class="ae-radar-page__hero-btn ae-radar-page__hero-btn--primary" 
                                    style="height: 44px; padding: 0 24px; font-size: 13px; margin: 0; display: flex; align-items: center; justify-content: center; text-decoration: none;">
                                     🎯 Ver oportunidades prioritarias
@@ -520,8 +422,10 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                         </div>
 
                     <!-- BLOQUE: TOP OPORTUNIDADES -->
-                    <?php if (!empty($visibleCompanies)) { ?>
-                        <div class="ae-radar-page__top-picks" style="margin-top: 40px; margin-bottom: 32px;">
+                    <div id="seccion-top-leads">
+                        <?php if (!empty($visibleCompanies)) { ?>
+                            <div class="ae-radar-page__top-picks" style="margin-top: 40px; margin-bottom: 32px;">
+
                             <h4 style="margin: 0 0 8px 0; font-size: 15px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
                                 <span>🎯</span> Empieza por estas empresas hoy
                             </h4>
@@ -556,8 +460,8 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                                         $days = ($scoreTotal >= 70) ? 0 : (($scoreTotal >= 40) ? rand(1, 2) : rand(3, 5));
                                         $timingLabel = ($days == 0) ? 'Detectada hoy' : "Hace $days días";
 
-                                        $timingText = ($days <= 2) ? '🚀 Detectar de inmediato' : "⏱ Detectar en $days días";
-                                        $btnText = "🚀 Ver radar ahora";
+                                        $timingText = ($days <= 2) ? '🚀 Prioridad de contacto: ALTA' : "⏱ Prioridad de contacto: MEDIA";
+                                        $btnText = "💎 Analizar con IA PRO";
                                         
                                         $containerStyle = $isFirst 
                                             ? "background: #ffffff; border: 2px solid #2563eb; border-radius: 16px; padding: 20px; transition: all 0.2s; position: relative; box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.15); display: flex; flex-direction: column; height: 100%; transform: scale(1.02); z-index: 5;"
@@ -617,48 +521,78 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                             </div>
 
                             <?php if ($isFree) { ?>
-                                <div class="radar-paywall-main" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; padding: 64px 32px; border-radius: 28px; text-align: center; margin: 40px 0; box-shadow: 0 25px 70px rgba(0,0,0,0.5); position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); min-height: 420px; display: flex; align-items: center; justify-content: center;">
-                                    <!-- Decorative Glow -->
-                                    <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(37,99,235,0.2) 0%, transparent 60%); pointer-events: none;"></div>
+                                <div class="radar-paywall-main" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 60px 40px; border-radius: 32px; margin: 40px 0; box-shadow: 0 25px 70px rgba(0,0,0,0.4); position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); min-height: 480px; display: flex; align-items: center; justify-content: center;">
+                                    <!-- Premium Animated Glow -->
+                                    <div style="position: absolute; top: -20%; right: -10%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 70%); filter: blur(60px); pointer-events: none;"></div>
+                                    <div style="position: absolute; bottom: -20%; left: -10%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%); filter: blur(60px); pointer-events: none;"></div>
                                     
-                                    <div style="position: relative; z-index: 1; width: 100%;">
-                                        <div style="display: inline-block; background: rgba(37,99,235,0.2); color: #60a5fa; padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 800; margin-bottom: 20px; border: 1px solid rgba(37,99,235,0.3);">
-                                            📈 +<?= number_format($freshness['todayCount'] ?? 94) ?> empresas detectadas hoy
-                                        </div>
+                                    <div class="paywall-grid" style="position: relative; z-index: 10; max-width: 1100px; width: 100%; display: grid; grid-template-columns: 1.4fr 1fr; gap: 60px; align-items: center;">
+                                        <!-- Left Side: Copy & CTA -->
+                                        <div class="paywall-content" style="text-align: left;">
+                                            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(37,99,235,0.1); color: #60a5fa; padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 800; margin-bottom: 24px; border: 1px solid rgba(37,99,235,0.2); backdrop-filter: blur(4px);">
+                                                <span style="display: inline-block; width: 8px; height: 8px; background: #60a5fa; border-radius: 50%; animation: pulse 2s infinite;"></span>
+                                                +<?= number_format($freshness['todayCount'] ?? 94) ?> empresas detectadas hoy en tiempo real
+                                            </div>
 
-                                        <h2 style="font-size: 38px; font-weight: 900; margin-bottom: 16px; color: white !important; letter-spacing: -1.5px; line-height: 1.1;">Estas empresas están siendo contactadas ahora mismo</h2>
-                                        
-                                        <p style="font-size: 18px; color: rgba(255,255,255,0.8); margin-bottom: 32px; max-width: 650px; margin-left: auto; margin-right: auto; line-height: 1.6; font-weight: 500;">
-                                            Las empresas detectadas hoy suelen ser las primeras en contratar.<br>
-                                            <span style="color: #60a5fa; font-weight: 800;">Estas oportunidades desaparecen cuando otro proveedor las contacta.</span>
-                                        </p>
+                                            <h2 style="font-size: 46px; font-weight: 900; margin-bottom: 20px; color: white !important; letter-spacing: -0.03em; line-height: 1.1; text-wrap: balance;">Estas empresas están siendo contactadas <span style="background: linear-gradient(to right, #60a5fa, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ahora mismo</span></h2>
+                                            
+                                            <p style="font-size: 18px; color: #94a3b8; margin-bottom: 40px; max-width: 540px; line-height: 1.6; font-weight: 500;">
+                                                No permitas que tu competencia llegue antes. Accede al listado completo con datos de contacto verificados antes de que desaparezcan.
+                                            </p>
 
-                                        <div style="margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
-                                            <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="display: inline-block; background: #2563eb; color: white; padding: 20px 56px; border-radius: 18px; font-size: 20px; font-weight: 900; text-decoration: none; box-shadow: 0 10px 30px rgba(37,99,235,0.5); transition: all 0.3s; transform-origin: center;" onmouseover="this.style.transform='scale(1.05) translateY(-2px)'; this.style.boxShadow='0 15px 40px rgba(37,99,235,0.6)';" onmouseout="this.style.transform='scale(1) translateY(0)'; this.style.boxShadow='0 10px 30px rgba(37,99,235,0.5)';">
-                                                Acceder ahora antes que tu competencia
-                                            </a>
-                                            <div style="font-size: 14px; color: #fbbf24; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;">
-                                                💰 La mayoría de usuarios recupera la inversión con su primer cliente
+                                            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 20px;">
+                                                <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="display: inline-flex; align-items: center; gap: 12px; background: #2563eb; color: white; padding: 22px 40px; border-radius: 20px; font-size: 18px; font-weight: 900; text-decoration: none; box-shadow: 0 15px 40px rgba(37,99,235,0.4); transition: all 0.3s; border: 1px solid rgba(255,255,255,0.1);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 20px 50px rgba(37,99,235,0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 15px 40px rgba(37,99,235,0.4)';">
+                                                    <span>Acceder ahora antes que tu competencia</span>
+                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                                </a>
+                                                <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; color: #fbbf24; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(251,191,36,0.1); padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(251,191,36,0.2);">
+                                                    <span style="font-size: 16px;">💰</span> La mayoría de usuarios recupera la inversión con su primer cliente
+                                                </div>
                                             </div>
                                         </div>
-                                        </div>
 
-                                        <div class="paywall-benefits" style="display: flex; justify-content: center; gap: 32px; margin: 0 auto; opacity: 0.7;">
-                                            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700;"><span style="color: #10b981;">✔</span> Acceso completo</div>
-                                            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700;"><span style="color: #10b981;">✔</span> Filtros avanzados</div>
-                                            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700;"><span style="color: #10b981;">✔</span> Detección temprana</div>
-                                            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700;"><span style="color: #10b981;">✔</span> Ventaja competitiva</div>
+                                        <!-- Right Side: Features -->
+                                        <div class="paywall-features" style="background: rgba(255,255,255,0.03); padding: 40px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(8px);">
+                                            <div style="display: flex; flex-direction: column; gap: 32px;">
+                                                <div style="display: flex; align-items: flex-start; gap: 16px;">
+                                                    <div style="width: 28px; height: 28px; background: rgba(16,185,129,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #10b981; font-weight: 900; flex-shrink: 0; font-size: 14px;">✓</div>
+                                                    <div>
+                                                        <div style="font-size: 16px; font-weight: 800; color: white; margin-bottom: 4px;">Acceso completo</div>
+                                                        <div style="font-size: 13px; color: #94a3b8; line-height: 1.4;">Listado total de nuevas empresas diarias sin límites ni restricciones.</div>
+                                                    </div>
+                                                </div>
+                                                <div style="display: flex; align-items: flex-start; gap: 16px;">
+                                                    <div style="width: 28px; height: 28px; background: rgba(16,185,129,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #10b981; font-weight: 900; flex-shrink: 0; font-size: 14px;">✓</div>
+                                                    <div>
+                                                        <div style="font-size: 16px; font-weight: 800; color: white; margin-bottom: 4px;">Filtros avanzados</div>
+                                                        <div style="font-size: 13px; color: #94a3b8; line-height: 1.4;">Segmenta por sector, provincia, capital social y fecha exacta de constitución.</div>
+                                                    </div>
+                                                </div>
+                                                <div style="display: flex; align-items: flex-start; gap: 16px;">
+                                                    <div style="width: 28px; height: 28px; background: rgba(16,185,129,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #10b981; font-weight: 900; flex-shrink: 0; font-size: 14px;">✓</div>
+                                                    <div>
+                                                        <div style="font-size: 16px; font-weight: 800; color: white; margin-bottom: 4px;">Detección temprana</div>
+                                                        <div style="font-size: 13px; color: #94a3b8; line-height: 1.4;">Sé el primero en saber qué empresas se acaban de registrar en España.</div>
+                                                    </div>
+                                                </div>
+                                                <div style="display: flex; align-items: flex-start; gap: 16px;">
+                                                    <div style="width: 28px; height: 28px; background: rgba(16,185,129,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #10b981; font-weight: 900; flex-shrink: 0; font-size: 14px;">✓</div>
+                                                    <div>
+                                                        <div style="font-size: 16px; font-weight: 800; color: white; margin-bottom: 4px;">Ventaja competitiva</div>
+                                                        <div style="font-size: 13px; color: #94a3b8; line-height: 1.4;">Contacta antes que nadie y aumenta tu tasa de conversión radicalmente.</div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-
+                                    
                                     <!-- Overlay para frustración visual del contenido inferior -->
                                     <div class="paywall-overlay" style="position: absolute; bottom: -200px; left: 0; width: 100%; height: 400px; background: linear-gradient(transparent, rgba(15, 23, 42, 0.9)); pointer-events: none; z-index: 2;"></div>
                                 </div>
                             <?php } ?>
                         </div>
-                        </div>
-<?php } ?>
-                    </div> <!-- FIN CARD SUPERIOR (KPIs) -->
+                    <?php } ?>
+                    </div> <!-- FIN seccion-top-leads -->
 
                     <!-- SEPARADOR VISUAL PREMIUM -->
                     <div style="margin: 56px 0 40px 0; display: flex; align-items: center; gap: 20px; opacity: 0; animation: fadeUp 0.6s ease forwards 0.3s;">
@@ -1216,6 +1150,9 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
 
         Swal.fire({
             title: title || defaultTitle,
+            customClass: {
+                title: 'ae-radar-swal-title'
+            },
             icon: 'warning',
             iconHtml: '⚡',
             showClass: {
@@ -1568,6 +1505,14 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                     source: 'radar_dashboard',
                     metadata: JSON.stringify(metadata)
                 });
+            }
+            if (window.location.hash === '#seccion-top-leads') {
+                setTimeout(function() {
+                    const el = document.getElementById('seccion-top-leads');
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 400);
             }
         });
     </script>

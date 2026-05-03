@@ -798,6 +798,29 @@ class Radar extends BaseController
     }
 
     /**
+     * Listado de facturas del usuario (dentro del layout Radar)
+     */
+    public function invoices()
+    {
+        if (!session('logged_in')) {
+            return redirect()->to(site_url('enter'));
+        }
+
+        $userId = (int) session('user_id');
+        $invoiceModel = new \App\Models\InvoiceModel();
+        $userModel = new \App\Models\UserModel();
+
+        $data = [
+            'title' => 'Mis Facturas - Radar PRO',
+            'invoices' => $invoiceModel->where('user_id', $userId)->orderBy('created_at', 'DESC')->paginate(15),
+            'pager' => $invoiceModel->pager,
+            'user' => $userModel->find($userId)
+        ];
+
+        return view('radar/invoices', $data);
+    }
+
+    /**
      * Actualizar el estado de un favorito (AJAX para Kanban)
      */
     public function updateFavoriteStatus()
@@ -1335,9 +1358,7 @@ class Radar extends BaseController
         $activePlan = $this->subscriptionModel->getActivePlanByUserId($userId);
         $isFree = (!$activePlan || !in_array($activePlan->product_type, ['radar', 'bundle']));
 
-        if ($isFree) {
-            return redirect()->to(site_url('leads-empresas-nuevas'))->with('message', 'El análisis de tendencias requiere un plan Radar PRO activo.');
-        }
+
 
         $db = \Config\Database::connect();
         $provinces = $db->query("SELECT province as name FROM seo_stats ORDER BY total_companies DESC LIMIT 52")->getResultArray();

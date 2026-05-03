@@ -129,8 +129,18 @@ class Login extends BaseController
         log_activity('login');
 
         // Redirección contextual o por defecto
-        $redirectUrl = $this->request->getPost('redirect') ?: 'dashboard';
+        $redirectUrl = $this->request->getPost('redirect');
         
+        if (empty($redirectUrl)) {
+            // Si no hay redirección específica, comprobamos si tiene radar para mandarlo allí
+            $subscriptionModel = new \App\Models\UsersuscriptionsModel();
+            if ($subscriptionModel->hasActiveSubscriptionFor($user->id, 'radar')) {
+                $redirectUrl = 'radar';
+            } else {
+                $redirectUrl = 'dashboard';
+            }
+        }
+
         // Si el destino es el radar, marcamos la intención en sesión
         if (strpos($redirectUrl, 'radar') !== false) {
             session()->set('intended_product', 'radar');
@@ -140,6 +150,7 @@ class Login extends BaseController
 
         return redirect()->to(site_url(ltrim($redirectUrl, '/')));
     }
+
 
     /**
      * Cierra la sesión de usuario

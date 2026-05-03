@@ -308,7 +308,8 @@
                     if (svg) svg.setAttribute('fill', 'currentColor');
                 }
             } else {
-                btn.innerHTML = '❌ Error';
+                Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'No se pudo actualizar el estado.', confirmButtonColor: '#2563eb' });
+                btn.innerHTML = '❌ Reintentar';
                 btn.disabled = false;
             }
         })
@@ -324,7 +325,12 @@
      */
     function handleDirectContact(companyId) {
         // Por ahora, como fallback, marcamos como contactado y abrimos una alerta de éxito
-        alert("Iniciando contacto directo... (Funcionalidad en desarrollo: se integrará con CRM/Voz)");
+        Swal.fire({
+            title: 'Contacto Directo',
+            text: 'Esta funcionalidad se integrará próximamente con tu CRM y sistema de telefonía IP.',
+            icon: 'info',
+            confirmButtonColor: '#2563eb'
+        });
         // Opcionalmente podrías activar el marcado automático:
         // markAsContactedFromAI(companyId, document.querySelector('.ai-primary-action'));
     }
@@ -393,7 +399,12 @@
                     if (favBtn) favBtn.classList.add('is-active');
                 }
             } else {
-                alert('Error al preparar contacto: ' + (data.message || 'Desconocido'));
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al preparar contacto',
+                    text: data.message || 'La acción no se pudo completar. Por favor, inténtalo de nuevo.',
+                    confirmButtonColor: '#2563eb'
+                });
                 btn.innerHTML = originalHtml;
                 btn.disabled = false;
             }

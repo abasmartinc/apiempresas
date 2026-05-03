@@ -324,49 +324,8 @@
 
 <div class="ae-radar-page">
     <div class="ae-radar-page__shell">
-        <aside class="ae-radar-page__sidebar">
-            <div class="ae-radar-page__brand">
-                <a href="<?=site_url() ?>" class="ae-radar-page__brand-header">
-                    <div class="brand-text">
-                        <span class="brand-name">API<span class="grad">Empresas</span>.es</span>
-                    </div>
-                </a>
-            </div>
-            <div class="ae-radar-page__sidebar-body">
-                <div class="ae-radar-page__nav-group">
-                    <span class="ae-radar-page__nav-label">Radar</span>
-                    <a href="<?= site_url('radar') ?>" class="ae-radar-page__nav-link">
-                        <span class="ae-radar-page__nav-icon">📊</span>
-                        Dashboard principal
-                    </a>
-                    <a href="<?= site_url('radar/favoritos') ?>" class="ae-radar-page__nav-link is-active">
-                        <span class="ae-radar-page__nav-icon">⭐</span>
-                        Mis favoritos
-                    </a>
-                    
-                    <a href="<?= site_url('radar/kanban') ?>" class="ae-radar-page__nav-link">
-                        <span class="ae-radar-page__nav-icon">📋</span>
-                        Embudo (Kanban)
-                    </a>
-                    
-                    <a href="<?= site_url('radar/trends') ?>" class="ae-radar-page__nav-link">
-                        <span class="ae-radar-page__nav-icon">📈</span>
-                        Análisis de Tendencias
-                    </a>
-                    
-                    <a href="<?= site_url('billing/invoices') ?>" class="ae-radar-page__nav-link">
-                        <span class="ae-radar-page__nav-icon">🧾</span>
-                        Mis facturas
-                    </a>
-                </div>
-            </div>
-            <div class="ae-radar-page__sidebar-footer">
-                <a href="<?= site_url('radar') ?>" class="ae-radar-page__nav-link">
-                    <span class="ae-radar-page__nav-icon">🏠</span>
-                    Volver al Radar
-                </a>
-            </div>
-        </aside>
+        <?= view('radar/partials/sidebar') ?>
+
 
         <main class="ae-radar-page__main">
             <header class="ae-radar-page__topbar">

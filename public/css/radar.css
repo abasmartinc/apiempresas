@@ -40,7 +40,6 @@
 .ae-radar-page .ae-radar-page__hero-title,
 .ae-radar-page .ae-radar-page__paywall-title,
 .ae-radar-page .ae-radar-page__paywall-kpi strong {
-    font-family: 'Outfit', sans-serif;
     letter-spacing: -0.03em;
 }
 
@@ -2301,9 +2300,17 @@
 
 /* Pulsating border animation for AI button */
 @keyframes ae-ai-shimmer {
-    0% { box-shadow: 0 0 0 0 rgba(33, 82, 255, 0.4); }
-    70% { box-shadow: 0 0 0 6px rgba(33, 82, 255, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(33, 82, 255, 0); }
+    0% {
+        box-shadow: 0 0 0 0 rgba(33, 82, 255, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 6px rgba(33, 82, 255, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(33, 82, 255, 0);
+    }
 }
 
 .ae-radar-page__btn-ai {
@@ -2402,7 +2409,9 @@
     padding: 30px;
     overflow-y: auto;
     flex: 1;
-}/* --- AI Analysis Enhanced Styles (Heuristic v2) --- */
+}
+
+/* --- AI Analysis Enhanced Styles (Heuristic v2) --- */
 .ae-ai-card {
     background: #fff;
     border: 1px solid #e2e8f0;
@@ -2466,7 +2475,7 @@
     background: #f8fafc;
     border-color: #94a3b8;
     color: #1e293b;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .ae-ai-copy-btn:active {
@@ -2530,8 +2539,15 @@
 }
 
 @keyframes aeModalIn {
-    from { opacity: 0; transform: scale(0.95) translateY(10px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 /* --- Radar Scoring & Prioritization --- */
@@ -2548,12 +2564,42 @@
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     border: 1px solid transparent;
 }
-.ae-score-pill--premium { background: #f5f3ff; color: #7c3aed; border-color: #ddd6fe; }
-.ae-score-pill--strong { background: #ecfdf5; color: #059669; border-color: #d1fae5; }
-.ae-score-pill--medium { background: #fffbeb; color: #d97706; border-color: #fef3c7; }
-.ae-score-pill--low { background: #f8fafc; color: #64748b; border-color: #e2e8f0; }
-.ae-score-pill--minimal { background: #f9fafb; color: #94a3b8; border-color: #f3f4f6; }
-.ae-score-pill--none { background: #f1f5f9; color: #94a3b8; border-color: #e2e8f0; }
+
+.ae-score-pill--premium {
+    background: #f5f3ff;
+    color: #7c3aed;
+    border-color: #ddd6fe;
+}
+
+.ae-score-pill--strong {
+    background: #ecfdf5;
+    color: #059669;
+    border-color: #d1fae5;
+}
+
+.ae-score-pill--medium {
+    background: #fffbeb;
+    color: #d97706;
+    border-color: #fef3c7;
+}
+
+.ae-score-pill--low {
+    background: #f8fafc;
+    color: #64748b;
+    border-color: #e2e8f0;
+}
+
+.ae-score-pill--minimal {
+    background: #f9fafb;
+    color: #94a3b8;
+    border-color: #f3f4f6;
+}
+
+.ae-score-pill--none {
+    background: #f1f5f9;
+    color: #94a3b8;
+    border-color: #e2e8f0;
+}
 
 .ae-priority-pill {
     display: inline-flex;
@@ -2567,10 +2613,31 @@
     border: 1px solid transparent;
     box-sizing: border-box;
 }
-.ae-priority-pill--muy-alta { background: #fff1f2; color: #e11d48; border-color: #fecdd3; }
-.ae-priority-pill--alta { background: #fef2f2; color: #ef4444; border-color: #fee2e2; }
-.ae-priority-pill--media { background: #fffbeb; color: #d97706; border-color: #fef3c7; }
-.ae-priority-pill--baja { background: #f8fafc; color: #64748b; border-color: #e2e8f0; }
+
+.ae-priority-pill--muy-alta {
+    background: #fff1f2;
+    color: #e11d48;
+    border-color: #fecdd3;
+}
+
+.ae-priority-pill--alta {
+    background: #fef2f2;
+    color: #ef4444;
+    border-color: #fee2e2;
+}
+
+.ae-priority-pill--media {
+    background: #fffbeb;
+    color: #d97706;
+    border-color: #fef3c7;
+}
+
+.ae-priority-pill--baja {
+    background: #f8fafc;
+    color: #64748b;
+    border-color: #e2e8f0;
+}
+
 .ae-act-pill {
     background: #f1f5f9;
     color: #475569;
@@ -2605,18 +2672,21 @@
     font-weight: 700;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .ae-radar-page__filter-chip:hover {
     border-color: #2563eb;
     color: #2563eb;
     transform: translateY(-1px);
     background: #f8fbff;
 }
+
 .ae-radar-page__filter-chip.is-active {
     background: #2563eb;
     color: white;
     border-color: #2563eb;
     box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
 }
+
 /* AI Modal - Enhanced Commercial Blocks */
 .ai-kpis-grid {
     display: grid;
@@ -2666,12 +2736,21 @@
 }
 
 /* Probabilidad Colors */
-.ai-kpi-card--prob-alta .ai-kpi-value { color: #10b981; }
-.ai-kpi-card--prob-media .ai-kpi-value { color: #f59e0b; }
-.ai-kpi-card--prob-baja .ai-kpi-value { color: #64748b; }
+.ai-kpi-card--prob-alta .ai-kpi-value {
+    color: #10b981;
+}
+
+.ai-kpi-card--prob-media .ai-kpi-value {
+    color: #f59e0b;
+}
+
+.ai-kpi-card--prob-baja .ai-kpi-value {
+    color: #64748b;
+}
 
 /* Objection & Angle Boxes */
-.ai-objection-box, .ai-angle-box {
+.ai-objection-box,
+.ai-angle-box {
     padding: 16px;
     border-radius: 12px;
     margin-bottom: 16px;
@@ -2707,8 +2786,13 @@
     margin-bottom: 4px;
 }
 
-.ai-objection-box .ai-box-label { color: #be123c; }
-.ai-angle-box .ai-box-label { color: #15803d; }
+.ai-objection-box .ai-box-label {
+    color: #be123c;
+}
+
+.ai-angle-box .ai-box-label {
+    color: #15803d;
+}
 
 .ai-box-text {
     font-size: 14px;
@@ -2974,8 +3058,15 @@
 }
 
 @keyframes fadeInSlideUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .ae-spinner--small {
@@ -3035,11 +3126,30 @@
     line-height: normal;
 }
 
-.ae-status-badge--nuevo { background: #eff6ff; color: #3b82f6; }
-.ae-status-badge--contactado { background: #f5f3ff; color: #8b5cf6; }
-.ae-status-badge--negociacion { background: #fffbeb; color: #f59e0b; }
-.ae-status-badge--ganado { background: #f0fdf4; color: #10b981; }
-.ae-status-badge--seguimiento { background: #eff6ff; color: #2563eb; }
+.ae-status-badge--nuevo {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.ae-status-badge--contactado {
+    background: #f5f3ff;
+    color: #8b5cf6;
+}
+
+.ae-status-badge--negociacion {
+    background: #fffbeb;
+    color: #f59e0b;
+}
+
+.ae-status-badge--ganado {
+    background: #f0fdf4;
+    color: #10b981;
+}
+
+.ae-status-badge--seguimiento {
+    background: #eff6ff;
+    color: #2563eb;
+}
 
 .ae-radar-page__score--now,
 .ae-radar-page__score--contactar-ahora,
@@ -3067,3 +3177,14 @@
     color: #94a3b8 !important;
     border-color: #f1f5f9 !important;
 }
+
+.swal2-title.ae-radar-swal-title {
+    line-height: 1.0 !important;
+    padding-top: 10px !important;
+    margin-bottom: 15px !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.02em !important;
+    display: block !important;
+}
+html { scroll-behavior: smooth; }
+

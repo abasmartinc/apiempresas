@@ -473,13 +473,21 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
                                         </div>
                                     </div>
                                     
-                                    <!-- Debug Info (Breakdown) -->
+                                    <!-- Desglose de Score amigable para el usuario -->
                                     <?php if (isset($scoreData['details'])): ?>
-                                        <div style="font-size: 9px; color: #94a3b8; display: flex; gap: 8px; margin-bottom: 4px; font-weight: 600;">
-                                            <span>B: <?= $scoreData['details']['borme'] ?></span>
-                                            <span>Q: <?= $scoreData['details']['quality'] ?></span>
-                                            <span>C: <?= $scoreData['details']['contact'] ?></span>
-                                            <span>P: <?= $scoreData['details']['personalization'] ?></span>
+                                        <div style="font-size: 10px; color: #64748b; display: flex; gap: 14px; margin-bottom: 8px; font-weight: 700; align-items: center;">
+                                            <span title="Fuerza de la señal comercial (BORME)" style="display: flex; align-items: center; gap: 4px; cursor: help;">
+                                                <span style="opacity: 0.6; font-size: 12px;">🎯</span> 
+                                                <span>Oportunidad: <span style="color: #0f172a;"><?= $scoreData['details']['borme'] ?>%</span></span>
+                                            </span>
+                                            <span title="Calidad y solidez del perfil de empresa" style="display: flex; align-items: center; gap: 4px; cursor: help;">
+                                                <span style="opacity: 0.6; font-size: 12px;">💎</span> 
+                                                <span>Perfil: <span style="color: #0f172a;"><?= $scoreData['details']['quality'] ?>%</span></span>
+                                            </span>
+                                            <span title="Nivel de datos de contacto disponibles" style="display: flex; align-items: center; gap: 4px; cursor: help;">
+                                                <span style="opacity: 0.6; font-size: 12px;">📞</span> 
+                                                <span>Contacto: <span style="color: #0f172a;"><?= $scoreData['details']['contact'] ?>%</span></span>
+                                            </span>
                                         </div>
                                     <?php endif; ?>
 
@@ -586,44 +594,55 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
 
                     <?php if ($isFree && !empty($lockedCompanies)) { ?>
                         <tr class="ae-radar-inline-paywall">
-                            <td colspan="3" style="padding: 60px 40px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 24px; text-align: center; color: white; position: relative; overflow: hidden; margin: 20px 0;">
+                            <td colspan="3" style="padding: 60px 40px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 24px; text-align: left; color: white; position: relative; overflow: hidden; margin: 20px 0;">
                                 <!-- Glow Effect -->
                                 <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 60%); pointer-events: none;"></div>
                                 
-                                <div style="max-width: 650px; margin: 0 auto; position: relative; z-index: 1;">
-                                    <h2 style="font-size: 32px; font-weight: 900; margin-bottom: 16px; letter-spacing: -1px;">Estas empresas están siendo contactadas ahora mismo</h2>
-                                    <p style="font-size: 16px; color: rgba(255,255,255,0.8); margin-bottom: 32px; line-height: 1.6;">Estas oportunidades desaparecen cuando otro proveedor las contacta. Desbloquea el acceso completo antes que tu competencia.</p>
-                                    
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 40px; text-align: left;">
-                                        <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9);">
-                                            <span style="color: #10b981; font-size: 18px;">✔</span> Acceso inmediato
+                                <div class="paywall-grid" style="max-width: 1000px; margin: 0 auto; position: relative; z-index: 10; display: grid; grid-template-columns: 1.4fr 1fr; gap: 48px; align-items: center;">
+                                    <div class="paywall-content">
+                                        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(37,99,235,0.1); color: #60a5fa; padding: 6px 12px; border-radius: 100px; font-size: 11px; font-weight: 800; margin-bottom: 20px; border: 1px solid rgba(37,99,235,0.2); backdrop-filter: blur(4px);">
+                                            <span style="display: inline-block; width: 6px; height: 6px; background: #60a5fa; border-radius: 50%; animation: pulse 2s infinite;"></span>
+                                            Oportunidades en tiempo real
                                         </div>
-                                        <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9);">
-                                            <span style="color: #10b981; font-size: 18px;">✔</span> Sin permanencia
-                                        </div>
-                                        <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9);">
-                                            <span style="color: #10b981; font-size: 18px;">✔</span> Recupera la inversión con 1 cliente
-                                        </div>
-                                        <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9);">
-                                            <span style="color: #10b981; font-size: 18px;">✔</span> Ventaja competitiva real
+
+                                        <h2 style="font-size: 34px; font-weight: 900; margin-bottom: 16px; letter-spacing: -1px; line-height: 1.1; color: white !important;">Estas empresas están siendo contactadas <span style="background: linear-gradient(to right, #60a5fa, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ahora mismo</span></h2>
+                                        <p style="font-size: 16px; color: rgba(255,255,255,0.7); margin-bottom: 32px; line-height: 1.6; max-width: 480px;">No permitas que tu competencia llegue antes. Desbloquea el acceso completo para ver los detalles de contacto antes que desaparezcan.</p>
+                                        
+                                        <div style="display: flex; flex-direction: column; gap: 16px; align-items: flex-start;">
+                                            <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="display: inline-flex; align-items: center; gap: 10px; background: #2563eb; color: white; padding: 18px 36px; border-radius: 16px; font-size: 16px; font-weight: 900; text-decoration: none; box-shadow: 0 10px 30px rgba(37,99,235,0.4); transition: transform 0.2s; transform-origin: center;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+                                                <span>Acceder ahora antes que tu competencia</span>
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                            </a>
+                                            <div style="display: flex; align-items: center; gap: 8px; font-size: 10px; color: #fbbf24; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(251,191,36,0.1); padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2);">
+                                                <span style="font-size: 14px;">💰</span> ROI: Recupera la inversión con 1 cliente
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div style="margin-bottom: 24px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-                                        <div style="font-size: 14px; color: #fbbf24; font-weight: 800; margin-bottom: 4px;">🚀 Urgencia Real</div>
-                                        <div style="font-size: 13px; color: rgba(255,255,255,0.7);">"Varias de estas empresas dejarán de estar disponibles hoy. Otros proveedores ya están contactando estas oportunidades."</div>
-                                    </div>
-
-                                    <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="display: inline-block; background: #2563eb; color: white; padding: 18px 48px; border-radius: 16px; font-size: 18px; font-weight: 900; text-decoration: none; box-shadow: 0 10px 30px rgba(37,99,235,0.4); transition: transform 0.2s; transform-origin: center;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                                        Desbloquear todas las oportunidades ahora
-                                    </a>
-                                    
-                                    <div style="margin-top: 20px; font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 600;">
-                                        Sin permanencia · Activación inmediata
+                                    <div class="paywall-features" style="background: rgba(255,255,255,0.03); padding: 32px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(8px);">
+                                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                                            <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.9);">
+                                                <span style="color: #10b981; font-size: 18px;">✔</span> Acceso completo hoy
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.9);">
+                                                <span style="color: #10b981; font-size: 18px;">✔</span> Filtros avanzados
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.9);">
+                                                <span style="color: #10b981; font-size: 18px;">✔</span> Detección temprana
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.9);">
+                                                <span style="color: #10b981; font-size: 18px;">✔</span> Ventaja competitiva
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; text-align: center;">
+                                            Sin permanencia · Activación inmediata
+                                        </div>
                                     </div>
                                 </div>
                             </td>
                         </tr>
+
                         <?php foreach ($lockedCompanies as $co): ?>
                             <tr class="ae-radar-row ae-locked-overlay" onclick="showConversionNudge('Oportunidad real bloqueada', 'Activa Radar PRO para ver los detalles de esta empresa y del resto de oportunidades detectadas hoy.', {id: '<?= $co['id'] ?>', action: 'view'})">
                                 <td class="ae-radar-page__td-identity" style="padding: 24px 20px;">
