@@ -9,45 +9,37 @@ if (!function_exists('calculateCompanySeoScore')) {
     {
         $score = 0;
 
-        // Función interna para validar si un campo tiene contenido real
         $isValid = function ($value) {
             if ($value === null) return false;
             $v = trim((string)$value);
-            $invalidValues = ['', '-', '00 DESCONOCIDA'];
-            return !in_array(strtoupper($v), $invalidValues);
+            return !in_array(strtoupper($v), ['', '-', '00 DESCONOCIDA', 'NULL', 'UNDEFINED']);
         };
 
-        // 1. Nombre (+1)
-        if ($isValid($company['name'] ?? $company['nombre'] ?? null)) {
-            $score += 1;
-        }
+        // 1. Identificación (+2)
+        if ($isValid($company['name'] ?? null)) $score += 1;
+        if ($isValid($company['cif'] ?? null)) $score += 1;
 
-        // 2. CIF (+1)
-        if ($isValid($company['cif'] ?? $company['nif'] ?? null)) {
-            $score += 1;
-        }
+        // 2. Datos Geográficos y Actividad (+2)
+        if ($isValid($company['province'] ?? null)) $score += 1;
+        if ($isValid($company['cnae'] ?? null)) $score += 1;
 
-        // 3. CNAE válido (+2)
-        // Buscamos tanto el código como el label
-        $cnae = $company['cnae'] ?? $company['cnae_code'] ?? null;
-        if ($isValid($cnae)) {
+        // 3. Objeto Social (+2) - Factor de peso
+        if ($isValid($company['corporate_purpose'] ?? null)) $score += 2;
+
+        // 4. Administradores (+2) - Factor de calidad humana
+        if (!empty($company['num_admins']) && (int)$company['num_admins'] > 0) {
             $score += 2;
         }
 
-        // 4. Provincia (+1)
-        if ($isValid($company['province'] ?? $company['provincia'] ?? null)) {
+        // 5. Historial BORME (+1)
+        if (!empty($company['num_borme_posts']) && (int)$company['num_borme_posts'] > 0) {
             $score += 1;
         }
 
-        // 5. Objeto Social (+2)
-        if ($isValid($company['corporate_purpose'] ?? $company['objeto_social'] ?? null)) {
-            $score += 2;
-        }
-
-        // 6. Descripción generada/meta (+2)
-        // Usualmente este campo se genera dinámicamente, pero si ya viene prefijado lo sumamos
-        if ($isValid($company['meta_description'] ?? $company['description'] ?? null)) {
-            $score += 2;
+        // 6. Bonus Empresa Nueva (+1)
+        $name = $company['name'] ?? '';
+        if (strpos($name, '2024') !== false || strpos($name, '2025') !== false) {
+            $score += 1;
         }
 
         return $score;
@@ -57,10 +49,10 @@ if (!function_exists('calculateCompanySeoScore')) {
 if (!function_exists('shouldIndexCompany')) {
     /**
      * Determina si una empresa debe ser indexada.
-     * Regla: Score >= 5 -> true
+     * Subimos el umbral a 6 para ser más estrictos con el contenido.
      */
     function shouldIndexCompany(array $company): bool
     {
-        return calculateCompanySeoScore($company) >= 5;
+        return calculateCompanySeoScore($company) >= 6;
     }
 }

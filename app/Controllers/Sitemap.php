@@ -132,7 +132,7 @@ class Sitemap extends Controller
         // Obtener lote de empresas
         // Necesitamos campos extra para el cálculo del score SEO (shouldIndexCompany)
         $companies = $model->builder()
-            ->select('id, cif, company_name as name, cnae_code as cnae, registro_mercantil as province, objeto_social as corporate_purpose') 
+            ->select('id, cif, company_name as name, cnae_code as cnae, registro_mercantil as province, objeto_social as corporate_purpose, num_admins, num_borme_posts') 
             ->orderBy('id', 'ASC') // Orden consistente
             ->limit($this->perPage, $offset)
             ->get()
@@ -156,12 +156,14 @@ class Sitemap extends Controller
             }
 
             $url = company_url($company);
+            $score = calculateCompanySeoScore($company);
+            $priority = ($score >= 7) ? '0.8' : '0.6';
             
             $xml .= '<url>' . PHP_EOL;
             $xml .= '  <loc>' . esc($url) . '</loc>' . PHP_EOL;
             $xml .= '  <lastmod>' . date('Y-m-d') . '</lastmod>' . PHP_EOL;
             $xml .= '  <changefreq>monthly</changefreq>' . PHP_EOL;
-            $xml .= '  <priority>0.6</priority>' . PHP_EOL;
+            $xml .= '  <priority>' . $priority . '</priority>' . PHP_EOL;
             $xml .= '</url>' . PHP_EOL;
             
             $included++;
