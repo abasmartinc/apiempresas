@@ -51,11 +51,14 @@ $formatCapital = function($val) {
 };
 
 $getOpportunityText = function($score) {
-    if ($score >= 85) return ['label' => 'LEAD CALIENTE', 'class' => 'hot'];
-    if ($score >= 70) return ['label' => 'OPORTUNIDAD ALTA', 'class' => 'high'];
-    if ($score >= 40) return ['label' => 'CONTACTAR AHORA', 'class' => 'now'];
-    return ['label' => 'POTENCIAL MEDIO', 'class' => 'medium'];
+    if ($score >= 85) return ['label' => 'Lead prioritario', 'class' => 'hot'];
+    if ($score >= 70) return ['label' => 'Oportunidad alta', 'class' => 'high'];
+    if ($score >= 50) return ['label' => 'Oportunidad media', 'class' => 'now'];
+    if ($score >= 30) return ['label' => 'Potencial bajo', 'class' => 'medium'];
+    if ($score > 0) return ['label' => 'Baja prioridad', 'class' => 'low-priority'];
+    return ['label' => 'No contactar', 'class' => 'no-contact'];
 };
+
 
 $getEstimatedTicket = function($capital) {
     if (!$capital || $capital <= 0) return '500€ - 1.500€';
@@ -174,6 +177,9 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
     .ae-opp-badge.high { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
     .ae-opp-badge.now { background: #dcfce7; color: #10b981; border: 1px solid #bbf7d0; }
     .ae-opp-badge.medium { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+    .ae-opp-badge.low-priority { background: #fffbeb; color: #d97706; border: 1px solid #fef3c7; }
+    .ae-opp-badge.no-contact { background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; }
+
 
     .ae-ticket-val {
         font-size: 15px;
@@ -437,12 +443,11 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
                             // 4. Motivo Inteligente (Fallback mejorado)
                             $sectorSimple = esc(mb_strimwidth($co['cnae_label'] ?? 'su sector', 0, 30, '...'));
                             if (empty($needText) || $needText == 'Necesidad detectada por Radar') {
-                                if ($scoreTotal >= 85) $reason = "Liderazgo detectado en $sectorSimple con alta tracción.";
-                                elseif ($daysSince <= 3) $reason = "Nueva constitución en $sectorSimple con necesidad inminente.";
-                                else $reason = "Empresa de $sectorSimple con señales de escalado detectadas.";
+                                $reason = $scoreData['details']['explanation'] ?? "Empresa de $sectorSimple con señales de interés detectadas.";
                             } else {
                                 $reason = $needText;
                             }
+
 
                             // 5. Estilo de Fila y Estado
                             $rowStyle = 'border-left: 5px solid transparent; transition: all 0.2s; vertical-align: middle;';
@@ -461,12 +466,23 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
                                         <a href="javascript:void(0)" onclick="<?= $isFree ? "showConversionNudge('Oportunidad real bloqueada', 'Activa Radar PRO para ver los detalles de esta empresa y del resto de oportunidades detectadas hoy.', {id: '".$co['id']."', action: 'view'})" : "openQuickView('".$co['id']."')" ?>" style="text-decoration: none;">
                                             <span style="font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.2; letter-spacing: -0.01em;"><?= esc($co['company_name']) ?></span>
                                         </a>
-                                        <div style="background: white; border: 1.5px solid <?= $scoreColor ?>; padding: 2px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;">
-                                            <span style="font-weight: 900; font-size: 10px; color: <?= $scoreColor ?>;">
-                                                <?= $scoreIcon ?> <?= $scoreTotal ?>/100
+                                        <div class="ae-score-badge" title="<?= esc($scoreData['details']['explanation'] ?? 'Puntuación inteligente de Radar') ?>" style="background: white; border: 1.5px solid <?= $co['lead_score_data']['color'] ?? $scoreColor ?>; padding: 2px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;">
+                                            <span style="font-weight: 900; font-size: 10px; color: <?= $co['lead_score_data']['color'] ?? $scoreColor ?>;">
+                                                <?= $co['lead_score_data']['icon'] ?? $scoreIcon ?> <?= $scoreTotal ?>/100
                                             </span>
                                         </div>
                                     </div>
+                                    
+                                    <!-- Debug Info (Breakdown) -->
+                                    <?php if (isset($scoreData['details'])): ?>
+                                        <div style="font-size: 9px; color: #94a3b8; display: flex; gap: 8px; margin-bottom: 4px; font-weight: 600;">
+                                            <span>B: <?= $scoreData['details']['borme'] ?></span>
+                                            <span>Q: <?= $scoreData['details']['quality'] ?></span>
+                                            <span>C: <?= $scoreData['details']['contact'] ?></span>
+                                            <span>P: <?= $scoreData['details']['personalization'] ?></span>
+                                        </div>
+                                    <?php endif; ?>
+
                                     
                                     <div class="ae-meta-sub">
                                         <div class="ae-meta-item" title="Actividad">

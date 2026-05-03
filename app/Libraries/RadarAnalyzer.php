@@ -248,29 +248,37 @@ class RadarAnalyzer
      */
     private static function detectConversionProbability(array $company): array
     {
-        $score = $company['score_total'] ?? 0;
-        $priority = $company['priority_level'] ?? 'baja';
-        $actType = $company['main_act_type'] ?? '';
+        // Re-calculamos usando el nuevo sistema para coherencia en informes IA
+        $scoring = \App\Libraries\RadarScoringSystem::calculate($company);
+        $score = $scoring['final_score'];
 
-        if ($score >= 75 || $priority === 'muy_alta' || $actType === 'Constitución') {
+        if ($score >= 85) {
             return [
-                'label' => 'Alta',
-                'description' => 'Alta probabilidad de necesitar servicios externos en fase inicial'
+                'label' => 'Muy Alta',
+                'description' => 'Prioridad máxima: Lead con señales BORME inminentes y perfil verificado.'
             ];
         }
 
-        if ($score >= 55) {
+        if ($score >= 70) {
+            return [
+                'label' => 'Alta',
+                'description' => 'Alta probabilidad de conversión según señales registrales y perfil.'
+            ];
+        }
+
+        if ($score >= 50) {
             return [
                 'label' => 'Media',
-                'description' => 'Probabilidad media de contratación según perfil y señales'
+                'description' => 'Probabilidad media: Requiere validación comercial de la necesidad.'
             ];
         }
 
         return [
             'label' => 'Baja',
-            'description' => 'Perfil en fase exploratoria o con señales comerciales débiles'
+            'description' => 'Baja probabilidad actual: Perfil latente o sin señales de urgencia.'
         ];
     }
+
 
     /**
      * Step 9: Detect Contact Window.

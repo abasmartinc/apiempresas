@@ -1096,50 +1096,26 @@ class Radar extends BaseController
      */
     private function getLeadScore($co, $engagementScore = 0, $groupScore = 0, $userScore = 0)
     {
-        // 1. Algoritmo base (Fiel a la base de datos authoritative)
-        $dbScore = (int)($co['score_total'] ?? 0);
-        
-        // Si no tenemos score en BD, calculamos el fallback dinámico
-        if ($dbScore <= 0) {
-            $baseScore = 50;
-            if (!empty($co['phone'])) $baseScore += 30;
-            if (!empty($co['cif']) && (!empty($co['cif'][0]) && $co['cif'][0] === 'B')) $baseScore += 10;
-            if (strlen($co['objeto_social'] ?? '') > 150) $baseScore += 10;
-        } else {
-            $baseScore = $dbScore;
-        }
-
-        // 2. Capa de Engagement Real (Booster suave personal del usuario por Lead específico)
-        $adjEngagement = min((int)$engagementScore, 50);
-        
-        // 3. Capa de Aprendizaje Grupal (Booster de sector/provincia global)
-        $adjGroupBoost = min((int)$groupScore, 100);
-        
-        // 4. Capa de Personalización Individual (Booster de IA aprendida por Usuario según sus nichos favoritos)
-        $adjUserPref = min((int)$userScore, 100);
-        // FÓRMULA ÓPTIMA (Elastic Weighted): 80% Base + 20% Dynamic Boosters
-        $dynamicBoosters = ($adjEngagement * 0.4) + ($adjGroupBoost * 0.3) + ($adjUserPref * 0.3);
-        $finalScore = max(0, min(100, ($baseScore * 0.8) + ($dynamicBoosters * 0.2)));
-
-        // 5. Proyección a Categorías Visuales (Umbrales 85/70/40 sincronizados con results_table.php)
-        $scoreColor = '#94a3b8'; $scoreProb = 'POTENCIAL MEDIO'; $scoreIcon = '⚪'; $scoreBg = 'rgba(148, 163, 184, 0.1)';
-        
-        if ($finalScore >= 85) {
-            $scoreColor = '#ef4444'; $scoreBg = 'rgba(239, 68, 68, 0.1)'; $scoreProb = 'LEAD CALIENTE'; $scoreIcon = '🔥';
-        } elseif ($finalScore >= 70) {
-            $scoreColor = '#f59e0b'; $scoreBg = 'rgba(245, 158, 11, 0.1)'; $scoreProb = 'OPORTUNIDAD ALTA'; $scoreIcon = '🟡';
-        } elseif ($finalScore >= 40) {
-            $scoreColor = '#10b981'; $scoreBg = 'rgba(16, 185, 129, 0.1)'; $scoreProb = 'CONTACTAR AHORA'; $scoreIcon = '🟢';
-        }
+        $result = \App\Libraries\RadarScoringSystem::calculate($co, (int)$engagementScore, (int)$groupScore, (int)$userScore);
         
         return [
-            'label' => $scoreProb,
-            'numeric' => $finalScore,
-            'base' => $baseScore,
-            'color' => $scoreColor,
-            'icon' => $scoreIcon
+            'label'   => $result['visuals']['label'],
+            'numeric' => $result['final_score'],
+            'base'    => $result['borme_score'], // Usamos borme_score como base para compatibilidad
+            'color'   => $result['visuals']['color'],
+            'icon'    => $result['visuals']['icon'],
+            'bg'      => $result['visuals']['bg'],
+            'priority_level' => $result['visuals']['priority'],
+            'details' => [
+                'borme'           => $result['borme_score'],
+                'quality'         => $result['quality_score'],
+                'contact'         => $result['contact_score'],
+                'personalization' => $result['personalization_score'],
+                'explanation'     => $result['explanation']
+            ]
         ];
     }
+
 
     /**
      * [PERSONALIZATION] Calcula el mapa de preferencias aprendidas para el usuario (con caché y umbral)
