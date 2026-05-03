@@ -639,6 +639,7 @@
     </main>
 
     <?= view('partials/footer') ?>
+    <?= view('partials/review_modal') ?>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
