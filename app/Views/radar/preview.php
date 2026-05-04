@@ -424,14 +424,21 @@
         .ae-modal.is-active .ae-modal__content { transform: translateY(0); }
         .ae-modal__close {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
+            top: 24px;
+            right: 24px;
+            background: #f1f5f9;
             border: none;
-            color: #94a3b8;
+            color: #64748b;
             cursor: pointer;
             padding: 8px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 10;
         }
+        .ae-modal__close:hover { background: #e2e8f0; color: #0f172a; transform: rotate(90deg); }
         .email-capture__title { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 24px; }
         .email-capture__form { display: flex; flex-direction: column; gap: 12px; }
         .email-capture__input {
@@ -832,22 +839,46 @@
     </div>
 
 
-<!-- ⑥ INTERACTION MODAL -->
+<!-- ⑥ INTERACTION MODAL (Premium Redesign) -->
 <div class="ae-modal" id="interaction-modal">
-    <div class="ae-modal__content">
+    <div class="ae-modal__content" style="padding: 0; overflow: hidden; max-width: 440px;">
         <button class="ae-modal__close" onclick="closeModal()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
-        <div style="text-align: center; margin-bottom: 24px;">
-            <h3 style="font-size: 1.5rem; font-weight: 900; color: #0f172a; margin-bottom: 8px;">Acceso restringido</h3>
-            <p style="color: #64748b; font-weight: 500;">Introduce tu email para ver los detalles de esta empresa y desbloquear el Radar.</p>
+
+        <div style="padding: 48px 40px 32px; text-align: center;">
+            <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: #f0fdf4; border: 1px solid #dcfce7; color: #16a34a; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; animation: pulse 2s infinite;"></span>
+                Radar B2B Activo
+            </div>
+
+            <h3 style="font-size: 1.75rem; font-weight: 950; color: #0f172a; margin-bottom: 12px; letter-spacing: -0.04em; line-height: 1.15;">
+                Acceso restringido
+            </h3>
+            <p style="color: #64748b; font-weight: 500; font-size: 1rem; line-height: 1.5; margin-bottom: 0;">
+                Introduce tu email profesional para ver el CIF, contacto y detalles de esta empresa.
+            </p>
         </div>
-        <div class="email-capture">
+
+        <div style="padding: 0 40px 48px;">
             <form class="email-capture__form preview-form-handler">
-                <input type="email" name="email" class="email-capture__input" placeholder="ejemplo@empresa.com" required>
-                <button type="submit" class="email-capture__btn submit-btn-handler">Acceder a las <?= $opps_count ?> empresas ahora</button>
-                <div class="form-error-handler" style="color: #ef4444; font-size: 0.85rem; font-weight: 700; margin-top: 8px; display: none;"></div>
+                <div style="position: relative;">
+                    <input type="email" name="email" class="email-capture__input" placeholder="ejemplo@empresa.com" style="height: 64px; font-size: 1.1rem; text-align: center; border-radius: 16px; background: #f8fafc; border: 2px solid #e2e8f0;" required>
+                </div>
+                <button type="submit" class="email-capture__btn submit-btn-handler" style="height: 64px; font-size: 1.1rem; font-weight: 850; border-radius: 16px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);">
+                    Acceder a las <?= $opps_count ?> empresas
+                </button>
+                <div class="form-error-handler" style="color: #ef4444; font-size: 0.85rem; font-weight: 700; margin-top: 12px; display: none; text-align: center;"></div>
             </form>
+
+            <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 24px; padding-top: 24px; border-top: 1px solid #f1f5f9;">
+                <div style="display: flex; align-items: center; gap: 6px; color: #94a3b8; font-size: 0.8rem; font-weight: 700;">
+                    <span style="color: #10b981;">✓</span> Sin tarjeta
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; color: #94a3b8; font-size: 0.8rem; font-weight: 700;">
+                    <span style="color: #10b981;">✓</span> Acceso 24/7
+                </div>
+            </div>
         </div>
     </div>
 </div>
