@@ -282,10 +282,8 @@ class AiContextService
      */
     public function getSystemPrompt(): string
     {
-        // Fetch Free Plan Limit for accuracy
-        $apiPlanModel = new \App\Models\ApiPlanModel();
-        $freePlan = $apiPlanModel->where('slug', 'free')->first();
-        $freeLimit = $freePlan ? (int)$freePlan->monthly_quota : 15;
+        helper('api');
+        $freeLimit = get_free_plan_limit();
 
         return "Eres el Asistente Inteligente de APIEmpresas.es (experto en datos mercantiles y tecnología API).
                 

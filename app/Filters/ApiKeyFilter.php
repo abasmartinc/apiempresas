@@ -10,6 +10,7 @@ class ApiKeyFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
+        helper('api');
         // ====== Medición de duración + request_id ======
         $request->api_t0 = microtime(true);
         $request->api_request_id = bin2hex(random_bytes(16)); // 32 hex chars
@@ -117,15 +118,15 @@ class ApiKeyFilter implements FilterInterface
                 ->get()
                 ->getRow();
             
-            $monthlyQuota = $planRow ? (int)$planRow->monthly_quota : 100;
+            $monthlyQuota = $planRow ? (int)$planRow->monthly_quota : get_free_plan_limit();
 
             $currentMonth = date('Y-m');
-            // --- LÓGICA DE MIGRACIÓN SEGURA (100 -> 15) ---
+            // --- LÓGICA DE MIGRACIÓN SEGURA (100 -> Dinámico) ---
             $migrationDate = '2026-04-26 00:00:00';
             $isLegacy = ($row->created_at < $migrationDate);
             
             if ($isLegacy && (int)$planId === 1 && (int)($row->migration_reset_done ?? 0) === 0) {
-                // Reset controlado: permitimos 15 nuevas consultas desde este momento
+                // Reset controlado: permitimos nuevas consultas desde este momento
                 $db->table('api_usage_daily')
                    ->where('user_id', (int)$row->user_id)
                    ->where('date >=', date('Y-m-01'))

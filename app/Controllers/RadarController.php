@@ -566,10 +566,7 @@ class RadarController extends BaseController
         // Dynamic Subtitle for H1 reinforcement
         $dynamicSubtitle = "{$displayCount}empresas en {$context} están contratando proveedores ahora mismo";
 
-        // Fetch Free Plan Limit
-        $apiPlanModel = new \App\Models\ApiPlanModel();
-        $freePlan = $apiPlanModel->where('slug', 'free')->first();
-        $freeLimit = $freePlan ? (int)$freePlan->monthly_quota : 15;
+        $freeLimit = get_free_plan_limit();
 
         $data = [
             'variant_id' => $variantId . '-' . $mVariantId,

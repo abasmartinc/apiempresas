@@ -9,9 +9,7 @@ class ApiPrices extends BaseController
      */
     public function index()
     {
-        $apiPlanModel = new \App\Models\ApiPlanModel();
-        $freePlan = $apiPlanModel->where('slug', 'free')->first();
-        $freeLimit = $freePlan ? (int)$freePlan->monthly_quota : 15;
+        $freeLimit = get_free_plan_limit();
 
         return view('seo/api_prices', ['freeLimit' => $freeLimit]);
     }

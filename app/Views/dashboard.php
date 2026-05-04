@@ -308,10 +308,10 @@
                         </div>
                         
                         <div class="search-form-dash" style="position: relative;">
-                            <input type="text" id="dash_q" class="search-input-dash" placeholder="Ej: B12345678 o Nombre de Empresa" <?= (!$isPaid && $requestsUsed >= 15) ? 'readonly style="background: #f8fafc; cursor: not-allowed;"' : '' ?>>
-                            <button id="btnDashValidate" class="btn-validate-dash" <?= (!$isPaid && $requestsUsed >= 15) ? 'style="background: #94a3b8;"' : '' ?>>Validar ahora</button>
+                            <input type="text" id="dash_q" class="search-input-dash" placeholder="Ej: B12345678 o Nombre de Empresa" <?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'readonly style="background: #f8fafc; cursor: not-allowed;"' : '' ?>>
+                            <button id="btnDashValidate" class="btn-validate-dash" <?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'style="background: #94a3b8;"' : '' ?>>Validar ahora</button>
                             
-                            <?php if (!$isPaid && $requestsUsed >= 15): ?>
+                            <?php if (!$isPaid && $requestsUsed >= $freeLimit): ?>
                             <div onclick="showUpgradeModal()" style="position: absolute; inset: 0; cursor: pointer; z-index: 5;"></div>
                             <?php endif; ?>
                         </div>
@@ -323,13 +323,13 @@
                                     $prog = ($requestsUsed / $freeLimit) * 100;
                                     $displayPercent = ($prog > 0 && $prog < 5) ? 5 : ceil($prog); 
                                 ?>
-                                <div class="progress-bar-fill" style="--target-width: <?= min(100, $displayPercent) ?>%; <?= ($requestsUsed >= 15) ? 'background: #e11d48;' : (($requestsUsed >= 10) ? 'background: #f59e0b;' : '') ?>"></div>
+                                <div class="progress-bar-fill" style="--target-width: <?= min(100, $displayPercent) ?>%; <?= ($requestsUsed >= $freeLimit) ? 'background: #e11d48;' : (($requestsUsed >= ($freeLimit * 0.7)) ? 'background: #f59e0b;' : '') ?>"></div>
                             </div>
                             <span class="progress-text" style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin-top: 8px; display: block;">
                                 <?= $requestsUsed ?> de <?= $freeLimit ?> empresas probadas
                             </span>
                             <span style="font-size: 0.75rem; color: #64748b; font-weight: 700; display: block; margin-top: 4px;">
-                                <?= ($requestsUsed >= 15) ? '<span style="color: #e11d48;">Has alcanzado el límite.</span>' : 'Completa varias validaciones para ver el valor real de la API' ?>
+                                <?= ($requestsUsed >= $freeLimit) ? '<span style="color: #e11d48;">Has alcanzado el límite.</span>' : 'Completa varias validaciones para ver el valor real de la API' ?>
                             </span>
                         </div>
                         <?php endif; ?>

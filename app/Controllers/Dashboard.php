@@ -44,7 +44,7 @@ class Dashboard extends BaseController
         if ($isLegacyUser && (int)$user->migration_reset_done === 0) {
             $db = \Config\Database::connect();
             
-            // "Reset" de consumo del mes actual para darles las 15 nuevas consultas
+            // "Reset" de consumo del mes actual para darles las nuevas consultas del plan
             // Nota: api_requests (historial real) NO se toca.
             $db->table('api_usage_daily')
                ->where('user_id', $userId)
@@ -119,13 +119,10 @@ class Dashboard extends BaseController
             $isPaid = ($currentPlanSlug !== 'free' && !empty($currentPlanSlug));
         }
 
-        // Obtener límites dinámicos de la base de datos
-        $apiPlanModel = new \App\Models\ApiPlanModel();
         if ($isPaid && $plan) {
             $maxLimit = (int)($plan->monthly_quota ?? 3000);
         } else {
-            $freePlan = $apiPlanModel->where('slug', 'free')->first();
-            $maxLimit = (int)($freePlan->monthly_quota ?? 15);
+            $maxLimit = get_free_plan_limit();
         }
         
         $remainingRequests = max(0, $maxLimit - $requestsUsedThisMonth);

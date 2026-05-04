@@ -74,7 +74,7 @@ $companies = $companies ?? [];
 $paywall_level = $paywall_level ?? 'strong';
 
 if ($paywall_level === 'none') {
-    $freeCount = $freeLimit ?? 15;
+    $freeCount = get_free_plan_limit();
 } elseif ($paywall_level === 'soft') {
     $freeCount = 20;
 } else {

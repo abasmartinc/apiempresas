@@ -55,9 +55,7 @@ class UsageStatus extends BaseController
         $count = (int)($usage['requests_count'] ?? 0);
         
         // Obtener límite del plan free dinámicamente
-        $apiPlanModel = new \App\Models\ApiPlanModel();
-        $freePlan = $apiPlanModel->where('slug', 'free')->first();
-        $limit = $freePlan ? (int)$freePlan->monthly_quota : 15;
+        $limit = get_free_plan_limit();
         
         $percentage = ($count / $limit) * 100;
 

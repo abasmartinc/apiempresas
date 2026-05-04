@@ -68,3 +68,35 @@ if (!function_exists('filter_company_data')) {
     }
 }
 
+if (!function_exists('get_free_plan_limit')) {
+    /**
+     * Gets the monthly quota for the free plan from the database.
+     * 
+     * @return int The free plan limit
+     */
+    function get_free_plan_limit(): int
+    {
+        $cache = \Config\Services::cache();
+        $cacheKey = 'api_free_plan_limit_v1';
+        $limit = $cache->get($cacheKey);
+
+        if ($limit === null) {
+            try {
+                $db = \Config\Database::connect();
+                $freePlan = $db->table('api_plans')
+                              ->where('slug', 'free')
+                              ->get()
+                              ->getRow();
+                
+                $limit = $freePlan ? (int)$freePlan->monthly_quota : 30; // Fallback to 30
+                
+                // Cache for 24 hours (it rarely changes)
+                $cache->save($cacheKey, $limit, 86400);
+            } catch (\Exception $e) {
+                return 30; // Global fallback
+            }
+        }
+
+        return (int)$limit;
+    }
+}
