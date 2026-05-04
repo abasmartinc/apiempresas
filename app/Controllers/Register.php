@@ -174,21 +174,19 @@ class Register extends BaseController
             // Correo de Bienvenida al usuario
             $this->emailService->sendWelcomeEmail($userData);
 
-            // 6) Auto-Login al usuario (DESHABILITADO por solicitud: se requiere login manual tras registro)
-            /*
+            // 6) Auto-Login al usuario (RE-HABILITADO para mejorar conversión)
             $this->userModel->update($user_id, [
                 'last_login_at' => date('Y-m-d H:i:s'),
             ]);
 
             session()->regenerate();
             session()->set([
-                'user_id' => $user_id,
+                'user_id'    => $user_id,
                 'user_email' => $email,
-                'user_name' => $data['name'],
-                'is_admin' => 0,
-                'logged_in' => true,
+                'user_name'  => $data['name'],
+                'is_admin'   => 0,
+                'logged_in'  => true,
             ]);
-            */
 
             // Track login from email if tracking code exists
             if ($tc = session('email_tracking_code')) {
@@ -203,15 +201,12 @@ class Register extends BaseController
             // Log successful registration
             log_activity('register', ['email' => $email], $user_id);
 
-            // 7) Redirección a Login con mensaje informativo (pasando redirect si existe)
-            $targetUrl = site_url('enter');
-            if (!empty($redirectUrl)) {
-                $targetUrl .= '?redirect=' . urlencode((string)$redirectUrl);
-            }
+            // 7) Redirección directa al Dashboard o URL previa
+            $targetUrl = !empty($redirectUrl) ? site_url(ltrim((string)$redirectUrl, '/')) : site_url('dashboard');
 
             return redirect()
                 ->to($targetUrl)
-                ->with('info', '¡Cuenta creada con éxito! Por favor, introduce tus credenciales para acceder.');
+                ->with('success', '¡Bienvenido! Tu cuenta ha sido creada y ya estás dentro.');
         } catch (\Throwable $e) {
 
             // Log del error real para depuración
