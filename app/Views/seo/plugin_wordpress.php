@@ -688,22 +688,6 @@
         </section>
 
 
-        <!-- MONETIZATION HOOK -->
-        <section class="radar-section radar-section--soft">
-            <div class="container">
-                <div
-                    style="background: #fff; border: 1px solid #e2e8f0; border-radius: 32px; padding: 40px; display: flex; align-items: center; justify-content: space-between; gap: 40px; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 300px;">
-                        <h2 style="font-size: 1.8rem; font-weight: 850; color: #0f172a; margin-bottom: 12px;">¿Necesitas
-                            más?</h2>
-                        <p style="font-size: 1.1rem; color: #64748b; margin: 0;">Activa un plan y desbloquea más
-                            consultas, datos avanzados y funcionalidades adicionales.</p>
-                    </div>
-                    <a href="<?= site_url('api-empresas') ?>" class="radar-btn radar-btn--primary"
-                        style="padding: 16px 32px;">Ver planes y precios</a>
-                </div>
-            </div>
-        </section>
 
         <!-- FAQ SECTION -->
         <section class="radar-section">
