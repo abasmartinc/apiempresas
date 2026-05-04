@@ -87,6 +87,40 @@
             </div>
         </section>
 
+        <!-- INTEGRATIONS STRIP -->
+        <section class="integrations-strip">
+            <div class="container">
+                <h3 class="integrations-title">Conecta con tus herramientas favoritas</h3>
+                <div class="integrations-grid">
+                    <!-- Zapier -->
+                    <div class="integration-item" title="Conecta con Zapier">
+                        <svg viewBox="0 0 24 24" fill="#FF4F00"><path d="M19.141 12l3.418-3.418c.319-.319.319-.838 0-1.157L19.141 4c-.319-.319-.838-.319-1.157 0L14.566 7.418l1.157 1.157L18 6.314l2.121 2.121-2.121 2.121 2.121 2.121 2.121-2.121-2.121-2.121 1.157-1.157c-.159 0-3.417 3.418-3.417 3.418zM4.859 12L1.441 8.582c-.319-.319-.319-.838 0-1.157L4.859 4c.319-.319.838-.319 1.157 0l3.418 3.418-1.157 1.157L6 6.314 3.879 8.435 6 10.556 3.879 12.677 1.758 10.556l2.121-2.121L4.859 12zm14.282 3.418l-3.418 3.418-1.157-1.157L18 17.686l2.121-2.121-2.121-2.121-2.121 2.121 2.121 2.121-2.121-2.121-1.157 1.157c.159 0 3.417-3.418 3.417-3.418zM4.859 15.418L1.441 18.836c-.319.319-.319.838 0 1.157L4.859 23.412c.319.319.838.319 1.157 0l3.418-3.418-1.157-1.157L6 21.123 3.879 19 6 16.877l-2.121-2.121 1.157-1.157c.159 0 3.417 3.418 3.417 3.418z"/></svg>
+                        <span>Zapier</span>
+                    </div>
+                    <!-- Make -->
+                    <div class="integration-item" title="Conecta con Make">
+                        <svg viewBox="0 0 24 24" fill="#6435c9"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm-3-9h6v2H9z"/></svg>
+                        <span>Make</span>
+                    </div>
+                    <!-- Google Sheets -->
+                    <div class="integration-item" title="Conecta con Google Sheets">
+                        <svg viewBox="0 0 24 24" fill="#0F9D58"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                        <span>Google Sheets</span>
+                    </div>
+                    <!-- Excel -->
+                    <div class="integration-item" title="Exporta a Excel">
+                        <svg viewBox="0 0 24 24" fill="#1D6F42"><path d="M15.8 2H13v3h3V2zm-4 0H9v3h2.8V2zM5.2 2H2v3h3.2V2zm16.8 4h-2.8v3H22V6zm-4 0H13v3h3.8V6zm-4 0H9v3h2.8V6zM5.2 6H2v3h3.2V6zM22 10h-2.8v3H22v-3zm-4 0H13v3h3.8v-3zm-4 0H9v3h2.8v-3zM5.2 10H2v3h3.2v-3zm16.8 4h-2.8v3H22v-3zm-4 0H13v3h3.8v-3zm-4 0H9v3h2.8v-3zM5.2 14H2v3h3.2v-3zm16.8 4h-2.8v3H22v-3zm-4 0H13v3h3.8v-3zm-4 0H9v3h2.8v-3zM5.2 18H2v3h3.2v-3z"/></svg>
+                        <span>Microsoft Excel</span>
+                    </div>
+                    <!-- WordPress -->
+                    <div class="integration-item" title="Plugin de WordPress">
+                        <svg viewBox="0 0 24 24" fill="#21759b"><path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 1.5c-4.694 0-8.5 3.806-8.5 8.5 0 .543.053 1.074.154 1.59l4.58-12.564c-.015-.008-.03-.017-.045-.026a8.411 8.411 0 0 0-4.689 2.5zm6.541 12.39c.094-.43.14-.858.14-1.283 0-1.13-.207-2.144-.622-3.042l-2.482 7.027c1.32-.716 2.427-1.631 3.32-2.702l-.356-.1zM12 12.75l-2.484 7.042c.8.21 1.637.333 2.484.333 1.103 0 2.158-.205 3.13-.578l-3.13-6.797zm-5.116-.252l2.64 7.37c-1.393-.572-2.584-1.464-3.5-2.613l.86-4.757z"/></svg>
+                        <span>WordPress</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- 3. BLOQUE DE AUTORIDAD -->
         <section class="band">
             <div class="container">
