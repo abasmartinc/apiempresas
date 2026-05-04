@@ -161,68 +161,89 @@ class MetricsController extends BaseController
     {
         $json = $this->request->getJSON();
         if ($json) {
-            $userId = $json->user_id ?? null;
+            $userIds = $json->user_ids ?? ($json->user_id ? [$json->user_id] : []);
             $message = $json->message ?? null;
             $subject = $json->subject ?? 'Novedades sobre tu acceso a la API';
         } else {
-            $userId = $this->request->getPost('user_id');
+            $userIds = $this->request->getPost('user_ids');
+            if (!$userIds) {
+                $userId = $this->request->getPost('user_id');
+                $userIds = $userId ? [$userId] : [];
+            }
             $message = $this->request->getPost('message');
             $subject = $this->request->getPost('subject') ?? 'Novedades sobre tu acceso a la API';
         }
         
-        $db = \Config\Database::connect();
-        $user = $db->table('users')->where('id', $userId)->get()->getRow();
-        
-        if (!$user) return $this->response->setJSON(['status' => 'error', 'message' => 'Usuario no encontrado']);
-
-        // Enviar Email
-        $email = \Config\Services::email();
-        $email->clear(true);
-        
-        $email->setTo($user->email);
-        $email->setBCC('papelo.amh@gmail.com');
-        
-        $emailConfig = config('Email');
-        $email->setFrom($emailConfig->fromEmail, $emailConfig->fromName);
-        
-        $email->setSubject($subject);
-
-        $trackingCode = bin2hex(random_bytes(16));
-
-        // Usar plantilla HTML oficial
-        $body = view('emails/user_notification', [
-            'user' => $user,
-            'content' => nl2br($message),
-            'subject' => $subject,
-            'tracking_code' => $trackingCode
-        ]);
-
-        $email->setMessage($body);
-
-        $status = 'success';
-        $errorMsg = null;
-        
-        if (!$email->send()) {
-            $status = 'error';
-            $errorMsg = $email->printDebugger(['headers']);
+        if (empty($userIds)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'No se han seleccionado usuarios']);
         }
 
-        // Logging con el Modelo Oficial
+        $db = \Config\Database::connect();
+        $emailService = \Config\Services::email();
+        $emailConfig = config('Email');
         $emailLogModel = new \App\Models\EmailLogModel();
-        $emailLogModel->insert([
-            'user_id' => $userId,
-            'subject' => $subject,
-            'message' => $message,
-            'status'  => $status,
-            'tracking_code' => $trackingCode,
-            'error_message' => $errorMsg,
-            'created_at' => date('Y-m-d H:i:s')
-        ]);
+        
+        $successCount = 0;
+        $errorCount = 0;
+        $lastError = null;
 
-        return $this->response->setJSON([
-            'status' => $status, 
-            'message' => ($status == 'success' ? 'Mensaje enviado correctamente' : 'Error al enviar: ' . $errorMsg)
-        ]);
+        foreach ($userIds as $userId) {
+            $user = $db->table('users')->where('id', $userId)->get()->getRow();
+            if (!$user) continue;
+
+            $emailService->clear(true);
+            $emailService->setTo($user->email);
+            $emailService->setBCC('papelo.amh@gmail.com');
+            $emailService->setFrom($emailConfig->fromEmail, $emailConfig->fromName);
+            $emailService->setSubject($subject);
+
+            $trackingCode = bin2hex(random_bytes(16));
+
+            // Usar plantilla HTML oficial
+            $body = view('emails/user_notification', [
+                'user' => $user,
+                'content' => nl2br($message),
+                'subject' => $subject,
+                'tracking_code' => $trackingCode
+            ]);
+
+            $emailService->setMessage($body);
+
+            $status = 'success';
+            $errorMsg = null;
+            
+            if (!$emailService->send()) {
+                $status = 'error';
+                $errorMsg = $emailService->printDebugger(['headers']);
+                $errorCount++;
+                $lastError = $errorMsg;
+            } else {
+                $successCount++;
+            }
+
+            // Logging con el Modelo Oficial
+            $emailLogModel->insert([
+                'user_id' => $userId,
+                'subject' => $subject,
+                'message' => $message,
+                'status'  => $status,
+                'tracking_code' => $trackingCode,
+                'error_message' => $errorMsg,
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+        }
+
+        if ($successCount > 0) {
+            return $this->response->setJSON([
+                'status' => 'success', 
+                'message' => $successCount . ' mensajes enviados correctamente' . ($errorCount > 0 ? ". ($errorCount fallidos)" : "")
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'status' => 'error', 
+                'message' => 'Error al enviar los mensajes. ' . $lastError
+            ]);
+        }
     }
 
     private function determineCaseType($u)

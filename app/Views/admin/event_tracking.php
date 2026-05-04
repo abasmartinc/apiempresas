@@ -146,7 +146,11 @@
                     <h3 style="margin: 0; font-size: 1.25rem; color: #1e293b; font-weight: 800;">Leads Prioritarios & Tareas</h3>
                     <p style="margin: 4px 0 0; font-size: 0.85rem; color: #64748b;">Ranking dinámico por Urgencia e Intención</p>
                 </div>
-                <div style="display: flex; gap: 8px;">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button id="btnBulkEmail" class="btn-action-sm" style="display:none; background: #10b981; border:none; padding: 8px 16px;" onclick="openBulkContactModal()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px; vertical-align: middle;"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                        Enviar a <span id="selectedCount">0</span> seleccionados
+                    </button>
                     <span class="status-badge status-critico" style="padding: 6px 12px;">CRÍTICO: <?= $summary['ready'] ?></span>
                 </div>
             </div>
@@ -154,6 +158,7 @@
                 <table class="admin-table">
                     <thead>
                         <tr>
+                            <th width="40" style="text-align: center;"><input type="checkbox" id="selectAll" style="width: 18px; height: 18px; cursor: pointer;"></th>
                             <th width="60">#</th>
                             <th>Usuario</th>
                             <th>Motivo (Estratégico)</th>
@@ -172,6 +177,9 @@
                             elseif ($reqToday >= 1) $icon = '⚪';
                         ?>
                         <tr>
+                            <td style="text-align: center;">
+                                <input type="checkbox" class="user-checkbox" value="<?= $u['id'] ?>" data-email="<?= esc($u['email']) ?>" data-case="<?= $u['case_type'] ?>" style="width: 18px; height: 18px; cursor: pointer;">
+                            </td>
                             <td style="font-weight: 900; color: #cbd5e1; font-size: 1.2rem;">
                                 <?= $icon ?>
                                 #<?= $idx + 1 ?>
@@ -218,6 +226,9 @@
                 <tbody>
                     <?php foreach($problematicUsers as $u): ?>
                     <tr>
+                        <td style="text-align: center; width: 40px;">
+                            <input type="checkbox" class="user-checkbox" value="<?= $u['id'] ?>" data-email="<?= esc($u['email']) ?>" data-case="onboarding" style="width: 18px; height: 18px; cursor: pointer;">
+                        </td>
                         <td>
                             <div style="font-weight: 600; font-size: 0.85rem;"><?= esc($u['email']) ?></div>
                             <div style="font-size: 0.7rem; color: #94a3b8;">ID #<?= $u['id'] ?></div>
@@ -252,8 +263,30 @@
     </div>
 
     <?= view('partials/footer') ?>
-
     <script>
+        document.getElementById('selectAll').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+            updateBulkButton();
+        });
+
+        document.querySelectorAll('.user-checkbox').forEach(cb => {
+            cb.addEventListener('change', updateBulkButton);
+        });
+
+        function updateBulkButton() {
+            const selected = document.querySelectorAll('.user-checkbox:checked');
+            const btn = document.getElementById('btnBulkEmail');
+            const countSpan = document.getElementById('selectedCount');
+            
+            if (selected.length > 0) {
+                btn.style.display = 'inline-block';
+                countSpan.innerText = selected.length;
+            } else {
+                btn.style.display = 'none';
+            }
+        }
+
         function openContactModal(userId, email, reason, caseType) {
             const modal = document.getElementById('contactModal');
             document.getElementById('modalUserEmail').innerText = email;
@@ -262,8 +295,38 @@
             const message = generateMessage(caseType);
             document.getElementById('modalMessage').value = message;
 
-            modal.dataset.userId = userId;
+            modal.dataset.userIds = JSON.stringify([userId]);
             modal.style.display = 'flex';
+        }
+
+        function openBulkContactModal() {
+            const selected = document.querySelectorAll('.user-checkbox:checked');
+            const userIds = Array.from(selected).map(cb => cb.value);
+            const emails = Array.from(selected).map(cb => cb.dataset.email);
+            
+            const modal = document.getElementById('contactModal');
+            document.getElementById('modalUserEmail').innerText = emails.length > 3 
+                ? `${emails.slice(0, 3).join(', ')} y ${emails.length - 3} más`
+                : emails.join(', ');
+            document.getElementById('modalReason').innerText = 'Envío masivo a usuarios seleccionados';
+
+            // Detectar el tipo de caso predominante o usar general
+            const caseTypes = Array.from(selected).map(cb => cb.dataset.case);
+            const mostFrequentCase = getMostFrequent(caseTypes) || 'general_followup';
+
+            const message = generateMessage(mostFrequentCase);
+            document.getElementById('modalMessage').value = message;
+
+            modal.dataset.userIds = JSON.stringify(userIds);
+            modal.style.display = 'flex';
+        }
+
+        function getMostFrequent(arr) {
+            const hashmap = arr.reduce((acc, val) => {
+                acc[val] = (acc[val] || 0) + 1;
+                return acc;
+            }, {});
+            return Object.keys(hashmap).reduce((a, b) => hashmap[a] > hashmap[b] ? a : b);
         }
 
         function closeModal() {
@@ -287,7 +350,7 @@
 
         function sendMessage() {
             const modal = document.getElementById('contactModal');
-            const userId = modal.dataset.userId;
+            const userIds = JSON.parse(modal.dataset.userIds);
             const message = document.getElementById('modalMessage').value;
             const subject = document.getElementById('modalSubject').value;
             const btn = document.getElementById('btnSend');
@@ -302,7 +365,7 @@
                     'X-Requested-With': 'XMLHttpRequest',
                     '<?= csrf_header() ?>': '<?= csrf_hash() ?>'
                 },
-                body: JSON.stringify({ user_id: userId, message: message, subject: subject })
+                body: JSON.stringify({ user_ids: userIds, message: message, subject: subject })
             })
             .then(res => res.json())
             .then(data => {
@@ -312,8 +375,8 @@
                 
                 Swal.fire({
                     icon: data.status === 'success' ? 'success' : 'error',
-                    title: data.status === 'success' ? '¡Enviado!' : 'Error',
-                    text: data.message || (data.status === 'success' ? 'Mensaje enviado correctamente' : 'Error al enviar mensaje'),
+                    title: data.status === 'success' ? '¡Hecho!' : 'Error',
+                    text: data.message,
                     confirmButtonColor: '#6366f1'
                 });
 
