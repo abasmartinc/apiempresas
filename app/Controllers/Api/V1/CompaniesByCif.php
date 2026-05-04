@@ -52,6 +52,9 @@ class CompaniesByCif extends ResourceController
                 $cached = mask_company_data($cached);
             }
 
+            // Apply filtering (remove requested fields)
+            $cached = filter_company_data($cached);
+
             return $this->respond(
                 [
                     'success' => true,
@@ -83,6 +86,9 @@ class CompaniesByCif extends ResourceController
             if ((int)$planId === 1) {
                 $company = mask_company_data($company);
             }
+
+            // Apply filtering (remove requested fields)
+            $company = filter_company_data($company);
 
             return $this->respond(
                 [

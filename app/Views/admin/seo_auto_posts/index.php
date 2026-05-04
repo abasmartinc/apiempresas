@@ -36,7 +36,7 @@
         <h1 class="title">SEO Auto Posts</h1>
         <div class="flex-gap-10">
             <button id="btn-generate-batch" class="btn primary">Generar posts pendientes</button>
-            <a href="<?= site_url('admin/dashboard') ?>" class="btn ghost">Volver al Dashboard</a>
+            <a href="<?= site_url('dashboard') ?>" class="btn ghost">Volver al Dashboard</a>
         </div>
     </div>
 

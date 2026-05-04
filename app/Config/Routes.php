@@ -144,7 +144,8 @@ $routes->post('leads/subscribe', 'Leads::subscribe');
 // Admin Routes
 $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('dashboard', 'Admin\Dashboard::index');
-    $routes->get('metrics', 'Admin\MetricsController::eventTracking');
+    $routes->get('metrics', 'Admin\MetricsController::index');
+    $routes->get('event-tracking', 'Admin\MetricsController::eventTracking');
     $routes->get('users', 'Admin\Dashboard::index');
     $routes->get('users/create', 'Admin\Dashboard::create');
     $routes->post('users/store', 'Admin\Dashboard::store');

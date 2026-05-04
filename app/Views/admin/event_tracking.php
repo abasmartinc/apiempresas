@@ -94,7 +94,7 @@
                     <span style="width: 10px; height: 10px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);"></span>
                     <span style="font-weight: 700; font-size: 0.9rem;"><?= $activeUsers ?> usuarios activos</span>
                 </div>
-                <a href="<?= site_url('admin/dashboard') ?>" class="btn ghost">Volver</a>
+                <a href="<?= site_url('dashboard') ?>" class="btn ghost">Volver</a>
             </div>
         </div>
 

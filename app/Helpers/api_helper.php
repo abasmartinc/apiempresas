@@ -9,14 +9,6 @@ if (!function_exists('mask_company_data')) {
      */
     function mask_company_data(array $data): array
     {
-        // 1. Mask Phone Numbers (show only prefix and last 2 digits)
-        if (!empty($data['phone'])) {
-            $data['phone'] = mask_string($data['phone'], 3, 2);
-        }
-        if (!empty($data['phone_mobile'])) {
-            $data['phone_mobile'] = mask_string($data['phone_mobile'], 3, 2);
-        }
-
         // 2. Mask Address detail
         // Requested format: "****************************************** (Alicante). España"
         if (!empty($data['address'])) {
@@ -54,22 +46,38 @@ if (!function_exists('mask_company_data')) {
     }
 }
 
-if (!function_exists('mask_string')) {
+if (!function_exists('filter_company_data')) {
     /**
-     * Helper to mask a string keeping some chars at the start and end.
+     * Filters company data to remove specific fields and conditional null fields.
+     * 
+     * @param array $data The original company data
+     * @return array The filtered company data
      */
-    function mask_string($str, $startVisible = 3, $endVisible = 2)
+    function filter_company_data(array $data): array
     {
-        $str = (string) $str;
-        $len = mb_strlen($str);
-        if ($len <= ($startVisible + $endVisible)) {
-            return str_repeat('*', $len);
+        // Fields to ALWAYS remove
+        $toRemove = [
+            'phone',
+            'phone_mobile',
+            'website_official',
+            'email',
+            'phone_enriched',
+            'phone_mobile_enriched'
+        ];
+
+        foreach ($toRemove as $field) {
+            unset($data[$field]);
         }
-        
-        $start = mb_substr($str, 0, $startVisible);
-        $end = mb_substr($str, -$endVisible);
-        $mask = str_repeat('*', $len - $startVisible - $endVisible);
-        
-        return $start . $mask . $end;
+
+        // Fields to remove ONLY IF they are null
+        if (array_key_exists('cnae_2025', $data) && $data['cnae_2025'] === null) {
+            unset($data['cnae_2025']);
+        }
+        if (array_key_exists('cnae_2025_label', $data) && $data['cnae_2025_label'] === null) {
+            unset($data['cnae_2025_label']);
+        }
+
+        return $data;
     }
 }
+

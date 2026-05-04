@@ -52,6 +52,9 @@ class CompaniesSearch extends ResourceController
                 $cachedData = mask_company_data($cachedData);
             }
 
+            // Apply filtering (remove requested fields)
+            $cachedData = filter_company_data($cachedData);
+
             return $this->respond(
                 [
                     'success' => true,
@@ -86,6 +89,9 @@ class CompaniesSearch extends ResourceController
             if ((int)$planId === 1) {
                 $data = mask_company_data($data);
             }
+
+            // Apply filtering (remove requested fields)
+            $data = filter_company_data($data);
 
             return $this->respond(
                 [
