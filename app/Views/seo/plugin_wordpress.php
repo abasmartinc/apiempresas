@@ -687,30 +687,6 @@
             </div>
         </section>
 
-        <!-- BLOQUE RADAR (CROSS-SELL) -->
-        <section class="radar-section">
-            <div class="container">
-                <div
-                    style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 32px; padding: 60px; color: #fff; text-align: center; position: relative; overflow: hidden;">
-                    <div
-                        style="position: absolute; top: -20%; right: -10%; width: 40%; height: 60%; background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%); filter: blur(40px);">
-                    </div>
-                    <div style="position: relative; z-index: 2;">
-                        <h2 style="font-size: 2.2rem; font-weight: 850; margin-bottom: 16px;">Estas empresas están
-                            buscando proveedor ahora mismo</h2>
-                        <p
-                            style="font-size: 1.2rem; color: #94a3b8; max-width: 650px; margin: 0 auto 12px; line-height: 1.6;">
-                            Cada día nuevas empresas aparecen — si no contactas tú, otro proveedor lo hará primero.
-                        </p>
-                        <p style="font-size: 0.85rem; color: #60a5fa; font-weight: 700; margin-bottom: 32px;">
-                            Actualizado en tiempo real con datos del BORME</p>
-                        <a href="<?= site_url('radar/preview') ?>" class="radar-btn radar-btn--primary"
-                            style="padding: 16px 40px; font-size: 1.1rem;">Ver empresas activas ahora</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-        ...
 
         <!-- MONETIZATION HOOK -->
         <section class="radar-section radar-section--soft">
