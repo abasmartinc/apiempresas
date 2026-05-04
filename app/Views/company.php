@@ -875,9 +875,9 @@
 
             <?php if ((!empty($company['lat']) && !empty($company['lng'])) || !empty($company['address'])): ?>
                 const hasCoords = <?= (!empty($company['lat']) && !empty($company['lng'])) ? 'true' : 'false' ?>;
-                const companyName = "<?= esc($company['name'] ?? $company['nombre'] ?? 'Empresa') ?>";
-                const rawAddress = "<?= esc($company['address'] ?? '') ?>";
-                const province = "<?= esc($company['province'] ?? $company['provincia'] ?? '') ?>";
+                const companyName = "<?= esc($company['name'] ?? $company['nombre'] ?? 'Empresa', 'js') ?>";
+                const rawAddress = "<?= esc($company['address'] ?? '', 'js') ?>";
+                const province = "<?= esc($company['province'] ?? $company['provincia'] ?? '', 'js') ?>";
 
                 if (hasCoords) {
                     // Coordinates appear to be swapped in the DB (Lng in Lat field)

@@ -392,6 +392,7 @@ class CompanyModel extends Model
             $builder2 = $this->builder();
             $builder2->select(implode(', ', $this->selectFields));
             $builder2->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
+            $builder2->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
             $builder2->whereNotIn('companies.cif', $excludeCifs);
             $builder2->where('companies.registro_mercantil', $province);
             $builder2->limit($needed);

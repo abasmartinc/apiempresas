@@ -16,9 +16,13 @@ class CompaniesByCif extends ResourceController
     /** @var CompanyModel */
     protected $companyModel;
 
+    /** @var \App\Services\EmailService */
+    protected $emailService;
+
     public function __construct()
     {
         $this->companyModel = new CompanyModel();
+        $this->emailService = new \App\Services\EmailService();
         helper('api');
     }
 
