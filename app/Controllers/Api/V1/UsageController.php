@@ -71,6 +71,7 @@ class UsageController extends ResourceController
                     if ((int)$planId === 1) {
                         $details = mask_company_data($details);
                     }
+                    $details = filter_company_data($details);
                     $history[] = $details;
                 }
             }

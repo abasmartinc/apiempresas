@@ -43,6 +43,7 @@ if (!function_exists('filter_company_data')) {
     {
         // Fields to ALWAYS remove
         $toRemove = [
+            'id',
             'phone',
             'phone_mobile',
             'website_official',

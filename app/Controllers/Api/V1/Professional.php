@@ -114,6 +114,9 @@ class Professional extends ResourceController
                 $company = mask_company_data($company);
             }
 
+            // Apply filtering (remove requested fields like 'id', 'phone', etc.)
+            $company = filter_company_data($company);
+
             return $this->respond([
                 'success' => true,
                 'data'    => $company
