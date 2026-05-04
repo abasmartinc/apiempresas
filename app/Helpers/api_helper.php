@@ -10,22 +10,8 @@ if (!function_exists('mask_company_data')) {
     function mask_company_data(array $data): array
     {
         // 2. Mask Address detail
-        // Requested format: "****************************************** (Alicante). España"
         if (!empty($data['address'])) {
-            $address = (string) $data['address'];
-            // Try to find the location part (starts with '(')
-            $lastPartIndex = mb_strrpos($address, '(');
-            
-            if ($lastPartIndex !== false) {
-                $locationPart = mb_substr($address, $lastPartIndex);
-                $streetPart = mb_substr($address, 0, $lastPartIndex);
-                $data['address'] = str_repeat('*', mb_strlen($streetPart)) . $locationPart;
-            } else {
-                // Fallback: mask 70%
-                $len = mb_strlen($address);
-                $maskLen = (int) ($len * 0.7);
-                $data['address'] = str_repeat('*', $maskLen) . mb_substr($address, $maskLen);
-            }
+            $data['address'] = "*** [ACTUALIZA A PRO PARA VER LA DIRECCION ]";
         }
 
         // 3. Mask Corporate Purpose (truncate and add upgrade message)
