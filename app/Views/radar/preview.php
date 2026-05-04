@@ -557,7 +557,7 @@
     <div class="ae-radar-page">
         <aside class="ae-radar-page__sidebar">
             <div class="ae-radar-page__brand">
-                <div class="ae-radar-page__brand-header">
+                <a href="<?= site_url() ?>" class="ae-radar-page__brand-header">
                     <svg class="ve-logo" width="32" height="32" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
                         <defs>
                             <linearGradient id="ve-g-preview" x1="10" y1="54" x2="54" y2="10" gradientUnits="userSpaceOnUse">
@@ -573,7 +573,7 @@
                         <span class="brand-name">API<span class="grad">Empresas</span></span>
                         <span class="brand-tag">Radar B2B</span>
                     </div>
-                </div>
+                </a>
             </div>
 
             <div class="ae-radar-page__sidebar-body">
@@ -607,9 +607,6 @@
                 </div>
             </div>
 
-            <div class="ae-radar-page__sidebar-footer">
-                <button class="email-capture__btn" style="width:100%; height: 44px; font-size:0.8rem; background: #2563eb;" onclick="scrollToEmail()">Activar Acceso PRO</button>
-            </div>
         </aside>
 
         <main class="ae-radar-page__main">
