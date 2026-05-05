@@ -398,5 +398,9 @@ body {
 .auth-separator:not(:empty)::before { margin-right: .75em; }
 .auth-separator:not(:empty)::after { margin-left: .75em; }
 .auth-btn-google { display: flex; align-items: center; justify-content: center; gap: 12px; background: #ffffff; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 700; text-decoration: none; transition: all 0.25s ease; cursor: pointer; }
-.auth-btn-google:hover { background: #f8fafc; border-color: #cbd5e1; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+.social-btn.google:hover { background: #f8fafc; border-color: #e2e8f0; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+.social-btn.github { background: #24292e; color: #ffffff !important; border-color: #24292e; }
+.social-btn.github:hover { background: #1b1f23; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.social-btn.github svg { fill: #ffffff; }
 .auth-btn-google img { width: 20px; height: 20px; }
