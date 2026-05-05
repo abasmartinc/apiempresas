@@ -36,6 +36,10 @@ $routes->get('auth/google/callback', 'GoogleAuth::callback');
 $routes->get('auth/github', 'GithubAuth::login');
 $routes->get('auth/github/callback', 'GithubAuth::callback');
 
+// LinkedIn Auth
+$routes->get('auth/linkedin', 'LinkedinAuth::login');
+$routes->get('auth/linkedin/callback', 'LinkedinAuth::callback');
+
 $routes->get('dashboard', 'Dashboard::index');
 // $routes->get('empresas-nuevas', 'NewCompanies::index'); // Deprecated route interfering with SeoController::newRadarHub (line 194)
 $routes->get('dashboard/kpis', 'Dashboard::kpis_ajax');
