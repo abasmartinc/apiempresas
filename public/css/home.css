@@ -4546,3 +4546,8 @@ section.container .search-panel h2::after,
 .integration-item svg { width: 24px; height: 24px; }
 .integration-item span { font-size: 1.1rem; font-weight: 700; color: #1e293b; letter-spacing: -0.01em; }
 @media (max-width: 768px) { .integrations-grid { gap: 24px; } .integration-item span { font-size: 0.9rem; } }
+
+/* Google Modal Button */
+.btn-google-modal { display: flex; align-items: center; justify-content: center; gap: 10px; background: #ffffff; color: #1e293b; border: 2px solid #f1f5f9; padding: 16px; border-radius: 16px; font-weight: 700; text-decoration: none; transition: all 0.3s ease; margin-top: 12px; font-size: 1rem; }
+.btn-google-modal:hover { background: #f8fafc; border-color: #e2e8f0; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+.btn-google-modal img { width: 20px; height: 20px; }

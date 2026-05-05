@@ -16,6 +16,8 @@ class UserModel extends Model
         'name',
         'company',
         'email',
+        'google_id',
+        'avatar',
         'password_hash',
         'is_active',
         'is_admin',

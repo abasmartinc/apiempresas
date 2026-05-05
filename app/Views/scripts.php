@@ -277,6 +277,17 @@
                             </button>
                         </form>
 
+                        <div class="auth-separator" style="margin: 20px 0; display: flex; align-items: center; text-align: center; color: #94a3b8; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                            <span style="flex: 1; border-bottom: 1px solid #f1f5f9; margin-right: 15px;"></span>
+                            O continúa con un clic
+                            <span style="flex: 1; border-bottom: 1px solid #f1f5f9; margin-left: 15px;"></span>
+                        </div>
+
+                        <a href="<?= site_url('auth/google') ?>" class="btn-google-modal">
+                            <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google">
+                            Entrar con Google
+                        </a>
+
                         <div style="margin-top: 24px; display: flex; align-items: center; justify-content: center; gap: 12px; opacity: 0.7;">
                             <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;">✨ Sin tarjeta · Plan gratuito de <?= get_free_plan_limit() ?> consultas/mes</span>
                         </div>

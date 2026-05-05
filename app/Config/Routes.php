@@ -27,6 +27,10 @@ $routes->get('register/quick', 'Register::quick');
 $routes->get('register_sucess', 'Register::register_sucess');
 $routes->post('signup', 'Register::store');
 $routes->post('register/quick_store', 'Register::quick_store');
+
+// Google Auth
+$routes->get('auth/google', 'GoogleAuth::login');
+$routes->get('auth/google/callback', 'GoogleAuth::callback');
 $routes->get('dashboard', 'Dashboard::index');
 // $routes->get('empresas-nuevas', 'NewCompanies::index'); // Deprecated route interfering with SeoController::newRadarHub (line 194)
 $routes->get('dashboard/kpis', 'Dashboard::kpis_ajax');

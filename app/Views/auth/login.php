@@ -76,6 +76,13 @@
                 </div>
 
                 <button type="submit" class="auth-btn-primary" id="login-submit">Entrar en el panel</button>
+
+                <div class="auth-separator">O</div>
+
+                <a href="<?= site_url('auth/google') ?>" class="auth-btn-google">
+                    <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google Logo">
+                    Continuar con Google
+                </a>
             </form>
 
             <div class="auth-form-footer">
