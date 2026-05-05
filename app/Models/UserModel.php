@@ -16,6 +16,7 @@ class UserModel extends Model
         'name',
         'company',
         'email',
+        'github_id',
         'google_id',
         'avatar',
         'password_hash',
