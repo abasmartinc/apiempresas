@@ -65,7 +65,37 @@
                 <?php if(!session('logged_in')): ?>
                     <a class="btn btn_header btn_header--ghost" href="<?=site_url() ?>enter">Iniciar sesión</a>
                 <?php else: ?>
-                    <a class="btn btn_header btn_header--ghost" href="<?=site_url() ?>logout">Cerrar sesión</a>
+                    <div class="user-dropdown-container">
+                        <button class="user-avatar-trigger" id="userMenuTrigger">
+                            <?php if(session('user_avatar')): ?>
+                                <img src="<?= session('user_avatar') ?>" alt="<?= esc(session('user_name')) ?>">
+                            <?php else: ?>
+                                <span class="user-avatar-initials"><?= strtoupper(substr(session('user_name') ?? 'U', 0, 1)) ?></span>
+                            <?php endif; ?>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px; opacity: 0.7;"><path d="m6 9 6 6 6-6"/></svg>
+                        </button>
+                        
+                        <div class="user-dropdown-menu" id="userDropdownMenu">
+                            <div class="dropdown-header">
+                                <span class="user-name-display"><?= esc(session('user_name')) ?></span>
+                                <span class="user-email-display"><?= esc(session('user_email')) ?></span>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="<?= site_url('dashboard') ?>" class="dropdown-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                                Mi Dashboard
+                            </a>
+                            <a href="<?= site_url('billing') ?>" class="dropdown-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10"/></svg>
+                                Mi Plan
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="<?= site_url('logout') ?>" class="dropdown-item logout-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                                Cerrar sesión
+                            </a>
+                        </div>
+                    </div>
                 <?php endif; ?>
             </div>
 
@@ -92,6 +122,19 @@
                         <?php if(!session('logged_in')): ?>
                             <a href="<?=site_url() ?>enter" class="btn btn-full ghost">Iniciar sesión</a>
                         <?php else: ?>
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 0 10px;">
+                                <div style="width: 44px; height: 44px; border-radius: 50%; overflow: hidden; border: 2px solid #f1f5f9; background: #f8fafc; display: flex; align-items: center; justify-content: center;">
+                                    <?php if(session('user_avatar')): ?>
+                                        <img src="<?= session('user_avatar') ?>" alt="User" style="width: 100%; height: 100%; object-fit: cover;">
+                                    <?php else: ?>
+                                        <span style="color: #64748b; font-weight: 800; font-size: 16px;"><?= strtoupper(substr(session('user_name') ?? 'U', 0, 1)) ?></span>
+                                    <?php endif; ?>
+                                </div>
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="font-size: 14px; font-weight: 800; color: #0f172a;"><?= esc(session('user_name')) ?></span>
+                                    <span style="font-size: 12px; color: #64748b; font-weight: 600;">Sesión activa</span>
+                                </div>
+                            </div>
                             <a href="<?=site_url() ?>logout" class="btn btn-full ghost">Cerrar sesión</a>
                         <?php endif; ?>
                     </div>
@@ -197,6 +240,90 @@
         .auth-buttons .btn_header--ghost { color: #ffffff !important; border-color: rgba(255,255,255,0.3) !important; }
         .auth-buttons .btn_header--ghost:hover { background: rgba(255,255,255,0.1); }
 
+        /* User Dropdown Styles */
+        .user-dropdown-container { position: relative; }
+        .user-avatar-trigger {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 4px 8px;
+            border-radius: 99px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #ffffff;
+        }
+        .user-avatar-trigger:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-1px);
+        }
+        .user-avatar-trigger img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .user-avatar-initials {
+            width: 32px;
+            height: 32px;
+            background: #ffffff;
+            color: #2152ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .user-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            width: 240px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 18px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            padding: 8px;
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            transform-origin: top right;
+            animation: dropdownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        @keyframes dropdownFade {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .user-dropdown-menu.active { display: flex; }
+
+        .dropdown-header { padding: 12px 16px; display: flex; flex-direction: column; }
+        .user-name-display { font-size: 14px; font-weight: 800; color: #0f172a; display: block; }
+        .user-email-display { font-size: 12px; color: #64748b; font-weight: 600; }
+        
+        .dropdown-divider { height: 1px; background: #f1f5f9; margin: 8px 0; }
+        
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            color: #334155;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        .dropdown-item:hover { background: #f8fafc; color: #2152ff; }
+        .logout-item { color: #ef4444; }
+        .logout-item:hover { background: #fef2f2; color: #ef4444; }
+
         @media (max-width: 1024px) {
             .desktop-only { display: none !important; }
             .mobile-menu-toggle { display: block; }
@@ -208,6 +335,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Mobile Menu
             const toggle = document.querySelector('.mobile-menu-toggle');
             const close = document.querySelector('.mobile-menu-close');
             const overlay = document.querySelector('.mobile-menu-overlay');
@@ -220,5 +348,22 @@
             if(close) close.addEventListener('click', closeMenu);
             if(overlay) overlay.addEventListener('click', function(e) { if (e.target === overlay) closeMenu(); });
             document.querySelectorAll('.mobile-nav-link').forEach(link => { link.addEventListener('click', closeMenu); });
+
+            // User Dropdown
+            const userTrigger = document.getElementById('userMenuTrigger');
+            const userMenu = document.getElementById('userDropdownMenu');
+
+            if (userTrigger && userMenu) {
+                userTrigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userMenu.classList.toggle('active');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!userMenu.contains(e.target) && !userTrigger.contains(e.target)) {
+                        userMenu.classList.remove('active');
+                    }
+                });
+            }
         });
     </script>
