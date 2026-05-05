@@ -481,8 +481,8 @@
                         <div class="price">0€<span>/mes</span></div>
                         <ul class="tier-features">
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> <?= $freeLimit ?> consultas al mes</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Acceso al mismo motor de validación</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Datos oficiales para comprobar resultados</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Acceso a endpoint /companies</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Datos básicos oficiales (CIF, Razón Social)</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Sin tarjeta de crédito</li>
                         </ul>
                         <a href="<?= site_url('register?plan=free') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar gratis", "plan": "free", "source_block": "pricing_cta", "page_type": "home"}'>Empezar gratis</a>
@@ -497,9 +497,9 @@
                         <div class="price">19€<span>/mes</span></div>
                         <ul class="tier-features">
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 3.000 consultas al mes</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Verificación completa y actualizada</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Tiempo real para automatización</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Ideal para facturación y scoring</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Datos completos BORME y Actividad</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Scoring Comercial IA (0-100)</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Acceso a Radar API (Prospección)</li>
                         </ul>
                         <a href="<?= site_url('register?plan=pro') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Pro", "plan": "pro", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Pro</a>
                     </div>
@@ -513,18 +513,145 @@
                         <div class="price">49€<span>/mes</span></div>
                         <ul class="tier-features">
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 10.000 consultas al mes</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Infraestructura preparada para alta carga</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> SLA y alta disponibilidad</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Soporte prioritario</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Webhooks Push (Notificaciones BORME)</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> IA Predictiva de Oportunidades</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Soporte Prioritario Slack / Email</li>
                         </ul>
                         <a href="<?= site_url('register?plan=business') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Business", "plan": "business", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Business</a>
                     </div>
                 </div>
-                <div style="text-align: center; margin-top: 48px;">
-                    <a href="<?= getRadarRedirect('home_pricing') ?>" class="btn-ae" style="background: #12b48a; color: white; padding: 18px 36px; font-size: 1.1rem; border-radius: 14px; box-shadow: 0 10px 20px rgba(18, 180, 138, 0.2); font-weight: 800;" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Ver Radar B2B (79€/mes)", "plan": "radar", "source_block": "pricing_cta", "page_type": "home"}'>Ver Radar B2B (79€/mes)</a>
+
+                <div style="text-align: center; margin-top: 80px; margin-bottom: 40px;">
+                    <h3 class="reveal" style="font-size: 1.8rem; font-weight: 850; color: var(--ae-dark);">Comparativa detallada de funciones</h3>
+                </div>
+                
+                <div class="table-responsive reveal delay-1" style="overflow-x: auto; background: #fff; border-radius: 24px; border: 1px solid var(--ae-border); box-shadow: var(--ae-shadow-sm);">
+                    <table class="capabilities-table">
+                        <thead>
+                            <tr>
+                                <th>Función / Capacidad</th>
+                                <th>Free</th>
+                                <th class="cap-featured-col">Pro</th>
+                                <th>Business</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Consultas mensuales</div>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; font-weight: 700;"><?= $freeLimit ?></td>
+                                <td class="cap-featured-col" style="text-align: center; font-weight: 700; color: var(--ae-blue);">3.000</td>
+                                <td style="text-align: center; font-weight: 700;">10.000</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Validación CIF / NIF</div>
+                                    </div>
+                                </td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Razón Social y Domicilio</div>
+                                    </div>
+                                </td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Actividad CNAE Oficial</div>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Scoring Comercial IA</div>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Radar API (Nuevas empresas)</div>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Webhooks Push (Notificaciones)</div>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">IA Predictiva de Oportunidades</div>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Soporte prioritario Slack</div>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p style="text-align: center; margin-top: 24px; color: var(--ae-slate); font-size: 0.9rem; font-weight: 500;">
+                    ¿Necesitas un plan personalizado con más volumen? <a href="<?= site_url('contact') ?>" style="color: var(--ae-blue); font-weight: 700; text-decoration: none;">Contacta con nosotros</a>
+                </p>
+
+                <div class="reveal delay-3 pricing-radar-banner" style="margin-top: 64px; background: linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 24px; padding: 32px; border: 1px solid var(--ae-border); display: flex; align-items: center; justify-content: space-between; gap: 32px; box-shadow: var(--ae-shadow-sm);">
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div style="width: 56px; height: 56px; background: rgba(18, 180, 138, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #12b48a; flex-shrink: 0;">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+                        </div>
+                        <div class="radar-banner-text">
+                            <h4 style="margin: 0; font-size: 1.2rem; font-weight: 850; color: var(--ae-dark);">¿Buscas una herramienta visual sin programar?</h4>
+                            <p style="margin: 4px 0 0; color: var(--ae-slate); font-weight: 500;">Radar B2B es la plataforma perfecta para equipos comerciales que no necesitan integración técnica.</p>
+                        </div>
+                    </div>
+                    <a href="<?= getRadarRedirect('home_pricing') ?>" class="btn-ae" style="background: #12b48a; color: white; padding: 16px 32px; font-size: 1rem; border-radius: 14px; border: none; font-weight: 800; white-space: nowrap; box-shadow: 0 10px 20px rgba(18, 180, 138, 0.2);" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Ver Radar B2B (79€/mes)", "plan": "radar", "source_block": "pricing_cta", "page_type": "home"}'>
+                        Ver Radar B2B (79€/mes)
+                    </a>
                 </div>
             </div>
         </section>
+
+
 
         <!-- 9. FAQ -->
         <section class="band" style="background: #F8FAFC; border-top: 1px solid var(--ae-border); border-bottom: 1px solid var(--ae-border); position: relative; overflow: hidden;">

@@ -593,4 +593,27 @@
     .footer-socials {
         justify-content: flex-start !important;
     }
+
+    /* Radar Banner (Pricing Section) */
+    .pricing-radar-banner {
+        flex-direction: column !important;
+        text-align: left !important;
+        gap: 24px !important;
+        padding: 24px !important;
+        align-items: flex-start !important;
+    }
+
+    .pricing-radar-banner .btn-ae {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    .radar-banner-text h4 {
+        font-size: 1.1rem !important;
+        line-height: 1.3 !important;
+    }
+
+    .radar-banner-text p {
+        font-size: 0.9rem !important;
+    }
 }
