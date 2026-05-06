@@ -71,7 +71,18 @@
         @media (max-width: 1024px) { .kpi-grid-4 { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 640px) { .kpi-grid-4 { grid-template-columns: 1fr; } }
         
-        .kpi-card-pro { 
+        .waiting-pulse {
+        animation: pulse-text 2s infinite ease-in-out;
+        display: inline-block;
+    }
+
+    @keyframes pulse-text {
+        0% { opacity: 0.4; transform: scale(0.98); }
+        50% { opacity: 1; transform: scale(1); }
+        100% { opacity: 0.4; transform: scale(0.98); }
+    }
+
+    .kpi-card-pro { 
             background: #ffffff; 
             border: 1px solid #e2e8f0; 
             padding: 24px; 
@@ -239,7 +250,14 @@
                     <div class="kpi-content">
                         <span class="label"><?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'Límite alcanzado' : 'Consultas Mes' ?></span>
                         <div class="value">
-                            <span id="kpi-requests"><?= $requestsUsed > 0 ? $requestsUsed : '0' ?></span>
+                            <div id="kpi-requests-container">
+                                <?php if ($requestsUsed > 0): ?>
+                                    <span id="kpi-requests"><?= $requestsUsed ?></span>
+                                <?php else: ?>
+                                    <span id="kpi-requests" style="display:none;">0</span>
+                                    <span id="kpi-waiting-msg" class="waiting-pulse" style="font-size: 0.85rem; color: #64748b; font-weight: 700; letter-spacing: -0.01em;">Esperando primera petición...</span>
+                                <?php endif; ?>
+                            </div>
                         </div>
                         <div class="meta"><?= (!$isPaid && $requestsUsed >= $freeLimit) ? '<strong>Activar Pro ahora &rarr;</strong>' : 'Límite: ' . ($isPaid ? number_format($maxLimit, 0, ',', '.') : $freeLimit) ?></div>
                     </div>
@@ -295,14 +313,28 @@
                         const errorVal = document.getElementById('kpi-error');
 
                         const totalRequests = data.api_request_total_month || 0;
-
-                        if (reqVal) reqVal.innerText = numFmt.format(totalRequests);
+                        const waitingMsg = document.getElementById('kpi-waiting-msg');
 
                         if (totalRequests > 0) {
+                            if (reqVal) {
+                                reqVal.innerText = numFmt.format(totalRequests);
+                                reqVal.style.display = 'inline';
+                            }
+                            if (waitingMsg) waitingMsg.style.display = 'none';
+
                             if (latencyVal) latencyVal.innerText = numFmt.format(data.avg_latency || 0);
                             if (latencyUnit) latencyUnit.style.display = 'inline';
                             if (errorVal) errorVal.innerText = (data.error_rate || 0) + '%';
                         } else {
+                            if (reqVal) reqVal.style.display = 'none';
+                            if (waitingMsg) {
+                                waitingMsg.style.display = 'inline';
+                            } else if (reqVal) {
+                                // Fallback if waitingMsg doesn't exist for some reason
+                                reqVal.innerText = '--';
+                                reqVal.style.display = 'inline';
+                            }
+
                             if (latencyVal) latencyVal.innerText = '--';
                             if (latencyUnit) latencyUnit.style.display = 'none';
                             if (errorVal) errorVal.innerText = '--';
