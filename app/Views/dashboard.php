@@ -77,9 +77,9 @@
     }
 
     @keyframes pulse-text {
-        0% { opacity: 0.4; transform: scale(0.98); }
-        50% { opacity: 1; transform: scale(1); }
-        100% { opacity: 0.4; transform: scale(0.98); }
+        0% { opacity: 0.5; }
+        50% { opacity: 1; }
+        100% { opacity: 0.5; }
     }
 
     .kpi-card-pro { 
@@ -255,7 +255,7 @@
                                     <span id="kpi-requests"><?= $requestsUsed ?></span>
                                 <?php else: ?>
                                     <span id="kpi-requests" style="display:none;">0</span>
-                                    <span id="kpi-waiting-msg" class="waiting-pulse" style="font-size: 0.85rem; color: #64748b; font-weight: 700; letter-spacing: -0.01em;">Esperando primera petición...</span>
+                                    <span id="kpi-waiting-msg" class="waiting-pulse" style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.02em; white-space: nowrap; display: block; margin: 4px 0;">Esperando actividad...</span>
                                 <?php endif; ?>
                             </div>
                         </div>
