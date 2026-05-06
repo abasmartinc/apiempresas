@@ -375,6 +375,7 @@
                         </style>
                         <script>
                             function fillAndSearch(cif) {
+                                if (window.trackEvent) trackEvent('example_cif_clicked', { cif: cif });
                                 document.getElementById('dash_q').value = cif;
                                 document.getElementById('btnDashValidate').click();
                             }
@@ -491,6 +492,7 @@
                                 const url = "<?= site_url('api/v1/companies') ?>";
                                 const cmd = `curl -X GET "${url}?cif=A15075062" \\\n  -H "X-API-KEY: ${key}"`;
                                 navigator.clipboard.writeText(cmd);
+                                if (window.trackEvent) trackEvent('curl_command_copied');
                                 Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Comando copiado', showConfirmButton: false, timer: 1500 });
                             }
                         </script>
@@ -634,6 +636,8 @@
                 alert('Introduce un CIF o nombre.');
                 return;
             }
+
+            if (window.trackEvent) trackEvent('dashboard_search_executed', { query: q });
 
             btnValidate.disabled = true;
             btnValidate.textContent = 'Validando...';

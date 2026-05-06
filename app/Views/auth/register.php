@@ -162,6 +162,15 @@
 
         if (!form || !btn) return;
 
+        // Track Form Started (Only once)
+        let startedTracking = false;
+        form.addEventListener('input', () => {
+            if (!startedTracking) {
+                if (window.trackEvent) trackEvent('register_form_started');
+                startedTracking = true;
+            }
+        }, { passive: true });
+
         form.addEventListener('submit', () => {
             if (btn.disabled) return;
             btn.disabled = true;

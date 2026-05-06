@@ -32,6 +32,12 @@
     const anonId = getAnonymousId();
     const sessId = getSessionId();
 
+    // Pages where we DON'T want passive noise (scroll, time)
+    const isFunctionalPage = () => {
+        const path = window.location.pathname;
+        return path.includes('/dashboard') || path.includes('/billing') || path.includes('/consumption') || path.includes('/register') || path.includes('/enter');
+    };
+
     // 2. Global trackEvent Function
     window.trackEvent = async (eventName, metadata = {}, element = null) => {
         // Backward compatibility for different signatures
@@ -77,9 +83,11 @@
     // 3.1 Page View
     trackEvent('page_view', { referrer: document.referrer });
 
-    // 3.2 Scroll Depth (Optimized)
+    // 3.2 Scroll Depth (Optimized) - Disabled on functional pages
     let triggeredDepths = new Set();
     const handleScroll = () => {
+        if (isFunctionalPage()) return;
+        
         const scrollTop = window.scrollY;
         const docHeight = document.documentElement.scrollHeight;
         const winHeight = window.innerHeight;
@@ -138,9 +146,11 @@
         }
     }, { capture: true });
 
-    // 3.5 Time on Page
+    // 3.5 Time on Page - Disabled on functional pages
     let startTime = Date.now();
     setInterval(() => {
+        if (isFunctionalPage()) return;
+        
         const timeSpent = Math.round((Date.now() - startTime) / 1000);
         if (timeSpent > 0 && (timeSpent === 10 || timeSpent === 30 || timeSpent === 60 || timeSpent % 120 === 0)) {
             trackEvent('time_on_page', { seconds: timeSpent });

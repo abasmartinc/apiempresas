@@ -547,6 +547,13 @@
             if (input) {
                 input.checked = true;
                 input.closest('.plan-card').classList.add('is-selected');
+                
+                if (window.trackEvent) {
+                    trackEvent('plan_selection_clicked', { 
+                        plan: value,
+                        period: document.querySelector('.period-btn.active')?.dataset.period || 'monthly'
+                    });
+                }
             }
             if (typeof window.updateBillingUI === 'function') window.updateBillingUI();
         }
@@ -650,8 +657,19 @@
 
             if (form) {
                 form.addEventListener('submit', () => {
-                    // Handled globally via .js-loading-btn
+                    if (window.trackEvent) {
+                        trackEvent('checkout_started', {
+                            plan: document.getElementById('planInput').value,
+                            period: document.getElementById('periodInput').value,
+                            email: document.getElementById('bill_email').value
+                        });
+                    }
                 });
+            }
+
+            // Page View - Checkout
+            if (window.trackEvent) {
+                trackEvent('checkout_view', { current_plan: currentPlan });
             }
 
         // Initial state logic for auto-selection
