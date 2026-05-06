@@ -32,10 +32,10 @@
     const anonId = getAnonymousId();
     const sessId = getSessionId();
 
-    // Pages where we DON'T want passive noise (scroll, time)
-    const isFunctionalPage = () => {
+    // Only track passive noise (scroll, time) on content-heavy pages like Home or Blog
+    const shouldTrackPassive = () => {
         const path = window.location.pathname;
-        return path.includes('/dashboard') || path.includes('/billing') || path.includes('/consumption') || path.includes('/register') || path.includes('/enter');
+        return path === '/' || path.includes('/blog');
     };
 
     // 2. Global trackEvent Function
@@ -86,7 +86,7 @@
     // 3.2 Scroll Depth (Optimized) - Disabled on functional pages
     let triggeredDepths = new Set();
     const handleScroll = () => {
-        if (isFunctionalPage()) return;
+        if (!shouldTrackPassive()) return;
         
         const scrollTop = window.scrollY;
         const docHeight = document.documentElement.scrollHeight;
@@ -149,7 +149,7 @@
     // 3.5 Time on Page - Disabled on functional pages
     let startTime = Date.now();
     setInterval(() => {
-        if (isFunctionalPage()) return;
+        if (!shouldTrackPassive()) return;
         
         const timeSpent = Math.round((Date.now() - startTime) / 1000);
         if (timeSpent > 0 && (timeSpent === 10 || timeSpent === 30 || timeSpent === 60 || timeSpent % 120 === 0)) {
