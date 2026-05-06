@@ -71,6 +71,49 @@
         .leaflet-popup-tip {
             box-shadow: none;
         }
+        .api-link-small:hover {
+            background: #dbeafe !important;
+            color: #1d4ed8 !important;
+        }
+
+        .cif-text:hover .copy-icon {
+            opacity: 1 !important;
+            color: #3b82f6 !important;
+        }
+
+        /* Toast Notification Styles */
+        .api-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #0f172a;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 90vw;
+        }
+        .api-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        .api-toast b {
+            color: #3b82f6;
+        }
+        .api-toast .btn-toast {
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
     </style>
 </head>
 
@@ -287,7 +330,18 @@
                         <dl class="company-card__grid">
                             <div>
                                 <dt>CIF</dt>
-                                <dd><?= esc($company['cif'] ?? $company['nif'] ?? '-') ?></dd>
+                                <dd>
+                                    <span class="cif-text" id="cif-val" style="cursor: pointer; position: relative; display: inline-flex; align-items: center; gap: 6px;" title="Clic para copiar">
+                                        <?= esc($company['cif'] ?? $company['nif'] ?? '-') ?>
+                                        <svg class="copy-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #64748b; opacity: 0.7; transition: opacity 0.2s;">
+                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                        </svg>
+                                    </span>
+                                    <a href="#api-dev-section" class="api-link-small" style="margin-left: 10px; font-size: 0.75rem; color: #2563eb; text-decoration: none; font-weight: 700; background: #eff6ff; padding: 2px 8px; border-radius: 4px; border: 1px solid #dbeafe;">
+                                        (Consultar vía API)
+                                    </a>
+                                </dd>
                             </div>
 
                             <div>
@@ -591,7 +645,7 @@
                 <?php endif; ?>
 
                 <!-- SECCIÓN PARA DESARROLLADORES (Premium Design) -->
-                <section class="api-dev-section"
+                <section id="api-dev-section" class="api-dev-section"
                     style="margin-top: 5rem; padding-bottom: 3rem; border-top: 1px solid #eef2f6;">
                     <div class="api-dev-grid"
                         style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center; background: #ffffff; padding: 2.5rem; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);">
@@ -653,7 +707,7 @@
                                     <pre
                                         style="margin: 0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.9rem; line-height: 1.7;">
 <span style="color: #94a3b8;"># Petición cURL para <?= esc($companyCif) ?></span>
-<span style="color: #ff79c6;">curl</span> -X GET <span style="color: #f1fa8c;">"<?= site_url("api/v1/companies?cif=" . esc($companyCif)) ?>"</span> \
+<span style="color: #ff79c6;">curl</span> -X GET <span style="color: #f1fa8c;">"https://apiempresas.es/api/v1/companies?cif=<?= esc($companyCif) ?>"</span> \
      -H <span style="color: #f1fa8c;">"Authorization: Bearer TU_API_KEY"</span></pre>
                                 </div>
                             </div>
@@ -692,6 +746,55 @@
                 <!-- Schema.org JSON-LD -->
                 <script type="application/ld+json">
                     <?= json_encode($schemaOrg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
+                </script>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const cifVal = document.getElementById('cif-val');
+                        
+                        // 1. Copy to clipboard on click
+                        if (cifVal) {
+                            cifVal.addEventListener('click', function() {
+                                const text = this.innerText.trim();
+                                navigator.clipboard.writeText(text).then(() => {
+                                    showApiToast();
+                                });
+                            });
+                        }
+
+                        // 2. Detect any copy event on the page (if they select and copy manually)
+                        document.addEventListener('copy', (event) => {
+                            const selection = document.getSelection();
+                            if (selection.toString().trim() === cifVal.innerText.trim()) {
+                                // Short delay to let the default copy finish
+                                setTimeout(showApiToast, 200);
+                            }
+                        });
+
+                        function showApiToast() {
+                            if (document.querySelector('.api-toast')) return;
+
+                            const toast = document.createElement('div');
+                            toast.className = 'api-toast';
+                            toast.innerHTML = `
+                                <div style="background: #3b82f6; width: 8px; height: 8px; border-radius: 50%;"></div>
+                                <div style="font-size: 0.9rem;">
+                                    ¿Copiando datos manualmente? <b>Usa nuestra API</b> y ahorra tiempo.
+                                </div>
+                                <a href="#api-dev-section" class="btn-toast">Ver API</a>
+                            `;
+                            document.body.appendChild(toast);
+                            
+                            // Trigger animation
+                            setTimeout(() => toast.classList.add('show'), 10);
+
+                            // Remove after 5 seconds
+                            setTimeout(() => {
+                                toast.classList.remove('show');
+                                setTimeout(() => toast.remove(), 400);
+                            }, 5000);
+                        }
+                    });
                 </script>
 
 
