@@ -265,7 +265,7 @@
                     </div>
                     <div class="kpi-content">
                         <span class="label">Ratio Error</span>
-                        <div class="value" id="kpi-error">...</div>
+                        <div class="value" id="kpi-error"><?= $requestsUsedThisMonth > 0 ? '...' : '<span style="font-size:0.8rem; color:#94a3b8">Sin datos</span>' ?></div>
                         <div class="meta">Tasa de fallo</div>
                     </div>
                 </div>
@@ -315,6 +315,26 @@
                             <div onclick="showUpgradeModal()" style="position: absolute; inset: 0; cursor: pointer; z-index: 5;"></div>
                             <?php endif; ?>
                         </div>
+
+                        <!-- CIF Examples -->
+                        <?php if ($requestsUsedThisMonth < 5): ?>
+                        <div style="margin-top: 12px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 700;">Prueba con:</span>
+                            <button class="example-cif-btn" onclick="fillAndSearch('A28130649')">Telefónica</button>
+                            <button class="example-cif-btn" onclick="fillAndSearch('A15075062')">Inditex</button>
+                            <button class="example-cif-btn" onclick="fillAndSearch('A46103834')">Mercadona</button>
+                        </div>
+                        <style>
+                            .example-cif-btn { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 10px; font-size: 0.75rem; color: #475569; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+                            .example-cif-btn:hover { background: #e2e8f0; color: #2152ff; border-color: #2152ff; }
+                        </style>
+                        <script>
+                            function fillAndSearch(cif) {
+                                document.getElementById('dash_q').value = cif;
+                                document.getElementById('btnDashValidate').click();
+                            }
+                        </script>
+                        <?php endif; ?>
 
                         <?php if (!$isPaid): ?>
                         <div class="progress-container" style="margin-top: 12px;">
@@ -408,27 +428,30 @@
                                 <button type="button" class="btn-small primary" id="btnCopyKey">Copiar</button>
                             </div>
                         </div>
-                    </section>
-                    <!-- NEXT STEP SECTION -->
-                    <?php if ($requestsUsedThisMonth >= 1): ?>
-                    <div style="margin-top: 24px; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px;">
-                        <h4 style="margin: 0 0 12px; font-size: 1rem; font-weight: 800; color: #0f172a;">Siguiente paso:</h4>
-                        <p style="margin: 0 0 16px; font-size: 0.9rem; color: #64748b; font-weight: 600;">Integra esta validación en tu sistema y automatiza todo el proceso.</p>
-                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                            <a href="<?= site_url('documentation') ?>" style="display: inline-flex; align-items: center; gap: 8px; color: #2152ff; font-weight: 800; font-size: 0.85rem; text-decoration: none;">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                                Documentación API
-                            </a>
-                            <a href="javascript:void(0)" onclick="showPluginComingSoon()" style="display: inline-flex; align-items: center; gap: 8px; color: #2152ff; font-weight: 800; font-size: 0.85rem; text-decoration: none;">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
-                                Plugin WordPress
-                            </a>
-                        </div>
-                    </div>
-                    <?php endif; ?>
 
-                    <!-- 3. GUÍA 3 PASOS -->
-                    <h3 style="font-size: 1.25rem; font-weight: 900; color: #0f172a; margin-bottom: 16px;">Empieza en 3 pasos</h3>
+                        <!-- NEW: Quick cURL Snippet -->
+                        <div style="margin-top: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Prueba rápida (cURL)</span>
+                                <button onclick="copyCurl()" style="background: none; border: none; color: #2152ff; font-weight: 800; font-size: 0.7rem; cursor: pointer;">Copiar comando</button>
+                            </div>
+                            <div id="curl-snippet" style="background: #1e293b; color: #e2e8f0; padding: 12px 16px; border-radius: 10px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; overflow-x: auto; white-space: nowrap; border: 1px solid #334155;">
+                                <span style="color: #94a3b8;">curl -X GET</span> "<?= site_url('api/v1/companies') ?>?cif=A15075062" \<br>
+                                &nbsp;&nbsp;-H <span style="color: #12b48a;">"X-API-KEY: <span id="curl-key-placeholder">••••••••••••••••</span>"</span>
+                            </div>
+                        </div>
+                        <script>
+                            function copyCurl() {
+                                const key = document.getElementById('apiKeyBox').getAttribute('data-api-key');
+                                const url = "<?= site_url('api/v1/companies') ?>";
+                                const cmd = `curl -X GET "${url}?cif=A15075062" \\\n  -H "X-API-KEY: ${key}"`;
+                                navigator.clipboard.writeText(cmd);
+                                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Comando copiado', showConfirmButton: false, timer: 1500 });
+                            }
+                        </script>
+                    </section>
+                    <!-- 3. GUÍA 3 PASOS (Subida de posición) -->
+                    <h3 style="font-size: 1.25rem; font-weight: 900; color: #0f172a; margin-bottom: 16px; margin-top: 40px;">Empieza en 3 pasos</h3>
                     <div class="step-guide">
                         <div class="step-card">
                             <div class="step-num">1</div>
