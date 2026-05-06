@@ -84,6 +84,11 @@
     }
 
     $barWidth = $percent !== null ? max(0, min(100, $percent)) : 0;
+
+    // Logic for adaptive messaging
+    $isVeryLowUsage = $usedThisMonth <= 5;
+    $isHighUsage = $usageRatio >= 0.7;
+    $isCriticalUsage = $usageRatio >= 0.9;
     ?>
 
     <main class="usage-main">
@@ -92,11 +97,18 @@
             <div class="usage-header">
                 <div>
                     <h1>Uso de la API</h1>
-                    <p style="font-weight: 700; color: <?= esc($stateColor) ?>; margin-top: 8px;">
-                        ⚠️ Estás usando la API en condiciones reales<br>
-                        <span style="font-weight: 400; opacity: 0.85;">
-                            Asegura continuidad antes de integrarla en producción
-                        </span>
+                    <p style="font-weight: 700; color: <?= $isVeryLowUsage ? '#64748b' : esc($stateColor) ?>; margin-top: 8px;">
+                        <?php if ($isVeryLowUsage): ?>
+                            ✨ Explorando la API: Fase de pruebas activa<br>
+                            <span style="font-weight: 400; opacity: 0.85;">
+                                Disfruta de tus consultas gratuitas para validar tu integración
+                            </span>
+                        <?php else: ?>
+                            ⚠️ Estás usando la API en condiciones reales<br>
+                            <span style="font-weight: 400; opacity: 0.85;">
+                                Asegura continuidad antes de integrarla en producción
+                            </span>
+                        <?php endif; ?>
                     </p>
                 </div>
 
@@ -205,8 +217,13 @@
                 <section class="usage-card">
                     <h2>Uso de tu plan</h2>
                     <p>
-                        Estás empezando a usar la API en condiciones reales<br>
-                        Evita quedarte sin acceso cuando más la necesites
+                        <?php if ($isVeryLowUsage): ?>
+                            Fase inicial de descubrimiento activa<br>
+                            Descubre el potencial de los datos oficiales
+                        <?php else: ?>
+                            Estás empezando a usar la API en condiciones reales<br>
+                            Evita quedarte sin acceso cuando más la necesites
+                        <?php endif; ?>
                     </p>
 
                     <div class="limit-block">
@@ -266,6 +283,7 @@
                         </div>
                     </div>
 
+                    <?php if (!$isVeryLowUsage && $usageRatio > 0.2): ?>
                     <div class="limit-block" style="margin-top:14px;">
                         <h3 style="color: #ef4444;">Presión de uso</h3>
                         <p style="font-weight: 600;">
@@ -275,15 +293,21 @@
                             Evita que tu sistema deje de validar empresas en producción
                         </p>
                     </div>
+                    <?php endif; ?>
 
                     <div class="limit-block" style="margin-top:14px;">
-                        <h3>Alertas</h3>
+                        <h3>Estado del sistema</h3>
                         <ul class="alert-list">
                             <li class="info" style="border-left: 4px solid <?= esc($stateColor) ?>;">
                                 <span class="badge-dot" style="background: <?= esc($stateColor) ?>;"></span>
                                 <div>
-                                    <strong>Tu uso ya está entrando en fase real</strong><br>
-                                    Es el punto en el que la mayoría de usuarios activan Pro.
+                                    <?php if ($isVeryLowUsage): ?>
+                                        <strong>Sistema listo para producción</strong><br>
+                                        Tu integración está respondiendo correctamente.
+                                    <?php else: ?>
+                                        <strong>Tu uso ya está entrando en fase real</strong><br>
+                                        Es el punto en el que la mayoría de usuarios activan Pro.
+                                    <?php endif; ?>
                                 </div>
                             </li>
                         </ul>
