@@ -239,7 +239,7 @@
                     <div class="kpi-content">
                         <span class="label"><?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'Límite alcanzado' : 'Consultas Mes' ?></span>
                         <div class="value">
-                            <span id="kpi-requests"><?= $requestsUsed ?></span>
+                            <span id="kpi-requests"><?= $requestsUsed > 0 ? $requestsUsed : '0' ?></span>
                         </div>
                         <div class="meta"><?= (!$isPaid && $requestsUsed >= $freeLimit) ? '<strong>Activar Pro ahora &rarr;</strong>' : 'Límite: ' . ($isPaid ? number_format($maxLimit, 0, ',', '.') : $freeLimit) ?></div>
                     </div>
@@ -252,8 +252,8 @@
                     <div class="kpi-content">
                         <span class="label">Latencia</span>
                         <div class="value">
-                            <span id="kpi-latency">...</span>
-                            <span class="value-unit">ms</span>
+                            <span id="kpi-latency"><?= $requestsUsed > 0 ? '...' : '--' ?></span>
+                            <span class="value-unit" id="kpi-latency-unit" style="<?= $requestsUsed > 0 ? '' : 'display:none' ?>">ms</span>
                         </div>
                         <div class="meta">Velocidad real</div>
                     </div>
@@ -265,7 +265,7 @@
                     </div>
                     <div class="kpi-content">
                         <span class="label">Ratio Error</span>
-                        <div class="value" id="kpi-error"><?= $requestsUsedThisMonth > 0 ? '...' : '<span style="font-size:0.8rem; color:#94a3b8">Sin datos</span>' ?></div>
+                        <div class="value" id="kpi-error"><?= $requestsUsed > 0 ? '...' : '--' ?></div>
                         <div class="meta">Tasa de fallo</div>
                     </div>
                 </div>
@@ -290,9 +290,23 @@
                         if(data.error) return;
                         const numFmt = new Intl.NumberFormat('es-ES');
                         const reqVal = document.getElementById('kpi-requests');
-                        if (reqVal) reqVal.innerText = numFmt.format(data.api_request_total_month || 0);
-                        document.getElementById('kpi-latency').innerText = numFmt.format(data.avg_latency || 0);
-                        document.getElementById('kpi-error').innerText = numFmt.format(data.error_rate || 0);
+                        const latencyVal = document.getElementById('kpi-latency');
+                        const latencyUnit = document.getElementById('kpi-latency-unit');
+                        const errorVal = document.getElementById('kpi-error');
+
+                        const totalRequests = data.api_request_total_month || 0;
+
+                        if (reqVal) reqVal.innerText = numFmt.format(totalRequests);
+
+                        if (totalRequests > 0) {
+                            if (latencyVal) latencyVal.innerText = numFmt.format(data.avg_latency || 0);
+                            if (latencyUnit) latencyUnit.style.display = 'inline';
+                            if (errorVal) errorVal.innerText = (data.error_rate || 0) + '%';
+                        } else {
+                            if (latencyVal) latencyVal.innerText = '--';
+                            if (latencyUnit) latencyUnit.style.display = 'none';
+                            if (errorVal) errorVal.innerText = '--';
+                        }
                     })
                     .catch(e => console.error('Error fetching KPIs', e));
                 });
