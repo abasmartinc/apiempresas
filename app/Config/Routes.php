@@ -235,6 +235,12 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('activity-logs/user/(:num)', 'Admin\ActivityLogs::user/$1');
     $routes->get('activity-logs/export', 'Admin\ActivityLogs::export');
 
+    // Email Templates
+    $routes->get('email-templates', 'Admin\EmailTemplates::index');
+    $routes->get('email-templates/edit/(:num)', 'Admin\EmailTemplates::edit/$1');
+    $routes->post('email-templates/update/(:num)', 'Admin\EmailTemplates::update/$1');
+    $routes->get('email-templates/preview/(:num)', 'Admin\EmailTemplates::preview/$1');
+
     // IA Marketing
     $routes->get('ia-marketing', 'Admin\Dashboard::ia_marketing');
     $routes->get('email-history/(:num)', 'Admin\Dashboard::email_history_ajax/$1');

@@ -303,273 +303,152 @@
 
         <!-- KPIs Section Removed for Performance -->
 
-        <!-- Listados y Gestión Section -->
+        <!-- Gestión de Negocio -->
         <div class="section-header">
-            <h2 class="section-title">Listados y Gestión</h2>
+            <h2 class="section-title">Gestión de Negocio</h2>
         </div>
-
         <div class="admin-grid">
             <a href="<?= site_url('admin/users') ?>" class="admin-card">
                 <div class="admin-icon-wrapper icon-sub-blue">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" /></svg>
                 </div>
-                <div class="admin-card-content">
-                    <span>Usuarios</span>
-                    <p>Gestión de cuentas, perfiles y permisos de acceso.</p>
-                </div>
+                <div class="admin-card-content"><span>Usuarios</span><p>Gestión de cuentas y perfiles.</p></div>
             </a>
-
             <a href="<?= site_url('admin/companies') ?>" class="admin-card">
                 <div class="admin-icon-wrapper icon-sub-indigo">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" /></svg>
                 </div>
-                <div class="admin-card-content">
-                    <span>Empresas</span>
-                    <p>Base de datos maestra de empresas y su información.</p>
-                </div>
+                <div class="admin-card-content"><span>Empresas</span><p>Base de datos maestra de empresas.</p></div>
             </a>
-
-            <a href="<?= site_url('admin/logs') ?>" class="admin-card">
-                <div class="admin-icon-wrapper icon-sub-amber">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75V16.5m0-4.5V9m0-4.5V3" />
-                    </svg>
-                </div>
-                <div class="admin-card-content">
-                    <span>Logs Búsqueda</span>
-                    <p>Historial y depuración de consultas de empresas.</p>
-                </div>
-            </a>
-
-            <a href="<?= site_url('admin/logs?zero=1') ?>" class="admin-card">
-                <div class="admin-icon-wrapper icon-sub-orange">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                    </svg>
-                </div>
-                <div class="admin-card-content">
-                    <span>Top Búsquedas</span>
-                    <p>Lo más buscado por los usuarios y lo que falta.</p>
-                </div>
-            </a>
-
-            <a href="<?= site_url('admin/api-requests') ?>" class="admin-card">
-                <div class="admin-icon-wrapper icon-sub-purple">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" />
-                    </svg>
-                </div>
-                <div class="admin-card-content">
-                    <span>Peticiones API</span>
-                    <p>Monitorización de tráfico y endpoints de la API.</p>
-                </div>
-            </a>
-
-            <a href="<?= site_url('admin/usage-daily') ?>" class="admin-card">
-                <div class="admin-icon-wrapper icon-sub-emerald">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                    </svg>
-                </div>
-                <div class="admin-card-content">
-                    <span>Consumo Diario</span>
-                    <p>Análisis de uso por día y picos de tráfico.</p>
-                </div>
-            </a>
-
-            <a href="<?= site_url('admin/plans') ?>" class="admin-card">
-                <div class="admin-icon-wrapper icon-sub-rose">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75-6.75a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 .75.75v9a.75.75 0 0 1-.75.75H3.75a.75.75 0 0 1-.75-.75v-9ZM12 3v3.375m0 0c0 .621.504 1.125 1.125 1.125h2.25c.621 0 1.125-.504 1.125-1.125V3m-4.5 0h4.5" />
-                    </svg>
-                </div>
-                <div class="admin-card-content">
-                    <span>Planes API</span>
-                    <p>Configuración de precios, límites y cuotas.</p>
-                </div>
-            </a>
-
-            <a href="<?= site_url('admin/api-keys') ?>" class="admin-card">
-                <div class="admin-icon-wrapper icon-sub-sky">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
-                    </svg>
-                </div>
-                <div class="admin-card-content">
-                    <span>API Keys</span>
-                    <p>Emisión y revocación de llaves de acceso.</p>
-                </div>
-            </a>
-
             <a href="<?= site_url('admin/subscriptions') ?>" class="admin-card">
                 <div class="admin-icon-wrapper icon-sub-indigo">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 3h.008v.008H12V18Zm-3-6h.008v.008H9v-.008ZM9 15h.008v.008H9V15Zm0 3h.008v.008H9V18Zm6-6h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008V15Zm0 3h.008v.008h-.008V18Z" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 3h.008v.008H12V18Zm-3-6h.008v.008H9v-.008ZM9 15h.008v.008H9V15Zm0 3h.008v.008H9V18Zm6-6h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008V15Zm0 3h.008v.008h-.008V18Z" /></svg>
                 </div>
-                <div class="admin-card-content">
-                    <span>Suscripciones</span>
-                    <p>Gestión de ciclos de facturación y pagos activos.</p>
-                </div>
+                <div class="admin-card-content"><span>Suscripciones</span><p>Ciclos de facturación y pagos activos.</p></div>
             </a>
-
             <a href="<?= site_url('admin/invoices') ?>" class="admin-card">
                 <div class="admin-icon-wrapper icon-sub-violet">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
                 </div>
-                <div class="admin-card-content">
-                    <span>Facturas</span>
-                    <p>Consulta y descarga del historial de facturación.</p>
-                </div>
+                <div class="admin-card-content"><span>Facturas</span><p>Historial de facturación y descargas.</p></div>
             </a>
+            <a href="<?= site_url('admin/plans') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-rose">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75-6.75a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 .75.75v9a.75.75 0 0 1-.75.75H3.75a.75.75 0 0 1-.75-.75v-9ZM12 3v3.375m0 0c0 .621.504 1.125 1.125 1.125h2.25c.621 0 1.125-.504 1.125-1.125V3m-4.5 0h4.5" /></svg>
+                </div>
+                <div class="admin-card-content"><span>Planes API</span><p>Precios, límites y cuotas.</p></div>
+            </a>
+            <a href="<?= site_url('admin/api-keys') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-sky">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" /></svg>
+                </div>
+                <div class="admin-card-content"><span>API Keys</span><p>Emisión y revocación de llaves.</p></div>
+            </a>
+        </div>
 
+        <!-- Monitorización y Análisis -->
+        <div class="section-header">
+            <h2 class="section-title">Monitorización y Análisis</h2>
+        </div>
+        <div class="admin-grid">
             <a href="<?= site_url('admin/activity-logs') ?>" class="admin-card">
                 <div class="admin-icon-wrapper icon-sub-slate">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
                 </div>
-                <div class="admin-card-content">
-                    <span>Activity Logs</span>
-                    <p>Registro de acciones administrativas críticas.</p>
-                </div>
+                <div class="admin-card-content"><span>Activity Logs</span><p>Acciones administrativas críticas.</p></div>
             </a>
-
+            <a href="<?= site_url('admin/logs') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-amber">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75V16.5m0-4.5V9m0-4.5V3" /></svg>
+                </div>
+                <div class="admin-card-content"><span>Logs Búsqueda</span><p>Historial de consultas de empresas.</p></div>
+            </a>
             <a href="<?= site_url('admin/email-logs') ?>" class="admin-card">
                 <div class="admin-icon-wrapper icon-sub-pink">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg>
                 </div>
-                <div class="admin-card-content">
-                    <span>Logs Emails</span>
-                    <p>Trazabilidad de correos electrónicos enviados.</p>
-                </div>
+                <div class="admin-card-content"><span>Logs Emails</span><p>Trazabilidad de correos enviados.</p></div>
             </a>
+            <a href="<?= site_url('admin/api-requests') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-purple">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" /></svg>
+                </div>
+                <div class="admin-card-content"><span>Peticiones API</span><p>Monitorización de tráfico.</p></div>
+            </a>
+            <a href="<?= site_url('admin/usage-daily') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-emerald">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" /></svg>
+                </div>
+                <div class="admin-card-content"><span>Consumo Diario</span><p>Análisis de uso y tráfico.</p></div>
+            </a>
+            <a href="<?= site_url('admin/event-tracking') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-amber">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M18.757 14.743l-1.591-1.591m-14.166-8.318 1.591 1.591M3.75 10.5H6m.743 4.243 1.591-1.591" /></svg>
+                </div>
+                <div class="admin-card-content"><span>Event Tracking</span><p>Comportamiento real de usuarios.</p></div>
+            </a>
+        </div>
 
+        <!-- Crecimiento y Marketing -->
+        <div class="section-header">
+            <h2 class="section-title">Crecimiento y Marketing</h2>
+        </div>
+        <div class="admin-grid">
+            <a href="<?= site_url('admin/ia-marketing') ?>" class="admin-card" style="border-color: rgba(16, 185, 129, 0.3);">
+                <div class="admin-icon-wrapper icon-sub-green">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
+                </div>
+                <div class="admin-card-content"><span>IA Marketing</span><p>Leads inteligentes y conversión.</p></div>
+            </a>
+            <a href="<?= site_url('admin/seo-auto-posts') ?>" class="admin-card" style="border-color: rgba(139, 92, 246, 0.3);">
+                <div class="admin-icon-wrapper icon-sub-purple">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                </div>
+                <div class="admin-card-content"><span>SEO Auto Posts</span><p>Generación automática de artículos.</p></div>
+            </a>
+            <a href="<?= site_url('admin/email-templates') ?>" class="admin-card" style="border-color: rgba(33, 82, 255, 0.3);">
+                <div class="admin-icon-wrapper icon-sub-blue">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                </div>
+                <div class="admin-card-content"><span>Gestor de Emails</span><p>Edición de plantillas automáticas.</p></div>
+            </a>
+            <a href="<?= site_url('admin/search-console') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-sky">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                </div>
+                <div class="admin-card-content"><span>Search Console</span><p>Métricas de Google y SEO.</p></div>
+            </a>
+            <a href="<?= site_url('admin/metrics') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-indigo">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" /></svg>
+                </div>
+                <div class="admin-card-content"><span>Métricas API</span><p>Funnel interno y activación.</p></div>
+            </a>
+            <a href="<?= site_url('admin/logs?zero=1') ?>" class="admin-card">
+                <div class="admin-icon-wrapper icon-sub-orange">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+                </div>
+                <div class="admin-card-content"><span>Top Búsquedas</span><p>Lo más buscado por usuarios.</p></div>
+            </a>
+        </div>
+
+        <!-- Sistema y Seguridad -->
+        <div class="section-header">
+            <h2 class="section-title">Sistema y Seguridad</h2>
+        </div>
+        <div class="admin-grid">
             <a href="<?= site_url('admin/blocked-ips') ?>" class="admin-card">
                 <div class="admin-icon-wrapper icon-sub-red">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" /></svg>
                 </div>
-                <div class="admin-card-content">
-                    <span>Centro de Seguridad</span>
-                    <p>Gestión de baneo de IPs y cortafuegos de la API.</p>
-                </div>
+                <div class="admin-card-content"><span>Centro de Seguridad</span><p>Baneo de IPs y cortafuegos.</p></div>
             </a>
-
-            <a href="<?= site_url('admin/ia-marketing') ?>" class="admin-card"
-                style="border-color: rgba(16, 185, 129, 0.3);">
-                <div class="admin-icon-wrapper icon-sub-green">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                    </svg>
-                </div>
-                <div class="admin-card-content">
-                    <span>IA Marketing</span>
-                    <p>Análisis de leads inteligentes e incentivación a suscripciones.</p>
-                </div>
-            </a>
-            <a href="<?= site_url('admin/seo-auto-posts') ?>" class="admin-card"
-                style="border-color: rgba(139, 92, 246, 0.3);">
-                <div class="admin-icon-wrapper icon-sub-purple">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                    </svg>
-                </div>
-                <div class="admin-card-content">
-                    <span>SEO Auto Posts</span>
-                    <p>Generación y publicación automática de artículos con IA.</p>
-                </div>
-            </a>
-            <a href="<?= site_url('admin/search-console') ?>" class="admin-card"
-                style="border-color: rgba(33, 150, 243, 0.3);">
-                <div class="admin-icon-wrapper icon-sub-sky">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                    </svg>
-                </div>
-                <div class="admin-card-content">
-                    <span>Search Console</span>
-                    <p>Métricas SEO, clics e impresiones desde Google.</p>
-                </div>
-            </a>
-            <a href="<?= site_url('admin/metrics') ?>" class="admin-card"
-                style="border-color: rgba(99, 102, 241, 0.3);">
-                <div class="admin-icon-wrapper icon-sub-indigo">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                    </svg>
-                </div>
-                <div class="admin-card-content">
-                    <span>Métricas API</span>
-                    <p>Visión interna del funnel, revenue y activación.</p>
-                </div>
-            </a>
-            <a href="<?= site_url('admin/event-tracking') ?>" class="admin-card"
-                style="border-color: rgba(245, 158, 11, 0.3);">
-                <div class="admin-icon-wrapper icon-sub-amber">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M18.757 14.743l-1.591-1.591m-14.166-8.318 1.591 1.591M3.75 10.5H6m.743 4.243 1.591-1.591" />
-                    </svg>
-                </div>
-                <div class="admin-card-content">
-                    <span>Event Tracking</span>
-                    <p>Análisis de clics y comportamiento real de usuarios.</p>
-                </div>
-            </a>
-
-        </div>
-
-        <!-- Herramientas del Sistema Section -->
-        <div class="section-header">
-            <h2 class="section-title">Herramientas del Sistema</h2>
-        </div>
-
-        <div class="admin-grid">
             <a href="#" class="admin-card" id="btn-clear-cache-card">
                 <div class="admin-icon-wrapper icon-sub-blue">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
                 </div>
-                <div class="admin-card-content">
-                    <span>Limpiar Caché</span>
-                    <p>Optimiza el rendimiento limpiando datos temporales.</p>
-                </div>
+                <div class="admin-card-content"><span>Limpiar Caché</span><p>Optimiza el rendimiento.</p></div>
             </a>
-
-
         </div>
 
         <script>

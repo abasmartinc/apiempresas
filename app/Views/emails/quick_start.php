@@ -26,7 +26,16 @@
             <h2>¡Hola, <?= esc($name) ?>!</h2>
             <p>Sabemos que registrarse es solo el primer paso. El momento clave es cuando recibes tu primer objeto de datos real en tu propio sistema.</p>
             
-            <p>Para facilitarte el trabajo, aquí tienes un ejemplo de la respuesta que obtendrás al validar un CIF con tu <strong>Plan Free</strong>:</p>
+            <p>Para facilitarte el trabajo, así de fácil es lanzar tu primera petición:</p>
+            
+            <div style="background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <code style="color: #38bdf8; font-family: 'Fira Code', monospace; font-size: 13px; word-break: break-all;">
+                    curl -X GET "https://apiempresas.es/api/v1/companies?cif=B12345678" \<br>
+                    &nbsp;&nbsp;-H "X-API-KEY: TU_CLAVE_API"
+                </code>
+            </div>
+
+            <p>Y esta es la respuesta que obtendrás al validar un CIF con tu <strong>Plan Free</strong>:</p>
 
             <pre style="background: #0f172a; color: #e2e8f0; padding: 20px; border-radius: 8px; font-family: 'Fira Code', monospace; font-size: 13px; line-height: 1.5; overflow-x: auto;">{
   "success": true,
