@@ -40,6 +40,13 @@
 
     // 2. Global trackEvent Function
     window.trackEvent = async (eventName, metadata = {}, element = null) => {
+        // [V2.1 - GLOBAL BLOCK] Kill noise events on functional pages
+        const noiseEvents = ['time_on_page', 'scroll_depth', 'section_view'];
+        if (noiseEvents.includes(eventName) && !shouldTrackPassive()) {
+            // console.log(`[Tracking] Blocked noise event: ${eventName}`);
+            return;
+        }
+
         // Backward compatibility for different signatures
         if (typeof eventName === 'object' && eventName !== null) {
             const obj = eventName;
