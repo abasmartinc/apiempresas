@@ -3,8 +3,8 @@
 
 <head>
     <?= view('partials/head', [
-        'title' => 'API Registro Mercantil y Webhooks BORME en tiempo real | APIEmpresas.es',
-        'excerptText' => 'Infraestructura técnica para integración masiva de datos mercantiles. API REST, Webhooks para el BORME y enriquecimiento de leads con IA para desarrolladores.',
+        'title' => 'Infraestructura API para Datos Mercantiles y KYB en España | APIEmpresas.es',
+        'excerptText' => 'Integra datos oficiales del Registro Mercantil y BORME en tu CRM o ERP. API REST diseñada para enriquecimiento de datos B2B, onboarding KYB automatizado y scoring IA.',
         'canonical' => site_url('api-empresas'),
         'robots' => 'index,follow',
     ]) ?>
@@ -135,7 +135,7 @@
         }
 
         .api-pricing-card.featured::before {
-            content: "OPCIÓN MÁS POPULAR";
+            content: "RECOMENDADO PARA SAAS/ERP";
             position: absolute;
             top: -16px;
             left: 50%;
@@ -742,31 +742,28 @@
                     </div>
 
                     <h1 class="radar-hero__title">
-                        API de empresas en España para <span>validar CIF, consultar datos y automatizar
-                            integraciones</span>
+                        Infraestructura de Datos Mercantiles para <span>Integración en CRM, ERP y Onboarding KYB</span>
                     </h1>
 
                     <p class="radar-hero__subtitle">
-                        Accede a datos del Registro Mercantil y BORME en tiempo real vía API REST. Diseñada para
-                        desarrolladores y sistemas de alta disponibilidad.
+                        Enriquece tu stack tecnológico con datos oficiales del Registro Mercantil y alertas del BORME. Automatiza procesos de alta, valida proveedores y prioriza leads en milisegundos.
                     </p>
                     <p style="margin-top: -10px; font-weight: 700; color: #1e40af; opacity: 0.8; font-size: 1rem;">
-                        API REST con respuesta en milisegundos, endpoints listos para producción y datos oficiales del
-                        Registro Mercantil.
+                        API REST de alta disponibilidad optimizada para ingesta masiva y enriquecimiento de datos empresariales en tiempo real.
                     </p>
 
                     <div class="radar-hero__proof">
                         <div class="radar-hero__proof-item">
-                            <strong>JSON REST</strong>
-                            <span>Integración simple</span>
+                            <strong>Sincronización BORME</strong>
+                            <span>Detección de cambios</span>
                         </div>
                         <div class="radar-hero__proof-item">
-                            <strong>Scoring IA</strong>
-                            <span>Modelo Inteligente</span>
+                            <strong>Enriquecimiento B2B</strong>
+                            <span>Lead Intelligence</span>
                         </div>
                         <div class="radar-hero__proof-item">
-                            <strong>Datos Oficiales</strong>
-                            <span>Seguridad mercantil</span>
+                            <strong>Ecosistema KYB</strong>
+                            <span>Compliance Seguro</span>
                         </div>
                     </div>
 
@@ -782,14 +779,11 @@
                     <!-- API HERO TWO-COLUMN PANEL -->
                     <div class="radar-hero__feature-panel" style="max-width: 1040px; margin-top: 40px;">
                         <div class="radar-hero__feature-copy">
-                            <h2>Impulsa tu prospección con datos en tiempo real</h2>
+                            <h2>Orquestra tus decisiones con datos societarios oficiales</h2>
                             <ul style="display: grid; gap: 16px;">
-                                <li><strong>Infraestructura API Nativa:</strong> Integración simple con JSON de alto
-                                    rendimiento para validar cada oportunidad técnica.</li>
-                                <li><strong>Webhooks del Registro Mercantil:</strong> Notificaciones HTTP directas del
-                                    BORME para automatizar tu CRM o ERP.</li>
-                                <li><strong>Enriquecimiento de Leads:</strong> Ingesta masiva de datos societarios,
-                                    cargos y capital social para scoring avanzado.</li>
+                                <li><strong>Normalización y Data Cleansing:</strong> Automatiza la validación de CIF/NIF y el parseo de razones sociales en tiempo real para asegurar la integridad de tu base de datos desde el <code>POST</code>.</li>
+                                <li><strong>Event-Driven Architecture (Webhooks):</strong> Implementa flujos asíncronos recibiendo notificaciones HTTP cada vez que el BORME publique un cambio de estado o cargo societario relevante para tu sistema.</li>
+                                <li><strong>Enriquecimiento Programático:</strong> Accede a payloads JSON estructurados con CNAE 2025, capital social y vinculaciones directivas para alimentar tus modelos de scoring o lógica de negocio.</li>
                             </ul>
                         </div>
 
@@ -806,8 +800,8 @@
                             <div class="api-preview-card__body">
                                 <div class="api-score-sector" style="margin-bottom: 20px;">
                                     <div class="api-score-main">
-                                        <div class="api-score-label">COMERCIAL SCORE</div>
-                                        <div class="api-score-value" style="font-size: 1.8rem;">94<span>/100</span>
+                                        <div class="api-score-label">PROPENSITY_INDEX</div>
+                                        <div class="api-score-value" style="font-size: 1.8rem;">0.94<span>/1.0</span>
                                         </div>
                                     </div>
                                     <div class="api-score-bar">
@@ -815,11 +809,27 @@
                                     </div>
                                 </div>
 
-                                <div class="api-insights-grid" style="grid-template-columns: 1fr;">
+                                <div class="api-insights-grid" style="grid-template-columns: 1fr; gap: 20px;">
                                     <div class="api-insight-item">
-                                        <label>IA INSIGHTS</label>
-                                        <p style="font-size: 0.78rem;">Alta probabilidad de inversión en digitalización.
-                                            Empresa en expansión detectada.</p>
+                                        <label>IA_SIGNAL_ANALYTICS</label>
+                                        <p style="font-size: 0.78rem; margin-bottom: 12px;"><strong>Trend:</strong> Positive Growth. <strong>Signal:</strong> Capital Expansion detected. <strong>Tech_Affinity:</strong> 0.94.</p>
+                                        
+                                        <div class="api-signals-tags">
+                                            <span>AMPLIACIÓN_CAPITAL</span>
+                                            <span>NUEVO_ADMINISTRADOR</span>
+                                            <span>SOLVENCIA_ALTA</span>
+                                        </div>
+                                    </div>
+
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-top: 16px; border-top: 1px dashed #e2e8f0;">
+                                        <div class="api-insight-item">
+                                            <label>CNAE_OFFICIAL</label>
+                                            <p style="font-size: 0.78rem; font-family: monospace;">6201 - Software Dev</p>
+                                        </div>
+                                        <div class="api-insight-item">
+                                            <label>LAST_SYNC</label>
+                                            <p style="font-size: 0.78rem; font-family: monospace;">2024-05-06T08:22Z</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -834,16 +844,14 @@
             <div class="container">
                 <div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 80px; align-items: center;">
                     <div>
-                        <div class="radar-kicker">Infraestructura de Datos</div>
+                        <div class="radar-kicker">Integración sin fricción</div>
                         <h2 class="radar-title"
                             style="margin-top: 12px; margin-bottom: 32px; font-size: 2.75rem; letter-spacing: -0.03em;">
-                            API de empresas en España: cómo funciona</h2>
+                            Arquitectura orientada a la automatización masiva</h2>
 
                         <p class="radar-text"
                             style="font-size: 1.2rem; line-height: 1.7; color: #334155; margin-bottom: 40px; max-width: 600px;">
-                            Nuestra infraestructura conecta directamente con los nodos del <strong>Registro
-                                Mercantil</strong> para ofrecerte una interfaz REST de baja latencia diseñada para
-                            automatización masiva.
+                            Nuestra infraestructura abstrae la complejidad del Registro Mercantil ofreciendo una interfaz REST de baja latencia para sistemas de misión crítica.
                         </p>
 
                         <div style="display: grid; gap: 32px; margin-bottom: 48px;">
@@ -873,11 +881,11 @@
                         <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: center;">
                             <a href="<?= site_url() ?>" class="radar-btn radar-btn--ghost"
                                 style="border: 2px solid #e2e8f0; padding: 14px 32px; border-radius: 16px; font-size: 1rem;">
-                                Herramienta Validar CIF
+                                Consultar CIF en Web
                             </a>
                             <a href="<?= site_url('documentation') ?>"
                                 style="font-weight: 800; color: #2563eb; text-decoration: none; display: flex; align-items: center; gap: 8px; font-size: 1.05rem;">
-                                Explorar documentación técnica →
+                                Guía de integración técnica →
                             </a>
                         </div>
                     </div>
@@ -899,13 +907,20 @@
                                     style="width: 10px; height: 10px; background: #28c840; border-radius: 50%;"></span>
                             </div>
                             <pre
-                                style="margin: 0; font-family: 'Fira Code', monospace; font-size: 14px; line-height: 1.8;">
-<span style="color: #c678dd;">GET</span> <span style="color: #98c379;">/v1/companies/B12345678</span>
+                                style="margin: 0; font-family: 'Fira Code', monospace; font-size: 14px; line-height: 1.6;">
+<span style="color: #c678dd;">GET</span> <span style="color: #98c379;">/v1/companies?cif=B12345678</span>
 <span style="color: #abb2bf;">{</span>
-  <span style="color: #d19a66;">"name"</span>: <span style="color: #98c379;">"TECH FLOW SL"</span>,
-  <span style="color: #d19a66;">"cif"</span>: <span style="color: #98c379;">"B12345678"</span>,
-  <span style="color: #d19a66;">"status"</span>: <span style="color: #98c379;">"ACTIVA"</span>,
-  <span style="color: #d19a66;">"score"</span>: <span style="color: #d19a66;">92</span>
+  <span style="color: #d19a66;">"success"</span>: <span style="color: #d19a66;">true</span>,
+  <span style="color: #d19a66;">"data"</span>: <span style="color: #abb2bf;">{</span>
+    <span style="color: #d19a66;">"name"</span>: <span style="color: #98c379;">"TECH FLOW SOLUTIONS SL"</span>,
+    <span style="color: #d19a66;">"cif"</span>: <span style="color: #98c379;">"B12345678"</span>,
+    <span style="color: #d19a66;">"status"</span>: <span style="color: #98c379;">"ACTIVA"</span>,
+    <span style="color: #d19a66;">"founded"</span>: <span style="color: #98c379;">"2024-03-12"</span>,
+    <span style="color: #d19a66;">"cnae"</span>: <span style="color: #98c379;">"6201"</span>,
+    <span style="color: #d19a66;">"cnae_label"</span>: <span style="color: #98c379;">"Programación informática"</span>,
+    <span style="color: #d19a66;">"municipality"</span>: <span style="color: #98c379;">"MADRID"</span>,
+    <span style="color: #d19a66;">"score"</span>: <span style="color: #d19a66;">94</span>
+  <span style="color: #abb2bf;">}</span>
 <span style="color: #abb2bf;">}</span></pre>
                         </div>
                     </div>
@@ -918,30 +933,29 @@
             <div class="container">
                 <div class="radar-split">
                     <div class="radar-split__content">
-                        <div class="radar-kicker">Capacidades técnicas</div>
-                        <h2 class="radar-title">¿Qué puedes hacer con la API de empresas?</h2>
-                        <p class="radar-text">Nuestra infraestructura te permite abstraer la complejidad de los
-                            registros oficiales en una interfaz programática simple y potente.</p>
+                        <div class="radar-kicker">Potencia para tu stack</div>
+                        <h2 class="radar-title">Capacidades de Enriquecimiento B2B</h2>
+                        <p class="radar-text">Integra inteligencia mercantil en tu flujo de trabajo y elimina los silos de información desactualizada en tu base de datos.</p>
                         <ul style="display: grid; gap: 12px; margin-top: 24px;">
                             <li
                                 style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
-                                <span style="color: #3b82f6;">✓</span> Validar CIF automáticamente
+                                <span style="color: #3b82f6;">✓</span> Onboarding KYB en segundos
                             </li>
                             <li
                                 style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
-                                <span style="color: #3b82f6;">✓</span> Consultar empresas por nombre o NIF
+                                <span style="color: #3b82f6;">✓</span> Sincronización masiva de bases de datos
                             </li>
                             <li
                                 style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
-                                <span style="color: #3b82f6;">✓</span> Acceder a datos del Registro Mercantil
+                                <span style="color: #3b82f6;">✓</span> Enriquecimiento de CRM (Salesforce, HubSpot, etc.)
                             </li>
                             <li
                                 style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
-                                <span style="color: #3b82f6;">✓</span> Integrar datos empresariales en CRM o ERP
+                                <span style="color: #3b82f6;">✓</span> Monitorización de insolvencias y cambios BORME
                             </li>
                             <li
                                 style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
-                                <span style="color: #3b82f6;">✓</span> Automatizar procesos KYC y validación
+                                <span style="color: #3b82f6;">✓</span> Scoring de salud mercantil vía IA
                             </li>
                         </ul>
                     </div>
@@ -975,27 +989,27 @@
                     <div
                         style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
                         <div style="font-size: 2rem; margin-bottom: 16px;">🛡️</div>
-                        <h4 style="margin: 0; font-weight: 800;">Validación de clientes (KYC)</h4>
+                        <h4 style="margin: 0; font-weight: 800;">Compliance & KYB Automatizado</h4>
                     </div>
                     <div
                         style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
                         <div style="font-size: 2rem; margin-bottom: 16px;">📈</div>
-                        <h4 style="margin: 0; font-weight: 800;">Enriquecimiento de leads</h4>
+                        <h4 style="margin: 0; font-weight: 800;">Enriquecimiento de Leads B2B</h4>
                     </div>
                     <div
                         style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
                         <div style="font-size: 2rem; margin-bottom: 16px;">🔄</div>
-                        <h4 style="margin: 0; font-weight: 800;">Integración en CRM</h4>
+                        <h4 style="margin: 0; font-weight: 800;">Sincronización de CRM/ERP</h4>
                     </div>
                     <div
                         style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
                         <div style="font-size: 2rem; margin-bottom: 16px;">💳</div>
-                        <h4 style="margin: 0; font-weight: 800;">Fintech y scoring</h4>
+                        <h4 style="margin: 0; font-weight: 800;">Risk Analysis & Lending</h4>
                     </div>
                     <div
                         style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
                         <div style="font-size: 2rem; margin-bottom: 16px;">🚀</div>
-                        <h4 style="margin: 0; font-weight: 800;">SaaS B2B</h4>
+                        <h4 style="margin: 0; font-weight: 800;">SaaS Product Integration</h4>
                     </div>
                 </div>
             </div>
@@ -1017,16 +1031,13 @@
                     style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px;">
                     <div class="api-feature-card">
                         <div class="api-feature-icon">🛡️</div>
-                        <h3>Ingestión Masiva</h3>
-                        <p class="radar-text">Elimina cuellos de botella técnicos. Nuestra API está diseñada para
-                            soportar
-                            miles de peticiones simultáneas con latencia mínima.</p>
+                        <h3>Ingestión Masiva de Datos</h3>
+                        <p class="radar-text">Diseñada para flujos de alta demanda. Nuestra arquitectura soporta miles de peticiones simultáneas sin degradación de latencia.</p>
                     </div>
                     <div class="api-feature-card">
                         <div class="api-feature-icon">🎯</div>
-                        <h3>Scoring IA (0-100)</h3>
-                        <p class="radar-text">Prioriza tu equipo comercial. Identifica qué nuevas empresas tienen mayor
-                            capital y probabilidad de compra.</p>
+                        <h3>Scoring IA Predictivo</h3>
+                        <p class="radar-text">Transforma datos brutos en inteligencia accionable. Prioriza tus esfuerzos comerciales basándote en la solvencia y potencial de cada empresa.</p>
                     </div>
                     <div class="api-feature-card">
                         <div class="api-feature-icon">⚡</div>
@@ -1060,10 +1071,13 @@
                                     Endpoint</th>
                                 <th
                                     style="padding: 20px; text-align: left; font-weight: 800; font-size: 13px; color: #64748b; text-transform: uppercase;">
-                                    Beneficio de Negocio</th>
+                                    Utilidad de Negocio e Integración</th>
                                 <th
                                     style="padding: 20px; text-align: center; font-weight: 800; font-size: 13px; color: #64748b; text-transform: uppercase;">
                                     Estado</th>
+                                <th
+                                    style="padding: 20px; text-align: center; font-weight: 800; font-size: 13px; color: #64748b; text-transform: uppercase;">
+                                    Payload</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1077,8 +1091,7 @@
                                 </td>
                                 <td style="padding: 18px 20px;">
                                     <strong
-                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Datos
-                                        Oficiales y Validación</strong>
+                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Data Enrichment Legal</strong>
                                     <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
                                         Obtén el perfil legal completo: <code style="color: #2563eb;">name</code>, <code
                                             style="color: #2563eb;">founded</code>, <code
@@ -1092,6 +1105,9 @@
                                 <td style="padding: 18px 20px; text-align: center;"><span
                                         style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">GÉNERICO</span>
                                 </td>
+                                <td style="padding: 18px 20px; text-align: center;">
+                                    <button onclick="showJsonPreview('get_companies')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                </td>
                             </tr>
                             <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
                                 <td style="padding: 18px 20px;">
@@ -1102,8 +1118,7 @@
                                 </td>
                                 <td style="padding: 18px 20px;">
                                     <strong
-                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Búsqueda
-                                        Inteligente</strong>
+                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Normalización y Búsqueda</strong>
                                     <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
                                         Localiza empresas por nombre comercial o razón social. Incluye sugerencias
                                         fonéticas y coincidencias parciales con alta precisión.
@@ -1111,6 +1126,9 @@
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;"><span
                                         style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">GÉNERICO</span>
+                                </td>
+                                <td style="padding: 18px 20px; text-align: center;">
+                                    <button onclick="showJsonPreview('get_search')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
 
@@ -1136,6 +1154,9 @@
                                 <td style="padding: 18px 20px; text-align: center;"><span
                                         style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO
                                         / BUS</span></td>
+                                <td style="padding: 18px 20px; text-align: center;">
+                                    <button onclick="showJsonPreview('get_score')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                </td>
                             </tr>
                             <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
                                 <td style="padding: 18px 20px;">
@@ -1156,6 +1177,9 @@
                                 <td style="padding: 18px 20px; text-align: center;"><span
                                         style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO
                                         / BUS</span></td>
+                                <td style="padding: 18px 20px; text-align: center;">
+                                    <button onclick="showJsonPreview('get_signals')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                </td>
                             </tr>
                             <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
                                 <td style="padding: 18px 20px;">
@@ -1166,8 +1190,7 @@
                                 </td>
                                 <td style="padding: 18px 20px;">
                                     <strong
-                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Insights
-                                        Predictivos por IA</strong>
+                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Predictive Business Insights</strong>
                                     <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
                                         Análisis avanzado de necesidades. Devuelve <code
                                             style="color: #2563eb;">profile</code> (resumen IA del nicho) y <code
@@ -1178,6 +1201,9 @@
                                 <td style="padding: 18px 20px; text-align: center;"><span
                                         style="background: #f5f3ff; color: #8b5cf6; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">IA
                                         PREMIUM</span></td>
+                                <td style="padding: 18px 20px; text-align: center;">
+                                    <button onclick="showJsonPreview('get_insights')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                </td>
                             </tr>
 
                             <!-- RADAR -->
@@ -1200,6 +1226,9 @@
                                 <td style="padding: 18px 20px; text-align: center;"><span
                                         style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO
                                         / BUS</span></td>
+                                <td style="padding: 18px 20px; text-align: center;">
+                                    <button onclick="showJsonPreview('get_radar')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                </td>
                             </tr>
 
                             <!-- WEBHOOKS -->
@@ -1212,8 +1241,7 @@
                                 </td>
                                 <td style="padding: 18px 20px;">
                                     <strong
-                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Suscripción
-                                        a Webhooks Push</strong>
+                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Sincronización PUSH (BORME)</strong>
                                     <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
                                         Registra tu URL de callback para recibir notificaciones HTTP en tiempo real
                                         cuando ocurra un evento de interés (ej: nueva empresa en tu zona).
@@ -1221,6 +1249,9 @@
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;"><span
                                         style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span>
+                                </td>
+                                <td style="padding: 18px 20px; text-align: center;">
+                                    <button onclick="showJsonPreview('post_webhook')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
                             <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
@@ -1242,6 +1273,9 @@
                                 <td style="padding: 18px 20px; text-align: center;"><span
                                         style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span>
                                 </td>
+                                <td style="padding: 18px 20px; text-align: center;">
+                                    <button onclick="showJsonPreview('get_webhooks')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                </td>
                             </tr>
                             <tr class="api-endpoint-row">
                                 <td style="padding: 18px 20px;">
@@ -1260,6 +1294,9 @@
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;"><span
                                         style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span>
+                                </td>
+                                <td style="padding: 18px 20px; text-align: center;">
+                                    <button onclick="showJsonPreview('delete_webhook')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -1288,8 +1325,7 @@
                             <h3>Free</h3>
                         </div>
                         <div class="api-price-value">0€<span>/ mes</span></div>
-                        <p class="api-pricing-card__desc">Ideal para desarrollos iniciales, pruebas de concepto y
-                            validación técnica.</p>
+                        <p class="api-pricing-card__desc">Para entornos de desarrollo, sandboxing técnico y validación de esquemas JSON.</p>
 
                         <ul class="api-price-list">
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
@@ -1327,8 +1363,7 @@
                             <h3>Pro</h3>
                         </div>
                         <div class="api-price-value">19€<span>/ mes</span></div>
-                        <p class="api-pricing-card__desc">El estándar para SaaS, ERPs y automatización comercial con
-                            scoring inteligente.</p>
+                        <p class="api-pricing-card__desc">Integración completa para procesos de onboarding B2B, enriquecimiento de leads y scoring.</p>
 
                         <ul class="api-price-list">
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
@@ -1358,8 +1393,7 @@
                             <h3>Business</h3>
                         </div>
                         <div class="api-price-value">49€<span>/ mes</span></div>
-                        <p class="api-pricing-card__desc">Infraestructura dedicada para alto volumen, Webhooks y
-                            procesos críticos.</p>
+                        <p class="api-pricing-card__desc">Sincronización en tiempo real vía Webhooks y volumen masivo para plataformas de misión crítica.</p>
 
                         <ul class="api-price-list">
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
@@ -1373,7 +1407,7 @@
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> IA Insights & Predictor</li>
+                                </svg> IA Insights & Predictiva de Negocio</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
@@ -1400,9 +1434,8 @@
             <div class="container">
                 <div class="radar-heading radar-heading--center">
                     <div class="radar-kicker">Developer First</div>
-                    <h2 class="radar-title">Cómo integrar la API de empresas</h2>
-                    <p class="radar-subtitle">Autenticación simple, Endpoints REST, ejemplos JSON y tiempos de respuesta
-                        optimizados para producción.</p>
+                    <h2 class="radar-title">Implementación orientada a Desarrolladores</h2>
+                    <p class="radar-subtitle">Documentación OpenAPI, autenticación mediante API Key y SDKs para una activación inmediata en producción.</p>
                 </div>
 
                 <!-- Language tabs -->
@@ -1537,15 +1570,14 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
             <div class="container">
                 <div class="radar-heading radar-heading--center">
                     <div class="radar-kicker">Respuesta a dudas técnicas</div>
-                    <h2 class="radar-title">Preguntas Frecuentes sobre la API</h2>
-                    <p class="radar-subtitle">Todo lo que necesitas saber para integrar nuestra infraestructura en tu
-                        producto.</p>
+                    <h2 class="radar-title">Soporte Técnico e Integración</h2>
+                    <p class="radar-subtitle">Resolvemos tus dudas sobre el flujo de datos mercantiles y las capacidades de nuestra infraestructura.</p>
                 </div>
 
                 <div class="api-faq">
                     <div class="api-faq-item active">
                         <button class="api-faq-question" onclick="this.parentElement.classList.toggle('active')">
-                            <span>¿Cómo se integra la API de empresas?</span>
+                            <span>¿Cómo realizar la integración técnica de la API?</span>
                             <span class="api-faq-icon">+</span>
                         </button>
                         <div class="api-faq-answer">
@@ -1559,7 +1591,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
 
                     <div class="api-faq-item">
                         <button class="api-faq-question" onclick="this.parentElement.classList.toggle('active')">
-                            <span>¿Con qué frecuencia se actualizan los datos del Registro Mercantil?</span>
+                            <span>¿Cuál es la frecuencia de actualización de los datos societarios?</span>
                             <span class="api-faq-icon">+</span>
                         </button>
                         <div class="api-faq-answer">
@@ -1573,7 +1605,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
 
                     <div class="api-faq-item">
                         <button class="api-faq-question" onclick="this.parentElement.classList.toggle('active')">
-                            <span>¿Soportan Webhooks para recibir alertas del BORME?</span>
+                            <span>¿Es posible recibir alertas automáticas del BORME vía Webhooks?</span>
                             <span class="api-faq-icon">+</span>
                         </button>
                         <div class="api-faq-answer">
@@ -1587,7 +1619,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
 
                     <div class="api-faq-item">
                         <button class="api-faq-question" onclick="this.parentElement.classList.toggle('active')">
-                            <span>¿Qué tipo de datos devuelve la API?</span>
+                            <span>¿Qué esquema de datos JSON devuelve el endpoint /companies?</span>
                             <span class="api-faq-icon">+</span>
                         </button>
                         <div class="api-faq-answer">
@@ -1791,6 +1823,168 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
             }
         });
     </script>
+        <!-- JSON PREVIEW MODAL -->
+        <div id="json-modal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:9999; backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:20px;">
+            <div style="background:#0f172a; width:100%; max-width:600px; border-radius:24px; border:1px solid rgba(255,255,255,0.1); box-shadow:0 50px 100px -20px rgba(0,0,0,0.5); overflow:hidden; position:relative;">
+                <div style="background:#1e293b; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="background:rgba(59,130,246,0.1); color:#3b82f6; font-size:11px; font-weight:800; padding:4px 10px; border-radius:6px; letter-spacing:0.05em;">PREVIEW_RESPONSE</span>
+                        <span id="modal-endpoint-name" style="color:#94a3b8; font-family:monospace; font-size:12px; font-weight:700;">GET /v1/companies</span>
+                    </div>
+                    <button onclick="closeJsonModal()" style="background:none; border:none; color:#64748b; cursor:pointer; font-size:24px; line-height:1;">&times;</button>
+                </div>
+                <div style="padding:32px; max-height:70vh; overflow-y:auto;">
+                    <pre id="modal-json-content" style="margin:0; font-family:'Fira Code', monospace; font-size:13.5px; line-height:1.6; color:#e2e8f0;"></pre>
+                </div>
+                <div style="background:#1e293b; padding:12px 24px; text-align:right;">
+                    <button onclick="closeJsonModal()" style="background:#3b82f6; color:white; border:none; padding:8px 20px; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer;">CERRAR</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const jsonExamples = {
+                get_companies: {
+                    success: true,
+                    data: {
+                        id: 12345,
+                        name: "TECH FLOW SOLUTIONS SL",
+                        cif: "B12345678",
+                        cnae: "6201",
+                        cnae_label: "Programación informática",
+                        founded: "2024-03-12",
+                        province: "MADRID",
+                        municipality: "MADRID",
+                        address: "CALLE DE LA TECNOLOGIA 42",
+                        status: "ACTIVA",
+                        score: 94
+                    }
+                },
+                get_search: {
+                    success: true,
+                    data: {
+                        name: "TECH FLOW SOLUTIONS SL",
+                        cif: "B12345678",
+                        score: 94,
+                        province: "MADRID",
+                        status: "ACTIVA"
+                    }
+                },
+                get_score: {
+                    success: true,
+                    data: {
+                        cif: "B12345678",
+                        score: 94,
+                        priority: "MUY_ALTA",
+                        reasons: ["Crecimiento de capital reciente", "Alta actividad en BORME"],
+                        last_signal: {
+                            type: "AMPLIACION_CAPITAL",
+                            date: "2024-05-01"
+                        }
+                    }
+                },
+                get_signals: {
+                    success: true,
+                    data: {
+                        cif: "B12345678",
+                        signals: [
+                            {
+                                type: "borme_event",
+                                label: "AMPLIACION_CAPITAL",
+                                date: "2024-05-01",
+                                probability: "MUY_ALTA"
+                            }
+                        ]
+                    }
+                },
+                get_insights: {
+                    success: true,
+                    data: {
+                        profile: "SaaS / Fintech / Cloud",
+                        summary: "Empresa con alta tracción y necesidad inminente de escalado tecnológico.",
+                        needs: ["Infraestructura Cloud", "Ciberseguridad", "Contratación Devs"],
+                        conversion_probability: "HIGH",
+                        estimated_ticket: "10k-50k€"
+                    }
+                },
+                get_radar: {
+                    success: true,
+                    meta: {
+                        plan: "business",
+                        count: 142,
+                        limit: 500
+                    },
+                    data: [
+                        { name: "NEW CORP SL", cif: "B99887766", founded: "2024-05-05", province: "BARCELONA", score: 88 }
+                    ]
+                },
+                post_webhook: {
+                    success: true,
+                    message: "Webhook creado correctamente",
+                    id: 789
+                },
+                get_webhooks: {
+                    success: true,
+                    data: [
+                        { id: "789", url: "https://tucrm.com/api/callback", event: "company.created" }
+                    ]
+                },
+                delete_webhook: {
+                    success: true,
+                    message: "Webhook eliminado"
+                }
+            };
+
+            function showJsonPreview(key) {
+                const modal = document.getElementById('json-modal');
+                const content = document.getElementById('modal-json-content');
+                const endpoint = document.getElementById('modal-endpoint-name');
+                
+                const names = {
+                    get_companies: 'GET /companies',
+                    get_search: 'GET /companies/search',
+                    get_score: 'GET /companies/score',
+                    get_signals: 'GET /companies/signals',
+                    get_insights: 'GET /companies/insights',
+                    get_radar: 'GET /companies/radar',
+                    post_webhook: 'POST /webhooks',
+                    get_webhooks: 'GET /webhooks',
+                    delete_webhook: 'DELETE /webhooks/{id}'
+                };
+
+                endpoint.textContent = names[key];
+                content.innerHTML = syntaxHighlight(jsonExamples[key]);
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeJsonModal() {
+                document.getElementById('json-modal').style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+
+            function syntaxHighlight(json) {
+                if (typeof json != 'string') {
+                    json = JSON.stringify(json, undefined, 2);
+                }
+                json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g, function (match) {
+                    var cls = 'color:#d19a66;'; // number
+                    if (/^"/.test(match)) {
+                        if (/:$/.test(match)) {
+                            cls = 'color:#e06c75;'; // key
+                        } else {
+                            cls = 'color:#98c379;'; // string
+                        }
+                    } else if (/true|false/.test(match)) {
+                        cls = 'color:#c678dd;'; // boolean
+                    } else if (/null/.test(match)) {
+                        cls = 'color:#abb2bf;'; // null
+                    }
+                    return '<span style="' + cls + '">' + match + '</span>';
+                });
+            }
+        </script>
 </body>
 
 </html>
