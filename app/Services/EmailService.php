@@ -135,10 +135,33 @@ class EmailService
 
         if ($email->send()) {
             log_message('info', "[EmailService] Notificación de registro ENVIADA a admin ({$adminEmail})");
+            $this->logToDatabase($userData['user_id'] ?? 0, $subject, $body, 'success');
             return true;
         } else {
-            log_message('error', "[EmailService] Error al enviar notificación de registro a admin: " . $email->printDebugger(['headers']));
+            $error = $email->printDebugger(['headers']);
+            log_message('error', "[EmailService] Error al enviar notificación de registro a admin: " . $error);
+            $this->logToDatabase($userData['user_id'] ?? 0, $subject, $body, 'error', $error);
             return false;
+        }
+    }
+
+    /**
+     * Helper to log email to DB
+     */
+    private function logToDatabase($userId, $subject, $message, $status, $error = null)
+    {
+        try {
+            $logModel = new \App\Models\EmailLogModel();
+            $logModel->insert([
+                'user_id'       => $userId,
+                'subject'       => $subject,
+                'message'       => substr($message, 0, 1000), // Evitar logs gigantes
+                'status'        => $status,
+                'error_message' => $error,
+                'created_at'    => date('Y-m-d H:i:s')
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', "[EmailService] Error al guardar log en BD: " . $e->getMessage());
         }
     }
 
@@ -165,10 +188,13 @@ class EmailService
         $email->setMessage($body);
 
         if ($email->send()) {
-            log_message('info', "[EmailService] Bienvenido ENVIADO a {$userEmail}");
+            log_message('info', "[EmailService] Bienvenido ENVIADO a {$userEmail} (con BCC a papelo)");
+            $this->logToDatabase($userData['user_id'] ?? 0, $subject, $body, 'success');
             return true;
         } else {
-            log_message('error', "[EmailService] Error al enviar bienvenido a {$userEmail}: " . $email->printDebugger(['headers']));
+            $error = $email->printDebugger(['headers']);
+            log_message('error', "[EmailService] Error al enviar bienvenido a {$userEmail}: " . $error);
+            $this->logToDatabase($userData['user_id'] ?? 0, $subject, $body, 'error', $error);
             return false;
         }
     }
