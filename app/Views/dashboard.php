@@ -381,7 +381,7 @@
                     </section>
 
                     <!-- API KEY SECTION (Prominent after first request) -->
-                    <section class="dash-card" id="section-api-key" data-track-section="api_key_block" style="margin-top: 32px; <?= $requestsUsedThisMonth == 0 ? 'opacity: 0.6; filter: grayscale(1); pointer-events: none;' : 'border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);' ?>">
+                    <section class="dash-card" id="section-api-key" data-track-section="api_key_block" style="margin-top: 32px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                             <div class="kicker" style="margin: 0; <?= $requestsUsedThisMonth > 0 ? 'background: #eef2ff; color: #4f46e5; border: 1px solid #e0e7ff;' : '' ?>">
                                 <?= $requestsUsedThisMonth > 0 ? 'EMPIEZA A INTEGRAR LA API AHORA' : 'Seguridad' ?>
