@@ -320,7 +320,6 @@
                         <?php if ($requestsUsedThisMonth < 5): ?>
                         <div style="margin-top: 12px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                             <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 700;">Prueba con:</span>
-                            <button class="example-cif-btn" onclick="fillAndSearch('A28130649')">Telefónica</button>
                             <button class="example-cif-btn" onclick="fillAndSearch('A15075062')">Inditex</button>
                             <button class="example-cif-btn" onclick="fillAndSearch('A46103834')">Mercadona</button>
                         </div>
