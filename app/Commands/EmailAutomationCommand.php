@@ -55,9 +55,15 @@ class EmailAutomationCommand extends BaseCommand
         $lastRequestTime = $this->getLastRequestTime($userId);
         $createdAt = $user['created_at'];
 
-        // 1. TRIGGER: reached_12_requests
-        if ($totalRequests >= 12) {
-            $this->checkAndSend($user, 'reached_12_requests', 'email_sent_limit_warning');
+        // 0. TRIGGER: reached_100_percent_quota
+        if ($totalRequests >= 30) {
+            $this->checkAndSend($user, 'reached_100_percent_quota', 'email_sent_quota_max', [], true);
+            return;
+        }
+
+        // 1. TRIGGER: reached_20_requests
+        if ($totalRequests >= 20) {
+            $this->checkAndSend($user, 'reached_20_requests', 'email_sent_limit_warning', [], true);
             return; // No enviamos más de uno en la misma ejecución
         }
 
@@ -84,14 +90,27 @@ class EmailAutomationCommand extends BaseCommand
                 return;
             }
         }
+
+        // 5. TRIGGER: monthly_report (Recurrente cada 30 días)
+        if (!$this->automationModel->wasSentRecently($userId, 'monthly_report', 30)) {
+            $usage30Days = $this->getUsageLast30Days($userId);
+            if ($usage30Days > 0) {
+                $this->checkAndSend($user, 'monthly_report', 'email_sent_monthly_report', ['usage' => $usage30Days], true);
+            }
+        }
     }
 
-    protected function checkAndSend(array $user, string $triggerType, string $trackingEvent)
+    protected function checkAndSend(array $user, string $triggerType, string $trackingEvent, array $extraParams = [], bool $isRecurring = false)
     {
         $userId = (int)$user['id'];
 
-        // Usamos email_type como nombre real del campo en la tabla
-        if ($this->automationModel->wasSent($userId, $triggerType)) {
+        // Si es recurrente, comprobamos si se envió en los últimos 30 días
+        // Si NO es recurrente, comprobamos si se envió alguna vez
+        $alreadySent = $isRecurring 
+            ? $this->automationModel->wasSentRecently($userId, $triggerType, 30)
+            : $this->automationModel->wasSent($userId, $triggerType);
+
+        if ($alreadySent) {
             return;
         }
 
@@ -108,8 +127,15 @@ class EmailAutomationCommand extends BaseCommand
             case 'reached_5_requests':
                 $result = $this->emailService->sendReached5Requests($user);
                 break;
-            case 'reached_12_requests':
-                $result = $this->emailService->sendReached12Requests($user);
+            case 'reached_20_requests':
+                $result = $this->emailService->sendReached20Requests($user);
+                break;
+            case 'reached_100_percent_quota':
+                $result = $this->emailService->sendQuotaExceeded($user);
+                break;
+            case 'monthly_report':
+                $usage = $extraParams['usage'] ?? 0;
+                $result = $this->emailService->sendMonthlyUsageReport($user, $usage);
                 break;
         }
 
@@ -135,6 +161,16 @@ class EmailAutomationCommand extends BaseCommand
             ->orderBy('updated_at', 'DESC')
             ->first();
         return $res['updated_at'] ?? null;
+    }
+
+    protected function getUsageLast30Days(int $userId): int
+    {
+        $date = date('Y-m-d', strtotime('-30 days'));
+        $res = $this->usageModel->selectSum('requests_count')
+            ->where('user_id', $userId)
+            ->where('date >=', $date)
+            ->get()->getRowArray();
+        return (int)($res['requests_count'] ?? 0);
     }
 
     protected function recordTracking(int $userId, string $eventName)

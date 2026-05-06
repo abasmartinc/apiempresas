@@ -23,21 +23,44 @@
             <h1>APIEmpresas.es</h1>
         </div>
         <div class="content">
-            <h2>¿Sigues ahí, <?= esc($name) ?>?</h2>
-            <p>Ayer creaste tu cuenta en APIEmpresas, pero vemos que todavía no has realizado ninguna consulta mediante la API.</p>
+            <h2>¡Hola, <?= esc($name) ?>!</h2>
             
-            <p>¿Tienes alguna duda técnica o necesitas ayuda con la integración? Recuerda que puedes probar la API directamente desde el panel sin configurar nada en tu servidor.</p>
+            <p>Mientras tu integración está en pausa, el mercado no se detiene. Solo hoy, nuestro radar ha detectado <strong><?= $count ?> nuevas empresas</strong> registradas oficialmente en España.</p>
+            
+            <p>Para que no pierdas el ritmo, te recordamos cómo interactuar con nuestra infraestructura directamente desde tu terminal o código:</p>
 
-            <div class="cta-container">
-                <a href="<?= site_url('dashboard') ?>" class="btn">Probar API ahora</a>
+            <div style="background: #1e293b; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p style="color: #94a3b8; font-size: 12px; margin-bottom: 10px; font-family: monospace;"># Ejemplo de petición rápida (curl)</p>
+                <code style="color: #38bdf8; font-family: 'Fira Code', monospace; font-size: 13px; word-break: break-all;">
+                    curl -X GET "https://apiempresas.es/api/v1/companies?cif=B12345678" \<br>
+                    &nbsp;&nbsp;-H "X-API-KEY: TU_CLAVE_API"
+                </code>
             </div>
-            
-            <p style="margin-top: 30px; font-size: 14px; color: #64748b;">
-                Si necesitas soporte personalizado, simplemente responde a este email y nuestro equipo técnico te ayudará hoy mismo.
+
+            <p>Recuerda que con tu <strong>Plan Free</strong> recibes la estructura completa pero con algunos metadatos enmascarados:</p>
+
+            <pre style="background: #f1f5f9; color: #334155; padding: 15px; border-radius: 8px; font-family: 'Fira Code', monospace; font-size: 12px; border: 1px solid #e2e8f0;">{
+  "success": true,
+  "data": {
+    "name": "TECH FLOW SOLUTIONS SL",
+    "cif": "B12345678",
+    "status": "ACTIVA",
+    "address": "*** [ACTUALIZA A PRO]",
+    "cnae": "6201",
+    "score": 94
+  }
+}</pre>
+
+            <p style="margin-top: 30px;">
+                Puedes encontrar tu API Key y la documentación completa entrando en tu cuenta cuando lo necesites. No hace falta que respondas si no tienes dudas técnicas.
+            </p>
+
+            <p style="font-size: 14px; color: #64748b; font-style: italic;">
+                Si necesitas un snippet en Python, Node.js o PHP, simplemente responde a este email y te lo enviamos.
             </p>
         </div>
         <div class="footer">
-            <p>&copy; <?= date('Y') ?> APIEmpresas - Integración simplificada de datos mercantiles.</p>
+            <p>&copy; <?= date('Y') ?> APIEmpresas - Datos oficiales para desarrolladores.</p>
         </div>
     </div>
 </body>

@@ -29,33 +29,29 @@
         </div>
         <div class="content">
             <h2>¡Hola, <?= esc($name) ?>!</h2>
-            <p>Es un placer tenerte con nosotros. Te damos la bienvenida oficial a <strong>APIEmpresas.es</strong>, la plataforma líder en verificación mercantil en tiempo real.</p>
+            <p>Tu cuenta en APIEmpresas ya está configurada. Estás a un paso de automatizar el enriquecimiento de datos de cualquier sociedad en España con datos oficiales.</p>
             
-            <p>Tu cuenta ha sido creada correctamente. Ahora tienes acceso a herramientas potentes para automatizar tus procesos de validación empresarial.</p>
-
             <div class="features">
-                <strong>¿Qué puedes hacer ahora?</strong>
-                <ul>
-                    <li>Consultar datos mercantiles por CIF/NIF.</li>
-                    <li>Buscar empresas por razón social.</li>
-                    <li>Acceder a documentación técnica completa.</li>
-                    <li>Gestionar tus API Keys desde el panel.</li>
+                <strong>Tus primeros pasos como desarrollador:</strong>
+                <ul style="margin-top: 10px;">
+                    <li style="margin-bottom: 15px;"><strong>Obtén tu API Key:</strong> La encontrarás nada más entrar, en la sección principal de tu <strong>Dashboard</strong>.</li>
+                    <li style="margin-bottom: 15px;"><strong>Lanza tu primera petición:</strong> Puedes usar nuestro Terminal Interactivo o integrar directamente el endpoint <code>GET /companies</code>.</li>
+                    <li style="margin-bottom: 15px;"><strong>Consulta la Documentación:</strong> Hemos preparado una guía técnica completa con ejemplos en PHP, JS y Python.</li>
                 </ul>
             </div>
 
-            <p>Para empezar, te recomendamos explorar tu panel de control y revisar la documentación técnica para realizar tu primera integración.</p>
+            <p>Tu plan <strong>Free</strong> incluye 30 consultas mensuales para que pruebes la integración sin compromiso.</p>
 
             <div class="cta-container">
-                <a href="<?= site_url('enter') ?>" class="btn">Entrar al Dashboard</a>
+                <a href="<?= site_url('dashboard') ?>" class="btn">Acceder a mi Dashboard</a>
             </div>
             
             <p style="margin-top: 30px; font-size: 14px; color: #64748b;">
-                Si tienes alguna duda, nuestro equipo de soporte está aquí para ayudarte. Solo responde a este correo.
+                Si tienes alguna duda sobre el formato del JSON o necesitas un aumento de cuota para pruebas, nuestro equipo de ingeniería está aquí para ayudarte. Solo responde a este correo.
             </p>
         </div>
         <div class="footer">
-            <p>Has recibido este correo porque te has registrado en <a href="https://apiempresas.es">APIEmpresas.es</a>.</p>
-            <p>&copy; <?= date('Y') ?> APIEmpresas - Todos los derechos reservados.</p>
+            <p>&copy; <?= date('Y') ?> APIEmpresas - Datos oficiales para desarrolladores.</p>
         </div>
     </div>
 </body>

@@ -12,13 +12,22 @@ class EmailAutomationModel extends Model
 
     protected $allowedFields = ['user_id', 'email_type', 'message_content', 'sent_at', 'created_at'];
 
-    /**
-     * Verifica si un correo de cierto tipo ya fue enviado a un usuario.
-     */
     public function wasSent(int $userId, string $emailType): bool
     {
         return $this->where('user_id', $userId)
                     ->where('email_type', $emailType)
+                    ->countAllResults() > 0;
+    }
+
+    /**
+     * Verifica si un correo fue enviado en los últimos X días.
+     */
+    public function wasSentRecently(int $userId, string $emailType, int $days = 30): bool
+    {
+        $date = date('Y-m-d H:i:s', strtotime("-$days days"));
+        return $this->where('user_id', $userId)
+                    ->where('email_type', $emailType)
+                    ->where('sent_at >=', $date)
                     ->countAllResults() > 0;
     }
 

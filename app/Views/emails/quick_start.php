@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prueba la API en menos de 30 segundos</title>
+    <title>Configura tu integración con APIEmpresas en 1 minuto 🚀</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #1e293b; margin: 0; padding: 0; background-color: #f8fafc; }
         .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
@@ -24,20 +24,36 @@
         </div>
         <div class="content">
             <h2>¡Hola, <?= esc($name) ?>!</h2>
-            <p>Hemos visto que ya tienes tu cuenta lista, pero aún no has realizado tu primera consulta.</p>
+            <p>Sabemos que registrarse es solo el primer paso. El momento clave es cuando recibes tu primer objeto de datos real en tu propio sistema.</p>
             
-            <p>Hemos diseñado un <strong>probador interactivo</strong> en tu panel para que puedas validar una empresa real en menos de 30 segundos, sin escribir una sola línea de código.</p>
+            <p>Para facilitarte el trabajo, aquí tienes un ejemplo de la respuesta que obtendrás al validar un CIF con tu <strong>Plan Free</strong>:</p>
+
+            <pre style="background: #0f172a; color: #e2e8f0; padding: 20px; border-radius: 8px; font-family: 'Fira Code', monospace; font-size: 13px; line-height: 1.5; overflow-x: auto;">{
+  "success": true,
+  "data": {
+    "name": "TECH FLOW SOLUTIONS SL",
+    "cif": "B12345678",
+    "status": "ACTIVA",
+    "founded": "2024-03-12",
+    "province": "MADRID",
+    "cnae": "6201",
+    "address": "*** [ACTUALIZA A PRO PARA VER LA DIRECCION ]",
+    "corporate_purpose": "La prestacion de servicios de consultoria informatica..."
+  }
+}</pre>
+
+            <p style="margin-top: 25px;">Solo tienes que lanzar una petición <code>GET</code> a nuestro endpoint e incluir tu <strong>X-API-KEY</strong> en las cabeceras.</p>
 
             <div class="cta-container">
-                <a href="<?= site_url('dashboard') ?>" class="btn">👉 Probar API ahora</a>
+                <a href="<?= site_url('dashboard') ?>" class="btn">🛠️ Ver Documentación y Claves</a>
             </div>
             
             <p style="margin-top: 30px; font-size: 14px; color: #64748b;">
-                Es la forma más rápida de ver cómo la API puede ayudarte a automatizar tus procesos. ¡Te esperamos en el dashboard!
+                <strong>Nota:</strong> El Plan Free enmascara automáticamente algunos campos. Una vez confirmes que la integración funciona, puedes activar el Plan Pro para desbloquear todos los metadatos sin cambiar ni una sola línea de tu código.
             </p>
         </div>
         <div class="footer">
-            <p>&copy; <?= date('Y') ?> APIEmpresas - Verificación mercantil en tiempo real.</p>
+            <p>&copy; <?= date('Y') ?> APIEmpresas - Datos oficiales para desarrolladores.</p>
         </div>
     </div>
 </body>
