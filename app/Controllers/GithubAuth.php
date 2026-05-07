@@ -147,7 +147,8 @@ class GithubAuth extends BaseController
                 'avatar'        => $avatar,
                 'api_key'       => $apiKey,
                 'is_active'     => 1,
-                'source_app'    => 'github_auth',
+                'api_access'    => 1,
+                'source_app'    => 'apiempresas',
                 'password_hash' => password_hash(bin2hex(random_bytes(10)), PASSWORD_DEFAULT) // Password aleatorio
             ];
 

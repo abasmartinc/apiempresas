@@ -306,6 +306,7 @@
                                 <?php endif; ?>
 
                                 <a href="<?= site_url('empresa/export/' . $company['id']) ?>" class="btn"
+                                    rel="nofollow noindex"
                                     aria-label="Descargar Informe PDF de <?= esc($companyName) ?>"
                                     style="padding: 8px 16px; font-size: 0.9rem; background: #ffffff; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s;">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"

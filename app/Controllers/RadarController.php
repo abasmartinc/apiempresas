@@ -149,6 +149,27 @@ class RadarController extends BaseController
         return $this->renderRadar('mes', $province);
     }
 
+    public function todayProvince($provinceSlug)
+    {
+        session_write_close();
+        $province = $this->deSlugify($provinceSlug);
+        return $this->renderRadar('hoy', $province);
+    }
+
+    public function weekProvince($provinceSlug)
+    {
+        session_write_close();
+        $province = $this->deSlugify($provinceSlug);
+        return $this->renderRadar('semana', $province);
+    }
+
+    public function monthProvince($provinceSlug)
+    {
+        session_write_close();
+        $province = $this->deSlugify($provinceSlug);
+        return $this->renderRadar('mes', $province);
+    }
+
     private function renderRadar($period, $province = null, $sector = null)
     {
         $data = $this->getRadarData($province, $sector, $period);

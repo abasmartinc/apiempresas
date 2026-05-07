@@ -307,6 +307,14 @@ $routes->get('empresas-nuevas-sector/(:any)', 'RadarController::sector/$1');
 // Combinations (e.g. /empresas-nuevas/hosteleria-en-madrid) -> NEW
 $routes->get('empresas-nuevas/(:any)-en-(:any)', 'RadarController::newRadarLongTail/$1/$2');
 
+$routes->get('empresas-nuevas-hoy/(:any)', 'RadarController::todayProvince/$1');
+$routes->get('empresas-nuevas-semana/(:any)', 'RadarController::weekProvince/$1');
+$routes->get('empresas-nuevas-mes/(:any)', 'RadarController::monthProvince/$1');
+
+// Legacy Sitemap Redirects
+$routes->addRedirect('informes/nuevas-empresas-en-(:any)', 'empresas-nuevas/$1', 301);
+$routes->addRedirect('informes/nuevas-empresas-sector-(:any)', 'empresas-nuevas-sector/$1', 301);
+
 $routes->get('empresas-nuevas/(:any)', 'RadarController::province/$1'); // Province Radar
 
 // Combination Sector + Province (e.g. /empresas-programacion-en-madrid)

@@ -386,6 +386,7 @@ class Company extends BaseController
         
         return $this->response->setHeader('Content-Type', 'application/pdf')
                               ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+                              ->setHeader('X-Robots-Tag', 'noindex, nofollow')
                               ->setBody($dompdf->output());
     }
 }
