@@ -19,12 +19,12 @@ class WebhookController extends ResourceController
 
     public function index()
     {
-        $planSlug = $this->request->api_meta['plan_slug'] ?? 'free';
+        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
         if (!$this->planAccess->canAccess($planSlug, 'webhooks')) {
             return $this->failForbidden('Los webhooks requieren un plan Business.');
         }
 
-        $userId = (int)$this->request->api_meta['user_id'];
+        $userId = (int)\App\Filters\ApiKeyFilter::$apiMeta['user_id'];
         $list = $this->webhookService->list($userId);
 
         return $this->respond([
@@ -35,7 +35,7 @@ class WebhookController extends ResourceController
 
     public function create()
     {
-        $planSlug = $this->request->api_meta['plan_slug'] ?? 'free';
+        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
         if (!$this->planAccess->canAccess($planSlug, 'webhooks')) {
             return $this->failForbidden('Los webhooks requieren un plan Business.');
         }
@@ -49,7 +49,7 @@ class WebhookController extends ResourceController
             return $this->fail($this->validator->getErrors());
         }
 
-        $userId = (int)$this->request->api_meta['user_id'];
+        $userId = (int)\App\Filters\ApiKeyFilter::$apiMeta['user_id'];
         $id = $this->webhookService->create($userId, $this->request->getJSON(true));
 
         return $this->respondCreated([
@@ -61,12 +61,12 @@ class WebhookController extends ResourceController
 
     public function delete($id = null)
     {
-        $planSlug = $this->request->api_meta['plan_slug'] ?? 'free';
+        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
         if (!$this->planAccess->canAccess($planSlug, 'webhooks')) {
             return $this->failForbidden('Los webhooks requieren un plan Business.');
         }
 
-        $userId = (int)$this->request->api_meta['user_id'];
+        $userId = (int)\App\Filters\ApiKeyFilter::$apiMeta['user_id'];
         if ($this->webhookService->delete($userId, (int)$id)) {
             return $this->respondDeleted(['success' => true, 'message' => 'Webhook eliminado']);
         }

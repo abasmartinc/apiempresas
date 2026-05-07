@@ -52,7 +52,7 @@ class Professional extends ResourceController
                 ];
 
                 // Apply masking if Free plan
-                $planId = $this->request->api_meta['plan_id'] ?? 1;
+                $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
                 if ((int)$planId === 1) {
                     // 4. Remove technical fields
                     unset($data['lat'], $data['lng']);
@@ -109,7 +109,7 @@ class Professional extends ResourceController
             }
 
             // Apply masking if Free plan (Mirroring CompaniesByCif logic)
-            $planId = $this->request->api_meta['plan_id'] ?? 1;
+            $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
             if ((int)$planId === 1) {
                 $company = mask_company_data($company);
             }

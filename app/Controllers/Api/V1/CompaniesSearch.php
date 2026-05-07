@@ -47,7 +47,7 @@ class CompaniesSearch extends ResourceController
 
         if (is_array($cachedData) && !empty($cachedData)) {
             // Apply masking if Free plan
-            $planId = $this->request->api_meta['plan_id'] ?? 1;
+            $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
             if ((int)$planId === 1) {
                 $cachedData = mask_company_data($cachedData);
             }
@@ -85,7 +85,7 @@ class CompaniesSearch extends ResourceController
             cache()->save($cacheKey, $data, 3600);
 
             // Apply masking if Free plan
-            $planId = $this->request->api_meta['plan_id'] ?? 1;
+            $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
             if ((int)$planId === 1) {
                 $data = mask_company_data($data);
             }

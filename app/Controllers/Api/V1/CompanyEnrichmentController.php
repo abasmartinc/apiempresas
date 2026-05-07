@@ -30,8 +30,8 @@ class CompanyEnrichmentController extends ResourceController
             return $this->fail('CIF es requerido', 400);
         }
 
-        $planSlug = $this->request->api_meta['plan_slug'] ?? 'free';
-        
+        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
+
         if (!$this->planAccess->canAccess($planSlug, 'company_score')) {
             return $this->failForbidden('Tu plan no tiene acceso al scoring comercial.');
         }
@@ -67,7 +67,7 @@ class CompanyEnrichmentController extends ResourceController
         $cif = $this->request->getGet('cif');
         if (!$cif) return $this->fail('CIF es requerido', 400);
 
-        $planSlug = $this->request->api_meta['plan_slug'] ?? 'free';
+        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
         if (!$this->planAccess->canAccess($planSlug, 'company_signals')) {
             return $this->failForbidden('Tu plan Pro o Business es requerido para ver señales societarias.');
         }
@@ -91,7 +91,7 @@ class CompanyEnrichmentController extends ResourceController
         $cif = $this->request->getGet('cif');
         if (!$cif) return $this->fail('CIF es requerido', 400);
 
-        $planSlug = $this->request->api_meta['plan_slug'] ?? 'free';
+        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
         $accessLevel = $this->planAccess->getAccessLevel($planSlug, 'insights');
 
         if ($accessLevel === 'none') {
@@ -127,7 +127,7 @@ class CompanyEnrichmentController extends ResourceController
         $cif = $this->request->getGet('cif');
         if (!$cif) return $this->fail('CIF es requerido', 400);
 
-        $planSlug = $this->request->api_meta['plan_slug'] ?? 'free';
+        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
         if (!$this->planAccess->canAccess($planSlug, 'contact_prep')) {
             return $this->failForbidden('La preparación de contacto con IA requiere un plan Business.');
         }

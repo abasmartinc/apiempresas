@@ -32,7 +32,7 @@ class UsageController extends ResourceController
      */
     public function index()
     {
-        $userId = $this->request->api_meta['user_id'] ?? null;
+        $userId = \App\Filters\ApiKeyFilter::$apiMeta['user_id'] ?? null;
 
         if (!$userId) {
             return $this->failUnauthorized('No se pudo identificar al usuario desde la API Key.');
@@ -67,7 +67,7 @@ class UsageController extends ResourceController
                 // We use getByCif but we could also use a lighter search if needed
                 $details = $this->companyModel->getByCif($cif);
                 if ($details) {
-                    $planId = $this->request->api_meta['plan_id'] ?? 1;
+                    $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
                     if ((int)$planId === 1) {
                         $details = mask_company_data($details);
                     }

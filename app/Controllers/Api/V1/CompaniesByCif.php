@@ -47,7 +47,7 @@ class CompaniesByCif extends ResourceController
 
         if (is_array($cached) && !empty($cached)) {
             // Apply masking if Free plan
-            $planId = $this->request->api_meta['plan_id'] ?? 1;
+            $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
             if ((int)$planId === 1) {
                 $cached = mask_company_data($cached);
             }
@@ -82,7 +82,7 @@ class CompaniesByCif extends ResourceController
             cache()->save($cacheKey, $company, 86400); // 24h
 
             // Apply masking if Free plan
-            $planId = $this->request->api_meta['plan_id'] ?? 1;
+            $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
             if ((int)$planId === 1) {
                 $company = mask_company_data($company);
             }
@@ -112,7 +112,7 @@ class CompaniesByCif extends ResourceController
             // Trigger: Milestone 1st Request Email
             try {
                 if (isset($company) && $company) {
-                    $userId = $this->request->api_meta['user_id'] ?? null;
+                    $userId = \App\Filters\ApiKeyFilter::$apiMeta['user_id'] ?? null;
                     if ($userId) {
                         $automationModel = new \App\Models\EmailAutomationModel();
                         if (!$automationModel->wasSent($userId, 'first_request')) {

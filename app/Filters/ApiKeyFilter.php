@@ -8,12 +8,17 @@ use CodeIgniter\HTTP\ResponseInterface;
 
 class ApiKeyFilter implements FilterInterface
 {
+    public static array $apiMeta = [];
+    public static float $apiT0 = 0.0;
+    public static string $apiRequestId = '';
+    public static bool $apiSkipBilling = false;
+
     public function before(RequestInterface $request, $arguments = null)
     {
         helper('api');
         // ====== Medición de duración + request_id ======
-        $request->api_t0 = microtime(true);
-        $request->api_request_id = bin2hex(random_bytes(16)); // 32 hex chars
+        self::$apiT0 = microtime(true);
+        self::$apiRequestId = bin2hex(random_bytes(16)); // 32 hex chars
 
         // 1) Leer API key (header recomendado)
         $apiKey = trim((string) $request->getHeaderLine('X-API-KEY'));
@@ -189,13 +194,13 @@ class ApiKeyFilter implements FilterInterface
         if (!$searchTerm) $searchTerm = $request->getGet('q');
         if (!$searchTerm) $searchTerm = $request->getGet('name');
 
-        $request->api_meta = [
+        self::$apiMeta = [
             'user_id'         => (int)$row->user_id,
             'api_key_id'      => (int)$row->api_key_id,
             'subscription_id' => $subscriptionId,
             'plan_id'         => (int)$planId,
             'plan_slug'       => $planSlug,
-            'request_id'      => (string)$request->api_request_id,
+            'request_id'      => (string)self::$apiRequestId,
             'search_term'     => $searchTerm ? (string)$searchTerm : null,
         ];
 
@@ -210,8 +215,8 @@ class ApiKeyFilter implements FilterInterface
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        $meta = $request->api_meta ?? null;
-        if (!$meta || empty($meta['user_id']) || empty($meta['api_key_id'])) {
+        $meta = self::$apiMeta;
+        if (empty($meta) || empty($meta['user_id']) || empty($meta['api_key_id'])) {
             return;
         }
 
@@ -221,9 +226,9 @@ class ApiKeyFilter implements FilterInterface
             $today = date('Y-m-d');
             $statusCode = (int)$response->getStatusCode();
 
-            $t0 = $request->api_t0 ?? null;
+            $t0 = self::$apiT0;
             $durationMs = null;
-            if ($t0 !== null) {
+            if ($t0 > 0.0) {
                 $durationMs = (int) round((microtime(true) - $t0) * 1000);
             }
 
@@ -250,7 +255,7 @@ class ApiKeyFilter implements FilterInterface
                 ]);
             }
 
-            $skipBilling = $request->api_skip_billing ?? false;
+            $skipBilling = self::$apiSkipBilling;
             if (!$skipBilling && (strpos($endpoint, 'api/v1/professional/search') !== false)) {
                 $skipBilling = true;
             }

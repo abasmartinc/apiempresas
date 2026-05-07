@@ -23,7 +23,7 @@ class RadarApiController extends ResourceController
      */
     public function index()
     {
-        $planSlug = $this->request->api_meta['plan_slug'] ?? 'free';
+        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
         
         $filters = [
             'province' => $this->request->getGet('province'),

@@ -15,7 +15,7 @@ class SubscriptionFilter implements FilterInterface
     public function before(RequestInterface $request, $arguments = null)
     {
         $currentUri = uri_string();
-        $isApiAuthenticated = isset($request->api_meta['user_id']); // Set by ApiKeyFilter
+        $isApiAuthenticated = !empty(\App\Filters\ApiKeyFilter::$apiMeta['user_id']); // Set by ApiKeyFilter
         $isLoggedIn = session()->get('logged_in');
         
         $productType = $arguments[0] ?? 'api';
@@ -38,7 +38,7 @@ class SubscriptionFilter implements FilterInterface
             return redirect()->to(site_url('enter?redirect=' . urlencode($currentUri)));
         }
 
-        $userId = $isApiAuthenticated ? $request->api_meta['user_id'] : session()->get('user_id');
+        $userId = $isApiAuthenticated ? \App\Filters\ApiKeyFilter::$apiMeta['user_id'] : session()->get('user_id');
         $productType = $arguments[0] ?? 'api'; // default is api access
 
         $subscriptionModel = new UsersuscriptionsModel();
