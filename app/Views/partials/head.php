@@ -128,6 +128,9 @@ $googlebot = $googlebot ?? ($robots . ',max-snippet:-1,max-image-preview:large,m
 </script>
 
 
+<!-- jQuery (Required for many interactive elements) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

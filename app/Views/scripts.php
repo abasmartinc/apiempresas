@@ -1,5 +1,4 @@
 <?php helper('api'); ?>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
         // We use the 'search' route which is now configured for both GET and POST
