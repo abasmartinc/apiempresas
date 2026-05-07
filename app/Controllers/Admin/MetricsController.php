@@ -27,7 +27,7 @@ class MetricsController extends BaseController
         $totalRevenue = $db->table('user_subscriptions s')
             ->join('api_plans p', 's.plan_id = p.id')
             ->where('s.status', 'active')
-            ->selectSum('p.price')
+            ->selectSum('p.price_monthly', 'price')
             ->get()->getRow()->price ?? 0;
 
         // Metrics Array Structure for the view
