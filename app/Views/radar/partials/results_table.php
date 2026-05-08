@@ -636,48 +636,48 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
 
                     <?php if ($isFree && !empty($lockedCompanies)) { ?>
                         <tr class="ae-radar-inline-paywall">
-                            <td colspan="3" style="padding: 60px 40px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 24px; text-align: left; color: white; position: relative; overflow: hidden; margin: 20px 0;">
-                                <!-- Glow Effect -->
-                                <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 60%); pointer-events: none;"></div>
+                            <td colspan="3" style="padding: 60px 40px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; text-align: left; color: #1e293b; position: relative; overflow: hidden; margin: 20px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                                <!-- Light Glow Effect -->
+                                <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(37,99,235,0.03) 0%, transparent 60%); pointer-events: none;"></div>
                                 
                                 <div class="paywall-grid" style="max-width: 1000px; margin: 0 auto; position: relative; z-index: 10; display: grid; grid-template-columns: 1.4fr 1fr; gap: 48px; align-items: center;">
                                     <div class="paywall-content">
-                                        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(37,99,235,0.1); color: #60a5fa; padding: 6px 12px; border-radius: 100px; font-size: 11px; font-weight: 800; margin-bottom: 20px; border: 1px solid rgba(37,99,235,0.2); backdrop-filter: blur(4px);">
-                                            <span style="display: inline-block; width: 6px; height: 6px; background: #60a5fa; border-radius: 50%; animation: pulse 2s infinite;"></span>
+                                        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(37,99,235,0.05); color: #2563eb; padding: 6px 12px; border-radius: 100px; font-size: 11px; font-weight: 800; margin-bottom: 20px; border: 1px solid rgba(37,99,235,0.1);">
+                                            <span style="display: inline-block; width: 6px; height: 6px; background: #2563eb; border-radius: 50%; animation: pulse 2s infinite;"></span>
                                             Oportunidades en tiempo real
                                         </div>
 
-                                        <h2 style="font-size: 34px; font-weight: 900; margin-bottom: 16px; letter-spacing: -1px; line-height: 1.1; color: white !important;">Estas empresas están siendo contactadas <span style="background: linear-gradient(to right, #60a5fa, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ahora mismo</span></h2>
-                                        <p style="font-size: 16px; color: rgba(255,255,255,0.7); margin-bottom: 32px; line-height: 1.6; max-width: 480px;">No permitas que tu competencia llegue antes. Desbloquea el acceso completo para ver los detalles de contacto antes que desaparezcan.</p>
+                                        <h2 style="font-size: 34px; font-weight: 900; margin-bottom: 16px; letter-spacing: -1px; line-height: 1.1; color: #1e293b !important;">Estas empresas están siendo contactadas <span style="background: linear-gradient(to right, #2563eb, #10b981); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">ahora mismo</span></h2>
+                                        <p style="font-size: 16px; color: #64748b; margin-bottom: 32px; line-height: 1.6; max-width: 480px; font-weight: 500;">No permitas que tu competencia llegue antes. Desbloquea el acceso completo para ver los detalles de contacto antes que desaparezcan.</p>
                                         
                                         <div style="display: flex; flex-direction: column; gap: 16px; align-items: flex-start;">
-                                            <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="display: inline-flex; align-items: center; gap: 10px; background: #2563eb; color: white; padding: 18px 36px; border-radius: 16px; font-size: 16px; font-weight: 900; text-decoration: none; box-shadow: 0 10px 30px rgba(37,99,235,0.4); transition: transform 0.2s; transform-origin: center;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+                                            <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="display: inline-flex; align-items: center; gap: 10px; background: #2563eb; color: white; padding: 18px 36px; border-radius: 16px; font-size: 16px; font-weight: 900; text-decoration: none; box-shadow: 0 10px 30px rgba(37,99,235,0.3); transition: transform 0.2s;">
                                                 <span>Acceder ahora antes que tu competencia</span>
                                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                                             </a>
-                                            <div style="display: flex; align-items: center; gap: 8px; font-size: 10px; color: #fbbf24; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(251,191,36,0.1); padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2);">
+                                            <div style="display: flex; align-items: center; gap: 8px; font-size: 10px; color: #d97706; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(217,119,6,0.05); padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(217,119,6,0.1);">
                                                 <span style="font-size: 14px;">💰</span> ROI: Recupera la inversión con 1 cliente
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="paywall-features" style="background: rgba(255,255,255,0.03); padding: 32px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(8px);">
+                                    <div class="paywall-features" style="background: #f8fafc; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0;">
                                         <div style="display: flex; flex-direction: column; gap: 20px;">
-                                            <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.9);">
+                                            <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; color: #475569;">
                                                 <span style="color: #10b981; font-size: 18px;">✔</span> Acceso completo hoy
                                             </div>
-                                            <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.9);">
+                                            <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; color: #475569;">
                                                 <span style="color: #10b981; font-size: 18px;">✔</span> Filtros avanzados
                                             </div>
-                                            <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.9);">
+                                            <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; color: #475569;">
                                                 <span style="color: #10b981; font-size: 18px;">✔</span> Detección temprana
                                             </div>
-                                            <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.9);">
+                                            <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; color: #475569;">
                                                 <span style="color: #10b981; font-size: 18px;">✔</span> Ventaja competitiva
                                             </div>
                                         </div>
                                         
-                                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; text-align: center;">
+                                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; font-weight: 600; text-align: center;">
                                             Sin permanencia · Activación inmediata
                                         </div>
                                     </div>

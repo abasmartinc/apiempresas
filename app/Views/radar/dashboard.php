@@ -277,16 +277,22 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                     <?php endif; ?>
 
                     <!-- ② BÚSQUEDA IA (hero) -->
-                    <div class="ae-pro-search-hero" style="<?= $isFree ? 'border-style: dashed; background: #fafafa;' : '' ?>">
+                    <div class="ae-pro-search-hero <?= $isFree ? 'is-locked' : '' ?>" style="<?= $isFree ? 'border-style: dashed; background: #fafafa;' : '' ?>">
                         <div class="ae-pro-search-hero__label">
                             <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" style="width:14px;height:14px;"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
                             Búsqueda con IA
-                            <span style="background:<?= $isFree ? '#f1f5f9' : '#dbeafe' ?>;color:<?= $isFree ? '#64748b' : '#2563eb' ?>;font-size:9px;font-weight:900;padding:2px 7px;border-radius:999px;letter-spacing:0.05em;"><?= $isFree ? 'PRO ONLY' : 'BETA' ?></span>
+                            <span style="background:<?= $isFree ? '#fff1f2' : '#dbeafe' ?>;color:<?= $isFree ? '#e11d48' : '#2563eb' ?>;font-size:9px;font-weight:900;padding:2px 7px;border-radius:999px;letter-spacing:0.05em;display:flex;align-items:center;gap:4px;">
+                                <?php if ($isFree): ?>
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                <?php endif; ?>
+                                <?= $isFree ? 'PRO ONLY' : 'BETA' ?>
+                            </span>
                         </div>
                         <div style="display:flex;gap:12px;align-items:center;">
                             <div style="position:relative;flex-grow:1;">
                                 <input type="text" id="radar-ai-query"
                                     class="ae-pro-search-hero__input"
+                                    <?= $isFree ? 'style="opacity:0.7;"' : '' ?>
                                     placeholder="Ej: Empresas nuevas de construcción en Madrid con score alto..."
                                     onkeypress="if(event.key==='Enter') handleAiSearch()">
                                 <div style="position:absolute;right:18px;top:50%;transform:translateY(-50%);color:#94a3b8;">
@@ -550,11 +556,19 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
     }
 
     function fillAiQuery(text) {
+        <?php if ($isFree): ?>
+            openUpgradeModal('Búsqueda con IA', 'Analiza el mercado con lenguaje natural y encuentra oportunidades exactas. Esta función es exclusiva de Radar PRO.');
+            return;
+        <?php endif; ?>
         $('#radar-ai-query').val(text);
         handleAiSearch();
     }
 
     function handleAiSearch() {
+        <?php if ($isFree): ?>
+            openUpgradeModal('Búsqueda con IA', 'Analiza el mercado con lenguaje natural y encuentra oportunidades exactas. Esta función es exclusiva de Radar PRO.');
+            return;
+        <?php endif; ?>
         const query = $('#radar-ai-query').val().trim();
         if (!query) return;
 
@@ -573,6 +587,13 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                     $('#ai-explanation-text').html(response.explanation);
                     $('#ai-search-explanation').fadeIn();
                     document.getElementById('radar-results-container').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    // Si el servidor devuelve error (ej: expiró sesión o perdió suscripción)
+                    if (response.message && response.message.includes('Radar PRO')) {
+                        openUpgradeModal('Radar PRO', response.message);
+                    } else {
+                        alert(response.message || 'Error en la búsqueda IA');
+                    }
                 }
             },
             complete: function() {
@@ -582,6 +603,16 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                 $('#radar-results-container').css('opacity', '1');
             }
         });
+    }
+
+    function openUpgradeModal(title, desc) {
+        $('#upgrade-modal-title').text(title || 'Acceso Limitado');
+        $('#upgrade-modal-desc').text(desc || 'Activa Radar PRO para desbloquear esta función.');
+        $('#radar-upgrade-modal').fadeIn();
+    }
+
+    function closeUpgradeModal() {
+        $('#radar-upgrade-modal').fadeOut();
     }
 
     function clearAiSearch() {
