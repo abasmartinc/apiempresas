@@ -75,7 +75,7 @@ $routes->get('plugin-wordpress-buscador-empresas', 'Plugin::index');
 $routes->get('obtener-plugin-wordpress', 'Plugin::get_plugin');
 $routes->get('descargar/plugin-wp', 'Plugin::download');
 $routes->get('leads-empresas-nuevas', 'RadarPrices::index');
-$routes->get('radar', 'Radar::index'); // Radar Dashboard (Handles login/guest internally)
+$routes->get('radar', 'Radar::index'); 
 $routes->get('radar/quickview/(:num)', 'Radar::quickView/$1');
 $routes->get('radar/favoritos', 'Radar::favorites');
 $routes->get('radar/exportar', 'Radar::export');
@@ -83,6 +83,7 @@ $routes->get('radar/invoices', 'Radar::invoices');
 $routes->post('radar/toggle-favorite', 'Radar::toggleFavorite');
 $routes->post('radar/save-note', 'Radar::saveNote');
 $routes->get('radar/map-data', 'Radar::mapData');
+$routes->post('radar/ai-search', 'Radar::aiSearch');
 $routes->get('radar/kanban', 'Radar::kanban', ['filter' => 'subscription:radar']);
 $routes->post('radar/update-favorite-status', 'Radar::updateFavoriteStatus', ['filter' => 'subscription:radar']);
 $routes->get('radar/trends', 'Radar::trends', ['filter' => 'subscription:radar']);

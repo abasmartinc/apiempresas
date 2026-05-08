@@ -24,7 +24,6 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
     if (empty($dateStr) || $dateStr === '0000-00-00') return 'Reciente';
     $timestamp = strtotime($dateStr);
     if (!$timestamp) return 'Reciente';
-    // Rechazar fechas futuras
     if ($timestamp > time()) return 'Reciente';
     $mesesEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     $mesesEs = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
@@ -32,9 +31,8 @@ $formatEsDate = function($dateStr, $format = 'd M Y') {
 };
 
 $allCompanies = $companies ?? [];
-$limitFree = 3; // Limitado a 3 empresas visibles para usuarios gratis
+$limitFree = 3; 
 $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCompanies;
-$lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
 ?>
 
 <div class="ae-radar-page">
@@ -62,14 +60,12 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                             <?php endif; ?>
                         </p>
                     </div>
-                    <button onclick="this.parentElement.parentElement.style.display='none'; trackGlobalEvent('radar_banner_close');" style="background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 700; white-space: nowrap;"> Entendido </button>
-                </div>
-                <div style="position: absolute; right: -20px; top: -20px; opacity: 0.1; transform: rotate(-15deg);">
-                    <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+                    <button onclick="this.parentElement.parentElement.style.display='none';" style="background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 700; white-space: nowrap;"> Entendido </button>
                 </div>
             </div>
             <?php session()->remove('just_bought_excel'); ?>
             <?php endif; ?>
+
             <header class="ae-radar-page__topbar">
                 <div class="ae-radar-page__breadcrumb">
                     <span>APIEmpresas</span>
@@ -89,7 +85,6 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                         <div class="ae-radar-page__pill ae-radar-page__pill--free">
                             Plan Free · Vista limitada
                         </div>
-
                         <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=' . esc($source)) ?>" class="ae-radar-page__cta-top" style="background: #2563eb; color: #ffffff; border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
                             Desbloquear todas las oportunidades ahora
                         </a>
@@ -116,632 +111,336 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
                 .ae-radar-page { background: #e2e8f0 !important; }
                 .ae-radar-page__content { background: transparent !important; padding: 40px !important; }
                 .ae-radar-page__container { max-width: 100% !important; margin: 0 auto !important; }
+                
+                /* ── Radar PRO Redesign ── */
+                .ae-pro-crm-bar {
+                    display: flex; align-items: center; gap: 24px;
+                    background: #fff; border: 1px solid #e2e8f0;
+                    border-radius: 14px; padding: 14px 24px;
+                    margin-bottom: 20px;
+                    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+                }
+                .ae-pro-crm-bar__stat { display: flex; align-items: center; gap: 10px; }
+                .ae-pro-crm-bar__num { font-size: 20px; font-weight: 900; color: #0f172a; line-height: 1; }
+                .ae-pro-crm-bar__label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+                .ae-pro-crm-bar__sep { width: 1px; height: 32px; background: #f1f5f9; flex-shrink: 0; }
+                .ae-pro-crm-bar__right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+                .ae-pro-search-hero {
+                    background: #fff; border: 1px solid #e2e8f0;
+                    border-radius: 20px; padding: 24px 32px;
+                    margin-bottom: 12px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+                }
+                .ae-pro-search-hero__label {
+                    font-size: 11px; font-weight: 800; text-transform: uppercase;
+                    letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 14px;
+                    display: flex; align-items: center; gap: 8px;
+                }
+                .ae-pro-search-hero__input {
+                    width: 100%; height: 58px; padding: 0 60px 0 24px;
+                    border-radius: 14px; border: 2px solid #e2e8f0;
+                    background: #f8fafc; font-size: 15px; font-weight: 500;
+                    color: #1e293b; transition: all 0.2s;
+                    outline: none;
+                }
+                .ae-pro-search-hero__input:focus {
+                    border-color: #2563eb; background: #fff;
+                    box-shadow: 0 0 0 4px rgba(37,99,235,0.08);
+                }
+                .ae-pro-search-hero__btn {
+                    height: 58px; padding: 0 28px;
+                    background: #0f172a; color: #fff;
+                    border-radius: 14px; border: none;
+                    font-weight: 800; font-size: 14px;
+                    cursor: pointer; display: flex; align-items: center; gap: 10px;
+                    transition: background 0.2s; white-space: nowrap;
+                }
+                .ae-pro-search-hero__btn:hover { background: #1e293b; }
+
+                .ae-pro-filters-toggle {
+                    display: flex; align-items: center; gap: 8px;
+                    font-size: 13px; font-weight: 700; color: #475569;
+                    background: none; border: none; cursor: pointer;
+                }
+
+                .ae-pro-filters-panel {
+                    background: #fff; border: 1px solid #e2e8f0;
+                    border-radius: 16px; padding: 20px 24px;
+                    margin-bottom: 16px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+                }
+
+                .ae-pro-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+                .ae-pro-chip {
+                    display: inline-flex; align-items: center; gap: 6px;
+                    height: 36px; padding: 0 16px;
+                    font-size: 12px; font-weight: 700;
+                    border-radius: 10px; border: 1px solid #e2e8f0;
+                    text-decoration: none; color: #475569; background: #fff;
+                    transition: all 0.15s;
+                }
+                .ae-pro-chip:hover { border-color: #2563eb; color: #2563eb; }
+                .ae-pro-chip.is-active { background: #2563eb; color: #fff; border-color: #2563eb; }
+
+                .ae-ai-example {
+                    background: #f1f5f9; border: 1px solid #e2e8f0;
+                    padding: 5px 12px; border-radius: 8px;
+                    font-size: 11px; font-weight: 600; color: #475569;
+                    cursor: pointer; transition: all 0.15s; border: none;
+                }
+                .ae-ai-example:hover { background: #e2e8f0; }
+                
+                .ae-status-select-chip.status-bg-nuevo { background-color: #f1f5f9; color: #64748b; }
+                .ae-status-select-chip.status-bg-contactado { background-color: #fff7ed; color: #ea580c; border-color: #ffedd5; }
+                .ae-status-select-chip.status-bg-seguimiento { background-color: #eff6ff; color: #2563eb; border-color: #dbeafe; }
+                .ae-status-select-chip.status-bg-negociacion { background-color: #faf5ff; color: #9333ea; border-color: #f3e8ff; }
+                .ae-status-select-chip.status-bg-ganado { background-color: #f0fdf4; color: #16a34a; border-color: #dcfce7; }
+                
+                @keyframes ae-slide-in {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .ae-shine-btn {
+                    position: relative;
+                    overflow: hidden;
+                }
+                .ae-shine-btn::after {
+                    content: "";
+                    position: absolute;
+                    top: -50%;
+                    left: -50%;
+                    width: 200%;
+                    height: 200%;
+                    background: linear-gradient(
+                        to bottom right,
+                        rgba(255, 255, 255, 0) 0%,
+                        rgba(255, 255, 255, 0) 40%,
+                        rgba(255, 255, 255, 0.4) 50%,
+                        rgba(255, 255, 255, 0) 60%,
+                        rgba(255, 255, 255, 0) 100%
+                    );
+                    transform: rotate(45deg);
+                    animation: ae-shine 3s infinite;
+                }
+                @keyframes ae-shine {
+                    0% { transform: translateX(-100%) rotate(45deg); }
+                    100% { transform: translateX(100%) rotate(45deg); }
+                }
             </style>
 
             <div class="ae-radar-page__content">
                 <div class="ae-radar-page__container">
-                    
-                    <!-- ⚡ CONTADOR DE USO (MANDATORIO) -->
-                    <div class="ae-usage-counter" style="margin-bottom: 24px; background: #ffffff; border-radius: 16px; padding: 20px 32px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between;">
-                        <div style="display: flex; align-items: center; gap: 20px;">
-                            <div style="width: 48px; height: 48px; background: #eff6ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">📊</div>
-                            <div>
-                                <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1e293b;">
-                                    <?php if ($isFree) { ?>
-                                        Estás viendo solo una parte — las oportunidades más valiosas están bloqueadas
-                                    <?php } else { ?>
-                                        Acceso completo ilimitado a las <?= number_format($pagination['total']) ?> oportunidades
-                                    <?php } ?>
-                                </h3>
-                                <p style="margin: 4px 0 0; font-size: 13px; color: #64748b; font-weight: 500;">
-                                    <?php if ($isFree) { ?>
-                                        <span style="color: #ef4444; font-weight: 700;">Estás viendo <?= count($visibleCompanies) ?> de <?= number_format($pagination['total']) ?> oportunidades disponibles.</span> Estas empresas están activas ahora mismo y ya están siendo contactadas.
-                                    <?php } else { ?>
-                                        Explora todas las empresas detectadas hoy en tiempo real.
-                                    <?php } ?>
-                                </p>
-                            </div>
-                        </div>
-                        <?php if ($isFree) { ?>
-                            <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=' . esc($source)) ?>" class="ae-radar-page__cta-top" style="margin: 0; background: #0f172a; color: #ffffff;">
-                                Desbloquear todas las oportunidades ahora
-                            </a>
-                        <?php } ?>
-                    </div>
-                    
-                    <!-- INICIO SECCION SUPERIOR (KPIs) -->
-                    <div class="ae-radar-page-top-section" style="width: 100%;">
 
-                    <!-- BLOQUE: ACTIVIDAD DEL DÍA (NUDGE DIARIO) -->
-                    <div class="ae-radar-page__daily-nudge" style="margin-bottom: 20px; background: linear-gradient(90deg, #eff6ff 0%, #ffffff 100%); border: 1px solid #dbeafe; border-radius: 12px; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.05);">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <span style="font-size: 20px; animation: pulse 2s infinite;">🔥</span>
+                    <?php if (!$isFree): ?>
+
+                    <!-- ① MINI CRM BAR -->
+                    <div class="ae-pro-crm-bar">
+                        <div class="ae-pro-crm-bar__stat">
                             <div>
-                                <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: #1e40af;">
-                                    Las empresas detectadas hoy suelen ser las más valiosas (+<?= number_format($stats['hoy']) ?> detectadas hoy)
-                                </h4>
-                                <div style="display: flex; gap: 12px; margin-top: 2px;">
-                                    <span style="font-size: 12px; color: #60a5fa; font-weight: 700;">• <?= max(1, round($stats['hoy'] * 0.7)) ?> oportunidades de alta prioridad detectadas</span>
-                                    <span style="font-size: 12px; color: #10b981; font-weight: 700;">• Otros equipos comerciales ya están trabajando estas oportunidades</span>
-                                </div>
+                                <div class="ae-pro-crm-bar__num"><?= number_format($crmStats['contactado'] ?? 0) ?></div>
+                                <div class="ae-pro-crm-bar__label">Contactadas</div>
                             </div>
                         </div>
-                        <div style="flex-shrink: 0;">
-                            <span style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; background: white; padding: 4px 10px; border-radius: 20px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 6px;">
-                                <span style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: block;"></span>
-                                Sistema en vivo
+                        <div class="ae-pro-crm-bar__sep"></div>
+                        <div class="ae-pro-crm-bar__stat">
+                            <div>
+                                <div class="ae-pro-crm-bar__num"><?= number_format($crmStats['seguimiento'] ?? 0) ?></div>
+                                <div class="ae-pro-crm-bar__label">En seguimiento</div>
+                            </div>
+                        </div>
+                        <div class="ae-pro-crm-bar__sep"></div>
+                        <div class="ae-pro-crm-bar__stat">
+                            <div>
+                                <div class="ae-pro-crm-bar__num" style="color:#2563eb;"><?= number_format($crmStats['nuevo'] ?? 0) ?></div>
+                                <div class="ae-pro-crm-bar__label">Sin contactar</div>
+                            </div>
+                        </div>
+                        <div class="ae-pro-crm-bar__sep"></div>
+                        <div class="ae-pro-crm-bar__stat">
+                            <div>
+                                <div class="ae-pro-crm-bar__num" style="color:#10b981;"><?= number_format($stats['hoy']) ?></div>
+                                <div class="ae-pro-crm-bar__label">Nuevas hoy</div>
+                            </div>
+                        </div>
+                        <div class="ae-pro-crm-bar__right">
+                            <span style="font-size:10px; font-weight:700; color:#94a3b8; display:flex; align-items:center; gap:5px;">
+                                <span style="width:6px;height:6px;background:#22c55e;border-radius:50%;display:block;"></span>
+                                En vivo · <?= $freshness['lastUpdate'] ?>
                             </span>
+                            <button class="js-start-radar-tour" style="display:flex;align-items:center;gap:5px;padding:6px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;color:#475569;font-size:11px;font-weight:700;cursor:pointer;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" style="width:12px;height:12px;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                Guía
+                            </button>
                         </div>
                     </div>
+                    <?php endif; ?>
 
-                    <style>
-                        @keyframes pulse {
-                            0% { transform: scale(1); }
-                            50% { transform: scale(1.1); }
-                            100% { transform: scale(1); }
-                        }
-                        .ae-status-select-chip.status-bg-nuevo { background-color: #f1f5f9; color: #64748b; }
-                        .ae-status-select-chip.status-bg-contactado { background-color: #fff7ed; color: #ea580c; border-color: #ffedd5; }
-                        .ae-status-select-chip.status-bg-seguimiento { background-color: #eff6ff; color: #2563eb; border-color: #dbeafe; }
-                        .ae-status-select-chip.status-bg-negociacion { background-color: #faf5ff; color: #9333ea; border-color: #f3e8ff; }
-                        .ae-status-select-chip.status-bg-ganado { background-color: #f0fdf4; color: #16a34a; border-color: #dcfce7; }
-
-                        /* Paywall Responsive Styles */
-                        @media (max-width: 991px) {
-                            .paywall-grid {
-                                grid-template-columns: 1fr !important;
-                                gap: 32px !important;
-                                text-align: center !important;
-                            }
-                            .paywall-content {
-                                text-align: center !important;
-                            }
-                            .paywall-content div {
-                                align-items: center !important;
-                                justify-content: center !important;
-                            }
-                            .paywall-features {
-                                padding: 24px !important;
-                            }
-                        }
-                    </style>
-                    <section class="ae-radar-page__hero <?= !$isFree ? 'ae-radar-page__hero--pro' : '' ?>" style="padding: 24px 32px; min-height: auto; margin-bottom: 20px; position: relative;">
-                        <div class="ae-radar-page__hero-glass"></div>
-                        <div class="ae-radar-page__hero-glow"></div>
-                        
-                        <div class="ae-radar-page__hero-grid" style="display: grid; grid-template-columns: 1fr 340px; align-items: center; gap: 40px; position: relative; z-index: 10;">
-                            <!-- Lado Izquierdo: Titular -->
-                            <div>
-                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                                    <div class="ae-radar-page__eyebrow" style="margin-bottom: 0; font-size: 11px;">
-                                        Nuevas constituciones · captación B2B
-                                    </div>
-                                    <button class="js-radar-tour-btn js-start-radar-tour" style="display: flex; align-items: center; gap: 6px; padding: 4px 12px; background: white; border: 1px solid #e2e8f0; border-radius: 999px; color: #475569; font-size: 10px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-transform: uppercase;">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" style="width: 12px; height: 12px;">
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                                        </svg>
-                                        Guía
-                                    </button>
-                                </div>
-
-                                <h1 class="ae-radar-page__hero-title" style="font-size: 32px; margin-bottom: 8px; line-height: 1.1; color: #0f172a !important; font-weight: 800;">
-                                    Detecta oportunidades nuevas antes que tu competencia
-                                </h1>
-
-                                <p class="ae-radar-page__hero-text" style="font-size: 14px; margin-bottom: 24px; max-width: 600px; color: #64748b; font-weight: 500; line-height: 1.4;">
-                                    Tu pipeline de ventas inteligente: detectamos empresas en fase inicial con alta probabilidad de compra.
-                                </p>
-
-                                <!-- BLOQUE PRINCIPAL DE PIPELINE (ROI REFINADO V2) -->
-                                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); position: relative; overflow: hidden;">
-                                    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; position: relative; z-index: 2;">
-                                        <div style="display: flex; flex-direction: column; gap: 14px;">
-                                            <div style="display: flex; align-items: center; gap: 10px;">
-                                                <span style="font-size: 18px;">💼</span>
-                                                <span style="font-size: 14px; font-weight: 700; color: #1e293b;"><?= number_format($pipelineMetrics['total_opps']) ?> oportunidades detectadas</span>
-                                            </div>
-                                            <div style="display: flex; align-items: center; gap: 10px;">
-                                                <span style="font-size: 18px;">🎯</span>
-                                                <span style="font-size: 14px; font-weight: 700; color: #1e293b;"><?= $pipelineMetrics['clients_label'] ?> oportunidades reales <span style="font-weight: 500; color: #64748b; font-size: 12px;">(según conv. media)</span></span>
-                                            </div>
-                                            <div style="margin-top: 4px; font-size: 12px; font-weight: 600; color: #64748b; display: flex; align-items: center; gap: 6px;">
-                                                🚀 Otros equipos comerciales ya están trabajando estas oportunidades
-                                            </div>
-                                        </div>
-
-                                        <div style="display: flex; flex-direction: column; gap: 16px; border-left: 1px solid #f1f5f9; padding-left: 24px;">
-                                            <div>
-                                                <span style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Potencial económico</span>
-                                                <div style="font-size: 22px; font-weight: 900; color: #2563eb; letter-spacing: -0.5px; margin-top: 2px;">
-                                                    💰 Estas oportunidades pueden generar entre 300.000€ y <?= $metricsService->formatCurrency($pipelineMetrics['pipeline_max']) ?> <span style="font-size: 12px; font-weight: 700; color: #64748b; display: block; margin-top: -2px;">en pipeline comercial potencial detectado</span>
-                                                </div>
-                                            </div>
-                                            
-                                            <button type="button" onclick="document.getElementById('seccion-top-leads').scrollIntoView({behavior:'smooth'})" 
-                                                    style="background: #2563eb; color: white; height: 42px; width: 100%; border-radius: 12px; font-weight: 800; font-size: 12px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                                Ir a las mejores oportunidades
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width: 14px; height: 14px;"><path d="M7 13l5 5 5-5M7 6l5 5 5-5"></path></svg>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <!-- ROI Highlight Footer -->
-                                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <span style="font-size: 14px;">✅</span>
-                                            <span style="font-size: 13px; font-weight: 700; color: #10b981;"><?= $pipelineMetrics['roi_message'] ?></span>
-                                        </div>
-                                        <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: #ea580c; text-transform: uppercase;">
-                                            <span style="width: 6px; height: 6px; background: #ea580c; border-radius: 50%; display: block; animation: pulse 2s infinite;"></span>
-                                            Ventana de contacto activa
-                                        </div>
-                                    </div>
-                                </div>
-
-                            <?php if ($isFree) { ?>
-                                <div class="ae-radar-page__hero-actions" style="margin-top: 20px;">
-                                    <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__hero-btn ae-radar-page__hero-btn--primary" style="height: 42px; padding: 0 24px; font-size: 13px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);">
-                                        Desbloquear todas las oportunidades ahora
-                                    </a>
-                                    <div style="margin-top: 10px; font-size: 11px; font-weight: 600; color: #64748b;">
-                                        ✔ Acceso inmediato · ✔ Sin permanencia · ✔ Recupera la inversión con 1 cliente
-                                    </div>
-                                </div>
-                            <?php } ?>
-                            </div>
-
-                            <!-- Lado Derecho: Actividad Realtime -->
-                            <div style="background: rgba(255, 255, 255, 0.8); padding: 20px; border-radius: 20px; border: 1px solid #ffffff; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; gap: 14px;">
-                                <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.7px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
-                                    Actividad de prospección
-                                </div>
-                                
-                                <div style="display: flex; align-items: center; justify-content: space-between;">
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <span style="font-size: 18px;">✨</span>
-                                        <span style="font-size: 13px; font-weight: 700; color: #475569;">nuevas oportunidades hoy</span>
-                                    </div>
-                                    <div style="font-size: 20px; font-weight: 800; color: #0f172a;"><?= number_format($stats['hoy']) ?></div>
-                                </div>
-
-                                <div style="display: flex; align-items: center; justify-content: space-between;">
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <span style="font-size: 18px;">📅</span>
-                                        <span style="font-size: 13px; font-weight: 700; color: #475569;">oportunidades esta semana</span>
-                                    </div>
-                                    <div style="font-size: 20px; font-weight: 800; color: #0f172a;"><?= number_format($stats['semana']) ?></div>
-                                </div>
-
-                                <div style="display: flex; align-items: center; justify-content: space-between;">
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <span style="font-size: 18px;">📈</span>
-                                        <span style="font-size: 13px; font-weight: 700; color: #475569;">en fase activa de compra</span>
-                                    </div>
-                                    <div style="font-size: 20px; font-weight: 800; color: #0f172a;"><?= number_format($stats['mes']) ?></div>
-                                </div>
-                            </div>
+                    <!-- ② BÚSQUEDA IA (hero) -->
+                    <div class="ae-pro-search-hero" style="<?= $isFree ? 'border-style: dashed; background: #fafafa;' : '' ?>">
+                        <div class="ae-pro-search-hero__label">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" style="width:14px;height:14px;"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                            Búsqueda con IA
+                            <span style="background:<?= $isFree ? '#f1f5f9' : '#dbeafe' ?>;color:<?= $isFree ? '#64748b' : '#2563eb' ?>;font-size:9px;font-weight:900;padding:2px 7px;border-radius:999px;letter-spacing:0.05em;"><?= $isFree ? 'PRO ONLY' : 'BETA' ?></span>
                         </div>
-                    </section>
-
-                    <!-- BLOQUE DE PROGRESO CRM (Ajuste 1) -->
-                    <div class="ae-radar-page__crm-progress" style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 24px; border-radius: 20px; color: white; margin-bottom: 24px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2); position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1);">
-                        <div style="position: absolute; right: -40px; top: -40px; width: 150px; height: 150px; background: rgba(37, 99, 235, 0.1); border-radius: 50%; opacity: 0.2; filter: blur(40px);"></div>
-                        
-                        <div style="display: flex; flex-direction: column; gap: 20px; position: relative; z-index: 2;">
-                            <div style="display: flex; align-items: center; justify-content: space-between;">
-                                <div style="flex: 1;">
-                                    <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 10px;">
-                                        <span>📊</span> Estás trabajando sobre oportunidades detectadas hoy
-                                    </h3>
-                                    <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 500;">
-                                        Gestiona tu embudo de ventas y asegura el cierre de cada oportunidad.
-                                        <span style="display: block; margin-top: 6px; color: #10b981; font-weight: 800; font-size: 14px; letter-spacing: -0.2px;">💰 Valor total estimado hoy: <?= $todayMetrics['pipeline_label'] ?></span>
-                                    </p>
-                                </div>
-                                
-                                <div style="display: flex; gap: 16px; align-items: center;">
-                                    <!-- Contactados -->
-                                    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 12px 20px; border-radius: 14px; text-align: center; min-width: 140px;">
-                                        <div style="font-size: 24px; font-weight: 900; color: #10b981; line-height: 1;"><?= number_format($crmStats['contactado'] ?? 0) ?></div>
-                                        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; color: rgba(16, 185, 129, 0.8);">oportunidades contactadas</div>
-                                    </div>
-                                    
-                                    <!-- Seguimiento -->
-                                    <div style="background: rgba(37, 99, 235, 0.15); border: 1px solid rgba(37, 99, 235, 0.3); padding: 12px 20px; border-radius: 14px; text-align: center; min-width: 140px;">
-                                        <div style="font-size: 24px; font-weight: 900; color: #3b82f6; line-height: 1;"><?= number_format($crmStats['seguimiento'] ?? 0) ?></div>
-                                        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; color: rgba(37, 99, 235, 0.8);">en seguimiento</div>
-                                    </div>
-                                    
-                                    <!-- Oportunidades Pendientes -->
-                                    <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 20px; border-radius: 14px; text-align: center; min-width: 140px;">
-                                        <div style="font-size: 24px; font-weight: 900; color: rgba(255,255,255,0.9); line-height: 1;"><?= number_format($crmStats['nuevo'] ?? 0) ?></div>
-                                        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; color: rgba(255,255,255,0.4);">oportunidades disponibles</div>
-                                    </div>
+                        <div style="display:flex;gap:12px;align-items:center;">
+                            <div style="position:relative;flex-grow:1;">
+                                <input type="text" id="radar-ai-query"
+                                    class="ae-pro-search-hero__input"
+                                    placeholder="Ej: Empresas nuevas de construcción en Madrid con score alto..."
+                                    onkeypress="if(event.key==='Enter') handleAiSearch()">
+                                <div style="position:absolute;right:18px;top:50%;transform:translateY(-50%);color:#94a3b8;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                                 </div>
                             </div>
-                            
-                            <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.05); pt-4; padding-top: 12px;">
-                                <div style="font-size: 13px; font-weight: 700; color: #3b82f6;">
-                                    👉 Sigue con las oportunidades recomendadas para avanzar hoy
-                                </div>
-                                <div style="font-size: 12px; font-weight: 800; color: #10b981;">
-                                    🔥 Varias de estas empresas dejarán de estar disponibles hoy. Actúa rápido.
-                                </div>
+                            <button onclick="handleAiSearch()" id="btn-ai-search" class="ae-pro-search-hero__btn" style="background: #1e293b; box-shadow: 0 4px 12px rgba(30, 41, 59, 0.15);">
+                                <span id="btn-ai-search-text">Buscar con IA</span>
+                                <div id="btn-ai-search-loader" class="ae-spinner ae-spinner--white" style="display:none;width:16px;height:16px;border-width:2px;"></div>
+                            </button>
+                        </div>
+                        <div style="margin-top:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                            <span style="font-size:11px;font-weight:700;color:#94a3b8;">Ejemplos:</span>
+                            <button class="ae-ai-example" onclick="fillAiQuery('Empresas nuevas en Madrid con score alto')">Empresas nuevas en Madrid con score alto</button>
+                            <button class="ae-ai-example" onclick="fillAiQuery('Leads recientes de construcción en Valencia')">Leads recientes de construcción en Valencia</button>
+                            <button class="ae-ai-example" onclick="fillAiQuery('Empresas que puedan necesitar software de facturación')">Empresas que puedan necesitar software de facturación</button>
+                        </div>
+                        <div id="ai-search-explanation" style="display:none;margin-top:16px;padding:16px 20px;background:linear-gradient(to right, #eff6ff, #f8fafc);border-radius:12px;border:1px solid #dbeafe;align-items:flex-start;gap:12px;animation:ae-slide-in 0.4s ease-out;">
+                            <span style="font-size:18px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.1));">💡</span>
+                            <div style="flex-grow:1;">
+                                <p id="ai-explanation-text" style="margin:0;font-size:13px;color:#1e40af;font-weight:600;line-height:1.6;"></p>
+                                <button onclick="clearAiSearch()" style="margin-top:8px;background:transparent;border:none;color:#3b82f6;font-size:12px;font-weight:700;padding:0;cursor:pointer;text-decoration:underline;opacity:0.8;transition:opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8">Limpiar búsqueda IA</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- BLOQUE DE INTELIGENCIA ESTRATÉGICA -->
-                    <div class="ae-radar-page__intel-stats" style="background: white; padding: 24px; border-radius: 16px; color: #1e293b; margin-bottom: 20px; position: relative; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-                        <div style="display: flex; flex-direction: column; gap: 16px;">
-                            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;">
-                                <div style="flex: 1;">
-                                    <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 10px; color: #0f172a;">
-                                        <span>🧠</span> Oportunidades listas para contactar hoy
-                                    </h3>
-                                    <p style="margin: 0; font-size: 14px; color: #64748b; font-weight: 500; max-width: 700px;">
-                                        Empresas recién creadas con mayor probabilidad de contratar servicios en sus primeros días.
-                                        <span style="display: block; margin-top: 4px; color: #2563eb; font-weight: 700; font-size: 13px;">💰 Valor estimado de estas oportunidades: <?= $intelMetrics['pipeline_label'] ?></span>
-                                    </p>
-                                </div>
-                                <a href="<?= site_url('radar?' . http_build_query(array_merge($filters, ['priority_level' => 'muy_alta', 'rango' => '7', 'intel' => 'active']))) ?>#seccion-top-leads" 
-                                   class="ae-radar-page__hero-btn ae-radar-page__hero-btn--primary" 
-                                   style="height: 44px; padding: 0 24px; font-size: 13px; margin: 0; display: flex; align-items: center; justify-content: center; text-decoration: none;">
-                                    🎯 Ver oportunidades prioritarias
-                                </a>
-                            </div>
+                    <?php if (!$isFree): ?>
 
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
-                                <div style="background: #f8fafc; padding: 12px 16px; border-radius: 10px; border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 10px;">
-                                    <span style="font-size: 18px;">🔥</span>
-                                    <span style="font-size: 13px; font-weight: 700; color: #475569;"><?= round(($freshness['todayCount'] ?? 250) * 0.15) ?> empresas con alta probabilidad de compra</span>
-                                </div>
-                                <div style="background: #fffbeb; padding: 12px 16px; border-radius: 10px; border: 1px solid #fef3c7; display: flex; align-items: center; gap: 10px;">
-                                    <span style="font-size: 18px;">⏱</span>
-                                    <span style="font-size: 13px; font-weight: 700; color: #475569;"><?= round(($freshness['todayCount'] ?? 250) * 0.28) ?> en su mejor momento de contacto</span>
-                                </div>
-                                <div style="background: #eff6ff; padding: 12px 16px; border-radius: 10px; border: 1px solid #dbeafe; display: flex; align-items: center; gap: 10px;">
-                                    <span style="font-size: 18px;">💰</span>
-                                    <span style="font-size: 13px; font-weight: 700; color: #475569;">15+ con ticket estimado alto</span>
-                                </div>
-                            </div>
-
-                            <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px dashed #e2e8f0;">
-                                <p style="margin: 0; font-size: 13px; font-weight: 700; color: #2563eb;">
-                                    💡 Empieza por las empresas con mayor score para maximizar probabilidad de cierre.
-                                </p>
-                                <?php if (isset($_GET['intel']) && $_GET['intel'] === 'active') { ?>
-                                    <div style="background: #2563eb; color: white; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 999px; display: flex; align-items: center; gap: 6px;">
-                                        <span style="width: 6px; height: 6px; background: white; border-radius: 50%; display: block;"></span>
-                                        Filtro activo: Mejores oportunidades
-                                    </div>
-                                <?php } ?>
-                            </div>
-                        </div>
-
-                    <!-- BLOQUE: TOP OPORTUNIDADES -->
-                    <div id="seccion-top-leads">
-                        <?php if (!empty($visibleCompanies)) { ?>
-                            <div class="ae-radar-page__top-picks" style="margin-top: 40px; margin-bottom: 32px;">
-
-                            <h4 style="margin: 0 0 8px 0; font-size: 15px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                                <span>🎯</span> Empieza por estas empresas hoy
-                            </h4>
-                            <p style="margin: 0 0 24px 0; font-size: 13px; color: #64748b; font-weight: 500;">
-                                Seleccionadas automáticamente por mayor score y mejor momento de contacto.
-                            </p>
-                            
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
-                                <?php 
-                                                   // Sincronización Top Scoring: Asegurar que mostramos lo mejor de lo mejor basándonos en IA total
-                                    $topPicks = $visibleCompanies;
-                                    usort($topPicks, fn($a, $b) => ($b['lead_score_data']['numeric'] ?? 0) <=> ($a['lead_score_data']['numeric'] ?? 0));
-                                    $top3 = array_slice($topPicks, 0, 3); 
-                                    
-                                    foreach ($top3 as $index => $co): 
-                                        $scoreData = $co['lead_score_data'] ?? ['numeric' => (int)($co['score_total'] ?? 0), 'base' => (int)($co['score_total'] ?? 0)];
-                                        $scoreTotal = (int)round($scoreData['numeric']);
-                                        $isBoosted = ($scoreTotal > (int)round($scoreData['base']));
-                                        $prioKey = $co['priority_level'] ?? 'media';
-                                        
-                                        // Umbrales 70/40 (Optimización de Interés Radar)
-                                        $scoreColor = '#94a3b8'; $scoreProb = 'Baja probabilidad'; $scoreIcon = '⚪'; $scoreBg = 'rgba(148, 163, 184, 0.1)';
-                                        if ($scoreTotal >= 70) {
-                                            $scoreColor = '#10b981'; $scoreBg = 'rgba(16, 185, 129, 0.1)'; $scoreProb = 'Alta probabilidad'; $scoreIcon = '🟢';
-                                        } elseif ($scoreTotal >= 40) {
-                                            $scoreColor = '#f59e0b'; $scoreBg = 'rgba(245, 158, 11, 0.1)'; $scoreProb = 'Interés medio'; $scoreIcon = '🟡';
-                                        }
-
-                                        $isFirst = ($index === 0);
-                                        
-                                        // Micro-urgencia: Detectada hoy o hace X días
-                                        $days = ($scoreTotal >= 70) ? 0 : (($scoreTotal >= 40) ? rand(1, 2) : rand(3, 5));
-                                        $timingLabel = ($days == 0) ? 'Detectada hoy' : "Hace $days días";
-
-                                        $timingText = ($days <= 2) ? '🚀 Prioridad de contacto: ALTA' : "⏱ Prioridad de contacto: MEDIA";
-                                        $btnText = "💎 Analizar con IA PRO";
-                                        
-                                        $containerStyle = $isFirst 
-                                            ? "background: #ffffff; border: 2px solid #2563eb; border-radius: 16px; padding: 20px; transition: all 0.2s; position: relative; box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.15); display: flex; flex-direction: column; height: 100%; transform: scale(1.02); z-index: 5;"
-                                            : "background: rgba(255, 255, 255, 0.6); border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; transition: all 0.2s; position: relative; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; height: 100%;";
+                    <!-- ③ FILTROS + CHIPS -->
+                    <div style="margin-bottom:20px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                            <div class="ae-pro-chips">
+                                <?php
+                                $activeFilter = 'todas';
+                                if (isset($_GET['intel']) && $_GET['intel'] === 'active') $activeFilter = 'mejores';
+                                elseif (isset($_GET['status']) && $_GET['status'] === 'nuevo') $activeFilter = 'sin_ver';
+                                elseif (($filters['rango'] ?? '') === '7') $activeFilter = 'ventana';
+                                $chips = [
+                                    'todas'   => ['label' => 'Todas', 'icon' => '📊', 'url' => site_url('radar')],
+                                    'sin_ver' => ['label' => 'Sin contactar', 'icon' => '🆕', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['status' => 'nuevo', 'intel' => null])))],
+                                    'ventana' => ['label' => 'Esta semana', 'icon' => '⏱', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['rango' => '7', 'intel' => null])))],
+                                    'mejores' => ['label' => 'Score alto', 'icon' => '🔥', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['min_score' => 75, 'intel' => 'active'])))],
+                                ];
+                                foreach ($chips as $key => $chip):
+                                    $active = ($activeFilter === $key) ? 'is-active' : '';
                                 ?>
-                                    <div style="<?= $containerStyle ?>">
-                                        <?php if ($isFirst) { ?>
-                                            <div style="position: absolute; top: -14px; left: 20px; background: #2563eb; color: white; padding: 4px 12px; border-radius: 999px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);">
-                                                🔥 Mejor oportunidad del día
-                                            </div>
-                                        <?php } ?>
-                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                                <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; display: flex; align-items: center; gap: 6px;">
-                                                    <span style="width: 6px; height: 6px; background: <?= $scoreColor ?>; border-radius: 50%; display: block;"></span>
-                                                    Sugerencia #<?= $index + 1 ?>
-                                                </div>
-                                                <div style="font-size: 10px; font-weight: 800; color: #10b981; background: #f0fdf4; padding: 2px 8px; border-radius: 4px; border: 1px solid #dcfce7;">
-                                                    <?= $timingLabel ?>
-                                                </div>
-                                            </div>
-                                        
-                                        <h5 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 800; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.4;" title="<?= esc($co['company_name']) ?>">
-                                            <?= esc($co['company_name']) ?>
-                                        </h5>
-                                        
-                                        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; flex-grow: 1;">
-                                            <!-- SCORE PROTAGONISTA EN TARJETA -->
-                                            <div style="background: <?= $scoreBg ?>; border: 1px solid <?= $scoreColor ?>; padding: 4px 10px; border-radius: 6px; display: inline-flex; width: fit-content; align-items: center; gap: 6px;">
-                                                <span style="font-weight: 900; font-size: 12px; color: <?= $scoreColor ?>; letter-spacing: -0.5px;">
-                                                    <?= $scoreIcon ?> <?= $scoreTotal ?>/100
-                                                </span>
-                                                <span style="font-size: 10px; font-weight: 800; color: <?= $scoreColor ?>; text-transform: uppercase; letter-spacing: 0.5px;">
-                                                    — <?= $scoreProb ?>
-                                                </span>
-                                            </div>
-                                            
-                                            <div style="font-size: 12px; font-weight: 700; color: #374151;">
-                                                <?= $timingText ?>
-                                            </div>
-                                        </div>
-                                        
-                                        <?php if ($isFree) { ?>
-                                            <button type="button" 
-                                                    onclick="showConversionNudge()"
-                                                    style="width: 100%; background: #2563eb; border: none; border-radius: 10px; padding: 12px; font-size: 11px; font-weight: 900; color: white; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); letter-spacing: 0.02em;">
-                                                <?= $btnText ?>
-                                            </button>
-                                        <?php } else { ?>
-                                            <button type="button" 
-                                                    onclick="analyzeAI('<?= $co['id'] ?>', this, '<?= esc($co['company_name']) ?>')"
-                                                    style="width: 100%; background: #2563eb; border: none; border-radius: 10px; padding: 12px; font-size: 11px; font-weight: 900; color: white; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); letter-spacing: 0.02em;">
-                                                <?= $btnText ?>
-                                            </button>
-                                        <?php } ?>
-                                    </div>
+                                    <a href="<?= $chip['url'] ?>" class="ae-pro-chip <?= $active ?>">
+                                        <?= $chip['icon'] ?> <?= $chip['label'] ?>
+                                    </a>
                                 <?php endforeach; ?>
                             </div>
 
-                            <?php if ($isFree) { ?>
-                                <div class="radar-paywall-main" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 60px 40px; border-radius: 32px; margin: 40px 0; box-shadow: 0 25px 70px rgba(0,0,0,0.4); position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); min-height: 480px; display: flex; align-items: center; justify-content: center;">
-                                    <!-- Premium Animated Glow -->
-                                    <div style="position: absolute; top: -20%; right: -10%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 70%); filter: blur(60px); pointer-events: none;"></div>
-                                    <div style="position: absolute; bottom: -20%; left: -10%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%); filter: blur(60px); pointer-events: none;"></div>
-                                    
-                                    <div class="paywall-grid" style="position: relative; z-index: 10; max-width: 1100px; width: 100%; display: grid; grid-template-columns: 1.4fr 1fr; gap: 60px; align-items: center;">
-                                        <!-- Left Side: Copy & CTA -->
-                                        <div class="paywall-content" style="text-align: left;">
-                                            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(37,99,235,0.1); color: #60a5fa; padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 800; margin-bottom: 24px; border: 1px solid rgba(37,99,235,0.2); backdrop-filter: blur(4px);">
-                                                <span style="display: inline-block; width: 8px; height: 8px; background: #60a5fa; border-radius: 50%; animation: pulse 2s infinite;"></span>
-                                                +<?= number_format($freshness['todayCount'] ?? 94) ?> empresas detectadas hoy en tiempo real
-                                            </div>
+                            <button type="button" class="ae-pro-filters-toggle" onclick="toggleFilters()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+                                Filtros avanzados
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" id="filters-chevron" style="width:14px;height:14px;transition:transform 0.2s;"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                        </div>
 
-                                            <h2 style="font-size: 46px; font-weight: 900; margin-bottom: 20px; color: white !important; letter-spacing: -0.03em; line-height: 1.1; text-wrap: balance;">Estas empresas están siendo contactadas <span style="background: linear-gradient(to right, #60a5fa, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ahora mismo</span></h2>
-                                            
-                                            <p style="font-size: 18px; color: #94a3b8; margin-bottom: 40px; max-width: 540px; line-height: 1.6; font-weight: 500;">
-                                                No permitas que tu competencia llegue antes. Accede al listado completo con datos de contacto verificados antes de que desaparezcan.
-                                            </p>
-
-                                            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 20px;">
-                                                <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="display: inline-flex; align-items: center; gap: 12px; background: #2563eb; color: white; padding: 22px 40px; border-radius: 20px; font-size: 18px; font-weight: 900; text-decoration: none; box-shadow: 0 15px 40px rgba(37,99,235,0.4); transition: all 0.3s; border: 1px solid rgba(255,255,255,0.1);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 20px 50px rgba(37,99,235,0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 15px 40px rgba(37,99,235,0.4)';">
-                                                    <span>Acceder ahora antes que tu competencia</span>
-                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                                                </a>
-                                                <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; color: #fbbf24; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(251,191,36,0.1); padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(251,191,36,0.2);">
-                                                    <span style="font-size: 16px;">💰</span> La mayoría de usuarios recupera la inversión con su primer cliente
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Right Side: Features -->
-                                        <div class="paywall-features" style="background: rgba(255,255,255,0.03); padding: 40px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(8px);">
-                                            <div style="display: flex; flex-direction: column; gap: 32px;">
-                                                <div style="display: flex; align-items: flex-start; gap: 16px;">
-                                                    <div style="width: 28px; height: 28px; background: rgba(16,185,129,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #10b981; font-weight: 900; flex-shrink: 0; font-size: 14px;">✓</div>
-                                                    <div>
-                                                        <div style="font-size: 16px; font-weight: 800; color: white; margin-bottom: 4px;">Acceso completo</div>
-                                                        <div style="font-size: 13px; color: #94a3b8; line-height: 1.4;">Listado total de nuevas empresas diarias sin límites ni restricciones.</div>
-                                                    </div>
-                                                </div>
-                                                <div style="display: flex; align-items: flex-start; gap: 16px;">
-                                                    <div style="width: 28px; height: 28px; background: rgba(16,185,129,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #10b981; font-weight: 900; flex-shrink: 0; font-size: 14px;">✓</div>
-                                                    <div>
-                                                        <div style="font-size: 16px; font-weight: 800; color: white; margin-bottom: 4px;">Filtros avanzados</div>
-                                                        <div style="font-size: 13px; color: #94a3b8; line-height: 1.4;">Segmenta por sector, provincia, capital social y fecha exacta de constitución.</div>
-                                                    </div>
-                                                </div>
-                                                <div style="display: flex; align-items: flex-start; gap: 16px;">
-                                                    <div style="width: 28px; height: 28px; background: rgba(16,185,129,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #10b981; font-weight: 900; flex-shrink: 0; font-size: 14px;">✓</div>
-                                                    <div>
-                                                        <div style="font-size: 16px; font-weight: 800; color: white; margin-bottom: 4px;">Detección temprana</div>
-                                                        <div style="font-size: 13px; color: #94a3b8; line-height: 1.4;">Sé el primero en saber qué empresas se acaban de registrar en España.</div>
-                                                    </div>
-                                                </div>
-                                                <div style="display: flex; align-items: flex-start; gap: 16px;">
-                                                    <div style="width: 28px; height: 28px; background: rgba(16,185,129,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #10b981; font-weight: 900; flex-shrink: 0; font-size: 14px;">✓</div>
-                                                    <div>
-                                                        <div style="font-size: 16px; font-weight: 800; color: white; margin-bottom: 4px;">Ventaja competitiva</div>
-                                                        <div style="font-size: 13px; color: #94a3b8; line-height: 1.4;">Contacta antes que nadie y aumenta tu tasa de conversión radicalmente.</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                        <div id="ae-filters-panel" class="ae-pro-filters-panel" style="<?= (!empty($filters['q']) || !empty($filters['provincia']) || $filters['rango'] !== 'hoy') ? '' : 'display:none;' ?>">
+                            <form action="<?= site_url('radar') ?>" method="GET" class="ae-radar-page__filters">
+                                <div class="ae-radar-page__filters-grid" style="display:grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 16px; align-items: flex-end;">
+                                    <div class="ae-radar-page__field">
+                                        <label style="font-size:11px;margin-bottom:6px;display:block;">Nicho / Palabras clave</label>
+                                        <input type="text" name="q" class="ae-radar-page__input" style="height:38px;font-size:13px;" placeholder="Ej: energía solar..." value="<?= esc($filters['q'] ?? '') ?>">
                                     </div>
-                                    
-                                    <!-- Overlay para frustración visual del contenido inferior -->
-                                    <div class="paywall-overlay" style="position: absolute; bottom: -200px; left: 0; width: 100%; height: 400px; background: linear-gradient(transparent, rgba(15, 23, 42, 0.9)); pointer-events: none; z-index: 2;"></div>
-                                </div>
-                            <?php } ?>
-                        </div>
-                    <?php } ?>
-                    </div> <!-- FIN seccion-top-leads -->
-
-                    <!-- SEPARADOR VISUAL PREMIUM -->
-                    <div style="margin: 56px 0 40px 0; display: flex; align-items: center; gap: 20px; opacity: 0; animation: fadeUp 0.6s ease forwards 0.3s;">
-                        <div style="flex-grow: 1; height: 1px; background: linear-gradient(to right, rgba(226, 232, 240, 0), rgba(148, 163, 184, 0.4));"></div>
-                        <div style="font-size: 11px; font-weight: 900; color: #334155; text-transform: uppercase; letter-spacing: 0.15em; background: #ffffff; padding: 12px 28px; border-radius: 100px; border: 1px solid #cbd5e1; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 4px 10px -5px rgba(37, 99, 235, 0.1); display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 14px; animation: pulse 2s infinite;">🎯</span> 
-                            Explorar Base de Datos
-                        </div>
-                        <div style="flex-grow: 1; height: 1px; background: linear-gradient(to left, rgba(226, 232, 240, 0), rgba(148, 163, 184, 0.4));"></div>
-                    </div> <!-- FIN SEPARADOR VISUAL PREMIUM -->
-
-                    <!-- INICIO FONDO BUSCADOR Y TABLA -->
-                    <div style="<?= $isFree ? 'filter: blur(8px); opacity: 0.4; pointer-events: none; user-select: none; position: relative;' : '' ?> background: #ffffff; padding: 40px; border-radius: 32px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); border: 1px solid #e1e7f0; margin-bottom: 40px;">
-                        <?php if ($isFree) { ?>
-                            <div style="position: absolute; inset: 0; z-index: 100; cursor: not-allowed;" onclick="showConversionNudge('Buscador bloqueado', 'Activa Radar PRO para filtrar y explorar toda la base de datos de empresas.')"></div>
-                        <?php } ?>
-
-                    <form action="<?= site_url('radar') ?>" method="GET" class="ae-radar-page__filters <?= $isFree ? 'is-locked' : '' ?>" style="padding: 16px 24px; margin-bottom: 20px;">
-                        <div class="ae-radar-page__filters-grid" style="grid-template-columns: 1fr 1fr 1fr auto; gap: 20px; align-items: flex-end;">
-                            <div class="ae-radar-page__field">
-                                <label style="font-size: 11px; margin-bottom: 6px;">Nicho / Palabras clave</label>
-                                <input type="text" name="q" 
-                                       class="ae-radar-page__input" 
-                                       style="height: 38px; font-size: 13px;"
-                                       placeholder="Ej: energía solar..." 
-                                       value="<?= esc($filters['q'] ?? '') ?>"
-                                       <?= $isFree ? 'disabled' : '' ?>>
-                            </div>
-
-                            <div class="ae-radar-page__field">
-                                <label style="font-size: 11px; margin-bottom: 6px;">Provincia</label>
-                                <select name="provincia" class="ae-radar-page__select" style="height: 38px; font-size: 13px;" <?= $isFree ? 'disabled' : '' ?>>
-                                    <option value="">Toda España</option>
-                                    <?php foreach ($provinces as $p): ?>
-                                        <option value="<?= url_title($p['name'], '-', true) ?>" <?= ($filters['provincia'] === url_title($p['name'], '-', true)) ? 'selected' : '' ?>>
-                                            <?= esc($p['name']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-
-                            <div class="ae-radar-page__field">
-                                <label style="font-size: 11px; margin-bottom: 6px;">Ventana temporal</label>
-                                <select name="rango" class="ae-radar-page__select" style="height: 38px; font-size: 13px;" <?= $isFree ? 'disabled' : '' ?>>
-                                    <option value="hoy" <?= ($filters['rango'] === 'hoy') ? 'selected' : '' ?>>Hoy mismo</option>
-                                    <option value="7" <?= ($filters['rango'] === '7') ? 'selected' : '' ?>>Últimos 7 días</option>
-                                    <option value="30" <?= ($filters['rango'] === '30') ? 'selected' : '' ?>>Últimos 30 días</option>
-                                    <option value="90" <?= ($filters['rango'] === '90') ? 'selected' : '' ?>>Últimos 90 días</option>
-                                </select>
-                            </div>
-
-                            <div class="ae-radar-page__field">
-                                <?php if ($isFree) { ?>
-                                    <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__filters-cta ae-radar-page__filters-cta--locked" style="height: 38px; font-size: 12px; padding: 0 16px;">
-                                        Activar PRO
-                                    </a>
-                                <?php } else { ?>
-                                    <button type="submit" class="ae-radar-page__filters-cta" style="height: 38px; font-size: 13px; padding: 0 16px;">
-                                        Ver oportunidades
+                                    <div class="ae-radar-page__field">
+                                        <label style="font-size:11px;margin-bottom:6px;display:block;">Provincia</label>
+                                        <select name="provincia" class="ae-radar-page__select" style="height:38px;font-size:13px;width:100%;">
+                                            <option value="">Toda España</option>
+                                            <?php foreach ($provinces as $p): ?>
+                                                <option value="<?= url_title($p['name'], '-', true) ?>" <?= ($filters['provincia'] === url_title($p['name'], '-', true)) ? 'selected' : '' ?>>
+                                                    <?= esc($p['name']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="ae-radar-page__field">
+                                        <label style="font-size:11px;margin-bottom:6px;display:block;">Ventana temporal</label>
+                                        <select name="rango" class="ae-radar-page__select" style="height:38px;font-size:13px;width:100%;">
+                                            <option value="hoy" <?= ($filters['rango'] === 'hoy') ? 'selected' : '' ?>>Hoy mismo</option>
+                                            <option value="7" <?= ($filters['rango'] === '7') ? 'selected' : '' ?>>Últimos 7 días</option>
+                                            <option value="30" <?= ($filters['rango'] === '30') ? 'selected' : '' ?>>Últimos 30 días</option>
+                                            <option value="90" <?= ($filters['rango'] === '90') ? 'selected' : '' ?>>Últimos 90 días</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="ae-radar-page__filters-cta" style="height:38px;font-size:13px;padding:0 20px;">
+                                        Aplicar
                                     </button>
-                                <?php } ?>
-                            </div>
-                        </div>
-                    </form>
-                    
-                    <!-- SMART FILTERS / ESTRATÉGICOS REFINADOS -->
-                    <div class="ae-radar-page__smart-filters" style="margin-bottom: 32px; background: #fdfdfd; padding: 24px; border-radius: 20px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);">
-                        <?php 
-                            $activeFilter = 'todas';
-                            $filterLabel = 'Mostrando todas las empresas registradas recientemente';
-                            
-                            if (isset($_GET['intel']) && $_GET['intel'] === 'active') {
-                                $activeFilter = 'mejores';
-                                $filterLabel = '🔥 Mostrando oportunidades prioritarias (Score > 80)';
-                            } elseif (isset($_GET['status']) && $_GET['status'] === 'nuevo') {
-                                $activeFilter = 'sin_ver';
-                                $filterLabel = '🆕 Mostrando oportunidades sin contactar';
-                            } elseif (($filters['priority_level'] ?? '') === 'muy_alta') {
-                                $activeFilter = 'alta';
-                                $filterLabel = '🟢 Mostrando empresas con alta probabilidad de cierre';
-                            } elseif (($filters['rango'] ?? '') === '7') {
-                                $activeFilter = 'ventana';
-                                $filterLabel = '⏱ Mostrando oportunidades en momento óptimo';
-                            } elseif (isset($_GET['ai']) && $_GET['ai'] === 'active') {
-                                $activeFilter = 'ai';
-                                $filterLabel = '🎯 Mostrando recomendaciones inteligentes del sistema';
-                            }
-                        ?>
-
-                        <div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                            Filtrar por tipo de oportunidad
-                        </div>
-
-                        <div style="font-size: 12px; font-weight: 800; color: #2563eb; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; background: #eff6ff; padding: 8px 16px; border-radius: 8px; width: fit-content;">
-                            <span style="font-size: 14px;">🔎</span>
-                            <?= $filterLabel ?>
-                        </div>
-
-                        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
-                            <?php
-                            $chips = [
-                                'todas' => ['label' => 'Todas las oportunidades', 'icon' => '📊', 'url' => site_url('radar')],
-                                'sin_ver' => ['label' => 'Sin contactar', 'icon' => '🆕', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['status' => 'nuevo', 'intel' => null, 'priority_level' => null, 'rango' => null, 'ticket' => null, 'ai' => null, 'min_score' => null])))],
-                                'alta' => ['label' => 'Alta probabilidad de cierre', 'icon' => '🟢', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['priority_level' => 'muy_alta', 'intel' => null, 'rango' => null, 'ticket' => null, 'ai' => null, 'status' => null, 'min_score' => null])))],
-                                'ventana' => ['label' => 'Momento óptimo de contacto', 'icon' => '⏱', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['rango' => '7', 'intel' => null, 'priority_level' => null, 'ticket' => null, 'ai' => null, 'status' => null, 'min_score' => null])))],
-                                'mejores' => ['label' => 'Score alto (>80)', 'icon' => '🔥', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['min_score' => 75, 'intel' => 'active', 'priority_level' => null, 'rango' => null, 'ticket' => null, 'ai' => null, 'status' => null])))],
-                                'ai' => ['label' => 'Recomendadas por el sistema', 'icon' => '🎯', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['ai' => 'active', 'min_score' => 60, 'intel' => null, 'priority_level' => null, 'rango' => null, 'ticket' => null, 'status' => null])))]
-                            ];
-
-                            foreach ($chips as $key => $chip):
-                                $isActive = ($activeFilter === $key);
-                                $style = $isActive 
-                                    ? "background: #2563eb; color: white; border-color: #2563eb; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);"
-                                    : "background: white; color: #475569; border-color: #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,0.05);";
-                            ?>
-                                <a href="<?= $chip['url'] ?>" 
-                                   class="ae-radar-page__filter-chip"
-                                   style="display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 20px; font-size: 13px; font-weight: 700; border-radius: 12px; border: 1px solid; transition: all 0.2s; text-decoration: none; <?= $style ?>">
-                                    <span style="font-size: 14px;"><?= $chip['icon'] ?></span>
-                                    <?= $chip['label'] ?>
-                                </a>
-                            <?php endforeach; ?>
+                                </div>
+                            </form>
                         </div>
                     </div>
 
-
-                        <section class="ae-radar-page__lead-wrap <?= $isFree ? 'is-paywalled' : '' ?>">
-                            <div id="radar-results-container">
-                                <?= view('radar/partials/results_table', array_merge($filters, [
-                                    'companies' => $visibleCompanies, 
-                                    'isFree' => $isFree,
-                                    'pagination' => $pagination ?? null,
-                                    'pager' => $pager ?? null,
-                                    'filters' => $filters ?? []
-                                ])) ?>
-                            </div>
-
-                            <div id="radar-map-view" style="display:none;">
-                                <div id="radar-leaflet-map" style="height:600px; width:100%; border-radius:20px; border:1px solid #e2e8f0; background:#f8fafc; z-index:1;"></div>
-                            </div>
+                    <!-- ④ RESULTADOS -->
+                    <section class="ae-radar-page__lead-wrap">
+                        <div id="radar-results-container">
+                            <?= view('radar/partials/results_table', array_merge($filters, [
+                                'companies'  => $visibleCompanies,
+                                'isFree'     => false,
+                                'pagination' => $pagination ?? null,
+                                'pager'      => $pager ?? null,
+                                'filters'    => $filters ?? []
+                            ])) ?>
+                        </div>
+                        <div id="radar-map-view" style="display:none;">
+                            <div id="radar-leaflet-map" style="height:600px;width:100%;border-radius:20px;border:1px solid #e2e8f0;z-index:1;"></div>
+                        </div>
                     </section>
 
-                    </div> <!-- FIN FONDO BUSCADOR Y TABLA -->
+                    <?php else: ?>
+                    <!-- USUARIO FREE -->
+                    <div class="ae-usage-counter" style="margin-bottom:24px;background:linear-gradient(to right, #fff, #f8fafc);border-radius:16px;padding:24px 32px;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                        <div>
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                                <span style="background:#fef2f2; color:#ef4444; font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px; text-transform:uppercase;">Acceso Limitado</span>
+                                <h3 style="margin:0;font-size:16px;font-weight:800;color:#1e293b;">Oportunidades detectadas hoy</h3>
+                            </div>
+                            <p style="margin:0;font-size:13px;color:#64748b;">Estás viendo las primeras <?= count($visibleCompanies) ?> de las <strong><?= number_format($pagination['total']) ?></strong> oportunidades encontradas hoy.</p>
+                        </div>
+                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=' . esc($source)) ?>" class="ae-radar-page__cta-top ae-shine-btn" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color:#fff; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4); border:none; padding: 12px 24px; border-radius: 12px; font-weight: 900; display: flex; align-items: center; gap: 8px;">
+                            <span>👑</span> Desbloquear acceso completo
+                        </a>
+                    </div>
+
+                    <!-- Contenedor de resultados (Sin blur global para mostrar el teaser) -->
+                    <div style="position:relative;background:#fff;padding:20px;border-radius:24px;border:1px solid #e1e7f0;margin-bottom:40px;box-shadow: 0 10px 30px rgba(0,0,0,0.02);">
+                        <section class="ae-radar-page__lead-wrap">
+                            <div id="radar-results-container">
+                                <?= view('radar/partials/results_table', array_merge($filters, [
+                                    'companies'  => $visibleCompanies,
+                                    'isFree'     => true,
+                                    'pagination' => $pagination ?? null,
+                                    'pager'      => $pager ?? null,
+                                    'filters'    => $filters ?? []
+                                ])) ?>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="radar-paywall-main" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:white;padding:60px 40px;border-radius:32px;margin:40px 0;text-align:center;">
+                        <h2 style="font-size:32px;font-weight:900;margin-bottom:16px;">¿Quieres llegar antes que nadie?</h2>
+                        <p style="font-size:16px;color:#94a3b8;margin-bottom:32px;">Los usuarios PRO reciben alertas en tiempo real y acceden a todos los contactos.</p>
+                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-shine-btn" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color:white; padding:20px 40px; border-radius:18px; font-weight:900; text-decoration:none; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3); display:inline-flex; align-items:center; gap:12px; font-size:18px; border: 1px solid rgba(255,255,255,0.2);">
+                            <span>🚀</span> Activar Radar PRO ahora
+                        </a>
+                    </div>
+                    <?php endif; ?>
 
                 </div>
             </div>
-            
+
             <footer class="ae-radar-page__footer">
-                &copy; <?= date('Y') ?> APIEmpresas · Inteligencia comercial para captación B2B
+                &copy; <?= date('Y') ?> APIEmpresas · Inteligencia comercial B2B
             </footer>
         </main>
     </div>
@@ -752,123 +451,170 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
         <div class="ae-qv-modal__backdrop" onclick="closeQuickView()"></div>
         <div class="ae-qv-modal__container">
             <div id="ae-qv-content" class="ae-qv-modal__content">
-                <!-- Se cargará por AJAX -->
             </div>
         </div>
     </div>
 
     <?= view('radar/partials/ai_modal') ?>
 
+    <!-- Modal Cancelación PRO (Retention Modal) -->
+    <div id="radar-cancel-modal" class="ae-modal-v3" style="display:none;">
+        <div class="ae-modal-v3__backdrop" onclick="closeCancelModal()"></div>
+        <div class="ae-modal-v3__content" style="max-width: 440px;">
+            <div style="text-align: center; padding: 20px 0 10px;">
+                <div style="width: 64px; height: 64px; background: #fef2f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" style="width: 32px; height: 32px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <h3 style="font-size: 20px; font-weight: 900; color: #1e293b; margin-bottom: 12px; letter-spacing: -0.02em;">¿Seguro que quieres cancelar?</h3>
+                <p style="font-size: 14px; color: #64748b; line-height: 1.6; margin-bottom: 30px;">
+                    Perderás el acceso a la <strong>Búsqueda IA</strong>, los filtros avanzados y la detección de leads en tiempo real. 
+                    Las oportunidades no esperan.
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button onclick="closeCancelModal()" style="background: #0f172a; color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer; transition: transform 0.2s;">
+                        Mantener mi acceso PRO
+                    </button>
+                    <button onclick="confirmRadarCancellation()" style="background: transparent; color: #ef4444; border: 1px solid #fee2e2; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer;">
+                        Sí, cancelar suscripción
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Upgrade PRO (Conversion Nudge) -->
+    <div id="radar-upgrade-modal" class="ae-modal-v3" style="display:none;">
+        <div class="ae-modal-v3__backdrop" onclick="closeUpgradeModal()"></div>
+        <div class="ae-modal-v3__content" style="max-width: 500px; padding: 0; overflow: hidden; border: none;">
+            <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 40px 32px; text-align: center; color: white; position: relative;">
+                <div style="position: absolute; top: 20px; right: 20px; cursor: pointer; opacity: 0.5;" onclick="closeUpgradeModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </div>
+                <div style="width: 80px; height: 80px; background: rgba(37, 99, 235, 0.2); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; border: 1px solid rgba(255,255,255,0.1);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" style="width: 40px; height: 40px;"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                </div>
+                <h3 id="upgrade-modal-title" style="font-size: 24px; font-weight: 900; color: white; margin-bottom: 12px; letter-spacing: -0.02em;">Acceso Limitado</h3>
+                <p id="upgrade-modal-desc" style="font-size: 15px; color: #94a3b8; line-height: 1.6; margin: 0;">Activa Radar PRO para desbloquear esta función y acceder a todas las oportunidades de hoy.</p>
+            </div>
+            <div style="padding: 32px; background: white;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px;">
+                    <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; color: #475569;">
+                        <span style="color: #10b981; font-size: 18px;">✔</span> Búsqueda con IA
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; color: #475569;">
+                        <span style="color: #10b981; font-size: 18px;">✔</span> Contactos Directos
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; color: #475569;">
+                        <span style="color: #10b981; font-size: 18px;">✔</span> Filtros Premium
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; color: #475569;">
+                        <span style="color: #10b981; font-size: 18px;">✔</span> Alertas en Vivo
+                    </div>
+                </div>
+                <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="display: block; background: #2563eb; color: white; text-align: center; padding: 18px; border-radius: 14px; font-weight: 900; font-size: 16px; text-decoration: none; box-shadow: 0 10px 25px rgba(37,99,235,0.3); transition: transform 0.2s;">
+                    Desbloquear acceso PRO ahora
+                </a>
+                <p style="text-align: center; margin-top: 16px; font-size: 11px; color: #94a3b8; font-weight: 700;">Recupera tu inversión con solo 1 cliente ganado</p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .ae-modal-v3 {
+            position: fixed; inset: 0; z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .ae-modal-v3__backdrop {
+            position: absolute; inset: 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(4px);
+        }
+        .ae-modal-v3__content {
+            position: relative; background: #fff;
+            border-radius: 24px; padding: 32px;
+            width: 100%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            animation: ae-modal-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes ae-modal-pop {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-   <script>
-    // Auto-scroll si el filtro inteligente está activo
-    document.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('intel') === 'active') {
-            const resultsContainer = document.getElementById('radar-results-container');
-            if (resultsContainer) {
-                // Scroll suave al listado
-                setTimeout(() => {
-                    resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 500);
-            }
-        }
-    });
-
-    /**
-     * Abre el modal de QuickView por ID de empresa
-     */
-    function openQuickView(id) {
-        if (!id) return;
-
-        const $modal = document.getElementById('ae-qv-modal');
-        const $content = document.getElementById('ae-qv-content');
-        
-        // Mostrar modal vacío con loading
-        $content.innerHTML = '<div style="padding:100px; text-align:center; color:#64748b;"><div class="ae-spinner"></div><p style="margin-top:16px; font-weight:600;">Cargando información...</p></div>';
-        $modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-
-        fetch('<?= site_url('radar/quickview/') ?>' + id, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Not found');
-            return response.text();
-        })
-        .then(html => {
-            $content.innerHTML = html;
-        })
-        .catch(err => {
-            $content.innerHTML = '<div style="padding:48px; text-align:center; color:#64748b;">' +
-                '<p style="font-size:18px; font-weight:700; color:#1e293b; margin-bottom:8px;">Error al cargar</p>' +
-                '<p>Ha ocurrido un problema al recuperar los datos. Inténtalo de nuevo.</p>' +
-                '<button type="button" class="ae-qv__btn ae-qv__btn--text" onclick="closeQuickView()" style="margin-top:24px;">Cerrar</button>' +
-                '</div>';
-        });
+    <script>
+    function toggleFilters() {
+        $('#ae-filters-panel').slideToggle();
+        $('#filters-chevron').toggleClass('is-open');
     }
 
-    /**
-     * Cierra el modal
-     */
-    function closeQuickView() {
-        document.getElementById('ae-qv-modal').style.display = 'none';
-        document.body.style.overflow = '';
+    function fillAiQuery(text) {
+        $('#radar-ai-query').val(text);
+        handleAiSearch();
     }
 
-    /**
-     * Alternar favorito (Estrella)
-     */
-    function toggleFavorite(btn, companyId) {
-        const isActive = btn.classList.contains('is-active');
-        const $svg = btn.querySelector('svg');
-        
-        // Optimistic UI update
-        btn.classList.toggle('is-active');
-        if (!isActive) {
-            $svg.setAttribute('fill', 'currentColor');
-            btn.title = 'Quitar de favoritos';
-        } else {
-            $svg.setAttribute('fill', 'none');
-            btn.title = 'Guardar en favoritos';
-        }
+    function handleAiSearch() {
+        const query = $('#radar-ai-query').val().trim();
+        if (!query) return;
 
-        const formData = new FormData();
-        formData.append('company_id', companyId);
+        $('#btn-ai-search').prop('disabled', true);
+        $('#btn-ai-search-loader').show();
+        $('#btn-ai-search-text').hide();
+        $('#radar-results-container').css('opacity', '0.5');
 
-        fetch('<?= site_url('radar/toggle-favorite') ?>', {
+        $.ajax({
+            url: '<?= site_url('radar/ai-search') ?>',
             method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status !== 'success') {
-                // Rollback if error
-                btn.classList.toggle('is-active');
-                if (isActive) {
-                    $svg.setAttribute('fill', 'currentColor');
-                } else {
-                    $svg.setAttribute('fill', 'none');
+            data: { query: query, '<?= csrf_token() ?>': '<?= csrf_hash() ?>' },
+            success: function(response) {
+                if (response.success) {
+                    $('#radar-results-container').html(response.html);
+                    $('#ai-explanation-text').html(response.explanation);
+                    $('#ai-search-explanation').fadeIn();
+                    document.getElementById('radar-results-container').scrollIntoView({ behavior: 'smooth' });
                 }
-                alert('No se pudo guardar en favoritos. Inténtalo de nuevo.');
+            },
+            complete: function() {
+                $('#btn-ai-search').prop('disabled', false);
+                $('#btn-ai-search-loader').hide();
+                $('#btn-ai-search-text').show();
+                $('#radar-results-container').css('opacity', '1');
             }
-        })
-        .catch(err => {
-            console.error('Error toggling favorite:', err);
-            alert('Error de conexión.');
         });
     }
 
-    // Cerrar con Escape
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeQuickView();
-            closeAIModal();
-        }
-    });
+    function clearAiSearch() {
+        $('#radar-ai-query').val('');
+        $('#ai-search-explanation').hide();
+        window.location.href = '<?= site_url('radar') ?>';
+    }
 
-    // --- Radar Map Logic ---
+    function openQuickView(id) {
+        $('#ae-qv-content').html('<div style="padding:100px;text-align:center;">Cargando...</div>');
+        $('#ae-qv-modal').fadeIn();
+        fetch('<?= site_url('radar/quickview/') ?>' + id).then(r => r.text()).then(h => $('#ae-qv-content').html(h));
+    }
+
+    function closeQuickView() {
+        $('#ae-qv-modal').fadeOut();
+    }
+
+    function updateLeadStatus(select, companyId) {
+        const status = select.value;
+        $(select).attr('class', 'ae-status-select-chip status-bg-' + status);
+        $.post('<?= site_url('radar/update-favorite-status') ?>', {
+            company_id: companyId,
+            status: status,
+            '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+        });
+    }
+
+    function toggleFavorite(btn, id) {
+        $(btn).toggleClass('is-active');
+        $.post('<?= site_url('radar/toggle-favorite') ?>', { company_id: id, '<?= csrf_token() ?>': '<?= csrf_hash() ?>' });
+    }
+
     let radarMap = null;
     let mapMarkers = [];
     const provinceCoords = {
@@ -893,628 +639,85 @@ $lockedCompanies  = $isFree ? array_slice($allCompanies, $limitFree, 5) : [];
     };
 
     function switchView(view) {
-        // Actualizar UI de botones
-        document.querySelectorAll('.ae-view-btn').forEach(btn => {
-            btn.classList.remove('is-active');
-            btn.style.background = 'transparent';
-            btn.style.color = '#64748b';
-            btn.style.boxShadow = 'none';
-        });
-        
-        const activeBtn = document.querySelector(`.ae-view-btn[data-view="${view}"]`);
-        if (activeBtn) {
-            activeBtn.classList.add('is-active');
-            activeBtn.style.background = 'white';
-            activeBtn.style.color = '#2563eb';
-            activeBtn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
-        }
-
-        if (view === 'list') {
-            document.getElementById('radar-list-view').show ? $('#radar-list-view').show() : document.getElementById('radar-list-view').style.display = 'block';
-            document.getElementById('radar-map-view').hide ? $('#radar-map-view').hide() : document.getElementById('radar-map-view').style.display = 'none';
-        } else {
-            document.getElementById('radar-list-view').hide ? $('#radar-list-view').hide() : document.getElementById('radar-list-view').style.display = 'none';
-            document.getElementById('radar-map-view').show ? $('#radar-map-view').show() : document.getElementById('radar-map-view').style.display = 'block';
-            setTimeout(initRadarMap, 100);
-        }
+        if (view === 'list') { $('#radar-list-view').show(); $('#radar-map-view').hide(); }
+        else { $('#radar-list-view').hide(); $('#radar-map-view').show(); initRadarMap(); }
     }
 
     function initRadarMap() {
-        if (radarMap) {
-            radarMap.invalidateSize();
-            loadMapData(); // FORCE DATA REFRESH 
-            return;
-        }
-
-        radarMap = L.map('radar-leaflet-map').setView([40.4168, -3.7038], 6);
-
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
-            maxZoom: 20
-        }).addTo(radarMap);
-
+        if (radarMap) { radarMap.invalidateSize(); return; }
+        radarMap = L.map('radar-leaflet-map').setView([40.41, -3.70], 6);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(radarMap);
         loadMapData();
     }
 
     function loadMapData() {
-        const filterForm = document.querySelector('.ae-radar-page__filters');
-        const formData = new FormData(filterForm);
-        const params = new URLSearchParams(formData);
-        
-        // Limpiar marcadores previos
+        const params = new URLSearchParams(new FormData(document.querySelector('.ae-radar-page__filters')));
         mapMarkers.forEach(m => radarMap.removeLayer(m));
         mapMarkers = [];
 
-        fetch('<?= site_url('radar/map-data') ?>?' + params.toString(), {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(response => response.json())
+        fetch('<?= site_url('radar/map-data') ?>?' + params.toString())
+        .then(res => res.json())
         .then(data => {
-            if (!data || data.length === 0) return;
-
             data.forEach(item => {
-                const province = item.province.toUpperCase();
-                const coords = provinceCoords[province];
-                
+                const coords = provinceCoords[item.province.toUpperCase()];
                 if (coords) {
-                    const radius = Math.max(12, Math.min(60, 8 + (parseInt(item.total) * 0.8)));
-                    const circle = L.circleMarker(coords, {
-                        radius: radius,
-                        fillColor: "#2563eb",
-                        color: "#fff",
-                        weight: 2,
-                        opacity: 1,
-                        fillOpacity: 0.7
-                    }).addTo(radarMap);
-
-                    circle.bindPopup(`
-                        <div style="font-family: inherit; padding: 5px;">
-                            <strong style="color: #1e293b; font-size: 14px;">${item.province}</strong><br>
-                            <span style="color: #2563eb; font-weight: 700; font-size: 18px;">${item.total}</span> 
-                            <span style="color: #64748b; font-size: 12px;">nuevas empresas</span>
-                        </div>
-                    `);
-
-                    mapMarkers.push(circle);
+                    const m = L.circleMarker(coords, { radius: 10, fillColor: "#2563eb", color: "#fff", weight: 2, fillOpacity: 0.7 }).addTo(radarMap);
+                    m.bindPopup(`<strong>${item.province}</strong>: ${item.total} empresas`);
+                    mapMarkers.push(m);
                 }
             });
         });
     }
-
-    /**
-     * Actualizar estado del Lead (Mini CRM)
-     */
-    function updateLeadStatus(select, companyId) {
-        const status = select.value;
-        const formData = new FormData();
-        formData.append('company_id', companyId);
-        formData.append('status', status);
-        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
-
-        // Actualizar clase visual inmediatamente para feedback instantáneo
-        select.className = 'ae-status-select-chip status-bg-' + status;
-        select.style.opacity = '0.7';
-
-        fetch('<?= site_url('radar/update-favorite-status') ?>', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(response => response.json())
-        .then(data => {
-            select.style.opacity = '1';
-            if (data.status === 'success') {
-                // Sincronización automática con Favoritos:
-                // Si el estado es distinto a 'nuevo', marcar automáticamente como favorito
-                const container = select.closest('.ae-radar-page__company-actions');
-                if (container) {
-                    const favBtn = container.querySelector('.ae-radar-page__btn-fav');
-                    if (favBtn && status !== 'nuevo') {
-                        if (!favBtn.classList.contains('is-active')) {
-                            favBtn.classList.add('is-active');
-                            const svg = favBtn.querySelector('svg');
-                            if (svg) {
-                                svg.setAttribute('fill', '#ffb800');
-                                svg.setAttribute('stroke', '#ffb800');
-                                svg.style.color = '#ffb800';
-                            }
-                            favBtn.title = 'Quitar de favoritos';
-                        }
-                    }
-                }
-                
-                // Notificación visual premium
-                if (typeof Swal !== 'undefined') {
-                    const Toast = Swal.mixin({
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 2000,
-                        timerProgressBar: true
-                    });
-                    Toast.fire({
-                        icon: 'success',
-                        title: 'Estado actualizado',
-                        background: '#f8fafc'
-                    });
-                }
-            }
-        })
-        .catch(err => {
-            select.style.opacity = '1';
-            console.error('Error al actualizar estado:', err);
-        });
-    }
-
-    /**
-     * Alternar favorito (AJAX)
-     */
-    function toggleFavorite(btn, companyId) {
-        const isActive = btn.classList.contains('is-active');
-        const $svg = btn.querySelector('svg');
-        
-        // Optimistic UI update
-        btn.classList.toggle('is-active');
-        if (!isActive) {
-            $svg.setAttribute('fill', 'currentColor');
-            btn.title = 'Quitar de favoritos';
-        } else {
-            $svg.setAttribute('fill', 'none');
-            btn.title = 'Guardar en favoritos';
-        }
-
-        const formData = new FormData();
-        formData.append('company_id', companyId);
-        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
-
-        fetch('<?= site_url('radar/toggle-favorite') ?>', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status !== 'success') {
-                // Rollback if error
-                btn.classList.toggle('is-active');
-                if (isActive) {
-                    $svg.setAttribute('fill', 'currentColor');
-                } else {
-                    $svg.setAttribute('fill', 'none');
-                }
-                alert('No se pudo guardar en favoritos. Inténtalo de nuevo.');
-            }
-        })
-        .catch(err => {
-            console.error('Error toggling favorite:', err);
-            alert('Error de conexión.');
-        });
-    }
-
-    /**
-     * Modal de conversión proactivo con tracking y refuerzo de ROI
-     */
-    window.showConversionNudge = function(title, text, metadata = {}) {
-        // Permitir UNA acción gratuita (QuickView o Contacto) para demostrar valor
-        if (!localStorage.getItem('radar_free_action_used')) {
-            const actionType = metadata.action || 'view';
-            const companyId = metadata.id;
-            
-            if (companyId) {
-                localStorage.setItem('radar_free_action_used', 'true');
-                if (actionType === 'contact') {
-                    // Si intentaba contactar, disparamos el modal real de contacto
-                    if (typeof handleContactClick === 'function') {
-                        handleContactClick(null, companyId, metadata.name || 'Empresa');
-                        return;
-                    }
-                } else {
-                    // Si intentaba ver, abrimos el QuickView real
-                    if (typeof openQuickView === 'function') {
-                        openQuickView(companyId);
-                        return;
-                    }
-                }
-            }
-        }
-
-        // Tracking de intención real
-        if (typeof dataLayer !== 'undefined') {
-            dataLayer.push({
-                'event': 'contact_attempt_blocked',
-                'nudge_title': title,
-                'nudge_text': text,
-                'metadata': metadata
-            });
-        }
-        
-        // Ocultar banner flotante si está visible para evitar solapamiento
-        const banner = document.getElementById('ae-floating-banner');
-        if (banner) banner.style.bottom = '-100px';
-
-        // Log event to server for CRM tracking
-        fetch('<?= site_url('radar/log-event') ?>', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
-            body: `lead_id=${metadata.id || ''}&action=blocked_click&<?= csrf_token() ?>=<?= csrf_hash() ?>`
-        });
-
-        const defaultTitle = 'Esta empresa puede cerrarse con otro proveedor ahora mismo';
-        const defaultText = 'Accede ahora y contacta antes que otros proveedores.<br>Esta empresa está en proceso de decisión.';
-        
-        // Generar ticket estimado aleatorio para el copy (simulando IA)
-        const minTicket = Math.floor(Math.random() * (15000 - 3000 + 1)) + 3000;
-        const maxTicket = minTicket * (Math.floor(Math.random() * 3) + 2);
-        const formatMoney = (val) => new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
-
-        Swal.fire({
-            title: title || defaultTitle,
-            customClass: {
-                title: 'ae-radar-swal-title'
-            },
-            icon: 'warning',
-            iconHtml: '⚡',
-            showClass: {
-                popup: 'animate__animated animate__zoomIn animate__faster'
-            },
-            html: `
-                <div style="text-align: center; padding: 0 10px;">
-                    <p style="font-size: 13px; color: #ef4444; font-weight: 800; margin: -5px 0 16px; text-transform: uppercase; letter-spacing: 0.5px;">
-                        Si no actúas ahora, perderás esta oportunidad frente a tu competencia
-                    </p>
-
-                    <div style="background: #f0fdf4; border: 2px solid #16a34a; padding: 14px; border-radius: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.1);">
-                        <span style="font-size: 24px;">💰</span>
-                        <div style="text-align: left;">
-                            <div style="font-size: 11px; font-weight: 800; color: #16a34a; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 1px;">Valor estimado que puedes perder ahora mismo</div>
-                            <div style="font-size: 19px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px;">${formatMoney(minTicket)} - ${formatMoney(maxTicket)}</div>
-                        </div>
-                    </div>
-
-                    <p style="font-size: 16px; color: #334155; line-height: 1.5; margin-bottom: 24px; font-weight: 600;">
-                        ${text || defaultText}
-                    </p>
-                    
-                    <div style="margin-bottom: 24px;">
-                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=modal_nudge') ?>" style="display: block; background: #2563eb; color: #ffffff; padding: 18px; border-radius: 16px; font-weight: 950; text-decoration: none; font-size: 19px; box-shadow: 0 10px 25px rgba(37,99,235,0.4); transition: all 0.3s; opacity: 0; transform: translateY(10px); animation: ae-fade-up 0.4s forwards 0.2s;" onmouseover="this.style.transform='translateY(-2px) scale(1.02)';" onmouseout="this.style.transform='translateY(0) scale(1)';" id="ae-modal-cta">
-                            Contactar antes que otros proveedores
-                        </a>
-                        <p style="margin-top: 12px; font-size: 12px; color: #64748b; font-weight: 800; letter-spacing: 0.2px;">
-                            ⚡ Acceso inmediato · Sin tarjeta · Empieza en menos de 10 segundos
-                        </p>
-                    </div>
-
-                    <div style="border-top: 1px solid #f1f5f9; padding-top: 18px; display: flex; flex-direction: column; gap: 8px;">
-                        <p style="margin: 0; font-size: 13px; color: #f97316; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px;">
-                            🔥 Varias oportunidades detectadas hoy dejarán de estar disponibles en horas
-                        </p>
-                        <p style="margin: 0; font-size: 12px; color: #475569; font-weight: 700;">
-                            La mayoría de usuarios recupera la inversión con su primer cliente
-                        </p>
-                    </div>
-                </div>
-                <style>
-                    @keyframes ae-fade-up {
-                        to { opacity: 1; transform: translateY(0); }
-                    }
-                </style>
-            `,
-            showConfirmButton: false, 
-            showCancelButton: true,
-            cancelButtonText: 'Seguir viendo solo 3 oportunidades',
-            showCloseButton: true,
-            focusCancel: true,
-            customClass: {
-                popup: 'ae-premium-modal',
-                cancelButton: 'ae-modal-cancel-btn'
-            }
-        });
-    }
-
-    window.updateResultsWithPerPage = function(perPage) {
-        const filterForm = document.querySelector('.ae-radar-page__filters');
-        const formData = new FormData(filterForm);
-        const params = new URLSearchParams(formData);
-        params.set('per_page', perPage);
-        
-        const url = filterForm.action + '?' + params.toString();
-        updateResults(url);
-    };
 
     function updateResults(url) {
-        const container = document.getElementById('radar-results-container');
-        if (!container) return;
-
-        container.style.opacity = '0.5';
-        container.style.pointerEvents = 'none';
-        
-        fetch(url, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(response => response.text())
-        .then(html => {
-            container.innerHTML = html;
-            container.style.opacity = '1';
-            container.style.pointerEvents = 'auto';
-            
-            // Si el mapa estaba cargado, avisarle que los datos podrían haber cambiado
-            if (radarMap) loadMapData();
-        })
-        .catch(err => {
-            console.error('Error loading results:', err);
-            container.style.opacity = '1';
-            container.style.pointerEvents = 'auto';
-        });
+        $('#radar-results-container').css('opacity', '0.5');
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(r => r.text())
+            .then(html => {
+                $('#radar-results-container').html(html).css('opacity', '1');
+            });
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const container = document.getElementById('radar-results-container');
-        const filterForm = document.querySelector('.ae-radar-page__filters');
-
-        // Delegación de eventos para paginación (sobreviene a reemplazos de innerHTML)
-        document.addEventListener('click', function(e) {
-            const link = e.target.closest('#radar-results-container .ae-radar-page__pagination a');
-            if (link) {
-                e.preventDefault();
-                updateResults(link.href);
-                // Scroll suave arriba del listado
-                const wrap = document.querySelector('.ae-radar-page__lead-wrap');
-                if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
-
-        if (filterForm) {
-            filterForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const formData = new FormData(this);
-                const params = new URLSearchParams(formData);
-                const url = this.action + '?' + params.toString();
-                updateResults(url);
-            });
-        }
-
-        // Manejo de clics en el sidebar (AJAX)
-        document.querySelectorAll('[data-sidebar-cnae]').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const cnae = this.getAttribute('data-sidebar-cnae');
-                const sectorSelect = document.querySelector('select[name="cnae"]');
-                
-                if (sectorSelect) {
-                    sectorSelect.value = cnae;
-                    filterForm.dispatchEvent(new Event('submit'));
-                }
-                
-                document.querySelectorAll('[data-sidebar-cnae]').forEach(l => l.classList.remove('is-active'));
-                this.classList.add('is-active');
-            });
-        });
+    $(document).on('click', '.ae-radar-page__pagination a', function(e) {
+        e.preventDefault();
+        updateResults(this.href);
     });
 
     function cancelRadarSubscription() {
-        Swal.fire({
-            title: '¿Cancelar suscripción PRO?',
-            html: 'Lamentamos que te vayas. Seguirás teniendo acceso a <strong>Radar PRO</strong> hasta el final de tu periodo de facturación actual.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, cancelar PRO',
-            cancelButtonText: 'Mantener plan',
-            reverseButtons: true,
-            focusCancel: true,
-            customClass: {
-                popup: 've-swal',
-                title: 've-swal-title',
-                htmlContainer: 've-swal-text',
-                confirmButton: 'btn danger ve-swal-confirm',
-                cancelButton: 'btn btn_header--ghost ve-swal-cancel',
-            },
-            buttonsStyling: false
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const btn = document.querySelector('.ae-radar-page__cta-top');
-                const originalHtml = btn.innerHTML;
-                if(btn) {
-                    btn.innerHTML = 'Cancelando...';
-                    btn.style.opacity = '0.7';
-                    btn.disabled = true;
-                }
+        $('#radar-cancel-modal').fadeIn(200);
+    }
 
-                fetch('<?= site_url("billing/cancel-subscription") ?>', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: 'ajax=1&<?= csrf_token() ?>=<?= csrf_hash() ?>'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        Swal.fire({
-                            title: 'Cancelada',
-                            text: data.message,
-                            icon: 'success',
-                            confirmButtonText: 'Entendido',
-                            customClass: {
-                                popup: 've-swal',
-                                title: 've-swal-title',
-                                htmlContainer: 've-swal-text',
-                                confirmButton: 'btn btn_primary ve-swal-confirm',
-                            },
-                            buttonsStyling: false
-                        }).then(() => {
-                            window.location.reload();
-                        });
-                    } else {
-                        throw new Error(data.message || 'Error desconocido');
-                    }
-                })
-                .catch(err => {
-                    if(btn) {
-                        btn.innerHTML = originalHtml;
-                        btn.style.opacity = '1';
-                        btn.disabled = false;
-                    }
-                    Swal.fire({
-                        title: 'Error', 
-                        text: err.message || 'No se ha podido procesar la baja. Inténtalo de nuevo o contáctanos.', 
-                        icon: 'error',
-                        customClass: {
-                            popup: 've-swal',
-                            title: 've-swal-title',
-                            htmlContainer: 've-swal-text',
-                            confirmButton: 'btn btn_primary ve-swal-confirm',
-                        },
-                        buttonsStyling: false
-                    });
-                });
-            }
+    function closeCancelModal() {
+        $('#radar-cancel-modal').fadeOut(200);
+    }
+
+    function confirmRadarCancellation() {
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerText = 'Cancelando...';
+        
+        $.post('<?= site_url("billing/cancel-subscription") ?>', { 
+            '<?= csrf_token() ?>': '<?= csrf_hash() ?>' 
+        }, function() {
+            window.location.reload();
         });
     }
     </script>
-    
-    <!-- Radar Web Tour -->
+
     <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
     <script src="<?= base_url('public/js/radar-tour.js?v=' . time()) ?>"></script>
-    <!-- Modal de Intención (Trigger de Scroll Profundo) -->
-    <?php if ($isFree) { ?>
-    <div id="ae-intent-modal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.8); z-index:9999; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(4px);">
-        <div style="background:#ffffff; border-radius:24px; max-width:500px; width:100%; padding:40px; text-align:center; position:relative; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
-            <button onclick="document.getElementById('ae-intent-modal').style.display='none'" style="position:absolute; top:20px; right:20px; background:none; border:none; font-size:24px; color:#94a3b8; cursor:pointer;">&times;</button>
-            <div style="font-size:48px; margin-bottom:20px;">🎯</div>
-            <h3 style="font-size:24px; font-weight:800; color:#0f172a; margin-bottom:16px;">Estás explorando oportunidades reales</h3>
-            <p style="font-size:16px; color:#475569; line-height:1.6; margin-bottom:32px;">Activa Radar PRO para acceder a todas y empezar a trabajar leads desde hoy.</p>
-            <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=' . esc($source)) ?>" style="display:block; background:#2563eb; color:#ffffff; padding:18px; border-radius:12px; font-weight:800; text-decoration:none; font-size:16px; box-shadow:0 10px 20px rgba(37,99,235,0.2);" onclick="trackUpgradeClick('intent_modal')">Activar acceso completo (79€/mes)</a>
-            <p style="margin-top:20px; font-size:13px; color:#94a3b8; font-weight:600;">Sin permanencia · Cancela cuando quieras</p>
-        </div>
-    </div>
 
-    <!-- Banner Flotante (Trigger por Scroll) -->
-    <div id="ae-floating-banner" style="position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #0f172a; color: white; padding: 16px 32px; border-radius: 100px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 20px; z-index: 9999; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); width: fit-content; border: 1px solid rgba(255,255,255,0.1);">
-        <div style="font-size: 14px; font-weight: 700; white-space: nowrap;">
-            ⚡ Estás viendo oportunidades reales ahora mismo.
-        </div>
-        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=' . esc($source)) ?>" style="background: #2563eb; color: white; padding: 8px 20px; border-radius: 50px; text-decoration: none; font-size: 13px; font-weight: 900; white-space: nowrap;" onclick="trackUpgradeClick('floating_banner')">
-            Activar acceso completo (79€/mes)
-        </a>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <?php if ($isFree): ?>
     <script>
-        // Track View
-        $(document).ready(function() {
-            // No mostrar banner si ya hay un modal abierto (prevención)
-            const isModalOpen = () => document.querySelector('.swal2-shown');
-
-            $.post('<?= site_url("api/tracking/event") ?>', {
-                event_type: 'radar_view',
-                source: '<?= esc($source) ?>'
-            });
-        });
-
-        function trackUpgradeClick(location) {
-            $.post('<?= site_url("api/tracking/event") ?>', {
-                event_type: 'upgrade_click',
-                source: '<?= esc($source) ?>',
-                metadata: JSON.stringify({ location: location })
-            });
+        window.showConversionNudge = function(title, desc) {
+            if (title) $('#upgrade-modal-title').text(title);
+            if (desc) $('#upgrade-modal-desc').text(desc);
+            $('#radar-upgrade-modal').fadeIn(200);
         }
-
-        // Trigger de Intención: Mostrar banner flotante al llegar al paywall
-        window.addEventListener('scroll', function() {
-            const banner = document.getElementById('ae-floating-banner');
-            const isSwalOpen = document.body.classList.contains('swal2-shown');
-            
-            if (window.scrollY > 500 && !sessionStorage.getItem('floating_banner_dismissed') && !isSwalOpen) {
-                banner.style.bottom = '40px';
-            } else {
-                banner.style.bottom = '-100px';
-            }
-        });
-
-        // Trigger por interacción: Al intentar usar elementos bloqueados
-        let interactionCount = 0;
-        document.addEventListener('click', function(e) {
-            const blockedBtn = e.target.closest('button[onclick*="showConversionNudge"]');
-            const blurredRow = e.target.closest('.ae-radar-row-blurred');
-            
-            if (blockedBtn || blurredRow) {
-                interactionCount++;
-                
-                // Si es el segundo intento, forzamos un mensaje más agresivo que sobrescriba el onclick individual si fuera necesario
-                if (interactionCount >= 2 && !sessionStorage.getItem('intent_modal_shown_aggressive')) {
-                    // Detenemos la propagación para que el onclick del botón no dispare el nudge normal
-                    if (blockedBtn) e.stopImmediatePropagation();
-                    
-                    showConversionNudge('Otros equipos ya están trabajando estas empresas', 'Activa Radar PRO ahora para no perder estas oportunidades. La velocidad es clave en la captación B2B. Con 1 cliente cubres el coste mensual.');
-                    sessionStorage.setItem('intent_modal_shown_aggressive', 'true');
-                    
-                    // Ocultar banner flotante si salta el modal
-                    const banner = document.getElementById('ae-floating-banner');
-                    if (banner) banner.style.display = 'none';
-                    sessionStorage.setItem('floating_banner_dismissed', 'true');
-                }
-            }
-        }, true); // Capturing phase para interceptar antes del onclick
-
+        window.closeUpgradeModal = function() {
+            $('#radar-upgrade-modal').fadeOut(200);
+        }
     </script>
-    <style>
-        .ae-premium-modal {
-            border-radius: 32px !important;
-            padding: 24px !important;
-            border: 1px solid rgba(255,255,255,0.2) !important;
-            box-shadow: 0 25px 80px rgba(0,0,0,0.3) !important;
-            font-family: 'Inter', sans-serif !important;
-        }
-        .ae-premium-modal .swal2-title {
-            font-family: 'Outfit', sans-serif !important;
-            font-weight: 900 !important;
-            font-size: 26px !important;
-            letter-spacing: -0.03em !important;
-            color: #0f172a !important;
-            padding-top: 10px !important;
-        }
-        .ae-modal-cancel-btn {
-            background: transparent !important;
-            color: #64748b !important;
-            font-weight: 700 !important;
-            font-size: 14px !important;
-            text-decoration: underline !important;
-            border: none !important;
-            box-shadow: none !important;
-            margin-top: 10px !important;
-        }
-        .ae-modal-cancel-btn:hover {
-            color: #1e293b !important;
-        }
-    </style>
-    <?php } ?>
-    <script>
-        $(document).ready(function() {
-            $('#radar_to_excel_cross_sell').on('click', function() {
-                trackGlobalEvent('radar_to_excel_click');
-            });
-            $('#radar_to_api_cross_sell').on('click', function() {
-                trackGlobalEvent('radar_to_api_click');
-            });
-
-            function trackGlobalEvent(type, metadata = {}) {
-                $.post('<?= site_url("api/tracking/event") ?>', {
-                    event_type: type,
-                    source: 'radar_dashboard',
-                    metadata: JSON.stringify(metadata)
-                });
-            }
-            if (window.location.hash === '#seccion-top-leads') {
-                setTimeout(function() {
-                    const el = document.getElementById('seccion-top-leads');
-                    if (el) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                }, 400);
-            }
-        });
-    </script>
+    <?php endif; ?>
 </body>
 </html>

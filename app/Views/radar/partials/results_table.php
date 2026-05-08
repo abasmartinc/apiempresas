@@ -381,7 +381,9 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
                     </div>
                 </div>
             <?php } else { ?>
-                <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__export-btn" style="background:#0f172a; padding: 11px 18px; border-radius:12px; color:#fff; text-decoration:none; font-size:13px; font-weight:800;">Desbloquear todas las oportunidades ahora</a>
+                <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-radar-page__export-btn ae-shine-btn" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 12px 24px; border-radius:12px; color:#fff; text-decoration:none; font-size:13px; font-weight:900; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4); border:none; display: inline-flex; align-items:center; gap:8px;">
+                    <span>👑</span> Desbloquear todas las oportunidades ahora
+                </a>
             <?php } ?>
         </div>
     </div>
@@ -400,8 +402,24 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
             <tbody>
                 <?php if (empty($visibleCompanies)) { ?>
                     <tr>
-                        <td colspan="3" style="text-align:center; padding: 40px; color: #6b7280;">
-                            No se han encontrado empresas con los filtros seleccionados.
+                        <td colspan="3" style="text-align:center; padding: 60px 40px; background: #f8fafc; border-radius: 20px; border: 1px dashed #cbd5e1;">
+                            <div style="max-width: 500px; margin: 0 auto;">
+                                <div style="font-size: 48px; margin-bottom: 20px;">🔍</div>
+                                <h3 style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 12px;">No se encontraron empresas con esos criterios</h3>
+                                <p style="font-size: 14px; color: #64748b; line-height: 1.6; margin-bottom: 24px;">
+                                    Prueba ampliando el rango de fechas, bajando el score mínimo o buscando un sector más genérico.
+                                </p>
+                                <div style="display: flex; gap: 12px; justify-content: center;">
+                                    <a href="<?= site_url('radar?rango=30&min_score=50') ?>" 
+                                       style="background: #2563eb; color: white; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 800; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);">
+                                        Ver últimos 30 días
+                                    </a>
+                                    <a href="<?= site_url('radar') ?>" 
+                                       style="background: white; color: #1e293b; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 800; border: 1px solid #e2e8f0;">
+                                        Limpiar todos los filtros
+                                    </a>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 <?php } else { ?>
@@ -422,8 +440,24 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
                             // 1. Score y Colores (Heurística unificada)
                             $scoreData = $co['lead_score_data'] ?? ['numeric' => (int)($co['score_total'] ?? 0), 'base' => (int)($co['score_total'] ?? 0)];
                             $scoreTotal = (int)round($scoreData['numeric']);
-                            $scoreColor = ($scoreTotal >= 70) ? '#059669' : ($scoreTotal >= 40 ? '#d97706' : '#64748b');
-                            $scoreIcon = ($scoreTotal >= 70) ? '🟢' : ($scoreTotal >= 40 ? '🟡' : '⚪');
+                            
+                            // Escala cromática estratégica
+                            if ($scoreTotal >= 80) {
+                                $scoreColor = '#10b981'; // Emerald (Alta calidad)
+                                $scoreBg = '#ecfdf5';
+                                $scoreBorder = '#d1fae5';
+                                $scoreIcon = '💎';
+                            } elseif ($scoreTotal >= 60) {
+                                $scoreColor = '#f59e0b'; // Amber (Interés medio)
+                                $scoreBg = '#fffbeb';
+                                $scoreBorder = '#fef3c7';
+                                $scoreIcon = '⭐';
+                            } else {
+                                $scoreColor = '#64748b'; // Slate (Frío)
+                                $scoreBg = '#f8fafc';
+                                $scoreBorder = '#f1f5f9';
+                                $scoreIcon = '⚪';
+                            }
 
                             // 2. Datos Comerciales
                             $opp = $getOpportunityText($scoreTotal);
@@ -464,11 +498,15 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
                                 <div style="display: flex; flex-direction: column;">
                                     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
                                         <a href="javascript:void(0)" onclick="<?= $isFree ? "showConversionNudge('Oportunidad real bloqueada', 'Activa Radar PRO para ver los detalles de esta empresa y del resto de oportunidades detectadas hoy.', {id: '".$co['id']."', action: 'view'})" : "openQuickView('".$co['id']."')" ?>" style="text-decoration: none;">
-                                            <span style="font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.2; letter-spacing: -0.01em;"><?= esc($co['company_name']) ?></span>
+                                            <span style="font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.2; letter-spacing: -0.01em;">
+                                                <?= $isFree ? esc(mb_strimwidth($co['company_name'], 0, 15, '...')) . ' (Compañía Reservada)' : esc($co['company_name']) ?>
+                                            </span>
                                         </a>
-                                        <div class="ae-score-badge" title="<?= esc($scoreData['details']['explanation'] ?? 'Puntuación inteligente de Radar') ?>" style="background: white; border: 1.5px solid <?= $co['lead_score_data']['color'] ?? $scoreColor ?>; padding: 2px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;">
-                                            <span style="font-weight: 900; font-size: 10px; color: <?= $co['lead_score_data']['color'] ?? $scoreColor ?>;">
-                                                <?= $co['lead_score_data']['icon'] ?? $scoreIcon ?> <?= $scoreTotal ?>/100
+                                        <div class="ae-score-badge" title="<?= esc($scoreData['details']['explanation'] ?? 'Puntuación inteligente de Radar') ?>" 
+                                            style="background: <?= $scoreBg ?>; border: 1px solid <?= $scoreBorder ?>; padding: 3px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                            <span style="font-weight: 900; font-size: 11px; color: <?= $scoreColor ?>; display: flex; align-items: center; gap: 4px;">
+                                                <span style="font-size: 12px;"><?= $scoreIcon ?></span>
+                                                <?= $scoreTotal ?>/100
                                             </span>
                                         </div>
                                     </div>
@@ -495,12 +533,14 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
                                     <div class="ae-meta-sub">
                                         <div class="ae-meta-item" title="Actividad">
                                             <span class="ae-meta-icon">🏢</span>
-                                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;"><?= esc($co['cnae_label'] ?? 'Sector no especificado') ?></span>
+                                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">
+                                                <?= $isFree ? 'Sector Reservado PRO' : esc($co['cnae_label'] ?? 'Sector no especificado') ?>
+                                            </span>
                                         </div>
                                         <div style="width: 1px; height: 10px; background: #e2e8f0;"></div>
                                         <div class="ae-meta-item" title="Ubicación">
                                             <span class="ae-meta-icon">📍</span>
-                                            <span><?= esc($co['registro_mercantil'] ?? 'N/D') ?></span>
+                                            <span><?= $isFree ? 'Ubicación Oculta' : esc($co['registro_mercantil'] ?? 'N/D') ?></span>
                                         </div>
                                     </div>
 
@@ -528,7 +568,7 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
                                     </div>
                                     <div class="ae-reason-text" style="border-top: 1px solid #f1f5f9; padding-top: 8px; font-style: italic;">
                                         <span style="color: #475569; font-weight: 800; font-style: normal;">Motivo:</span> 
-                                        "<?= esc($reason) ?>"
+                                        "<?= $isFree ? 'Análisis de IA disponible solo para usuarios PRO' : esc($reason) ?>"
                                     </div>
                                 </div>
                             </td>
@@ -558,12 +598,14 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
                                     
                                     <!-- Acciones Secundarias -->
                                     <div style="display: flex; gap: 6px;">
-                                        <button type="button" class="ae-btn-strategy ae-btn-hover" onclick="analyzeAI('<?= $co['id'] ?>', this, '<?= esc($co['company_name']) ?>', 'analyze')" 
+                                        <button type="button" class="ae-btn-strategy ae-btn-hover" 
+                                                onclick="<?= $isFree ? "showConversionNudge('Acceso bloqueado', 'El Radar IA puede decirte exactamente CÓMO vender a esta empresa, pero requiere acceso PRO.')" : "analyzeAI('".$co['id']."', this, '".esc($co['company_name'])."', 'analyze')" ?>" 
                                                 style="flex: 1; height: 36px; border-radius: 8px; font-weight: 700; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
                                             🎯 Cómo venderle
                                         </button>
 
-                                        <button type="button" class="ae-btn-fav-v3 <?= ($co['is_favorite'] ?? false) ? 'is-active' : '' ?>" onclick="toggleFavorite(this, '<?= $co['id'] ?>')"
+                                        <button type="button" class="ae-btn-fav-v3 <?= ($co['is_favorite'] ?? false) ? 'is-active' : '' ?>" 
+                                                onclick="<?= $isFree ? "showConversionNudge('Acceso bloqueado', 'Guarda leads en tus favoritos para hacerles seguimiento. Disponible en PRO.')" : "toggleFavorite(this, '".$co['id']."')" ?>"
                                                 style="width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="<?= ($co['is_favorite'] ?? false) ? '#ffb800' : 'none' ?>" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                                         </button>

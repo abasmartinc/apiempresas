@@ -436,6 +436,13 @@ class Radar extends BaseController
             }
         }
 
+        // 2.5 Filtro por teléfono (columna verificada en companies)
+        if ($this->request->getGet('has_phone')) {
+            $this->companyModel->where('companies.phone !=', '');
+            $this->companyModel->where('companies.phone IS NOT NULL');
+        }
+        // Nota: has_email y has_website no existen como columnas en companies
+
         // Rango de tiempo
         $today = date('Y-m-d');
         if ($timeRange === 'hoy') {
@@ -554,7 +561,10 @@ class Radar extends BaseController
                 'per_page' => $perPage,
                 'priority_level' => $priority,
                 'main_act_type' => $actType,
-                'min_score' => $minScore
+                'min_score' => $minScore,
+                'has_phone' => $this->request->getGet('has_phone'),
+                'has_email' => $this->request->getGet('has_email'),
+                'has_website' => $this->request->getGet('has_website')
             ],
             'pagination' => [
                 'total' => $totalCount,
@@ -1554,5 +1564,233 @@ class Radar extends BaseController
             'notify_when_contact' => true,
             'next_step'           => 'Contactar en cuanto aparezca web o teléfono'
         ]);
+    }
+
+    /**
+     * Endpoint para búsqueda en lenguaje natural usando IA
+     */
+    public function aiSearch()
+    {
+        if (!session('logged_in')) {
+            return $this->response->setStatusCode(401)->setJSON(['success' => false, 'message' => 'Sesión expirada.']);
+        }
+
+        $userId = session('user_id');
+        
+        // Verificación de suscripción activa para Radar
+        $activePlan = $this->subscriptionModel->getActivePlanByUserId($userId);
+        if (!$activePlan || !in_array($activePlan->product_type, ['radar', 'bundle'])) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Esta función requiere una suscripción activa a Radar PRO.']);
+        }
+
+        $query = $this->request->getPost('query');
+        if (empty($query)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'La consulta no puede estar vacía.']);
+        }
+
+        if (strlen($query) > 500) {
+            return $this->response->setJSON(['success' => false, 'message' => 'La consulta es demasiado larga (máx. 500 caracteres).']);
+        }
+
+        $aiService = new \App\Services\RadarAiSearchService();
+        $interpreted = $aiService->interpretQuery($query);
+
+        if (!$interpreted) {
+            $this->logAiSearch($userId, $query, null, 0, false, 'No se pudo interpretar la búsqueda.');
+            return $this->response->setJSON(['success' => false, 'message' => 'No se pudo interpretar la búsqueda. Intenta escribirlo de otra forma.']);
+        }
+
+        // DEBUG: Log del JSON interpretado por la IA para verificar claves
+        log_message('debug', '[RadarAiSearch] Query: ' . $query . ' | Interpreted: ' . json_encode($interpreted));
+
+        // Mapeo de filtros IA a parámetros internos seguros
+        $f = $this->mapAiFilters($interpreted);
+
+        // --- Construir query directamente (no delegamos a index() para evitar problemas con IncomingRequest) ---
+        $db = \Config\Database::connect();
+
+        $this->companyModel->select('
+            companies.id, 
+            companies.company_name, 
+            companies.cif, 
+            companies.fecha_constitucion, 
+            companies.cnae_label, 
+            companies.registro_mercantil, 
+            companies.municipality, 
+            companies.objeto_social, 
+            companies.phone,
+            companies.capital_social_raw,
+            crs.score_total,
+            crs.priority_level,
+            crs.score_reasons,
+            crs.main_act_type,
+            crs.last_borme_date
+        ');
+        $this->companyModel->join('company_radar_scores crs', 'crs.company_id = companies.id', 'left');
+        $this->companyModel->where('companies.fecha_constitucion IS NOT NULL');
+
+        // Filtro de provincia
+        if (!empty($f['provincia'])) {
+            $provFormatted = strtoupper(str_replace('-', ' ', $f['provincia']));
+            $this->companyModel->where('companies.registro_mercantil', $provFormatted);
+        }
+
+        // Filtro de palabras clave (nicho/sector) - busca en objeto social y en etiqueta CNAE
+        if (!empty($f['q'])) {
+            $kw = trim($f['q']);
+            $this->companyModel->groupStart()
+                ->like('companies.objeto_social', $kw)
+                ->orLike('companies.cnae_label', $kw)
+                ->orLike('companies.company_name', $kw)
+                ->groupEnd();
+        }
+        // Keywords adicionales de CNAE (OR entre ellas)
+        if (!empty($f['q_keywords'])) {
+            $keywords = explode('|', $f['q_keywords']);
+            $this->companyModel->groupStart();
+            foreach ($keywords as $i => $kw) {
+                $kw = trim($kw);
+                if (!$kw) continue;
+                if ($i === 0) {
+                    $this->companyModel->like('companies.objeto_social', $kw);
+                    $this->companyModel->orLike('companies.cnae_label', $kw);
+                } else {
+                    $this->companyModel->orLike('companies.objeto_social', $kw);
+                    $this->companyModel->orLike('companies.cnae_label', $kw);
+                }
+            }
+            $this->companyModel->groupEnd();
+        }
+
+        // Filtro de score mínimo
+        if (!empty($f['min_score'])) {
+            $this->companyModel->where('crs.score_total >=', (int)$f['min_score']);
+        }
+
+        // Filtros de contacto
+        if (!empty($f['has_phone'])) {
+            $this->companyModel->where('companies.phone !=', '');
+            $this->companyModel->where('companies.phone IS NOT NULL');
+        }
+        // Nota: has_email y has_website no están disponibles en companies tabla actualmente
+
+        // Filtro de rango temporal
+        $rango = $f['rango'] ?? '30';
+        $dateLimit = ($rango === 'hoy') ? date('Y-m-d') : date('Y-m-d', strtotime('-' . (int)$rango . ' days'));
+        $this->companyModel->where('companies.fecha_constitucion >=', $dateLimit);
+
+        $this->companyModel->orderBy('crs.score_total', 'DESC');
+        $this->companyModel->orderBy('crs.last_borme_date', 'DESC');
+        $this->companyModel->orderBy('companies.fecha_constitucion', 'DESC');
+
+        $perPage = min((int)($f['per_page'] ?? 50), 100);
+        $companies = $this->companyModel->paginate($perPage);
+        $pager = $this->companyModel->pager;
+        $totalCount = $pager->getTotal();
+
+        // Enriquecer con score y estado
+        $favoriteMap = $this->favoriteModel->getFavoriteMap($userId);
+        $leadIds = array_column($companies, 'id');
+        $engagementMap = $this->getEngagementMap($userId, $leadIds);
+        $groupMap = $this->getGroupEngagementMap();
+        $userPrefMap = $this->getUserPersonalizationMap($userId);
+
+        foreach ($companies as &$co) {
+            $groupKey = strtolower(trim($co['cnae_label'] ?? '')) . '|' . strtolower(trim($co['registro_mercantil'] ?? ''));
+            $co['lead_score_data'] = $this->getLeadScore($co, $engagementMap[$co['id']] ?? 0, $groupMap[$groupKey] ?? 0, $userPrefMap[$groupKey] ?? 0);
+            $co['lead_score'] = $co['lead_score_data']['label'];
+            $co['status'] = $favoriteMap[$co['id']] ?? 'nuevo';
+            $co['is_favorite'] = isset($favoriteMap[$co['id']]);
+            $co['is_following'] = false;
+        }
+
+        usort($companies, function($a, $b) {
+            return ($b['lead_score_data']['numeric'] ?? 0) <=> ($a['lead_score_data']['numeric'] ?? 0);
+        });
+
+        $html = view('radar/partials/results_table', [
+            'companies'       => $companies,
+            'isFree'          => false,
+            'pagination'      => ['total' => $totalCount, 'start' => 1, 'end' => count($companies)],
+            'pager'           => $pager,
+            'filters'         => array_merge($f, ['provincia' => $f['provincia'] ?? '', 'rango' => $rango, 'q' => $f['q'] ?? '']),
+        ]);
+
+        // Registro de log
+        $this->logAiSearch($userId, $query, json_encode($interpreted), $totalCount, true);
+
+        return $this->response->setJSON([
+            'success'     => true,
+            'filters'     => $interpreted,
+            'count'       => $totalCount,
+            'explanation' => $interpreted['explanation'] ?? 'Búsqueda interpretada correctamente.',
+            'html'        => $html
+        ]);
+    }
+
+    private function mapAiFilters($aiJson)
+    {
+        $map = [];
+        
+        // Provincia: la IA devuelve "Madrid", nosotros la convertimos a "MADRID"
+        if (!empty($aiJson['province'])) {
+            // Guardamos el nombre raw para la query (se hará strtoupper en la query)
+            $map['provincia'] = url_title($aiJson['province'], '-', true);
+        }
+        
+        // Palabras clave del sector
+        if (!empty($aiJson['sector'])) {
+            $map['q'] = $aiJson['sector'];
+        }
+        if (!empty($aiJson['cnae_keywords'])) {
+            // Si ya hay q, usamos solo las keywords de cnae que sean más útiles
+            $map['q_keywords'] = implode('|', (array)$aiJson['cnae_keywords']);
+        }
+        
+        // Rango temporal
+        if (!empty($aiJson['date_range'])) {
+            switch ($aiJson['date_range']) {
+                case 'today': $map['rango'] = 'hoy'; break;
+                case 'last_7_days': $map['rango'] = '7'; break;
+                case 'last_30_days': $map['rango'] = '30'; break;
+                case 'last_90_days': $map['rango'] = '90'; break;
+            }
+        } else {
+            // Default amplio para no quedarse sin resultados
+            $map['rango'] = '90';
+        }
+        
+        // Score mínimo (solo si la IA lo especificó explícitamente)
+        if (!empty($aiJson['min_score'])) {
+            $map['min_score'] = $aiJson['min_score'];
+        }
+        
+        if (($aiJson['has_phone'] ?? false) === true) $map['has_phone'] = 1;
+        if (($aiJson['has_email'] ?? false) === true) $map['has_email'] = 1;
+        if (($aiJson['has_website'] ?? false) === true) $map['has_website'] = 1;
+        
+        $limit = $aiJson['limit'] ?? 50;
+        if ($limit > 100) $limit = 100;
+        $map['per_page'] = $limit;
+
+        return $map;
+    }
+
+    private function logAiSearch($userId, $query, $filtersJson, $count, $success, $error = null)
+    {
+        try {
+            $db = \Config\Database::connect();
+            $db->table('radar_ai_search_logs')->insert([
+                'user_id' => $userId,
+                'query_original' => $query,
+                'filters_json' => $filtersJson,
+                'results_count' => $count,
+                'success' => $success ? 1 : 0,
+                'error_message' => $error,
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error logging AI Search: ' . $e->getMessage());
+        }
     }
 }

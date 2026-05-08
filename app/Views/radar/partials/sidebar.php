@@ -88,14 +88,34 @@ $current_url = current_url();
             </div>
         </div>
 
-        <div class="ae-radar-page__roi-box">
-            <div class="ae-radar-page__roi-title">Calculadora ROI</div>
-            <div class="ae-radar-page__roi-text">La mayoría de usuarios recupera la inversión con su primer cliente. Solo 1 cierre paga <strong>5 años</strong> de Radar PRO.</div>
-            <div class="ae-radar-page__roi-stat">
-                <span>Rentabilidad estimada</span>
-                <strong>+450%</strong>
+        <div class="ae-radar-pulse-box" style="margin: 32px 16px 0 16px; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 16px; border: 1px solid rgba(255,255,255,0.06);">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <div class="ae-pulse-dot"></div>
+                <span style="font-size: 11px; font-weight: 800; color: #22c55e; text-transform: uppercase; letter-spacing: 0.05em;">Radar Live</span>
+            </div>
+            <div style="font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.5; font-weight: 500;">
+                Detección activa en <br><strong style="color: white;">Toda España</strong>
+            </div>
+            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 20px; font-weight: 900; color: white; line-height: 1;"><?= number_format($stats['hoy'] ?? 250) ?></div>
+                <div style="font-size: 10px; color: rgba(255,255,255,0.4); font-weight: 700; margin-top: 4px; text-transform: uppercase;">Empresas hoy</div>
             </div>
         </div>
+
+        <style>
+            .ae-pulse-dot {
+                width: 8px; height: 8px;
+                background: #22c55e;
+                border-radius: 50%;
+                box-shadow: 0 0 0 rgba(34, 197, 94, 0.4);
+                animation: ae-pulse 2s infinite;
+            }
+            @keyframes ae-pulse {
+                0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+                70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+            }
+        </style>
     </div>
 
     <div class="ae-radar-page__sidebar-footer">
