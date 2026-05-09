@@ -8,8 +8,7 @@
         body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.5; color: #334155; margin: 0; padding: 0; background-color: #f1f5f9; }
         .wrapper { padding: 40px 20px; }
         .container { max-width: 580px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        .header { background-color: #0f172a; padding: 30px; text-align: center; color: #f8fafc; }
-        .header h1 { margin: 0; font-size: 20px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .header { padding: 30px; text-align: center; }
         .content { padding: 30px; }
         .content h2 { color: #1e293b; font-size: 18px; margin-top: 0; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px; }
         .message-content { color: #475569; font-size: 16px; line-height: 1.6; }
@@ -21,8 +20,9 @@
 <body>
     <div class="wrapper">
         <div class="container">
-            <div class="header">
-                <h1>Notificación de APIEmpresas.es</h1>
+            <div class="header" style="background: linear-gradient(135deg, #2152FF 0%, #10B981 100%); padding: 25px 20px; text-align: center; color: #ffffff;">
+                <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 800; letter-spacing: -1px;">APIEmpresas.es</h1>
+                <p style="margin: 5px 0 0; color: rgba(255,255,255,0.9); font-size: 14px; font-weight: 500;">Datos oficiales para desarrolladores</p>
             </div>
             <div class="content">
                 <h2><?= esc($subject) ?></h2>

@@ -12,8 +12,9 @@
                 <table width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
                     <!-- Header -->
                     <tr>
-                        <td style="background-color: #1a1a1a; padding: 30px; text-align: center;">
-                            <img src="https://apiempresas.es/logo.png" alt="APIEmpresas.es" style="max-width: 200px;">
+                        <td style="background: linear-gradient(135deg, #2152FF 0%, #10B981 100%); padding: 30px; text-align: center; color: #ffffff;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 800; letter-spacing: -1px;">APIEmpresas.es</h1>
+                            <p style="margin: 5px 0 0; color: rgba(255,255,255,0.9); font-size: 14px; font-weight: 500;">Datos oficiales para desarrolladores</p>
                         </td>
                     </tr>
                     

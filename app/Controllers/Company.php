@@ -362,10 +362,38 @@ class Company extends BaseController
      */
     public function exportPdf($id)
     {
-        $company = $this->companyModel->getById((int)$id);
+        $id = (int)$id;
+        $company = $this->companyModel->getById($id);
 
         if (!$company) {
             throw PageNotFoundException::forPageNotFound();
+        }
+
+        // Administrators (with filtering logic same as prepareViewData)
+        $adminsRaw = $this->adminModel->getByCompanyId($id);
+        $filteredAdmins = [];
+        $excludeKeywords = ['CAPITAL', 'DOMICILIO', 'OBJETO SOCIAL', 'OTROS CONCEPTOS', 'COMIENZO DE OPERACIONES', 'INSCRIPCION', 'RESULTANTE', 'SUSCRITO', 'EURO', 'REMITIDO'];
+        $seenAdmins = [];
+
+        foreach ($adminsRaw as $admin) {
+            $nameStr = strtoupper($admin['name'] ?? '');
+            $posStr = strtoupper($admin['position'] ?? '');
+            $combinedText = $nameStr . ' ' . $posStr;
+
+            $exclude = false;
+            foreach ($excludeKeywords as $kw) {
+                if (strpos($combinedText, $kw) !== false) {
+                    $exclude = true;
+                    break;
+                }
+            }
+            if ($exclude || preg_match('/[0-9]+/', $nameStr)) continue;
+
+            $uniqueKey = md5(trim($nameStr) . '|' . trim($posStr));
+            if (isset($seenAdmins[$uniqueKey])) continue;
+
+            $seenAdmins[$uniqueKey] = true;
+            $filteredAdmins[] = $admin;
         }
 
         $options = new Options();
@@ -375,7 +403,9 @@ class Company extends BaseController
         $dompdf = new Dompdf($options);
         
         $html = view('reports/company_pdf', [
-            'company' => $company
+            'company'        => $company,
+            'administrators' => $filteredAdmins,
+            'bormePosts'     => $this->bormePostsModel->getByCompanyId($id)
         ]);
 
         $dompdf->loadHtml($html);
