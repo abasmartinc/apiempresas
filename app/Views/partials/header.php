@@ -89,8 +89,40 @@
                     <a class="btn btn_header btn_header--ghost" href="<?= site_url() ?>enter">Iniciar sesión</a>
                     <a class="btn btn_header btn_header--primary" href="<?= site_url() ?>register">Crear cuenta gratis</a>
                 <?php else: ?>
-                    <a class="btn btn_header btn_header--ghost" href="<?= site_url('dashboard') ?>">Dashboard</a>
-                    <a class="btn btn_header btn_header--ghost logout" href="<?= site_url('logout') ?>">Salir</a>
+                    <div class="user-dropdown-container">
+                        <button class="user-avatar-trigger" id="userMenuTrigger">
+                            <?php 
+                                $fullName = session('user_name') ?? 'Usuario';
+                                $firstName = explode(' ', trim($fullName))[0];
+                            ?>
+                            <div class="user-avatar-wrapper" style="display: flex; align-items: center; gap: 8px;">
+                                <?php if(session('user_avatar')): ?>
+                                    <img src="<?= session('user_avatar') ?>" alt="<?= esc($fullName) ?>" style="margin-left: 0;">
+                                <?php else: ?>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.9;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                <?php endif; ?>
+                            </div>
+                            <span class="user-nav-name"><?= esc($firstName) ?></span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6; margin-left: -2px;"><path d="m6 9 6 6 6-6"/></svg>
+                        </button>
+                        
+                        <div class="user-dropdown-menu" id="userDropdownMenu">
+                            <div class="dropdown-header">
+                                <span class="user-name-display"><?= esc(session('user_name')) ?></span>
+                                <span class="user-email-display"><?= esc(session('user_email')) ?></span>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="<?= site_url('dashboard') ?>" class="dropdown-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                                Mi Dashboard
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="<?= site_url('logout') ?>" class="dropdown-item logout logout-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                                Cerrar sesión
+                            </a>
+                        </div>
+                    </div>
                 <?php endif; ?>
             </div>
 
@@ -467,6 +499,84 @@
         .auth-buttons .btn_header--ghost { color: #ffffff !important; border-color: rgba(255,255,255,0.3) !important; }
         .auth-buttons .btn_header--ghost:hover { background: rgba(255,255,255,0.1); }
 
+        /* User Dropdown Styles */
+        .user-dropdown-container { position: relative; }
+        .user-avatar-trigger {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1.5px solid rgba(255, 255, 255, 0.25);
+            padding: 6px 16px;
+            border-radius: 99px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #ffffff;
+        }
+        .user-avatar-trigger:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .user-avatar-trigger img {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1.5px solid rgba(255,255,255,0.4);
+        }
+        .user-nav-name {
+            font-size: 13.5px;
+            font-weight: 800;
+            letter-spacing: 0.01em;
+        }
+
+        .user-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            width: 240px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 18px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            padding: 8px;
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            transform-origin: top right;
+            animation: dropdownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        @keyframes dropdownFade {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .user-dropdown-menu.active { display: flex; }
+
+        .dropdown-header { padding: 12px 16px; display: flex; flex-direction: column; }
+        .user-name-display { font-size: 14px; font-weight: 800; color: #0f172a; display: block; }
+        .user-email-display { font-size: 12px; color: #64748b; font-weight: 600; }
+        
+        .dropdown-divider { height: 1px; background: #f1f5f9; margin: 8px 0; }
+        
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            color: #334155;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        .dropdown-item:hover { background: #f8fafc; color: #2152ff; }
+        .logout-item { color: #ef4444; }
+        .logout-item:hover { background: #fef2f2; color: #ef4444; }
+
         @media (max-width: 1024px) {
             .desktop-only { display: none !important; }
             .mobile-menu-toggle { display: block; }
@@ -500,6 +610,23 @@
             overlay.addEventListener('click', function(e) {
                 if (e.target === overlay) closeMenu();
             });
+
+            // User Dropdown
+            const userTrigger = document.getElementById('userMenuTrigger');
+            const userMenu = document.getElementById('userDropdownMenu');
+
+            if (userTrigger && userMenu) {
+                userTrigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userMenu.classList.toggle('active');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!userMenu.contains(e.target) && !userTrigger.contains(e.target)) {
+                        userMenu.classList.remove('active');
+                    }
+                });
+            }
 
             // Close on link click
             document.querySelectorAll('.mobile-nav-link').forEach(link => {

@@ -45,12 +45,19 @@
         <div class="desktop-only auth-buttons">
             <div class="user-dropdown-container">
                 <button class="user-avatar-trigger" id="userMenuTrigger">
-                    <?php if(session('user_avatar')): ?>
-                        <img src="<?= session('user_avatar') ?>" alt="<?= esc(session('user_name')) ?>">
-                    <?php else: ?>
-                        <span class="user-avatar-initials"><?= strtoupper(substr(session('user_name') ?? 'A', 0, 1)) ?></span>
-                    <?php endif; ?>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px; opacity: 0.7;"><path d="m6 9 6 6 6-6"/></svg>
+                    <?php 
+                        $fullName = session('user_name') ?? 'Admin';
+                        $firstName = explode(' ', trim($fullName))[0];
+                    ?>
+                    <div class="user-avatar-wrapper" style="display: flex; align-items: center; gap: 8px;">
+                        <?php if(session('user_avatar')): ?>
+                            <img src="<?= session('user_avatar') ?>" alt="<?= esc($fullName) ?>" style="margin-left: 0;">
+                        <?php else: ?>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.9;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <?php endif; ?>
+                    </div>
+                    <span class="user-nav-name"><?= esc($firstName) ?></span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6; margin-left: -2px;"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
                 
                 <div class="user-dropdown-menu" id="userDropdownMenu">
@@ -90,39 +97,34 @@
     .user-dropdown-container { position: relative; }
     .user-avatar-trigger {
         background: rgba(255, 255, 255, 0.1);
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        padding: 4px 8px;
+        border: 1.5px solid rgba(255, 255, 255, 0.25);
+        padding: 6px 16px;
         border-radius: 99px;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         color: #ffffff;
     }
     .user-avatar-trigger:hover {
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.15);
         border-color: rgba(255, 255, 255, 0.4);
         transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
     .user-avatar-trigger img {
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
         object-fit: cover;
-        border: 1px solid rgba(255,255,255,0.2);
+        border: 1.5px solid rgba(255,255,255,0.4);
+        margin-left: -6px; /* Offset for better balance if icon present */
     }
-    .user-avatar-initials {
-        width: 32px;
-        height: 32px;
-        background: #ffffff;
-        color: #2152ff;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .user-nav-name {
+        font-size: 13.5px;
         font-weight: 800;
-        font-size: 14px;
+        letter-spacing: 0.01em;
     }
 
     .user-dropdown-menu {
