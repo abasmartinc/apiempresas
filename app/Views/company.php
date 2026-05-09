@@ -886,9 +886,6 @@
                                             Empresa</th>
                                         <th
                                             style="padding: 0.75rem 1rem; color: #64748b; font-weight: 600; font-size: 0.8rem; text-transform: uppercase;">
-                                            CIF</th>
-                                        <th
-                                            style="padding: 0.75rem 1rem; color: #64748b; font-weight: 600; font-size: 0.8rem; text-transform: uppercase;">
                                             Ubicación</th>
                                         <th
                                             style="padding: 0.75rem 1rem; color: #64748b; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; text-align: right;">
@@ -908,9 +905,6 @@
                                                     style="font-weight: 600; color: #0f172a; text-decoration: none;">
                                                     <?= esc($rel['name'] ?? 'Empresa') ?>
                                                 </a>
-                                            </td>
-                                            <td style="padding: 0.75rem 1rem; color: #475569; font-family: monospace;">
-                                                <?= esc($rel['cif'] ?? '-') ?>
                                             </td>
                                             <td style="padding: 0.75rem 1rem; color: #475569;">
                                                 <?= esc($rel['province'] ?? '-') ?>
