@@ -539,17 +539,10 @@
                             <tr>
                                 <td>
                                     <div class="cap-col-feature">
-                                        <div class="cap-feature-name">Consultas mensuales</div>
-                                    </div>
-                                </td>
-                                <td style="text-align: center; font-weight: 700;"><?= $freeLimit ?></td>
-                                <td class="cap-featured-col" style="text-align: center; font-weight: 700; color: var(--ae-blue);">3.000</td>
-                                <td style="text-align: center; font-weight: 700;">10.000</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="cap-col-feature">
-                                        <div class="cap-feature-name">Validación CIF / NIF</div>
+                                        <div class="cap-feature-name">Validación y Enriquecimiento</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies</div>
+                                        <div class="cap-feature-desc">Valida la existencia de una sociedad y obtén sus datos oficiales (CNAE, Domicilio, Capital).</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('get_companies')" class="btn-json-preview">Ver Respuesta JSON</button>
                                     </div>
                                 </td>
                                 <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
@@ -559,17 +552,10 @@
                             <tr>
                                 <td>
                                     <div class="cap-col-feature">
-                                        <div class="cap-feature-name">Razón Social y Domicilio</div>
-                                    </div>
-                                </td>
-                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
-                                <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
-                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="cap-col-feature">
-                                        <div class="cap-feature-name">Actividad CNAE Oficial</div>
+                                        <div class="cap-feature-name">Buscador Inteligente</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies/search</div>
+                                        <div class="cap-feature-desc">Encuentra empresas por nombre o razón social con autocompletado y normalización.</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('get_search')" class="btn-json-preview">Ver Respuesta JSON</button>
                                     </div>
                                 </td>
                                 <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
@@ -580,6 +566,22 @@
                                 <td>
                                     <div class="cap-col-feature">
                                         <div class="cap-feature-name">Scoring Comercial IA</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies/score</div>
+                                        <div class="cap-feature-desc">Clasifica empresas por potencial de compra y salud financiera mediante nuestro algoritmo.</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('get_score')" class="btn-json-preview">Ver Respuesta JSON</button>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">Basic</td>
+                                <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Señales Societarias BORME</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies/signals</div>
+                                        <div class="cap-feature-desc">Monitoriza eventos reales: ampliaciones de capital, cambios de administrador y más.</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('get_signals')" class="btn-json-preview">Ver Respuesta JSON</button>
                                     </div>
                                 </td>
                                 <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
@@ -589,7 +591,10 @@
                             <tr>
                                 <td>
                                     <div class="cap-col-feature">
-                                        <div class="cap-feature-name">Radar API (Nuevas empresas)</div>
+                                        <div class="cap-feature-name">Radar API (Nuevas Sociedades)</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies/radar</div>
+                                        <div class="cap-feature-desc">Extrae masivamente empresas recién creadas por provincia o actividad económica.</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('get_radar')" class="btn-json-preview">Ver Respuesta JSON</button>
                                     </div>
                                 </td>
                                 <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
@@ -599,7 +604,23 @@
                             <tr>
                                 <td>
                                     <div class="cap-col-feature">
-                                        <div class="cap-feature-name">Webhooks Push (Notificaciones)</div>
+                                        <div class="cap-feature-name">IA Business Insights</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies/insights</div>
+                                        <div class="cap-feature-desc">Análisis avanzado de necesidades de negocio y probabilidad de conversión.</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('get_insights')" class="btn-json-preview">Ver Respuesta JSON</button>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center; color: var(--ae-slate); opacity: 0.5;">Preview</td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">IA Contact Prep</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies/contact-prep</div>
+                                        <div class="cap-feature-desc">Genera argumentos de venta personalizados para cada empresa con nuestra IA.</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('get_contact_prep')" class="btn-json-preview">Ver Respuesta JSON</button>
                                     </div>
                                 </td>
                                 <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
@@ -609,23 +630,17 @@
                             <tr>
                                 <td>
                                     <div class="cap-col-feature">
-                                        <div class="cap-feature-name">IA Predictiva de Oportunidades</div>
+                                        <div class="cap-feature-name">Webhooks PUSH</div>
+                                        <div class="cap-feature-endpoint">POST /api/v1/webhooks</div>
+                                        <div class="cap-feature-desc">Sincroniza eventos en tiempo real con tu CRM sin necesidad de consultar la API.</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('post_webhook')" class="btn-json-preview">Ver Respuesta JSON</button>
                                     </div>
                                 </td>
                                 <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
                                 <td class="cap-featured-col" style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
                                 <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
                             </tr>
-                            <tr>
-                                <td>
-                                    <div class="cap-col-feature">
-                                        <div class="cap-feature-name">Soporte prioritario Slack</div>
-                                    </div>
-                                </td>
-                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
-                                <td class="cap-featured-col" style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
-                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
-                            </tr>
+
                         </tbody>
                     </table>
                 </div>
@@ -803,7 +818,168 @@
     <?= view('partials/footer') ?>
     <?= view('partials/review_modal') ?>
 
+    <!-- JSON PREVIEW MODAL -->
+    <div id="json-modal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.4); z-index:9999; backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#ffffff; width:100%; max-width:640px; border-radius:20px; border:1px solid #e2e8f0; box-shadow:0 30px 60px -12px rgba(15,23,42,0.15); overflow:hidden; position:relative;">
+            <div style="background:#f8fafc; padding:18px 24px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #f1f5f9;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <span style="background:rgba(37,99,235,0.08); color:#2563eb; font-size:10px; font-weight:800; padding:4px 10px; border-radius:6px; letter-spacing:0.05em; text-transform:uppercase;">Response Data</span>
+                    <span id="modal-endpoint-name" style="color:#475569; font-family:'Fira Code', monospace; font-size:13px; font-weight:700;">GET /v1/companies</span>
+                </div>
+                <button onclick="closeJsonModal()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:24px; line-height:1; transition:color 0.2s;" onmouseover="this.style.color='#0f172a'" onmouseout="this.style.color='#94a3b8'">&times;</button>
+            </div>
+            <div style="padding:32px; max-height:70vh; overflow-y:auto; background:#ffffff;">
+                <pre id="modal-json-content" style="margin:0; font-family:'Fira Code', 'Courier New', monospace; font-size:14px; line-height:1.6; color:#1e293b;"></pre>
+            </div>
+            <div style="background:#f8fafc; padding:16px 24px; text-align:right; border-top:1px solid #f1f5f9;">
+                <button onclick="closeJsonModal()" style="background:#ffffff; color:#475569; border:1px solid #e2e8f0; padding:10px 24px; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#ffffff'">Cerrar ventana</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        const jsonExamples = {
+            get_companies: {
+                success: true,
+                data: {
+                    id: 12345,
+                    name: "TECH FLOW SOLUTIONS SL",
+                    cif: "B12345678",
+                    cnae: "6201",
+                    cnae_label: "Programación informática",
+                    founded: "2024-03-12",
+                    province: "MADRID",
+                    municipality: "MADRID",
+                    address: "CALLE DE LA TECNOLOGIA 42",
+                    status: "ACTIVA",
+                    score: 94
+                }
+            },
+            get_search: {
+                success: true,
+                data: {
+                    name: "TECH FLOW SOLUTIONS SL",
+                    cif: "B12345678",
+                    score: 94,
+                    province: "MADRID",
+                    status: "ACTIVA"
+                }
+            },
+            get_score: {
+                success: true,
+                data: {
+                    cif: "B12345678",
+                    score: 94,
+                    priority: "MUY_ALTA",
+                    reasons: ["Crecimiento de capital reciente", "Alta actividad en BORME"],
+                    last_signal: {
+                        type: "AMPLIACION_CAPITAL",
+                        date: "2024-05-01"
+                    }
+                }
+            },
+            get_signals: {
+                success: true,
+                data: {
+                    cif: "B12345678",
+                    signals: [
+                        {
+                            type: "borme_event",
+                            label: "AMPLIACION_CAPITAL",
+                            date: "2024-05-01",
+                            probability: "MUY_ALTA"
+                        }
+                    ]
+                }
+            },
+            get_insights: {
+                success: true,
+                data: {
+                    profile: "SaaS / Fintech / Cloud",
+                    summary: "Empresa con alta tracción y necesidad inminente de escalado tecnológico.",
+                    needs: ["Infraestructura Cloud", "Ciberseguridad", "Contratación Devs"],
+                    conversion_probability: "HIGH",
+                    estimated_ticket: "10k-50k€"
+                }
+            },
+            get_radar: {
+                success: true,
+                meta: {
+                    plan: "pro",
+                    count: 142,
+                    limit: 100
+                },
+                data: [
+                    { name: "NEW CORP SL", cif: "B99887766", founded: "2024-05-05", province: "BARCELONA", score: 88 }
+                ]
+            },
+            get_contact_prep: {
+                success: true,
+                data: {
+                    cif: "B12345678",
+                    pitch_angle: "Escalabilidad tecnológica",
+                    suggested_message: "Hola, he visto que Tech Flow Solutions SL está creciendo...",
+                    key_metrics: ["+20% empleados este año", "Última ronda: Series A"]
+                }
+            },
+            post_webhook: {
+                success: true,
+                message: "Webhook creado correctamente",
+                id: 789
+            }
+        };
+
+        function showJsonPreview(key) {
+            const modal = document.getElementById('json-modal');
+            const content = document.getElementById('modal-json-content');
+            const endpoint = document.getElementById('modal-endpoint-name');
+            
+            const names = {
+                get_companies: 'GET /companies',
+                get_search: 'GET /companies/search',
+                get_score: 'GET /companies/score',
+                get_signals: 'GET /companies/signals',
+                get_insights: 'GET /companies/insights',
+                get_radar: 'GET /companies/radar',
+                get_contact_prep: 'GET /companies/contact-prep',
+                post_webhook: 'POST /webhooks'
+            };
+
+            endpoint.textContent = names[key];
+            content.innerHTML = syntaxHighlight(jsonExamples[key]);
+            modal.style.display = 'flex';
+            // Eliminamos overflow hidden para evitar saltos de scroll
+            // document.body.style.overflow = 'hidden';
+        }
+
+        function closeJsonModal() {
+            document.getElementById('json-modal').style.display = 'none';
+            // document.body.style.overflow = 'auto';
+        }
+
+        function syntaxHighlight(json) {
+            if (typeof json != 'string') {
+                json = JSON.stringify(json, undefined, 2);
+            }
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g, function (match) {
+                var cls = 'color:#d97706;'; // number (Orange)
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'color:#2563eb;'; // key (Blue)
+                    } else {
+                        cls = 'color:#16a34a;'; // string (Green)
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'color:#9333ea;'; // boolean (Purple)
+                } else if (/null/.test(match)) {
+                    cls = 'color:#64748b;'; // null (Gray)
+                }
+                return '<span style="' + cls + ' font-weight: 500;">' + match + '</span>';
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // FAQ Accordion Logic
             const faqItems = document.querySelectorAll('.faq-item');
@@ -838,16 +1014,12 @@
         // CTA Click Tracking
         $(document).on('click', '[data-cta="radar_home"]', function(e) {
             const source = $(this).data('source') || 'home_generic';
-            if (typeof trackRadarEvent === 'function') {
-                trackRadarEvent({ event_type: 'cta_click', source: source });
-            } else {
-                $.post('<?= site_url("api/tracking/event") ?>', {
-                    event_type: 'cta_click',
-                    source: source
-                });
-            }
+            $.post('<?= site_url("api/tracking/event") ?>', {
+                event_type: 'cta_click',
+                source: source
+            });
         });
     </script>
 </body>
-
 </html>
+

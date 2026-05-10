@@ -1106,7 +1106,7 @@
                                         style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">GÉNERICO</span>
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;">
-                                    <button onclick="showJsonPreview('get_companies')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_companies')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
                             <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
@@ -1128,7 +1128,7 @@
                                         style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">GÉNERICO</span>
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;">
-                                    <button onclick="showJsonPreview('get_search')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_search')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
 
@@ -1155,7 +1155,7 @@
                                         style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO
                                         / BUS</span></td>
                                 <td style="padding: 18px 20px; text-align: center;">
-                                    <button onclick="showJsonPreview('get_score')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_score')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
                             <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
@@ -1178,7 +1178,7 @@
                                         style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO
                                         / BUS</span></td>
                                 <td style="padding: 18px 20px; text-align: center;">
-                                    <button onclick="showJsonPreview('get_signals')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_signals')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
                             <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
@@ -1202,7 +1202,7 @@
                                         style="background: #f5f3ff; color: #8b5cf6; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">IA
                                         PREMIUM</span></td>
                                 <td style="padding: 18px 20px; text-align: center;">
-                                    <button onclick="showJsonPreview('get_insights')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_insights')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
 
@@ -1227,7 +1227,7 @@
                                         style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO
                                         / BUS</span></td>
                                 <td style="padding: 18px 20px; text-align: center;">
-                                    <button onclick="showJsonPreview('get_radar')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_radar')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
 
@@ -1251,7 +1251,7 @@
                                         style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span>
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;">
-                                    <button onclick="showJsonPreview('post_webhook')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('post_webhook')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
                             <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
@@ -1274,7 +1274,7 @@
                                         style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span>
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;">
-                                    <button onclick="showJsonPreview('get_webhooks')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_webhooks')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
                             <tr class="api-endpoint-row">
@@ -1296,7 +1296,7 @@
                                         style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span>
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;">
-                                    <button onclick="showJsonPreview('delete_webhook')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('delete_webhook')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -1824,20 +1824,20 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
         });
     </script>
         <!-- JSON PREVIEW MODAL -->
-        <div id="json-modal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:9999; backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:20px;">
-            <div style="background:#0f172a; width:100%; max-width:600px; border-radius:24px; border:1px solid rgba(255,255,255,0.1); box-shadow:0 50px 100px -20px rgba(0,0,0,0.5); overflow:hidden; position:relative;">
-                <div style="background:#1e293b; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <div id="json-modal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.4); z-index:9999; backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:20px;">
+            <div style="background:#ffffff; width:100%; max-width:640px; border-radius:20px; border:1px solid #e2e8f0; box-shadow:0 30px 60px -12px rgba(15,23,42,0.15); overflow:hidden; position:relative;">
+                <div style="background:#f8fafc; padding:18px 24px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #f1f5f9;">
                     <div style="display:flex; align-items:center; gap:12px;">
-                        <span style="background:rgba(59,130,246,0.1); color:#3b82f6; font-size:11px; font-weight:800; padding:4px 10px; border-radius:6px; letter-spacing:0.05em;">PREVIEW_RESPONSE</span>
-                        <span id="modal-endpoint-name" style="color:#94a3b8; font-family:monospace; font-size:12px; font-weight:700;">GET /v1/companies</span>
+                        <span style="background:rgba(37,99,235,0.08); color:#2563eb; font-size:10px; font-weight:800; padding:4px 10px; border-radius:6px; letter-spacing:0.05em; text-transform:uppercase;">Response Data</span>
+                        <span id="modal-endpoint-name" style="color:#475569; font-family:'Fira Code', monospace; font-size:13px; font-weight:700;">GET /v1/companies</span>
                     </div>
-                    <button onclick="closeJsonModal()" style="background:none; border:none; color:#64748b; cursor:pointer; font-size:24px; line-height:1;">&times;</button>
+                    <button onclick="closeJsonModal()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:24px; line-height:1; transition:color 0.2s;" onmouseover="this.style.color='#0f172a'" onmouseout="this.style.color='#94a3b8'">&times;</button>
                 </div>
-                <div style="padding:32px; max-height:70vh; overflow-y:auto;">
-                    <pre id="modal-json-content" style="margin:0; font-family:'Fira Code', monospace; font-size:13.5px; line-height:1.6; color:#e2e8f0;"></pre>
+                <div style="padding:32px; max-height:70vh; overflow-y:auto; background:#ffffff;">
+                    <pre id="modal-json-content" style="margin:0; font-family:'Fira Code', 'Courier New', monospace; font-size:14px; line-height:1.6; color:#1e293b;"></pre>
                 </div>
-                <div style="background:#1e293b; padding:12px 24px; text-align:right;">
-                    <button onclick="closeJsonModal()" style="background:#3b82f6; color:white; border:none; padding:8px 20px; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer;">CERRAR</button>
+                <div style="background:#f8fafc; padding:16px 24px; text-align:right; border-top:1px solid #f1f5f9;">
+                    <button onclick="closeJsonModal()" style="background:#ffffff; color:#475569; border:1px solid #e2e8f0; padding:10px 24px; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#ffffff'">Cerrar ventana</button>
                 </div>
             </div>
         </div>
@@ -1955,12 +1955,13 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                 endpoint.textContent = names[key];
                 content.innerHTML = syntaxHighlight(jsonExamples[key]);
                 modal.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
+                // Evitamos el salto quitando el hidden del body si causa conflicto
+                // document.body.style.overflow = 'hidden'; 
             }
 
             function closeJsonModal() {
                 document.getElementById('json-modal').style.display = 'none';
-                document.body.style.overflow = 'auto';
+                // document.body.style.overflow = 'auto';
             }
 
             function syntaxHighlight(json) {
@@ -1969,19 +1970,19 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                 }
                 json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g, function (match) {
-                    var cls = 'color:#d19a66;'; // number
+                    var cls = 'color:#d97706;'; // number (Orange)
                     if (/^"/.test(match)) {
                         if (/:$/.test(match)) {
-                            cls = 'color:#e06c75;'; // key
+                            cls = 'color:#2563eb;'; // key (Blue)
                         } else {
-                            cls = 'color:#98c379;'; // string
+                            cls = 'color:#16a34a;'; // string (Green)
                         }
                     } else if (/true|false/.test(match)) {
-                        cls = 'color:#c678dd;'; // boolean
+                        cls = 'color:#9333ea;'; // boolean (Purple)
                     } else if (/null/.test(match)) {
-                        cls = 'color:#abb2bf;'; // null
+                        cls = 'color:#64748b;'; // null (Gray)
                     }
-                    return '<span style="' + cls + '">' + match + '</span>';
+                    return '<span style="' + cls + ' font-weight: 500;">' + match + '</span>';
                 });
             }
         </script>
