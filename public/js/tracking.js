@@ -35,7 +35,11 @@
     // Only track passive noise (scroll, time) on content-heavy pages like Home or Blog
     const shouldTrackPassive = () => {
         const path = window.location.pathname;
-        return path === '/' || path.includes('/blog');
+        return path === '/' || 
+               path.includes('/blog') || 
+               path.includes('/empresas-nuevas') || 
+               path.includes('/radar/preview') || 
+               path.includes('/excel/preview');
     };
 
     // 2. Global trackEvent Function

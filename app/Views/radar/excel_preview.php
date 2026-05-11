@@ -258,12 +258,13 @@
             });
         });
 
-        function trackEvent(type, metadata = {}) {
-            $.post('<?= site_url("api/tracking/event") ?>', {
-                event_type: type,
-                source: 'excel_preview',
-                metadata: JSON.stringify(metadata)
-            });
+        function trackEvent(eventName, metadata = {}) {
+            if (window.trackEvent) {
+                window.trackEvent(eventName, { 
+                    source: 'excel_preview', 
+                    ...metadata 
+                });
+            }
         }
     </script>
 </body>

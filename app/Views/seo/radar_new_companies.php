@@ -155,7 +155,7 @@ $province = 'España';
                 </p>
 
                 <div class="ae-radar-page__hero-actions">
-                    <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary">
+                    <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary" data-track-event="click_radar_primary_hero">
                         Acceder ahora y detectar estas oportunidades antes que otros
                     </a>
                 </div>
@@ -471,7 +471,7 @@ $province = 'España';
 
                     <div class="ae-radar-page__excel-actions">
                         <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 700px;">
-                            <a href="<?= site_url('excel/preview?period=30days') ?>" class="ae-radar-page__excel-btn js-loading-btn" style="white-space: nowrap !important;">
+                            <a href="<?= site_url('excel/preview?period=30days') ?>" class="ae-radar-page__excel-btn js-loading-btn" style="white-space: nowrap !important;" data-track-event="click_radar_excel_national">
                                 Acceder al listado Nacional (<?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 15, 0) ?>€
                             </a>
                         </div>
@@ -677,7 +677,7 @@ $province = 'España';
 
     <script>
     let modalTriggered = false;
-    function showRadarModal() {
+    function showRadarModal(trigger = 'unknown') {
         if (modalTriggered) return;
         modalTriggered = true;
         const modal = document.getElementById('radarConversionModal');
@@ -687,6 +687,11 @@ $province = 'España';
                 modal.style.opacity = '1';
                 modal.querySelector('.radar-modal-content').style.transform = 'translateY(0)';
             }, 10);
+
+            // TRACKING: Modal Shown
+            if (window.trackEvent) {
+                window.trackEvent('radar_modal_view', { trigger: trigger, page: 'radar_landing' });
+            }
         }
     }
 
@@ -698,6 +703,11 @@ $province = 'España';
             setTimeout(() => {
                 modal.style.display = 'none';
             }, 300);
+
+            // TRACKING: Modal Closed
+            if (window.trackEvent) {
+                window.trackEvent('radar_modal_close', { page: 'radar_landing' });
+            }
         }
     }
 
@@ -707,20 +717,18 @@ $province = 'España';
         blurredCards.forEach(card => {
             card.addEventListener('click', (e) => {
                 e.preventDefault();
-                setTimeout(showRadarModal, 300);
+                setTimeout(() => showRadarModal('blurred_card'), 300);
             });
         });
 
-        // Intercept clicks on primary CTAs to show modal instead of direct redirect?
-        // Wait, the user said: "Mostrar modal SOLO cuando: el usuario hace clic en CTA principal".
-        // If they click the primary CTA, it should show the modal instead of navigating immediately?
-        // Yes, that adds friction but increases the "pressure".
+        // Intercept clicks on primary CTAs
         const mainCtas = document.querySelectorAll('.ae-radar-page__btn--primary:not(#radarConversionModal .ae-radar-page__btn--primary)');
         mainCtas.forEach(cta => {
             cta.addEventListener('click', (e) => {
                 if(!modalTriggered) {
                     e.preventDefault();
-                    setTimeout(showRadarModal, 300);
+                    const eventName = cta.getAttribute('data-track-event') || 'primary_cta';
+                    setTimeout(() => showRadarModal(eventName), 300);
                 }
             });
         });
@@ -728,8 +736,8 @@ $province = 'España';
         // Scroll > 60%
         window.addEventListener('scroll', () => {
             const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
-            if (scrollPercent > 60) {
-                setTimeout(showRadarModal, 300);
+            if (scrollPercent > 60 && !modalTriggered) {
+                setTimeout(() => showRadarModal('scroll_60'), 300);
             }
         });
     });
