@@ -130,13 +130,134 @@
                 </div>
             </div>
 
-            <div class="kpi-card" style="--kpi-color: var(--kpi-orange);">
-                <div class="kpi-icon-wrapper">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+        </div>
+
+        <!-- Radar B2B Funnel Section -->
+        <div style="margin-bottom: 3rem;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem;">
+                <h2 style="margin: 0; font-size: 1.5rem; color: #0f172a; font-weight: 800;">Embudo Radar B2B (Hoy)</h2>
+                <span style="background: #eff6ff; color: #3b82f6; padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 800;">REAL-TIME</span>
+            </div>
+
+            <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <div class="kpi-card" style="--kpi-color: #3b82f6; padding: 1.5rem;">
+                    <span class="kpi-label">Tráfico Landing</span>
+                    <span class="kpi-value" style="font-size: 1.8rem;"><?= number_format($radarKpis['landing_visits']) ?></span>
+                    <span class="kpi-sub">Visitas /empresas-nuevas</span>
                 </div>
-                <span class="kpi-label">Listos para Convertir</span>
-                <span class="kpi-value"><?= $summary['ready'] ?></span>
-                <span class="kpi-sub">Urgencia Crítica/Alta</span>
+                
+                <div class="kpi-card" style="--kpi-color: #8b5cf6; padding: 1.5rem;">
+                    <span class="kpi-label">Vistas Preview</span>
+                    <span class="kpi-value" style="font-size: 1.8rem;"><?= number_format($radarKpis['preview_views']) ?></span>
+                    <span class="kpi-sub">CTR: <strong style="color:#1e293b;"><?= $radarKpis['ctr_preview'] ?>%</strong></span>
+                    <div class="progress-bar-container" style="height: 4px;">
+                        <div class="progress-bar-fill" style="width: <?= $radarKpis['ctr_preview'] ?>%;"></div>
+                    </div>
+                </div>
+
+                <div class="kpi-card" style="--kpi-color: #10b981; padding: 1.5rem;">
+                    <span class="kpi-label">Leads Capturados</span>
+                    <span class="kpi-value" style="font-size: 1.8rem;"><?= number_format($radarKpis['email_submits']) ?></span>
+                    <span class="kpi-sub">Conv: <strong style="color:#1e293b;"><?= $radarKpis['conv_rate'] ?>%</strong></span>
+                    <div class="progress-bar-container" style="height: 4px;">
+                        <div class="progress-bar-fill" style="width: <?= $radarKpis['conv_rate'] ?>%;"></div>
+                    </div>
+                </div>
+
+                <div class="kpi-card" style="--kpi-color: #f59e0b; padding: 1.5rem;">
+                    <span class="kpi-label">Excel Ventas</span>
+                    <span class="kpi-value" style="font-size: 1.8rem;"><?= number_format($radarKpis['excel_sales']) ?></span>
+                    <span class="kpi-sub"><?= number_format($radarKpis['excel_previews']) ?> Previews</span>
+                </div>
+            </div>
+
+            <!-- Funnel Visualization (CSS Simple) -->
+            <div style="background: white; border-radius: 24px; padding: 2rem; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 1rem; overflow-x: auto; margin-bottom: 2rem;">
+                <div style="flex: 1; min-width: 150px; text-align: center; padding: 1rem; background: #f8fafc; border-radius: 16px;">
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Landing</div>
+                    <div style="font-size: 1.2rem; font-weight: 900; color: #1e293b;"><?= number_format($radarKpis['landing_visits']) ?></div>
+                </div>
+                <div style="color: #cbd5e1;">➔</div>
+                <div style="flex: 1; min-width: 150px; text-align: center; padding: 1rem; background: #f8fafc; border-radius: 16px;">
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Modal View</div>
+                    <div style="font-size: 1.2rem; font-weight: 900; color: #1e293b;"><?= number_format($radarKpis['modal_views']) ?></div>
+                </div>
+                <div style="color: #cbd5e1;">➔</div>
+                <div style="flex: 1; min-width: 150px; text-align: center; padding: 1rem; background: #f8fafc; border-radius: 16px;">
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Preview</div>
+                    <div style="font-size: 1.2rem; font-weight: 900; color: #1e293b;"><?= number_format($radarKpis['preview_views']) ?></div>
+                </div>
+                <div style="color: #cbd5e1;">➔</div>
+                <div style="flex: 1; min-width: 150px; text-align: center; padding: 1rem; background: #ecfdf5; border-radius: 16px; border: 1px solid #bbf7d0;">
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #059669; text-transform: uppercase;">Lead (Email)</div>
+                    <div style="font-size: 1.2rem; font-weight: 900; color: #065f46;"><?= number_format($radarKpis['email_submits']) ?></div>
+                </div>
+            </div>
+
+            <!-- Detailed Insights & Leads -->
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+                <!-- Engagement Insights -->
+                <div style="background: white; border-radius: 24px; padding: 2rem; border: 1px solid #e2e8f0;">
+                    <h3 style="font-size: 1rem; font-weight: 800; color: #1e293b; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        Insights de Engagement
+                    </h3>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <p style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">Triggers del Modal</p>
+                        <?php foreach($radarInsights['triggers'] as $t): ?>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+                                <span style="color: #475569;"><?= esc(str_replace(['"', 'click_'], '', $t['trigger_name'])) ?></span>
+                                <span style="font-weight: 700;"><?= $t['total'] ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                        <?php if(empty($radarInsights['triggers'])): ?>
+                            <p style="font-size: 0.8rem; color: #94a3b8; font-style: italic;">Sin datos aún hoy</p>
+                        <?php endif; ?>
+                    </div>
+
+                    <div>
+                        <p style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">Top Provincias Buscadas</p>
+                        <?php foreach($radarInsights['top_provinces'] as $p): ?>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+                                <span style="color: #475569;"><?= esc(str_replace('"', '', $p['province'])) ?></span>
+                                <span style="font-weight: 700;"><?= $p['total'] ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <!-- Latest Radar Leads -->
+                <div style="background: white; border-radius: 24px; padding: 2rem; border: 1px solid #e2e8f0;">
+                    <h3 style="font-size: 1rem; font-weight: 800; color: #1e293b; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        Últimos Leads Radar B2B
+                    </h3>
+                    
+                    <div class="table-responsive">
+                        <table class="admin-table" style="font-size: 0.85rem;">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Contexto</th>
+                                    <th style="text-align: right;">Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach($radarLeads as $l): ?>
+                                <tr>
+                                    <td style="font-weight: 700; color: #1e293b;"><?= esc($l['email']) ?></td>
+                                    <td style="color: #64748b;"><?= esc($l['context']) ?></td>
+                                    <td style="text-align: right; color: #94a3b8;"><?= date('H:i', strtotime($l['created_at'])) ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                                <?php if(empty($radarLeads)): ?>
+                                    <tr><td colspan="3" style="text-align: center; color: #94a3b8; padding: 2rem;">No hay leads registrados hoy</td></tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 

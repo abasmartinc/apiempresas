@@ -81,6 +81,50 @@ class MetricsController extends BaseController
         ];
         $kpis['conversion_rate'] = $kpis['total_registros'] > 0 ? round(($kpis['paid_users'] / $kpis['total_registros']) * 100, 1) : 0;
 
+        // --- 1.1 RADAR B2B FUNNEL KPIs ---
+        $radarKpis = [
+            'landing_visits' => $db->table('tracking_events')->where('page LIKE', '%empresas-nuevas%')->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
+            'preview_views'  => $db->table('tracking_events')->where('event_name', 'preview_view')->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
+            'modal_views'    => $db->table('tracking_events')->where('event_name', 'radar_modal_view')->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
+            'email_submits'  => $db->table('tracking_events')->where('event_name', 'preview_email_submit')->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
+            'excel_previews' => $db->table('tracking_events')->where('page LIKE', '%excel/preview%')->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
+            'excel_sales'    => $db->table('user_subscriptions')->whereIn('plan_id', [5, 6])->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
+        ];
+        
+        // Calcular CTR y Conversion Rate del Radar
+        $radarKpis['ctr_preview'] = $radarKpis['landing_visits'] > 0 ? round(($radarKpis['preview_views'] / $radarKpis['landing_visits']) * 100, 1) : 0;
+        $radarKpis['conv_rate'] = $radarKpis['preview_views'] > 0 ? round(($radarKpis['email_submits'] / $radarKpis['preview_views']) * 100, 1) : 0;
+
+        // --- 1.2 RADAR ENGAGEMENT INSIGHTS ---
+        $radarInsights = [
+            'avg_scroll' => $db->table('tracking_events')->where('event_name', 'scroll_depth')->where('page LIKE', '%empresas-nuevas%')->selectAvg('CAST(metadata AS UNSIGNED)', 'avg')->get()->getRow()->avg ?? 0,
+            'triggers' => $db->table('tracking_events')
+                ->where('event_name', 'radar_modal_view')
+                ->select("JSON_EXTRACT(metadata, '$.trigger') as trigger_name, COUNT(*) as total")
+                ->groupBy('trigger_name')
+                ->get()->getResultArray(),
+            'top_provinces' => $db->table('tracking_events')
+                ->where('event_name', 'preview_view')
+                ->select("JSON_EXTRACT(metadata, '$.provincia') as province, COUNT(*) as total")
+                ->groupBy('province')
+                ->orderBy('total', 'DESC')
+                ->limit(5)
+                ->get()->getResultArray()
+        ];
+
+        // --- 1.3 LATEST RADAR LEADS ---
+        $radarLeads = $db->table('tracking_events')
+            ->where('event_name', 'preview_email_submit')
+            ->orderBy('created_at', 'DESC')
+            ->limit(10)
+            ->get()->getResultArray();
+
+        foreach ($radarLeads as &$lead) {
+            $meta = json_decode($lead['metadata'], true);
+            $lead['email'] = $meta['email'] ?? 'N/A';
+            $lead['context'] = ($meta['provincia'] ?? '') . ' ' . ($meta['periodo'] ?? '');
+        }
+
         // --- 2. PROCESAMIENTO DE USUARIOS CON PRIORIZACIÓN ---
         $rawUsers = $db->query("
             SELECT 
@@ -203,6 +247,9 @@ class MetricsController extends BaseController
         return view('admin/event_tracking', [
             'title'           => 'Leads & Conversión - Admin',
             'kpis'            => $kpis,
+            'radarKpis'       => $radarKpis,
+            'radarInsights'   => $radarInsights,
+            'radarLeads'      => $radarLeads,
             'summary'         => $summary,
             'whatToDoNow'     => $whatToDoNow,
             'problematicUsers'=> $problematicUsers,
