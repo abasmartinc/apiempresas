@@ -41,7 +41,7 @@ class ApiKeyFilter implements FilterInterface
         $db = \Config\Database::connect('default');
 
         $row = $db->table('api_keys')
-            ->select('api_keys.id AS api_key_id, api_keys.user_id, api_keys.is_active, users.is_active as user_active, users.created_at, users.migration_reset_done')
+            ->select('api_keys.id AS api_key_id, api_keys.user_id, api_keys.is_active, api_keys.last_used_at, users.is_active as user_active, users.created_at, users.migration_reset_done')
             ->join('users', 'users.id = api_keys.user_id', 'left')
             ->where('api_keys.api_key', $apiKey)
             ->get()
@@ -59,11 +59,14 @@ class ApiKeyFilter implements FilterInterface
                 ->setJSON(['error' => 'API key inactiva o usuario inactivo']);
         }
 
-        // 4) Registrar uso (opcional)
+        // 4) Registrar uso (con throttling para evitar bloqueos en ráfagas)
         try {
-            $db->table('api_keys')
-                ->where('id', (int)$row->api_key_id)
-                ->update(['last_used_at' => date('Y-m-d H:i:s')]);
+            $lastUsed = $row->last_used_at ? strtotime($row->last_used_at) : 0;
+            if (time() - $lastUsed > 300) { // Solo actualizar cada 5 minutos
+                $db->table('api_keys')
+                    ->where('id', (int)$row->api_key_id)
+                    ->update(['last_used_at' => date('Y-m-d H:i:s')]);
+            }
         } catch (\Throwable $e) {
             log_message('error', '[ApiKeyFilter::before:last_used_at] ' . $e->getMessage());
         }
@@ -134,31 +137,39 @@ class ApiKeyFilter implements FilterInterface
             $monthlyQuota = $planRow ? (int)$planRow->monthly_quota : get_free_plan_limit();
 
             $currentMonth = date('Y-m');
-            // --- LÓGICA DE MIGRACIÓN SEGURA (100 -> Dinámico) ---
-            $migrationDate = '2026-04-26 00:00:00';
-            $isLegacy = ($row->created_at < $migrationDate);
-            
-            if ($isLegacy && (int)$planId === 1 && (int)($row->migration_reset_done ?? 0) === 0) {
-                // Reset controlado: permitimos nuevas consultas desde este momento
-                $db->table('api_usage_daily')
-                   ->where('user_id', (int)$row->user_id)
-                   ->where('date >=', date('Y-m-01'))
-                   ->delete();
-                
-                $db->table('users')
-                   ->where('id', (int)$row->user_id)
-                   ->update(['migration_reset_done' => 1]);
-                
-                $currentUsage = 0;
-            } else {
-                $usageRow = $db->table('api_usage_daily')
-                    ->selectSum('requests_count')
-                    ->where('user_id', (int)$row->user_id)
-                    ->like('date', $currentMonth, 'after')
-                    ->get()
-                    ->getRow();
+            $cacheKey = "api_usage_{$row->user_id}_{$currentMonth}";
+            $currentUsage = cache()->get($cacheKey);
 
-                $currentUsage = $usageRow ? (int)$usageRow->requests_count : 0;
+            if ($currentUsage === null) {
+                // --- LÓGICA DE MIGRACIÓN SEGURA (100 -> Dinámico) ---
+                $migrationDate = '2026-04-26 00:00:00';
+                $isLegacy = ($row->created_at < $migrationDate);
+                
+                if ($isLegacy && (int)$planId === 1 && (int)($row->migration_reset_done ?? 0) === 0) {
+                    // Reset controlado: permitimos nuevas consultas desde este momento
+                    $db->table('api_usage_daily')
+                       ->where('user_id', (int)$row->user_id)
+                       ->where('date >=', date('Y-m-01'))
+                       ->delete();
+                    
+                    $db->table('users')
+                       ->where('id', (int)$row->user_id)
+                       ->update(['migration_reset_done' => 1]);
+                    
+                    $currentUsage = 0;
+                } else {
+                    $usageRow = $db->table('api_usage_daily')
+                        ->selectSum('requests_count')
+                        ->where('user_id', (int)$row->user_id)
+                        ->like('date', $currentMonth, 'after')
+                        ->get()
+                        ->getRow();
+
+                    $currentUsage = $usageRow ? (int)$usageRow->requests_count : 0;
+                }
+                
+                // Cacheamos el uso por 30 segundos para aliviar la DB en ráfagas Enterprise
+                cache()->save($cacheKey, $currentUsage, 30);
             }
 
             if ($currentUsage >= $monthlyQuota && (int)$planId !== 7) {
@@ -246,21 +257,27 @@ class ApiKeyFilter implements FilterInterface
             $ua = (string)$request->getUserAgent();
             if (strlen($ua) > 255) $ua = substr($ua, 0, 255);
 
+            // Optimización Enterprise: No loguear cada petición exitosa en la tabla pesada api_requests
+            // si es un cliente Enterprise, para ahorrar I/O.
+            $isEnterprise = ($meta['plan_slug'] === 'enterprise');
+            
             if ($db->tableExists('api_requests')) {
-                $db->table('api_requests')->insert([
-                    'user_id'         => (int)$meta['user_id'],
-                    'api_key_id'      => (int)$meta['api_key_id'],
-                    'subscription_id' => $meta['subscription_id'] !== null ? (int)$meta['subscription_id'] : null,
-                    'endpoint'        => $endpoint,
-                    'http_method'     => $method,
-                    'status_code'     => $statusCode,
-                    'request_id'      => (string)$meta['request_id'],
-                    'ip_address'      => $ip,
-                    'user_agent'      => $ua,
-                    'duration_ms'     => $durationMs,
-                    'search_term'     => $meta['search_term'] ?? null,
-                    'created_at'      => $now,
-                ]);
+                if (!$isEnterprise || $statusCode !== 200) {
+                    $db->table('api_requests')->insert([
+                        'user_id'         => (int)$meta['user_id'],
+                        'api_key_id'      => (int)$meta['api_key_id'],
+                        'subscription_id' => $meta['subscription_id'] !== null ? (int)$meta['subscription_id'] : null,
+                        'endpoint'        => $endpoint,
+                        'http_method'     => $method,
+                        'status_code'     => $statusCode,
+                        'request_id'      => (string)$meta['request_id'],
+                        'ip_address'      => $ip,
+                        'user_agent'      => $ua,
+                        'duration_ms'     => $durationMs,
+                        'search_term'     => $meta['search_term'] ?? null,
+                        'created_at'      => $now,
+                    ]);
+                }
             }
 
             $skipBilling = self::$apiSkipBilling;
