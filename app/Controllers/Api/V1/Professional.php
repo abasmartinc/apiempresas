@@ -51,18 +51,6 @@ class Professional extends ResourceController
                     'cnae'    => $item['cnae'] ?? '',
                 ];
 
-                // Apply masking if Free plan
-                $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
-                if ((int)$planId === 1) {
-                    // 4. Remove technical fields
-                    unset($data['lat'], $data['lng']);
-
-                    // 5. Mask CIF (Key identifier)
-                    if (!empty($data['cif'])) {
-                        $data['cif'] = 'B********';
-                    }
-                }
-
                 return $data;
             }, $results);
 
@@ -108,11 +96,6 @@ class Professional extends ResourceController
                 ], ResponseInterface::HTTP_NOT_FOUND);
             }
 
-            // Apply masking if Free plan (Mirroring CompaniesByCif logic)
-            $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
-            if ((int)$planId === 1) {
-                $company = mask_company_data($company);
-            }
 
             // Apply filtering (remove requested fields like 'id', 'phone', etc.)
             $company = filter_company_data($company);
