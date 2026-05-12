@@ -49,6 +49,14 @@ class SubscriptionFilter implements FilterInterface
             return null;
         }
 
+        $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
+
+        if ($productType === 'api' && (int)$planId === 1) {
+            // Permitimos acceso al plan gratuito de la API si la API Key es válida
+            // (La cuota de 30 ya se verifica en el ApiKeyFilter)
+            return null;
+        }
+
         if (!$subscriptionModel->hasActiveSubscriptionFor($userId, $productType)) {
             // If it's an API request, return JSON error for missing subscription
             if ($isApiRoute) {

@@ -34,6 +34,7 @@ class UserModel extends Model
         'last_active_at',
         'migration_notice_shown',
         'migration_reset_done',
+        'unsuscribe',
     ];
 
     protected $useTimestamps = false;

@@ -292,6 +292,12 @@ class MetricsController extends BaseController
             $user = $db->table('users')->where('id', $userId)->get()->getRow();
             if (!$user) continue;
 
+            // Skip if unsubscribed
+            if (isset($user->unsuscribe) && (int)$user->unsuscribe === 1) {
+                log_message('info', "[MetricsController] Email manual saltado para {$user->email} por unsuscribe=1");
+                continue;
+            }
+
             $emailService->clear(true);
             $emailService->setTo($user->email);
             $emailService->setBCC('papelo.amh@gmail.com');

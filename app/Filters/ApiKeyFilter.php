@@ -80,6 +80,10 @@ class ApiKeyFilter implements FilterInterface
                     ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id')
                     ->where('user_subscriptions.user_id', (int)$row->user_id)
                     ->where('user_subscriptions.status', 'active')
+                    ->groupStart()
+                        ->where('api_plans.product_type', 'api')
+                        ->orWhere('api_plans.product_type', 'bundle')
+                    ->groupEnd()
                     ->orderBy('user_subscriptions.id', 'DESC')
                     ->get()
                     ->getRow();
@@ -100,6 +104,10 @@ class ApiKeyFilter implements FilterInterface
                     ->join('api_plans', 'api_plans.id = usersuscriptions.plan_id')
                     ->where('usersuscriptions.user_id', (int)$row->user_id)
                     ->where('usersuscriptions.status', 'active')
+                    ->groupStart()
+                        ->where('api_plans.product_type', 'api')
+                        ->orWhere('api_plans.product_type', 'bundle')
+                    ->groupEnd()
                     ->orderBy('usersuscriptions.id', 'DESC')
                     ->get()
                     ->getRow();

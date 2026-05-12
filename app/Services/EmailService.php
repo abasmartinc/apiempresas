@@ -267,6 +267,12 @@ class EmailService
             return false;
         }
 
+        // Check if the recipient is unsubscribed
+        if ($this->isUnsubscribed($to)) {
+            log_message('info', "[EmailService] Email [{$slug}] saltado para {$to} por unsuscribe=1");
+            return true; // Return true as if handled
+        }
+
         $email = Services::email();
         $email->clear(true);
 
@@ -315,5 +321,20 @@ class EmailService
             }
         }
         return $content;
+    }
+
+    /**
+     * Check if an email address belongs to an unsubscribed user.
+     */
+    private function isUnsubscribed(string $email): bool
+    {
+        $db = \Config\Database::connect();
+        $user = $db->table('users')
+                   ->select('unsuscribe')
+                   ->where('email', $email)
+                   ->get()
+                   ->getRow();
+        
+        return $user && (int)($user->unsuscribe ?? 0) === 1;
     }
 }

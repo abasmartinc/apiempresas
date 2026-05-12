@@ -32,11 +32,12 @@ class EmailAutomationCommand extends BaseCommand
         // Solo procesamos usuarios FREE activos
         $db = \Config\Database::connect();
         $usersToCheck = $db->table('users')
-            ->select('users.*, usersuscriptions.plan_id')
-            ->join('usersuscriptions', 'usersuscriptions.user_id = users.id')
-            ->where('usersuscriptions.status', 'active')
-            ->where('usersuscriptions.plan_id', 1) // 1 = FREE
+            ->select('users.*, user_subscriptions.plan_id')
+            ->join('user_subscriptions', 'user_subscriptions.user_id = users.id')
+            ->where('user_subscriptions.status', 'active')
+            ->where('user_subscriptions.plan_id', 1) // 1 = FREE
             ->where('users.is_admin', 0)
+            ->where('users.unsuscribe', 0)
             ->get()->getResultArray();
 
         CLI::write('- Usuarios Free detectados: ' . count($usersToCheck));
