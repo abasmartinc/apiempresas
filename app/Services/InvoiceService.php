@@ -20,7 +20,7 @@ class InvoiceService
     /**
      * Genera un registro de factura y su PDF correspondiente
      */
-    public function createInvoiceFromPayment(int $userId, int $planId, array $billingData = [], ?string $stripeInvoiceId = null)
+    public function createInvoiceFromPayment(int $userId, int $planId, array $billingData = [], ?string $stripeInvoiceId = null, ?float $forcedAmount = null, ?float $forcedTax = null)
     {
         $userModel = new UserModel();
         $user = $userModel->find($userId);
@@ -43,9 +43,8 @@ class InvoiceService
         }
 
         // Datos de la factura
-        $amount = (float)$plan->price_monthly;
-        $taxRate = 0.21; // 21% IVA
-        $taxAmount = $amount * $taxRate;
+        $amount = $forcedAmount ?? (float)$plan->price_monthly;
+        $taxAmount = $forcedTax ?? ($amount * 0.21); // 21% IVA default
         $totalAmount = $amount + $taxAmount;
 
         $invoiceData = [

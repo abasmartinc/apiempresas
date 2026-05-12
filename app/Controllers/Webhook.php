@@ -140,16 +140,21 @@ class Webhook extends Controller
         }
 
         // 3. Desactivar suscripciones anteriores en nuestra BD
-        $subscriptionModel->where('user_id', $userId)->set(['status' => 'inactive'])->update();
+        // Nota: El ENUM no permite 'inactive', usamos '' o 'canceled'. 
+        // Para mantener coherencia con el resto del sistema, usaremos '' que es lo que el ENUM permite como fallback.
+        $subscriptionModel->where('user_id', $userId)->set(['status' => ''])->update();
 
-        // 4. Crear nueva suscripción
+        // 4. Crear nueva suscripción (Recuperamos fechas reales de Stripe)
+        $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));
+        $stripeSub = $stripe->subscriptions->retrieve($stripeSubscriptionId);
+
         $subscriptionModel->insert([
             'user_id'                => $userId,
             'plan_id'                => $plan->id,
             'stripe_subscription_id' => $stripeSubscriptionId,
             'status'                 => 'active',
-            'current_period_start'   => date('Y-m-d H:i:s'),
-            'current_period_end'     => date('Y-m-d H:i:s', strtotime('+1 month')),
+            'current_period_start'   => date('Y-m-d H:i:s', $stripeSub->current_period_start),
+            'current_period_end'     => date('Y-m-d H:i:s', $stripeSub->current_period_end),
             'created_at'             => date('Y-m-d H:i:s'),
             'updated_at'             => date('Y-m-d H:i:s'),
         ]);
@@ -212,11 +217,16 @@ class Webhook extends Controller
         }
 
         if ($sub) {
-            // Actualizar fecha de fin
+            // Recuperar suscripción de Stripe para saber el periodo real (Mensual vs Anual)
+            $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));
+            $stripeSub = $stripe->subscriptions->retrieve($stripeSubscriptionId);
+
+            // Actualizar fecha de fin usando los datos reales de Stripe
             $subscriptionModel->update($sub->id, [
-                'current_period_end' => date('Y-m-d H:i:s', strtotime('+1 month')),
-                'status'             => 'active',
-                'updated_at'         => date('Y-m-d H:i:s'),
+                'current_period_start' => date('Y-m-d H:i:s', $stripeSub->current_period_start),
+                'current_period_end'   => date('Y-m-d H:i:s', $stripeSub->current_period_end),
+                'status'               => 'active',
+                'updated_at'           => date('Y-m-d H:i:s'),
             ]);
 
             // Extraer datos fiscales del objeto Invoice de Stripe
@@ -271,7 +281,9 @@ class Webhook extends Controller
                     'address' => $billingAddress,
                     'vat'     => $billingVat
                 ],
-                $invoice->id // Stripe Invoice ID (in_...)
+                $invoice->id, // Stripe Invoice ID (in_...)
+                (float)($invoice->amount_paid / 100) - (float)($invoice->tax / 100), // Base Amount
+                (float)($invoice->tax / 100) // Tax
             );
 
             // Enviar notificación por email al admin
@@ -407,7 +419,7 @@ class Webhook extends Controller
         $subscriptionModel = new UsersuscriptionsModel();
         
         $subscriptionModel->where('stripe_subscription_id', $stripeSubscriptionId)
-                         ->set(['status' => 'inactive', 'canceled_at' => date('Y-m-d H:i:s')])
+                         ->set(['status' => 'canceled', 'canceled_at' => date('Y-m-d H:i:s')])
                          ->update();
                          
         log_message('info', "[Webhook::stripe] Subscription canceled: {$stripeSubscriptionId}");
