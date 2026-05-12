@@ -34,20 +34,24 @@ class ApiUsageLogger
         $now = date('Y-m-d H:i:s');
         $today = date('Y-m-d');
 
-        // 1) Insert detallado
-        $this->requestsModel->insert([
-            'user_id' => (int)$ctx['user_id'],
-            'api_key_id' => (int)$ctx['api_key_id'],
-            'subscription_id' => $ctx['subscription_id'] !== null ? (int)$ctx['subscription_id'] : null,
-            'endpoint' => (string)$ctx['endpoint'],
-            'http_method' => (string)$ctx['http_method'],
-            'status_code' => (int)$ctx['status_code'],
-            'request_id' => $ctx['request_id'] ? (string)$ctx['request_id'] : null,
-            'ip_address' => $ctx['ip_address'] ? (string)$ctx['ip_address'] : null,
-            'user_agent' => $ctx['user_agent'] ? (string)$ctx['user_agent'] : null,
-            'duration_ms' => $ctx['duration_ms'] !== null ? (int)$ctx['duration_ms'] : null,
-            'created_at' => $now,
-        ]);
+        // 1) Insert detallado (Omitir si es búsqueda profesional para ahorrar recursos)
+        $isSearch = (strpos((string)$ctx['endpoint'], 'api/v1/professional/search') !== false);
+
+        if (!$isSearch) {
+            $this->requestsModel->insert([
+                'user_id' => (int)$ctx['user_id'],
+                'api_key_id' => (int)$ctx['api_key_id'],
+                'subscription_id' => $ctx['subscription_id'] !== null ? (int)$ctx['subscription_id'] : null,
+                'endpoint' => (string)$ctx['endpoint'],
+                'http_method' => (string)$ctx['http_method'],
+                'status_code' => (int)$ctx['status_code'],
+                'request_id' => $ctx['request_id'] ? (string)$ctx['request_id'] : null,
+                'ip_address' => $ctx['ip_address'] ? (string)$ctx['ip_address'] : null,
+                'user_agent' => $ctx['user_agent'] ? (string)$ctx['user_agent'] : null,
+                'duration_ms' => $ctx['duration_ms'] !== null ? (int)$ctx['duration_ms'] : null,
+                'created_at' => $now,
+            ]);
+        }
 
         // 2) Upsert diario (MySQL ON DUPLICATE KEY)
         // Requiere unique (user_id, plan_id, date) que YA tienes.

@@ -172,7 +172,7 @@ class ApiKeyFilter implements FilterInterface
                 cache()->save($cacheKey, $currentUsage, 30);
             }
 
-            if ($currentUsage >= $monthlyQuota && (int)$planId !== 7) {
+            if ($currentUsage >= $monthlyQuota) {
                 return service('response')
                     ->setStatusCode(429)
                     ->setJSON([
@@ -257,12 +257,14 @@ class ApiKeyFilter implements FilterInterface
             $ua = (string)$request->getUserAgent();
             if (strlen($ua) > 255) $ua = substr($ua, 0, 255);
 
-            // Optimización Enterprise: No loguear cada petición exitosa en la tabla pesada api_requests
-            // si es un cliente Enterprise, para ahorrar I/O.
+            $isSearch = (strpos($endpoint, 'api/v1/professional/search') !== false);
+
+            // Optimización Enterprise/Search: No loguear peticiones en la tabla pesada api_requests
+            // si es un cliente Enterprise (solo fallos) o es el endpoint de búsqueda (nunca), para ahorrar I/O.
             $isEnterprise = ($meta['plan_slug'] === 'enterprise');
             
             if ($db->tableExists('api_requests')) {
-                if (!$isEnterprise || $statusCode !== 200) {
+                if (!$isSearch && (!$isEnterprise || $statusCode !== 200)) {
                     $db->table('api_requests')->insert([
                         'user_id'         => (int)$meta['user_id'],
                         'api_key_id'      => (int)$meta['api_key_id'],
@@ -281,7 +283,7 @@ class ApiKeyFilter implements FilterInterface
             }
 
             $skipBilling = self::$apiSkipBilling;
-            if (!$skipBilling && (strpos($endpoint, 'api/v1/professional/search') !== false)) {
+            if (!$skipBilling && $isSearch) {
                 $skipBilling = true;
             }
 
