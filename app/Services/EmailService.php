@@ -264,13 +264,13 @@ class EmailService
 
         if (!$template) {
             log_message('error', "[EmailService] Plantilla no encontrada: {$slug}");
-            return false;
+            return ['success' => false, 'body' => ''];
         }
 
         // Check if the recipient is unsubscribed
         if ($this->isUnsubscribed($to)) {
             log_message('info', "[EmailService] Email [{$slug}] saltado para {$to} por unsuscribe=1");
-            return true; // Return true as if handled
+            return ['success' => true, 'body' => '']; // Return true as if handled
         }
 
         $email = Services::email();
@@ -299,14 +299,14 @@ class EmailService
             if ($userId > 0) {
                 $this->logToDatabase($userId, $subject, $body, 'success');
             }
-            return true;
+            return ['success' => true, 'body' => $body];
         } else {
             $error = $email->printDebugger(['headers']);
             log_message('error', "[EmailService] Error al enviar [{$slug}] a {$to}: " . $error);
             if ($userId > 0) {
                 $this->logToDatabase($userId, $subject, $body, 'error', $error);
             }
-            return false;
+            return ['success' => false, 'body' => ''];
         }
     }
 
