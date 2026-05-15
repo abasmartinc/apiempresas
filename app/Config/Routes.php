@@ -134,6 +134,8 @@ $routes->post('api/user/log-event', 'Api\EventTracker::log');
 
 // Swagger
 $routes->cli('swagger:generate', 'App\Commands\GenerateSwaggerCommand::run');
+$routes->get('api/docs', 'Api\Docs::index');
+$routes->get('api/docs/openapi.json', 'Api\Docs::json');
 $routes->get('documentation', 'Documentation::index');
 
 

@@ -3,7 +3,7 @@
         'name' => 'codeigniter4/framework',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '83742094c457acb7aaee7c2c4857c1a1febb724f',
+        'reference' => '9237fb9c6125c5da1096b3f96300d767b48593ca',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -31,7 +31,7 @@
         'codeigniter4/framework' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '83742094c457acb7aaee7c2c4857c1a1febb724f',
+            'reference' => '9237fb9c6125c5da1096b3f96300d767b48593ca',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -278,7 +278,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../nikic/php-parser',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
         ),
         'openai-php/client' => array(
             'pretty_version' => 'v0.19.1',
@@ -382,6 +382,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'phpstan/phpdoc-parser' => array(
+            'pretty_version' => '2.3.2',
+            'version' => '2.3.2.0',
+            'reference' => 'a004701b11273a26cd7955a61d67a7f1e525a45a',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../phpstan/phpdoc-parser',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'phpunit/php-code-coverage' => array(
             'pretty_version' => '10.1.16',
             'version' => '10.1.16.0',
@@ -461,7 +470,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../psr/container',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
         ),
         'psr/event-dispatcher' => array(
             'pretty_version' => '1.0.0',
@@ -541,6 +550,15 @@
                 0 => '1.0|2.0|3.0',
                 1 => '3.0.0',
             ),
+        ),
+        'radebatz/type-info-extras' => array(
+            'pretty_version' => '1.0.7',
+            'version' => '1.0.7.0',
+            'reference' => '95a524a74a61648b44e355cb33d38db4b17ef5ce',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../radebatz/type-info-extras',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'ralouphie/getallheaders' => array(
             'pretty_version' => '3.0.3',
@@ -783,7 +801,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/console',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
         ),
         'symfony/deprecation-contracts' => array(
             'pretty_version' => 'v3.6.0',
@@ -834,7 +852,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/finder',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
         ),
         'symfony/options-resolver' => array(
             'pretty_version' => 'v7.4.8',
@@ -852,7 +870,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/polyfill-ctype',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
         ),
         'symfony/polyfill-intl-grapheme' => array(
             'pretty_version' => 'v1.34.0',
@@ -861,7 +879,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/polyfill-intl-grapheme',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
         ),
         'symfony/polyfill-intl-idn' => array(
             'pretty_version' => 'v1.34.0',
@@ -888,7 +906,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/polyfill-mbstring',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
         ),
         'symfony/polyfill-php80' => array(
             'pretty_version' => 'v1.34.0',
@@ -951,7 +969,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/service-contracts',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
         ),
         'symfony/stopwatch' => array(
             'pretty_version' => 'v8.0.8',
@@ -969,7 +987,16 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/string',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
+        ),
+        'symfony/type-info' => array(
+            'pretty_version' => 'v8.0.9',
+            'version' => '8.0.9.0',
+            'reference' => '08723aceb8c3271e8cb3db8b2565728b0c88e866',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/type-info',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'symfony/yaml' => array(
             'pretty_version' => 'v8.0.8',
@@ -978,7 +1005,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/yaml',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
         ),
         'thecodingmachine/safe' => array(
             'pretty_version' => 'v3.4.0',
@@ -999,13 +1026,13 @@
             'dev_requirement' => true,
         ),
         'zircote/swagger-php' => array(
-            'pretty_version' => '4.11.1',
-            'version' => '4.11.1.0',
-            'reference' => '7df10e8ec47db07c031db317a25bef962b4e5de1',
+            'pretty_version' => '6.1.2',
+            'version' => '6.1.2.0',
+            'reference' => 'f66289ab9c9c3a1cf70222e0bebbe7c6c7109f2f',
             'type' => 'library',
             'install_path' => __DIR__ . '/../zircote/swagger-php',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
         ),
     ),
 );

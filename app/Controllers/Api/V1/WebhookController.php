@@ -5,6 +5,7 @@ namespace App\Controllers\Api\V1;
 use CodeIgniter\RESTful\ResourceController;
 use App\Services\PlanAccessService;
 use App\Services\WebhookService;
+use OpenApi\Attributes as OA;
 
 class WebhookController extends ResourceController
 {
@@ -17,6 +18,22 @@ class WebhookController extends ResourceController
         $this->webhookService = new WebhookService();
     }
 
+    #[OA\Get(
+        path: "/api/v1/webhooks",
+        summary: "Listar Webhooks",
+        description: "Obtener todos los webhooks configurados para recibir notificaciones (Requiere Plan Business).",
+        tags: ["3. Plan Business"]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Lista de webhooks",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "success", type: "boolean", example: true),
+                new OA\Property(property: "data", type: "array", items: new OA\Items(type: "object"))
+            ]
+        )
+    )]
     public function index()
     {
         $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
@@ -33,6 +50,32 @@ class WebhookController extends ResourceController
         ]);
     }
 
+    #[OA\Post(
+        path: "/api/v1/webhooks",
+        summary: "Crear Webhook",
+        description: "Registra una nueva URL para recibir eventos asíncronos.",
+        tags: ["3. Plan Business"]
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "url", type: "string", format: "uri"),
+                new OA\Property(property: "event", type: "string")
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 201,
+        description: "Webhook creado",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "success", type: "boolean", example: true),
+                new OA\Property(property: "message", type: "string"),
+                new OA\Property(property: "id", type: "integer")
+            ]
+        )
+    )]
     public function create()
     {
         $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
@@ -59,6 +102,29 @@ class WebhookController extends ResourceController
         ]);
     }
 
+    #[OA\Delete(
+        path: "/api/v1/webhooks/{id}",
+        summary: "Eliminar Webhook",
+        description: "Elimina un webhook previamente configurado.",
+        tags: ["3. Plan Business"]
+    )]
+    #[OA\Parameter(
+        name: "id",
+        in: "path",
+        required: true,
+        description: "ID del webhook a eliminar",
+        schema: new OA\Schema(type: "integer")
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Webhook eliminado",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "success", type: "boolean", example: true),
+                new OA\Property(property: "message", type: "string")
+            ]
+        )
+    )]
     public function delete($id = null)
     {
         $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';

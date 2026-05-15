@@ -11,7 +11,7 @@ use OpenApi\Generator;
 /**
  * An object representing a server variable for server URL template substitution.
  *
- * @see [OAI Server Variable Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-variable-object)
+ * @see [Server Variable Object](https://spec.openapis.org/oas/v3.1.1.html#server-variable-object)
  *
  * @Annotation
  */
@@ -27,7 +27,7 @@ class ServerVariable extends AbstractAnnotation
     /**
      * An enumeration of values to be used if the substitution options are from a limited set.
      *
-     * @var array<string|int|float|bool|\UnitEnum>|class-string
+     * @var list<string|int|float|bool|\UnitEnum>|class-string
      */
     public $enum = Generator::UNDEFINED;
 

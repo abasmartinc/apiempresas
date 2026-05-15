@@ -5,6 +5,7 @@ namespace App\Controllers\Api\V1;
 use CodeIgniter\RESTful\ResourceController;
 use App\Services\PlanAccessService;
 use App\Services\CompanyRadarService;
+use OpenApi\Attributes as OA;
 
 class RadarApiController extends ResourceController
 {
@@ -21,6 +22,37 @@ class RadarApiController extends ResourceController
      * GET /api/v1/companies/radar
      * Filtros: province, priority, range (hoy, 7, 30)
      */
+    #[OA\Get(
+        path: "/api/v1/companies/radar",
+        summary: "Búsqueda Radar (Leads)",
+        description: "Obtener empresas de reciente creación según la provincia y prioridad. Los resultados están limitados por tu plan.",
+        tags: ["3. Plan Business"]
+    )]
+    #[OA\Parameter(
+        name: "province",
+        in: "query",
+        required: false,
+        description: "Filtro por provincia",
+        schema: new OA\Schema(type: "string")
+    )]
+    #[OA\Parameter(
+        name: "range",
+        in: "query",
+        required: false,
+        description: "Rango de tiempo: 'hoy', '7' días o '30' días",
+        schema: new OA\Schema(type: "string", default: "hoy")
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Leads encontrados",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "success", type: "boolean", example: true),
+                new OA\Property(property: "meta", type: "object"),
+                new OA\Property(property: "data", type: "array", items: new OA\Items(type: "object"))
+            ]
+        )
+    )]
     public function index()
     {
         $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';

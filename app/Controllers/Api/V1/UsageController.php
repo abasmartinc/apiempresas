@@ -7,6 +7,7 @@ use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\CompanyModel;
 use App\Models\ApiRequestsModel;
+use OpenApi\Attributes as OA;
 
 class UsageController extends ResourceController
 {
@@ -30,6 +31,32 @@ class UsageController extends ResourceController
      * Get usage statistics and history for the API key holder
      * GET /api/v1/usage
      */
+    #[OA\Get(
+        path: "/api/v1/usage",
+        summary: "Obtener Estadísticas de Consumo",
+        description: "Devuelve el recuento de peticiones del mes actual y el historial reciente de empresas consultadas asociado a la API Key.",
+        tags: ["1. Plan Free / General"]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Estadísticas y datos del historial",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "success", type: "boolean", example: true),
+                new OA\Property(property: "data", type: "object")
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "No autorizado",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "success", type: "boolean", example: false),
+                new OA\Property(property: "error", type: "string")
+            ]
+        )
+    )]
     public function index()
     {
         $userId = \App\Filters\ApiKeyFilter::$apiMeta['user_id'] ?? null;

@@ -6,6 +6,7 @@ use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\CompanyModel;
+use OpenApi\Attributes as OA;
 
 class Professional extends ResourceController
 {
@@ -26,6 +27,29 @@ class Professional extends ResourceController
      * Step 1: Search / Autocomplete (Free)
      * GET /api/v1/professional/search?q=...
      */
+    #[OA\Get(
+        path: "/api/v1/professional/search",
+        summary: "Búsqueda Autocompletado Profesional",
+        description: "Devuelve coincidencias ligeras para autocompletado en búsquedas.",
+        tags: ["2. Plan Professional"]
+    )]
+    #[OA\Parameter(
+        name: "q",
+        in: "query",
+        required: true,
+        description: "Término de búsqueda",
+        schema: new OA\Schema(type: "string")
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Resultados del autocompletado",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "success", type: "boolean", example: true),
+                new OA\Property(property: "data", type: "array", items: new OA\Items(type: "object"))
+            ]
+        )
+    )]
     public function search()
     {
         $q = trim((string) $this->request->getGet('q'));
@@ -73,6 +97,29 @@ class Professional extends ResourceController
      * Step 2: Company Details (Billed)
      * GET /api/v1/professional/details?cif=...
      */
+    #[OA\Get(
+        path: "/api/v1/professional/details",
+        summary: "Detalles Profesionales de Empresa",
+        description: "Devuelve los datos profesionales de una empresa basados en su CIF.",
+        tags: ["2. Plan Professional"]
+    )]
+    #[OA\Parameter(
+        name: "cif",
+        in: "query",
+        required: true,
+        description: "El CIF de la empresa",
+        schema: new OA\Schema(type: "string")
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Detalles completos de la empresa",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "success", type: "boolean", example: true),
+                new OA\Property(property: "data", type: "object")
+            ]
+        )
+    )]
     public function details()
     {
         $cif = trim((string) $this->request->getGet('cif'));

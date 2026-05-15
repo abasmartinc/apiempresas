@@ -31,6 +31,12 @@
                                 Autenticación
                             </a>
                         </li>
+                        <li>
+                            <a href="<?= site_url('api/docs') ?>" style="color: #2563eb; font-weight: 800;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                                Swagger UI (Interactivo)
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
@@ -93,6 +99,18 @@
             <div class="docs-content">
                 <h1>Documentación de la API</h1>
                 <p>Bienvenido a la documentación oficial de <strong>APIEmpresas.es</strong>. Nuestra API te permite consultar datos mercantiles actualizados de empresas españolas de forma rápida y sencilla.</p>
+
+                <!-- SWAGGER CTA -->
+                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 20px; padding: 28px; margin: 32px 0; display: flex; align-items: center; justify-content: space-between; gap: 24px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);">
+                    <div>
+                        <h3 style="margin: 0 0 8px 0; color: #1e40af; font-size: 1.2rem; font-weight: 800;">🚀 Consola de Pruebas Interactiva</h3>
+                        <p style="margin: 0; color: #1e40af; font-size: 1rem; opacity: 0.85;">¿Quieres probar los endpoints ahora mismo? Accede a Swagger UI y lánzalos en tiempo real con tu API Key.</p>
+                    </div>
+                    <a href="<?= site_url('api/docs') ?>" class="btn primary" style="background: #2563eb; color: white !important; white-space: nowrap; padding: 14px 28px; border-radius: 14px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
+                        <span>Ir a Swagger UI</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    </a>
+                </div>
 
                 <!-- USE CASES -->
                 <div class="use-case-box" style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border: 1px solid #e2e8f0; padding: 40px; border-radius: 24px; margin: 40px 0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);">

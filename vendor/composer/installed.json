@@ -2832,6 +2832,56 @@
             "install-path": "../phpseclib/phpseclib"
         },
         {
+            "name": "phpstan/phpdoc-parser",
+            "version": "2.3.2",
+            "version_normalized": "2.3.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phpstan/phpdoc-parser.git",
+                "reference": "a004701b11273a26cd7955a61d67a7f1e525a45a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/a004701b11273a26cd7955a61d67a7f1e525a45a",
+                "reference": "a004701b11273a26cd7955a61d67a7f1e525a45a",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "doctrine/annotations": "^2.0",
+                "nikic/php-parser": "^5.3.0",
+                "php-parallel-lint/php-parallel-lint": "^1.2",
+                "phpstan/extension-installer": "^1.0",
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
+                "phpunit/phpunit": "^9.6",
+                "symfony/process": "^5.2"
+            },
+            "time": "2026-01-25T14:56:51+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "PHPStan\\PhpDocParser\\": [
+                        "src/"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "PHPDoc parser with support for nullable, intersection and generic types",
+            "support": {
+                "issues": "https://github.com/phpstan/phpdoc-parser/issues",
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/2.3.2"
+            },
+            "install-path": "../phpstan/phpdoc-parser"
+        },
+        {
             "name": "phpunit/php-code-coverage",
             "version": "10.1.16",
             "version_normalized": "10.1.16.0",
@@ -3726,6 +3776,71 @@
                 "source": "https://github.com/php-fig/log/tree/3.0.2"
             },
             "install-path": "../psr/log"
+        },
+        {
+            "name": "radebatz/type-info-extras",
+            "version": "1.0.7",
+            "version_normalized": "1.0.7.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/DerManoMann/type-info-extras.git",
+                "reference": "95a524a74a61648b44e355cb33d38db4b17ef5ce"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/DerManoMann/type-info-extras/zipball/95a524a74a61648b44e355cb33d38db4b17ef5ce",
+                "reference": "95a524a74a61648b44e355cb33d38db4b17ef5ce",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.2",
+                "phpstan/phpdoc-parser": "^2.0",
+                "symfony/type-info": "^7.3.8 || ^7.4.1 || ^8.0 || ^8.1-@dev"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.70",
+                "phpstan/phpstan": "^2.1",
+                "phpunit/phpunit": "^11.0"
+            },
+            "time": "2026-03-06T22:40:29+00:00",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.x-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Radebatz\\TypeInfoExtras\\": "src"
+                },
+                "exclude-from-classmap": [
+                    "/tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Martin Rademacher",
+                    "email": "mano@radebatz.org"
+                }
+            ],
+            "description": "Extras for symfony/type-info",
+            "homepage": "http://radebatz.net/mano/",
+            "keywords": [
+                "component",
+                "symfony",
+                "type-info",
+                "types"
+            ],
+            "support": {
+                "issues": "https://github.com/DerManoMann/type-info-extras/issues",
+                "source": "https://github.com/DerManoMann/type-info-extras/tree/1.0.7"
+            },
+            "install-path": "../radebatz/type-info-extras"
         },
         {
             "name": "ralouphie/getallheaders",
@@ -7279,6 +7394,91 @@
             "install-path": "../symfony/string"
         },
         {
+            "name": "symfony/type-info",
+            "version": "v8.0.9",
+            "version_normalized": "8.0.9.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/type-info.git",
+                "reference": "08723aceb8c3271e8cb3db8b2565728b0c88e866"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/type-info/zipball/08723aceb8c3271e8cb3db8b2565728b0c88e866",
+                "reference": "08723aceb8c3271e8cb3db8b2565728b0c88e866",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.4",
+                "psr/container": "^1.1|^2.0"
+            },
+            "conflict": {
+                "phpstan/phpdoc-parser": "<1.30"
+            },
+            "require-dev": {
+                "phpstan/phpdoc-parser": "^1.30|^2.0"
+            },
+            "time": "2026-04-29T15:02:55+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\TypeInfo\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mathias Arlaud",
+                    "email": "mathias.arlaud@gmail.com"
+                },
+                {
+                    "name": "Baptiste LEDUC",
+                    "email": "baptiste.leduc@gmail.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Extracts PHP types information.",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "PHPStan",
+                "phpdoc",
+                "symfony",
+                "type"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/type-info/tree/v8.0.9"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "install-path": "../symfony/type-info"
+        },
+        {
             "name": "symfony/yaml",
             "version": "v8.0.8",
             "version_normalized": "8.0.8.0",
@@ -7557,49 +7757,52 @@
         },
         {
             "name": "zircote/swagger-php",
-            "version": "4.11.1",
-            "version_normalized": "4.11.1.0",
+            "version": "6.1.2",
+            "version_normalized": "6.1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zircote/swagger-php.git",
-                "reference": "7df10e8ec47db07c031db317a25bef962b4e5de1"
+                "reference": "f66289ab9c9c3a1cf70222e0bebbe7c6c7109f2f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/7df10e8ec47db07c031db317a25bef962b4e5de1",
-                "reference": "7df10e8ec47db07c031db317a25bef962b4e5de1",
+                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/f66289ab9c9c3a1cf70222e0bebbe7c6c7109f2f",
+                "reference": "f66289ab9c9c3a1cf70222e0bebbe7c6c7109f2f",
                 "shasum": ""
             },
             "require": {
-                "ext-json": "*",
-                "php": ">=7.2",
+                "nikic/php-parser": "^4.19 || ^5.0",
+                "php": ">=8.2",
+                "phpstan/phpdoc-parser": "^2.0",
                 "psr/log": "^1.1 || ^2.0 || ^3.0",
+                "radebatz/type-info-extras": "^1.0.2",
+                "symfony/console": "^7.4 || ^8.0",
                 "symfony/deprecation-contracts": "^2 || ^3",
-                "symfony/finder": ">=2.2",
-                "symfony/yaml": ">=3.3"
+                "symfony/finder": "^5.0 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/yaml": "^5.4 || ^6.0 || ^7.0 || ^8.0"
+            },
+            "conflict": {
+                "symfony/process": ">=6, <6.4.14"
             },
             "require-dev": {
                 "composer/package-versions-deprecated": "^1.11",
-                "doctrine/annotations": "^1.7 || ^2.0",
-                "friendsofphp/php-cs-fixer": "^2.17 || 3.62.0",
-                "phpstan/phpstan": "^1.6",
-                "phpunit/phpunit": ">=8",
-                "vimeo/psalm": "^4.23"
+                "doctrine/annotations": "^2.0",
+                "friendsofphp/php-cs-fixer": "^3.62.0",
+                "phpstan/phpstan": "^2.0",
+                "phpunit/phpunit": "^11.5 || >=12.5.22",
+                "rector/rector": "^2.3.1"
             },
-            "suggest": {
-                "doctrine/annotations": "^1.7 || ^2.0"
-            },
-            "time": "2024-10-15T19:20:02+00:00",
+            "time": "2026-04-28T04:47:53+00:00",
             "bin": [
                 "bin/openapi"
             ],
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.x-dev"
+                    "dev-master": "6.x-dev"
                 }
             },
-            "installation-source": "source",
+            "installation-source": "dist",
             "autoload": {
                 "psr-4": {
                     "OpenApi\\": "src"
@@ -7625,8 +7828,8 @@
                     "homepage": "https://radebatz.net"
                 }
             ],
-            "description": "swagger-php - Generate interactive documentation for your RESTful API using phpdoc annotations",
-            "homepage": "https://github.com/zircote/swagger-php/",
+            "description": "Generate interactive documentation for your RESTful API using PHP attributes (preferred) or PHPDoc annotations",
+            "homepage": "https://github.com/zircote/swagger-php",
             "keywords": [
                 "api",
                 "json",
@@ -7635,8 +7838,14 @@
             ],
             "support": {
                 "issues": "https://github.com/zircote/swagger-php/issues",
-                "source": "https://github.com/zircote/swagger-php/tree/4.11.1"
+                "source": "https://github.com/zircote/swagger-php/tree/6.1.2"
             },
+            "funding": [
+                {
+                    "url": "https://github.com/zircote",
+                    "type": "github"
+                }
+            ],
             "install-path": "../zircote/swagger-php"
         }
     ],
@@ -7656,7 +7865,6 @@
         "mikey179/vfsstream",
         "myclabs/deep-copy",
         "nexusphp/cs-config",
-        "nikic/php-parser",
         "phar-io/manifest",
         "phar-io/version",
         "phpunit/php-code-coverage",
@@ -7666,7 +7874,6 @@
         "phpunit/php-timer",
         "phpunit/phpunit",
         "predis/predis",
-        "psr/container",
         "psr/event-dispatcher",
         "react/cache",
         "react/child-process",
@@ -7690,23 +7897,14 @@
         "sebastian/recursion-context",
         "sebastian/type",
         "sebastian/version",
-        "symfony/console",
         "symfony/event-dispatcher",
         "symfony/event-dispatcher-contracts",
         "symfony/filesystem",
-        "symfony/finder",
-        "symfony/polyfill-ctype",
-        "symfony/polyfill-intl-grapheme",
-        "symfony/polyfill-mbstring",
         "symfony/polyfill-php80",
         "symfony/polyfill-php81",
         "symfony/polyfill-php84",
         "symfony/process",
-        "symfony/service-contracts",
         "symfony/stopwatch",
-        "symfony/string",
-        "symfony/yaml",
-        "theseer/tokenizer",
-        "zircote/swagger-php"
+        "theseer/tokenizer"
     ]
 }

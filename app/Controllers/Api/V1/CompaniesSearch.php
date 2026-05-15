@@ -6,6 +6,7 @@ use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\CompanyModel;
+use OpenApi\Attributes as OA;
 
 class CompaniesSearch extends ResourceController
 {
@@ -22,6 +23,50 @@ class CompaniesSearch extends ResourceController
         helper('api');
     }
 
+    #[OA\Get(
+        path: "/api/v1/companies/search",
+        summary: "Búsqueda de Empresas",
+        description: "Busca empresas por nombre o CIF. Permite búsqueda exacta o paginada.",
+        tags: ["1. Plan Free / General"]
+    )]
+    #[OA\Parameter(
+        name: "q",
+        in: "query",
+        required: true,
+        description: "Nombre o CIF de la empresa a buscar",
+        schema: new OA\Schema(type: "string")
+    )]
+    #[OA\Parameter(
+        name: "multiple",
+        in: "query",
+        required: false,
+        description: "Si es true, devuelve una lista paginada de coincidencias. Si es false, devuelve la mejor coincidencia.",
+        schema: new OA\Schema(type: "boolean", default: false)
+    )]
+    #[OA\Parameter(
+        name: "limit",
+        in: "query",
+        required: false,
+        description: "Número máximo de resultados por página (solo si multiple=true). Máximo 100.",
+        schema: new OA\Schema(type: "integer", default: 20)
+    )]
+    #[OA\Parameter(
+        name: "page",
+        in: "query",
+        required: false,
+        description: "Número de página (solo si multiple=true).",
+        schema: new OA\Schema(type: "integer", default: 1)
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Resultados de la búsqueda",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "success", type: "boolean", example: true),
+                new OA\Property(property: "data", type: "array", items: new OA\Items(type: "object"))
+            ]
+        )
+    )]
     public function index()
     {
         // Acepta name= o q=

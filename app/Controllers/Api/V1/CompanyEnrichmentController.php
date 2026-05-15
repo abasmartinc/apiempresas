@@ -6,6 +6,7 @@ use CodeIgniter\RESTful\ResourceController;
 use App\Services\PlanAccessService;
 use App\Services\CompanyScoringService;
 use App\Services\CompanyAiService;
+use OpenApi\Attributes as OA;
 
 class CompanyEnrichmentController extends ResourceController
 {
@@ -23,6 +24,29 @@ class CompanyEnrichmentController extends ResourceController
     /**
      * GET /api/v1/companies/score?cif=B12345678
      */
+    #[OA\Get(
+        path: "/api/v1/companies/score",
+        summary: "Scoring Comercial",
+        description: "Obtener la puntuación y desglose de scoring para una empresa.",
+        tags: ["2. Plan Professional"]
+    )]
+    #[OA\Parameter(
+        name: "cif",
+        in: "query",
+        required: true,
+        description: "CIF de la empresa",
+        schema: new OA\Schema(type: "string")
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Datos del scoring comercial",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "success", type: "boolean", example: true),
+                new OA\Property(property: "data", type: "object")
+            ]
+        )
+    )]
     public function score()
     {
         $cif = $this->request->getGet('cif');
@@ -62,6 +86,29 @@ class CompanyEnrichmentController extends ResourceController
     /**
      * GET /api/v1/companies/signals?cif=B12345678
      */
+    #[OA\Get(
+        path: "/api/v1/companies/signals",
+        summary: "Señales Societarias",
+        description: "Obtener eventos societarios relevantes (BORME) de una empresa.",
+        tags: ["2. Plan Professional"]
+    )]
+    #[OA\Parameter(
+        name: "cif",
+        in: "query",
+        required: true,
+        description: "CIF de la empresa",
+        schema: new OA\Schema(type: "string")
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Señales societarias de la empresa",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "success", type: "boolean", example: true),
+                new OA\Property(property: "data", type: "object")
+            ]
+        )
+    )]
     public function signals()
     {
         $cif = $this->request->getGet('cif');
@@ -86,6 +133,29 @@ class CompanyEnrichmentController extends ResourceController
     /**
      * GET /api/v1/companies/insights?cif=B12345678
      */
+    #[OA\Get(
+        path: "/api/v1/companies/insights",
+        summary: "Análisis con Inteligencia Artificial",
+        description: "Obtener un análisis profundo y perfilado de ventas mediante IA.",
+        tags: ["3. Plan Business"]
+    )]
+    #[OA\Parameter(
+        name: "cif",
+        in: "query",
+        required: true,
+        description: "CIF de la empresa",
+        schema: new OA\Schema(type: "string")
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Insights generados por IA",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "success", type: "boolean", example: true),
+                new OA\Property(property: "data", type: "object")
+            ]
+        )
+    )]
     public function insights()
     {
         $cif = $this->request->getGet('cif');
@@ -122,6 +192,29 @@ class CompanyEnrichmentController extends ResourceController
     /**
      * GET /api/v1/companies/contact-prep?cif=B12345678
      */
+    #[OA\Get(
+        path: "/api/v1/companies/contact-prep",
+        summary: "Preparación de Contacto",
+        description: "Obtener tácticas recomendadas por la IA para contactar o vender a la empresa.",
+        tags: ["3. Plan Business"]
+    )]
+    #[OA\Parameter(
+        name: "cif",
+        in: "query",
+        required: true,
+        description: "CIF de la empresa",
+        schema: new OA\Schema(type: "string")
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Tácticas de preparación",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "success", type: "boolean", example: true),
+                new OA\Property(property: "data", type: "object")
+            ]
+        )
+    )]
     public function contactPrep()
     {
         $cif = $this->request->getGet('cif');

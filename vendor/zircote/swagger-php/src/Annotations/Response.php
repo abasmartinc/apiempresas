@@ -6,13 +6,14 @@
 
 namespace OpenApi\Annotations;
 
+use OpenApi\Analysis;
 use OpenApi\Generator;
 
 /**
  * Describes a single response from an API Operation, including design-time,
  * static links to operations based on the response.
  *
- * @see [OAI Response Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#response-object)
+ * @see [Response Object](https://spec.openapis.org/oas/v3.1.1.html#response-object)
  *
  * @Annotation
  */
@@ -21,7 +22,7 @@ class Response extends AbstractAnnotation
     /**
      * The relative or absolute path to a response.
      *
-     * @see [Using refs](https://swagger.io/docs/specification/using-ref/)
+     * @see [Reference Object](https://spec.openapis.org/oas/v3.1.1.html#reference-object)
      *
      * @var string|class-string|object
      */
@@ -48,13 +49,13 @@ class Response extends AbstractAnnotation
     /**
      * Maps a header name to its definition.
      *
-     * RFC7230 states header names are case insensitive.
+     * RFC7230 states header names are case-insensitive.
      *
      * If a response header is defined with the name "Content-Type", it shall be ignored.
      *
      * @see [RFC7230](https://tools.ietf.org/html/rfc7230#page-22)
      *
-     * @var Header[]
+     * @var list<Header>
      */
     public $headers = Generator::UNDEFINED;
 
@@ -76,7 +77,7 @@ class Response extends AbstractAnnotation
      * The key of the map is a short name for the link, following the naming constraints of the names for Component
      * Objects.
      *
-     * @var Link[]
+     * @var list<Link>
      */
     public $links = Generator::UNDEFINED;
 
@@ -113,18 +114,16 @@ class Response extends AbstractAnnotation
         Trace::class,
     ];
 
-    /**
-     * @inheritdoc
-     */
-    public function validate(array $stack = [], array $skip = [], string $ref = '', $context = null): bool
+    #[\Override]
+    public function validate(?Analysis $analysis = null, string $version = OpenApi::DEFAULT_VERSION, ?object $context = null): bool
     {
-        $valid = parent::validate($stack, $skip, $ref, $context);
+        $isValid = parent::validate($analysis, $version, $context);
 
         if (Generator::isDefault($this->description) && Generator::isDefault($this->ref)) {
-            $this->_context->logger->warning($this->identity() . ' One of description or ref is required');
-            $valid = false;
+            $this->_context->logger->warning($this->identity() . ' One of description or ref is required in ' . $this->_context);
+            $isValid = false;
         }
 
-        return $valid;
+        return $isValid;
     }
 }

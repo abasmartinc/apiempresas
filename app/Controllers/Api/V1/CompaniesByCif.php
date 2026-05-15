@@ -6,6 +6,7 @@ use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\CompanyModel;
+use OpenApi\Attributes as OA;
 
 class CompaniesByCif extends ResourceController
 {
@@ -26,6 +27,51 @@ class CompaniesByCif extends ResourceController
         helper('api');
     }
 
+    #[OA\Get(
+        path: "/api/v1/companies",
+        summary: "Obtener Empresa por CIF",
+        description: "Devuelve los datos detallados de una empresa a partir de su CIF exacto.",
+        tags: ["1. Plan Free / General"]
+    )]
+    #[OA\Parameter(
+        name: "cif",
+        in: "query",
+        required: true,
+        description: "El CIF de la empresa a consultar",
+        schema: new OA\Schema(type: "string")
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Datos de la empresa",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "success", type: "boolean", example: true),
+                new OA\Property(property: "data", type: "object")
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: "Error de validación",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "success", type: "boolean", example: false),
+                new OA\Property(property: "error", type: "string", example: "VALIDATION_ERROR"),
+                new OA\Property(property: "message", type: "string")
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: "Empresa no encontrada",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "success", type: "boolean", example: false),
+                new OA\Property(property: "error", type: "string", example: "COMPANY_NOT_FOUND"),
+                new OA\Property(property: "message", type: "string")
+            ]
+        )
+    )]
     public function index()
     {
         $cif = trim((string) $this->request->getGet('cif'));
