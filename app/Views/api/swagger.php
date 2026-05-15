@@ -157,6 +157,7 @@ window.onload = function() {
     ],
     layout: "StandaloneLayout",
     tagsSorter: "alpha",
+    validatorUrl: null,
     onComplete: function() {
         // Traducción inicial
         translateSwagger();
