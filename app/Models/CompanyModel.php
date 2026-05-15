@@ -408,62 +408,97 @@ class CompanyModel extends Model
      * Busca múltiples empresas por término (CIF, Nombre, CNAE o Provincia).
      * Prioriza CIF, luego FULLTEXT y finalmente LIKE.
      */
-    public function searchMany(string $term, int $limit = 20): array
+    public function searchMany(string $term, int $limit = 20, int $page = 1, bool $returnMeta = false): array
     {
         $term = trim($term);
         if ($term === '' || mb_strlen($term) < 2) {
-            return [];
+            return $returnMeta ? ['data' => [], 'meta' => ['page' => $page, 'limit' => $limit, 'has_more' => false]] : [];
         }
 
         $results = [];
         $seenCifs = [];
+        $page = max(1, $page);
+        $offset = ($page - 1) * $limit;
+        
+        // Fetch one extra item to determine has_more
+        $fetchLimit = $limit > 0 ? $limit + ($returnMeta ? 1 : 0) : 0;
+        $targetFetch = $fetchLimit > 0 ? $offset + $fetchLimit : 0;
+        $hasLimit = $targetFetch > 0;
 
         // 1. Priority 1: Búsqueda por CIF (Indexado, muy rápido)
         $builderCif = $this->builder();
-        $builderCif->select(implode(', ', $this->selectFields));
-        $builderCif->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
-        $builderCif->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
+        $builderCif->select('companies.id, companies.cif');
         $builderCif->like('companies.cif', $term, 'after');
-        $builderCif->limit($limit);
+        if ($hasLimit) {
+            $builderCif->limit($targetFetch);
+        }
 
         foreach ($builderCif->get()->getResultArray() as $row) {
             $results[] = $row;
             $seenCifs[$row['cif']] = true;
         }
 
-        if (count($results) >= $limit) {
-            return $results;
+        if (!$hasLimit || count($results) < $targetFetch) {
+            // 2. Priority 2: FULLTEXT por nombre y etiquetas (Muy rápida)
+            try {
+                $cleanTerm = preg_replace('/[+\-><()~*\"@]+/', ' ', $term);
+                $parts = array_filter(explode(' ', $cleanTerm));
+                $booleanTerm = '';
+                foreach ($parts as $p) {
+                    $len = mb_strlen($p, 'UTF-8');
+                    if ($len >= 4) {
+                        $booleanTerm .= '+' . $p . '* ';
+                    } elseif ($len >= 2) {
+                        $booleanTerm .= $p . '* ';
+                    }
+                }
+                $booleanTerm = trim($booleanTerm);
+
+                if ($booleanTerm !== '') {
+                    $sql = "SELECT companies.id, companies.cif, 
+                            MATCH(companies.company_name, companies.cnae_label, companies.registro_mercantil) AGAINST (? IN BOOLEAN MODE) as score
+                            FROM {$this->table}
+                            WHERE MATCH(companies.company_name, companies.cnae_label, companies.registro_mercantil) AGAINST (? IN BOOLEAN MODE)
+                            ORDER BY score DESC";
+                            
+                    if ($hasLimit) {
+                        $sql .= " LIMIT ?";
+                        $query = $this->db->query($sql, [$booleanTerm, $booleanTerm, $targetFetch]);
+                    } else {
+                        $query = $this->db->query($sql, [$booleanTerm, $booleanTerm]);
+                    }
+                    
+                    foreach ($query->getResultArray() as $row) {
+                        if ($hasLimit && count($results) >= $targetFetch)
+                            break;
+                        if (!isset($seenCifs[$row['cif']])) {
+                            $results[] = $row;
+                            $seenCifs[$row['cif']] = true;
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                log_message('debug', '[CompanyModel::searchMany] Fulltext falló: ' . $e->getMessage());
+            }
         }
 
-        // 2. Priority 2: FULLTEXT por nombre y etiquetas (Muy rápida)
-        try {
-            $cleanTerm = preg_replace('/[+\-><()~*\"@]+/', ' ', $term);
-            $parts = array_filter(explode(' ', $cleanTerm));
-            $booleanTerm = '';
-            foreach ($parts as $p) {
-                $len = mb_strlen($p, 'UTF-8');
-                if ($len >= 4) {
-                    $booleanTerm .= '+' . $p . '* ';
-                } elseif ($len >= 2) {
-                    $booleanTerm .= $p . '* ';
+        if (!$hasLimit || count($results) < $targetFetch) {
+            // 3. Fallback: B-Tree Index friendly LIKE (Evitando comodín inicial)
+            if (mb_strlen($term) >= 3) {
+                $builderFallback = $this->builder();
+                $builderFallback->select('companies.id, companies.cif');
+                $builderFallback->like('companies.company_name', $term, 'both');
+
+                if (!empty($seenCifs)) {
+                    $builderFallback->whereNotIn('companies.cif', array_keys($seenCifs));
                 }
-            }
-            $booleanTerm = trim($booleanTerm);
 
-            if ($booleanTerm !== '') {
-                $fields = implode(', ', $this->selectFields);
-                $sql = "SELECT {$fields}, 
-                        MATCH(companies.company_name, companies.cnae_label, companies.registro_mercantil) AGAINST (? IN BOOLEAN MODE) as score
-                        FROM {$this->table}
-                        LEFT JOIN cnae_2009_2025 ON cnae_2009_2025.cnae_2009 = companies.cnae_code
-                        LEFT JOIN company_enrichment ON company_enrichment.company_id = companies.id
-                        WHERE MATCH(companies.company_name, companies.cnae_label, companies.registro_mercantil) AGAINST (? IN BOOLEAN MODE)
-                        ORDER BY score DESC
-                        LIMIT ?";
+                if ($hasLimit) {
+                    $builderFallback->limit($targetFetch - count($results));
+                }
 
-                $query = $this->db->query($sql, [$booleanTerm, $booleanTerm, $limit]);
-                foreach ($query->getResultArray() as $row) {
-                    if (count($results) >= $limit)
+                foreach ($builderFallback->get()->getResultArray() as $row) {
+                    if ($hasLimit && count($results) >= $targetFetch)
                         break;
                     if (!isset($seenCifs[$row['cif']])) {
                         $results[] = $row;
@@ -471,39 +506,55 @@ class CompanyModel extends Model
                     }
                 }
             }
-        } catch (\Throwable $e) {
-            log_message('debug', '[CompanyModel::searchMany] Fulltext falló: ' . $e->getMessage());
         }
 
-        if (count($results) >= $limit) {
-            return $results;
+        if ($offset > 0) {
+            $results = array_slice($results, $offset, $fetchLimit);
+        } else if ($hasLimit) {
+            $results = array_slice($results, 0, $fetchLimit);
         }
 
-        // 3. Fallback: B-Tree Index friendly LIKE (Evitando comodín inicial)
-        if (mb_strlen($term) >= 3) {
-            $builderFallback = $this->builder();
-            $builderFallback->select(implode(', ', $this->selectFields));
-            $builderFallback->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
-            $builderFallback->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
-            $builderFallback->like('companies.company_name', $term, 'both');
-
-            if (!empty($seenCifs)) {
-                $builderFallback->whereNotIn('companies.cif', array_keys($seenCifs));
+        $finalData = [];
+        if (!empty($results)) {
+            $ids = array_column($results, 'id');
+            
+            $builderData = $this->builder();
+            $builderData->select(implode(', ', $this->selectFields));
+            $builderData->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
+            $builderData->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
+            $builderData->whereIn('companies.id', $ids);
+            
+            $fetchedRows = $builderData->get()->getResultArray();
+            
+            // Reordenar para que coincidan con el orden de búsqueda original (que respeta el score)
+            $rowMap = [];
+            foreach ($fetchedRows as $row) {
+                $rowMap[$row['id']] = $row;
             }
-
-            $builderFallback->limit($limit - count($results));
-
-            foreach ($builderFallback->get()->getResultArray() as $row) {
-                if (count($results) >= $limit)
-                    break;
-                if (!isset($seenCifs[$row['cif']])) {
-                    $results[] = $row;
-                    $seenCifs[$row['cif']] = true;
+            
+            foreach ($ids as $id) {
+                if (isset($rowMap[$id])) {
+                    $finalData[] = $rowMap[$id];
                 }
             }
         }
 
-        return $results;
+        if ($returnMeta) {
+            $hasMore = count($results) > $limit;
+            if ($hasMore) {
+                array_pop($finalData);
+            }
+            return [
+                'data' => $finalData,
+                'meta' => [
+                    'page' => $page,
+                    'limit' => $limit,
+                    'has_more' => $hasMore
+                ]
+            ];
+        }
+
+        return $finalData;
     }
 
     /**

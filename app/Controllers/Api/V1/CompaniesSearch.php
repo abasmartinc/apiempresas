@@ -41,65 +41,136 @@ class CompaniesSearch extends ResourceController
             );
         }
 
+        $multiple = $this->request->getGet('multiple') !== null ? filter_var($this->request->getGet('multiple'), FILTER_VALIDATE_BOOLEAN) : false;
+        $limitParam = $this->request->getGet('limit');
+        $limit = $limitParam !== null ? (int)$limitParam : 20;
+
+        // Hard Limit para seguridad (previene OOM errors)
+        if ($limit <= 0 || $limit > 100) {
+            $limit = 100;
+        }
+
+        $pageParam = $this->request->getGet('page');
+        $page = $pageParam !== null ? max(1, (int)$pageParam) : 1;
+
         // Cache interno por query normalizada (1h)
-        $cacheKey = 'company_search_best_' . md5(mb_strtolower($name, 'UTF-8'));
+        if ($multiple) {
+            $cacheKey = 'company_search_mult_v4_' . $limit . '_p' . $page . '_' . md5(mb_strtolower($name, 'UTF-8'));
+        } else {
+            $cacheKey = 'company_search_best_' . md5(mb_strtolower($name, 'UTF-8'));
+        }
         $cachedData = cache($cacheKey);
 
         if (is_array($cachedData) && !empty($cachedData)) {
+            // Retrocompatibilidad con la caché antigua (antes del formato con meta)
+            $isOldFormat = $multiple && !isset($cachedData['data']);
+            $items = $multiple ? ($isOldFormat ? $cachedData : $cachedData['data']) : $cachedData;
+
             // Apply masking if Free plan
             $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
             if ((int)$planId === 1) {
-                $cachedData = mask_company_data($cachedData);
+                if ($multiple) {
+                    foreach ($items as &$item) {
+                        $item = mask_company_data($item);
+                    }
+                } else {
+                    $items = mask_company_data($items);
+                }
             }
 
             // Apply filtering (remove requested fields)
-            $cachedData = filter_company_data($cachedData);
+            if ($multiple) {
+                foreach ($items as &$item) {
+                    $item = filter_company_data($item);
+                }
+            } else {
+                $items = filter_company_data($items);
+            }
 
-            return $this->respond(
-                [
-                    'success' => true,
-                    'data'    => $cachedData,
-                ],
-                ResponseInterface::HTTP_OK
-            );
+            $response = [
+                'success' => true,
+                'data'    => $items,
+            ];
+            
+            if ($multiple && !$isOldFormat && isset($cachedData['meta'])) {
+                $response['meta'] = $cachedData['meta'];
+            }
+
+            return $this->respond($response, ResponseInterface::HTTP_OK);
         }
 
         try {
-            $result = $this->companyModel->getBestByName($name);
+            if ($multiple) {
+                // Pasamos true como cuarto argumento para $returnMeta
+                $results = $this->companyModel->searchMany($name, $limit, $page, true);
 
-            if (!$result) {
-                return $this->respond(
-                    [
-                        'success' => false,
-                        'error'   => 'COMPANY_NOT_FOUND',
-                        'message' => 'No se encontró ninguna empresa similar al nombre indicado.'
-                    ],
-                    ResponseInterface::HTTP_NOT_FOUND
-                );
+                if (empty($results['data'])) {
+                    return $this->respond(
+                        [
+                            'success' => false,
+                            'error'   => 'COMPANY_NOT_FOUND',
+                            'message' => 'No se encontraron empresas similares al nombre indicado.'
+                        ],
+                        ResponseInterface::HTTP_NOT_FOUND
+                    );
+                }
+
+                $dataToCache = $results; // array con 'data' y 'meta'
+                $data = $results['data'];
+            } else {
+                $result = $this->companyModel->getBestByName($name);
+
+                if (!$result) {
+                    return $this->respond(
+                        [
+                            'success' => false,
+                            'error'   => 'COMPANY_NOT_FOUND',
+                            'message' => 'No se encontró ninguna empresa similar al nombre indicado.'
+                        ],
+                        ResponseInterface::HTTP_NOT_FOUND
+                    );
+                }
+
+                // El modelo puede devolver ['data'=>..., 'meta'=>...]; aquí solo nos interesa data
+                $data = $result['data'] ?? $result;
+                $dataToCache = $data;
             }
 
-            // El modelo puede devolver ['data'=>..., 'meta'=>...]; aquí solo nos interesa data
-            $data = $result['data'] ?? $result;
-
-            // Guardar SOLO data en cache (completa)
-            cache()->save($cacheKey, $data, 3600);
+            // Guardar en cache (para multiple guarda ['data'=>..., 'meta'=>...], para single guarda solo 'data')
+            cache()->save($cacheKey, $dataToCache, 3600);
 
             // Apply masking if Free plan
             $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
             if ((int)$planId === 1) {
-                $data = mask_company_data($data);
+                if ($multiple) {
+                    foreach ($data as &$item) {
+                        $item = mask_company_data($item);
+                    }
+                } else {
+                    $data = mask_company_data($data);
+                }
             }
 
             // Apply filtering (remove requested fields)
-            $data = filter_company_data($data);
+            if ($multiple) {
+                foreach ($data as &$item) {
+                    $item = filter_company_data($item);
+                }
+            } else {
+                $data = filter_company_data($data);
+            }
 
-            return $this->respond(
-                [
-                    'success' => true,
-                    'data'    => $data,
-                ],
-                ResponseInterface::HTTP_OK
-            );
+            $response = [
+                'success' => true,
+                'data'    => $data,
+            ];
+            
+            if ($multiple && isset($results['meta'])) {
+                $response['meta'] = $results['meta'];
+            }
+
+            return $this->respond($response, ResponseInterface::HTTP_OK);
+
         } catch (\Throwable $e) {
             log_message('error', '[CompaniesSearch::index] ' . $e->getMessage());
 
