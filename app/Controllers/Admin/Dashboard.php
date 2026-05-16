@@ -613,6 +613,11 @@ class Dashboard extends BaseController
             return redirect()->to(site_url('admin/users'))->with('error', 'Usuario no encontrado.');
         }
 
+        // Check unsubscribe status
+        if ((int)($user->unsuscribe ?? 0) === 1) {
+            return redirect()->to(site_url('admin/users'))->with('error', 'El usuario se ha dado de baja y no desea recibir correos.');
+        }
+
         $email = \Config\Services::email();
 
         $email->setTo($user->email);
@@ -640,7 +645,8 @@ class Dashboard extends BaseController
             'user' => $user,
             'content' => nl2br($finalMessage),
             'subject' => $subject,
-            'tracking_code' => $trackingCode
+            'tracking_code' => $trackingCode,
+            'unsubscribe_url' => (new \App\Services\EmailService())->generateUnsubscribeLink($user->email)
         ]);
 
         $email->setMessage($body);
@@ -769,6 +775,12 @@ class Dashboard extends BaseController
         $errorCount = 0;
 
         foreach ($users as $user) {
+            // Skip if unsubscribed
+            if ((int)($user->unsuscribe ?? 0) === 1) {
+                log_message('info', "[AdminDashboard] Email masivo saltado para {$user->email} por unsuscribe=1");
+                continue;
+            }
+
             // Reset email service for each iteration
             $emailService->clear();
 
@@ -797,7 +809,8 @@ class Dashboard extends BaseController
                 'user' => $user,
                 'content' => nl2br($finalMessage),
                 'subject' => $subject,
-                'tracking_code' => $trackingCode
+                'tracking_code' => $trackingCode,
+                'unsubscribe_url' => (new \App\Services\EmailService())->generateUnsubscribeLink($user->email)
             ]);
 
             $emailService->setMessage($body);

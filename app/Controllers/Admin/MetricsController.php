@@ -311,7 +311,8 @@ class MetricsController extends BaseController
                 'user' => $user,
                 'content' => nl2br($message),
                 'subject' => $subject,
-                'tracking_code' => $trackingCode
+                'tracking_code' => $trackingCode,
+                'unsubscribe_url' => (new \App\Services\EmailService())->generateUnsubscribeLink($user->email)
             ]);
 
             $emailService->setMessage($body);

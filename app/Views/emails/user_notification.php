@@ -41,6 +41,9 @@
             </div>
             <div class="footer">
                 <p>Este mensaje fue enviado a <?= esc($user->email) ?>.</p>
+                <?php if (isset($unsubscribe_url)): ?>
+                    <p>¿No quieres recibir más correos? <a href="<?= $unsubscribe_url ?>" style="color: #94a3b8; text-decoration: underline;">Date de baja aquí</a>.</p>
+                <?php endif; ?>
                 <p>&copy; <?= date('Y') ?> APIEmpresas.es</p>
             </div>
         </div>

@@ -283,6 +283,12 @@ class EmailService
         $subject = $this->parsePlaceholders($template->subject, $data);
         $body    = $this->parsePlaceholders($template->body, $data);
 
+        // Add unsubscribe link if not already present
+        if (strpos($body, 'unsubscribe') === false) {
+            $unsubUrl = $this->generateUnsubscribeLink($to);
+            $body .= "\n\n<p style='font-size:12px; color:#94a3b8; text-align:center; margin-top:30px;'>¿No quieres recibir más correos? <a href='{$unsubUrl}' style='color:#94a3b8; text-decoration:underline;'>Date de baja aquí</a>.</p>";
+        }
+
         $email->setTo($to);
         if (!empty($bcc)) {
             $email->setBCC($bcc);
@@ -336,5 +342,14 @@ class EmailService
                    ->getRow();
         
         return $user && (int)($user->unsuscribe ?? 0) === 1;
+    }
+
+    /**
+     * Generate a secure unsubscribe link for an email address.
+     */
+    public function generateUnsubscribeLink(string $email): string
+    {
+        $hash = hash_hmac('sha256', $email, env('encryption.key', 'apiempresas-secret-key'));
+        return site_url("unsubscribe/{$hash}?email=" . urlencode($email));
     }
 }

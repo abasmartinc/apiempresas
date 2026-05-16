@@ -373,6 +373,10 @@ $routes->get('admin/event-tracking', 'Admin\MetricsController::eventTracking');
 $routes->get('admin/event-tracking/table', 'Admin\MetricsController::getTable');
 $routes->get('admin/event-tracking/ai-analyze', 'Admin\MetricsController::getAiAnalysis');
 
+// Unsubscribe
+$routes->get('unsubscribe/(:any)', 'Unsubscribe::index/$1');
+$routes->post('unsubscribe/confirm', 'Unsubscribe::confirm');
+
 // Company pages: CIF-based and Slug-based URLs (must be last)
 $routes->get('([a-zA-Z][0-9]{7}[a-zA-Z0-9].*)', 'Company::show/$1');
 $routes->get('(:segment)', 'Company::show/$1');
