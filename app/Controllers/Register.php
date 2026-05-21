@@ -62,7 +62,7 @@ class Register extends BaseController
             ],
             'email' => [
                 'label' => 'Correo electrónico',
-                'rules' => 'required|valid_email|max_length[190]|is_unique[users.email]',
+                'rules' => 'required|valid_email|max_length[190]|is_unique[users.email]|not_disposable_email',
             ],
             'password' => [
                 'label' => 'Contraseña',
@@ -88,6 +88,7 @@ class Register extends BaseController
                 'valid_email' => 'Introduce un correo electrónico válido.',
                 'max_length' => 'El correo electrónico no puede superar los 190 caracteres.',
                 'is_unique' => 'Ya existe una cuenta registrada con este correo.',
+                'not_disposable_email' => 'No se permiten correos electrónicos temporales o desechables.',
             ],
             'password' => [
                 'required' => 'La contraseña es obligatoria.',
@@ -237,6 +238,20 @@ class Register extends BaseController
         
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return redirect()->back()->with('error', 'Por favor, introduce un email válido.');
+        }
+
+        // Check for disposable email
+        $validation = \Config\Services::validation();
+        $validation->setRules([
+            'email' => [
+                'rules' => 'not_disposable_email',
+                'errors' => [
+                    'not_disposable_email' => 'No se permiten correos electrónicos temporales o desechables.'
+                ]
+            ]
+        ]);
+        if (!$validation->run(['email' => $email])) {
+            return redirect()->back()->with('error', $validation->getError('email'))->withInput();
         }
 
         // Check if user exists

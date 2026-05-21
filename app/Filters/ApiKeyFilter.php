@@ -180,8 +180,35 @@ class ApiKeyFilter implements FilterInterface
                         'error'   => 'Quota Exceeded',
                         'message' => 'Has superado el límite mensual de consultas de tu plan (' . $monthlyQuota . ').',
                         'current_usage' => $currentUsage,
-                        'upgrade_url' => site_url('billing/manage')
+                        'upgrade_url' => site_url('billing'),
+                        'payment_link' => site_url('billing') // Direct link to Stripe checkout UI
                     ]);
+            }
+
+            // Limit free plan by IP address to 30 requests/month (Option C)
+            if ((int)$planId === 1 && $db->tableExists('api_requests')) {
+                $ipAddress = $request->getIPAddress();
+                $subscriptionTable = $db->tableExists('user_subscriptions') ? 'user_subscriptions' : 'usersuscriptions';
+                
+                $ipUsage = $db->table('api_requests r')
+                    ->join($subscriptionTable . ' us', 'us.user_id = r.user_id')
+                    ->where('us.plan_id', 1)
+                    ->where('us.status', 'active')
+                    ->where('r.ip_address', $ipAddress)
+                    ->where('r.created_at >=', date('Y-m-01 00:00:00'))
+                    ->countAllResults();
+
+                if ($ipUsage >= 30) {
+                    return service('response')
+                        ->setStatusCode(429)
+                        ->setJSON([
+                            'success' => false,
+                            'error'   => 'Quota Exceeded',
+                            'message' => 'Se ha superado el límite de 30 consultas gratuitas mensuales por dirección IP para evitar abusos. Si necesitas más consultas, por favor actualiza a un plan de pago.',
+                            'upgrade_url' => site_url('billing'),
+                            'payment_link' => site_url('billing')
+                        ]);
+                }
             }
 
             if ((int)$planId === 7) {

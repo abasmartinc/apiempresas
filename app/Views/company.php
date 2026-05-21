@@ -645,6 +645,24 @@
                     </div>
                 <?php endif; ?>
 
+                <!-- CTA PROMOCIONAL PARA TRÁFICO SEO (SEO-Friendly) -->
+                <?php if (!session('logged_in')): ?>
+                <aside class="seo-cta-banner" style="margin-top: 3rem; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #e2e8f0; border-radius: 16px; padding: 2rem; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                    <div style="background: #e0e7ff; color: #4338ca; padding: 8px 16px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                        Base de Datos B2B
+                    </div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 1rem; line-height: 1.3;">
+                        ¿Necesitas los datos de <?= esc($companyName) ?> y otros 4 millones de empresas?
+                    </div>
+                    <p style="color: #475569; font-size: 1.1rem; max-width: 600px; margin: 0 auto 1.5rem; line-height: 1.6;">
+                        Descarga la información en Excel o intégrala directamente en tu software vía API. Crea una cuenta gratuita ahora y obtén <strong>30 consultas al mes sin coste</strong>.
+                    </p>
+                    <a href="<?= site_url('register') ?>" rel="nofollow" style="background: #2563eb; color: #ffffff; padding: 12px 28px; border-radius: 8px; font-weight: 700; font-size: 1.1rem; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: all 0.2s;">
+                        Crear mi cuenta gratis
+                    </a>
+                </aside>
+                <?php endif; ?>
+
                 <!-- SECCIÓN PARA DESARROLLADORES (Premium Design) -->
                 <section id="api-dev-section" class="api-dev-section"
                     style="margin-top: 5rem; padding-bottom: 3rem; border-top: 1px solid #eef2f6;">

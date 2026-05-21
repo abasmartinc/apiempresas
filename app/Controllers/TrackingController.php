@@ -31,7 +31,27 @@ class TrackingController extends BaseController
         $ignoredIps = array_filter(array_map('trim', explode(',', $ignoredIpsStr)));
         return in_array($ip, $ignoredIps);
     }
+    /**
+     * Verifica si la petición proviene de un bot o crawler conocido
+     */
+    private function isBotRequest(): bool
+    {
+        $agent = $this->request->getUserAgent();
+        if ($agent->isRobot()) {
+            return true;
+        }
 
+        $agentString = strtolower($agent->getAgentString());
+        $bots = ['bot', 'crawl', 'spider', 'slurp', 'mediapartners', 'ahrefs', 'semrush', 'python', 'curl', 'wget', 'lighthouse'];
+        
+        foreach ($bots as $bot) {
+            if (strpos($agentString, $bot) !== false) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
     /**
      * Procesa y guarda un evento de la demo del Radar
      * POST /tracking/radar-demo-event
@@ -39,6 +59,10 @@ class TrackingController extends BaseController
     public function processRadarEvent()
     {
         try {
+            if ($this->isBotRequest()) {
+                return $this->response->setJSON(['success' => true, 'ignored' => true]);
+            }
+
             $clientIp = $this->request->getIPAddress();
             if ($this->isIpIgnored($clientIp)) {
                 return $this->response->setJSON(['success' => true, 'ignored' => true]);
@@ -109,6 +133,10 @@ class TrackingController extends BaseController
     public function logEvent()
     {
         try {
+            if ($this->isBotRequest()) {
+                return $this->response->setJSON(['success' => true, 'ignored' => true]);
+            }
+
             $clientIp = $this->request->getIPAddress();
             if ($this->isIpIgnored($clientIp)) {
                 return $this->response->setJSON(['success' => true, 'ignored' => true]);

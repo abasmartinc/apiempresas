@@ -43,7 +43,7 @@ class CompanyModel extends Model
         if ($cif === '')
             return null;
 
-        return $this->asArray()
+        $result = $this->asArray()
             ->select(implode(', ', $this->selectFields))
             ->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left')
             ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left')
@@ -51,6 +51,30 @@ class CompanyModel extends Model
             ->limit(1)
             ->get()
             ->getRowArray() ?: null;
+
+        if ($result) {
+            return $result;
+        }
+
+        // If not found locally, trigger real-time hot-enrichment using Serper + OpenAI
+        try {
+            $enrichmentService = new \App\Services\SerperEnrichmentService();
+            if ($enrichmentService->enrichByCif($cif)) {
+                // Re-query the database to load the newly enriched company
+                return $this->asArray()
+                    ->select(implode(', ', $this->selectFields))
+                    ->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left')
+                    ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left')
+                    ->where('companies.cif', $cif)
+                    ->limit(1)
+                    ->get()
+                    ->getRowArray() ?: null;
+            }
+        } catch (\Throwable $e) {
+            log_message('error', '[CompanyModel::getByCif] Hot-enrichment failed: ' . $e->getMessage());
+        }
+
+        return null;
     }
 
     public function getById(int $id): ?array
@@ -133,7 +157,33 @@ class CompanyModel extends Model
         }
 
         // 2) Fallback LIKE + scoring en PHP (más lento, pero acotado)
-        return $this->fallbackBestByLike($qClean);
+        $likeResult = $this->fallbackBestByLike($qClean);
+        if ($likeResult !== null) {
+            return $likeResult;
+        }
+
+        // 3) Enriquecimiento en caliente por nombre (Infonif -> Serper -> DB)
+        try {
+            $infonifService = new \App\Services\InfonifSearchService();
+            $cif = $infonifService->searchForCif($name);
+            if ($cif) {
+                // Delegamos en getByCif, que a su vez verificará en BD y sino llamará a SerperEnrichmentService
+                $enrichedCompany = $this->getByCif($cif);
+                if ($enrichedCompany) {
+                    return [
+                        'data' => $enrichedCompany,
+                        'meta' => [
+                            'method' => 'infonif_enrichment',
+                            'score' => 100 // High confidence if Infonif matched it
+                        ]
+                    ];
+                }
+            }
+        } catch (\Throwable $e) {
+            log_message('error', '[CompanyModel::getBestByName] Name enrichment failed: ' . $e->getMessage());
+        }
+
+        return null;
     }
 
     private function tryFulltextBest(string $qClean): ?array

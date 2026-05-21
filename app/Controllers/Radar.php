@@ -196,6 +196,20 @@ class Radar extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Por favor, introduce un email válido.']);
         }
 
+        // Check for disposable email
+        $validation = \Config\Services::validation();
+        $validation->setRules([
+            'email' => [
+                'rules' => 'not_disposable_email',
+                'errors' => [
+                    'not_disposable_email' => 'No se permiten correos electrónicos temporales o desechables.'
+                ]
+            ]
+        ]);
+        if (!$validation->run(['email' => $email])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $validation->getError('email')]);
+        }
+
         $userModel = new \App\Models\UserModel();
         $user = $userModel->where('email', $email)->first();
 
