@@ -148,13 +148,19 @@ class Webhook extends Controller
         $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));
         $stripeSub = $stripe->subscriptions->retrieve($stripeSubscriptionId);
 
+        $start = !empty($stripeSub->current_period_start) ? date('Y-m-d H:i:s', $stripeSub->current_period_start) : date('Y-m-d H:i:s');
+        $end   = !empty($stripeSub->current_period_end) ? date('Y-m-d H:i:s', $stripeSub->current_period_end) : date('Y-m-d H:i:s', strtotime('+1 month'));
+        if ($start === $end) {
+            $end = date('Y-m-d H:i:s', strtotime($start . ' +1 month'));
+        }
+
         $subscriptionModel->insert([
             'user_id'                => $userId,
             'plan_id'                => $plan->id,
             'stripe_subscription_id' => $stripeSubscriptionId,
             'status'                 => 'active',
-            'current_period_start'   => date('Y-m-d H:i:s', $stripeSub->current_period_start),
-            'current_period_end'     => date('Y-m-d H:i:s', $stripeSub->current_period_end),
+            'current_period_start'   => $start,
+            'current_period_end'     => $end,
             'created_at'             => date('Y-m-d H:i:s'),
             'updated_at'             => date('Y-m-d H:i:s'),
         ]);
@@ -197,13 +203,19 @@ class Webhook extends Controller
                     $plan = $planModel->where('slug', $planSlug)->first();
                     
                     if ($plan) {
+                        $start = !empty($stripeSub->current_period_start) ? date('Y-m-d H:i:s', $stripeSub->current_period_start) : date('Y-m-d H:i:s');
+                        $end   = !empty($stripeSub->current_period_end) ? date('Y-m-d H:i:s', $stripeSub->current_period_end) : date('Y-m-d H:i:s', strtotime('+1 month'));
+                        if ($start === $end) {
+                            $end = date('Y-m-d H:i:s', strtotime($start . ' +1 month'));
+                        }
+
                         $subscriptionModel->insert([
                             'user_id'                => $userId,
                             'plan_id'                => $plan->id,
                             'stripe_subscription_id' => $stripeSubscriptionId,
                             'status'                 => 'active',
-                            'current_period_start'   => date('Y-m-d H:i:s', $stripeSub->current_period_start),
-                            'current_period_end'     => date('Y-m-d H:i:s', $stripeSub->current_period_end),
+                            'current_period_start'   => $start,
+                            'current_period_end'     => $end,
                             'created_at'             => date('Y-m-d H:i:s'),
                             'updated_at'             => date('Y-m-d H:i:s'),
                         ]);
@@ -221,10 +233,16 @@ class Webhook extends Controller
             $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));
             $stripeSub = $stripe->subscriptions->retrieve($stripeSubscriptionId);
 
+            $start = !empty($stripeSub->current_period_start) ? date('Y-m-d H:i:s', $stripeSub->current_period_start) : date('Y-m-d H:i:s');
+            $end   = !empty($stripeSub->current_period_end) ? date('Y-m-d H:i:s', $stripeSub->current_period_end) : date('Y-m-d H:i:s', strtotime('+1 month'));
+            if ($start === $end) {
+                $end = date('Y-m-d H:i:s', strtotime($start . ' +1 month'));
+            }
+
             // Actualizar fecha de fin usando los datos reales de Stripe
             $subscriptionModel->update($sub->id, [
-                'current_period_start' => date('Y-m-d H:i:s', $stripeSub->current_period_start),
-                'current_period_end'   => date('Y-m-d H:i:s', $stripeSub->current_period_end),
+                'current_period_start' => $start,
+                'current_period_end'   => $end,
                 'status'               => 'active',
                 'updated_at'           => date('Y-m-d H:i:s'),
             ]);

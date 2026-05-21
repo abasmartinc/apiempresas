@@ -56,7 +56,11 @@ class Webhooks extends BaseController
                         $sub = \Stripe\Subscription::retrieve($subscriptionId);
 
                         $start = isset($sub->current_period_start) ? date('Y-m-d H:i:s', (int)$sub->current_period_start) : date('Y-m-d H:i:s');
-                        $end = isset($sub->current_period_end) ? date('Y-m-d H:i:s', (int)$sub->current_period_end) : date('Y-m-d H:i:s');
+                        $end = isset($sub->current_period_end) ? date('Y-m-d H:i:s', (int)$sub->current_period_end) : date('Y-m-d H:i:s', strtotime('+1 month'));
+
+                        if ($start === $end) {
+                            $end = date('Y-m-d H:i:s', strtotime($start . ' +1 month'));
+                        }
 
                         $planRow = $db->table('api_plans')->select('id')->where('slug', $planSlug)->get()->getRowArray();
                         $planId = (int)($planRow['id'] ?? 0);
