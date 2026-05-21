@@ -760,6 +760,12 @@ class Billing extends BaseController
     public function rotate_key()
     {
         if (!session('logged_in')) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Sesión expirada. Por favor, inicia sesión.'
+                ])->setStatusCode(401);
+            }
             return redirect()->to(site_url('enter'));
         }
 
@@ -783,6 +789,14 @@ class Billing extends BaseController
 
         // Log API key rotation
         log_activity('api_key_rotated');
+
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'API Key regenerada con éxito.',
+                'api_key' => $newKey
+            ]);
+        }
 
         return redirect()->to(site_url('dashboard'))->with('message', 'Tu API Key ha sido rotada con éxito. Recuerda actualizar tus aplicaciones.');
     }

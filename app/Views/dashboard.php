@@ -740,7 +740,10 @@
                 try {
                     const res = await fetch('<?= site_url('billing/rotate-key') ?>', {
                         method: 'POST',
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        headers: { 
+                            'X-Requested-With': 'XMLHttpRequest',
+                            '<?= csrf_header() ?>': '<?= csrf_hash() ?>'
+                        }
                     });
                     const data = await res.json();
                     if(data.status === 'success' || data.success) {
