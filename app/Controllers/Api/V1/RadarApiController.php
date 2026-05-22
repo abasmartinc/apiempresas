@@ -63,15 +63,28 @@ class RadarApiController extends ResourceController
             'range'    => $this->request->getGet('range') ?? 'hoy',
         ];
 
-        $results = $this->radarService->getRadarResults($filters, $planSlug);
+        $radarData = $this->radarService->getRadarResults($filters, $planSlug);
+        
+        $totalCount = $radarData['total'];
+        $results = $radarData['results'];
+        $limit = $this->planAccess->getRadarLimit($planSlug);
+        
+        $meta = [
+            'plan' => $planSlug,
+            'mostrados' => count($results),
+            'limit' => $limit,
+            'total_disponibles' => $totalCount,
+        ];
+
+        $ocultos = $totalCount - count($results);
+        if ($ocultos > 0) {
+            $meta['oportunidades_ocultas'] = $ocultos;
+            $meta['upsell'] = "🔒 Tienes {$ocultos} empresas nuevas esperándote hoy. Sube a Business para verlas todas y descargar listados completos.";
+        }
 
         return $this->respond([
             'success' => true,
-            'meta' => [
-                'plan' => $planSlug,
-                'count' => count($results),
-                'limit' => $this->planAccess->getRadarLimit($planSlug)
-            ],
+            'meta' => $meta,
             'data' => $results
         ]);
     }

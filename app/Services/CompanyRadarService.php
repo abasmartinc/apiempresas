@@ -59,6 +59,7 @@ class CompanyRadarService
         $builder->orderBy('crs.score_total', 'DESC');
         $builder->orderBy('companies.fecha_constitucion', 'DESC');
         
+        $totalCount = $builder->countAllResults(false);
         $results = $builder->get($limit)->getResultArray();
 
         // Aplicar enmascaramiento si es Free
@@ -69,7 +70,10 @@ class CompanyRadarService
             }
         }
 
-        return $results;
+        return [
+            'total' => $totalCount,
+            'results' => $results
+        ];
     }
 
     private function maskName(string $name): string

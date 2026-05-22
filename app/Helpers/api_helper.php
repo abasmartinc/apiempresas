@@ -28,6 +28,11 @@ if (!function_exists('mask_company_data')) {
         // 5. CIF -> The user sample shows it UNMASKED. 
         // We will keep it as is (removing the previous masking logic).
 
+        $data['upsell_opportunities'] = [
+            'campos_ocultos' => ['direccion_completa', 'objeto_social_completo', 'geolocalizacion_lat_lng'],
+            'mensaje' => '🔒 Pásate al plan Pro para desbloquear la ubicación y los datos societarios completos de esta empresa.'
+        ];
+
         return $data;
     }
 }

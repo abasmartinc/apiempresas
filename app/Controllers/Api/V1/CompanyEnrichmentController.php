@@ -72,7 +72,10 @@ class CompanyEnrichmentController extends ResourceController
                 'data' => [
                     'cif' => 'B********',
                     'score' => $data['score'],
-                    'message' => 'Actualiza a Pro para ver el desglose y señales del BORME'
+                    'fuerza_financiera' => '🔒 Actualiza a Pro',
+                    'riesgo_impago' => '🔒 Actualiza a Pro',
+                    'trayectoria' => '🔒 Actualiza a Pro',
+                    'mensaje' => 'Actualiza a Pro para ver el desglose detallado y señales del BORME'
                 ]
             ]);
         }
@@ -116,7 +119,15 @@ class CompanyEnrichmentController extends ResourceController
 
         $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
         if (!$this->planAccess->canAccess($planSlug, 'company_signals')) {
-            return $this->failForbidden('Tu plan Pro o Business es requerido para ver señales societarias.');
+            $signals = $this->scoringService->getSignals($cif);
+            $count = is_array($signals) ? count($signals) : 0;
+            return $this->respond([
+                'success' => false,
+                'message' => "Te estás perdiendo {$count} eventos societarios recientes (nombramientos, ampliaciones, etc.). Actualiza al plan Pro para acceder al historial completo y tomar mejores decisiones.",
+                'upsell_opportunities' => [
+                    'eventos_ocultos' => $count
+                ]
+            ], 403);
         }
 
         $signals = $this->scoringService->getSignals($cif);
@@ -165,7 +176,15 @@ class CompanyEnrichmentController extends ResourceController
         $accessLevel = $this->planAccess->getAccessLevel($planSlug, 'insights');
 
         if ($accessLevel === 'none') {
-            return $this->failForbidden('El análisis IA requiere un plan Business.');
+            return $this->respond([
+                'success' => false,
+                'message' => 'El análisis IA requiere un plan Business.',
+                'upsell_opportunities' => [
+                    'pain_points' => '🔒 Desbloquea Business para ver los puntos de dolor',
+                    'buyer_persona' => '🔒 Desbloquea Business para ver quién toma las decisiones',
+                    'sales_arguments' => '🔒 Desbloquea Business para obtener argumentos de venta'
+                ]
+            ], 403);
         }
 
         $insights = $this->aiService->getInsights($cif);
@@ -178,6 +197,9 @@ class CompanyEnrichmentController extends ResourceController
                 'data' => [
                     'profile' => $insights['profile'],
                     'conversion_probability' => $insights['conversion_probability'],
+                    'pain_points' => '🔒 Desbloquea Business para ver los puntos de dolor',
+                    'buyer_persona' => '🔒 Desbloquea Business para ver quién toma las decisiones',
+                    'sales_arguments' => '🔒 Desbloquea Business para obtener argumentos de venta',
                     'message' => 'Actualiza a Business para ver el análisis comercial completo y necesidades detectadas.'
                 ]
             ]);
@@ -222,7 +244,15 @@ class CompanyEnrichmentController extends ResourceController
 
         $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
         if (!$this->planAccess->canAccess($planSlug, 'contact_prep')) {
-            return $this->failForbidden('La preparación de contacto con IA requiere un plan Business.');
+            return $this->respond([
+                'success' => false,
+                'message' => 'La IA ha detectado que esta empresa es altamente receptiva. Pásate a Business para obtener los guiones de venta y preparación de contacto generados por IA.',
+                'upsell_opportunities' => [
+                    'tacticas' => '🔒 Exclusivo Business',
+                    'guiones_email' => '🔒 Exclusivo Business',
+                    'guiones_linkedin' => '🔒 Exclusivo Business'
+                ]
+            ], 403);
         }
 
         $prep = $this->aiService->getContactPrep($cif);
