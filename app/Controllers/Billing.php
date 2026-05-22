@@ -214,6 +214,18 @@ class Billing extends BaseController
             $successUrl = site_url('billing/success') . '?session_id={CHECKOUT_SESSION_ID}';
             $cancelUrl = site_url('billing/cancel');
 
+            // Si es una compra de radar/excel, enviamos a Stripe una URL de cancelación dinámica
+            // para que el usuario vuelva a su resumen de compra en vez de a /billing/cancel (que requiere login)
+            if ($plan === 'radar') {
+                $exportParams = ['type' => $period === 'single' ? 'single' : 'subscription'];
+                if (!empty($postData['provincia'])) $exportParams['provincia'] = $postData['provincia'];
+                if (!empty($postData['cnae'])) $exportParams['cnae'] = $postData['cnae'];
+                if (!empty($postData['sector'])) $exportParams['sector'] = $postData['sector'];
+                if (!empty($postData['period_radar'])) $exportParams['period'] = $postData['period_radar'];
+                
+                $cancelUrl = site_url('checkout/radar-export?' . http_build_query($exportParams));
+            }
+
             // Tax Rate for IVA
             $taxRateId = env('STRIPE_TAX_RATE_ID');
 
