@@ -15,8 +15,8 @@ if (!isset($isPaid)) {
 // Logic for what to recommend
 $recoPlan = 'Pro';
 $recoPrice = '19€';
-$recoQueries = '3.000';
-$recoFeatures = ['API completa + Radar B2B', 'Validación automática', 'Soporte prioritario'];
+$recoQueries = '3.000 consultas / mes';
+$recoFeatures = ['Scoring Comercial IA', 'Radar Inteligente B2B', '10 Webhooks Activos'];
 $recoDesc = 'Ideal para automatizar validaciones en tu CRM o sistema.';
 $recoCta = 'Activar Pro ahora';
 $recoValue = 'Ahorra +10h de validación manual';
@@ -25,8 +25,8 @@ if ($isPaid && strpos($currentPlanSlug, 'pro') !== false) {
     // Already on Pro, recommend Business
     $recoPlan = 'Business';
     $recoPrice = '49€';
-    $recoQueries = '10.000+';
-    $recoFeatures = ['SLA Avanzado (99.9%)', 'Gestión de equipos', 'Consultoría técnica'];
+    $recoQueries = '10.000+ consultas / mes';
+    $recoFeatures = ['SLA Avanzado (99.9%)', 'Gestor de cuenta personal', 'Webhooks Ilimitados'];
     $recoDesc = 'Para volumen alto, roles avanzados y soporte dedicado.';
     $recoCta = 'Mejorar a Business';
     $recoValue = 'Escalabilidad sin límites';
@@ -53,7 +53,7 @@ if ($isPaid && strpos($currentPlanSlug, 'pro') !== false) {
             <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 12px;">
                 <li style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 700; color: #334155;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                    <?= $recoQueries ?> consultas / mes
+                    <?= $recoQueries ?>
                 </li>
                 <?php foreach($recoFeatures as $feat): ?>
                 <li style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 700; color: #334155;">

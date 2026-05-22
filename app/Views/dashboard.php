@@ -230,7 +230,7 @@
                 <?php endif; ?>
             </div>
 
-            <div class="kpi-grid-4" data-track-section="kpis">
+            <div id="kpi-section" class="kpi-grid-4" data-track-section="kpis" style="<?= $requestsUsedThisMonth == 0 ? 'display: none;' : '' ?>">
                 <?php 
                     $requestsUsed = (int)$requestsUsedThisMonth;
                     $kpiClass = '';
@@ -321,6 +321,8 @@
                                 reqVal.style.display = 'inline';
                             }
                             if (waitingMsg) waitingMsg.style.display = 'none';
+                            const kpiSec = document.getElementById('kpi-section');
+                            if (kpiSec) kpiSec.style.display = ''; // Reset to default (grid)
 
                             if (latencyVal) latencyVal.innerText = numFmt.format(data.avg_latency || 0);
                             if (latencyUnit) latencyUnit.style.display = 'inline';
@@ -347,9 +349,10 @@
             <div class="dash-grid">
                 <div>
                     <!-- 1. BLOQUE PRINCIPAL ACTIVACIÓN -->
-                    <section class="activation-main-card" data-track-section="activation_search" style="<?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'border: 2px solid #e11d48; background: #fff1f2;' : '' ?>">
-                        <div class="activation-header">
-                            <h2><?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'Límite mensual alcanzado' : 'Valida empresas en segundos' ?></h2>
+                    <section class="activation-main-card" data-track-section="activation_search" style="position: relative; <?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'border: 2px solid #e11d48; background: #fff1f2;' : '' ?>">
+                        <div style="position: absolute; top: -14px; left: 32px; background: #2152ff; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 6px rgba(33, 82, 255, 0.3);">Paso 1</div>
+                        <div class="activation-header" style="margin-top: 10px;">
+                            <h2><?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'Límite mensual alcanzado' : 'Prueba la API en segundos' ?></h2>
                             <p><?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'Has agotado tus ' . $freeLimit . ' consultas gratuitas. Activa el Plan Pro para seguir validando.' : 'Introduce un CIF o nombre y valida una empresa real.' ?></p>
                         </div>
                         
@@ -446,23 +449,20 @@
                         </div>
                     </section>
 
-                    <!-- API KEY SECTION (Prominent after first request) -->
-                    <section class="dash-card" id="section-api-key" data-track-section="api_key_block" style="margin-top: 32px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                            <div class="kicker" style="margin: 0; <?= $requestsUsedThisMonth > 0 ? 'background: #eef2ff; color: #4f46e5; border: 1px solid #e0e7ff;' : '' ?>">
-                                <?= $requestsUsedThisMonth > 0 ? 'EMPIEZA A INTEGRAR LA API AHORA' : 'Seguridad' ?>
+                    <!-- API KEY SECTION -->
+                    <section class="activation-main-card" id="section-api-key" data-track-section="api_key_block" style="margin-top: 32px; position: relative; <?= $requestsUsedThisMonth > 0 ? 'border-color: #2152ff; box-shadow: 0 10px 15px -3px rgba(33, 82, 255, 0.1);' : 'opacity: 0.8;' ?>">
+                        <div style="position: absolute; top: -14px; left: 32px; background: <?= $requestsUsedThisMonth > 0 ? '#2152ff' : '#94a3b8' ?>; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Paso 2</div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; margin-top: 10px;">
+                            <div>
+                                <h2 style="font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 0 0 8px !important;">Copia tu API Key</h2>
+                                <p style="font-size: 0.95rem; color: #64748b; font-weight: 600; margin: 0;">
+                                    <?= $requestsUsedThisMonth > 0 ? 'Usa tu clave para conectar tu sistema.' : 'Realiza tu primera búsqueda (Paso 1) para activar tu clave.' ?>
+                                </p>
                             </div>
                             <button type="button" class="btn-small" id="btnRotateKey" style="color: #64748b; border-color: #e2e8f0; font-size: 0.75rem; padding: 6px 12px;">Regenerar clave</button>
                         </div>
                         
-                        <h2 style="margin-top: 0 !important;">Tu API Key</h2>
-                        <p style="font-size: 0.85rem; color: #64748b; font-weight: 600; margin-bottom: 4px;">
-                            <?= $requestsUsedThisMonth > 0 ? 'Copia tu API Key y úsala en tu sistema.' : 'Realiza tu primera búsqueda para activar tu clave.' ?>
-                        </p>
-                        <?php if ($requestsUsedThisMonth > 0): ?>
-                            <p style="font-size: 0.75rem; color: #94a3b8; font-weight: 700; margin-bottom: 16px;">La mayoría de usuarios empieza a integrarlo tras varias validaciones</p>
-                        <?php endif; ?>
-                        <div class="apikey-row">
+                        <div class="apikey-row" style="margin-top: 24px;">
                             <div class="apikey-box" id="apiKeyBox" data-api-key="<?=htmlspecialchars($api_key->api_key ?? '') ?>">
                                 <div>
                                     <div class="apikey-label">API KEY</div>
@@ -471,12 +471,20 @@
                             </div>
                             <div class="apikey-actions">
                                 <button type="button" class="btn-small" id="btnToggleKey">Mostrar</button>
-                                <button type="button" class="btn-small primary" id="btnCopyKey">Copiar</button>
+                                <button type="button" class="btn-small primary" id="btnCopyKey" <?= $requestsUsedThisMonth == 0 ? 'style="background: #94a3b8; border-color: #94a3b8;"' : '' ?>>Copiar</button>
                             </div>
                         </div>
+                    </section>
 
-                        <!-- NEW: Quick cURL Snippet -->
-                        <div style="margin-top: 20px;">
+                    <!-- PASO 3: INTEGRACIÓN -->
+                    <section class="activation-main-card" style="margin-top: 32px; position: relative; <?= $requestsUsedThisMonth > 0 ? '' : 'opacity: 0.6; pointer-events: none;' ?>">
+                        <div style="position: absolute; top: -14px; left: 32px; background: <?= $requestsUsedThisMonth > 0 ? '#2152ff' : '#94a3b8' ?>; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Paso 3</div>
+                        <div style="margin-top: 10px;">
+                            <h2 style="font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 0 0 8px !important;">Integra en tu sistema</h2>
+                            <p style="font-size: 0.95rem; color: #64748b; font-weight: 600; margin: 0 0 20px;">
+                                Prueba la conexión ejecutando este comando en tu terminal o consulta la <a href="<?=site_url('documentation')?>" style="color: #2152ff; font-weight: 800; text-decoration: underline;">documentación</a>.
+                            </p>
+                            
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                 <span style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Prueba rápida (cURL)</span>
                                 <button onclick="copyCurl()" style="background: none; border: none; color: #2152ff; font-weight: 800; font-size: 0.7rem; cursor: pointer;">Copiar comando</button>
@@ -497,34 +505,6 @@
                             }
                         </script>
                     </section>
-                    <!-- 3. GUÍA 3 PASOS (Subida de posición) -->
-                    <h3 style="font-size: 1.25rem; font-weight: 900; color: #0f172a; margin-bottom: 16px; margin-top: 40px;">Empieza en 3 pasos</h3>
-                    <div class="step-guide">
-                        <div class="step-card">
-                            <div class="step-num">1</div>
-                            <h4>Prueba una empresa</h4>
-                            <p>Valida un CIF o nombre desde el panel.</p>
-                        </div>
-                        <div class="step-card">
-                            <div class="step-num">2</div>
-                            <h4>Copia tu API Key</h4>
-                            <p>Usa tu clave para conectar tu sistema.</p>
-                        </div>
-                        <div class="step-card">
-                            <div class="step-num">3</div>
-                            <h4>Integra en minutos</h4>
-                            <p>Consulta la documentación o usa el plugin oficial.</p>
-                        </div>
-                    </div>
-
-                    <!-- 4. RADAR SECUNDARIO -->
-                    <div class="radar-secondary-card" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px dashed #cbd5e1; border-radius: 20px; padding: 24px; margin-top: 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px;">
-                        <div class="radar-sec-info">
-                            <h3 style="font-size: 1.1rem; font-weight: 900; color: #0f172a; margin-bottom: 8px;">¿Buscas clientes en vez de validar datos?</h3>
-                            <p style="font-size: 0.9rem; color: #64748b; font-weight: 600;">Detecta nuevas empresas y accede a oportunidades antes que tu competencia.</p>
-                        </div>
-                        <a href="<?= site_url('radar') ?>" class="trigger-cta" style="white-space: nowrap; display: inline-block; background: #2152ff; color: white !important; text-decoration: none !important; padding: 12px 24px; border-radius: 10px; font-weight: 800; font-size: 0.9rem; transition: all 0.2s;">Ver Radar B2B</a>
-                    </div>
                 </div>
 
 
