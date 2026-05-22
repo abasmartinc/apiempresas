@@ -227,8 +227,14 @@ class Register extends BaseController
             $redirect = $this->request->getGet('redirect') ?? 'billing/checkout';
             return redirect()->to(site_url(ltrim($redirect, '/')));
         }
+        $db = \Config\Database::connect();
+        $oppsCount = $db->table('companies')
+            ->where('fecha_constitucion >=', date('Y-m-d'))
+            ->countAllResults();
+
         return view('auth/quick_register', [
-            'redirect' => $this->request->getGet('redirect') ?? 'billing/checkout'
+            'redirect' => $this->request->getGet('redirect') ?? 'billing/checkout',
+            'oppsCount' => $oppsCount
         ]);
     }
 

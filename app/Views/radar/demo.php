@@ -840,10 +840,10 @@ $strategiesJson = json_encode(array_map(function ($co) {
                 <p style="margin: 0 0 24px; font-size: 1.15rem; font-weight: 800; color: #0f172a; text-align: center;">
                     "Las empresas que ves hoy pueden no estar mañana."
                 </p>
-                <a href="<?= site_url('register?source=cta_final') ?>" 
+                <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=cta_final') ?>" 
                    class="radar-btn radar-btn--primary" 
                    style="font-size:1.2rem;padding:22px 56px;box-shadow:0 0 50px rgba(37,99,235,0.5);"
-                   onclick="trackEvent({event_type:'click_cta', source:'cta_final', cta_label:'Acceder a estas empresas antes que tu competencia', url:'/register?source=cta_final'})">
+                   onclick="trackEvent({event_type:'click_cta', source:'cta_final', cta_label:'Acceder a estas empresas antes que tu competencia', url:'/checkout/radar-export?type=subscription&plan=radar&source=cta_final'})">
                     🚀 Acceder a estas empresas antes que tu competencia
                 </a>
                 

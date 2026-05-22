@@ -143,7 +143,7 @@
                 <div style="background: #FFF7ED; border: 1px solid #FFEDD5; padding: 10px; border-radius: 12px; margin-bottom: 16px;">
                     <div style="display: flex; align-items: center; justify-content: center; gap: 10px; color: #9A3412; font-weight: 800; font-size: 0.85rem;">
                         <span style="display: block; width: 6px; height: 6px; background: #EA580C; border-radius: 50%; box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.1);"></span>
-                        +94 empresas detectadas HOY — otras empresas ya están contactando estas oportunidades
+                        +<?= esc($oppsCount) ?> empresas detectadas HOY — otras empresas ya están contactando estas oportunidades
                     </div>
                 </div>
                 <!-- Preview Visual Section (Compact) -->
@@ -209,7 +209,7 @@
 
             <?php if (isset($redirect) && strpos($redirect, 'radar') !== false): ?>
                 <p style="margin-top: 12px; font-size: 0.85rem; color: #EA580C; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                    🚀 Hoy hay +94 empresas esperando ser contactadas
+                    🚀 Hoy hay +<?= esc($oppsCount) ?> empresas esperando ser contactadas
                 </p>
                 <div style="display: flex; justify-content: center; gap: 16px; margin-top: 16px; font-size: 0.75rem; font-weight: 700; color: #64748B;">
                     <div style="display: flex; align-items: center; gap: 4px;"><span>✔</span> Acceso inmediato</div>

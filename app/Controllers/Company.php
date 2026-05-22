@@ -163,6 +163,63 @@ class Company extends BaseController
             $filteredAdmins[] = $admin;
         }
 
+        // Calcular datos para el CTA B2B (Movido desde la vista)
+        $companyProv = $company['registro_mercantil'] ?? '';
+        $cnaeCodeStr = substr($company['cnae_code'] ?? $company['cnae'] ?? '', 0, 4);
+        $cnaeUrlParam = urlencode($cnaeCodeStr);
+        $provUrlParam = urlencode($companyProv);
+        $sectorName = $company['cnae_label'] ?? 'este sector';
+        
+        $db = \Config\Database::connect();
+        
+        // 1. Intentar Sector + Provincia
+        $builder = $db->table('companies');
+        if ($cnaeCodeStr) $builder->where('cnae_code LIKE', $cnaeCodeStr . '%');
+        $builder->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
+        if ($companyProv && strtolower($companyProv) !== 'españa') {
+            if (strtolower($companyProv) === 'alicante') {
+                $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+            } else {
+                $builder->where('registro_mercantil', $companyProv);
+            }
+        }
+        $listCount = $builder->countAllResults();
+        $targetProv = $companyProv;
+
+        // 2. Fallback: Si hay menos de 50 empresas, ampliar a TODA ESPAÑA para ese sector
+        if ($listCount < 50 && $cnaeCodeStr) {
+            $builder2 = $db->table('companies');
+            $builder2->where('cnae_code LIKE', $cnaeCodeStr . '%');
+            $builder2->where('fecha_constitucion IS NOT NULL');
+            $listCount = $builder2->countAllResults();
+            $targetProv = 'toda España';
+            $provUrlParam = 'España';
+        }
+
+        // 3. Fallback: Si AÚN hay menos de 50 (sector rarísimo), ofrecer TODA LA PROVINCIA (sin sector)
+        if ($listCount < 50 && $companyProv && strtolower($companyProv) !== 'españa') {
+            $builder3 = $db->table('companies');
+            $builder3->where('fecha_constitucion IS NOT NULL');
+            if (strtolower($companyProv) === 'alicante') {
+                $builder3->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+            } else {
+                $builder3->where('registro_mercantil', $companyProv);
+            }
+            $listCount = $builder3->countAllResults();
+            $targetProv = $companyProv;
+            $provUrlParam = urlencode($companyProv);
+            $cnaeUrlParam = ''; // Quitamos el filtro de sector
+            $sectorName = 'todos los sectores';
+        }
+
+        $sectorUrlParam = urlencode($sectorName);
+        $radarCheckoutUrl = site_url("checkout/radar-export?type=single&provincia={$provUrlParam}&cnae={$cnaeUrlParam}&sector={$sectorUrlParam}");
+        
+        helper('pricing');
+        $pricing = calculate_radar_price($listCount);
+        $priceStr = number_format($pricing['base_price'], 0, ',', '.');
+        $countFormatted = number_format($listCount, 0, ',', '.');
+
         return [
             'company'          => $company,
             'statusRaw'        => $statusRaw,
@@ -175,7 +232,12 @@ class Company extends BaseController
             'administrators'   => $filteredAdmins,
             'provinceUrl'      => $provinceUrl,
             'cnaeUrl'          => $cnaeUrl,
-            'provinceCnaeUrl'  => $provinceCnaeUrl
+            'provinceCnaeUrl'  => $provinceCnaeUrl,
+            'radarCheckoutUrl' => $radarCheckoutUrl,
+            'countFormatted'   => $countFormatted,
+            'priceStr'         => $priceStr,
+            'sectorName'       => $sectorName,
+            'targetProv'       => $targetProv,
         ];
     }
 

@@ -359,7 +359,7 @@
                                     Acceso en &lt; 10s
                                 </div>
                             <?php endif; ?>
-                            <button type="submit" class="btn js-loading-btn" style="width: 100%; padding: 18px; font-size: 1rem; font-weight: 950; background: #2563eb; color: white; border-radius: 16px; border: none; cursor: pointer; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4); text-transform: uppercase; letter-spacing: 0.01em; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 30px rgba(37, 99, 235, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(37, 99, 235, 0.4)';">
+                            <button type="submit" class="btn js-loading-btn" onclick="window.dataLayer = window.dataLayer || []; window.dataLayer.push({'event': 'checkout_submit'});" style="width: 100%; padding: 18px; font-size: 1rem; font-weight: 950; background: #2563eb; color: white; border-radius: 16px; border: none; cursor: pointer; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4); text-transform: uppercase; letter-spacing: 0.01em; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 30px rgba(37, 99, 235, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(37, 99, 235, 0.4)';">
                                 <?php if ($type === 'subscription'): ?>
                                     <span style="font-size: 1.1rem; letter-spacing: -0.01em; pointer-events: none;">Activar Radar PRO</span>
                                 <?php else: ?>
@@ -444,12 +444,16 @@
                 <span style="font-size: 0.75rem; color: #64748b; font-weight: 800; text-transform: uppercase;"><?= $type === 'subscription' ? 'Total (IVA incl.)' : 'Pago único (IVA incl.)' ?></span>
                 <span style="font-weight: 900; font-size: 1.25rem; color: #0f172a; line-height: 1;"><?= number_format($price + $tax, 2, ',', '.') ?> €</span>
             </div>
-            <button type="button" class="btn" style="background: #2563eb; color: white; border-radius: 12px; font-weight: 800; padding: 14px 24px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);" onclick="document.querySelector('.order-card form').submit();">
+            <button type="button" class="btn" style="background: #2563eb; color: white; border-radius: 12px; font-weight: 800; padding: 14px 24px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);" onclick="window.dataLayer = window.dataLayer || []; window.dataLayer.push({'event': 'checkout_submit'}); document.querySelector('.order-card form').submit();">
                 <?= $type === 'subscription' ? 'Activar Radar' : 'Pagar y Descargar' ?>
             </button>
         </div>
     </main>
 
     <?= view('partials/footer') ?>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({'event': 'checkout_view'});
+    </script>
 </body>
 </html>

@@ -157,8 +157,7 @@ class Radar extends BaseController
         }
 
         // 2. Métricas de Escala
-        $realCount = $this->countNewCompanies('hoy');
-        $todayCount = $realCount > 100 ? $realCount : 206; // Fallback to 206 as per user's earlier copy
+        $todayCount = $this->countNewCompanies('hoy');
         $pipelineMetrics = $metricsService->getMetrics($todayCount);
 
         // Deterministic Rotation for Preview

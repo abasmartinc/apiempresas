@@ -409,69 +409,12 @@
                 </article>
 
                 <?php if (!session('logged_in')): ?>
-                <?php
-                    $cnaeCodeStr = substr($company['cnae'] ?? '', 0, 4);
-                    $cnaeUrlParam = urlencode($cnaeCodeStr);
-                    $provUrlParam = urlencode($companyProv);
-                    $sectorName = $company['cnae_label'] ?? 'este sector';
-                    
-                    $db = \Config\Database::connect();
-                    
-                    // 1. Intentar Sector + Provincia
-                    $builder = $db->table('companies');
-                    if ($cnaeCodeStr) $builder->where('cnae_code LIKE', $cnaeCodeStr . '%');
-                    $builder->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
-                    if ($companyProv && strtolower($companyProv) !== 'españa') {
-                        if (strtolower($companyProv) === 'alicante') {
-                            $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
-                        } else {
-                            $builder->where('registro_mercantil', $companyProv);
-                        }
-                    }
-                    $listCount = $builder->countAllResults();
-                    $targetProv = $companyProv;
-
-                    // 2. Fallback: Si hay menos de 50 empresas, ampliar a TODA ESPAÑA para ese sector
-                    if ($listCount < 50 && $cnaeCodeStr) {
-                        $builder2 = $db->table('companies');
-                        $builder2->where('cnae_code LIKE', $cnaeCodeStr . '%');
-                        $builder2->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
-                        $listCount = $builder2->countAllResults();
-                        $targetProv = 'toda España';
-                        $provUrlParam = 'España';
-                    }
-
-                    // 3. Fallback: Si AÚN hay menos de 50 (sector rarísimo), ofrecer TODA LA PROVINCIA (sin sector)
-                    if ($listCount < 50 && $companyProv && strtolower($companyProv) !== 'españa') {
-                        $builder3 = $db->table('companies');
-                        $builder3->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
-                        if (strtolower($companyProv) === 'alicante') {
-                            $builder3->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
-                        } else {
-                            $builder3->where('registro_mercantil', $companyProv);
-                        }
-                        $listCount = $builder3->countAllResults();
-                        $targetProv = $companyProv;
-                        $provUrlParam = urlencode($companyProv);
-                        $cnaeUrlParam = ''; // Quitamos el filtro de sector
-                        $sectorName = 'todos los sectores';
-                    }
-
-                    $sectorUrlParam = urlencode($sectorName);
-                    $radarCheckoutUrl = site_url("checkout/radar-export?type=single&provincia={$provUrlParam}&cnae={$cnaeUrlParam}&sector={$sectorUrlParam}");
-                    
-                    // Calcular precio dinámico
-                    helper('pricing');
-                    $pricing = calculate_radar_price($listCount);
-                    $priceStr = number_format($pricing['base_price'], 0, ',', '.');
-                    $countFormatted = number_format($listCount, 0, ',', '.');
-                ?>
                 <div style="margin: 2rem 0; background: #e0e7ff; border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;">
                     <div>
                         <div style="margin: 0; font-size: 1.1rem; color: #1e3a8a; font-weight: bold;">¿Vendes a empresas como <?= esc($companyName) ?>?</div>
                         <p style="margin: 0.5rem 0 0; font-size: 0.95rem; color: #3730a3;">Descarga el listado de <strong><?= esc($sectorName) ?></strong> en <strong><?= esc($targetProv) ?></strong>.</p>
                     </div>
-                    <a href="<?= $radarCheckoutUrl ?>" rel="nofollow" style="background: #2563eb; color: #ffffff; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 0.95rem; text-decoration: none; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2); transition: all 0.2s; white-space: nowrap;">
+                    <a href="<?= $radarCheckoutUrl ?>" rel="nofollow" onclick="window.dataLayer = window.dataLayer || []; window.dataLayer.push({'event': 'cta_excel_click'});" style="background: #2563eb; color: #ffffff; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 0.95rem; text-decoration: none; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2); transition: all 0.2s; white-space: nowrap;">
                         Descargar Excel (<?= $countFormatted ?>) por <?= $priceStr ?>€ →
                     </a>
                 </div>
@@ -726,7 +669,7 @@
                     <p style="color: #475569; font-size: 1.1rem; max-width: 650px; margin: 0 auto 1.5rem; line-height: 1.6;">
                         Descarga ahora mismo un Excel con todas las empresas de <strong><?= esc($sectorName) ?></strong> en <strong><?= esc($targetProv) ?></strong>. Ideal para tus campañas de marketing y equipos de ventas.
                     </p>
-                    <a href="<?= $radarCheckoutUrl ?>" rel="nofollow" style="background: #2563eb; color: #ffffff; padding: 12px 28px; border-radius: 8px; font-weight: 700; font-size: 1.1rem; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: all 0.2s;">
+                    <a href="<?= $radarCheckoutUrl ?>" rel="nofollow" onclick="window.dataLayer = window.dataLayer || []; window.dataLayer.push({'event': 'cta_excel_click'});" style="background: #2563eb; color: #ffffff; padding: 12px 28px; border-radius: 8px; font-weight: 700; font-size: 1.1rem; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: all 0.2s;">
                         Descargar Excel (<?= $countFormatted ?> empresas) por <?= $priceStr ?>€
                     </a>
                 </aside>
