@@ -670,5 +670,79 @@
             });
         });
     </script>
+    <!-- SEO Schema: Product & FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Product",
+          "name": "Plan Radar B2B",
+          "description": "Acceso mensual completo al radar de nuevas empresas en España, con filtros avanzados y exportación ilimitada.",
+          "image": "<?= base_url('public/images/logo.png') ?>",
+          "brand": {
+            "@type": "Brand",
+            "name": "APIEmpresas"
+          },
+          "offers": {
+            "@type": "Offer",
+            "url": "<?= site_url('leads-empresas-nuevas') ?>",
+            "priceCurrency": "EUR",
+            "price": "79",
+            "availability": "https://schema.org/InStock",
+            "seller": {
+              "@type": "Organization",
+              "name": "APIEmpresas"
+            }
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "¿De dónde salen los datos?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Los datos se obtienen diariamente del BORME y de registros mercantiles oficiales en España."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Cada cuánto se actualiza el radar?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Radar se actualiza diariamente con todas las nuevas constituciones detectadas."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Puedo cancelar la suscripción?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Sí. Es una suscripción mensual sin permanencia. Puedes cancelarla cuando quieras."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Puedo exportar los leads?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Sí. Puedes exportar los leads filtrados en formato Excel o CSV directamente desde Radar."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Hay permanencia?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. No existe permanencia ni compromiso de permanencia."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
 </body>
 </html>
