@@ -949,7 +949,9 @@ class RadarController extends BaseController
      */
     public function exportExcel()
     {
-        if (!session('logged_in')) {
+        // Permitir descarga sin login si hay token de simulador en sesión (BILLING_MODE=simulator)
+        $hasSimulatorToken = session('simulator_excel_token') !== null || session('just_bought_excel') !== null;
+        if (!session('logged_in') && !$hasSimulatorToken) {
             return redirect()->to(site_url('enter'))->with('error', 'Debes iniciar sesión para descargar el listado.');
         }
 
@@ -1046,17 +1048,22 @@ class RadarController extends BaseController
             }
         }
 
+        // Filtro de fecha: 'general' o CNAE histórico sin period = sin límite de fecha
         if ($period === 'hoy') {
             $builder->where('fecha_constitucion', date('Y-m-d'));
         } elseif ($period === 'semana' || $period === '7') {
             $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')));
-            $builder->where('fecha_constitucion <=', date('Y-m-d')); // Excluir fechas futuras
+            $builder->where('fecha_constitucion <=', date('Y-m-d'));
         } elseif ($period === '90') {
             $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')));
-            $builder->where('fecha_constitucion <=', date('Y-m-d')); // Excluir fechas futuras
+            $builder->where('fecha_constitucion <=', date('Y-m-d'));
+        } elseif ($period === 'general') {
+            // Histórico completo: sin filtro de fecha (para exportaciones de directorios CNAE)
+            $builder->where('fecha_constitucion IS NOT NULL');
         } else {
+            // Default: últimos 90 días
             $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')));
-            $builder->where('fecha_constitucion <=', date('Y-m-d')); // Excluir fechas futuras
+            $builder->where('fecha_constitucion <=', date('Y-m-d'));
         }
 
         $builder->orderBy('fecha_constitucion', 'DESC');

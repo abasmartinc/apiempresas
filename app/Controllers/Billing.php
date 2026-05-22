@@ -136,21 +136,43 @@ class Billing extends BaseController
             // Set context for simulator too if it's an excel download
             if ($period === 'single') {
                 $prov = $postData['provincia'] ?? 'España';
-                $sect = $postData['sector'] ?? 'General';
-                $per  = $postData['period_radar'] ?? '30days';
-                
-                $radar = new \App\Controllers\RadarController();
-                $radarData = $radar->getRadarData($prov, $sect, $per, 1);
-                $count = $radarData['total_context_count'] ?? 0;
+                $sect = $postData['sector'] ?? '';
+                $cnae = $postData['cnae'] ?? '';
+                // period_radar vacío = flujo histórico CNAE (sin filtro de fecha) -> 'general'
+                $per  = ($postData['period_radar'] !== '' && $postData['period_radar'] !== null)
+                    ? ($postData['period_radar'] ?? '30days')
+                    : ($cnae !== '' ? 'general' : '30days');
+
+                // Contar igual que el flujo real de Stripe: por CNAE si viene, si no por getRadarData
+                if ($cnae !== '') {
+                    $db      = \Config\Database::connect();
+                    $builder = $db->table('companies');
+                    $builder->where('cnae_code LIKE', $cnae . '%');
+                    $builder->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
+                    if ($prov && strtolower($prov) !== 'españa') {
+                        if (strtolower($prov) === 'alicante') {
+                            $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+                        } else {
+                            $builder->where('registro_mercantil', $prov);
+                        }
+                    }
+                    $count = $builder->countAllResults();
+                } else {
+                    $radar = new \App\Controllers\RadarController();
+                    $radarData = $radar->getRadarData($prov, $sect, $per, 1);
+                    $count = $radarData['total_context_count'] ?? 0;
+                }
 
                 session()->set('checkout_context', [
                     'type'        => 'excel',
                     'sector'      => $sect,
-                    'cnae'        => $postData['cnae'] ?? '',
+                    'cnae'        => $cnae,
                     'provincia'   => $prov,
                     'period'      => $per,
                     'total_count' => $count
                 ]);
+                // Token para permitir descarga sin login en modo simulador
+                session()->set('simulator_excel_token', bin2hex(random_bytes(8)));
             }
 
             if ($simulator->simulatePayment($userId, $plan, $period)) {
@@ -200,12 +222,16 @@ class Billing extends BaseController
             $prov = $postData['provincia'] ?? 'España';
             $sect = $postData['sector'] ?? '';
             $cnae = $postData['cnae'] ?? '';
-            $per  = $postData['period_radar'] ?? '30days';
+            // period_radar vacío = flujo histórico CNAE (sin filtro de fecha) -> 'general'
+            $per  = ($postData['period_radar'] !== '' && isset($postData['period_radar']))
+                ? $postData['period_radar']
+                : ($cnae !== '' ? 'general' : '30days');
 
             if ($cnae !== '') {
                 $db      = \Config\Database::connect();
                 $builder = $db->table('companies');
                 $builder->where('cnae_code LIKE', $cnae . '%');
+                $builder->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
                 if ($prov && strtolower($prov) !== 'españa') {
                     if (strtolower($prov) === 'alicante') {
                         $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
@@ -339,13 +365,20 @@ class Billing extends BaseController
             ];
         }
 
-            // Buscar si el usuario ya tiene un customer_id en Stripe
-            $user = $this->userModel->find($userId);
-            if (!empty($user->stripe_customer_id)) {
-                $sessionParams['customer'] = $user->stripe_customer_id;
+            // Buscar si el usuario ya tiene un customer_id en Stripe (sólo si está logueado)
+            if ($userId > 0) {
+                $user = $this->userModel->find($userId);
+                if (!empty($user->stripe_customer_id)) {
+                    $sessionParams['customer'] = $user->stripe_customer_id;
+                } else {
+                    // Solo enviamos email si no hay customer asignado (Stripe fallará si envías ambos)
+                    $sessionParams['customer_email'] = $email ?: null;
+                }
             } else {
-                // Solo enviamos email si no hay customer asignado (Stripe fallará si envías ambos)
-                $sessionParams['customer_email'] = $email ?: null;
+                // Usuario invitado (guest): solo email si se proporcionó
+                if ($email) {
+                    $sessionParams['customer_email'] = $email;
+                }
             }
 
             $session = \Stripe\Checkout\Session::create($sessionParams);
@@ -409,6 +442,7 @@ class Billing extends BaseController
                 $db      = \Config\Database::connect();
                 $builder = $db->table('companies');
                 $builder->where('cnae_code LIKE', $cnae . '%');
+                $builder->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
                 if ($province && strtolower($province) !== 'españa') {
                     if (strtolower($province) === 'alicante') {
                         $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
@@ -450,8 +484,10 @@ class Billing extends BaseController
      */
     public function success()
     {
-        if (!session('logged_in')) {
-            return redirect()->to(site_url('dashboard'));
+        // Permitir acceso sin login si viene del simulador con contexto de excel en sesión
+        $hasSimulatorContext = session('checkout_context') !== null || session('simulator_excel_token') !== null;
+        if (!session('logged_in') && !$hasSimulatorContext) {
+            return redirect()->to(site_url('enter'))->with('error', 'Debes iniciar sesión para continuar.');
         }
 
         $userId = (int) session('user_id');
@@ -492,7 +528,7 @@ class Billing extends BaseController
             }
             $downloadUrl = site_url('billing/export-excel?' . http_build_query($exportParams));
             
-            $user = $this->userModel->find($userId);
+            $user = $userId > 0 ? $this->userModel->find($userId) : null;
 
             $data = [
                 'download_url'  => $downloadUrl,
@@ -906,7 +942,7 @@ class Billing extends BaseController
 
         try {
             $session = \Stripe\BillingPortal\Session::create([
-                'customer' => $user->stripe_customer_id,
+                'customer'   => $user->stripe_customer_id,
                 'return_url' => site_url('billing'),
             ]);
 

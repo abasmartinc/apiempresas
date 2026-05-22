@@ -191,15 +191,24 @@
                         </div>
 
                         <h1 style="font-size: 1.8rem; font-weight: 900; color: #1e293b; margin-bottom: 8px; letter-spacing: -0.03em; line-height: 1.15;">
-                            <?php if ($sector): ?>
-                                Nuevas empresas de <?= mb_strtolower($sector) ?> en <?= ucfirst($province) ?>
+                            <?php 
+                                $isHistorical = ($period === '' && $cnae !== '');
+                                $prefix = $isHistorical ? 'Base de datos completa de' : 'Nuevas empresas de';
+                                $prefixNoSector = $isHistorical ? 'Base de datos de empresas' : 'Nuevas empresas';
+                            ?>
+                            <?php if ($sector && $sector !== 'todos los sectores'): ?>
+                                <?= $prefix ?> <span style="text-transform: lowercase;"><?= esc($sector) ?></span> en <?= ucfirst(esc($province)) ?>
                             <?php else: ?>
-                                Nuevas empresas en <?= ucfirst($province) ?>
+                                <?= $prefixNoSector ?> en <?= ucfirst(esc($province)) ?>
                             <?php endif; ?>
                         </h1>
 
                         <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5; margin-bottom: 14px;">
-                            Listado oficial BORME procesado y listo para descargar en Excel.
+                            <?php if ($isHistorical): ?>
+                                Listado completo y actualizado, procesado desde el BORME y listo para descargar en Excel.
+                            <?php else: ?>
+                                Listado oficial BORME procesado y listo para descargar en Excel.
+                            <?php endif; ?>
                         </p>
 
                         <div class="alert-box" style="background: #f0fdf4; border-color: #bbf7d0; color: #166534; display: flex; flex-direction: column; gap: 8px; padding: 16px;">
@@ -221,7 +230,9 @@
                                 <div class="stat-box-value"><?= number_format($total_count ?? 0, 0, ',', '.') ?></div>
                                 <div class="stat-box-sub">
                                     <?php
-                                    if ($period === 'hoy') echo 'Detectadas hoy';
+                                    $isHistorical = ($period === '' && $cnae !== '');
+                                    if ($isHistorical) echo 'Empresas en activo';
+                                    elseif ($period === 'hoy') echo 'Detectadas hoy';
                                     elseif ($period === 'semana') echo 'Detectadas esta semana';
                                     elseif ($period === 'mes') echo 'Detectadas este mes';
                                     else echo 'Detectadas en los últimos 30 días';
@@ -313,8 +324,11 @@
                                 </div>
                             <?php endif; ?>
                             <button type="submit" class="btn js-loading-btn" style="width: 100%; padding: 18px; font-size: 1rem; font-weight: 950; background: #2563eb; color: white; border-radius: 16px; border: none; cursor: pointer; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4); text-transform: uppercase; letter-spacing: 0.01em; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 30px rgba(37, 99, 235, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(37, 99, 235, 0.4)';">
-                                <span style="font-size: 0.95rem; pointer-events: none;">Contactar antes que</span>
-                                <span style="font-size: 1.1rem; letter-spacing: -0.01em; pointer-events: none;">otros proveedores</span>
+                                <?php if ($type === 'subscription'): ?>
+                                    <span style="font-size: 1.1rem; letter-spacing: -0.01em; pointer-events: none;">Activar Radar PRO</span>
+                                <?php else: ?>
+                                    <span style="font-size: 1.1rem; letter-spacing: -0.01em; pointer-events: none;">Pagar y Descargar Excel</span>
+                                <?php endif; ?>
                             </button>
                         </div>
                     </form>
