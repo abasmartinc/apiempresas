@@ -260,20 +260,29 @@
                         </div>
 
                         <div style="background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; margin-top: 20px;">
-                            <h3 style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Excel vs Radar PRO</h3>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                                <div style="font-size: 0.8rem;">
-                                    <span style="display: block; font-weight: 800; color: #64748b; margin-bottom: 4px;">Tu Excel</span>
-                                    <ul style="list-style: none; padding: 0; margin: 0; color: #64748b;">
-                                        <li>✔ Descarga única</li>
-                                        <li>✔ Datos estáticos</li>
+                            <h3 style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">¿Por qué la mayoría elige Radar PRO?</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: white; padding: 12px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                                <div style="font-size: 0.75rem;">
+                                    <span style="display: block; font-weight: 800; color: #64748b; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">Listado Excel</span>
+                                    <ul style="list-style: none; padding: 0; margin: 0; color: #64748b; display: flex; flex-direction: column; gap: 6px;">
+                                        <li><span style="color: #94a3b8; font-weight: bold;">✔</span> Foto actual (<?= date('M Y') ?>)</li>
+                                        <li><span style="color: #94a3b8; font-weight: bold;">✔</span> 1 única descarga</li>
+                                        <li><span style="color: #94a3b8; font-weight: bold;">✔</span> Admins. incluidos</li>
+                                        <li><span style="color: #cbd5e1; font-weight: bold;">✗</span> Sin aviso de nuevas</li>
+                                        <li><span style="color: #cbd5e1; font-weight: bold;">✗</span> Sin filtros extras</li>
                                     </ul>
                                 </div>
-                                <div style="font-size: 0.8rem; border-left: 1px solid #e2e8f0; padding-left: 16px;">
-                                    <span style="display: block; font-weight: 800; color: #2563eb; margin-bottom: 4px;">Radar PRO</span>
-                                    <ul style="list-style: none; padding: 0; margin: 0; color: #2563eb;">
-                                        <li>✔ Nuevas cada día</li>
-                                        <li>✔ Acceso ilimitado</li>
+                                <div style="font-size: 0.75rem; position: relative;">
+                                    <span style="display: flex; align-items: center; justify-content: space-between; font-weight: 800; color: #2563eb; margin-bottom: 8px; border-bottom: 2px solid #2563eb; padding-bottom: 4px;">
+                                        Radar PRO
+                                        <span style="background: #2563eb; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; text-transform: uppercase;">Favorito</span>
+                                    </span>
+                                    <ul style="list-style: none; padding: 0; margin: 0; color: #1e3a8a; display: flex; flex-direction: column; gap: 6px; font-weight: 600;">
+                                        <li><span style="color: #2563eb; font-weight: bold;">✔</span> Nuevas cada día</li>
+                                        <li><span style="color: #2563eb; font-weight: bold;">✔</span> Descargas ilimitadas</li>
+                                        <li><span style="color: #2563eb; font-weight: bold;">✔</span> CRM integrado</li>
+                                        <li><span style="color: #2563eb; font-weight: bold;">✔</span> Filtros por tamaño</li>
+                                        <li><span style="color: #2563eb; font-weight: bold;">✔</span> Cancelas cuando quieras</li>
                                     </ul>
                                 </div>
                             </div>
@@ -296,10 +305,17 @@
                             <span style="font-weight: 700; color: #0f172a;"><?= number_format($price, 2, ',', '.') ?> €</span>
                         </div>
                     <?php else: ?>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #64748b; font-size: 0.88rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: #64748b; font-size: 0.88rem;">
                             <span>Listado Excel (<?= number_format($total_count ?? 0, 0, ',', '.') ?> empresas)</span>
                             <span style="font-weight: 700; color: #0f172a;"><?= number_format($price, 2, ',', '.') ?> €</span>
                         </div>
+                        <?php if ($total_count > 0 && $price > 0): ?>
+                        <div style="text-align: right; font-size: 0.72rem; color: #10b981; font-weight: 800; margin-bottom: 12px;">
+                            <span style="background: #ecfdf5; padding: 2px 6px; border-radius: 4px;">
+                                Apenas <?= number_format($price / $total_count, 3, ',', '.') ?>€ por empresa
+                            </span>
+                        </div>
+                        <?php endif; ?>
                     <?php endif; ?>
 
                     <div style="display: flex; justify-content: space-between; margin-bottom: 6px; color: #64748b; font-size: 0.88rem;">
@@ -317,6 +333,13 @@
                         <span style="font-size: 14px;">💡</span>
                         <p style="font-size: 0.75rem; color: #166534; font-weight: 800; margin: 0; line-height: 1.2;">
                             Con 1 cliente cubres el coste mensual
+                        </p>
+                    </div>
+                    <?php else: ?>
+                    <div style="background: #fffbeb; border-radius: 8px; padding: 8px 12px; margin-top: 10px; display: flex; align-items: center; gap: 8px; border: 1px solid #fef3c7;">
+                        <span style="font-size: 14px;">⚡</span>
+                        <p style="font-size: 0.75rem; color: #b45309; font-weight: 800; margin: 0; line-height: 1.2;">
+                            Datos actualizados a fecha de hoy — Descarga la versión más reciente
                         </p>
                     </div>
                     <?php endif; ?>

@@ -1068,8 +1068,32 @@ class RadarController extends BaseController
 
         $builder->orderBy('fecha_constitucion', 'DESC');
         $builder->limit($cnae !== '' ? 2000 : 5000);
+        $companies = $builder->get()->getResultArray();
         
-        return $builder->get()->getResultArray();
+        if (empty($companies)) {
+            return [];
+        }
+
+        $companyIds = array_column($companies, 'id');
+        
+        $adminRows = $db->table('company_administrators')
+            ->select('company_id, position, name')
+            ->whereIn('company_id', $companyIds)
+            ->get()->getResultArray();
+
+        $adminsByCompany = [];
+        foreach ($adminRows as $row) {
+            $cid = $row['company_id'];
+            $position = $row['position'] ?: 'Administrador';
+            $adminsByCompany[$cid][] = $position . ': ' . $row['name'];
+        }
+
+        foreach ($companies as &$c) {
+            $cid = $c['id'];
+            $c['administrators'] = isset($adminsByCompany[$cid]) ? implode(' | ', $adminsByCompany[$cid]) : '';
+        }
+
+        return $companies;
     }
 
     private function getExportFilename($params): string
@@ -1098,6 +1122,7 @@ class RadarController extends BaseController
         echo '<thead><tr>';
         echo '<th style="' . $thStyle . '">Nombre de la Empresa</th>';
         echo '<th style="' . $thStyle . '">CIF</th>';
+        echo '<th style="' . $thStyle . '">Administradores y Cargos</th>';
         echo '<th style="' . $thStyle . '">Sector CNAE</th>';
         echo '<th style="' . $thStyle . '">Provincia</th>';
         echo '<th style="' . $thStyle . '">Municipio</th>';
@@ -1113,6 +1138,7 @@ class RadarController extends BaseController
             echo '<tr>';
             echo '<td style="' . $tdStyle . '">' . esc($company['name'] ?? '') . '</td>';
             echo '<td style="' . $textStyle . '">' . esc($company['cif'] ?? '') . '</td>';
+            echo '<td style="' . $tdStyle . '">' . esc($company['administrators'] ?? '') . '</td>';
             echo '<td style="' . $tdStyle . '">' . esc($company['cnae_label'] ?? '') . '</td>';
             echo '<td style="' . $tdStyle . '">' . esc($company['registro_mercantil'] ?? '') . '</td>';
             echo '<td style="' . $tdStyle . '">' . esc($company['municipality'] ?? $company['municipio'] ?? '') . '</td>';
