@@ -330,12 +330,6 @@
                         <input type="hidden" name="cnae" value="<?= esc($cnae ?? '') ?>">
                         <input type="hidden" name="period_radar" value="<?= esc($period) ?>">
 
-                        <?php if (!session('logged_in')): ?>
-                        <div style="margin-bottom: 16px;">
-                            <input type="email" name="email" placeholder="Tu email para recibir el Excel y factura" required style="width: 100%; padding: 16px; border-radius: 12px; border: 1px solid #cbd5e1; font-size: 0.95rem; box-sizing: border-box; background: #f8fafc; color: #0f172a;" />
-                        </div>
-                        <?php endif; ?>
-
                         <div style="position: relative;">
                             <?php if ($type === 'subscription'): ?>
                                 <div style="position: absolute; top: -12px; right: 12px; background: #ef4444; color: white; font-size: 10px; padding: 3px 10px; border-radius: 20px; font-weight: 900; z-index: 20; box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2); text-transform: uppercase; pointer-events: none; white-space: nowrap;">
@@ -376,18 +370,18 @@
                         <?php endif; ?>
                     </p>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; font-size: 0.7rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
-                        <div style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 8px; border-radius: 6px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 16px; font-size: 0.65rem; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 4px; background: #f1f5f9; padding: 8px 4px; border-radius: 6px; white-space: nowrap;">
                             <span>🔒</span> Pago Seguro SSL
                         </div>
-                        <div style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 8px; border-radius: 6px;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 4px; background: #f1f5f9; padding: 8px 4px; border-radius: 6px; white-space: nowrap;">
                             <span>📄</span> Factura Incluida
                         </div>
-                        <div style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 8px; border-radius: 6px;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 4px; background: #f1f5f9; padding: 8px 4px; border-radius: 6px; white-space: nowrap;">
                             <span>🏛️</span> Datos del BORME
                         </div>
-                        <div style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 8px; border-radius: 6px;">
-                            <span>↩️</span> Garantía 48h
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 4px; background: #f1f5f9; padding: 8px 4px; border-radius: 6px; white-space: nowrap;">
+                            <span>⚡</span> Descarga Inmediata
                         </div>
                     </div>
 
