@@ -71,7 +71,7 @@ class RadarApiController extends ResourceController
         
         $meta = [
             'plan' => $planSlug,
-            'mostrados' => count($results),
+            'count' => count($results),
             'limit' => $limit,
             'total_disponibles' => $totalCount,
         ];
