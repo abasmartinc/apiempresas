@@ -23,6 +23,11 @@
                 transform: rotate(360deg);
             }
         }
+        .plan-card.is-selected {
+            border: 2px solid #2152ff !important;
+            box-shadow: 0 10px 25px -5px rgba(33, 82, 255, 0.15) !important;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 
@@ -128,7 +133,10 @@
 
                             <div class="period-toggle" role="group" aria-label="Periodicidad">
                                 <button type="button" class="period-btn active" data-period="monthly">Mensual</button>
-                                <button type="button" class="period-btn" data-period="annual">Anual </button>
+                                <button type="button" class="period-btn" data-period="annual" style="position: relative;">
+                                    Anual 
+                                    <span style="position: absolute; top: -10px; right: -15px; background: #10b981; color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 999px; font-weight: 800; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);">Ahorra 20%</span>
+                                </button>
                             </div>
                         </div>
                         <div class="plan-grid" role="radiogroup" aria-label="Planes">
@@ -155,9 +163,10 @@
                                 </div>
 
                                 <ul class="features">
-                                    <li>✓ Límite mensual superior (sin bloqueos inesperados)</li>
-                                    <li>✓ Métricas de latencia/errores para monitorizar calidad</li>
-                                    <li>✓ Soporte prioritario</li>
+                                    <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2152ff" stroke-width="3" style="margin-right: 6px;"><polyline points="20 6 9 17 4 12"></polyline></svg> 3.000 consultas al mes</li>
+                                    <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2152ff" stroke-width="3" style="margin-right: 6px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Datos completos BORME y Actividad</li>
+                                    <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2152ff" stroke-width="3" style="margin-right: 6px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Scoring Comercial IA (0-100)</li>
+                                    <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2152ff" stroke-width="3" style="margin-right: 6px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Acceso a Radar B2B (Prospección)</li>
                                 </ul>
                             </label>
 
@@ -184,9 +193,10 @@
                                 </div>
 
                                 <ul class="features">
-                                    <li>✓ Límite alto para uso intensivo</li>
-                                    <li>✓ SLA avanzado</li>
-                                    <li>✓ Gestión de equipos</li>
+                                    <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" style="margin-right: 6px;"><polyline points="20 6 9 17 4 12"></polyline></svg> 10.000 consultas al mes</li>
+                                    <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" style="margin-right: 6px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Webhooks Push (Notificaciones)</li>
+                                    <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" style="margin-right: 6px;"><polyline points="20 6 9 17 4 12"></polyline></svg> IA Predictiva de Oportunidades</li>
+                                    <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" style="margin-right: 6px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Soporte Prioritario Slack / Email</li>
                                 </ul>
                             </label>
                         </div>
@@ -247,10 +257,7 @@
                                     <input type="hidden" name="country" value="ES">
                                 </div>
 
-                                <div class="closing-block" style="margin-top: 32px; padding: 24px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 16px; margin-bottom: 24px;">
-                                    <h3 style="margin: 0 0 8px; font-size: 1.25rem; color: #1e40af; font-weight: 800;">Estás a un paso de activar Pro para producción</h3>
-                                    <p style="margin: 0; color: #1e40af; opacity: 0.9; font-size: 14px; line-height: 1.5;">Evita limitaciones antes de que tu aplicación empiece a recibir tráfico real.</p>
-                                </div>
+
 
                                 <div class="form-actions">
                                     <div class="secure-note" style="margin-bottom: 20px;">
@@ -264,7 +271,8 @@
                                         </div>
                                         <button class="btn btn_primary js-loading-btn" type="submit" id="btnCheckout" style="width: 100%; padding: 18px; font-size: 1.1rem; font-weight: 800;">👉 Activar Pro y usar en producción</button>
                                         <div style="text-align: center;">
-                                            <div style="font-size: 13px; color: #16a34a; font-weight: 700; margin-bottom: 4px;">Acceso inmediato. Sin permanencia. Cancela cuando quieras.</div>
+                                            <div style="font-size: 13px; color: #16a34a; font-weight: 800; margin-bottom: 4px;">🔒 Pago 100% seguro con Stripe.</div>
+                                            <div style="font-size: 12px; color: #64748b; font-weight: 600;">Acceso inmediato. Sin permanencia. Cancela en 1 clic.</div>
                                         </div>
                                         <a class="btn btn_light" href="<?= site_url() ?>dashboard" style="margin-top: 8px;">Cancelar</a>
                                     </div>
@@ -276,6 +284,43 @@
                                 <input type="hidden" name="payment_method" id="paymentMethodInput" value="stripe" />
                             </form>
                         </div>
+
+                        <!-- FAQ MOVED HERE -->
+                        <section class="faq-section" style="margin-top: 40px; padding-top: 32px; border-top: 1px solid #e2e8f0;">
+                            <div class="kicker">Dudas frecuentes</div>
+                            <h2>Preguntas sobre facturación</h2>
+                            
+                            <div class="faq-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px;">
+                                <div class="faq-item" style="background: rgba(255,255,255,0.7); border: 1px solid rgba(205,214,234,0.6); padding: 20px; border-radius: 16px; box-shadow: 0 4px 14px rgba(15,23,42,0.03); transition: transform 0.2s;">
+                                    <div style="background: #e0e7ff; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #4338ca;">
+                                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                    </div>
+                                    <h4 style="font-size: 1rem; font-weight: 800; margin-bottom: 8px; color: #1e293b;">¿Recibiré factura oficial?</h4>
+                                    <p style="font-size: 0.85rem; color: #475569; line-height: 1.6; margin: 0;">Sí, tras cada pago recibirás automáticamente una factura legal con el desglose del IVA correspondiente a tu NIF/CIF.</p>
+                                </div>
+                                <div class="faq-item" style="background: rgba(255,255,255,0.7); border: 1px solid rgba(205,214,234,0.6); padding: 20px; border-radius: 16px; box-shadow: 0 4px 14px rgba(15,23,42,0.03); transition: transform 0.2s;">
+                                    <div style="background: #dcfce7; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #15803d;">
+                                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                    </div>
+                                    <h4 style="font-size: 1rem; font-weight: 800; margin-bottom: 8px; color: #1e293b;">¿Puedo cancelar cuando quiera?</h4>
+                                    <p style="font-size: 0.85rem; color: #475569; line-height: 1.6; margin: 0;">Sin compromiso. Puedes cancelar tu suscripción con un solo clic desde tu panel y seguirás teniendo acceso hasta el final del periodo pagado.</p>
+                                </div>
+                                <div class="faq-item" style="background: rgba(255,255,255,0.7); border: 1px solid rgba(205,214,234,0.6); padding: 20px; border-radius: 16px; box-shadow: 0 4px 14px rgba(15,23,42,0.03); transition: transform 0.2s;">
+                                    <div style="background: #fef3c7; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #b45309;">
+                                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                                    </div>
+                                    <h4 style="font-size: 1rem; font-weight: 800; margin-bottom: 8px; color: #1e293b;">¿Cómo funciona el cambio de plan?</h4>
+                                    <p style="font-size: 0.85rem; color: #475569; line-height: 1.6; margin: 0;">Si pasas de Pro a Business, Stripe prorrateará el importe y solo pagarás la diferencia por el tiempo restante.</p>
+                                </div>
+                                <div class="faq-item" style="background: rgba(255,255,255,0.7); border: 1px solid rgba(205,214,234,0.6); padding: 20px; border-radius: 16px; box-shadow: 0 4px 14px rgba(15,23,42,0.03); transition: transform 0.2s;">
+                                    <div style="background: #f1f5f9; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #334155;">
+                                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    </div>
+                                    <h4 style="font-size: 1rem; font-weight: 800; margin-bottom: 8px; color: #1e293b;">¿El pago es seguro?</h4>
+                                    <p style="font-size: 0.85rem; color: #475569; line-height: 1.6; margin: 0;">Utilizamos Stripe como pasarela de pago. Tus datos bancarios nunca tocan nuestros servidores y están protegidos por cifrado bancario.</p>
+                                </div>
+                            </div>
+                        </section>
 
                         <?php if ($plan && $planName !== 'Free'): ?>
                             <!-- GESTIÓN DE SUSCRIPCIÓN ACTIVA -->
@@ -509,29 +554,7 @@
                     </section>
                 </aside>
 
-                <section class="faq-section">
-                    <div class="kicker">Dudas frecuentes</div>
-                    <h2>Preguntas sobre facturación</h2>
-                    
-                    <div class="faq-grid">
-                        <div class="faq-item">
-                            <h4>¿Recibiré factura oficial?</h4>
-                            <p>Sí, tras cada pago recibirás automáticamente una factura legal con el desglose del IVA correspondiente a tu NIF/CIF.</p>
-                        </div>
-                        <div class="faq-item">
-                            <h4>¿Puedo cancelar cuando quiera?</h4>
-                            <p>Sin compromiso. Puedes cancelar tu suscripción con un solo clic desde tu panel y seguirás teniendo acceso hasta el final del periodo pagado.</p>
-                        </div>
-                        <div class="faq-item">
-                            <h4>¿Cómo funciona el cambio de plan?</h4>
-                            <p>Si pasas de Pro a Business, Stripe prorrateará el importe y solo pagarás la diferencia por el tiempo restante.</p>
-                        </div>
-                        <div class="faq-item">
-                            <h4>¿El pago es seguro?</h4>
-                            <p>Utilizamos Stripe como pasarela de pago. Tus datos bancarios nunca tocan nuestros servidores y están protegidos por cifrado bancario.</p>
-                        </div>
-                    </div>
-                </section>
+
             </div>
     </div>
     </main>

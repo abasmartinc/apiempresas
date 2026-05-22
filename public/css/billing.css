@@ -116,8 +116,8 @@ body {
 /* GRID */
 .billing-grid {
     display: grid;
-    grid-template-columns: 1.15fr .85fr;
-    gap: 16px;
+    grid-template-columns: 1.8fr 1fr;
+    gap: 24px;
     align-items: start;
 }
 

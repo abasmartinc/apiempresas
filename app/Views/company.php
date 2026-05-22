@@ -987,7 +987,6 @@
 
     <?= view('partials/footer') ?>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const btn = document.getElementById('btnToggleJson');
@@ -1002,30 +1001,57 @@
             }
 
             <?php if ((!empty($company['lat']) && !empty($company['lng'])) || !empty($company['address'])): ?>
-                const hasCoords = <?= (!empty($company['lat']) && !empty($company['lng'])) ? 'true' : 'false' ?>;
-                const companyName = "<?= esc($company['name'] ?? $company['nombre'] ?? 'Empresa', 'js') ?>";
-                const rawAddress = "<?= esc($company['address'] ?? '', 'js') ?>";
-                const province = "<?= esc($company['province'] ?? $company['provincia'] ?? '', 'js') ?>";
+            const mapContainer = document.getElementById('company-map');
+            if (mapContainer) {
+                let mapLoaded = false;
+                const loadMap = () => {
+                    if (mapLoaded) return;
+                    mapLoaded = true;
 
-                if (hasCoords) {
-                    // Coordinates appear to be swapped in the DB (Lng in Lat field)
+                    const hasCoords = <?= (!empty($company['lat']) && !empty($company['lng'])) ? 'true' : 'false' ?>;
+                    const companyName = "<?= esc($company['name'] ?? $company['nombre'] ?? 'Empresa', 'js') ?>";
+                    const rawAddress = "<?= esc($company['address'] ?? '', 'js') ?>";
+                    const province = "<?= esc($company['province'] ?? $company['provincia'] ?? '', 'js') ?>";
+
+                    if (hasCoords) {
+                        if (typeof L === 'undefined') {
+                            const script = document.createElement('script');
+                            script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+                            script.onload = () => initLeafletMap(companyName, rawAddress, province);
+                            document.head.appendChild(script);
+                        } else {
+                            initLeafletMap(companyName, rawAddress, province);
+                        }
+                    } else {
+                        const fullAddress = `${rawAddress}, ${province}, España`;
+                        const iframe = document.createElement('iframe');
+                        iframe.width = "100%";
+                        iframe.height = "100%";
+                        iframe.frameBorder = "0";
+                        iframe.style.border = "0";
+                        iframe.style.borderRadius = "12px";
+                        iframe.loading = "lazy";
+                        iframe.src = `https://maps.google.com/maps?q=${encodeURIComponent(fullAddress)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+                        mapContainer.innerHTML = '';
+                        mapContainer.appendChild(iframe);
+                    }
+                };
+
+                const initLeafletMap = (companyName, rawAddress, province) => {
                     const lat = <?= (float) ($company['lat'] ?? 0) ?>;
                     const lng = <?= (float) ($company['lng'] ?? 0) ?>;
 
-                    // Initialize Map with a cleaner zoom
                     const map = L.map('company-map', {
                         scrollWheelZoom: false,
                         zoomControl: true
                     }).setView([lat, lng], 16);
 
-                    // Add Modern Tile Layer (CartoDB Voyager)
                     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
                         subdomains: 'abcd',
                         maxZoom: 20
                     }).addTo(map);
 
-                    // Modern SVG Marker Icon
                     const modernIcon = L.divIcon({
                         className: 'custom-div-icon',
                         html: `
@@ -1038,26 +1064,25 @@
                         popupAnchor: [0, -35]
                     });
 
-                    // Add Marker
                     L.marker([lat, lng], { icon: modernIcon }).addTo(map)
                         .bindPopup(`<strong>${companyName}</strong><br><span style="color: #64748b; font-size: 0.85rem;">${rawAddress}${province ? ', ' + province : ''}</span>`)
                         .openPopup();
+                };
+
+                if ('IntersectionObserver' in window) {
+                    const observer = new IntersectionObserver((entries, observer) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                loadMap();
+                                observer.disconnect();
+                            }
+                        });
+                    }, { rootMargin: '300px 0px' });
+                    observer.observe(mapContainer);
                 } else {
-                    // FALLBACK: Load Google Maps Iframe by Address
-                    const mapContainer = document.getElementById('company-map');
-                    const fullAddress = `${rawAddress}, ${province}, España`;
-                    const iframe = document.createElement('iframe');
-
-                    iframe.width = "100%";
-                    iframe.height = "100%";
-                    iframe.frameBorder = "0";
-                    iframe.style.border = "0";
-                    iframe.style.borderRadius = "12px";
-                    iframe.src = `https://maps.google.com/maps?q=${encodeURIComponent(fullAddress)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
-
-                    mapContainer.innerHTML = ''; // Clear Leaflet placeholders if any
-                    mapContainer.appendChild(iframe);
+                    loadMap();
                 }
+            }
             <?php endif; ?>
         });
     </script>

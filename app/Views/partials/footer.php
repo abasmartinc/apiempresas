@@ -175,9 +175,9 @@
 
         <div class="trust-panel">
             <div class="trust-panel__logos">
-                <img src="<?= base_url('public/images/stripe.png') ?>" alt="Stripe">
+                <img src="<?= base_url('public/images/stripe.png') ?>" alt="Stripe" loading="lazy" width="80" height="auto">
                 <span class="trust-panel__divider"></span>
-                <img src="<?= base_url('public/images/ssl.png') ?>" alt="SSL Secure">
+                <img src="<?= base_url('public/images/ssl.png') ?>" alt="SSL Secure" loading="lazy" width="80" height="auto">
             </div>
         </div>
     </div>
