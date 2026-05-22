@@ -408,6 +408,75 @@
 
                 </article>
 
+                <?php if (!session('logged_in')): ?>
+                <?php
+                    $cnaeCodeStr = substr($company['cnae'] ?? '', 0, 4);
+                    $cnaeUrlParam = urlencode($cnaeCodeStr);
+                    $provUrlParam = urlencode($companyProv);
+                    $sectorName = $company['cnae_label'] ?? 'este sector';
+                    
+                    $db = \Config\Database::connect();
+                    
+                    // 1. Intentar Sector + Provincia
+                    $builder = $db->table('companies');
+                    if ($cnaeCodeStr) $builder->where('cnae_code LIKE', $cnaeCodeStr . '%');
+                    $builder->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
+                    if ($companyProv && strtolower($companyProv) !== 'españa') {
+                        if (strtolower($companyProv) === 'alicante') {
+                            $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+                        } else {
+                            $builder->where('registro_mercantil', $companyProv);
+                        }
+                    }
+                    $listCount = $builder->countAllResults();
+                    $targetProv = $companyProv;
+
+                    // 2. Fallback: Si hay menos de 50 empresas, ampliar a TODA ESPAÑA para ese sector
+                    if ($listCount < 50 && $cnaeCodeStr) {
+                        $builder2 = $db->table('companies');
+                        $builder2->where('cnae_code LIKE', $cnaeCodeStr . '%');
+                        $builder2->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
+                        $listCount = $builder2->countAllResults();
+                        $targetProv = 'toda España';
+                        $provUrlParam = 'España';
+                    }
+
+                    // 3. Fallback: Si AÚN hay menos de 50 (sector rarísimo), ofrecer TODA LA PROVINCIA (sin sector)
+                    if ($listCount < 50 && $companyProv && strtolower($companyProv) !== 'españa') {
+                        $builder3 = $db->table('companies');
+                        $builder3->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
+                        if (strtolower($companyProv) === 'alicante') {
+                            $builder3->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+                        } else {
+                            $builder3->where('registro_mercantil', $companyProv);
+                        }
+                        $listCount = $builder3->countAllResults();
+                        $targetProv = $companyProv;
+                        $provUrlParam = urlencode($companyProv);
+                        $cnaeUrlParam = ''; // Quitamos el filtro de sector
+                        $sectorName = 'todos los sectores';
+                    }
+
+                    $sectorUrlParam = urlencode($sectorName);
+                    $radarCheckoutUrl = site_url("checkout/radar-export?type=single&provincia={$provUrlParam}&cnae={$cnaeUrlParam}&sector={$sectorUrlParam}");
+                    
+                    // Calcular precio dinámico
+                    helper('pricing');
+                    $pricing = calculate_radar_price($listCount);
+                    $priceStr = number_format($pricing['base_price'], 0, ',', '.');
+                    $countFormatted = number_format($listCount, 0, ',', '.');
+                ?>
+                <div style="margin: 2rem 0; background: #e0e7ff; border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;">
+                    <div>
+                        <div style="margin: 0; font-size: 1.1rem; color: #1e3a8a; font-weight: bold;">¿Vendes a empresas como <?= esc($companyName) ?>?</div>
+                        <p style="margin: 0.5rem 0 0; font-size: 0.95rem; color: #3730a3;">Descarga el listado de <strong><?= esc($sectorName) ?></strong> en <strong><?= esc($targetProv) ?></strong>.</p>
+                    </div>
+                    <a href="<?= $radarCheckoutUrl ?>" rel="nofollow" style="background: #2563eb; color: #ffffff; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 0.95rem; text-decoration: none; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2); transition: all 0.2s; white-space: nowrap;">
+                        Descargar Excel (<?= $countFormatted ?>) por <?= $priceStr ?>€ →
+                    </a>
+                </div>
+                <?php endif; ?>
+
 
                 <?php if ((!empty($company['lat']) && !empty($company['lng'])) || !empty($company['address'])): ?>
                     <div id="map-area" class="map-card">
@@ -647,63 +716,6 @@
 
                 <!-- CTA PROMOCIONAL B2B (Data Paywall / Excel Export) -->
                 <?php if (!session('logged_in')): ?>
-                <?php
-                    $cnaeCodeStr = substr($company['cnae'] ?? '', 0, 4);
-                    $cnaeUrlParam = urlencode($cnaeCodeStr);
-                    $provUrlParam = urlencode($companyProv);
-                    $sectorName = $company['cnae_label'] ?? 'este sector';
-                    
-                    $db = \Config\Database::connect();
-                    
-                    // 1. Intentar Sector + Provincia
-                    $builder = $db->table('companies');
-                    if ($cnaeCodeStr) $builder->where('cnae_code LIKE', $cnaeCodeStr . '%');
-                    $builder->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
-                    if ($companyProv && strtolower($companyProv) !== 'españa') {
-                        if (strtolower($companyProv) === 'alicante') {
-                            $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
-                        } else {
-                            $builder->where('registro_mercantil', $companyProv);
-                        }
-                    }
-                    $listCount = $builder->countAllResults();
-                    $targetProv = $companyProv;
-
-                    // 2. Fallback: Si hay menos de 50 empresas, ampliar a TODA ESPAÑA para ese sector
-                    if ($listCount < 50 && $cnaeCodeStr) {
-                        $builder2 = $db->table('companies');
-                        $builder2->where('cnae_code LIKE', $cnaeCodeStr . '%');
-                        $builder2->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
-                        $listCount = $builder2->countAllResults();
-                        $targetProv = 'toda España';
-                        $provUrlParam = 'España';
-                    }
-
-                    // 3. Fallback: Si AÚN hay menos de 50 (sector rarísimo), ofrecer TODA LA PROVINCIA (sin sector)
-                    if ($listCount < 50 && $companyProv && strtolower($companyProv) !== 'españa') {
-                        $builder3 = $db->table('companies');
-                        $builder3->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
-                        if (strtolower($companyProv) === 'alicante') {
-                            $builder3->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
-                        } else {
-                            $builder3->where('registro_mercantil', $companyProv);
-                        }
-                        $listCount = $builder3->countAllResults();
-                        $targetProv = $companyProv;
-                        $provUrlParam = urlencode($companyProv);
-                        $cnaeUrlParam = ''; // Quitamos el filtro de sector
-                        $sectorName = 'todos los sectores';
-                    }
-
-                    $sectorUrlParam = urlencode($sectorName);
-                    $radarCheckoutUrl = site_url("checkout/radar-export?type=single&provincia={$provUrlParam}&cnae={$cnaeUrlParam}&sector={$sectorUrlParam}");
-                    
-                    // Calcular precio dinámico
-                    helper('pricing');
-                    $pricing = calculate_radar_price($listCount);
-                    $priceStr = number_format($pricing['base_price'], 0, ',', '.');
-                    $countFormatted = number_format($listCount, 0, ',', '.');
-                ?>
                 <aside class="seo-cta-banner" style="margin-top: 3rem; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #e2e8f0; border-radius: 16px; padding: 2rem; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
                     <div style="background: #e0e7ff; color: #4338ca; padding: 8px 16px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">
                         Base de Datos B2B

@@ -431,10 +431,11 @@ class Billing extends BaseController
         $tax   = 0;
 
         if ($type === 'subscription') {
-            $price = 79.00;
-            $tax   = $price * 0.21;
-            // No count needed for subscription intro usually, but we can show "Total Radar"
             $db      = \Config\Database::connect();
+            $planRow = $db->table('api_plans')->where('slug', 'radar')->get()->getRow();
+            $price   = $planRow ? (float)$planRow->price_monthly : 49.00;
+            $tax     = $price * 0.21;
+            // No count needed for subscription intro usually, but we can show "Total Radar"
             $count   = $db->table('companies')->countAllResults();
         } else {
             // Si viene de combined.php (cnae code), contar directamente sin filtro de fecha

@@ -121,13 +121,26 @@
             .order-card { position: static; }
             .page-summary { padding: 16px 16px 32px; }
             .cols-grid { grid-template-columns: repeat(2, 1fr); }
+            
+            /* Sticky mobile CTA */
+            .mobile-sticky-cta {
+                position: fixed; bottom: 0; left: 0; right: 0;
+                background: white; padding: 16px;
+                box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+                z-index: 999; display: flex;
+                align-items: center; justify-content: space-between;
+                gap: 12px; border-top: 1px solid #e2e8f0;
+            }
         }
         @media (max-width: 480px) {
             .main-card { padding: 18px 16px; }
             .order-card { padding: 18px 16px; }
             .cols-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
             .stat-grid { grid-template-columns: 1fr 1fr; }
-            .summary-grid { gap: 16px; }
+            .summary-grid { gap: 16px; margin-bottom: 80px; } /* Espacio para el sticky */
+        }
+        @media (min-width: 901px) {
+            .mobile-sticky-cta { display: none; }
         }
     </style>
 </head>
@@ -317,6 +330,12 @@
                         <input type="hidden" name="cnae" value="<?= esc($cnae ?? '') ?>">
                         <input type="hidden" name="period_radar" value="<?= esc($period) ?>">
 
+                        <?php if (!session('logged_in')): ?>
+                        <div style="margin-bottom: 16px;">
+                            <input type="email" name="email" placeholder="Tu email para recibir el Excel y factura" required style="width: 100%; padding: 16px; border-radius: 12px; border: 1px solid #cbd5e1; font-size: 0.95rem; box-sizing: border-box; background: #f8fafc; color: #0f172a;" />
+                        </div>
+                        <?php endif; ?>
+
                         <div style="position: relative;">
                             <?php if ($type === 'subscription'): ?>
                                 <div style="position: absolute; top: -12px; right: 12px; background: #ef4444; color: white; font-size: 10px; padding: 3px 10px; border-radius: 20px; font-weight: 900; z-index: 20; box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2); text-transform: uppercase; pointer-events: none; white-space: nowrap;">
@@ -357,27 +376,60 @@
                         <?php endif; ?>
                     </p>
 
-                    <div class="trust-badges">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" style="height: 18px; opacity: 0.4;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; font-size: 0.7rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
+                        <div style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 8px; border-radius: 6px;">
+                            <span>🔒</span> Pago Seguro SSL
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 8px; border-radius: 6px;">
+                            <span>📄</span> Factura Incluida
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 8px; border-radius: 6px;">
+                            <span>🏛️</span> Datos del BORME
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 8px; border-radius: 6px;">
+                            <span>↩️</span> Garantía 48h
+                        </div>
                     </div>
 
                     <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 18px 0 14px;">
 
                     <div style="text-align: center;">
+                        <?php 
+                            $switchParams = http_build_query([
+                                'provincia' => $province,
+                                'sector' => $sector,
+                                'cnae' => $cnae,
+                                'period_radar' => $period
+                            ]);
+                            
+                            $db = \Config\Database::connect();
+                            $radarPlan = $db->table('api_plans')->where('slug', 'radar')->get()->getRow();
+                            $radarPrice = $radarPlan ? (float)$radarPlan->price_monthly : 49.00;
+                        ?>
                         <?php if ($type === 'subscription'): ?>
                             <div style="font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px;">¿Necesitas solo un listado?</div>
-                            <a href="<?= site_url('checkout/radar-export?type=single') ?>" style="color: var(--primary); font-weight: 800; text-decoration: none; font-size: 0.9rem;">
+                            <a href="<?= site_url('checkout/radar-export?type=single&' . $switchParams) ?>" style="color: var(--primary); font-weight: 800; text-decoration: none; font-size: 0.9rem;">
                                 Comprar listado puntual →
                             </a>
                         <?php else: ?>
                             <div style="font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px;">O elige acceso total</div>
-                            <a href="<?= site_url('checkout/radar-export?type=subscription') ?>" style="color: var(--primary); font-weight: 800; text-decoration: none; font-size: 0.9rem;">
-                                Radar Ilimitado por 79€/mes →
+                            <a href="<?= site_url('checkout/radar-export?type=subscription&' . $switchParams) ?>" style="color: var(--primary); font-weight: 800; text-decoration: none; font-size: 0.9rem;">
+                                Radar Ilimitado por <?= number_format($radarPrice, 0, ',', '.') ?>€/mes →
                             </a>
                         <?php endif; ?>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="mobile-sticky-cta">
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-size: 0.75rem; color: #64748b; font-weight: 800; text-transform: uppercase;"><?= $type === 'subscription' ? 'Total (IVA incl.)' : 'Pago único (IVA incl.)' ?></span>
+                <span style="font-weight: 900; font-size: 1.25rem; color: #0f172a; line-height: 1;"><?= number_format($price + $tax, 2, ',', '.') ?> €</span>
+            </div>
+            <button type="button" class="btn" style="background: #2563eb; color: white; border-radius: 12px; font-weight: 800; padding: 14px 24px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);" onclick="document.querySelector('.order-card form').submit();">
+                <?= $type === 'subscription' ? 'Activar Radar' : 'Pagar y Descargar' ?>
+            </button>
         </div>
     </main>
 

@@ -178,7 +178,12 @@
                         <span class="badge" style="background:var(--primary); color:white;">Empresas Nuevas PRO</span>
                         <h3>Plan Radar</h3>
                         <p class="muted">Acceso ilimitado a nuevas constituciones.</p>
-                        <div class="price">99 €<span style="font-size:16px; color:var(--muted);">/mes</span></div>
+                        <?php 
+                            $db = \Config\Database::connect();
+                            $radarPlan = $db->table('api_plans')->where('slug', 'radar')->get()->getRow();
+                            $radarPrice = $radarPlan ? (float)$radarPlan->price_monthly : 49.00;
+                        ?>
+                        <div class="price"><?= number_format($radarPrice, 0, ',', '.') ?> €<span style="font-size:16px; color:var(--muted);">/mes</span></div>
 
                         <ul class="tier__list" style="text-align:left; margin-top:20px;">
                             <li style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
