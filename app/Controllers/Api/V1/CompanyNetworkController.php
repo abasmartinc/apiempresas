@@ -58,7 +58,44 @@ class CompanyNetworkController extends ResourceController
             if (isset($validation['user_id'])) {
                 ApiRequestLogger::log($validation['user_id'], 'network', 'error', $validation['message']);
             }
-            return $this->failUnauthorized($validation['message']);
+            
+            $model = new CompanyModel();
+            $company = $model->getByCif($cif);
+            
+            $stats = [
+                'total_administrators' => '🔒 Pro/Business Plan',
+                'total_linked_companies' => '🔒 Pro/Business Plan',
+            ];
+            
+            if ($company) {
+                $adminModel = new CompanyAdministratorModel();
+                $admins = $adminModel->getByCompanyId($company['id']);
+                if (!empty($admins)) {
+                    $adminNames = array_unique(array_column($admins, 'name'));
+                    $linkedRecords = $adminModel->getLinkedCompaniesByAdminNames($adminNames, $company['id']);
+                    $stats = [
+                        'total_administrators' => count($adminNames),
+                        'total_linked_companies' => count(array_unique(array_column($linkedRecords, 'company_id'))),
+                    ];
+                }
+            }
+
+            return $this->respond([
+                'success' => false,
+                'message' => $validation['message'],
+                'data' => [
+                    'nodes' => [],
+                    'edges' => [],
+                    'stats' => $stats
+                ],
+                'upsell_opportunities' => [
+                    'grafos_completos' => '🔒 Desbloquea el plan Professional o Business para ver las conexiones societarias completas.',
+                    'nodos_detectados' => ($company && isset($stats['total_administrators']) && is_numeric($stats['total_administrators'])) 
+                        ? "Hemos detectado {$stats['total_administrators']} administradores y {$stats['total_linked_companies']} empresas vinculadas. ¡Pásate a Pro para mapear su red!"
+                        : 'Mapea la red de vinculación entre empresas a través de sus administradores.',
+                    'upgrade_url' => site_url('billing')
+                ]
+            ], 403);
         }
 
         $userId = $validation['user_id'];

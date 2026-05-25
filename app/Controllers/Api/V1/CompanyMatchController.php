@@ -66,7 +66,43 @@ class CompanyMatchController extends ResourceController
             if (isset($validation['user_id'])) {
                 ApiRequestLogger::log($validation['user_id'], 'match', 'error', $validation['message']);
             }
-            return $this->failUnauthorized($validation['message']);
+            
+            $model = new CompanyModel();
+            $company = $model->getByCif($cif);
+            
+            $previewLevel = '🔒 Business Plan';
+            if ($company) {
+                // We run match analysis to get the fit level for preview
+                $db = \Config\Database::connect();
+                $scoring = $db->table('company_radar_scores')
+                              ->where('company_id', $company['id'])
+                              ->get()
+                              ->getRowArray();
+                if ($scoring) {
+                    $company = array_merge($company, $scoring);
+                }
+                $matchResult = RadarAnalyzer::calculateMatch($company, $sellerSector);
+                $previewLevel = $matchResult['fit_level'] ?? 'Medio';
+            }
+            
+            return $this->respond([
+                'success' => false,
+                'message' => $validation['message'],
+                'data' => [
+                    'match_score' => '🔒 Business Plan',
+                    'fit_level' => $previewLevel,
+                    'pain_points_addressed' => [],
+                    'sales_argument' => '🔒 Desbloquea el plan Business para obtener el argumentario comercial.',
+                    'recommendation' => '🔒 Requiere plan Business.'
+                ],
+                'upsell_opportunities' => [
+                    'calculadora_match' => '🔒 Desbloquea el plan Business para obtener la puntuación de encaje B2B exacta y la recomendación comercial.',
+                    'fit_level_detectado' => ($company) 
+                        ? "Hemos detectado un nivel de encaje ({$previewLevel}) para el sector '{$sellerSector}'. ¡Pásate a Business para ver el informe completo!"
+                        : "Evalúa el encaje comercial entre cualquier prospecto y tu sector de ventas.",
+                    'upgrade_url' => site_url('billing')
+                ]
+            ], 403);
         }
 
         $userId = $validation['user_id'];

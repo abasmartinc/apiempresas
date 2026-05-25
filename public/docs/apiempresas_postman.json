@@ -2,12 +2,13 @@
 	"info": {
 		"_postman_id": "8c5e2a1b-7d3a-4f5a-9e2c-1b2a3d4f5g6h",
 		"name": "APIEmpresas.es - API V1",
-		"description": "Colección completa de la API de APIEmpresas.es. Datos mercantiles, scoring comercial, señales BORME, Radar de empresas y Webhooks.",
+		"description": "Colección completa de la API de APIEmpresas.es organizada por planes de acceso (Free, Professional y Business).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Core",
+			"name": "1. Plan Free / General",
+			"description": "Endpoints accesibles para todos los planes, incluido el plan Free.",
 			"item": [
 				{
 					"name": "Consulta por CIF",
@@ -46,14 +47,31 @@
 							]
 						}
 					}
+				},
+				{
+					"name": "Estadísticas de Consumo",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" },
+							{ "key": "Accept", "value": "application/json", "type": "text" }
+						],
+						"url": {
+							"raw": "https://apiempresas.es/api/v1/usage",
+							"protocol": "https",
+							"host": ["apiempresas", "es"],
+							"path": ["api", "v1", "usage"]
+						}
+					}
 				}
 			]
 		},
 		{
-			"name": "Enriquecimiento (Pro / Business)",
+			"name": "2. Plan Professional",
+			"description": "Endpoints que requieren suscripción activa al Plan Professional o superior.",
 			"item": [
 				{
-					"name": "Score Comercial",
+					"name": "Scoring Comercial",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -89,6 +107,66 @@
 					}
 				},
 				{
+					"name": "Grafos de Poder Societario",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
+						],
+						"url": {
+							"raw": "https://apiempresas.es/api/v1/companies/network?cif=B79359220",
+							"protocol": "https",
+							"host": ["apiempresas", "es"],
+							"path": ["api", "v1", "companies", "network"],
+							"query": [
+								{ "key": "cif", "value": "B79359220" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Búsqueda Autocompletado Profesional",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
+						],
+						"url": {
+							"raw": "https://apiempresas.es/api/v1/professional/search?q=Telefónica",
+							"protocol": "https",
+							"host": ["apiempresas", "es"],
+							"path": ["api", "v1", "professional", "search"],
+							"query": [
+								{ "key": "q", "value": "Telefónica" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Detalles Profesionales de Empresa",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
+						],
+						"url": {
+							"raw": "https://apiempresas.es/api/v1/professional/details?cif=B12345678",
+							"protocol": "https",
+							"host": ["apiempresas", "es"],
+							"path": ["api", "v1", "professional", "details"],
+							"query": [
+								{ "key": "cif", "value": "B12345678" }
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Plan Business",
+			"description": "Endpoints premium exclusivos del Plan Business o superior.",
+			"item": [
+				{
 					"name": "Insights IA",
 					"request": {
 						"method": "GET",
@@ -105,14 +183,27 @@
 							]
 						}
 					}
-				}
-			]
-		},
-		{
-			"name": "Radar",
-			"item": [
+				},
 				{
-					"name": "Listado de nuevas empresas",
+					"name": "Preparación de Contacto (Contact Prep)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
+						],
+						"url": {
+							"raw": "https://apiempresas.es/api/v1/companies/contact-prep?cif=B12345678",
+							"protocol": "https",
+							"host": ["apiempresas", "es"],
+							"path": ["api", "v1", "companies", "contact-prep"],
+							"query": [
+								{ "key": "cif", "value": "B12345678" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Búsqueda Radar (Leads)",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -129,12 +220,26 @@
 							]
 						}
 					}
-				}
-			]
-		},
-		{
-			"name": "Webhooks (Business)",
-			"item": [
+				},
+				{
+					"name": "Calculadora de Match B2B",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
+						],
+						"url": {
+							"raw": "https://apiempresas.es/api/v1/companies/match?cif=B12345678&seller_sector=Software",
+							"protocol": "https",
+							"host": ["apiempresas", "es"],
+							"path": ["api", "v1", "companies", "match"],
+							"query": [
+								{ "key": "cif", "value": "B12345678" },
+								{ "key": "seller_sector", "value": "Software" }
+							]
+						}
+					}
+				},
 				{
 					"name": "Listar Webhooks",
 					"request": {
