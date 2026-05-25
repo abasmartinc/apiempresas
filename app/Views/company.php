@@ -308,6 +308,7 @@
                                 <a href="<?= site_url('empresa/export/' . $company['id']) ?>" class="btn"
                                     rel="nofollow noindex"
                                     aria-label="Descargar Informe PDF de <?= esc($companyName) ?>"
+                                    onclick="window.dataLayer = window.dataLayer || []; window.dataLayer.push({'event': 'cta_pdf_click'});"
                                     style="padding: 8px 16px; font-size: 0.9rem; background: #ffffff; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s;">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2" aria-hidden="true">
@@ -415,7 +416,7 @@
                         <p style="margin: 0.5rem 0 0; font-size: 0.95rem; color: #3730a3;">Descarga el listado de <strong><?= esc($sectorName) ?></strong> en <strong><?= esc($targetProv) ?></strong>.</p>
                     </div>
                     <a href="<?= $radarCheckoutUrl ?>" rel="nofollow" onclick="window.dataLayer = window.dataLayer || []; window.dataLayer.push({'event': 'cta_excel_click'});" style="background: #2563eb; color: #ffffff; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 0.95rem; text-decoration: none; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2); transition: all 0.2s; white-space: nowrap;">
-                        Descargar Excel (<?= $countFormatted ?>) por <?= $priceStr ?>€ →
+                        Descargar Excel (<?= $countFormatted ?> empresas) por <?= $priceStr ?>€ →
                     </a>
                 </div>
                 <?php endif; ?>

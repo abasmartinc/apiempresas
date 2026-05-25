@@ -311,6 +311,26 @@ Accept: application/json</code></pre>
                         </div>
                         <p>Pitch de venta sugerido y manejo de objeciones generado por IA.</p>
                     </div>
+
+                    <!-- NETWORK -->
+                    <div style="margin-top: 32px;">
+                        <div class="endpoint-header">
+                            <span class="http-badge get">GET</span>
+                            <code>/companies/network</code>
+                            <span class="plan-badge pro">Pro</span>
+                        </div>
+                        <p>Obtiene la red de vinculación entre empresas a través de sus administradores. Requiere el parámetro <code>cif</code>.</p>
+                    </div>
+
+                    <!-- MATCH -->
+                    <div style="margin-top: 32px;">
+                        <div class="endpoint-header">
+                            <span class="http-badge get">GET</span>
+                            <code>/companies/match</code>
+                            <span class="plan-badge business">Business</span>
+                        </div>
+                        <p>Calculadora de Match B2B. Requiere los parámetros <code>cif</code> y <code>seller_sector</code>. Devuelve el nivel de encaje comercial y un argumentario personalizado.</p>
+                    </div>
                 </section>
 
                 <!-- RADAR -->

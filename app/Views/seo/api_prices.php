@@ -1231,6 +1231,51 @@
                                 </td>
                             </tr>
 
+                            <!-- NETWORK -->
+                            <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 18px 20px;">
+                                    <div
+                                        style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">
+                                        GET /companies/network</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Parámetro: ?cif=...</div>
+                                </td>
+                                <td style="padding: 18px 20px;">
+                                    <strong
+                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Grafos de Poder Societario</strong>
+                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
+                                        Obtiene la red de vinculación entre empresas a través de sus administradores.
+                                    </p>
+                                </td>
+                                <td style="padding: 18px 20px; text-align: center;"><span
+                                        style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO
+                                        / BUS</span></td>
+                                <td style="padding: 18px 20px; text-align: center;">
+                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_network')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                </td>
+                            </tr>
+
+                            <!-- MATCH -->
+                            <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 18px 20px;">
+                                    <div
+                                        style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">
+                                        GET /companies/match</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Filtros: cif, seller_sector</div>
+                                </td>
+                                <td style="padding: 18px 20px;">
+                                    <strong
+                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Calculadora de Match B2B</strong>
+                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
+                                        Evalúa el encaje comercial entre una empresa prospecto y un sector de ventas, devolviendo un score y argumentario.
+                                    </p>
+                                </td>
+                                <td style="padding: 18px 20px; text-align: center;"><span
+                                        style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span></td>
+                                <td style="padding: 18px 20px; text-align: center;">
+                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_match')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                </td>
+                            </tr>
+
                             <!-- WEBHOOKS -->
                             <tr class="api-endpoint-row">
                                 <td style="padding: 18px 20px;">
@@ -1382,6 +1427,10 @@
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
                                 </svg> Acceso a Radar API</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                                </svg> Grafos de Poder Societario</li>
                         </ul>
 
                         <a href="<?= site_url('register') ?>" class="api-pricing-btn primary">Activar Plan Pro</a>
@@ -1408,6 +1457,10 @@
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
                                 </svg> IA Insights & Predictiva de Negocio</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                                </svg> Calculadora de Match B2B</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
@@ -1918,6 +1971,35 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         { name: "NEW CORP SL", cif: "B99887766", founded: "2024-05-05", province: "BARCELONA", score: 88 }
                     ]
                 },
+                get_network: {
+                    success: true,
+                    data: {
+                        cif: "B12345678",
+                        administrators: [
+                            {
+                                name: "GARCIA LOPEZ JUAN",
+                                position: "Administrador Único",
+                                linked_companies: [
+                                    { name: "OTRA EMPRESA SL", cif: "B87654321", status: "ACTIVA" }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                get_match: {
+                    success: true,
+                    data: {
+                        cif: "B12345678",
+                        seller_sector: "software",
+                        match_score: 85,
+                        analysis: {
+                            match_level: "Alto",
+                            synergy: "Alta sinergia",
+                            buyer_needs: ["Digitalización", "CRM"]
+                        },
+                        sales_pitch: "He visto que están creciendo. Nuestro software puede ayudarles a..."
+                    }
+                },
                 post_webhook: {
                     success: true,
                     message: "Webhook creado correctamente",
@@ -1947,6 +2029,8 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                     get_signals: 'GET /companies/signals',
                     get_insights: 'GET /companies/insights',
                     get_radar: 'GET /companies/radar',
+                    get_network: 'GET /companies/network',
+                    get_match: 'GET /companies/match',
                     post_webhook: 'POST /webhooks',
                     get_webhooks: 'GET /webhooks',
                     delete_webhook: 'DELETE /webhooks/{id}'
@@ -1955,6 +2039,13 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                 endpoint.textContent = names[key];
                 content.innerHTML = syntaxHighlight(jsonExamples[key]);
                 modal.style.display = 'flex';
+
+                // Tracking Event
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({
+                    'event': 'view_json_preview',
+                    'api_endpoint': names[key]
+                });
                 // Evitamos el salto quitando el hidden del body si causa conflicto
                 // document.body.style.overflow = 'hidden'; 
             }

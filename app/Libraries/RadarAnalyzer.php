@@ -440,4 +440,68 @@ class RadarAnalyzer
 
         return null;
     }
+
+    /**
+     * Calculates the B2B Match score based on the seller's sector and the target company profile.
+     */
+    public static function calculateMatch(array $company, string $sellerSector): array
+    {
+        $profile = self::detectCommercialProfile($company);
+        $needs = self::detectProbableNeeds($company, $profile);
+        $score = $company['score_total'] ?? 50; // Base score from Radar
+
+        $sellerSectorLower = mb_strtolower($sellerSector);
+        $matchBase = 50;
+        
+        $relevantKeywords = explode(' ', $sellerSectorLower);
+        $needMatches = 0;
+        foreach ($needs as $need) {
+            foreach ($relevantKeywords as $kw) {
+                if (strlen($kw) > 3 && mb_stripos(mb_strtolower($need), $kw) !== false) {
+                    $needMatches++;
+                }
+            }
+        }
+
+        $synergies = [
+            'marketing' => ['commerce', 'tech', 'consulting'],
+            'software' => ['tech', 'consulting', 'commerce', 'logistics', 'health'],
+            'rrhh' => ['consulting', 'hospitality', 'construction', 'logistics'],
+            'asesoria' => ['commerce', 'construction', 'hospitality', 'general'],
+            'logistica' => ['commerce', 'industrial']
+        ];
+
+        $buyerSlug = $profile['slug'] ?? 'general';
+        $synergyBonus = 0;
+
+        foreach ($synergies as $sellerKw => $buyerSlugs) {
+            if (mb_stripos($sellerSectorLower, $sellerKw) !== false) {
+                if (in_array($buyerSlug, $buyerSlugs)) {
+                    $synergyBonus = 20;
+                }
+            }
+        }
+
+        $matchScore = min(99, $matchBase + ($needMatches * 10) + $synergyBonus + ($score / 5));
+        
+        $fitLevel = 'Medio';
+        if ($matchScore >= 80) $fitLevel = 'Muy Alto';
+        elseif ($matchScore >= 65) $fitLevel = 'Alto';
+        elseif ($matchScore < 40) $fitLevel = 'Bajo';
+
+        $painPoints = array_slice($needs, 0, 3);
+        if (empty($painPoints)) {
+            $painPoints = ['Necesidad de optimización operativa', 'Digitalización de procesos básicos'];
+        }
+
+        $salesArgument = "El perfil de esta empresa (" . $profile['label'] . ") muestra indicadores de que requieren soluciones como las tuyas. Sus puntos de dolor actuales son ideales para una propuesta de valor en " . $sellerSector . ".";
+
+        return [
+            'match_score' => round($matchScore),
+            'fit_level' => $fitLevel,
+            'pain_points_addressed' => $painPoints,
+            'sales_argument' => $salesArgument,
+            'recommendation' => $matchScore >= 65 ? 'Prioridad Alta: Contactar inmediatamente.' : 'Nutrición: Mantener en radar hasta detectar más señales.'
+        ];
+    }
 }

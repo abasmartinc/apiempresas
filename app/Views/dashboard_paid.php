@@ -538,7 +538,7 @@
                     document.getElementById('aha-cif').textContent = comp.cif || '-';
                     document.getElementById('aha-status').textContent = comp.status || 'Activa';
                     document.getElementById('aha-address').textContent = comp.address || '-';
-                    
+
                     ahaCard.style.display = 'block';
                     ahaCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     

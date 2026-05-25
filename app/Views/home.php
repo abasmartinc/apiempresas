@@ -500,6 +500,7 @@
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Datos completos BORME y Actividad</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Scoring Comercial IA (0-100)</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Acceso a Radar API (Prospección)</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Grafos de Poder Societario</li>
                         </ul>
                         <a href="<?= site_url('register?plan=pro') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Pro", "plan": "pro", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Pro</a>
                     </div>
@@ -515,6 +516,7 @@
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 10.000 consultas al mes</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Webhooks Push (Notificaciones BORME)</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> IA Predictiva de Oportunidades</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Calculadora de Match B2B</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Soporte Prioritario Slack / Email</li>
                         </ul>
                         <a href="<?= site_url('register?plan=business') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Business", "plan": "business", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Business</a>
@@ -621,6 +623,32 @@
                                         <div class="cap-feature-endpoint">GET /api/v1/companies/contact-prep</div>
                                         <div class="cap-feature-desc">Genera argumentos de venta personalizados para cada empresa con nuestra IA.</div>
                                         <button type="button" onclick="event.preventDefault(); showJsonPreview('get_contact_prep')" class="btn-json-preview">Ver Respuesta JSON</button>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Grafos de Poder Societario</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies/network</div>
+                                        <div class="cap-feature-desc">Obtiene la red de vinculación entre empresas a través de sus administradores.</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('get_network')" class="btn-json-preview">Ver Respuesta JSON</button>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Calculadora Match B2B</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies/match</div>
+                                        <div class="cap-feature-desc">Evalúa el encaje comercial y genera un argumentario de venta personalizado.</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('get_match')" class="btn-json-preview">Ver Respuesta JSON</button>
                                     </div>
                                 </td>
                                 <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
@@ -914,6 +942,35 @@
                     { name: "NEW CORP SL", cif: "B99887766", founded: "2024-05-05", province: "BARCELONA", score: 88 }
                 ]
             },
+            get_network: {
+                success: true,
+                data: {
+                    cif: "B12345678",
+                    administrators: [
+                        {
+                            name: "GARCIA LOPEZ JUAN",
+                            position: "Administrador Único",
+                            linked_companies: [
+                                { name: "OTRA EMPRESA SL", cif: "B87654321", status: "ACTIVA" }
+                            ]
+                        }
+                    ]
+                }
+            },
+            get_match: {
+                success: true,
+                data: {
+                    cif: "B12345678",
+                    seller_sector: "software",
+                    match_score: 85,
+                    analysis: {
+                        match_level: "Alto",
+                        synergy: "Alta sinergia",
+                        buyer_needs: ["Digitalización", "CRM"]
+                    },
+                    sales_pitch: "He visto que están creciendo. Nuestro software puede ayudarles a..."
+                }
+            },
             get_contact_prep: {
                 success: true,
                 data: {
@@ -942,6 +999,8 @@
                 get_signals: 'GET /companies/signals',
                 get_insights: 'GET /companies/insights',
                 get_radar: 'GET /companies/radar',
+                get_network: 'GET /companies/network',
+                get_match: 'GET /companies/match',
                 get_contact_prep: 'GET /companies/contact-prep',
                 post_webhook: 'POST /webhooks'
             };
@@ -949,6 +1008,13 @@
             endpoint.textContent = names[key];
             content.innerHTML = syntaxHighlight(jsonExamples[key]);
             modal.style.display = 'flex';
+
+            // Tracking Event
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+                'event': 'view_json_preview',
+                'api_endpoint': names[key]
+            });
             // Eliminamos overflow hidden para evitar saltos de scroll
             // document.body.style.overflow = 'hidden';
         }

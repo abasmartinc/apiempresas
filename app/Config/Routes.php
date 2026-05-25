@@ -115,6 +115,8 @@ $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function
     $routes->get('api/v1/companies/insights', 'Api\V1\CompanyEnrichmentController::insights');
     $routes->get('api/v1/companies/contact-prep', 'Api\V1\CompanyEnrichmentController::contactPrep');
     $routes->get('api/v1/companies/radar', 'Api\V1\RadarApiController::index');
+    $routes->get('api/v1/companies/match', 'Api\V1\CompanyMatchController::index');
+    $routes->get('api/v1/companies/network', 'Api\V1\CompanyNetworkController::index');
 
     // Webhooks CRUD
     $routes->get('api/v1/webhooks', 'Api\V1\WebhookController::index');
