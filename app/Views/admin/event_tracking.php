@@ -132,6 +132,82 @@
 
         </div>
 
+        <!-- New General Behavior KPIs Section -->
+        <div style="margin-bottom: 3rem;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem;">
+                <h2 style="margin: 0; font-size: 1.5rem; color: #0f172a; font-weight: 800;">Comportamiento General Web (30 Días)</h2>
+                <span style="background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 800;">GLOBAL</span>
+            </div>
+
+            <!-- Developer Journey Funnel -->
+            <h3 style="font-size: 1rem; color: #64748b; margin-bottom: 1rem; font-weight: 700; text-transform: uppercase;">Viaje del Desarrollador</h3>
+            <div style="background: white; border-radius: 24px; padding: 2rem; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 1rem; overflow-x: auto; margin-bottom: 2rem; box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);">
+                <div style="flex: 1; min-width: 150px; text-align: center; padding: 1rem; background: #f8fafc; border-radius: 16px;">
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Copias API Key</div>
+                    <div style="font-size: 1.5rem; font-weight: 900; color: #1e293b;"><?= number_format($developerKpis['api_keys_copied']) ?></div>
+                    <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 8px;">Veces que un dev ha copiado su clave de acceso.</div>
+                </div>
+                <div style="color: #cbd5e1;">➔</div>
+                <div style="flex: 1; min-width: 150px; text-align: center; padding: 1rem; background: #f8fafc; border-radius: 16px;">
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Copias cURL</div>
+                    <div style="font-size: 1.5rem; font-weight: 900; color: #1e293b;"><?= number_format($developerKpis['curl_copied']) ?></div>
+                    <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 8px;">Intentos de usar un código de ejemplo en su terminal.</div>
+                </div>
+                <div style="color: #cbd5e1;">➔</div>
+                <div style="flex: 1; min-width: 150px; text-align: center; padding: 1rem; background: #e0e7ff; border-radius: 16px; border: 1px solid #c7d2fe;">
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #4338ca; text-transform: uppercase;">Búsquedas Dashboard</div>
+                    <div style="font-size: 1.5rem; font-weight: 900; color: #3730a3;"><?= number_format($developerKpis['dashboard_searches']) ?></div>
+                    <div style="font-size: 0.75rem; color: #6366f1; margin-top: 8px; opacity: 0.8;">Búsquedas de empresas reales hechas desde el panel.</div>
+                </div>
+            </div>
+
+            <!-- Monetization Funnel -->
+            <h3 style="font-size: 1rem; color: #64748b; margin-bottom: 1rem; font-weight: 700; text-transform: uppercase;">Intención de Compra</h3>
+            <div style="background: white; border-radius: 24px; padding: 2rem; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 1rem; overflow-x: auto; margin-bottom: 2rem; box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);">
+                <div style="flex: 1; min-width: 150px; text-align: center; padding: 1rem; background: #f8fafc; border-radius: 16px;">
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Clics Precios/Planes</div>
+                    <div style="font-size: 1.5rem; font-weight: 900; color: #1e293b;"><?= number_format($pricingKpis['pricing_clicks']) ?></div>
+                    <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 8px;">Interés mostrado haciendo clic en botones de "Ver precios" o seleccionando un plan.</div>
+                </div>
+                <div style="color: #cbd5e1;">➔</div>
+                <div style="flex: 1; min-width: 150px; text-align: center; padding: 1rem; background: #f8fafc; border-radius: 16px;">
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Vistas Checkout</div>
+                    <div style="font-size: 1.5rem; font-weight: 900; color: #1e293b;"><?= number_format($pricingKpis['checkout_views']) ?></div>
+                    <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 8px;">Usuarios que aterrizaron en la pantalla final de pago.</div>
+                </div>
+                <div style="color: #cbd5e1;">➔</div>
+                <div style="flex: 1; min-width: 150px; text-align: center; padding: 1rem; background: #ecfdf5; border-radius: 16px; border: 1px solid #bbf7d0;">
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #059669; text-transform: uppercase;">Checkouts Iniciados</div>
+                    <div style="font-size: 1.5rem; font-weight: 900; color: #065f46;"><?= number_format($pricingKpis['checkout_started']) ?></div>
+                    <div style="font-size: 0.75rem; color: #10b981; margin-top: 8px; opacity: 0.8;">Usuarios que comenzaron a escribir sus datos de tarjeta en Stripe.</div>
+                </div>
+            </div>
+
+            <!-- Other Engagement KPIs -->
+            <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <div class="kpi-card" style="--kpi-color: #f59e0b; padding: 1.5rem;">
+                    <span class="kpi-label">Uso de Demo (Web)</span>
+                    <span class="kpi-value" style="font-size: 1.8rem;"><?= number_format($engagementKpis['demo_starts']) ?></span>
+                    <span class="kpi-sub"><?= number_format($engagementKpis['demo_results']) ?> Resultados Mostrados</span>
+                    <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 12px; line-height: 1.3;">Interacciones de visitantes buscando empresas en el buscador interactivo (demo).</div>
+                </div>
+                
+                <div class="kpi-card" style="--kpi-color: #8b5cf6; padding: 1.5rem;">
+                    <span class="kpi-label">Interacción (CTAs)</span>
+                    <span class="kpi-value" style="font-size: 1.8rem;"><?= number_format($engagementKpis['ctas_clicked']) ?></span>
+                    <span class="kpi-sub">De <?= number_format($engagementKpis['page_views']) ?> page views</span>
+                    <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 12px; line-height: 1.3;">Total de clics en llamadas a la acción relevantes (botones principales, registros) en la web.</div>
+                </div>
+
+                <div class="kpi-card" style="--kpi-color: #10b981; padding: 1.5rem;">
+                    <span class="kpi-label">Emails Transaccionales</span>
+                    <span class="kpi-value" style="font-size: 1.8rem;"><?= number_format($emailKpis['engaged'] + $emailKpis['no_usage']) ?></span>
+                    <span class="kpi-sub">Enviados por actividad</span>
+                    <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 12px; line-height: 1.3;">Muestra los correos lanzados automáticamente para empujar la adopción o retener usuarios inactivos.</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Radar B2B Funnel Section -->
         <div style="margin-bottom: 3rem;">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem;">

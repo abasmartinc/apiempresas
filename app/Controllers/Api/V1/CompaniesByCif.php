@@ -24,7 +24,7 @@ class CompaniesByCif extends ResourceController
     {
         $this->companyModel = new CompanyModel();
         $this->emailService = new \App\Services\EmailService();
-        helper('api');
+        helper(['api', 'company']);
     }
 
     #[OA\Get(
@@ -82,6 +82,21 @@ class CompaniesByCif extends ResourceController
                     'success' => false,
                     'error'   => 'VALIDATION_ERROR',
                     'message' => 'El parámetro "cif" es obligatorio.'
+                ],
+                ResponseInterface::HTTP_BAD_REQUEST
+            );
+        }
+
+        if (!is_valid_cif($cif)) {
+            $message = 'El CIF proporcionado no tiene un formato válido (debe tener una letra, 7 dígitos y un dígito o letra de control).';
+            if (strlen($cif) > 12 || preg_match('/\s/', $cif)) {
+                $message = 'El parámetro "cif" parece contener el nombre de una empresa en lugar de un CIF. Para realizar búsquedas por nombre, utiliza el endpoint de búsqueda: /api/v1/companies/search?q=' . urlencode($cif);
+            }
+            return $this->respond(
+                [
+                    'success' => false,
+                    'error'   => 'INVALID_CIF_FORMAT',
+                    'message' => $message
                 ],
                 ResponseInterface::HTTP_BAD_REQUEST
             );

@@ -81,13 +81,32 @@ class MetricsController extends BaseController
         ];
         $kpis['conversion_rate'] = $kpis['total_registros'] > 0 ? round(($kpis['paid_users'] / $kpis['total_registros']) * 100, 1) : 0;
 
+        $thirtyDaysAgo = date('Y-m-d 00:00:00', strtotime('-30 days'));
+
+        // Identificar bots (IDs anónimos con > 200 eventos) + eventos sin ID
+        $botIdsResult = $db->table('tracking_events')
+            ->select('anonymous_id')
+            ->where('created_at >=', $thirtyDaysAgo)
+            ->where('anonymous_id !=', '')
+            ->groupBy('anonymous_id')
+            ->having('COUNT(*) >', 200)
+            ->get()->getResultArray();
+            
+        $botIds = array_column($botIdsResult, 'anonymous_id');
+        $botIds[] = ''; // Excluir eventos sin anonymous_id (posibles requests directos sin JS)
+
+        // Función helper para obtener la tabla ya filtrada
+        $getFilteredTable = function() use ($db, $botIds) {
+            return $db->table('tracking_events')->whereNotIn('anonymous_id', $botIds);
+        };
+
         // --- 1.1 RADAR B2B FUNNEL KPIs ---
         $radarKpis = [
-            'landing_visits' => $db->table('tracking_events')->where('page LIKE', '%empresas-nuevas%')->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
-            'preview_views'  => $db->table('tracking_events')->where('event_name', 'preview_view')->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
-            'modal_views'    => $db->table('tracking_events')->where('event_name', 'radar_modal_view')->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
-            'email_submits'  => $db->table('tracking_events')->where('event_name', 'preview_email_submit')->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
-            'excel_previews' => $db->table('tracking_events')->where('page LIKE', '%excel/preview%')->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
+            'landing_visits' => $getFilteredTable()->where('page LIKE', '%empresas-nuevas%')->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
+            'preview_views'  => $getFilteredTable()->where('event_name', 'preview_view')->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
+            'modal_views'    => $getFilteredTable()->where('event_name', 'radar_modal_view')->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
+            'email_submits'  => $getFilteredTable()->where('event_name', 'preview_email_submit')->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
+            'excel_previews' => $getFilteredTable()->where('page LIKE', '%excel/preview%')->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
             'excel_sales'    => $db->table('user_subscriptions')->whereIn('plan_id', [5, 6])->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
         ];
         
@@ -95,15 +114,41 @@ class MetricsController extends BaseController
         $radarKpis['ctr_preview'] = $radarKpis['landing_visits'] > 0 ? round(($radarKpis['preview_views'] / $radarKpis['landing_visits']) * 100, 1) : 0;
         $radarKpis['conv_rate'] = $radarKpis['preview_views'] > 0 ? round(($radarKpis['email_submits'] / $radarKpis['preview_views']) * 100, 1) : 0;
 
+        // --- NEW KPIs (Last 30 days) ---
+        $developerKpis = [
+            'api_keys_copied' => $getFilteredTable()->where('event_name', 'api_key_copied')->where('created_at >=', $thirtyDaysAgo)->countAllResults(),
+            'curl_copied' => $getFilteredTable()->where('event_name', 'curl_command_copied')->where('created_at >=', $thirtyDaysAgo)->countAllResults(),
+            'dashboard_searches' => $getFilteredTable()->where('event_name', 'dashboard_search_executed')->where('created_at >=', $thirtyDaysAgo)->countAllResults(),
+        ];
+
+        $pricingKpis = [
+            'pricing_clicks' => $getFilteredTable()->whereIn('event_name', ['pricing_cta_click', 'plan_selection_clicked'])->where('created_at >=', $thirtyDaysAgo)->countAllResults(),
+            'checkout_views' => $getFilteredTable()->where('event_name', 'checkout_view')->where('created_at >=', $thirtyDaysAgo)->countAllResults(),
+            'checkout_started' => $getFilteredTable()->where('event_name', 'checkout_started')->where('created_at >=', $thirtyDaysAgo)->countAllResults(),
+        ];
+
+        $engagementKpis = [
+            'page_views' => $getFilteredTable()->where('event_name', 'page_view')->where('created_at >=', $thirtyDaysAgo)->countAllResults(),
+            'ctas_clicked' => $getFilteredTable()->where('event_name', 'click_cta')->where('created_at >=', $thirtyDaysAgo)->countAllResults(),
+            'demo_starts' => $getFilteredTable()->where('event_name', 'demo_input_started')->where('created_at >=', $thirtyDaysAgo)->countAllResults(),
+            'demo_results' => $getFilteredTable()->where('event_name', 'demo_results_shown')->where('created_at >=', $thirtyDaysAgo)->countAllResults(),
+        ];
+
+        $emailKpis = [
+            'engaged' => $getFilteredTable()->where('event_name', 'email_sent_engaged')->where('created_at >=', $thirtyDaysAgo)->countAllResults(),
+            'no_usage' => $getFilteredTable()->where('event_name', 'email_sent_no_usage')->where('created_at >=', $thirtyDaysAgo)->countAllResults(),
+            'quota_max' => $getFilteredTable()->where('event_name', 'email_sent_quota_max')->where('created_at >=', $thirtyDaysAgo)->countAllResults(),
+        ];
+
         // --- 1.2 RADAR ENGAGEMENT INSIGHTS ---
         $radarInsights = [
-            'avg_scroll' => $db->table('tracking_events')->where('event_name', 'scroll_depth')->where('page LIKE', '%empresas-nuevas%')->selectAvg('CAST(metadata AS UNSIGNED)', 'avg')->get()->getRow()->avg ?? 0,
-            'triggers' => $db->table('tracking_events')
+            'avg_scroll' => $getFilteredTable()->where('event_name', 'scroll_depth')->where('page LIKE', '%empresas-nuevas%')->selectAvg('CAST(metadata AS UNSIGNED)', 'avg')->get()->getRow()->avg ?? 0,
+            'triggers' => $getFilteredTable()
                 ->where('event_name', 'radar_modal_view')
                 ->select("JSON_EXTRACT(metadata, '$.trigger') as trigger_name, COUNT(*) as total")
                 ->groupBy('trigger_name')
                 ->get()->getResultArray(),
-            'top_provinces' => $db->table('tracking_events')
+            'top_provinces' => $getFilteredTable()
                 ->where('event_name', 'preview_view')
                 ->select("JSON_EXTRACT(metadata, '$.provincia') as province, COUNT(*) as total")
                 ->groupBy('province')
@@ -250,6 +295,10 @@ class MetricsController extends BaseController
             'radarKpis'       => $radarKpis,
             'radarInsights'   => $radarInsights,
             'radarLeads'      => $radarLeads,
+            'developerKpis'   => $developerKpis,
+            'pricingKpis'     => $pricingKpis,
+            'engagementKpis'  => $engagementKpis,
+            'emailKpis'       => $emailKpis,
             'summary'         => $summary,
             'whatToDoNow'     => $whatToDoNow,
             'problematicUsers'=> $problematicUsers,
