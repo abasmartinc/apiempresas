@@ -267,9 +267,12 @@ class EmailService
             return ['success' => false, 'body' => ''];
         }
 
+        // Define which templates are purely transactional (must send even if unsubscribed)
+        $transactionalSlugs = ['payment_notification', 'user_invoice', 'admin_registration', 'set_password', 'welcome_email'];
+
         // Check if the recipient is unsubscribed
-        if ($this->isUnsubscribed($to)) {
-            log_message('info', "[EmailService] Email [{$slug}] saltado para {$to} por unsuscribe=1");
+        if (!in_array($slug, $transactionalSlugs) && $this->isUnsubscribed($to)) {
+            log_message('info', "[EmailService] Email comercial [{$slug}] saltado para {$to} por unsuscribe=1");
             return ['success' => true, 'body' => '']; // Return true as if handled
         }
 
@@ -283,10 +286,10 @@ class EmailService
         $subject = $this->parsePlaceholders($template->subject, $data);
         $body    = $this->parsePlaceholders($template->body, $data);
 
-        // Add unsubscribe link if not already present
-        if (strpos($body, 'unsubscribe') === false) {
+        // Add unsubscribe link if not already present and only for commercial/marketing emails
+        if (!in_array($slug, $transactionalSlugs) && strpos($body, 'unsubscribe') === false) {
             $unsubUrl = $this->generateUnsubscribeLink($to);
-            $body .= "\n\n<p style='font-size:12px; color:#94a3b8; text-align:center; margin-top:30px;'>¿No quieres recibir más correos? <a href='{$unsubUrl}' style='color:#94a3b8; text-decoration:underline;'>Date de baja aquí</a>.</p>";
+            $body .= "\n\n<p style='font-size:12px; color:#94a3b8; text-align:center; margin-top:30px;'>¿No quieres recibir correos con consejos u ofertas? <a href='{$unsubUrl}' style='color:#94a3b8; text-decoration:underline;'>Date de baja de la lista aquí</a>.</p>";
         }
 
         $email->setTo($to);

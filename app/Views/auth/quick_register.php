@@ -202,6 +202,21 @@
                     <input type="email" name="email" id="email_input" class="form-control" placeholder="ejemplo@empresa.com" required autofocus>
                 </div>
 
+                <div style="text-align: left; margin-bottom: 12px; font-size: 0.80rem; color: #475569;">
+                    <div style="display: flex; align-items: flex-start; gap: 6px; margin-bottom: 6px;">
+                        <input type="checkbox" id="terms" name="terms" value="1" required style="margin-top: 3px;" />
+                        <label for="terms" style="line-height: 1.3; margin: 0;">
+                            Acepto <a href="#" data-modal-target="modalPrivacy" style="color: var(--primary); text-decoration: none; font-weight: 600;">Privacidad</a> y <a href="#" data-modal-target="modalTerms" style="color: var(--primary); text-decoration: none; font-weight: 600;">Aviso Legal</a>.
+                        </label>
+                    </div>
+                    <div style="display: flex; align-items: flex-start; gap: 6px;">
+                        <input type="checkbox" id="no_marketing" name="no_marketing" value="1" style="margin-top: 3px;" />
+                        <label for="no_marketing" style="line-height: 1.3; margin: 0;">
+                            No deseo recibir consejos ni ofertas comerciales.
+                        </label>
+                    </div>
+                </div>
+
                 <button type="submit" class="btn-primary" style="<?= (isset($redirect) && strpos($redirect, 'radar') !== false) ? 'background: #2563EB;' : '' ?>">
                     <?= (isset($redirect) && strpos($redirect, 'radar') !== false) ? 'Acceder a estas empresas ahora' : 'Continuar al Pago' ?>
                 </button>
