@@ -38,6 +38,7 @@ class EmailAutomationCommand extends BaseCommand
             ->where('user_subscriptions.plan_id', 1) // 1 = FREE
             ->where('users.is_admin', 0)
             ->where('users.unsuscribe', 0)
+            ->where('users.source_app', 'apiempresas')
             ->get()->getResultArray();
 
         CLI::write('- Usuarios Free detectados: ' . count($usersToCheck));
