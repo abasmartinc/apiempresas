@@ -204,7 +204,7 @@ class ApiKeyFilter implements FilterInterface
                         ->setJSON([
                             'success' => false,
                             'error'   => 'Quota Exceeded',
-                            'message' => 'Se ha superado el límite de 30 consultas gratuitas mensuales por dirección IP para evitar abusos. Si necesitas más consultas, por favor actualiza a un plan de pago.',
+                            'message' => 'Has completado las 30 consultas gratuitas mensuales del Plan Free. Para seguir consultando sin límites, actualiza tu plan a Professional o Business.',
                             'upgrade_url' => site_url('billing'),
                             'payment_link' => site_url('billing')
                         ]);
