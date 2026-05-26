@@ -34,44 +34,48 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mapeo de triggers
     const triggers = {
         'first_use': {
-            icon: '🔥',
-            title: 'Ya estás usando la API',
-            desc: 'Ahora puedes automatizar tus leads con Radar',
+            icon: '🚀',
+            title: '¡Tu primera llamada a la API ha sido un éxito!',
+            desc: 'Pásate a Pro para desbloquear datos sin enmascarar y mayor velocidad.',
             bg: '#eff6ff',
             border: '#bfdbfe',
             text: '#1e40af',
             ctaBg: '#2563eb',
-            ctaText: '#ffffff'
+            ctaText: '#ffffff',
+            ctaLabel: 'Ver Plan Pro'
         },
         '20_percent': {
-            icon: '📊',
-            title: 'Has usado el 20% del plan Free',
-            desc: 'Activa Radar para recibir leads ilimitados',
+            icon: '📈',
+            title: 'Le estás sacando partido a la API',
+            desc: 'Asegura la escalabilidad de tu proyecto con una cuota mayor de consultas.',
             bg: '#f0f9ff',
             border: '#bae6fd',
             text: '#0369a1',
             ctaBg: '#0284c7',
-            ctaText: '#ffffff'
+            ctaText: '#ffffff',
+            ctaLabel: 'Mejorar a Pro'
         },
         '50_percent': {
             icon: '⚠️',
-            title: 'Estás cerca del límite',
-            desc: 'Tu competencia ya está usando Radar',
+            title: 'Has consumido el 50% de tu cuota',
+            desc: 'Actualiza tu plan antes de llegar al límite para evitar cortes en tu servicio.',
             bg: '#fff7ed',
             border: '#fed7aa',
             text: '#9a3412',
             ctaBg: '#ea580c',
-            ctaText: '#ffffff'
+            ctaText: '#ffffff',
+            ctaLabel: 'Actualizar a Pro'
         },
         '80_percent': {
             icon: '🚨',
-            title: 'Límite casi alcanzado',
-            desc: 'Activa acceso completo para no perder leads',
+            title: 'Límite gratuito casi agotado',
+            desc: 'Tu integración dejará de funcionar pronto. Activa Pro para mantener el servicio.',
             bg: '#fef2f2',
             border: '#fecaca',
             text: '#991b1b',
             ctaBg: '#dc2626',
-            ctaText: '#ffffff'
+            ctaText: '#ffffff',
+            ctaLabel: 'Evitar corte de servicio'
         }
     };
 
@@ -96,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 banner.style.color = config.text;
                 cta.style.backgroundColor = config.ctaBg;
                 cta.style.color = config.ctaText;
+                cta.textContent = config.ctaLabel || 'Activar Plan Pro';
                 
                 // Mostrar banner
                 container.style.display = 'block';
