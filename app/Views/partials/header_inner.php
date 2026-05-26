@@ -58,7 +58,33 @@
                 <span class="nav-sep">•</span>
                 <a class="minor-nav-link" href="<?=site_url() ?>documentation">Docs</a>
                 <span class="nav-sep">•</span>
-                <a class="minor-nav-link" href="<?=site_url() ?>search_company">Buscador</a>
+                
+                <div class="main-nav-dropdown-container">
+                    <button class="minor-nav-link" id="mainNavDropdownTrigger" style="display: flex; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; padding: 6px 4px;">
+                        Integraciones 
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.8; margin-top: 1px;"><path d="m6 9 6 6 6-6"/></svg>
+                        <span style="background: #e0f2fe; color: #0284c7; font-size: 9px; padding: 1px 4px; border-radius: 4px; font-weight: 800; margin-left: 2px;">NUEVO</span>
+                    </button>
+                    
+                    <div class="main-nav-dropdown-menu" id="mainNavDropdownMenu">
+                        <a href="#" class="dropdown-item js-track-wp-cta">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
+                            Plugin WordPress
+                        </a>
+                        <a href="#" class="dropdown-item js-track-wp-cta">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                            Extensión Google Sheets
+                        </a>
+                        <a href="#" class="dropdown-item js-track-wp-cta">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                            App para Zapier / Make
+                        </a>
+                        <a href="#" class="dropdown-item js-track-wp-cta">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                            Plugin Shopify B2B
+                        </a>
+                    </div>
+                </div>
             </nav>
 
             <div class="desktop-only auth-buttons">
@@ -124,7 +150,7 @@
                     <a href="<?=site_url() ?>billing" class="mobile-nav-link">Mi Plan</a>
                     <a href="<?=site_url() ?>consumption" class="mobile-nav-link">Consumo</a>
                     <a href="<?=site_url() ?>documentation" class="mobile-nav-link">Documentación</a>
-                    <a href="<?=site_url() ?>search_company" class="mobile-nav-link">Buscador</a>
+                    <a href="#" class="mobile-nav-link js-track-wp-cta" style="color: #0369a1;">Plugin WordPress <span style="background: #e0f2fe; color: #0284c7; font-size: 10px; padding: 2px 6px; border-radius: 4px;">NUEVO</span></a>
                     <div class="mobile-auth">
                         <?php if(!session('logged_in')): ?>
                             <a href="<?=site_url() ?>enter" class="btn btn-full ghost">Iniciar sesión</a>
@@ -325,6 +351,44 @@
         .logout-item { color: #ef4444; }
         .logout-item:hover { background: #fef2f2; color: #ef4444; }
 
+        /* Main Nav Dropdown Styles */
+        .main-nav-dropdown-container { position: relative; display: flex; align-items: center; }
+        .main-nav-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) scale(0.95);
+            width: 250px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 8px;
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .main-nav-dropdown-menu::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 10px;
+            height: 10px;
+            background: #ffffff;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            border-left: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .main-nav-dropdown-menu.active {
+            display: flex;
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+
         @media (max-width: 1024px) {
             .desktop-only { display: none !important; }
             .mobile-menu-toggle { display: block; }
@@ -366,5 +430,25 @@
                     }
                 });
             }
+
+            // Main Nav Dropdown
+            const mainTrigger = document.getElementById('mainNavDropdownTrigger');
+            const mainMenu = document.getElementById('mainNavDropdownMenu');
+
+            if (mainTrigger && mainMenu) {
+                mainTrigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    mainMenu.classList.toggle('active');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!mainMenu.contains(e.target) && !mainTrigger.contains(e.target)) {
+                        mainMenu.classList.remove('active');
+                    }
+                });
+            }
         });
     </script>
+    
+    <?= view('partials/wp_coming_soon_modal') ?>

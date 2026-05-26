@@ -8,7 +8,11 @@
 <body>
 <div class="bg-halo" aria-hidden="true"></div>
 
-<?= view('partials/header') ?>
+<?php if(session('logged_in')): ?>
+    <?= view('partials/header_inner') ?>
+<?php else: ?>
+    <?= view('partials/header') ?>
+<?php endif; ?>
 
 
 <main class="docs-main">

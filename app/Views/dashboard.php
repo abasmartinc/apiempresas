@@ -542,6 +542,22 @@
                     <?php endif; ?>
 
 
+                    <!-- WP Plugin Banner -->
+                    <section class="dash-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 24px;">
+                        <div style="display: flex; align-items: flex-start; gap: 16px;">
+                            <div style="background: #f0f7ff; color: #21759b; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 900; font-size: 1.1rem; border: 1px solid #bae6fd;">
+                                WP
+                            </div>
+                            <div>
+                                <h3 style="font-size: 1rem; font-weight: 900; color: #0f172a; margin: 0 0 4px !important;">Plugin WordPress</h3>
+                                <p style="font-size: 0.8rem; color: #64748b; font-weight: 600; margin: 0 0 12px !important; line-height: 1.4;">Integra el buscador oficial en tu web sin programar nada.</p>
+                                <button class="js-track-wp-cta" style="background: none; border: none; padding: 0; color: #2152ff; font-weight: 800; font-size: 0.85rem; cursor: pointer; border-bottom: 2px solid rgba(33, 82, 255, 0.1); transition: all 0.2s;">
+                                    Descargar Plugin Gratis
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
                     <section class="dash-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px;">
                         <div style="display: flex; align-items: flex-start; gap: 16px;">
                             <div style="background: #eff6ff; color: #2152ff; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">

@@ -79,7 +79,7 @@ class TrackingController extends BaseController
             }
 
             // 1. Whitelists de Seguridad
-            $allowedEvents = ['click_cta', 'view_strategy', 'page_view'];
+            $allowedEvents = ['click_cta', 'view_strategy', 'page_view', 'click_cta_coming_soon', 'join_integration_waitlist'];
             
             $eventType = $json['event_type'] ?? 'unknown';
             $source    = $json['source'] ?? 'unknown';

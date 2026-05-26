@@ -70,18 +70,56 @@
         <span>Nuevas empresas en tiempo real</span>
     </div>
 </a>
-                        <a href="<?=site_url('plugin-wordpress-buscador-empresas') ?>">
-                            <div class="nav-item-icon">🧩</div>
+                    </div>
+                </div>
+
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger">
+                        Integraciones
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                        <span style="background: #e0f2fe; color: #0284c7; font-size: 9px; padding: 1px 4px; border-radius: 4px; font-weight: 800; margin-left: 2px;">NUEVO</span>
+                    </button>
+                    <div class="nav-dropdown-menu">
+                        <a href="#" class="js-track-wp-cta">
+                            <div class="nav-item-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
+                            </div>
                             <div>
                                 <strong>Plugin WordPress</strong>
                                 <span>Buscador oficial para tu web</span>
                             </div>
                         </a>
+                        <a href="#" class="js-track-wp-cta">
+                            <div class="nav-item-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                            </div>
+                            <div>
+                                <strong>Extensión Google Sheets</strong>
+                                <span>Sincronización de datos B2B</span>
+                            </div>
+                        </a>
+                        <a href="#" class="js-track-wp-cta">
+                            <div class="nav-item-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                            </div>
+                            <div>
+                                <strong>App para Zapier / Make</strong>
+                                <span>Automatiza tus flujos de trabajo</span>
+                            </div>
+                        </a>
+                        <a href="#" class="js-track-wp-cta">
+                            <div class="nav-item-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                            </div>
+                            <div>
+                                <strong>Plugin Shopify B2B</strong>
+                                <span>Validación en checkout</span>
+                            </div>
+                        </a>
                     </div>
                 </div>
                 
-                <a class="minor-nav-link" href="<?=site_url('blog') ?>">Blog</a>
-                <a class="minor-nav-link" href="<?=site_url('documentation') ?>">Documentación</a>
+                <a class="minor-nav-link" href="<?=site_url('documentation') ?>">Docs</a>
             </nav>
 
             <div class="desktop-only auth-buttons">
@@ -150,14 +188,18 @@
                         <a href="<?= getRadarRedirect('mobile_header') ?>" class="mobile-nav-link">
                             <span>Radar Inteligente</span>
                         </a>
-                        <a href="<?=site_url('plugin-wordpress-buscador-empresas') ?>" class="mobile-nav-link">
-                            <span>Plugin WordPress</span>
-                        </a>
+                    </div>
+
+                    <div class="mobile-nav-group" style="margin-top: 16px;">
+                        <div class="mobile-nav-label">Integraciones <span style="background: #e0f2fe; color: #0284c7; font-size: 9px; padding: 1px 4px; border-radius: 4px; font-weight: 800; margin-left: 6px;">NUEVO</span></div>
+                        <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Plugin WordPress</span></a>
+                        <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Google Sheets</span></a>
+                        <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Zapier / Make</span></a>
+                        <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Shopify B2B</span></a>
                     </div>
                     
                     <div class="mobile-nav-group" style="margin-top: 16px;">
-                        <a href="<?=site_url('blog') ?>" class="mobile-nav-link">Blog</a>
-                        <a href="<?=site_url('documentation') ?>" class="mobile-nav-link">Documentación</a>
+                        <a href="<?=site_url('documentation') ?>" class="mobile-nav-link">Docs</a>
                     </div>
                     <div class="mobile-auth">
                         <?php if (!session('logged_in')): ?>
@@ -678,4 +720,6 @@
             }
         });
     </script>
+
+    <?= view('partials/wp_coming_soon_modal') ?>
 
