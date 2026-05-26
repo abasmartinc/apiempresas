@@ -38,8 +38,8 @@
     </div>
 
     <div class="auth-branding-main">
-        <h1 class="auth-branding-title">Inteligencia de Datos <span>para tu Negocio</span></h1>
-        <p class="auth-branding-sub">Accede a la infraestructura más completa de información empresarial en España y optimiza tus procesos B2B.</p>
+        <h1 class="auth-branding-title">La API de Información Mercantil <span>diseñada para escalar</span></h1>
+        <p class="auth-branding-sub">Automatiza el onboarding de clientes, reduce riesgos financieros y enriquece tu CRM integrando datos oficiales de <strong style="background: linear-gradient(135deg, #ffe162 0%, #ff6b00 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900;">más de 4 millones de empresas españolas</strong> en tu software.</p>
 
         <div class="auth-features">
             <div class="auth-feature-item">
@@ -59,6 +59,16 @@
                 <div class="auth-feature-content">
                     <h4>Radar de Empresas</h4>
                     <p>Detecta nuevas empresas, prioriza oportunidades y acelera tu prospección B2B antes que tu competencia.</p>
+                </div>
+            </div>
+
+            <div class="auth-feature-item">
+                <div class="auth-feature-icon" style="background: rgba(251, 191, 36, 0.1); color: #fbbf24;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                </div>
+                <div class="auth-feature-content">
+                    <h4>Datos de Grado Bancario</h4>
+                    <p>Información 100% oficial sincronizada con el BORME, ideal para validación (KYC/KYB) y análisis B2B.</p>
                 </div>
             </div>
         </div>

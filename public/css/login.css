@@ -71,7 +71,7 @@ body {
 .auth-branding-main {
     position: relative;
     z-index: 10;
-    max-width: 500px;
+    max-width: 650px;
 }
 
 .auth-branding-title {
@@ -160,7 +160,7 @@ body {
 
 /* --- Right Side: Form --- */
 .auth-form-side {
-    width: 600px;
+    width: 700px;
     flex-shrink: 0;
     background: #ffffff;
     display: flex;
