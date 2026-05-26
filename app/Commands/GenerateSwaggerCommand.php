@@ -13,8 +13,23 @@ class GenerateSwaggerCommand extends BaseCommand
 
     public function run(array $params)
     {
-        $output = shell_exec('php vendor/bin/openapi --output public/swagger.json app');
-        CLI::write($output, 'green');
+        $openapiPath = ROOTPATH . 'vendor/zircote/swagger-php/bin/openapi';
+        $openapiPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $openapiPath);
+        
+        $outputPath = ROOTPATH . 'public/swagger.json';
+        $outputPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $outputPath);
+        
+        $appPath = ROOTPATH . 'app';
+        $appPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $appPath);
+        
+        $command = 'php ' . escapeshellarg($openapiPath) . ' --output ' . escapeshellarg($outputPath) . ' ' . escapeshellarg($appPath);
+        $output = shell_exec($command);
+        
+        if ($output) {
+            CLI::write($output, 'green');
+        } else {
+            CLI::write("Documentación de Swagger generada con éxito en public/swagger.json.", 'green');
+        }
     }
 }
 

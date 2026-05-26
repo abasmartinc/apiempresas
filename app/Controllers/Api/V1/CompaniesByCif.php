@@ -52,12 +52,12 @@ class CompaniesByCif extends ResourceController
     )]
     #[OA\Response(
         response: 400,
-        description: "Error de validación",
+        description: "Error de validación o formato de CIF incorrecto",
         content: new OA\JsonContent(
             properties: [
                 new OA\Property(property: "success", type: "boolean", example: false),
-                new OA\Property(property: "error", type: "string", example: "VALIDATION_ERROR"),
-                new OA\Property(property: "message", type: "string")
+                new OA\Property(property: "error", type: "string", example: "INVALID_CIF_FORMAT", description: "Código del error: 'VALIDATION_ERROR' o 'INVALID_CIF_FORMAT'"),
+                new OA\Property(property: "message", type: "string", example: "El CIF proporcionado no tiene un formato válido (debe tener una letra, 7 dígitos y un dígito o letra de control).")
             ]
         )
     )]
