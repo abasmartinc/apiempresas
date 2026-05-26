@@ -128,6 +128,7 @@
         <p>Lamentamos que quieras irte. Si confirmas, dejaremos de enviar notificaciones y actualizaciones a <span class="email-display"><?= esc($email) ?></span>.</p>
 
         <form action="<?= site_url('unsubscribe/confirm') ?>" method="POST">
+            <?= csrf_field() ?>
             <input type="hidden" name="email" value="<?= esc($email) ?>">
             <input type="hidden" name="hash" value="<?= esc($hash) ?>">
             
