@@ -156,7 +156,7 @@
         </div>
 
         <div class="auth-legal-footer">
-            © <?= date('Y') ?> AlertaEmpresas. <a href="#" data-modal-target="modalTerms">Aviso Legal</a> · <a href="#" data-modal-target="modalPrivacy">Privacidad</a>
+            © <?= date('Y') ?> ApiEmpresas. <a href="#" data-modal-target="modalTerms">Aviso Legal</a> · <a href="#" data-modal-target="modalPrivacy">Privacidad</a>
         </div>
     </div>
 </div>
