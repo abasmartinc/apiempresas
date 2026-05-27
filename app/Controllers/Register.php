@@ -62,7 +62,7 @@ class Register extends BaseController
             ],
             'email' => [
                 'label' => 'Correo electrónico',
-                'rules' => 'required|valid_email|max_length[190]|is_unique[users.email]|not_disposable_email',
+                'rules' => 'required|valid_email|max_length[190]|not_disposable_email',
             ],
             'password' => [
                 'label' => 'Contraseña',
@@ -108,6 +108,19 @@ class Register extends BaseController
         }
 
         $email = strtolower(trim((string) $this->request->getPost('email')));
+
+        // Scoped Uniqueness Check: Check if email already exists for 'apiempresas'
+        $existingUser = $this->userModel
+            ->where('email', $email)
+            ->where('source_app', 'apiempresas')
+            ->first();
+
+        if ($existingUser) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Ya existe una cuenta registrada con este correo en APIEmpresas.');
+        }
 
         // Generar API key robusta (64 chars hex)
         $apiKey = bin2hex(random_bytes(32));
@@ -262,7 +275,7 @@ class Register extends BaseController
         }
 
         // Check if user exists
-        $user = $this->userModel->where('email', $email)->first();
+        $user = $this->userModel->where('email', $email)->where('source_app', 'apiempresas')->first();
 
         if ($user) {
             // Autologin para usuarios existentes (Zero Friction) excepto admins

@@ -22,7 +22,7 @@
                 <li><strong>Prestación del servicio y gestión de tu cuenta:</strong> Necesario para la ejecución del contrato (Términos de Uso) al registrarte.</li>
                 <li><strong>Facturación y cobros:</strong> Cumplimiento de obligaciones legales y fiscales.</li>
                 <li><strong>Prevención de fraude y seguridad:</strong> Basado en nuestro interés legítimo de mantener la plataforma segura.</li>
-                <li><strong>Comunicaciones comerciales y marketing:</strong> Solo se enviarán si nos das tu <strong>consentimiento expreso</strong> marcando la casilla correspondiente en el registro. Podrás revocarlo en cualquier momento.</li>
+                <li><strong>Comunicaciones comerciales y marketing:</strong> Nos basamos en nuestro <strong>interés legítimo</strong> para enviarte información sobre productos o servicios similares a los contratados. Puedes oponerte a este tratamiento marcando la casilla correspondiente durante el registro o dándote de baja en cualquier momento.</li>
             </ul>
 
             <h3>3. Conservación de los Datos</h3>

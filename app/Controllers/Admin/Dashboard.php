@@ -390,12 +390,17 @@ class Dashboard extends BaseController
     {
         $rules = [
             'name' => 'required|min_length[3]',
-            'email' => 'required|valid_email|is_unique[users.email]',
+            'email' => 'required|valid_email',
             'password' => 'required|min_length[8]',
         ];
 
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('error', 'Revisa los errores: ' . implode(' ', $this->validator->getErrors()));
+        }
+
+        $email = $this->request->getPost('email');
+        if ($this->userModel->where('email', $email)->where('source_app', 'apiempresas')->first()) {
+            return redirect()->back()->withInput()->with('error', 'Ya existe una cuenta con este correo en APIEmpresas.');
         }
 
         $this->userModel->save([
@@ -440,11 +445,17 @@ class Dashboard extends BaseController
         $id = $this->request->getPost('id');
         $rules = [
             'name' => 'required|min_length[3]',
-            'email' => "required|valid_email|is_unique[users.email,id,{$id}]",
+            'email' => "required|valid_email",
         ];
 
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('error', 'Revisa los errores.');
+        }
+
+        $email = $this->request->getPost('email');
+        $existing = $this->userModel->where('email', $email)->where('source_app', 'apiempresas')->first();
+        if ($existing && $existing->id != $id) {
+            return redirect()->back()->withInput()->with('error', 'Ya existe una cuenta con este correo en APIEmpresas.');
         }
 
         $data = [
