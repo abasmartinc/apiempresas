@@ -129,7 +129,7 @@
                 </button>
 
                 <div style="font-size: 10px; color: #94a3b8; text-align: left; margin-top: 8px; line-height: 1.2;">
-                    <strong>Protección de Datos:</strong> Responsable: Ariel Martinez Hernandez. Finalidad: Prestar el servicio y enviar ofertas similares (Int. Legítimo). Derechos: Acceso, rectificación, supresión y oposición, según <a href="#" data-modal-target="modalPrivacy" style="color: #64748b; text-decoration: underline;">Privacidad</a>.
+                    <strong>Protección de Datos:</strong> Responsable: APIEmpresas. Finalidad: Prestar el servicio y enviar ofertas similares (Int. Legítimo). Derechos: Acceso, rectificación, supresión y oposición, según <a href="#" data-modal-target="modalPrivacy" style="color: #64748b; text-decoration: underline;">Privacidad</a>.
                 </div>
 
                 <div class="auth-separator" style="margin: 12px 0;">O regístrate con un clic</div>

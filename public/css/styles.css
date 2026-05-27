@@ -5697,7 +5697,7 @@ body::after,
 }
 
 /* FOOTER: SIEMPRE visible */
-.modal-footer_old {
+.modal-footer {
     position: relative;
     padding: 14px 22px 18px;
     border-top: 1px solid var(--border);
@@ -5750,7 +5750,7 @@ body::after,
 
     .modal-header,
     .modal-body,
-    .modal-footer_old {
+    .modal-footer {
         padding-left: 16px;
         padding-right: 16px;
     }

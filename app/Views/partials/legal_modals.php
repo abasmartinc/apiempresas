@@ -55,7 +55,7 @@
 </div>
 
 <!-- =========================
-     MODAL · AVISO LEGAL Y TÉRMINOS DE USO
+     MODAL · AVISO LEGAL Y T�?RMINOS DE USO
      ========================= -->
 <div class="modal-overlay" id="modalTerms" aria-hidden="true">
     <div class="modal modal-wow" role="dialog" aria-modal="true" aria-labelledby="termsTitle" tabindex="-1">
@@ -112,3 +112,5 @@
         </div>
     </div>
 </div>
+
+
