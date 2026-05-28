@@ -471,7 +471,16 @@
                     <p class="reveal delay-2" style="font-size: 1.1rem; color: var(--ae-slate);">Empieza validando CIF y razón social en Sandbox. Cuando lo lleves a producción, escala a Pro/Business con control de consumo y trazabilidad. Sin permanencias, sin costes ocultos.<br><br><strong style="color: var(--ae-dark);">Los planes siguientes corresponden al acceso a la API. Radar B2B dispone de una suscripción independiente orientada a equipos comerciales.</strong></p>
                 </div>
                 
-                <div class="tier-grid" style="margin-top: 48px;">
+                <!-- TOGGLE ANUAL / MENSUAL -->
+                <div style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 40px; margin-top: 24px; gap: 12px;">
+                    <span style="font-size: 0.95rem; font-weight: 600; color: #94a3b8; transition: all 0.3s;" id="labelMonthlyHome">Mensual</span>
+                    <button type="button" id="billingToggleHome" style="width: 56px; height: 32px; background: #0f172a; border-radius: 99px; position: relative; cursor: pointer; border: none; padding: 4px; transition: background 0.3s;" onclick="togglePricingHome()">
+                        <div id="toggleKnobHome" style="width: 24px; height: 24px; background: white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); transform: translateX(24px);"></div>
+                    </button>
+                    <span style="font-size: 0.95rem; font-weight: 800; color: #2563eb; display: flex; align-items: center; gap: 8px; transition: all 0.3s;" id="labelAnnualHome">Anual <span style="background: #dcfce7; color: #166534; font-size: 10px; padding: 4px 8px; border-radius: 99px; letter-spacing: 0.05em; font-weight: 800;">AHORRA 20%</span></span>
+                </div>
+
+                <div class="tier-grid" style="margin-top: 16px;">
                     <!-- FREE -->
                     <div class="tier tier-free reveal delay-1">
                         <div class="tier-tag">TESTING</div>
@@ -494,7 +503,7 @@
                         <h3>Pro</h3>
                         <div class="tier-subtitle">Para automatizar validaciones</div>
                         <div class="tier-desc">La opción ideal para SaaS, ERPs y productos que ya necesitan validación en producción.</div>
-                        <div class="price">19€<span>/mes</span></div>
+                        <div class="price"><b id="priceProHome" data-monthly="19" data-annual="15" style="font-weight: inherit;">15</b>€<span>/mes</span></div>
                         <ul class="tier-features">
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 3.000 consultas al mes</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Datos completos BORME y Actividad</li>
@@ -511,7 +520,7 @@
                         <h3>Business</h3>
                         <div class="tier-subtitle">Para equipos y alto volumen</div>
                         <div class="tier-desc">Pensado para plataformas con más carga, procesos críticos y necesidades de mayor disponibilidad.</div>
-                        <div class="price">49€<span>/mes</span></div>
+                        <div class="price"><b id="priceBizHome" data-monthly="49" data-annual="39" style="font-weight: inherit;">39</b>€<span>/mes</span></div>
                         <ul class="tier-features">
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 10.000 consultas al mes</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Webhooks Push (Notificaciones BORME)</li>
@@ -1085,6 +1094,37 @@
                 source: source
             });
         });
+
+        // Pricing Toggle Home
+        let isAnnualHome = true;
+        function togglePricingHome() {
+            isAnnualHome = !isAnnualHome;
+            const knob = document.getElementById('toggleKnobHome');
+            const labelMonthly = document.getElementById('labelMonthlyHome');
+            const labelAnnual = document.getElementById('labelAnnualHome');
+            const pricePro = document.getElementById('priceProHome');
+            const priceBiz = document.getElementById('priceBizHome');
+
+            if(isAnnualHome) {
+                knob.style.transform = 'translateX(24px)';
+                labelMonthly.style.color = '#94a3b8';
+                labelMonthly.style.fontWeight = '600';
+                labelAnnual.style.color = '#2563eb';
+                labelAnnual.style.fontWeight = '800';
+                
+                pricePro.textContent = pricePro.dataset.annual;
+                priceBiz.textContent = priceBiz.dataset.annual;
+            } else {
+                knob.style.transform = 'translateX(0px)';
+                labelMonthly.style.color = '#2563eb';
+                labelMonthly.style.fontWeight = '800';
+                labelAnnual.style.color = '#94a3b8';
+                labelAnnual.style.fontWeight = '600';
+                
+                pricePro.textContent = pricePro.dataset.monthly;
+                priceBiz.textContent = priceBiz.dataset.monthly;
+            }
+        }
     </script>
 </body>
 </html>
