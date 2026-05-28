@@ -227,19 +227,29 @@
                                         </div>
                                     </div>
 
-                                    <div class="field">
-                                        <label for="bill_name">Nombre / Empresa</label>
-                                        <input id="bill_name" name="name" type="text" placeholder="Nombre o razón social" value="<?= esc($get($user, 'company') ?: $get($user, 'name') ?: '') ?>" />
-                                        <div class="muted" style="font-size:12px; margin-top:6px;">
-                                            Recomendado si necesitas factura a nombre de empresa.
-                                        </div>
+                                    <!-- Campos colapsables para simplificar el checkout -->
+                                    <div id="billing_details_toggle" style="grid-column: 1 / -1; margin-top: 8px;">
+                                        <button type="button" onclick="document.getElementById('billing_extra_fields').style.display='flex'; this.style.display='none';" style="background:none; border:none; color:#2152ff; font-weight:700; cursor:pointer; font-size:0.9rem; display:flex; align-items:center; gap:6px; padding: 0;">
+                                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                            Añadir datos fiscales para factura (Opcional)
+                                        </button>
                                     </div>
+                                    
+                                    <div id="billing_extra_fields" style="display:none; grid-column: 1 / -1; flex-direction:column; gap:20px; width:100%;">
+                                        <div class="field" style="width: 100%;">
+                                            <label for="bill_name">Nombre / Empresa</label>
+                                            <input id="bill_name" name="name" type="text" placeholder="Nombre o razón social" value="<?= esc($get($user, 'company') ?: $get($user, 'name') ?: '') ?>" />
+                                            <div class="muted" style="font-size:12px; margin-top:6px;">
+                                                Recomendado si necesitas factura a nombre de empresa.
+                                            </div>
+                                        </div>
 
-                                    <div class="field">
-                                        <label for="bill_vat">NIF/CIF (opcional)</label>
-                                        <input id="bill_vat" name="vat" type="text" placeholder="ESB12345678" />
-                                        <div class="muted" style="font-size:12px; margin-top:6px;">
-                                            Si lo indicas, lo incluiremos en la factura.
+                                        <div class="field" style="width: 100%;">
+                                            <label for="bill_vat">NIF/CIF (opcional)</label>
+                                            <input id="bill_vat" name="vat" type="text" placeholder="ESB12345678" />
+                                            <div class="muted" style="font-size:12px; margin-top:6px;">
+                                                Si lo indicas, lo incluiremos en la factura.
+                                            </div>
                                         </div>
                                     </div>
 
@@ -273,6 +283,13 @@
                                         <div style="text-align: center;">
                                             <div style="font-size: 13px; color: #16a34a; font-weight: 800; margin-bottom: 4px;">🔒 Pago 100% seguro con Stripe.</div>
                                             <div style="font-size: 12px; color: #64748b; font-weight: 600;">Acceso inmediato. Sin permanencia. Cancela en 1 clic.</div>
+                                        </div>
+                                        <div style="margin-top: 8px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 12px; display: flex; align-items: flex-start; gap: 10px;">
+                                            <div style="font-size: 1.2rem;">🛡️</div>
+                                            <div>
+                                                <div style="color: #166534; font-weight: 800; font-size: 0.9rem; margin-bottom: 2px;">Garantía de reembolso de 14 días</div>
+                                                <div style="color: #15803d; font-size: 0.8rem; line-height: 1.4;">Si la API no se adapta a tu sistema o no es lo que esperabas, escríbenos y te devolvemos el dinero sin hacer preguntas.</div>
+                                            </div>
                                         </div>
                                         <a class="btn btn_light" href="<?= site_url() ?>dashboard" style="margin-top: 8px;">Cancelar</a>
                                     </div>
@@ -552,6 +569,25 @@
                             <p>Si estás en staging, puedes seguir en Free y activar Pro cuando pases a producción definitiva.</p>
                         </div>
                     </section>
+                    
+                    <!-- TESTIMONIO CRO -->
+                    <div style="margin-top: 24px; padding: 20px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                        <div style="display:flex; gap: 4px; color: #f59e0b; margin-bottom: 12px;">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        </div>
+                        <p style="font-size: 0.9rem; color: #334155; font-style: italic; line-height: 1.6; margin-bottom: 16px;">"La integración nos llevó literamente 15 minutos. Desde que pusimos APIEmpresas en nuestro flujo de alta, los datos falsos o erróneos en el CRM han bajado a cero. El plan Pro se paga solo."</p>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 40px; height: 40px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #475569;">AS</div>
+                            <div>
+                                <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a;">Alex S.</div>
+                                <div style="font-size: 0.75rem; color: #64748b;">CTO en SaaS B2B</div>
+                            </div>
+                        </div>
+                    </div>
                 </aside>
 
 

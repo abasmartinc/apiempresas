@@ -430,8 +430,12 @@
                                     <div class="aha-val" id="aha-status">-</div>
                                 </div>
                                 <div class="aha-item" style="grid-column: span 2;">
-                                    <div class="aha-label">Dirección / Sede Social</div>
+                                    <div class="aha-label" style="display:flex; justify-content:space-between;">Dirección / Sede Social <?php if (!$isPaid): ?><a href="<?=site_url('billing')?>" style="color:#2152ff;text-decoration:none;">Desbloquear Pro 🔒</a><?php endif; ?></div>
                                     <div class="aha-val" id="aha-address">-</div>
+                                </div>
+                                <div class="aha-item" style="grid-column: span 2;">
+                                    <div class="aha-label" style="display:flex; justify-content:space-between;">Actividad / Objeto Social <?php if (!$isPaid): ?><a href="<?=site_url('billing')?>" style="color:#2152ff;text-decoration:none;">Desbloquear Pro 🔒</a><?php endif; ?></div>
+                                    <div class="aha-val" id="aha-activity">-</div>
                                 </div>
                             </div>
                             <div style="margin-top: 20px; border-top: 1px solid #bae6fd; padding-top: 16px;">
@@ -715,7 +719,14 @@ print(response.json())</div>
                     document.getElementById('aha-name').textContent = comp.name || '-';
                     document.getElementById('aha-cif').textContent = comp.cif || '-';
                     document.getElementById('aha-status').textContent = comp.status || 'Activa';
+                    
+                    <?php if (!$isPaid): ?>
+                    document.getElementById('aha-address').innerHTML = '<span style="filter: blur(4px); user-select: none;">Calle Falsa 123, 28080 Madrid</span> <span style="font-size:0.8rem; color:#e11d48; margin-left:8px; font-weight:800;">🔒 Pro</span>';
+                    document.getElementById('aha-activity').innerHTML = '<span style="filter: blur(4px); user-select: none;">La prestación de servicios de consultoría...</span> <span style="font-size:0.8rem; color:#e11d48; margin-left:8px; font-weight:800;">🔒 Pro</span>';
+                    <?php else: ?>
                     document.getElementById('aha-address').textContent = comp.address || '-';
+                    document.getElementById('aha-activity').textContent = comp.corporate_purpose || '-';
+                    <?php endif; ?>
                     
                     ahaCard.style.display = 'block';
                     
