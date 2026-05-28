@@ -212,13 +212,13 @@ class EmailService
     }
 
     /**
-     * TRIGGER: reached_20_requests
+     * TRIGGER: reached_80_requests
      */
-    public function sendReached20Requests(array $userData)
+    public function sendReached80Requests(array $userData)
     {
         $templateData = [
             'name'        => $userData['name'] ?? 'Usuario',
-            'content'     => 'Has alcanzado las 20 consultas. Tu límite mensual de 30 está cerca.<br><br>Para evitar que tu integración se detenga por falta de cuota, te recomendamos activar el Plan Pro hoy mismo.<br><br><b>¿Qué obtendrás al activar Pro?</b><br>• Hasta 3.000 consultas mensuales.<br>• Datos enriquecidos sin enmascarar.<br>• Soporte técnico prioritario.',
+            'content'     => 'Has alcanzado las 80 consultas. Tu bono garantizado de 100 está cerca de agotarse.<br><br>Para evitar que tu integración se detenga por falta de cuota, te recomendamos activar el Plan Pro hoy mismo.<br><br><b>¿Qué obtendrás al activar Pro?</b><br>• Hasta 3.000 consultas mensuales.<br>• Datos enriquecidos sin enmascarar.<br>• Soporte técnico prioritario.',
             'button_text' => 'Evitar cortes de servicio',
             'button_url'  => base_url('billing')
         ];
@@ -232,7 +232,7 @@ class EmailService
     {
         $templateData = [
             'name'        => $userData['name'] ?? 'Usuario',
-            'content'     => 'Has agotado tu cuota de 30 consultas gratuitas de este mes.<br><br>Tu integración ha dejado de recibir datos oficiales hasta que se reinicie el ciclo mensual o actives un Plan Pro.<br><br><b>Activa Pro ahora para reanudar el servicio instantáneamente:</b>',
+            'content'     => 'Has agotado tu bono de 100 consultas gratuitas.<br><br>Tu integración ha dejado de recibir datos oficiales hasta que actives un Plan Pro o Business.<br><br><b>Activa Pro ahora para reanudar el servicio instantáneamente:</b>',
             'button_text' => 'Reanudar servicio (Plan Pro)',
             'button_url'  => base_url('billing')
         ];

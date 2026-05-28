@@ -57,15 +57,15 @@ class EmailAutomationCommand extends BaseCommand
         $lastRequestTime = $this->getLastRequestTime($userId);
         $createdAt = $user['created_at'];
 
-        // 0. TRIGGER: reached_100_percent_quota
-        if ($totalRequests >= 30) {
+        // 0. TRIGGER: reached_100_percent_quota (Bono de 100)
+        if ($totalRequests >= 100) {
             $this->checkAndSend($user, 'reached_100_percent_quota', 'email_sent_quota_max', [], true);
             return;
         }
 
-        // 1. TRIGGER: reached_20_requests
-        if ($totalRequests >= 20) {
-            $this->checkAndSend($user, 'reached_20_requests', 'email_sent_limit_warning', [], true);
+        // 1. TRIGGER: limit_warning (Avisar a las 80 consultas)
+        if ($totalRequests >= 80) {
+            $this->checkAndSend($user, 'reached_80_requests', 'email_sent_limit_warning', [], true);
             return; // No enviamos más de uno en la misma ejecución
         }
 
@@ -129,8 +129,8 @@ class EmailAutomationCommand extends BaseCommand
             case 'reached_5_requests':
                 $result = $this->emailService->sendReached5Requests($user);
                 break;
-            case 'reached_20_requests':
-                $result = $this->emailService->sendReached20Requests($user);
+            case 'reached_80_requests':
+                $result = $this->emailService->sendReached80Requests($user);
                 break;
             case 'reached_100_percent_quota':
                 $result = $this->emailService->sendQuotaExceeded($user);
