@@ -48,6 +48,11 @@ class EmailAutomationCommand extends BaseCommand
         }
 
         CLI::write('✅ Proceso de automatización finalizado.', 'green');
+
+        // --- BLOQUE 2: USUARIOS CON ALTA TASA DE ERRORES 400 ---
+        CLI::write('🔍 Detectando usuarios con errores 400 en peticiones...', 'cyan');
+        $this->processBadRequestUsers();
+        CLI::write('✅ Proceso de errores 400 finalizado.', 'green');
     }
 
     protected function processTriggersForUser(array $user)
@@ -188,6 +193,68 @@ class EmailAutomationCommand extends BaseCommand
             ]);
         } catch (\Exception $e) {
             // Ignorar si falla el tracking
+        }
+    }
+
+    /**
+     * Detecta usuarios Free con alta tasa de errores 400 hoy,
+     * les envía un email de ayuda técnica y restaura las consultas fallidas.
+     * Condiciones: >= 20 errores 400, >= 30% del total, registrado hace <= 7 días,
+     * y que nunca hayan recibido este correo antes.
+     */
+    protected function processBadRequestUsers()
+    {
+        $db = \Config\Database::connect();
+
+        $results = $db->query("
+            SELECT 
+                u.id, u.email, u.name, u.created_at,
+                SUM(CASE WHEN r.status_code = 400 THEN 1 ELSE 0 END) as bad_count,
+                COUNT(r.id) as total_count
+            FROM users u
+            JOIN user_subscriptions us ON us.user_id = u.id AND us.status = 'active' AND us.plan_id = 1
+            JOIN api_requests r ON r.user_id = u.id AND DATE(r.created_at) = CURDATE()
+            WHERE u.is_admin = 0
+              AND u.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+              AND u.id NOT IN (
+                  SELECT user_id FROM user_email_automation
+                  WHERE email_type = 'bad_request_help'
+              )
+            GROUP BY u.id, u.email, u.name, u.created_at
+            HAVING bad_count >= 20
+              AND (bad_count / total_count) >= 0.30
+        ")->getResultArray();
+
+        if (empty($results)) {
+            CLI::write('  - Sin usuarios con alta tasa de errores 400 hoy.', 'dark_gray');
+            return;
+        }
+
+        foreach ($results as $user) {
+            $userId   = (int)$user['id'];
+            $badCount = (int)$user['bad_count'];
+            $restore  = min($badCount, 50); // Máximo 50 consultas a restaurar
+
+            CLI::write("  -> {$user['email']}: {$badCount} errores 400. Restaurando {$restore} consultas...");
+
+            // 1) Restaurar cuota en api_usage_daily
+            $db->query("
+                UPDATE api_usage_daily
+                SET requests_count = GREATEST(0, requests_count - ?),
+                    updated_at = NOW()
+                WHERE user_id = ? AND date = CURDATE()
+            ", [$restore, $userId]);
+
+            // 2) Enviar correo de ayuda técnica
+            $result = $this->emailService->sendBadRequestHelp($user, $restore);
+
+            if ($result['success']) {
+                // 3) Marcar como enviado para no repetir nunca
+                $this->automationModel->markAsSent($userId, 'bad_request_help', $result['body']);
+                CLI::write("     [SENT] bad_request_help OK — {$restore} consultas restauradas", 'yellow');
+            } else {
+                CLI::write("     [ERROR] No se pudo enviar el email a {$user['email']}", 'red');
+            }
         }
     }
 }
