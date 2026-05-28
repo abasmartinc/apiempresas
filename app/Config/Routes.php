@@ -47,6 +47,8 @@ $routes->get('dashboard/test-sample', 'Api\V1\DashboardTestApi::getSample');
 $routes->get('search_company', 'Search::search_company');
 $routes->post('search_company', 'Search::search_company_post');
 $routes->match(['get', 'post'], 'search', 'Search::index');
+$routes->get('administrador/(:any)', 'AdministratorController::show/$1');
+
 // Billing
 $routes->get('billing', 'Billing::index');
 $routes->get('billing/purchase_success', 'Billing::purchase_success');
@@ -133,6 +135,9 @@ $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function
 // Triggers & Usage API (Session Auth)
 $routes->get('api/user/usage-status', 'Api\UsageStatus::index');
 $routes->post('api/user/log-event', 'Api\EventTracker::log');
+
+// AI Internal Routes
+$routes->post('api/internal/generate-seo-text', 'AiSeoController::generate');
 
 // Swagger
 $routes->cli('swagger:generate', 'App\Commands\GenerateSwaggerCommand::run');

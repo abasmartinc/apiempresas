@@ -195,12 +195,16 @@
                     [
                         'q' => "¿Quiénes son los administradores de {$companyName}?",
                         'a' => "{$adminResponse} Adicionalmente, en la sección de **Actos del BORME** puede revisar el histórico oficial de nombramientos, ceses y dimisiones desde su constitución."
-                    ],
-                    [
-                        'q' => "¿A qué se dedica {$companyName}?",
-                        'a' => "Su actividad principal CNAE es: **{$companyAct}**. Esta clasificación permite categorizar su sector de negocio y actividad económica."
                     ]
                 ];
+
+                // Sobrescribir con FAQs de IA si existen
+                if (!empty($company['ai_faqs'])) {
+                    $aiFaqsDecoded = json_decode($company['ai_faqs'], true);
+                    if (json_last_error() === JSON_ERROR_NONE && !empty($aiFaqsDecoded)) {
+                        $faqs = $aiFaqsDecoded;
+                    }
+                }
 
                 // Schema.org Data
                 $schemaOrg = [
@@ -328,7 +332,36 @@
                         </div>
                     </header>
 
-                    <section class="company-card__body">
+                    <?php
+                    // --- TOC START ---
+                    ?>
+                    <nav class="company-toc" aria-label="Índice de contenidos" style="margin: 1.5rem 1.5rem 2rem; padding: 0.75rem 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px;">
+                        <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin: 0; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.05em; flex-shrink: 0;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                            Secciones:
+                        </div>
+                        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px;">
+                            <li><a href="#datos-generales" style="display: block; padding: 4px 10px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.8rem; font-weight: 600; color: #475569; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)'" onmouseout="this.style.borderColor='#cbd5e1'; this.style.color='#475569'">Datos Generales</a></li>
+                            <?php if ((!empty($company['lat']) && !empty($company['lng'])) || !empty($company['address'])): ?>
+                            <li><a href="#map-area" style="display: block; padding: 4px 10px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.8rem; font-weight: 600; color: #475569; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)'" onmouseout="this.style.borderColor='#cbd5e1'; this.style.color='#475569'">Ubicación</a></li>
+                            <?php endif; ?>
+                            <?php if (!empty($administrators)): ?>
+                            <li><a href="#administradores" style="display: block; padding: 4px 10px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.8rem; font-weight: 600; color: #475569; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)'" onmouseout="this.style.borderColor='#cbd5e1'; this.style.color='#475569'">Cargos</a></li>
+                            <?php endif; ?>
+                            <?php if (!empty($bormePosts)): ?>
+                            <li><a href="#borme" style="display: block; padding: 4px 10px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.8rem; font-weight: 600; color: #475569; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)'" onmouseout="this.style.borderColor='#cbd5e1'; this.style.color='#475569'">BORME</a></li>
+                            <?php endif; ?>
+                            <li><a href="#preguntas-frecuentes" style="display: block; padding: 4px 10px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.8rem; font-weight: 600; color: #475569; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)'" onmouseout="this.style.borderColor='#cbd5e1'; this.style.color='#475569'">FAQs</a></li>
+                            <?php if (!empty($related)): ?>
+                            <li><a href="#empresas-relacionadas" style="display: block; padding: 4px 10px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.8rem; font-weight: 600; color: #475569; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)'" onmouseout="this.style.borderColor='#cbd5e1'; this.style.color='#475569'">Similares</a></li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
+                    <?php
+                    // --- TOC END ---
+                    ?>
+
+                    <section class="company-card__body" id="datos-generales">
                         <dl class="company-card__grid">
                             <div>
                                 <dt>CIF</dt>
@@ -430,7 +463,7 @@
                                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                                 <circle cx="12" cy="10" r="3"></circle>
                             </svg>
-                            Ubicación y Datos de Contacto
+                            Ubicación y Datos de Contacto de <?= esc($companyName) ?>
                         </h2>
                         <div id="company-map"></div>
                     </div>
@@ -441,49 +474,75 @@
                 <!-- SEO Text Block -->
                 <div class="company-seo-block">
                     <h2 class="company-seo-title">Información General y de Contacto de <?= esc($companyName) ?></h2>
-                    <p class="seo-text mb-4">
-                        La empresa <strong><?= esc($companyName) ?></strong> cuenta con el <strong>CIF
-                            <?= esc($companyCif) ?></strong> y mantiene su
-                        <strong>domicilio social</strong> en
-                        <?php if (!empty($provinceUrl)): ?>
-                            <a href="<?= esc($provinceUrl) ?>"
-                                style="color: inherit; font-weight: 700;"><?= esc($companyProv) ?></a>.
-                        <?php else: ?>
-                            <strong><?= esc($companyProv) ?></strong>.
-                        <?php endif; ?>
+                    <?php if (!empty($company['ai_seo_text'])): ?>
+                        <div class="seo-text mb-4" style="line-height: 1.6; color: #475569;">
+                            <?= nl2br(esc($company['ai_seo_text'])) ?>
+                        </div>
+                    <?php else: ?>
+                        <div id="fallback-seo-text" style="display: none;">
+                            <p class="seo-text mb-4">
+                                La empresa <strong><?= esc($companyName) ?></strong> cuenta con el <strong>CIF
+                                    <?= esc($companyCif) ?></strong> y mantiene su
+                                <strong>domicilio social</strong> en
+                                <?php if (!empty($provinceUrl)): ?>
+                                    <a href="<?= esc($provinceUrl) ?>"
+                                        style="color: inherit; font-weight: 700;"><?= esc($companyProv) ?></a>.
+                                <?php else: ?>
+                                    <strong><?= esc($companyProv) ?></strong>.
+                                <?php endif; ?>
 
-                        Esta sociedad desarrolla su actividad en el sector de
-                        <?php if (!empty($provinceCnaeUrl)): ?>
-                            <a href="<?= esc($provinceCnaeUrl) ?>"
-                                style="color: inherit; font-weight: 700;"><?= esc($companyAct) ?></a>,
-                        <?php elseif (!empty($cnaeUrl)): ?>
-                            <a href="<?= esc($cnaeUrl) ?>"
-                                style="color: inherit; font-weight: 700;"><?= esc($companyAct) ?></a>,
-                        <?php else: ?>
-                            <em><?= esc($companyAct) ?></em>,
-                        <?php endif; ?>
-                        registrada bajo el código <strong>CNAE
-                            <?= esc($company['cnae'] ?? ($company['cnae_code'] ?? '-')) ?></strong>.
-                    </p>
+                                Esta sociedad desarrolla su actividad en el sector de
+                                <?php if (!empty($provinceCnaeUrl)): ?>
+                                    <a href="<?= esc($provinceCnaeUrl) ?>"
+                                        style="color: inherit; font-weight: 700;"><?= esc($companyAct) ?></a>,
+                                <?php elseif (!empty($cnaeUrl)): ?>
+                                    <a href="<?= esc($cnaeUrl) ?>"
+                                        style="color: inherit; font-weight: 700;"><?= esc($companyAct) ?></a>,
+                                <?php else: ?>
+                                    <em><?= esc($companyAct) ?></em>,
+                                <?php endif; ?>
+                                registrada bajo el código <strong>CNAE
+                                    <?= esc($company['cnae'] ?? ($company['cnae_code'] ?? '-')) ?></strong>.
+                            </p>
 
-                    <?php
-                    $objeto = $company['corporate_purpose'] ?? $company['objeto_social'] ?? '';
-                    if (!empty($objeto)):
-                        ?>
-                        <p class="seo-text mb-4">
-                            <strong>Objeto Social:</strong> <?= esc(character_limiter($objeto, 300)) ?>
-                        </p>
+                            <?php
+                            $objeto = $company['corporate_purpose'] ?? $company['objeto_social'] ?? '';
+                            if (!empty($objeto)):
+                                ?>
+                                <p class="seo-text mb-4">
+                                    <strong>Objeto Social:</strong> <?= esc(character_limiter($objeto, 300)) ?>
+                                </p>
+                            <?php endif; ?>
+
+                            <p class="seo-text mb-0">
+                                La fecha de constitución de la empresa es el
+                                <strong><?= esc($company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '-') ?></strong>
+                                y su estado mercantil actual es <strong><?= esc($statusRaw) ?></strong>.
+                                En esta página podrá consultar el <strong>Informe Mercantil</strong>, el historial de
+                                <strong>Actos del BORME</strong>,
+                                sus <strong>administradores</strong> y la validación de su <strong>CIF</strong> para fines
+                                comerciales y financieros.
+                            </p>
+                        </div>
+
+                        <div id="ai-seo-container" class="seo-text mb-4" style="line-height: 1.6; color: #475569; position: relative; min-height: 120px;">
+                            <div class="ai-skeleton" style="display: flex; flex-direction: column; gap: 10px;">
+                                <div style="height: 16px; background: #e2e8f0; border-radius: 4px; width: 100%; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;"></div>
+                                <div style="height: 16px; background: #e2e8f0; border-radius: 4px; width: 90%; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;"></div>
+                                <div style="height: 16px; background: #e2e8f0; border-radius: 4px; width: 95%; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;"></div>
+                                <div style="height: 16px; background: #e2e8f0; border-radius: 4px; width: 80%; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;"></div>
+                            </div>
+                            <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px; display: flex; align-items: center; gap: 6px;">
+                                <style>
+                                    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+                                    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                                    .spin-icon { animation: spin 1s linear infinite; }
+                                </style>
+                                <svg class="spin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>
+                                Analizando trayectoria de la empresa con IA...
+                            </div>
+                        </div>
                     <?php endif; ?>
-
-                    <p class="seo-text mb-0">
-                        La fecha de constitución de la empresa es el
-                        <strong><?= esc($company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '-') ?></strong>
-                        y su estado mercantil actual es <strong><?= esc($statusRaw) ?></strong>.
-                        En esta página podrá consultar el <strong>Informe Mercantil</strong>, el historial de
-                        <strong>Actos del BORME</strong>,
-                        sus <strong>administradores</strong> y la validación de su <strong>CIF</strong> para fines
-                        comerciales y financieros.
-                    </p>
 
                     <div class="company-share-row">
                         <span class="badge-demo badge-verified">
@@ -528,7 +587,7 @@
 
                 <!-- SECCIÓN DE ADMINISTRADORES Y CARGOS -->
                 <?php if (!empty($administrators)): ?>
-                    <div style="margin-top: 4rem;">
+                    <div id="administradores" style="margin-top: 4rem;">
                         <h2
                             style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 2rem; display: flex; align-items: center; gap: 12px;">
                             <span
@@ -541,7 +600,7 @@
                                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                                 </svg>
                             </span>
-                            Administradores y Cargos Directivos
+                            Administradores y Cargos Directivos de <?= esc($companyName) ?>
                         </h2>
 
                         <div
@@ -559,8 +618,14 @@
                                         </svg>
                                     </div>
                                     <div>
-                                        <div style="font-weight: 700; color: #1e293b; font-size: 1rem; line-height: 1.2;">
-                                            <?= esc($admin['name']) ?></div>
+                                        <?php 
+                                            helper('text');
+                                            $adminSlug = url_title($admin['name'], '-', true);
+                                            $adminUrl = site_url('administrador/' . $adminSlug);
+                                        ?>
+                                        <a href="<?= esc($adminUrl) ?>" style="font-weight: 700; color: #1e293b; font-size: 1rem; line-height: 1.2; text-decoration: none; display: block;" onmouseover="this.style.color='#2563eb'; this.style.textDecoration='underline'" onmouseout="this.style.color='#1e293b'; this.style.textDecoration='none'">
+                                            <?= esc($admin['name']) ?>
+                                        </a>
                                         <div
                                             style="color: #64748b; font-size: 0.85rem; margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
                                             <?= esc($admin['position']) ?></div>
@@ -573,7 +638,7 @@
 
                 <!-- BORME TIMELINE SECTION -->
                 <?php if (!empty($bormePosts)): ?>
-                    <div style="margin-top: 4rem;">
+                    <div id="borme" style="margin-top: 4rem;">
                         <h2
                             style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 2.5rem; display: flex; align-items: center; gap: 12px;">
                             <span
@@ -587,7 +652,7 @@
                                     <polyline points="10 9 9 9 8 9"></polyline>
                                 </svg>
                             </span>
-                            Actos del Registro Mercantil (BORME)
+                            Actos del Registro Mercantil (BORME) de <?= esc($companyName) ?>
                         </h2>
 
                         <div class="borme-timeline">
@@ -756,11 +821,11 @@
                 <!-- FIN SECCIÓN PARA DESARROLLADORES -->
 
                 <!-- FAQ Section HTML -->
-                <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee;">
+                <div id="preguntas-frecuentes" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee;">
                     <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: #444;">Preguntas Frecuentes sobre
                         <?= esc($companyName) ?>
                     </h3>
-                    <div style="display: grid; gap: 1.5rem;">
+                    <div id="faq-list-container" style="display: grid; gap: 1.5rem;">
                         <?php foreach ($faqs as $faq): ?>
                             <div>
                                 <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; color: #111;">
@@ -903,9 +968,8 @@
                 </div>
 
                 <?php if (!empty($related)): ?>
-                    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e2e8f0;">
-                        <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem; color: #444;">Empresas relacionadas en el
-                            sector y provincia</h3>
+                    <div id="empresas-relacionadas" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e2e8f0;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem; color: #444;">Empresas relacionadas con <?= esc($companyName) ?></h3>
 
                         <div class="table-container"
                             style="background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
@@ -1084,6 +1148,80 @@
                     loadMap();
                 }
             }
+            <?php endif; ?>
+
+            <?php if (empty($company['ai_seo_text'])): ?>
+            // Fetch AI SEO Text if not cached
+            fetch('<?= site_url("api/internal/generate-seo-text") ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'cif': '<?= esc($companyCif) ?>'
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network error or rate limit');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const container = document.getElementById('ai-seo-container');
+                if (container && (data.status === 'generated' || data.status === 'cached')) {
+                    // Replace newlines with <br> and fade in
+                    const htmlText = data.text.replace(/\n/g, '<br>');
+                    container.style.opacity = 0;
+                    container.innerHTML = htmlText;
+                    setTimeout(() => {
+                        container.style.transition = 'opacity 0.5s';
+                        container.style.opacity = 1;
+                    }, 50);
+
+                    // Dynamically update FAQs if generated
+                    if (data.faqs && data.faqs.length > 0) {
+                        const faqList = document.getElementById('faq-list-container');
+                        if (faqList) {
+                            const escapeHtml = (str) => {
+                                return str
+                                    .replace(/&/g, "&amp;")
+                                    .replace(/</g, "&lt;")
+                                    .replace(/>/g, "&gt;")
+                                    .replace(/"/g, "&quot;")
+                                    .replace(/'/g, "&#039;");
+                            };
+                            let html = '';
+                            data.faqs.forEach(faq => {
+                                html += `<div>
+                                    <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; color: #111;">
+                                        ${escapeHtml(faq.q)}
+                                    </h4>
+                                    <div style="font-size: 0.9rem; color: #555; line-height: 1.5;">
+                                        ${escapeHtml(faq.a)}
+                                    </div>
+                                </div>`;
+                            });
+                            faqList.innerHTML = html;
+                        }
+                    }
+                } else {
+                    throw new Error('API generated an error');
+                }
+            })
+            .catch(error => {
+                console.error('Error generating AI text:', error);
+                const container = document.getElementById('ai-seo-container');
+                const fallback = document.getElementById('fallback-seo-text');
+                if (container && fallback) {
+                    container.style.opacity = 0;
+                    container.innerHTML = fallback.innerHTML;
+                    setTimeout(() => {
+                        container.style.transition = 'opacity 0.5s';
+                        container.style.opacity = 1;
+                    }, 50);
+                }
+            });
             <?php endif; ?>
         });
     </script>

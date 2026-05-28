@@ -35,6 +35,8 @@ class CompanyModel extends Model
         'company_enrichment.email',
         'company_enrichment.phone_enriched',
         'company_enrichment.phone_mobile_enriched',
+        'company_enrichment.ai_seo_text',
+        'company_enrichment.ai_faqs',
     ];
 
     public function getByCif(string $cif): ?array
