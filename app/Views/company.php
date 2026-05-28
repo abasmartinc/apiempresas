@@ -291,7 +291,7 @@
                         <div>
                             <div class="company-card__eyebrow">Ficha registral</div>
                             <h1 class="company-card__name" style="font-size: 1.5rem; margin: 0;">Información de empresa:
-                                <?= esc($company['name'] ?? '-') ?>
+                                <?= esc($company['name'] ?? '-') ?> <?= (!empty($companyCif) ? ' (CIF ' . esc($companyCif) . ')' : '') ?>
                             </h1>
                             <div class="company-card__meta">
                                 <?= esc(($company['cif'] ?? $company['nif'] ?? '-') . ' · ' . ($company['province'] ?? $company['provincia'] ?? '-')) ?>

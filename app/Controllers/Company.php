@@ -75,11 +75,11 @@ class Company extends BaseController
             $prov = $company['provincia'];
         }
         
-        $title = "{$name} - CIF, Teléfono, Dirección y Cargos";
+        $title = "{$name} - CIF {$cif}, Teléfono, Dirección y Cargos";
         if ($prov) $title .= " | {$prov}";
         $title .= " - APIEmpresas.es";
 
-        $desc = "Consulte el CIF, dirección, teléfono y cargos de {$name}";
+        $desc = "Consulte el CIF {$cif}, dirección, teléfono y cargos de {$name}";
         if ($prov) $desc .= " en {$prov}";
         $desc .= ". ";
         
@@ -224,6 +224,7 @@ class Company extends BaseController
             'company'          => $company,
             'statusRaw'        => $statusRaw,
             'statusClass'      => $isActive ? 'company-status company-status--active' : 'company-status company-status--inactive',
+            'companyCif'       => $cif, // Pasamos el cif limpio a la vista
             'title'            => $title,
             'meta_description' => $desc,
             'robots'           => $robots,
