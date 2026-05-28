@@ -248,7 +248,7 @@
                         <?php endif; ?>
                     </div>
                     <div class="kpi-content">
-                        <span class="label"><?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'Límite alcanzado' : 'Consultas Mes' ?></span>
+                        <span class="label"><?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'Límite alcanzado' : (!$isPaid ? 'Consultas Totales' : 'Consultas Mes') ?></span>
                         <div class="value">
                             <div id="kpi-requests-container">
                                 <?php if ($requestsUsed > 0): ?>
@@ -352,7 +352,7 @@
                     <section class="activation-main-card" data-track-section="activation_search" style="position: relative; <?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'border: 2px solid #e11d48; background: #fff1f2;' : '' ?>">
                         <div style="position: absolute; top: -14px; left: 32px; background: #2152ff; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 6px rgba(33, 82, 255, 0.3);">Paso 1</div>
                         <div class="activation-header" style="margin-top: 10px;">
-                            <h2><?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'Límite mensual alcanzado' : 'Prueba la API en segundos' ?></h2>
+                            <h2><?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'Límite alcanzado' : 'Prueba la API en segundos' ?></h2>
                             <p><?= (!$isPaid && $requestsUsed >= $freeLimit) ? 'Has agotado tus ' . $freeLimit . ' consultas gratuitas. Activa el Plan Pro para seguir validando.' : 'Introduce un CIF o nombre y valida una empresa real.' ?></p>
                         </div>
                         
@@ -439,13 +439,22 @@
                                 <div style="display: flex; flex-direction: column; gap: 10px;">
                                     <div style="display: flex; gap: 10px;">
                                         <button class="btn-small" id="btnCopyEndpoint">Copiar endpoint</button>
-                                        <button class="btn-small" id="btnShowJson">Ver JSON</button>
+                                        <button class="btn-small" id="btnShowJson">Ver en Popup</button>
                                     </div>
                                     <?php if (!$isPaid): ?>
                                      <a href="<?= site_url('billing') ?>" class="btn-small primary" style="background: #10b981; color: white !important; border: none; text-align: center; justify-content: center; padding: 14px; font-weight: 900; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); border-radius: 12px; font-size: 1rem;">Activar Pro y automatizar esto</a>
                                     <?php endif; ?>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- JSON RAW VIEW INLINE -->
+                        <div id="inlineJsonContainer" style="display: none; margin-top: 16px; animation: slideDown 0.4s ease-out;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Respuesta JSON (Datos Reales)</span>
+                                <button id="btnCopyInlineJson" style="background: none; border: none; color: #2152ff; font-weight: 800; font-size: 0.7rem; cursor: pointer;">Copiar JSON</button>
+                            </div>
+                            <pre id="inlineJsonPre" style="background: #1e293b; color: #f8fafc; padding: 16px; border-radius: 10px; font-size: 0.75rem; max-height: 250px; overflow: auto; margin: 0; font-family: 'JetBrains Mono', monospace; border: 1px solid #334155;"></pre>
                         </div>
                     </section>
 
@@ -486,23 +495,80 @@
                             </p>
                             
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <span style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Prueba rápida (cURL)</span>
-                                <button onclick="copyCurl()" style="background: none; border: none; color: #2152ff; font-weight: 800; font-size: 0.7rem; cursor: pointer;">Copiar comando</button>
+                                <div style="display: flex; gap: 8px;" id="snippetTabs">
+                                    <button class="snippet-tab active" data-target="curl">cURL</button>
+                                    <button class="snippet-tab" data-target="php">PHP</button>
+                                    <button class="snippet-tab" data-target="node">Node.js</button>
+                                    <button class="snippet-tab" data-target="python">Python</button>
+                                </div>
+                                <button id="btnCopySnippet" style="background: none; border: none; color: #2152ff; font-weight: 800; font-size: 0.7rem; cursor: pointer;">Copiar código</button>
                             </div>
-                            <div id="curl-snippet" style="background: #1e293b; color: #e2e8f0; padding: 12px 16px; border-radius: 10px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; overflow-x: auto; white-space: nowrap; border: 1px solid #334155;">
-                                <span style="color: #94a3b8;">curl -X GET</span> "<?= site_url('api/v1/companies') ?>?cif=A15075062" \<br>
-                                &nbsp;&nbsp;-H <span style="color: #12b48a;">"X-API-KEY: <span id="curl-key-placeholder">••••••••••••••••</span>"</span>
-                            </div>
+                            
+                            <style>
+                                .snippet-tab { background: none; border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; color: #64748b; cursor: pointer; transition: all 0.2s; }
+                                .snippet-tab:hover { color: #0f172a; background: #f1f5f9; }
+                                .snippet-tab.active { background: #1e293b; color: white; }
+                                .snippet-code { display: none; background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 10px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; overflow-x: auto; white-space: pre; border: 1px solid #334155; }
+                                .snippet-code.active { display: block; }
+                            </style>
+
+                            <div id="snippet-curl" class="snippet-code active"><span style="color: #94a3b8;">curl -X GET</span> "<?= site_url('api/v1/companies') ?>?cif=A15075062" \
+  -H <span style="color: #12b48a;">"X-API-KEY: <span class="snippet-key-placeholder">••••••••••••••••</span>"</span></div>
+                            
+                            <div id="snippet-php" class="snippet-code"><span style="color: #94a3b8;">&lt;?php</span>
+$curl = curl_init();
+curl_setopt_array($curl, array(
+  CURLOPT_URL => '<span style="color: #12b48a;"><?= site_url('api/v1/companies') ?>?cif=A15075062</span>',
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_HTTPHEADER => array(
+    <span style="color: #12b48a;">"X-API-KEY: <span class="snippet-key-placeholder">••••••••••••••••</span>"</span>
+  ),
+));
+$response = curl_exec($curl);
+$data = json_decode($response, true);
+print_r($data);</div>
+                            
+                            <div id="snippet-node" class="snippet-code"><span style="color: #94a3b8;">const</span> fetch = require(<span style="color: #12b48a;">'node-fetch'</span>);
+
+fetch(<span style="color: #12b48a;">'<?= site_url('api/v1/companies') ?>?cif=A15075062'</span>, {
+  headers: {
+    <span style="color: #12b48a;">'X-API-KEY'</span>: <span style="color: #12b48a;">'<span class="snippet-key-placeholder">••••••••••••••••</span>'</span>
+  }
+})
+.then(res => res.json())
+.then(data => console.log(data));</div>
+
+                            <div id="snippet-python" class="snippet-code"><span style="color: #94a3b8;">import</span> requests
+
+url = <span style="color: #12b48a;">"<?= site_url('api/v1/companies') ?>?cif=A15075062"</span>
+headers = {
+    <span style="color: #12b48a;">"X-API-KEY"</span>: <span style="color: #12b48a;">"<span class="snippet-key-placeholder">••••••••••••••••</span>"</span>
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())</div>
                         </div>
                         <script>
-                            function copyCurl() {
+                            document.querySelectorAll('.snippet-tab').forEach(tab => {
+                                tab.addEventListener('click', () => {
+                                    document.querySelectorAll('.snippet-tab').forEach(t => t.classList.remove('active'));
+                                    document.querySelectorAll('.snippet-code').forEach(c => c.classList.remove('active'));
+                                    tab.classList.add('active');
+                                    document.getElementById('snippet-' + tab.dataset.target).classList.add('active');
+                                });
+                            });
+
+                            document.getElementById('btnCopySnippet').addEventListener('click', () => {
+                                const activeSnippet = document.querySelector('.snippet-code.active');
+                                let code = activeSnippet.innerText || activeSnippet.textContent;
                                 const key = document.getElementById('apiKeyBox').getAttribute('data-api-key');
-                                const url = "<?= site_url('api/v1/companies') ?>";
-                                const cmd = `curl -X GET "${url}?cif=A15075062" \\\n  -H "X-API-KEY: ${key}"`;
-                                navigator.clipboard.writeText(cmd);
-                                if (window.trackEvent) trackEvent('curl_command_copied');
-                                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Comando copiado', showConfirmButton: false, timer: 1500 });
-                            }
+                                if (key) {
+                                    code = code.replace(/••••••••••••••••/g, key);
+                                }
+                                navigator.clipboard.writeText(code);
+                                if (window.trackEvent) trackEvent('snippet_copied', { type: document.querySelector('.snippet-tab.active').dataset.target });
+                                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Código copiado', showConfirmButton: false, timer: 1500 });
+                            });
                         </script>
                     </section>
                 </div>
@@ -652,6 +718,15 @@
                     document.getElementById('aha-address').textContent = comp.address || '-';
                     
                     ahaCard.style.display = 'block';
+                    
+                    // Update Inline JSON
+                    const jsonContainer = document.getElementById('inlineJsonContainer');
+                    const jsonPre = document.getElementById('inlineJsonPre');
+                    if (jsonContainer && jsonPre) {
+                        jsonPre.textContent = JSON.stringify(data, null, 4);
+                        jsonContainer.style.display = 'block';
+                    }
+                    
                     ahaCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     
                     // Store for JSON view
@@ -701,6 +776,17 @@
                             }, 2000);
                         });
                     }
+                });
+            }
+        });
+
+        document.getElementById('btnCopyInlineJson')?.addEventListener('click', () => {
+            const pre = document.getElementById('inlineJsonPre');
+            if(pre && pre.textContent) {
+                navigator.clipboard.writeText(pre.textContent);
+                Swal.fire({
+                    toast: true, position: 'top-end', icon: 'success',
+                    title: 'JSON Copiado', showConfirmButton: false, timer: 1500
                 });
             }
         });
@@ -797,7 +883,7 @@ function showUpgradeModal() {
 
     Swal.fire({
         title: '¡Límite alcanzado!',
-        text: 'Has completado tus <?= $freeLimit ?> consultas gratuitas de este mes. Activa el Plan Pro para tener acceso ilimitado y automatizar tus procesos.',
+        text: 'Has consumido tus <?= $freeLimit ?> consultas gratuitas. Activa el Plan Pro para tener acceso ilimitado y automatizar tus procesos.',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Activar Plan Pro',
@@ -818,8 +904,8 @@ function showUpgradeModal() {
 <?php if (!empty($showMigrationNotice)): ?>
     document.addEventListener('DOMContentLoaded', function() {
         Swal.fire({
-            title: '¡Actualización del Plan!',
-            text: 'Hemos simplificado el plan gratuito para mejorar la experiencia. Ahora tienes <?= $freeLimit ?> nuevas consultas para seguir probando la API.',
+            title: '¡Mejora del Plan Free!',
+            text: 'Hemos escuchado vuestro feedback. Ahora dispones de <?= $freeLimit ?> consultas garantizadas sin caducidad mensual para probar e integrar la API a tu ritmo.',
             icon: 'info',
             confirmButtonText: 'Entendido',
             confirmButtonColor: '#2152ff',

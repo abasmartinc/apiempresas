@@ -478,9 +478,9 @@
                         <h3>Free</h3>
                         <div class="tier-subtitle">Para probar la API</div>
                         <div class="tier-desc">Prueba la API con datos reales y valida resultados antes de pasar a producción.</div>
-                        <div class="price">0€<span>/mes</span></div>
+                        <div class="price">0€<span>/único</span></div>
                         <ul class="tier-features">
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> <?= $freeLimit ?> consultas al mes</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> <?= $freeLimit ?> consultas garantizadas</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Acceso a endpoint /companies</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Datos básicos oficiales (CIF, Razón Social, CNAE)</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Sin tarjeta de crédito</li>
@@ -754,7 +754,7 @@
                             </div>
                             <div class="faq-content">
                                 <div class="faq-body">
-                                    Sí, al registrarte obtienes un plan Free con <?= $freeLimit ?> consultas gratuitas al mes para que puedas hacer pruebas en nuestro entorno Sandbox o en producción sin ningún tipo de compromiso.
+                                    Sí, al registrarte obtienes un plan Free con <?= $freeLimit ?> consultas gratuitas sin caducidad para que puedas hacer pruebas en nuestro entorno Sandbox o en producción sin ningún tipo de compromiso.
                                 </div>
                             </div>
                         </div>

@@ -82,7 +82,7 @@ if (!function_exists('get_free_plan_limit')) {
     function get_free_plan_limit(): int
     {
         $cache = \Config\Services::cache();
-        $cacheKey = 'api_free_plan_limit_v1';
+        $cacheKey = 'api_free_plan_limit_v2';
         $limit = $cache->get($cacheKey);
 
         if ($limit === null) {
@@ -93,12 +93,12 @@ if (!function_exists('get_free_plan_limit')) {
                               ->get()
                               ->getRow();
                 
-                $limit = $freePlan ? (int)$freePlan->monthly_quota : 30; // Fallback to 30
+                $limit = $freePlan ? (int)$freePlan->monthly_quota : 100; // Fallback to 100
                 
                 // Cache for 24 hours (it rarely changes)
                 $cache->save($cacheKey, $limit, 86400);
             } catch (\Exception $e) {
-                return 30; // Global fallback
+                return 100; // Global fallback
             }
         }
 

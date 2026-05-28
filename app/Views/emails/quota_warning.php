@@ -25,7 +25,7 @@
         </div>
         <div class="content">
             <h2>Hola, <?= esc($name) ?>.</h2>
-            <p>Te informamos de que has superado el <strong><?= esc($percent) ?>%</strong> de tu cuota mensual de consultas en APIEmpresas.</p>
+            <p>Te informamos de que has superado el <strong><?= esc($percent) ?>%</strong> de tu límite de consultas en APIEmpresas.</p>
             
             <div class="warning-box">
                 <strong>¿Qué significa esto?</strong>

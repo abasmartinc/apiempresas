@@ -1369,14 +1369,14 @@
                         <div class="api-pricing-card__header">
                             <h3>Free</h3>
                         </div>
-                        <div class="api-price-value">0€<span>/ mes</span></div>
+                        <div class="api-price-value">0€<span>/ único</span></div>
                         <p class="api-pricing-card__desc">Para entornos de desarrollo, sandboxing técnico y validación de esquemas JSON.</p>
 
                         <ul class="api-price-list">
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> <?= $freeLimit ?> consultas / mes</li>
+                                </svg> <?= $freeLimit ?> consultas garantizadas</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />

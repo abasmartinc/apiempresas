@@ -137,55 +137,55 @@ class ApiKeyFilter implements FilterInterface
             $monthlyQuota = $planRow ? (int)$planRow->monthly_quota : get_free_plan_limit();
 
             $currentMonth = date('Y-m');
-            $cacheKey = "api_usage_{$row->user_id}_{$currentMonth}";
+            // Cache key adaptado: si es plan Free, es lifetime, si no, es mensual
+            $cacheKey = ((int)$planId === 1) 
+                ? "api_usage_lifetime_{$row->user_id}" 
+                : "api_usage_{$row->user_id}_{$currentMonth}";
+            
             $currentUsage = cache()->get($cacheKey);
 
             if ($currentUsage === null) {
-                // --- LÓGICA DE MIGRACIÓN SEGURA (100 -> Dinámico) ---
-                $migrationDate = '2026-04-26 00:00:00';
-                $isLegacy = ($row->created_at < $migrationDate);
-                
-                if ($isLegacy && (int)$planId === 1 && (int)($row->migration_reset_done ?? 0) === 0) {
-                    // Reset controlado: permitimos nuevas consultas desde este momento
-                    $db->table('api_usage_daily')
-                       ->where('user_id', (int)$row->user_id)
-                       ->where('date >=', date('Y-m-01'))
-                       ->delete();
-                    
-                    $db->table('users')
-                       ->where('id', (int)$row->user_id)
-                       ->update(['migration_reset_done' => 1]);
-                    
-                    $currentUsage = 0;
+                if ((int)$planId === 1) {
+                    // Plan Free: Bono 100 consultas Lifetime (desde hoy 2026-05-28)
+                    $usageRow = $db->table('api_usage_daily')
+                        ->selectSum('requests_count')
+                        ->where('user_id', (int)$row->user_id)
+                        ->where('date >=', '2026-05-28')
+                        ->get()
+                        ->getRow();
                 } else {
+                    // Planes de Pago: Consumo Mensual
                     $usageRow = $db->table('api_usage_daily')
                         ->selectSum('requests_count')
                         ->where('user_id', (int)$row->user_id)
                         ->like('date', $currentMonth, 'after')
                         ->get()
                         ->getRow();
-
-                    $currentUsage = $usageRow ? (int)$usageRow->requests_count : 0;
                 }
+                $currentUsage = $usageRow ? (int)$usageRow->requests_count : 0;
                 
                 // Cacheamos el uso por 30 segundos para aliviar la DB en ráfagas Enterprise
                 cache()->save($cacheKey, $currentUsage, 30);
             }
 
             if ($currentUsage >= $monthlyQuota) {
+                $errorMsg = ((int)$planId === 1)
+                    ? 'Has consumido las ' . $monthlyQuota . ' consultas gratuitas garantizadas. Por favor, actualiza tu plan a Pro para continuar usando la API.'
+                    : 'Has superado el límite mensual de consultas de tu plan (' . $monthlyQuota . ').';
+
                 return service('response')
                     ->setStatusCode(429)
                     ->setJSON([
                         'success' => false,
                         'error'   => 'Quota Exceeded',
-                        'message' => 'Has superado el límite mensual de consultas de tu plan (' . $monthlyQuota . ').',
+                        'message' => $errorMsg,
                         'current_usage' => $currentUsage,
                         'upgrade_url' => site_url('billing'),
-                        'payment_link' => site_url('billing') // Direct link to Stripe checkout UI
+                        'payment_link' => site_url('billing')
                     ]);
             }
 
-            // Limit free plan by IP address to 30 requests/month (Option C)
+            // Limit free plan by IP address to 100 requests (Lifetime since migration)
             if ((int)$planId === 1 && $db->tableExists('api_requests')) {
                 $ipAddress = $request->getIPAddress();
                 $subscriptionTable = $db->tableExists('user_subscriptions') ? 'user_subscriptions' : 'usersuscriptions';
@@ -195,16 +195,16 @@ class ApiKeyFilter implements FilterInterface
                     ->where('us.plan_id', 1)
                     ->where('us.status', 'active')
                     ->where('r.ip_address', $ipAddress)
-                    ->where('r.created_at >=', date('Y-m-01 00:00:00'))
+                    ->where('r.created_at >=', '2026-05-28 00:00:00')
                     ->countAllResults();
 
-                if ($ipUsage >= 30) {
+                if ($ipUsage >= 100) {
                     return service('response')
                         ->setStatusCode(429)
                         ->setJSON([
                             'success' => false,
                             'error'   => 'Quota Exceeded',
-                            'message' => 'Has completado las 30 consultas gratuitas mensuales del Plan Free. Para seguir consultando sin límites, actualiza tu plan a Professional o Business.',
+                            'message' => 'Límite de seguridad por IP alcanzado. Has consumido el bono de 100 consultas gratuitas. Actualiza tu plan.',
                             'upgrade_url' => site_url('billing'),
                             'payment_link' => site_url('billing')
                         ]);

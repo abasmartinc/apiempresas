@@ -87,9 +87,39 @@ class CompaniesByCif extends ResourceController
             );
         }
 
+        // Limpieza de formato
+        $cif = strtoupper($cif);
+        $cif = preg_replace('/^ES/', '', $cif); // Quitar prefijo de país si lo ponen
+        $cif = preg_replace('/[^A-Z0-9]/', '', $cif); // Quitar guiones, espacios, símbolos raros
+
+        // Detectar CIFs de prueba comunes
+        $fakeCifs = ['B99999999', 'B12345678', 'B12345674', 'A12345678', 'B00000000'];
+        if (in_array($cif, $fakeCifs)) {
+            return $this->respond(
+                [
+                    'success' => false,
+                    'error'   => 'FAKE_CIF_NOT_ALLOWED',
+                    'message' => 'Este parece ser un CIF de prueba. Por favor, utiliza un CIF real o prueba con el de Inditex (A15075062).'
+                ],
+                ResponseInterface::HTTP_BAD_REQUEST
+            );
+        }
+
+        // Detectar Autónomos (DNI: 8 números + Letra, o NIE: X/Y/Z + 7 números + Letra)
+        if (preg_match('/^[0-9]{8}[A-Z]$/', $cif) || preg_match('/^[XYZ][0-9]{7}[A-Z]$/', $cif)) {
+            return $this->respond(
+                [
+                    'success' => false,
+                    'error'   => 'AUTONOMO_NOT_SUPPORTED',
+                    'message' => 'No proporcionamos datos de autónomos por motivos de RGPD, únicamente sociedades (CIF).'
+                ],
+                ResponseInterface::HTTP_BAD_REQUEST
+            );
+        }
+
         if (!is_valid_cif($cif)) {
             $message = 'El CIF proporcionado no tiene un formato válido (debe tener una letra, 7 dígitos y un dígito o letra de control).';
-            if (strlen($cif) > 12 || preg_match('/\s/', $cif)) {
+            if (strlen($cif) > 12) {
                 $message = 'El parámetro "cif" parece contener el nombre de una empresa en lugar de un CIF. Para realizar búsquedas por nombre, utiliza el endpoint de búsqueda: /api/v1/companies/search?q=' . urlencode($cif);
             }
             return $this->respond(
@@ -133,7 +163,7 @@ class CompaniesByCif extends ResourceController
                     [
                         'success' => false,
                         'error'   => 'COMPANY_NOT_FOUND',
-                        'message' => 'No se encontró ninguna empresa con ese CIF.'
+                        'message' => 'Empresa no encontrada en BD principal. Ha sido encolada automáticamente y estará disponible en los próximos minutos.'
                     ],
                     ResponseInterface::HTTP_NOT_FOUND
                 );

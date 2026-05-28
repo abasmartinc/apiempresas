@@ -542,7 +542,7 @@
                         <div class="api-pricing-card__header">
                             <h3>Free</h3>
                         </div>
-                        <div class="api-price-value">0€<span>/ mes</span></div>
+                        <div class="api-price-value">0€<span>/ único</span></div>
                         <p class="api-pricing-card__desc">Para blogs y webs con poco tráfico que necesitan validación
                             básica de empresas.</p>
 
@@ -558,7 +558,7 @@
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> 15 búsquedas / mes</li>
+                                </svg> <?= $freeLimit ?> búsquedas garantizadas</li>
                         </ul>
 
                         <a href="<?= site_url('obtener-plugin-wordpress') ?>"
@@ -719,7 +719,7 @@
                         <div class="api-faq-answer">
                             <div class="api-faq-answer-inner">
                                 No, el plugin es gratuito. El uso se rige por el plan de suscripción que tengas en
-                                APIEmpresas (incluido el plan gratuito de <?= $freeLimit ?> consultas).
+                                APIEmpresas (incluido el plan gratuito de <?= $freeLimit ?> consultas garantizadas).
                             </div>
                         </div>
                     </div>

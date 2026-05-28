@@ -35,34 +35,10 @@ class Dashboard extends BaseController
         $user   = $userModel->find($userId);
         $data['user'] = $user;
 
-        // --- MIGRACIÓN SEGURA PLAN FREE (100 -> 15) ---
-        $migrationDate = '2026-04-26 00:00:00';
-        $isLegacyUser  = ($user->created_at < $migrationDate);
         $data['showMigrationNotice'] = false;
 
-        // 1. Reset controlado para usuarios legacy (solo una vez)
-        if ($isLegacyUser && (int)$user->migration_reset_done === 0) {
-            $db = \Config\Database::connect();
-            
-            // "Reset" de consumo del mes actual para darles las nuevas consultas del plan
-            // Nota: api_requests (historial real) NO se toca.
-            $db->table('api_usage_daily')
-               ->where('user_id', $userId)
-               ->where('date >=', date('Y-m-01'))
-               ->delete();
-
-            $userModel->update($userId, [
-                'migration_reset_done' => 1,
-                'migration_notice_shown' => 0 // Forzamos mostrar el mensaje tras el reset
-            ]);
-
-            // Actualizamos objeto en memoria para la ejecución actual
-            $user->migration_reset_done = 1;
-            $user->migration_notice_shown = 0;
-        }
-
-        // 2. Preparar aviso de migración (solo una vez)
-        if ($isLegacyUser && (int)$user->migration_notice_shown === 0) {
+        // Mostrar aviso de migración (solo una vez) para TODOS los usuarios que no lo hayan visto
+        if ((int)$user->migration_notice_shown === 0) {
             $data['showMigrationNotice'] = true;
             $userModel->update($userId, ['migration_notice_shown' => 1]);
         }
@@ -104,12 +80,6 @@ class Dashboard extends BaseController
         
         // --- API Usage & Activation Metrics ---
         $db = \Config\Database::connect();
-        $usageSum = $db->table('api_usage_daily')
-            ->selectSum('requests_count', 'total')
-            ->where('user_id', $userId)
-            ->where('date >=', date('Y-m-01'))
-            ->get()->getRow();
-        $requestsUsedThisMonth = (int)($usageSum->total ?? 0);
         
         $plan = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
         $isPaid = false;
@@ -121,9 +91,24 @@ class Dashboard extends BaseController
 
         if ($isPaid && $plan) {
             $maxLimit = (int)($plan->monthly_quota ?? 3000);
+            
+            $usageSum = $db->table('api_usage_daily')
+                ->selectSum('requests_count', 'total')
+                ->where('user_id', $userId)
+                ->where('date >=', date('Y-m-01'))
+                ->get()->getRow();
         } else {
             $maxLimit = get_free_plan_limit();
+            
+            // Plan Free: Bono 100 consultas Lifetime (desde hoy 2026-05-28)
+            $usageSum = $db->table('api_usage_daily')
+                ->selectSum('requests_count', 'total')
+                ->where('user_id', $userId)
+                ->where('date >=', '2026-05-28')
+                ->get()->getRow();
         }
+        
+        $requestsUsedThisMonth = (int)($usageSum->total ?? 0);
         
         $remainingRequests = max(0, $maxLimit - $requestsUsedThisMonth);
         

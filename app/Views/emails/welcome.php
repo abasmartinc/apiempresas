@@ -87,7 +87,7 @@
 }</pre>
 
                              <p style="margin: 25px 0; color: #64748b; font-size: 14px; font-weight: 500;">
-                                 Tu plan <strong>Free</strong> incluye 30 consultas mensuales para que pruebes la integración sin límites técnicos.
+                                 Tu plan <strong>Free</strong> incluye <?= $freeLimit ?> consultas gratuitas para que pruebes la integración sin límites técnicos y sin caducidad.
                              </p>
 
                             <!-- CTA -->
