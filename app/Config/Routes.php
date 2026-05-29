@@ -57,6 +57,8 @@ $routes->get('billing', 'Billing::index');
 $routes->match(['GET', 'POST'], 'billing/checkout', 'Billing::checkout');
 $routes->get('billing/single_checkout', 'Billing::single_checkout');
 $routes->get('checkout/radar-export', 'Billing::order_summary');
+$routes->get('billing/directory_checkout', 'Billing::directory_checkout');
+$routes->get('checkout/directory-export', 'Billing::directory_order_summary');
 $routes->get('billing/success', 'Billing::success'); // callback Stripe
 $routes->get('billing/cancel', 'Billing::cancel');   // cancel Stripe/PayPal
 $routes->get('billing/purchase-success', 'Billing::purchase_success');
@@ -305,6 +307,7 @@ $routes->get('empresas/(:any)', 'RadarController::provinceCatalog/$1');
 $routes->get('radar-demo', 'Radar::demo');
 $routes->get('radar/preview', 'Radar::preview');
 $routes->post('radar/preview', 'Radar::preview_store');
+$routes->get('excel/preview', 'RadarController::excel_preview');
 $routes->post('tracking/radar-demo-event', 'TrackingController::processRadarEvent');
 
 // Radar Hub (New Companies Strategy)
@@ -338,8 +341,8 @@ $routes->get('directorio/provincia/(:any)', 'Directory::province/$1');
 $routes->get('directorio/provincia/(:any)/(:num)', 'Directory::province/$1/$2');
 $routes->get('directorio/cnae/(:any)', 'Directory::cnae/$1');
 $routes->get('directorio/cnae/(:any)/(:num)', 'Directory::cnae/$1/$2');
-$routes->get('directorio/ultimas-empresas-registradas', 'Directory::latest');
-$routes->get('directorio/ultimas-empresas-registradas/(:num)', 'Directory::latest/$1');
+$routes->addRedirect('directorio/ultimas-empresas-registradas', 'empresas-nuevas', 301);
+$routes->addRedirect('directorio/ultimas-empresas-registradas/(:num)', 'empresas-nuevas', 301);
 $routes->get('directorio/provincia/(:any)/cnae/(:any)', 'Directory::provinceCnae/$1/$2');
 $routes->get('directorio/provincia/(:any)/cnae/(:any)/(:num)', 'Directory::provinceCnae/$1/$2/$3');
 

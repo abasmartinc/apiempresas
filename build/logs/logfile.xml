@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="Tests\Feature\PublicRoutesTest" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" tests="6" assertions="45" errors="0" failures="0" skipped="0" time="8.003007">
-    <testcase name="testHeaderNavigation" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="59" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="14" time="2.673700"/>
-    <testcase name="testFooterRadarRoutes" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="73" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="9" time="1.640169"/>
-    <testcase name="testUtilitiesRoutes" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="85" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="6" time="0.834785"/>
-    <testcase name="testProvinceRoutes" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="95" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="6" time="0.961044"/>
-    <testcase name="testBusinessProfiles" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="105" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="8" time="1.564235"/>
-    <testcase name="testDynamicSeoRoutes" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="124" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="2" time="0.329074"/>
+  <testsuite name="Tests\Feature\PublicRoutesTest" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" tests="6" assertions="47" errors="0" failures="0" skipped="0" time="7.880541">
+    <testcase name="testHeaderNavigation" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="59" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="14" time="2.073392"/>
+    <testcase name="testFooterRadarRoutes" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="73" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="9" time="1.641716"/>
+    <testcase name="testUtilitiesRoutes" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="85" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="6" time="0.858671"/>
+    <testcase name="testProvinceRoutes" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="95" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="8" time="1.291536"/>
+    <testcase name="testBusinessProfiles" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="106" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="8" time="1.693340"/>
+    <testcase name="testDynamicSeoRoutes" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="125" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="2" time="0.321885"/>
   </testsuite>
 </testsuites>

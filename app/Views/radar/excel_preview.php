@@ -165,8 +165,8 @@
                     </p>
                 </div>
 
-                <a href="<?= site_url('checkout/radar-export?' . http_build_query($_GET)) ?>" class="submit-btn" style="text-decoration: none; text-align: center; display: block;" id="excel_checkout_btn">
-                    Desbloquear Listado Completo
+                <a href="<?= site_url('checkout/radar-export?' . http_build_query($_GET)) ?>" class="submit-btn" style="text-decoration: none; text-align: center; display: block; line-height: 60px;" id="excel_checkout_btn">
+                    Desbloquear Listado Completo · <?= number_format($dynamic_price['base_price'] ?? 15, 0) ?>€
                 </a>
                 <p style="font-size: 0.8rem; color: #64748b; text-align: center; margin-top: 16px; font-weight: 500;">
                     Acceso inmediato tras el pago · Sin registro previo necesario

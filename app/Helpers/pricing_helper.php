@@ -34,9 +34,9 @@ if (!function_exists('calculate_radar_price')) {
             } elseif ($count <= 2000) {
                 $basePrice = 15.00;
             } elseif ($count <= 5000) {
-                $basePrice = 20.00;
+                $basePrice = 39.00;
             } else {
-                $basePrice = 25.00;
+                $basePrice = 49.00;
             }
         }
 

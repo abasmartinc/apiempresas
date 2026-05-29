@@ -1,205 +1,447 @@
 <!doctype html>
 <html lang="es">
 <head>
-    <?= view('partials/head', ['title' => $title, 'excerptText' => $meta_description]) ?>
+    <?= view('partials/head', [
+        'title'       => $title, 
+        'excerptText' => $meta_description,
+        'robots'      => $robots ?? 'index,follow',
+        'prevUrl'     => $pagination['prev'] ?? null,
+        'nextUrl'     => $pagination['next'] ?? null
+    ]) ?>
     <style>
         :root {
             --dir-primary: #2152FF;
+            --dir-emerald: #10b981;
             --dir-slate-900: #0f172a;
             --dir-slate-800: #1e293b;
             --dir-slate-600: #475569;
             --dir-slate-400: #94a3b8;
+            --dir-slate-200: #e2e8f0;
             --dir-bg: #f8fafc;
         }
 
-        /* Hero refinements consistent with index */
+        /* ── Hero ── */
         .dir-hero {
             padding: 80px 0 60px;
-            background: var(--dir-slate-900);
+            background: linear-gradient(160deg, #090d16 0%, #0d1a3a 60%, #0f172a 100%);
             color: #fff;
             position: relative;
             overflow: hidden;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-
+        .dir-hero::before {
+            content: '';
+            position: absolute;
+            top: -120px; right: -120px;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(33,82,255,0.18) 0%, transparent 70%);
+            pointer-events: none;
+        }
         .dir-hero h1 {
-            font-size: 3rem;
+            font-size: clamp(1.9rem, 4vw, 2.9rem);
             font-weight: 800;
             color: #fff;
-            letter-spacing: -0.025em;
-            margin-bottom: 1rem;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.75rem;
             line-height: 1.1;
         }
-
-        .dir-hero p {
-            font-size: 1.15rem;
-            color: var(--dir-slate-400);
-            max-width: 800px;
+        .dir-hero h1 span { color: #60a5fa; }
+        .dir-hero .hero-sub {
+            font-size: 1.05rem;
+            color: #94a3b8;
+            max-width: 680px;
             line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+        .hero-stats {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .hero-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .hero-stat__value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.03em;
+        }
+        .hero-stat__label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .hero-stat__divider {
+            width: 1px;
+            background: rgba(255,255,255,0.1);
+            align-self: stretch;
         }
 
+        /* ── Layout ── */
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 2rem;
         }
-
         .list-main {
-            padding: 0px 0 120px;
+            padding: 0 0 120px;
             background-color: var(--dir-bg);
             min-height: 80vh;
         }
 
+        /* ── Breadcrumb ── */
         .breadcrumb {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 2.5rem;
-            font-size: 0.85rem;
+            gap: 0.5rem;
+            padding: 1.25rem 0;
+            font-size: 0.8rem;
             color: var(--dir-slate-400);
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--dir-slate-200);
+            margin-bottom: 2rem;
         }
-
         .breadcrumb a {
             color: var(--dir-primary);
             text-decoration: none;
-            transition: color 0.2s;
         }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb .sep { color: #cbd5e1; }
 
-        .breadcrumb a:hover {
-            color: var(--dir-slate-900);
+        /* ── Search bar ── */
+        .search-bar-wrap {
+            position: relative;
+            margin-bottom: 1.5rem;
         }
-
-        .breadcrumb .sep {
-            color: #cbd5e1;
+        .search-bar-wrap svg {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--dir-slate-400);
+            pointer-events: none;
         }
-
-        .company-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 2rem;
-        }
-
-        .company-card {
+        #companySearch {
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 2.75rem;
+            border: 1.5px solid var(--dir-slate-200);
+            border-radius: 12px;
+            font-size: 0.97rem;
+            font-family: inherit;
             background: #fff;
-            border: 1px solid #e5e7eb;
-            padding: 2.5rem;
-            border-radius: 28px;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            color: var(--dir-slate-900);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+            box-sizing: border-box;
         }
-
-        .company-card:hover {
-            transform: translateY(-8px);
+        #companySearch:focus {
             border-color: var(--dir-primary);
-            box-shadow: 0 30px 60px -12px rgba(33, 82, 255, 0.12);
+            box-shadow: 0 0 0 3px rgba(33,82,255,0.1);
+        }
+        #searchCount {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--dir-slate-400);
         }
 
-        .company-card__top {
+        /* ── Table ── */
+        .dir-table-wrap {
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid var(--dir-slate-200);
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .dir-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .dir-table thead th {
+            background: #f8fafc;
+            padding: 0.85rem 1.25rem;
+            text-align: left;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--dir-slate-400);
+            border-bottom: 1px solid var(--dir-slate-200);
+        }
+        .dir-table thead th:last-child { text-align: right; }
+        .dir-table tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.15s;
+        }
+        .dir-table tbody tr:last-child { border-bottom: none; }
+        .dir-table tbody tr:hover { background: #f8fafc; }
+        .dir-table tbody td {
+            padding: 1rem 1.25rem;
+            vertical-align: middle;
+        }
+
+
+        .company-name {
+            font-size: 0.94rem;
+            font-weight: 700;
+            color: var(--dir-slate-900);
+            line-height: 1.3;
+            max-width: 380px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .company-cif {
+            font-size: 0.76rem;
+            color: var(--dir-slate-400);
+            font-weight: 600;
+            font-family: monospace;
+            margin-top: 1px;
+        }
+
+        /* CIF column */
+        .td-cif {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--dir-primary);
+            font-family: monospace;
+            white-space: nowrap;
+        }
+
+        /* Action button */
+        .btn-ficha {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 14px;
+            background: transparent;
+            border: 1.5px solid var(--dir-slate-200);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--dir-slate-600);
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .btn-ficha:hover {
+            background: var(--dir-primary);
+            border-color: var(--dir-primary);
+            color: #fff;
+        }
+        .btn-ficha svg { flex-shrink: 0; }
+
+        .td-action { text-align: right; }
+
+        /* Hidden row (search filter) */
+        .dir-table tbody tr.hidden-row { display: none; }
+
+        /* No results */
+        .no-results-row td {
+            text-align: center;
+            padding: 3rem;
+            color: var(--dir-slate-400);
+            font-weight: 600;
+        }
+
+        /* ── Pagination ── */
+        .pagination-wrap {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--dir-slate-200);
+            flex-wrap: wrap;
+            gap: 1rem;
         }
-
-        .badge-official {
-            background: #f1f5f9;
+        .pagination-info {
+            font-size: 0.85rem;
+            color: var(--dir-slate-400);
+            font-weight: 600;
+        }
+        .pagination-info strong { color: var(--dir-slate-900); }
+        .pagination-btns {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .btn-page {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1.5px solid var(--dir-slate-200);
+            border-radius: 10px;
+            font-size: 0.84rem;
+            font-weight: 700;
             color: var(--dir-slate-600);
-            font-size: 0.65rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            padding: 6px 12px;
-            border-radius: 8px;
+            text-decoration: none;
+            background: #fff;
+            transition: all 0.2s;
+            white-space: nowrap;
         }
-
-        .company-card__cif {
-            font-weight: 800;
+        .btn-page:hover {
+            border-color: var(--dir-primary);
             color: var(--dir-primary);
-            font-size: 0.95rem;
-            letter-spacing: -0.01em;
+        }
+        .btn-page.disabled {
+            opacity: 0.35;
+            pointer-events: none;
+        }
+        .page-counter {
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: var(--dir-slate-600);
+            padding: 8px 12px;
+            background: #f8fafc;
+            border: 1.5px solid var(--dir-slate-200);
+            border-radius: 10px;
         }
 
-        .company-card__name {
-            font-size: 1.4rem;
+        /* ── Sectors (cross-links) ── */
+        .sectors-section {
+            margin-top: 4rem;
+            padding-top: 3rem;
+            border-top: 1px solid var(--dir-slate-200);
+        }
+        .sectors-section h2 {
+            font-size: 1.25rem;
             font-weight: 800;
             color: var(--dir-slate-900);
-            line-height: 1.25;
-            margin: 0;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            margin-bottom: 1.25rem;
             letter-spacing: -0.02em;
         }
-
-        .company-card__footer {
-            margin-top: auto;
-            padding-top: 1.5rem;
-            border-top: 1px solid #f1f5f9;
+        .sector-pills {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.6rem;
         }
-
-        .company-card__location {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--dir-slate-600);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .company-card__view {
-            color: var(--dir-primary);
-            font-weight: 800;
-            font-size: 0.9rem;
-            display: flex;
+        .sector-pill {
+            display: inline-flex;
             align-items: center;
             gap: 0.4rem;
-            transition: gap 0.3s ease;
+            padding: 7px 14px;
+            background: #fff;
+            border: 1.5px solid var(--dir-slate-200);
+            border-radius: 999px;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--dir-slate-600);
+            text-decoration: none;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .sector-pill:hover {
+            border-color: var(--dir-primary);
+            color: var(--dir-primary);
+            background: #eef2ff;
+        }
+        .sector-pill__count {
+            font-size: 0.72rem;
+            font-weight: 800;
+            background: #f1f5f9;
+            color: var(--dir-slate-400);
+            border-radius: 999px;
+            padding: 1px 7px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .sector-pill:hover .sector-pill__count {
+            background: rgba(33,82,255,0.1);
+            color: var(--dir-primary);
         }
 
-        .company-card:hover .company-card__view {
-            gap: 0.7rem;
+        /* ── Radar CTA ── */
+        .radar-cta {
+            margin-top: 4rem;
+            padding: 3rem 2.5rem;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+            border-radius: 24px;
+            border: 1px solid #bbf7d0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .radar-cta__text h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #14532d;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+        .radar-cta__text p {
+            color: #475569;
+            font-size: 0.97rem;
+            max-width: 500px;
+            line-height: 1.6;
+        }
+        .radar-cta__btn {
+            background: #16a34a;
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.97rem;
+            text-decoration: none;
+            white-space: nowrap;
+            box-shadow: 0 8px 20px rgba(22,163,74,0.25);
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .radar-cta__btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(22,163,74,0.3);
         }
 
+        /* ── Bottom CTA ── */
         .cta-bottom {
-            margin-top: 8rem;
-            padding: 6rem 2rem;
+            margin-top: 3rem;
+            padding: 3.5rem 2rem;
             background: #ffffff;
-            border-radius: 40px;
-            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            border: 1px solid var(--dir-slate-200);
             text-align: center;
-            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.02);
+        }
+        .cta-bottom h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--dir-slate-900);
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+        .cta-bottom p {
+            color: var(--dir-slate-600);
+            margin-bottom: 2rem;
+            max-width: 540px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+        .cta-btn-row {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
-        @media (max-width: 768px) {
-            .container { padding: 0 1.5rem; }
-            .dir-hero { padding: 60px 1.5rem 40px; text-align: center; }
-            .dir-hero h1 { font-size: 2.25rem; }
-            .list-main { padding: 60px 0 80px; }
-            .company-grid { grid-template-columns: 1fr; gap: 1.5rem; }
-            .company-card { padding: 2rem; }
-            .cta-bottom { padding: 3rem 1.5rem; }
-        }
-
-        /* Paywall Styles */
+        /* ── Paywall ── */
         .paywall-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 20%, #fff 60%);
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 25%, #f8fafc 60%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -211,15 +453,23 @@
             background: white;
             padding: 40px;
             border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1), 0 0 0 1px rgba(33, 82, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1), 0 0 0 1px rgba(33,82,255,0.1);
             max-width: 500px;
             width: 100%;
         }
-        .blurred-row {
-            filter: blur(4px);
-            opacity: 0.5;
-            pointer-events: none;
-            user-select: none;
+        .blurred-row td { filter: blur(4px); opacity: 0.4; user-select: none; pointer-events: none; }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .container { padding: 0 1.25rem; }
+            .dir-hero { padding: 60px 1.25rem 40px; }
+            .dir-hero h1 { font-size: 1.75rem; }
+            .hero-stats { gap: 1.25rem; }
+            .list-main { padding: 0 0 80px; }
+            .company-name { max-width: 180px; }
+            .td-cif { display: none; }
+            .radar-cta { flex-direction: column; text-align: center; }
+            .radar-cta__text p { max-width: 100%; }
         }
     </style>
 </head>
@@ -229,186 +479,316 @@
 
 <header class="dir-hero">
     <div class="container">
-        <h1><?= esc($header) ?></h1>
-        <p><?= esc($excerptText) ?></p>
+        <nav class="breadcrumb" style="padding:0; border:none; margin-bottom:1.5rem; background:transparent; color:#64748b; text-transform:uppercase; font-size:0.75rem; letter-spacing:0.06em;">
+            <a href="<?= site_url() ?>" style="color:#60a5fa; text-decoration:none;">Inicio</a>
+            <span style="color:#334155;">/</span>
+            <a href="<?= site_url('directorio') ?>" style="color:#60a5fa; text-decoration:none;">Directorio</a>
+            <span style="color:#334155;">/</span>
+            <span style="color:#94a3b8;"><?= esc($province_name ?? $header) ?></span>
+        </nav>
+
+        <?php if (!empty($province_name)): ?>
+            <h1><span><?= esc($total_formatted ?? count($items)) ?> empresas</span> registradas en <?= esc($province_name) ?></h1>
+            <p class="hero-sub" style="margin-bottom: 0.5rem;"><?= esc($excerptText) ?></p>
+            <p style="color: #94a3b8; max-width: 700px; font-size: 0.95rem; line-height: 1.5; margin-bottom: 2.5rem;">
+                Consulta el listado completo de sociedades y empresas en <?= esc($province_name) ?>. 
+                Accede a la ficha mercantil completa con CIF, razón social, administradores, sector CNAE y vinculaciones.
+                Información actualizada diariamente desde el BORME y el Registro Mercantil Central.
+            </p>
+        <?php else: ?>
+            <h1><?= esc($header ?? 'Directorio de Empresas') ?></h1>
+            <p class="hero-sub" style="margin-bottom: 0.5rem;"><?= esc($excerptText ?? '') ?></p>
+            <p style="color: #94a3b8; max-width: 700px; font-size: 0.95rem; line-height: 1.5; margin-bottom: 2.5rem;">
+                <?= esc($meta_description ?? '') ?>
+            </p>
+        <?php endif; ?>
+
+        <div class="hero-stats" style="align-items: center;">
+            <div class="hero-stat">
+                <span class="hero-stat__value"><?= esc($total_formatted ?? count($items)) ?></span>
+                <span class="hero-stat__label">Empresas registradas</span>
+            </div>
+            <div class="hero-stat__divider"></div>
+            <div class="hero-stat">
+                <span class="hero-stat__value"><?= esc($pagination['total'] ?? '—') ?></span>
+                <span class="hero-stat__label">Páginas disponibles</span>
+            </div>
+            <div class="hero-stat__divider"></div>
+            <div class="hero-stat">
+                <span class="hero-stat__value"><?= count($items) ?></span>
+                <span class="hero-stat__label">En esta página</span>
+            </div>
+            
+            <?php 
+                if (!empty($province_name)) {
+                    if (isset($cnae_code)) {
+                        $checkoutUrl = site_url('billing/directory_checkout?cnae=' . esc($cnae_code) . '&sector=' . urlencode($province_name ?? ''));
+                    } else {
+                        $checkoutUrl = site_url('billing/directory_checkout?provincia=' . urlencode($province_name ?? 'España'));
+                    }
+                } else {
+                    $checkoutUrl = site_url('checkout/radar-export?type=single');
+                }
+            ?>
+
+            <?php if (!empty($province_name)): ?>
+            <div style="margin-left: auto; text-align: right;">
+                <a href="<?= $checkoutUrl ?>" style="display: inline-flex; align-items: center; gap: 8px; background: #10b981; color: #fff; padding: 12px 24px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; text-decoration: none; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25); transition: all 0.2s; margin-bottom: 8px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 25px rgba(16, 185, 129, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(16, 185, 129, 0.25)';">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Descargar Excel (<?= esc($province_name ?? 'España') ?>) — <?= esc($dynamic_price ?? '9') ?>€
+                </a>
+                <div style="font-size: 0.75rem; color: #94a3b8; max-width: 280px; margin-left: auto;">
+                    Incluye: CIF, Razón social, CNAE, Provincia, Fecha constitución y Cargos. <strong style="color: #64748b; font-weight: 600;">(No incluye email ni teléfono)</strong>.
+                </div>
+            </div>
+            <?php endif; ?>
+        </div>
     </div>
 </header>
 
 <main class="list-main">
-    <div class="container" style="padding-top: 40px; padding-bottom: 40px;">
-        
-        <nav class="breadcrumb">
-            <a href="<?= site_url() ?>">Inicio</a>
-            <span class="sep">/</span>
-            <a href="<?= site_url('directorio') ?>">Directorio</a>
-            <span class="sep">/</span>
-            <span style="color: var(--dir-slate-900)"><?= esc($header) ?></span>
-        </nav>
+    <div class="container" style="padding-top: 2.5rem;">
 
-        <div class="company-grid" style="position: relative;">
-            <?php 
-                helper('company');
-                foreach($items as $company): 
-                $url = company_url($company);
-            ?>
-            <a href="<?= esc($url) ?>" class="company-card">
-                <div class="company-card__top">
-                    <span class="company-card__cif"><?= esc($company['cif'] ?? '-') ?></span>
-                    <span class="badge-official">Oficial</span>
-                </div>
-                
-                <h2 class="company-card__name" title="<?= esc($company['name']) ?>">
-                    <?= esc($company['name']) ?>
-                </h2>
-                
-                <div class="company-card__footer">
-                    <div class="company-card__location">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                        <?= esc($company['province'] ?? 'España') ?>
-                    </div>
-                    
-                    <div class="company-card__view">
-                        Ver ficha
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </div>
-                </div>
-            </a>
-            <?php endforeach; ?>
 
-            <?php if (isset($paywall_level) && $paywall_level === 'soft'): ?>
-                <?php for ($i = 0; $i < 6; $i++): ?>
-                <div class="company-card blurred-row">
-                    <div class="company-card__top">
-                        <span class="company-card__cif">A00******</span>
-                        <span class="badge-official">Oculto</span>
-                    </div>
-                    <h2 class="company-card__name">Empresa Restringida S.L.</h2>
-                    <div class="company-card__footer">
-                        <div class="company-card__location">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                            Cargando...
-                        </div>
-                    </div>
-                </div>
-                <?php endfor; ?>
-            <?php endif; ?>
+
+        <!-- Search bar -->
+        <div class="search-bar-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input type="search" id="companySearch" placeholder="Buscar empresa por nombre o CIF en <?= esc($province_name ?? '') ?>..." autocomplete="off" aria-label="Buscar empresa">
+            <span id="searchCount"><?= count($items) ?> empresas</span>
+        </div>
+
+        <!-- Table -->
+        <div class="dir-table-wrap" style="position: relative;">
+            <table class="dir-table" id="companyTable">
+                <thead>
+                    <tr>
+                        <th>Empresa</th>
+                        <th class="td-cif">CIF</th>
+                        <th style="text-align:right;">Ficha</th>
+                    </tr>
+                </thead>
+                <tbody id="companyTableBody">
+                    <?php 
+                        helper('company');
+                        foreach($items as $company):
+                        $url = company_url($company);
+                    ?>
+                    <tr data-name="<?= esc(strtolower($company['name'])) ?>" data-cif="<?= esc(strtolower($company['cif'] ?? '')) ?>">
+                        <td>
+                            <div class="company-name" title="<?= esc($company['name']) ?>"><?= esc($company['name']) ?></div>
+                            <div class="company-cif"><?= esc($company['cif'] ?? '—') ?></div>
+                        </td>
+                        <td class="td-cif"><?= esc($company['cif'] ?? '—') ?></td>
+                        <td class="td-action">
+                            <a href="<?= esc($url) ?>" class="btn-ficha">
+                                Ver ficha
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+
+                    <?php if (isset($paywall_level) && $paywall_level === 'soft'): ?>
+                        <?php for ($i = 0; $i < 8; $i++): ?>
+                        <tr class="blurred-row">
+                            <td>
+                                <div class="td-avatar">
+                                    <div class="avatar">?</div>
+                                    <div>
+                                        <div class="company-name">Empresa Restringida S.L.</div>
+                                        <div class="company-cif">A00******</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="td-cif">A00******</td>
+                            <td class="td-action"><span class="btn-ficha">Ver ficha</span></td>
+                        </tr>
+                        <?php endfor; ?>
+                    <?php endif; ?>
+
+                    <tr class="no-results-row" id="noResultsRow" style="display:none;">
+                        <td colspan="3">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 0.75rem; display:block; opacity:0.3;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                            Sin resultados para tu búsqueda en esta página
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
             <?php if (isset($paywall_level) && $paywall_level === 'soft'): ?>
                 <div class="paywall-overlay">
                     <div class="paywall-card">
-                        <div style="width: 56px; height: 56px; background: #eef2ff; color: var(--dir-primary); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 24px;">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        <div style="width:52px; height:52px; background:#eef2ff; color:var(--dir-primary); border-radius:14px; display:inline-flex; align-items:center; justify-content:center; margin-bottom:20px;">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                         </div>
-                        <h3 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 12px;">Solo estás viendo una muestra de empresas recientes</h3>
-                        <p style="color: #475569; margin-bottom: 24px; line-height: 1.6;">
-                            Desbloquea acceso completo para ver todas las nuevas constituciones y detectar oportunidades comerciales antes que otros.
-                        </p>
-                        <div style="display: flex; flex-direction: column; gap: 12px;">
-                            <a href="<?= site_url('leads-empresas-nuevas') ?>" style="background: var(--dir-primary); color: white; padding: 16px 24px; border-radius: 12px; font-weight: 800; text-decoration: none; box-shadow: 0 8px 16px rgba(33, 82, 255, 0.2);">
-                                Desbloquear acceso completo
-                            </a>
-                            <a href="<?= site_url('billing/single_checkout?provincia=España&period=30days') ?>" style="background: white; color: #0f172a; border: 1px solid #cbd5e1; padding: 14px 24px; border-radius: 12px; font-weight: 700; text-decoration: none;">
-                                Descargar Últimas 30 Días (Excel) · 9€
-                            </a>
+                        <h3 style="font-size:1.35rem; font-weight:800; color:#0f172a; margin-bottom:10px;">Viendo solo una muestra</h3>
+                        <p style="color:#475569; margin-bottom:22px; line-height:1.6;">Accede a todas las empresas de <?= esc($province_name ?? '') ?> con datos de contacto y ficha completa.</p>
+                        <div style="display:flex; flex-direction:column; gap:10px;">
+                            <?php if (!empty($province_name)): // Historical Directory flow ?>
+                                <?php if(isset($checkoutUrl)): ?>
+                                <a href="<?= $checkoutUrl ?>" style="background:var(--dir-primary); color:white; padding:14px 20px; border-radius:12px; font-weight:800; text-decoration:none;">Descargar Excel Completo · <?= esc($dynamic_price ?? '9') ?>€</a>
+                                <?php endif; ?>
+                                <a href="<?= site_url('search_company') ?>" style="background:white; color:#0f172a; border:1.5px solid #cbd5e1; padding:12px 20px; border-radius:12px; font-weight:700; text-decoration:none;">Ir al Buscador Avanzado</a>
+                            <?php else: // Radar 30-Days flow ?>
+                                <a href="<?= site_url('excel/preview?period=30days') ?>" style="background:var(--dir-primary); color:white; padding:14px 20px; border-radius:12px; font-weight:800; text-decoration:none;">Desbloquear acceso completo</a>
+                                <?php if(isset($checkoutUrl)): ?>
+                                <a href="<?= $checkoutUrl ?>" style="background:white; color:#0f172a; border:1.5px solid #cbd5e1; padding:12px 20px; border-radius:12px; font-weight:700; text-decoration:none;">Descargar Excel · <?= esc($dynamic_price ?? '39') ?>€</a>
+                                <?php endif; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
             <?php endif; ?>
-        </div>
+        </div><!-- /.dir-table-wrap -->
 
+        <!-- Pagination -->
         <?php if (!empty($pagination) && ($pagination['prev'] || $pagination['next'])): ?>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e2e8f0;">
-            
-            <?php if ($pagination['prev']): ?>
-            <a href="<?= esc($pagination['prev']) ?>" class="btn secondary" style="display: flex; align-items: center; gap: 8px;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                Página Anterior
-            </a>
-            <?php else: ?>
-            <span class="btn secondary" style="opacity: 0.5; pointer-events: none; display: flex; align-items: center; gap: 8px;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                Página Anterior
+        <div class="pagination-wrap">
+            <span class="pagination-info">
+                Página <strong><?= esc($pagination['current']) ?></strong> de <strong><?= esc($pagination['total'] ?? '—') ?></strong>
+                <?php if (!empty($total_formatted)): ?>
+                    &nbsp;·&nbsp; <?= esc($total_formatted) ?> empresas en total
+                <?php endif; ?>
             </span>
-            <?php endif; ?>
+            <div class="pagination-btns">
+                <?php if ($pagination['prev']): ?>
+                    <a href="<?= esc($pagination['prev']) ?>" class="btn-page" rel="prev">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+                        Anterior
+                    </a>
+                <?php else: ?>
+                    <span class="btn-page disabled">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+                        Anterior
+                    </span>
+                <?php endif; ?>
 
-            <span style="font-weight: 600; color: var(--dir-slate-600);">
-                Página <?= esc($pagination['current']) ?>
-            </span>
+                <span class="page-counter"><?= esc($pagination['current']) ?> / <?= esc($pagination['total'] ?? '?') ?></span>
 
-            <?php if ($pagination['next']): ?>
-            <a href="<?= esc($pagination['next']) ?>" class="btn secondary" style="display: flex; align-items: center; gap: 8px;">
-                Siguiente Página
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-            </a>
-            <?php else: ?>
-            <span class="btn secondary" style="opacity: 0.5; pointer-events: none; display: flex; align-items: center; gap: 8px;">
-                Siguiente Página
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-            </span>
-            <?php endif; ?>
+                <?php if ($pagination['next']): ?>
+                    <a href="<?= esc($pagination['next']) ?>" class="btn-page" rel="next">
+                        Siguiente
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+                    </a>
+                <?php else: ?>
+                    <span class="btn-page disabled">
+                        Siguiente
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+                    </span>
+                <?php endif; ?>
+            </div>
         </div>
         <?php endif; ?>
 
+        <!-- Sectors cross-links -->
         <?php if (!empty($cross_links) && !empty($cross_links['items'])): ?>
-        <div style="margin-top: 5rem; padding-top: 3rem; border-top: 1px solid #e2e8f0;">
-            <h3 style="font-size: 1.5rem; font-weight: 800; color: var(--dir-slate-900); margin-bottom: 2rem;"><?= esc($cross_links['title']) ?></h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem;">
+        <div class="sectors-section">
+            <h2><?= esc($cross_links['title']) ?></h2>
+            <div class="sector-pills">
                 <?php foreach($cross_links['items'] as $cl): ?>
                     <?php 
                         if($cross_links['type'] === 'cnae') {
-                            $clUrl = site_url('directorio/cnae/' . $cl['code']);
+                            $clUrl  = site_url('directorio/cnae/' . $cl['code']);
                             $clName = $cl['label'] ?: "CNAE {$cl['code']}";
                         } else {
-                            $clUrl = site_url('directorio/provincia/' . urlencode($cl['name']));
+                            $clUrl  = site_url('directorio/provincia/' . urlencode($cl['name']));
                             $clName = $cl['name'];
                         }
                     ?>
-                    <a href="<?= esc($clUrl) ?>" style="text-decoration: none; color: var(--dir-slate-600); font-size: 0.95rem; font-weight: 500; display: block; padding: 0.5rem 0; transition: color 0.2s;" onmouseover="this.style.color='#2152FF'" onmouseout="this.style.color='#475569'">
+                    <a href="<?= esc($clUrl) ?>" class="sector-pill">
                         <?= esc($clName) ?>
+                        <?php if (!empty($cl['total'])): ?>
+                            <span class="sector-pill__count"><?= number_format($cl['total'], 0, ',', '.') ?></span>
+                        <?php endif; ?>
                     </a>
                 <?php endforeach; ?>
             </div>
         </div>
         <?php endif; ?>
 
-        <?php
-        // ItemList Schema for better visibility of the list in search results
-        $itemListSchema = [
-            "@context" => "https://schema.org",
-            "@type" => "ItemList",
-            "itemListElement" => []
-        ];
-        helper('company');
-        foreach($items as $index => $company) {
-            $url = company_url($company);
-            $itemListSchema["itemListElement"][] = [
-                "@type" => "ListItem",
-                "position" => $index + 1,
-                "url" => $url,
-                "name" => $company['name']
-            ];
-        }
-        ?>
-        <script type="application/ld+json">
-            <?= json_encode($itemListSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
-        </script>
-        <div class="radar-cross-promo" style="margin-top: 4rem; padding: 3rem; background: linear-gradient(135deg, #f0fdf4, #ffffff); border-radius: 24px; border: 1px solid #dcfce7; text-align: center; box-shadow: 0 10px 25px -5px rgba(22, 163, 74, 0.1);">
-            <h2 style="font-size: 1.8rem; font-weight: 800; color: #16a34a; margin-bottom: 1rem;">¿Buscas empresas que están activamente buscando proveedores?</h2>
-            <p style="color: #475569; font-size: 1.1rem; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">Nuestro Radar detecta en tiempo real qué sociedades tienen mayor probabilidad de necesitar tus servicios.</p>
-            <a href="<?= site_url('radar') ?>" class="btn" style="background: #16a34a; color: white; padding: 1rem 2.5rem; border-radius: 12px; font-weight: 800; font-size: 1.1rem; text-decoration: none; display: inline-block; box-shadow: 0 8px 16px rgba(22, 163, 74, 0.25);">Ver oportunidades activas</a>
+        <!-- Radar CTA personalizado -->
+        <div class="radar-cta">
+            <div class="radar-cta__text">
+                <h2>¿Buscas clientes potenciales en <?= esc($province_name ?? 'España') ?>?</h2>
+                <p>Nuestro Radar detecta en tiempo real las sociedades con mayor probabilidad de necesitar tus servicios ahora mismo.</p>
+            </div>
+            <a href="<?= site_url('radar') ?>" class="radar-cta__btn">Ver oportunidades activas →</a>
         </div>
 
+        <!-- Bottom CTA -->
         <div class="cta-bottom">
-            <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--dir-slate-900); margin-bottom: 1rem;">¿No encuentra la empresa que busca?</h2>
-            <p style="color: var(--dir-slate-600); font-size: 1.1rem; margin-bottom: 2.5rem; max-width: 600px; margin-left: auto; margin-right: auto;">Nuestro buscador avanzado permite encontrar cualquier sociedad en España por nombre, CIF o ubicación.</p>
-            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                <a href="<?= site_url('search_company') ?>" class="btn primary" style="padding: 1rem 2.5rem;">Buscador Avanzado</a>
-                <a href="<?= site_url('directorio') ?>" class="btn secondary" style="padding: 1rem 2.5rem;">Volver al Directorio</a>
+            <h2>¿No encuentra la empresa que busca?</h2>
+            <p>Nuestro buscador avanzado permite localizar cualquier sociedad en España por nombre, CIF o ubicación.</p>
+            <div class="cta-btn-row">
+                <a href="<?= site_url('search_company') ?>" class="btn primary" style="padding: 0.9rem 2rem;">Buscador Avanzado</a>
+                <a href="<?= site_url('directorio') ?>" class="btn secondary" style="padding: 0.9rem 2rem;">Volver al Directorio</a>
             </div>
         </div>
+
+        <!-- JSON-LD: ItemList -->
+        <?php
+            $itemListSchema = [
+                "@context"        => "https://schema.org",
+                "@type"           => "ItemList",
+                "itemListElement" => []
+            ];
+            helper('company');
+            foreach($items as $index => $company) {
+                $url = company_url($company);
+                $itemListSchema["itemListElement"][] = [
+                    "@type"    => "ListItem",
+                    "position" => $index + 1,
+                    "url"      => $url,
+                    "name"     => $company['name']
+                ];
+            }
+        ?>
+        <script type="application/ld+json"><?= json_encode($itemListSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?></script>
+
+        <!-- JSON-LD: BreadcrumbList -->
+        <?php
+            $breadcrumbSchema = [
+                "@context" => "https://schema.org",
+                "@type"    => "BreadcrumbList",
+                "itemListElement" => [
+                    ["@type" => "ListItem", "position" => 1, "name" => "Inicio",      "item" => site_url()],
+                    ["@type" => "ListItem", "position" => 2, "name" => "Directorio",  "item" => site_url('directorio')],
+                    ["@type" => "ListItem", "position" => 3, "name" => $province_name ?? $header, "item" => current_url()]
+                ]
+            ];
+        ?>
+        <script type="application/ld+json"><?= json_encode($breadcrumbSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?></script>
 
     </div>
 </main>
 
 <?= view('partials/footer') ?>
+
+<script>
+(function() {
+    const input      = document.getElementById('companySearch');
+    const rows       = document.querySelectorAll('#companyTableBody tr[data-name]');
+    const countEl    = document.getElementById('searchCount');
+    const noResults  = document.getElementById('noResultsRow');
+    const total      = rows.length;
+
+    input.addEventListener('input', function() {
+        const q = this.value.trim().toLowerCase();
+        let visible = 0;
+        rows.forEach(function(row) {
+            const name = row.dataset.name || '';
+            const cif  = row.dataset.cif  || '';
+            const match = !q || name.includes(q) || cif.includes(q);
+            row.classList.toggle('hidden-row', !match);
+            if (match) visible++;
+        });
+        countEl.textContent = q ? visible + ' resultado' + (visible !== 1 ? 's' : '') : total + ' empresas';
+        noResults.style.display = (visible === 0 && q) ? '' : 'none';
+    });
+})();
+</script>
 </body>
 </html>

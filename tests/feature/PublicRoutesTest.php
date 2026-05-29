@@ -97,6 +97,7 @@ class PublicRoutesTest extends TestCase
         $this->assertRouteWorks('empresas-nuevas/madrid', 'Madrid');
         $this->assertRouteWorks('empresas-nuevas/barcelona', 'Barcelona');
         $this->assertRouteWorks('directorio', 'Provincias');
+        $this->assertRouteWorks('directorio/provincia/A%20Coru%C3%B1a', 'A Coruña');
     }
 
     /**

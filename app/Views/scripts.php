@@ -1,6 +1,25 @@
 <?php helper('api'); ?>
 <script>
-    $(document).ready(function() {
+    function runWithJquery(fn) {
+        if (window.jQuery) {
+            fn();
+        } else {
+            document.addEventListener('DOMContentLoaded', () => {
+                if (window.jQuery) {
+                    fn();
+                } else {
+                    let interval = setInterval(() => {
+                        if (window.jQuery) {
+                            clearInterval(interval);
+                            fn();
+                        }
+                    }, 20);
+                }
+            });
+        }
+    }
+    runWithJquery(function() {
+        $(document).ready(function() {
         // We use the 'search' route which is now configured for both GET and POST
         const SEARCH_ENDPOINT = '<?= site_url("search") ?>';
         const RADAR_BASE_URL = '<?= site_url("leads-empresas-nuevas") ?>';
@@ -366,4 +385,5 @@
             }
         }
     });
+});
 </script>

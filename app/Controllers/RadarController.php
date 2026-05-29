@@ -963,6 +963,13 @@ class RadarController extends BaseController
 
         header('Content-Type: application/vnd.ms-excel');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        if (!empty($params['dl_token'])) {
+            setcookie('dl_token', $params['dl_token'], time() + 120, '/');
+        }
         
         echo $this->generateExcelHtml($companies);
         exit();
@@ -1015,6 +1022,9 @@ class RadarController extends BaseController
         $cnae     = $params['cnae']     ?? '';
 
         $allowedPeriods = ['7', '30', '90', 'hoy', 'semana', 'mes', '30days', 'general'];
+        if (($params['is_historical'] ?? '0') === '1') {
+            $period = 'general';
+        }
         if (!in_array($period, $allowedPeriods, true)) {
             $period = '30days';
         }
@@ -1027,15 +1037,17 @@ class RadarController extends BaseController
             $builder->where('cnae_code LIKE', $cnae . '%');
         }
 
-        if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
-            if (mb_strtolower($province, 'UTF-8') === 'alicante') {
-                $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+        if ($province && mb_strtolower($province, 'UTF-8') !== 'españa' && $province !== $sector) {
+            if (in_array(mb_strtolower($province, 'UTF-8'), ['alicante', 'alacant', 'alicante/alacant'])) {
+                $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
+            } elseif (in_array(mb_strtolower($province, 'UTF-8'), ['araba/álava', 'álava', 'álava-araba', 'araba', 'alava'])) {
+                $builder->whereIn('registro_mercantil', ['ÁLAVA', 'Álava-Araba', 'Araba/Álava', 'ALAVA']);
             } else {
                 $builder->where('registro_mercantil', $province);
             }
         }
 
-        if ($sector) {
+        if ($sector && mb_strtolower($sector, 'UTF-8') !== 'general') {
             $resolution = $this->resolveCnaeCodes(url_title($sector, '-', true));
             if ($resolution) {
                 $codes = $resolution['codes'];
@@ -1058,8 +1070,8 @@ class RadarController extends BaseController
             $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')));
             $builder->where('fecha_constitucion <=', date('Y-m-d'));
         } elseif ($period === 'general') {
-            // Histórico completo: sin filtro de fecha (para exportaciones de directorios CNAE)
-            $builder->where('fecha_constitucion IS NOT NULL');
+            // Histórico completo: sin filtro de fecha (para exportaciones de directorios CNAE y provincias)
+            // No requerimos fecha_constitucion IS NOT NULL para no perder registros históricos.
         } else {
             // Default: últimos 90 días
             $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')));
@@ -1067,7 +1079,17 @@ class RadarController extends BaseController
         }
 
         $builder->orderBy('fecha_constitucion', 'DESC');
-        $builder->limit($cnae !== '' ? 2000 : 5000);
+        
+        $isHistorical = ($params['is_historical'] ?? '0') === '1' || $period === 'general';
+        
+        if (!$isHistorical) {
+            $builder->limit($cnae !== '' ? 2000 : 5000);
+        } else {
+            // For historical province downloads, limit must be much higher or removed.
+            // We set it to 500k to prevent OOM but allow full provinces.
+            $builder->limit(500000);
+        }
+
         $companies = $builder->get()->getResultArray();
         
         if (empty($companies)) {
@@ -1101,10 +1123,16 @@ class RadarController extends BaseController
         $sector   = $params['sector']   ?? '';
         $province = $params['provincia'] ?? 'España';
         $cnae     = $params['cnae']     ?? '';
+        $isHistorical = ($params['is_historical'] ?? '0') === '1';
 
         if ($cnae !== '') {
             return "Directorio_" . preg_replace('/[^A-Za-z0-9_]/', '_', $cnae) . "_" . str_replace(' ', '_', $province) . ".xls";
         }
+        
+        if ($isHistorical) {
+            return "Directorio_Historico_" . str_replace(' ', '_', $province) . ".xls";
+        }
+        
         return "Listado_Nuevas_Empresas_" . str_replace(' ', '_', $sector) . "_" . str_replace(' ', '_', $province) . ".xls";
     }
 

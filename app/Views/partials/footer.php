@@ -10,7 +10,6 @@
                     <li><a href="<?=site_url('empresas-nuevas-semana') ?>">Creadas esta semana</a></li>
                     <li><a href="<?=site_url('empresas-nuevas-mes') ?>">Constituidas este mes</a></li>
                     <li><a href="<?=site_url('empresas-nuevas') ?>">Radar Nacional (Hub)</a></li>
-                    <li><a href="<?=site_url('directorio/ultimas-empresas-registradas') ?>">Últimas registradas</a></li>
                 </ul>
             </div>
 
@@ -42,6 +41,7 @@
             <div>
                 <h4 class="foot-title">Directorio y API</h4>
                 <ul class="foot-links">
+                    <li><a href="<?=site_url('directorio') ?>">Directorio Histórico Completo</a></li>
                     <li><a href="<?= getRadarRedirect('footer') ?>">Beneficios de Radar Pro</a></li>
                     <li><a href="https://alertaempresas.es/" target="_blank">Portal AlertaEmpresas</a></li>
                     <li><a href="<?=site_url('plugin-wordpress-buscador-empresas') ?>">Plugin de WordPress</a></li>

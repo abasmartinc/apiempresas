@@ -70,6 +70,12 @@ $googlebot = $googlebot ?? ($robots . ',max-snippet:-1,max-image-preview:large,m
 <meta name="googlebot" content="<?= esc($googlebot) ?>" />
 
 <link rel="canonical" href="<?= esc($canonicalUrl) ?>" />
+<?php if (!empty($prevUrl)): ?>
+<link rel="prev" href="<?= esc($prevUrl) ?>" />
+<?php endif; ?>
+<?php if (!empty($nextUrl)): ?>
+<link rel="next" href="<?= esc($nextUrl) ?>" />
+<?php endif; ?>
 
 <!-- Hreflang (si solo tienes ES, esto es suficiente) -->
 <link rel="alternate" href="<?= esc($canonicalUrl) ?>" hreflang="es-ES" />
@@ -129,10 +135,10 @@ $googlebot = $googlebot ?? ($robots . ',max-snippet:-1,max-image-preview:large,m
 
 
 <!-- jQuery (Required for many interactive elements) -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
 
 <!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
 
 
 <!-- Favicons -->

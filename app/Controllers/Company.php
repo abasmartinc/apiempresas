@@ -135,6 +135,32 @@ class Company extends BaseController
         $company['seo_score']     = calculateCompanySeoScore($company);
         // --- DINAMIC SEO INDEXING ---
 
+        // --- BOT DETECTION & SYNCHRONOUS AI SEO TEXT GENERATION ---
+        if (empty($company['ai_seo_text'])) {
+            $agent = service('request')->getUserAgent();
+            $isBot = $agent->isRobot();
+            if (!$isBot) {
+                $userAgentString = strtolower($agent->getAgentString());
+                $botKeywords = ['googlebot', 'bingbot', 'yandex', 'baidu', 'duckduck', 'crawler', 'spider', 'archiver'];
+                foreach ($botKeywords as $kw) {
+                    if (strpos($userAgentString, $kw) !== false) {
+                        $isBot = true;
+                        break;
+                    }
+                }
+            }
+
+            if ($isBot) {
+                helper('seo_dynamic_helper');
+                $seoData = getOrGenerateAiSeoData($company);
+                if ($seoData) {
+                    $company['ai_seo_text'] = $seoData['text'];
+                    $company['ai_faqs'] = json_encode($seoData['faqs'], JSON_UNESCAPED_UNICODE);
+                }
+            }
+        }
+        // --- BOT DETECTION & SYNCHRONOUS AI SEO TEXT GENERATION ---
+
         // Administrators
         $adminsRaw = $this->adminModel->getByCompanyId((int)$company['id']);
         $filteredAdmins = [];
@@ -219,6 +245,12 @@ class Company extends BaseController
         $pricing = calculate_radar_price($listCount);
         $priceStr = number_format($pricing['base_price'], 0, ',', '.');
         $countFormatted = number_format($listCount, 0, ',', '.');
+
+        // Optimizar la meta descripción si disponemos de texto generado por la IA
+        if (!empty($company['ai_seo_text'])) {
+            $cleanDesc = strip_tags(str_replace(["\r", "\n"], ' ', $company['ai_seo_text']));
+            $desc = character_limiter($cleanDesc, 155, '...');
+        }
 
         return [
             'company'          => $company,

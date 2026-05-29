@@ -346,9 +346,18 @@ $province = 'España';
                                     </div>
                                 </div>
 
-                                <div class="ae-radar-page__paywall-actions" style="display: flex; justify-content: center; margin-top: 0.5rem;">
+                                <div class="ae-radar-page__paywall-actions" style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-top: 0.5rem;">
                                     <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--primary" style="background: linear-gradient(135deg, #3b82f6, #6366f1); border: none; padding: 1.1rem 3rem; font-size: 1.15rem; font-weight: 800; border-radius: 100px; box-shadow: 0 8px 24px rgba(99,102,241,0.45), 0 2px 8px rgba(59,130,246,0.3); letter-spacing: -0.01em; transition: all 0.25s ease; display: inline-block; min-width: 280px; text-align: center;">
-                                        <span>Entrar al Radar ahora</span>
+                                        <span>Entrar al Radar Completo</span>
+                                    </a>
+                                    <?php 
+                                        $excelParams = [];
+                                        if (isset($province)) $excelParams['provincia'] = $province;
+                                        if (isset($period)) $excelParams['period'] = $period;
+                                        if (isset($sector)) $excelParams['sector'] = json_encode($sector);
+                                    ?>
+                                    <a href="<?= site_url('excel/preview?' . http_build_query($excelParams)) ?>" style="color: #64748b; font-size: 0.95rem; text-decoration: underline; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='#0f172a'" onmouseout="this.style.color='#64748b'">
+                                        O solo descargar este listado en Excel
                                     </a>
                                 </div>
                             </div>
@@ -600,9 +609,20 @@ $province = 'España';
                 <div style="position: relative; z-index: 2;">
                     <h2 style="font-size: 2.5rem; font-weight: 900; margin-bottom: 1.5rem; letter-spacing: -0.02em; color: white;">Si no accedes ahora, estas oportunidades desaparecerán en horas</h2>
                     <p style="font-size: 1.25rem; opacity: 0.8; max-width: 700px; margin: 0 auto 1.5rem; color: white;">Más de 40 empresas nuevas aparecen cada día — quienes detectan primero son quienes cierran</p>
-                    <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary" style="padding: 1.25rem 3.5rem; font-size: 1.25rem; font-weight: 700; border-radius: 100px; background: white; color: #0f172a; box-shadow: 0 0 30px rgba(255,255,255,0.2);">
-                        Acceder ahora y detectar estas empresas antes que otros
-                    </a>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                        <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary" style="padding: 1.25rem 3.5rem; font-size: 1.25rem; font-weight: 700; border-radius: 100px; background: white; color: #0f172a; box-shadow: 0 0 30px rgba(255,255,255,0.2);">
+                            Acceder ahora y detectar estas empresas antes que otros
+                        </a>
+                        <?php 
+                            $excelParams = [];
+                            if (isset($province)) $excelParams['provincia'] = $province;
+                            if (isset($period)) $excelParams['period'] = $period;
+                            if (isset($sector)) $excelParams['sector'] = json_encode($sector);
+                        ?>
+                        <a href="<?= site_url('excel/preview?' . http_build_query($excelParams)) ?>" style="color: rgba(255,255,255,0.8); font-size: 0.95rem; text-decoration: underline; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='rgba(255,255,255,0.8)'">
+                            O solo descargar este listado en Excel
+                        </a>
+                    </div>
                     <p style="font-size: 0.95rem; color: rgba(255,255,255,0.7); margin-top: 1.25rem; font-weight: 500;">La mayoría de usuarios consigue su primer cliente en días</p>
                 </div>
                 <!-- Subtle background glow -->

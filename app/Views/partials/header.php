@@ -69,7 +69,13 @@
         <strong>Radar Inteligente</strong>
         <span>Nuevas empresas en tiempo real</span>
     </div>
-</a>
+                        <a href="<?= site_url('directorio') ?>">
+                            <div class="nav-item-icon">🗂️</div>
+                            <div>
+                                <strong>Directorio Histórico</strong>
+                                <span>Bases de datos por provincia y sector</span>
+                            </div>
+                        </a>
                     </div>
                 </div>
 
@@ -187,6 +193,9 @@
                         </a>
                         <a href="<?= getRadarRedirect('mobile_header') ?>" class="mobile-nav-link">
                             <span>Radar Inteligente</span>
+                        </a>
+                        <a href="<?=site_url('directorio') ?>" class="mobile-nav-link">
+                            <span>Directorio Histórico</span>
                         </a>
                     </div>
 

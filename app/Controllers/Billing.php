@@ -112,7 +112,7 @@ class Billing extends BaseController
         $period = strtolower(trim((string) ($postData['period'] ?? 'single')));
         $pm = strtolower(trim((string) ($postData['payment_method'] ?? 'stripe')));
 
-        if (!in_array($plan, ['pro', 'business', 'radar'], true)) {
+        if (!in_array($plan, ['pro', 'business', 'radar', 'directory_single'], true)) {
             $plan = 'radar'; // default fallback for single downloads
         }
         if (!in_array($period, ['monthly', 'annual', 'single'], true)) {
@@ -136,41 +136,73 @@ class Billing extends BaseController
             // Set context for simulator too if it's an excel download
             if ($period === 'single') {
                 $prov = $postData['provincia'] ?? 'España';
-                $sect = $postData['sector'] ?? '';
-                $cnae = $postData['cnae'] ?? '';
-                // period_radar vacío = flujo histórico CNAE (sin filtro de fecha) -> 'general'
-                $per  = ($postData['period_radar'] !== '' && $postData['period_radar'] !== null)
-                    ? ($postData['period_radar'] ?? '30days')
-                    : ($cnae !== '' ? 'general' : '30days');
-
-                // Contar igual que el flujo real de Stripe: por CNAE si viene, si no por getRadarData
-                if ($cnae !== '') {
-                    $db      = \Config\Database::connect();
-                    $builder = $db->table('companies');
-                    $builder->where('cnae_code LIKE', $cnae . '%');
-                    $builder->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
-                    if ($prov && strtolower($prov) !== 'españa') {
-                        if (strtolower($prov) === 'alicante') {
-                            $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+                
+                if ($plan === 'directory_single') {
+                    $count = (int) ($postData['total_count'] ?? 0);
+                    $cnae = $postData['cnae'] ?? '';
+                    $sect = $postData['sector'] ?? '';
+                    if ($count <= 0) {
+                        $db = \Config\Database::connect();
+                        $builder = $db->table('companies');
+                        if ($cnae !== '') {
+                            $builder->where('cnae_code', $cnae);
                         } else {
-                            $builder->where('registro_mercantil', $prov);
+                            if (strtolower($prov) !== 'españa') {
+                                if (in_array(strtolower($prov), ['alicante', 'alacant', 'alicante/alacant'])) {
+                                    $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
+                                } else {
+                                    $builder->where('registro_mercantil', $prov);
+                                }
+                            }
                         }
+                        $count = $builder->countAllResults();
                     }
-                    $count = $builder->countAllResults();
+                    
+                    session()->set('checkout_context', [
+                        'type'        => 'directory_excel',
+                        'provincia'   => $prov,
+                        'cnae'        => $cnae,
+                        'sector'      => $sect,
+                        'total_count' => $count
+                    ]);
                 } else {
-                    $radar = new \App\Controllers\RadarController();
-                    $radarData = $radar->getRadarData($prov, $sect, $per, 1);
-                    $count = $radarData['total_context_count'] ?? 0;
-                }
+                    $sect = $postData['sector'] ?? '';
+                    $cnae = $postData['cnae'] ?? '';
+                    // period_radar vacío = flujo histórico CNAE (sin filtro de fecha) -> 'general'
+                    $per  = (isset($postData['period_radar']) && $postData['period_radar'] !== '')
+                        ? $postData['period_radar']
+                        : ($cnae !== '' ? 'general' : '30days');
 
-                session()->set('checkout_context', [
-                    'type'        => 'excel',
-                    'sector'      => $sect,
-                    'cnae'        => $cnae,
-                    'provincia'   => $prov,
-                    'period'      => $per,
-                    'total_count' => $count
-                ]);
+                    // Contar igual que el flujo real de Stripe: por CNAE si viene, si no por getRadarData
+                    if ($cnae !== '') {
+                        $db      = \Config\Database::connect();
+                        $builder = $db->table('companies');
+                        $builder->where('cnae_code LIKE', $cnae . '%');
+                        $builder->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
+                        if ($prov && strtolower($prov) !== 'españa') {
+                            if (strtolower($prov) === 'alicante') {
+                                $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+                            } else {
+                                $builder->where('registro_mercantil', $prov);
+                            }
+                        }
+                        $count = $builder->countAllResults();
+                    } else {
+                        $radar = new \App\Controllers\RadarController();
+                        $radarData = $radar->getRadarData($prov, $sect, $per, 1);
+                        $count = $radarData['total_context_count'] ?? 0;
+                    }
+
+                    session()->set('checkout_context', [
+                        'type'        => 'excel',
+                        'sector'      => $sect,
+                        'cnae'        => $cnae,
+                        'provincia'   => $prov,
+                        'period'      => $per,
+                        'total_count' => $count
+                    ]);
+                }
+                
                 // Token para permitir descarga sin login en modo simulador
                 session()->set('simulator_excel_token', bin2hex(random_bytes(8)));
             }
@@ -224,53 +256,106 @@ class Billing extends BaseController
                 if (!empty($postData['period_radar'])) $exportParams['period'] = $postData['period_radar'];
                 
                 $cancelUrl = site_url('checkout/radar-export?' . http_build_query($exportParams));
+            } elseif ($plan === 'directory_single') {
+                $cancelParams = [];
+                if (!empty($postData['cnae'])) {
+                    $cancelParams['cnae'] = $postData['cnae'];
+                    $cancelParams['sector'] = $postData['sector'] ?? '';
+                } else {
+                    $cancelParams['provincia'] = $postData['provincia'] ?? 'España';
+                }
+                $cancelUrl = site_url('checkout/directory-export?' . http_build_query($cancelParams));
             }
 
             // Tax Rate for IVA
             $taxRateId = env('STRIPE_TAX_RATE_ID');
 
-        if ($period === 'single' || ($plan === 'radar' && $period === 'single')) {
-            // Recalculate count for security to determine price
+        if ($period === 'single' || ($plan === 'radar' && $period === 'single') || $plan === 'directory_single') {
             $prov = $postData['provincia'] ?? 'España';
-            $sect = $postData['sector'] ?? '';
-            $cnae = $postData['cnae'] ?? '';
-            // period_radar vacío = flujo histórico CNAE (sin filtro de fecha) -> 'general'
-            $per  = ($postData['period_radar'] !== '' && isset($postData['period_radar']))
-                ? $postData['period_radar']
-                : ($cnae !== '' ? 'general' : '30days');
-
-            if ($cnae !== '') {
-                $db      = \Config\Database::connect();
-                $builder = $db->table('companies');
-                $builder->where('cnae_code LIKE', $cnae . '%');
-                $builder->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
-                if ($prov && strtolower($prov) !== 'españa') {
-                    if (strtolower($prov) === 'alicante') {
-                        $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+            
+            if ($plan === 'directory_single') {
+                $count = (int) ($postData['total_count'] ?? 0);
+                $amount = (float) ($postData['price'] ?? 0);
+                $cnae = $postData['cnae'] ?? '';
+                $sect = $postData['sector'] ?? '';
+                
+                // Fallback si no vinieran
+                if ($count <= 0 || $amount <= 0) {
+                    $db = \Config\Database::connect();
+                    $builder = $db->table('companies');
+                    if ($cnae !== '') {
+                        $builder->where('cnae_code', $cnae);
                     } else {
-                        $builder->where('registro_mercantil', $prov);
+                        if (strtolower($prov) !== 'españa') {
+                            if (in_array(strtolower($prov), ['alicante', 'alacant', 'alicante/alacant'])) {
+                                $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
+                            } else {
+                                $builder->where('registro_mercantil', $prov);
+                            }
+                        }
                     }
+                    $count = $builder->countAllResults();
+                    $amount = round(9 + (($count / 1000) * 0.50), 2);
                 }
-                $count = $builder->countAllResults();
+
+                session()->set('checkout_context', [
+                    'type'        => 'directory_excel',
+                    'provincia'   => $prov,
+                    'cnae'        => $cnae,
+                    'sector'      => $sect,
+                    'total_count' => $count
+                ]);
+
+                $productName = 'BBDD Histórica ' . $prov . ' (' . number_format($count, 0, ',', '.') . ' empresas)';
+                $productDesc = 'Descarga en Excel del listado histórico completo.';
+                $metadataPlan = 'directory_single';
+
             } else {
-                $radar = new \App\Controllers\RadarController();
-                $radarData = $radar->getRadarData($prov, $sect, $per, 1);
-                $count = $radarData['total_context_count'] ?? 0;
+                // Recalculate count for security to determine price (Radar flow)
+                $sect = $postData['sector'] ?? '';
+                $cnae = $postData['cnae'] ?? '';
+                // period_radar vacío = flujo histórico CNAE (sin filtro de fecha) -> 'general'
+                $per  = ($postData['period_radar'] !== '' && isset($postData['period_radar']))
+                    ? $postData['period_radar']
+                    : ($cnae !== '' ? 'general' : '30days');
+
+                if ($cnae !== '') {
+                    $db      = \Config\Database::connect();
+                    $builder = $db->table('companies');
+                    $builder->where('cnae_code LIKE', $cnae . '%');
+                    $builder->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
+                    if ($prov && strtolower($prov) !== 'españa') {
+                        if (strtolower($prov) === 'alicante') {
+                            $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+                        } else {
+                            $builder->where('registro_mercantil', $prov);
+                        }
+                    }
+                    $count = $builder->countAllResults();
+                } else {
+                    $radar = new \App\Controllers\RadarController();
+                    $radarData = $radar->getRadarData($prov, $sect, $per, 1);
+                    $count = $radarData['total_context_count'] ?? 0;
+                }
+
+                // Dynamic Pricing based on scale
+                $pricing = calculate_radar_price($count);
+                $amount = $pricing['base_price'];
+
+                // Guardar contexto para la página de éxito
+                session()->set('checkout_context', [
+                    'type'        => 'excel',
+                    'sector'      => $sect,
+                    'cnae'        => $cnae,
+                    'provincia'   => $prov,
+                    'period'      => $per,
+                    'total_count' => $count
+                ]);
+                
+                $productName = 'Descarga Listado Radar B2B (' . $count . ' empresas)';
+                $productDesc = 'Listado completo de nuevas empresas constituidas.';
+                $metadataPlan = 'radar_single';
             }
-
-            // Dynamic Pricing based on scale
-            $pricing = calculate_radar_price($count);
-            $amount = $pricing['base_price'];
-
-            // Guardar contexto para la página de éxito
-            session()->set('checkout_context', [
-                'type'        => 'excel',
-                'sector'      => $sect,
-                'cnae'        => $cnae,
-                'provincia'   => $prov,
-                'period'      => $per,
-                'total_count' => $count
-            ]);
             
             $lineItem = [
                 'quantity' => 1,
@@ -278,8 +363,8 @@ class Billing extends BaseController
                     'currency' => 'eur',
                     'unit_amount' => (int)($amount * 100),
                     'product_data' => [
-                        'name' => 'Descarga Listado Radar B2B (' . $count . ' empresas)',
-                        'description' => 'Listado completo de nuevas empresas constituidas.'
+                        'name' => $productName,
+                        'description' => $productDesc
                     ]
                 ]
             ];
@@ -299,14 +384,14 @@ class Billing extends BaseController
                     'invoice_data' => [
                         'metadata' => [
                             'user_id' => (string) $userId,
-                            'plan' => 'radar_single',
+                            'plan' => $metadataPlan,
                             'period' => 'single',
                         ]
                     ]
                 ],
                 'metadata' => [
                     'user_id' => (string) $userId,
-                    'plan' => 'radar_single',
+                    'plan' => $metadataPlan,
                     'period' => 'single',
                 ],
             ];
@@ -426,6 +511,75 @@ class Billing extends BaseController
     }
 
     /**
+     * GET /billing/directory_checkout
+     * Entry point for the historical directory export purchase flow.
+     * Redirects to the order summary page (does NOT use the radar flow).
+     */
+    public function directory_checkout()
+    {
+        $province = $this->request->getGet('provincia') ?? 'España';
+        $cnae = $this->request->getGet('cnae') ?? '';
+        $sector = $this->request->getGet('sector') ?? '';
+        
+        $params = [];
+        if ($cnae !== '') {
+            $params['cnae'] = $cnae;
+            $params['sector'] = $sector;
+        } else {
+            $params['provincia'] = $province;
+        }
+        
+        return redirect()->to(site_url('checkout/directory-export?' . http_build_query($params)));
+    }
+
+    /**
+     * GET /checkout/directory-export
+     * Pre-checkout summary for historical province directory downloads.
+     * Uses the dynamic pricing: 9€ + (totalCompanies / 1000) * 0.50€
+     */
+    public function directory_order_summary()
+    {
+        $province = $this->request->getGet('provincia') ?? 'España';
+        $cnae = $this->request->getGet('cnae') ?? '';
+        $sector = $this->request->getGet('sector') ?? '';
+
+        $db = \Config\Database::connect();
+        $builder = $db->table('companies');
+
+        if ($cnae !== '') {
+            $builder->where('cnae_code', $cnae);
+            $totalCount = $builder->countAllResults();
+            $titleName = $sector ?: "CNAE {$cnae}";
+            $displayName = $titleName; 
+            // Do not overwrite $province, it should remain 'España' for national CNAE
+        } else {
+            if (strtolower($province) !== 'españa') {
+                if (in_array(strtolower($province), ['alicante', 'alacant', 'alicante/alacant'])) {
+                    $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
+                } else {
+                    $builder->where('registro_mercantil', $province);
+                }
+            }
+            $totalCount = $builder->countAllResults();
+            $displayName = $province;
+        }
+
+        // Dynamic pricing: 9€ base + 0.50€ per 1,000 records
+        $price = round(9 + (($totalCount / 1000) * 0.50), 2);
+        $tax   = round($price * 0.21, 2);
+
+        return view('billing/directory_order_summary', [
+            'province'    => $province,
+            'display_name'=> $displayName,
+            'total_count' => $totalCount,
+            'price'       => $price,
+            'tax'         => $tax,
+            'cnae'        => $cnae,
+            'sector'      => $sector
+        ]);
+    }
+
+    /**
      * GET /checkout/radar-export
      * Show a pre-checkout summary to build trust
      */
@@ -512,13 +666,19 @@ class Billing extends BaseController
         $lastInfo = session('last_purchase_info') ?? [];
 
         // 1. Excel Single Purchase Flow (Check context or last info)
-        if (($checkoutData['type'] ?? '') === 'excel' || (!empty($lastInfo) && empty($subscription))) {
+        if (($checkoutData['type'] ?? '') === 'excel' || ($checkoutData['type'] ?? '') === 'directory_excel' || (!empty($lastInfo) && empty($subscription))) {
             
-            if (($checkoutData['type'] ?? '') === 'excel') {
+            $isDir = false;
+            if (($checkoutData['type'] ?? '') === 'directory_excel' || ($lastInfo['export_params']['is_historical'] ?? '0') === '1') {
+                $isDir = true;
+            }
+
+            if (($checkoutData['type'] ?? '') === 'excel' || ($checkoutData['type'] ?? '') === 'directory_excel') {
                 $exportParams = [
                     'sector'    => $checkoutData['sector']   ?? 'General',
                     'provincia' => $checkoutData['provincia'] ?? 'España',
-                    'period'    => $checkoutData['period']    ?? '30days',
+                    'period'    => $isDir ? 'general' : ($checkoutData['period'] ?? '30days'),
+                    'is_historical' => $isDir ? '1' : '0'
                 ];
                 $totalCount = $checkoutData['total_count'] ?? 0;
 
@@ -539,6 +699,15 @@ class Billing extends BaseController
             if (!empty($lastInfo['cnae'])) {
                 $exportParams['cnae'] = $lastInfo['cnae'];
             }
+            
+            // Retroactive fix: If we detected it's a directory download but exportParams is missing the flag
+            if ($isDir && (!isset($exportParams['is_historical']) || $exportParams['is_historical'] !== '1')) {
+                $exportParams['is_historical'] = '1';
+                $exportParams['period'] = 'general';
+                $lastInfo['export_params'] = $exportParams;
+                session()->set('last_purchase_info', $lastInfo);
+            }
+            
             $downloadUrl = site_url('billing/export-excel?' . http_build_query($exportParams));
             
             $user = $userId > 0 ? $this->userModel->find($userId) : null;
@@ -551,6 +720,9 @@ class Billing extends BaseController
                 'user_email'    => $user->email ?? session('email') ?? ''
             ];
 
+            if ($isDir ?? false) {
+                return view('billing/success_directory', $data);
+            }
             return view('billing/success_single', $data);
         }
 
