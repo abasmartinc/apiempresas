@@ -24,7 +24,8 @@ class Directory extends BaseController
             // Exclusiones de provincias y CNAEs no válidos
             $invalidNames = [
                 '', ' ', '  ', '-', '.', '..', '...', '8', 'N/A', 'NULL', 'UNDEFINED', 
-                '00 DESCONOCIDA', 'desconocido', 'desconocida', 'no disponible', 'n/a', 'unknown', 'sin especificar'
+                '00 DESCONOCIDA', 'desconocido', 'desconocida', 'no disponible', 'n/a', 'unknown', 'sin especificar',
+                'ÍNDICE ALFABÉTICO DE SOCIEDADES', 'No Detectado'
             ];
 
             // Obtener lista de provincias únicas con conteo simple
@@ -43,6 +44,8 @@ class Directory extends BaseController
                 $name = $p['name'];
                 if (in_array(strtolower($name), ['alicante', 'alacant', 'alicante/alacant'])) {
                     $name = 'ALACANT';
+                } elseif (in_array(mb_strtolower($name, 'UTF-8'), ['araba/álava', 'álava', 'álava-araba', 'araba', 'alava'])) {
+                    $name = 'Araba/Álava';
                 }
                 if (!isset($provincesMap[$name])) {
                     $provincesMap[$name] = ['name' => $name, 'total' => 0];
@@ -50,7 +53,11 @@ class Directory extends BaseController
                 $provincesMap[$name]['total'] += $p['total'];
             }
             $provinces = array_values($provincesMap);
-            usort($provinces, fn($a, $b) => strcmp($a['name'], $b['name']));
+            usort($provinces, function($a, $b) {
+                $search  = ['Á','É','Í','Ó','Ú','á','é','í','ó','ú'];
+                $replace = ['A','E','I','O','U','a','e','i','o','u'];
+                return strcmp(str_replace($search, $replace, $a['name']), str_replace($search, $replace, $b['name']));
+            });
 
             $cnaes = $this->companyModel->builder()
                 ->select('cnae_code as cnae, COUNT(id) as total')
@@ -58,20 +65,22 @@ class Directory extends BaseController
                 ->where('cnae_code >=', '0100')
                 ->groupBy('cnae_code')
                 ->orderBy('total', 'DESC')
-                ->limit(24)
                 ->get()
                 ->getResultArray();
 
+            $db = \Config\Database::connect();
+            $cnaeLabels = $db->table('cnae_2009_2025')
+                ->select('cnae_2009 as cnae, label_2009 as label')
+                ->get()
+                ->getResultArray();
+                
+            $cnaeMap = [];
+            foreach ($cnaeLabels as $row) {
+                $cnaeMap[$row['cnae']] = $row['label'];
+            }
+
             foreach ($cnaes as &$cnae) {
-                $row = $this->companyModel->builder()
-                    ->select('cnae_label')
-                    ->where('cnae_code', $cnae['cnae'])
-                    ->where('cnae_label >=', 'A')
-                    ->whereNotIn('cnae_label', $invalidNames)
-                    ->limit(1)
-                    ->get()
-                    ->getRowArray();
-                $cnae['name'] = $row['cnae_label'] ?? "CNAE {$cnae['cnae']}";
+                $cnae['name'] = $cnaeMap[$cnae['cnae']] ?? "CNAE {$cnae['cnae']}";
             }
             unset($cnae);
 
@@ -102,7 +111,7 @@ class Directory extends BaseController
         $totalFormatted = number_format($totalAll, 0, ',', '.');
         $numProvinces   = count($data['provinces']);
 
-        $dynamicPrice = round(9 + (($totalAll / 1000) * 0.50));
+        $dynamicPrice = round(19 + (($totalAll / 1000) * 1.00), 2);
 
         return view('directory/index', [
             'provinces'        => $data['provinces'],
@@ -183,7 +192,8 @@ class Directory extends BaseController
         if (!$topCnaes) {
             $invalidNames = [
                 '', ' ', '  ', '-', '.', '..', '...', '8', 'N/A', 'NULL', 'UNDEFINED', 
-                '00 DESCONOCIDA', 'desconocido', 'desconocida', 'no disponible', 'n/a', 'unknown', 'sin especificar'
+                '00 DESCONOCIDA', 'desconocido', 'desconocida', 'no disponible', 'n/a', 'unknown', 'sin especificar',
+                'ÍNDICE ALFABÉTICO DE SOCIEDADES', 'No Detectado'
             ];
             $cnaeBuilder = $this->companyModel->builder()
                 ->select('cnae_code as code, cnae_label as label, COUNT(id) as total');
@@ -208,7 +218,7 @@ class Directory extends BaseController
         }
 
         $totalFormatted = number_format($totalCompanies, 0, ',', '.');
-        $dynamicPrice = round(9 + (($totalCompanies / 1000) * 0.50));
+        $dynamicPrice = round(19 + (($totalCompanies / 1000) * 1.00), 2);
 
         return view('directory/list', [
             'items'           => $companies,
@@ -302,7 +312,8 @@ class Directory extends BaseController
         if (!$topProvinces) {
             $invalidNames = [
                 '', ' ', '  ', '-', '.', '..', '...', '8', 'N/A', 'NULL', 'UNDEFINED', 
-                '00 DESCONOCIDA', 'desconocido', 'desconocida', 'no disponible', 'n/a', 'unknown', 'sin especificar'
+                '00 DESCONOCIDA', 'desconocido', 'desconocida', 'no disponible', 'n/a', 'unknown', 'sin especificar',
+                'ÍNDICE ALFABÉTICO DE SOCIEDADES', 'No Detectado'
             ];
             $topProvincesData = $this->companyModel->builder()
                 ->select('registro_mercantil as name, COUNT(id) as total')
@@ -320,6 +331,8 @@ class Directory extends BaseController
                 $name = $p['name'];
                 if (in_array(strtolower($name), ['alicante', 'alacant', 'alicante/alacant'])) {
                     $name = 'ALACANT';
+                } elseif (in_array(mb_strtolower($name, 'UTF-8'), ['araba/álava', 'álava', 'álava-araba', 'araba', 'alava'])) {
+                    $name = 'Araba/Álava';
                 }
                 if (!isset($provincesMap[$name])) {
                     $provincesMap[$name] = ['name' => $name, 'total' => 0];
@@ -333,7 +346,7 @@ class Directory extends BaseController
         }
 
         $totalFormatted = number_format($totalCompanies, 0, ',', '.');
-        $dynamicPrice = round(9 + (($totalCompanies / 1000) * 0.50));
+        $dynamicPrice = round(19 + (($totalCompanies / 1000) * 1.00), 2);
 
         return view('directory/list', [
             'items'     => $companies,

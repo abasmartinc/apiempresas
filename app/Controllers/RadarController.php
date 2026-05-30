@@ -1031,7 +1031,7 @@ class RadarController extends BaseController
 
         $db = \Config\Database::connect();
         $builder = $db->table('companies');
-        $builder->select('id, company_name as name, cif, fecha_constitucion, cnae_label, registro_mercantil, municipality, objeto_social');
+        $builder->select('id, company_name as name, cif, fecha_constitucion, cnae_label, registro_mercantil, municipality, address, objeto_social');
 
         if ($cnae !== '') {
             $builder->where('cnae_code LIKE', $cnae . '%');
@@ -1098,10 +1098,23 @@ class RadarController extends BaseController
 
         $companyIds = array_column($companies, 'id');
         
-        $adminRows = $db->table('company_administrators')
-            ->select('company_id, position, name')
-            ->whereIn('company_id', $companyIds)
-            ->get()->getResultArray();
+        $adminRows = [];
+        $bormeRows = [];
+        $chunks = array_chunk($companyIds, 5000);
+        
+        foreach ($chunks as $chunk) {
+            $chunkAdmin = $db->table('company_administrators')
+                ->select('company_id, position, name')
+                ->whereIn('company_id', $chunk)
+                ->get()->getResultArray();
+            $adminRows = array_merge($adminRows, $chunkAdmin);
+
+            $chunkBorme = $db->table('borme_posts')
+                ->select('company_id, description')
+                ->whereIn('company_id', $chunk)
+                ->get()->getResultArray();
+            $bormeRows = array_merge($bormeRows, $chunkBorme);
+        }
 
         $adminsByCompany = [];
         foreach ($adminRows as $row) {
@@ -1110,9 +1123,31 @@ class RadarController extends BaseController
             $adminsByCompany[$cid][] = $position . ': ' . $row['name'];
         }
 
+        $bormeExtracted = [];
+        foreach ($bormeRows as $row) {
+            $cid = $row['company_id'];
+            $desc = $row['description'] ?? '';
+            
+            if (!isset($bormeExtracted[$cid])) {
+                $bormeExtracted[$cid] = ['capital' => '', 'socio_unico' => ''];
+            }
+            
+            // Extract Capital
+            if (empty($bormeExtracted[$cid]['capital']) && preg_match('/Capital:\s*([\d\.,]+\s*Euros?)/iu', $desc, $matches)) {
+                $bormeExtracted[$cid]['capital'] = trim($matches[1]);
+            }
+            
+            // Extract Socio unico
+            if (empty($bormeExtracted[$cid]['socio_unico']) && preg_match('/Socio único:\s*([^.]+)\./iu', $desc, $matches)) {
+                $bormeExtracted[$cid]['socio_unico'] = trim($matches[1]);
+            }
+        }
+
         foreach ($companies as &$c) {
             $cid = $c['id'];
             $c['administrators'] = isset($adminsByCompany[$cid]) ? implode(' | ', $adminsByCompany[$cid]) : '';
+            $c['capital_social'] = $bormeExtracted[$cid]['capital'] ?? '';
+            $c['socio_unico'] = $bormeExtracted[$cid]['socio_unico'] ?? '';
         }
 
         return $companies;
@@ -1150,12 +1185,15 @@ class RadarController extends BaseController
         echo '<thead><tr>';
         echo '<th style="' . $thStyle . '">Nombre de la Empresa</th>';
         echo '<th style="' . $thStyle . '">CIF</th>';
-        echo '<th style="' . $thStyle . '">Administradores y Cargos</th>';
-        echo '<th style="' . $thStyle . '">Sector CNAE</th>';
-        echo '<th style="' . $thStyle . '">Provincia</th>';
+        echo '<th style="' . $thStyle . '">Dirección</th>';
         echo '<th style="' . $thStyle . '">Municipio</th>';
-        echo '<th style="' . $thStyle . '">Fecha Registro</th>';
+        echo '<th style="' . $thStyle . '">Provincia</th>';
+        echo '<th style="' . $thStyle . '">Sector CNAE</th>';
         echo '<th style="' . $thStyle . '">Objeto Social</th>';
+        echo '<th style="' . $thStyle . '">Fecha Registro</th>';
+        echo '<th style="' . $thStyle . '">Administradores y Cargos</th>';
+        echo '<th style="' . $thStyle . '">Socio Único</th>';
+        echo '<th style="' . $thStyle . '">Capital Social</th>';
         echo '</tr></thead><tbody>';
 
         foreach ($companies as $company) {
@@ -1166,12 +1204,15 @@ class RadarController extends BaseController
             echo '<tr>';
             echo '<td style="' . $tdStyle . '">' . esc($company['name'] ?? '') . '</td>';
             echo '<td style="' . $textStyle . '">' . esc($company['cif'] ?? '') . '</td>';
-            echo '<td style="' . $tdStyle . '">' . esc($company['administrators'] ?? '') . '</td>';
-            echo '<td style="' . $tdStyle . '">' . esc($company['cnae_label'] ?? '') . '</td>';
-            echo '<td style="' . $tdStyle . '">' . esc($company['registro_mercantil'] ?? '') . '</td>';
+            echo '<td style="' . $tdStyle . '">' . esc($company['address'] ?? '') . '</td>';
             echo '<td style="' . $tdStyle . '">' . esc($company['municipality'] ?? $company['municipio'] ?? '') . '</td>';
-            echo '<td style="' . $tdStyle . '">' . $cleanDate . '</td>';
+            echo '<td style="' . $tdStyle . '">' . esc($company['registro_mercantil'] ?? '') . '</td>';
+            echo '<td style="' . $tdStyle . '">' . esc($company['cnae_label'] ?? '') . '</td>';
             echo '<td style="' . $tdStyle . '">' . esc($company['objeto_social'] ?? '') . '</td>';
+            echo '<td style="' . $tdStyle . '">' . $cleanDate . '</td>';
+            echo '<td style="' . $tdStyle . '">' . esc($company['administrators'] ?? '') . '</td>';
+            echo '<td style="' . $tdStyle . '">' . esc($company['socio_unico'] ?? '') . '</td>';
+            echo '<td style="' . $tdStyle . '">' . esc($company['capital_social'] ?? '') . '</td>';
             echo '</tr>';
         }
         

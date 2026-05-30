@@ -188,9 +188,12 @@
                             <?php foreach ([
                                 'CIF / NIF',
                                 'Razón Social',
+                                'Dirección',
                                 'Sector CNAE',
                                 'Provincia',
                                 'Fecha de constitución',
+                                'Capital Social',
+                                'Socio Único',
                                 'Forma jurídica',
                             ] as $field): ?>
                             <div class="col-item">

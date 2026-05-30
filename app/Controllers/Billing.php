@@ -295,7 +295,7 @@ class Billing extends BaseController
                         }
                     }
                     $count = $builder->countAllResults();
-                    $amount = round(9 + (($count / 1000) * 0.50), 2);
+                    $amount = round(19 + (($count / 1000) * 1.00), 2);
                 }
 
                 session()->set('checkout_context', [
@@ -565,7 +565,7 @@ class Billing extends BaseController
         }
 
         // Dynamic pricing: 9€ base + 0.50€ per 1,000 records
-        $price = round(9 + (($totalCount / 1000) * 0.50), 2);
+        $price = round(19 + (($totalCount / 1000) * 1.00), 2);
         $tax   = round($price * 0.21, 2);
 
         return view('billing/directory_order_summary', [
