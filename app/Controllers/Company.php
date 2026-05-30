@@ -112,7 +112,9 @@ class Company extends BaseController
 
         $cnaeUrl = '';
         if ($cnaeCode) {
-             $cnaeUrl = site_url('directorio/cnae/' . $cnaeCode);
+             helper('text');
+             $cnaeSlug = url_title($company['cnae_label'] ?? "CNAE {$cnaeCode}", '-', true);
+             $cnaeUrl = site_url('directorio/cnae/' . $cnaeCode . '/' . $cnaeSlug);
         }
 
         $provinceCnaeUrl = '';
@@ -242,7 +244,7 @@ class Company extends BaseController
         $radarCheckoutUrl = site_url("checkout/radar-export?type=single&provincia={$provUrlParam}&cnae={$cnaeUrlParam}&sector={$sectorUrlParam}");
         
         helper('pricing');
-        $pricing = calculate_radar_price($listCount);
+        $pricing = calculate_directory_price($listCount);
         $priceStr = number_format($pricing['base_price'], 0, ',', '.');
         $countFormatted = number_format($listCount, 0, ',', '.');
 

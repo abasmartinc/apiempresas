@@ -49,3 +49,20 @@ if (!function_exists('calculate_radar_price')) {
         ];
     }
 }
+
+if (!function_exists('calculate_directory_price')) {
+    /**
+     * Calcula el precio dinámico para listas de directorios
+     */
+    function calculate_directory_price(int $count): array
+    {
+        $basePrice = round(19 + (($count / 1000) * 1.00), 2);
+        $tax = round($basePrice * 0.21, 2);
+
+        return [
+            'base_price' => $basePrice,
+            'tax'        => $tax,
+            'total'      => $basePrice + $tax
+        ];
+    }
+}

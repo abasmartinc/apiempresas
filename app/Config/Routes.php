@@ -339,8 +339,10 @@ $routes->get('empresas-(:any)-en-(:any)', 'RadarController::sectorProvince/$1/$2
 $routes->get('directorio', 'Directory::index');
 $routes->get('directorio/provincia/(:any)', 'Directory::province/$1');
 $routes->get('directorio/provincia/(:any)/(:num)', 'Directory::province/$1/$2');
-$routes->get('directorio/cnae/(:any)', 'Directory::cnae/$1');
-$routes->get('directorio/cnae/(:any)/(:num)', 'Directory::cnae/$1/$2');
+$routes->get('directorio/cnae/(:segment)', 'Directory::cnae/$1');
+$routes->get('directorio/cnae/(:segment)/(:num)', 'Directory::cnae/$1/$2');
+$routes->get('directorio/cnae/(:segment)/(:segment)', 'Directory::cnae/$1/$2');
+$routes->get('directorio/cnae/(:segment)/(:segment)/(:num)', 'Directory::cnae/$1/$2/$3');
 $routes->addRedirect('directorio/ultimas-empresas-registradas', 'empresas-nuevas', 301);
 $routes->addRedirect('directorio/ultimas-empresas-registradas/(:num)', 'empresas-nuevas', 301);
 $routes->get('directorio/provincia/(:any)/cnae/(:any)', 'Directory::provinceCnae/$1/$2');

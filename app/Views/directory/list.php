@@ -535,7 +535,11 @@
             <div style="margin-left: auto; text-align: right;">
                 <a href="<?= $checkoutUrl ?>" style="display: inline-flex; align-items: center; gap: 8px; background: #10b981; color: #fff; padding: 12px 24px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; text-decoration: none; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25); transition: all 0.2s; margin-bottom: 8px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 25px rgba(16, 185, 129, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(16, 185, 129, 0.25)';">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Descargar Excel (<?= esc($province_name ?? 'España') ?>) — <?= esc($dynamic_price ?? '9') ?>€
+                    <?php if (isset($cnae_code)): ?>
+                        Descargar Excel — <?= esc($dynamic_price ?? '9') ?>€
+                    <?php else: ?>
+                        Descargar Excel (<?= esc($province_name ?? 'España') ?>) — <?= esc($dynamic_price ?? '9') ?>€
+                    <?php endif; ?>
                 </a>
                 <div style="font-size: 0.75rem; color: #94a3b8; max-width: 280px; margin-left: auto;">
                     Incluye: CIF, Razón social, Dirección, CNAE, Provincia, Fecha constitución, Capital Social, Socio Único y Cargos. <strong style="color: #64748b; font-weight: 600;">(No incluye email ni teléfono)</strong>.
@@ -691,7 +695,9 @@
                 <?php foreach($cross_links['items'] as $cl): ?>
                     <?php 
                         if($cross_links['type'] === 'cnae') {
-                            $clUrl  = site_url('directorio/cnae/' . $cl['code']);
+                            helper('text');
+                            $cnaeSlug = url_title($cl['label'] ?: "CNAE {$cl['code']}", '-', true);
+                            $clUrl  = site_url('directorio/cnae/' . $cl['code'] . '/' . $cnaeSlug);
                             $clName = $cl['label'] ?: "CNAE {$cl['code']}";
                         } else {
                             $clUrl  = site_url('directorio/provincia/' . urlencode($cl['name']));

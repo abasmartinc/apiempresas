@@ -111,7 +111,9 @@ class Directory extends BaseController
         $totalFormatted = number_format($totalAll, 0, ',', '.');
         $numProvinces   = count($data['provinces']);
 
-        $dynamicPrice = round(19 + (($totalAll / 1000) * 1.00), 2);
+        helper('pricing');
+        $priceData = calculate_directory_price($totalAll);
+        $dynamicPrice = $priceData['base_price'];
 
         return view('directory/index', [
             'provinces'        => $data['provinces'],
@@ -218,7 +220,9 @@ class Directory extends BaseController
         }
 
         $totalFormatted = number_format($totalCompanies, 0, ',', '.');
-        $dynamicPrice = round(19 + (($totalCompanies / 1000) * 1.00), 2);
+        helper('pricing');
+        $priceData = calculate_directory_price($totalCompanies);
+        $dynamicPrice = $priceData['base_price'];
 
         return view('directory/list', [
             'items'           => $companies,
@@ -248,15 +252,68 @@ class Directory extends BaseController
         ]);
     }
 
-    public function cnae($cnaeCode, $page = 1)
+    public function cnae(...$args)
     {
-        $page = (int)$page;
+        if (empty($args)) {
+            return redirect()->to(site_url('directorio'));
+        }
+
+        $cnaeCode = $args[0];
+        $slug = null;
+        $page = 1;
+
+        if (count($args) === 1) {
+            // URL: /directorio/cnae/6920
+        } elseif (count($args) === 2) {
+            if (is_numeric($args[1])) {
+                $page = (int)$args[1];
+            } else {
+                $slug = $args[1];
+            }
+        } elseif (count($args) >= 3) {
+            $slug = $args[1];
+            $page = (int)$args[2];
+        }
+
         if ($page < 1) $page = 1;
         $perPage = 100;
         $offset = ($page - 1) * $perPage;
 
-        $countKey = 'cnae_total_v3_' . $cnaeCode;
+        // Get the most frequent CNAE label early to validate the slug
         $cache = \Config\Services::cache();
+        $labelKey = 'cnae_label_v3_' . $cnaeCode;
+        $cnaeLabel = $cache->get($labelKey);
+        if (!$cnaeLabel) {
+            $labelRow = $this->companyModel->builder()
+                ->select('cnae_label, COUNT(*) as count')
+                ->where('cnae_code', $cnaeCode)
+                ->where('cnae_label !=', '')
+                ->groupBy('cnae_label')
+                ->orderBy('count', 'DESC')
+                ->limit(1)
+                ->get()
+                ->getRowArray();
+            $cnaeLabel = $labelRow['cnae_label'] ?? "CNAE {$cnaeCode}";
+            // Clean up typical garbage
+            if (strlen($cnaeLabel) > 100) {
+                $cnaeLabel = substr($cnaeLabel, 0, 100) . '...';
+            }
+            $cache->save($labelKey, $cnaeLabel, 1296000); // 15 days
+        }
+
+        helper('text');
+        $correctSlug = url_title($cnaeLabel, '-', true);
+
+        // Redirect if slug is missing or incorrect
+        if ($slug !== $correctSlug) {
+            $redirectUrl = "directorio/cnae/{$cnaeCode}/{$correctSlug}";
+            if ($page > 1) {
+                $redirectUrl .= "/{$page}";
+            }
+            return redirect()->to(site_url($redirectUrl), 301);
+        }
+
+        $countKey = 'cnae_total_v3_' . $cnaeCode;
         $totalCompanies = $cache->get($countKey);
         
         if ($totalCompanies === null) {
@@ -278,30 +335,9 @@ class Directory extends BaseController
 
         if (empty($companies)) {
              if ($page > 1) {
-                 return redirect()->to(site_url("directorio/cnae/{$cnaeCode}"));
+                 return redirect()->to(site_url("directorio/cnae/{$cnaeCode}/{$correctSlug}"));
              }
              return redirect()->to(site_url('directorio'));
-        }
-
-        // Get the most frequent CNAE label to avoid dirty data from random first alphabetical company
-        $labelKey = 'cnae_label_v3_' . $cnaeCode;
-        $cnaeLabel = $cache->get($labelKey);
-        if (!$cnaeLabel) {
-            $labelRow = $this->companyModel->builder()
-                ->select('cnae_label, COUNT(*) as count')
-                ->where('cnae_code', $cnaeCode)
-                ->where('cnae_label !=', '')
-                ->groupBy('cnae_label')
-                ->orderBy('count', 'DESC')
-                ->limit(1)
-                ->get()
-                ->getRowArray();
-            $cnaeLabel = $labelRow['cnae_label'] ?? "CNAE {$cnaeCode}";
-            // Clean up typical garbage
-            if (strlen($cnaeLabel) > 100) {
-                $cnaeLabel = substr($cnaeLabel, 0, 100) . '...';
-            }
-            $cache->save($labelKey, $cnaeLabel, 1296000); // 15 days
         }
 
         // Cross-pollination: Provinces for this CNAE
@@ -346,7 +382,9 @@ class Directory extends BaseController
         }
 
         $totalFormatted = number_format($totalCompanies, 0, ',', '.');
-        $dynamicPrice = round(19 + (($totalCompanies / 1000) * 1.00), 2);
+        helper('pricing');
+        $priceData = calculate_directory_price($totalCompanies);
+        $dynamicPrice = $priceData['base_price'];
 
         return view('directory/list', [
             'items'     => $companies,
@@ -369,9 +407,9 @@ class Directory extends BaseController
             'pagination' => [
                 'current' => $page,
                 'total'   => $totalPages,
-                'next'    => ($page < $totalPages) ? site_url("directorio/cnae/{$cnaeCode}/" . ($page + 1)) : null,
-                'prev'    => ($page > 1) ? site_url("directorio/cnae/{$cnaeCode}/" . ($page - 1)) : null,
-                'base'    => site_url("directorio/cnae/{$cnaeCode}")
+                'next'    => ($page < $totalPages) ? site_url("directorio/cnae/{$cnaeCode}/{$correctSlug}/" . ($page + 1)) : null,
+                'prev'    => ($page > 1) ? site_url("directorio/cnae/{$cnaeCode}/{$correctSlug}/" . ($page - 1)) : null,
+                'base'    => site_url("directorio/cnae/{$cnaeCode}/{$correctSlug}")
             ]
         ]);
     }

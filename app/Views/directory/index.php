@@ -350,7 +350,11 @@
                         ?>
                         <tr class="cnae-row <?= $collapsedClass ?>" data-name="<?= esc($label) ?>" style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
                             <td style="padding: 1rem 1.5rem;">
-                                <a href="<?= site_url('directorio/cnae/' . $cnae['cnae']) ?>" style="font-weight: 700; color: #0f172a; text-decoration: none; display: inline-flex; align-items: center; gap: 10px;" title="<?= esc($cnae['name']) ?>">
+                                <?php 
+                                    helper('text');
+                                    $cnaeSlug = url_title($cnae['name'], '-', true);
+                                ?>
+                                <a href="<?= site_url('directorio/cnae/' . $cnae['cnae'] . '/' . $cnaeSlug) ?>" style="font-weight: 700; color: #0f172a; text-decoration: none; display: inline-flex; align-items: center; gap: 10px;" title="<?= esc($cnae['name']) ?>">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
                                     <span style="display: inline-block; max-width: 450px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                         <?= esc($label) ?>
@@ -366,7 +370,11 @@
                                 </div>
                             </td>
                             <td style="padding: 1rem 1.5rem; text-align: right; white-space: nowrap;">
-                                <a href="<?= site_url('directorio/cnae/' . $cnae['cnae']) ?>" style="color: #10b981; font-weight: 700; text-decoration: none; font-size: 0.85rem; border: 1px solid #d1fae5; padding: 6px 16px; border-radius: 99px; background: #fff; transition: all 0.2s; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;" onmouseover="this.style.background='#10b981'; this.style.color='#fff'; this.style.borderColor='#10b981';" onmouseout="this.style.background='#fff'; this.style.color='#10b981'; this.style.borderColor='#d1fae5';">
+                                <?php 
+                                    helper('text');
+                                    $cnaeSlug = url_title($cnae['name'], '-', true);
+                                ?>
+                                <a href="<?= site_url('directorio/cnae/' . $cnae['cnae'] . '/' . $cnaeSlug) ?>" style="color: #10b981; font-weight: 700; text-decoration: none; font-size: 0.85rem; border: 1px solid #d1fae5; padding: 6px 16px; border-radius: 99px; background: #fff; transition: all 0.2s; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;" onmouseover="this.style.background='#10b981'; this.style.color='#fff'; this.style.borderColor='#10b981';" onmouseout="this.style.background='#fff'; this.style.color='#10b981'; this.style.borderColor='#d1fae5';">
                                     Ver sector
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-left: 2px;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                                 </a>

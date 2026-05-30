@@ -192,13 +192,22 @@ class Sitemap extends Controller
             ->get()
             ->getResultArray();
 
-        // CNAEs principales
         $cnaes = $model->builder()
             ->select('cnae_code as code')
             ->where('cnae_code IS NOT NULL')
             ->groupBy('cnae_code')
             ->get()
             ->getResultArray();
+
+        $db = \Config\Database::connect();
+        $cnaeLabels = $db->table('cnae_2009_2025')
+            ->select('cnae_2009 as cnae, label_2009 as label')
+            ->get()
+            ->getResultArray();
+        $cnaeMap = [];
+        foreach ($cnaeLabels as $row) {
+            $cnaeMap[$row['cnae']] = $row['label'];
+        }
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
@@ -213,9 +222,12 @@ class Sitemap extends Controller
             $xml .= '</url>';
         }
 
+        helper('text');
         foreach ($cnaes as $c) {
+            $label = $cnaeMap[$c['code']] ?? "CNAE {$c['code']}";
+            $slug = url_title($label, '-', true);
             $xml .= '<url>';
-            $xml .= '<loc>' . site_url('directorio/cnae/' . $c['code']) . '</loc>';
+            $xml .= '<loc>' . site_url('directorio/cnae/' . $c['code'] . '/' . $slug) . '</loc>';
             $xml .= '<changefreq>weekly</changefreq><priority>0.8</priority>';
             $xml .= '</url>';
         }
