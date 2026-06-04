@@ -35,6 +35,7 @@ class UserModel extends Model
         'migration_notice_shown',
         'migration_reset_done',
         'unsuscribe',
+        'wizard_completed',
     ];
 
     protected $useTimestamps = false;

@@ -43,6 +43,7 @@ $routes->get('auth/linkedin/callback', 'LinkedinAuth::callback');
 $routes->get('dashboard', 'Dashboard::index');
 // $routes->get('empresas-nuevas', 'NewCompanies::index'); // Deprecated route interfering with SeoController::newRadarHub (line 194)
 $routes->get('dashboard/kpis', 'Dashboard::kpis_ajax');
+$routes->post('dashboard/complete-wizard', 'Dashboard::completeWizard');
 $routes->get('dashboard/test-sample', 'Api\V1\DashboardTestApi::getSample');
 $routes->get('search_company', 'Search::search_company');
 $routes->post('search_company', 'Search::search_company_post');

@@ -43,6 +43,10 @@ class Dashboard extends BaseController
             $userModel->update($userId, ['migration_notice_shown' => 1]);
         }
 
+        // Determinar si hay que mostrar el wizard de onboarding
+        $data['show_wizard'] = ((int)($user->wizard_completed ?? 0) === 0);
+
+
         // Allow admins to view the client dashboard with ?view=client
         if (($user->is_admin ?? false) && $this->request->getGet('view') !== 'client') {
             $data['title'] = 'Panel de Administración';
@@ -265,6 +269,21 @@ class Dashboard extends BaseController
         ]);
 
         return redirect()->to(site_url('admin/users'))->with('message', 'Has vuelto a tu cuenta de administrador.');
+    }
+
+    /**
+     * Completa el onboarding wizard vía AJAX
+     */
+    public function completeWizard()
+    {
+        if (!session('logged_in')) {
+            return $this->response->setJSON(['error' => 'No autorizado'])->setStatusCode(401);
+        }
+
+        $userId = session('user_id');
+        $this->userModel->update($userId, ['wizard_completed' => 1]);
+
+        return $this->response->setJSON(['success' => true]);
     }
 }
 
