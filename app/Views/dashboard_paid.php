@@ -157,7 +157,6 @@
 </head>
 
 <body>
-<div class="bg-halo" aria-hidden="true"></div>
 
 <div class="auth-wrapper">
     <?=view('partials/header_inner') ?>
@@ -519,7 +518,13 @@
         async function validateCompany() {
             const q = inputQ.value.trim();
             if(!q) {
-                alert('Introduce un CIF o nombre.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campo vacío',
+                    text: 'Por favor, introduce un CIF o nombre de empresa para buscar.',
+                    confirmButtonColor: '#2152ff',
+                    confirmButtonText: 'Entendido'
+                });
                 return;
             }
 
@@ -541,6 +546,12 @@
 
                     ahaCard.style.display = 'block';
                     ahaCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Remove internal AI fields from JSON view
+                    if (data.data) {
+                        delete data.data.ai_seo_text;
+                        delete data.data.ai_faqs;
+                    }
                     
                     // Store for JSON view
                     window.lastAhaResult = data;

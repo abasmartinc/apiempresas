@@ -168,7 +168,6 @@
 </head>
 
 <body>
-<div class="bg-halo" aria-hidden="true"></div>
 
 <div class="auth-wrapper">
     <?=view('partials/header_inner') ?>
@@ -490,7 +489,7 @@
                     </section>
 
                     <!-- PASO 3: INTEGRACIÓN -->
-                    <section class="activation-main-card" style="margin-top: 32px; position: relative; <?= $requestsUsedThisMonth > 0 ? '' : 'opacity: 0.6; pointer-events: none;' ?>">
+                    <section id="section-paso3" class="activation-main-card" style="margin-top: 32px; position: relative; <?= $requestsUsedThisMonth > 0 ? '' : 'opacity: 0.6; pointer-events: none;' ?>">
                         <div style="position: absolute; top: -14px; left: 32px; background: <?= $requestsUsedThisMonth > 0 ? '#2152ff' : '#94a3b8' ?>; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Paso 3</div>
                         <div style="margin-top: 10px;">
                             <h2 style="font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 0 0 8px !important;">Integra en tu sistema</h2>
@@ -499,13 +498,14 @@
                             </p>
                             
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <div style="display: flex; gap: 8px;" id="snippetTabs">
+                                <div style="display: flex; gap: 8px; overflow-x: auto;" id="snippetTabs">
                                     <button class="snippet-tab active" data-target="curl">cURL</button>
                                     <button class="snippet-tab" data-target="php">PHP</button>
                                     <button class="snippet-tab" data-target="node">Node.js</button>
                                     <button class="snippet-tab" data-target="python">Python</button>
+                                    <button class="snippet-tab" data-target="postman">Postman</button>
                                 </div>
-                                <button id="btnCopySnippet" style="background: none; border: none; color: #2152ff; font-weight: 800; font-size: 0.7rem; cursor: pointer;">Copiar código</button>
+                                <button id="btnCopySnippet" style="background: none; border: none; color: #2152ff; font-weight: 800; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">Copiar código</button>
                             </div>
                             
                             <style>
@@ -517,7 +517,7 @@
                             </style>
 
                             <div id="snippet-curl" class="snippet-code active"><span style="color: #94a3b8;">curl -X GET</span> "<?= site_url('api/v1/companies') ?>?cif=A15075062" \
-  -H <span style="color: #12b48a;">"X-API-KEY: <span class="snippet-key-placeholder">••••••••••••••••</span>"</span></div>
+  -H <span style="color: #12b48a;">"X-API-KEY: <?= htmlspecialchars($api_key->api_key ?? 'TU_API_KEY') ?>"</span></div>
                             
                             <div id="snippet-php" class="snippet-code"><span style="color: #94a3b8;">&lt;?php</span>
 $curl = curl_init();
@@ -525,7 +525,7 @@ curl_setopt_array($curl, array(
   CURLOPT_URL => '<span style="color: #12b48a;"><?= site_url('api/v1/companies') ?>?cif=A15075062</span>',
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_HTTPHEADER => array(
-    <span style="color: #12b48a;">"X-API-KEY: <span class="snippet-key-placeholder">••••••••••••••••</span>"</span>
+    <span style="color: #12b48a;">"X-API-KEY: <?= htmlspecialchars($api_key->api_key ?? 'TU_API_KEY') ?>"</span>
   ),
 ));
 $response = curl_exec($curl);
@@ -536,7 +536,7 @@ print_r($data);</div>
 
 fetch(<span style="color: #12b48a;">'<?= site_url('api/v1/companies') ?>?cif=A15075062'</span>, {
   headers: {
-    <span style="color: #12b48a;">'X-API-KEY'</span>: <span style="color: #12b48a;">'<span class="snippet-key-placeholder">••••••••••••••••</span>'</span>
+    <span style="color: #12b48a;">'X-API-KEY'</span>: <span style="color: #12b48a;">'<?= htmlspecialchars($api_key->api_key ?? 'TU_API_KEY') ?>'</span>
   }
 })
 .then(res => res.json())
@@ -546,11 +546,22 @@ fetch(<span style="color: #12b48a;">'<?= site_url('api/v1/companies') ?>?cif=A15
 
 url = <span style="color: #12b48a;">"<?= site_url('api/v1/companies') ?>?cif=A15075062"</span>
 headers = {
-    <span style="color: #12b48a;">"X-API-KEY"</span>: <span style="color: #12b48a;">"<span class="snippet-key-placeholder">••••••••••••••••</span>"</span>
+    <span style="color: #12b48a;">"X-API-KEY"</span>: <span style="color: #12b48a;">"<?= htmlspecialchars($api_key->api_key ?? 'TU_API_KEY') ?>"</span>
 }
 
 response = requests.get(url, headers=headers)
 print(response.json())</div>
+
+                            <div id="snippet-postman" class="snippet-code" style="text-align: center; padding: 32px 20px; white-space: normal;">
+                                <h3 style="font-size: 1.25rem; font-weight: 900; color: white; margin-bottom: 12px;">Colección Oficial de Postman</h3>
+                                <p style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 24px; max-width: 450px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+                                    Descarga nuestra colección pre-configurada para probar todos los endpoints cómodamente desde la aplicación de Postman.
+                                </p>
+                                <a href="<?= base_url('public/docs/apiempresas_postman.json') ?>" download style="display: inline-flex; align-items: center; gap: 8px; background: #ff6c37; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 800; font-size: 1rem; text-decoration: none; box-shadow: 0 4px 6px -1px rgba(255, 108, 55, 0.3);">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    Descargar Colección
+                                </a>
+                            </div>
                         </div>
                         <script>
                             document.querySelectorAll('.snippet-tab').forEach(tab => {
@@ -559,16 +570,18 @@ print(response.json())</div>
                                     document.querySelectorAll('.snippet-code').forEach(c => c.classList.remove('active'));
                                     tab.classList.add('active');
                                     document.getElementById('snippet-' + tab.dataset.target).classList.add('active');
+                                    
+                                    if(tab.dataset.target === 'postman') {
+                                        document.getElementById('btnCopySnippet').style.display = 'none';
+                                    } else {
+                                        document.getElementById('btnCopySnippet').style.display = 'flex';
+                                    }
                                 });
                             });
 
                             document.getElementById('btnCopySnippet').addEventListener('click', () => {
                                 const activeSnippet = document.querySelector('.snippet-code.active');
                                 let code = activeSnippet.innerText || activeSnippet.textContent;
-                                const key = document.getElementById('apiKeyBox').getAttribute('data-api-key');
-                                if (key) {
-                                    code = code.replace(/••••••••••••••••/g, key);
-                                }
                                 navigator.clipboard.writeText(code);
                                 if (window.trackEvent) trackEvent('snippet_copied', { type: document.querySelector('.snippet-tab.active').dataset.target });
                                 Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Código copiado', showConfirmButton: false, timer: 1500 });
@@ -699,7 +712,13 @@ print(response.json())</div>
         async function validateCompany() {
             const q = inputQ.value.trim();
             if(!q) {
-                alert('Introduce un CIF o nombre.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campo vacío',
+                    text: 'Por favor, introduce un CIF o nombre de empresa para buscar.',
+                    confirmButtonColor: '#2152ff',
+                    confirmButtonText: 'Entendido'
+                });
                 return;
             }
 
@@ -730,6 +749,12 @@ print(response.json())</div>
                     
                     ahaCard.style.display = 'block';
                     
+                    // Remove internal AI fields from JSON view
+                    if (data.data) {
+                        delete data.data.ai_seo_text;
+                        delete data.data.ai_faqs;
+                    }
+                    
                     // Update Inline JSON
                     const jsonContainer = document.getElementById('inlineJsonContainer');
                     const jsonPre = document.getElementById('inlineJsonPre');
@@ -743,9 +768,33 @@ print(response.json())</div>
                     // Store for JSON view
                     window.lastAhaResult = data;
 
-                    // If it was the first request, refresh to show API Key section fully active
+                    // If it was the first request, visually activate the API Key section instead of reloading
                     <?php if ($requestsUsedThisMonth == 0): ?>
-                    setTimeout(() => { window.location.reload(); }, 3000);
+                    const sectionApiKey = document.getElementById('section-api-key');
+                    if (sectionApiKey) {
+                        sectionApiKey.style.opacity = '1';
+                        sectionApiKey.style.borderColor = '#2152ff';
+                        sectionApiKey.style.boxShadow = '0 10px 15px -3px rgba(33, 82, 255, 0.1)';
+                        const paso2Badge = sectionApiKey.querySelector('div');
+                        if (paso2Badge) paso2Badge.style.background = '#2152ff';
+                        
+                        const pDesc = sectionApiKey.querySelector('p');
+                        if (pDesc) pDesc.textContent = 'Usa tu clave para conectar tu sistema.';
+                        
+                        const btnCopyKey = document.getElementById('btnCopyKey');
+                        if (btnCopyKey) {
+                            btnCopyKey.style.background = '';
+                            btnCopyKey.style.borderColor = '';
+                        }
+                    }
+                    
+                    const sectionPaso3 = document.getElementById('section-paso3');
+                    if (sectionPaso3) {
+                        sectionPaso3.style.opacity = '1';
+                        sectionPaso3.style.pointerEvents = 'auto';
+                        const paso3Badge = sectionPaso3.querySelector('div');
+                        if (paso3Badge) paso3Badge.style.background = '#2152ff';
+                    }
                     <?php endif; ?>
                 } else {
                     alert(data.message || 'No se encontró la empresa.');
