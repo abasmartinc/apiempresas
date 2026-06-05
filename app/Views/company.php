@@ -289,6 +289,21 @@
                         ]
                     ]
                 ];
+
+                if (isset($ratingCount) && $ratingCount > 0) {
+                    foreach ($schemaOrg['@graph'] as &$node) {
+                        if ($node && in_array($node['@type'], ['Organization', 'LocalBusiness'])) {
+                            $node['aggregateRating'] = [
+                                "@type" => "AggregateRating",
+                                "ratingValue" => round($ratingAvg, 1),
+                                "ratingCount" => $ratingCount,
+                                "bestRating" => "5",
+                                "worstRating" => "1"
+                            ];
+                        }
+                    }
+                    unset($node);
+                }
                 ?>
                 <article class="company-card">
                     <header class="company-card__header">
@@ -441,6 +456,134 @@
 
 
                 </article>
+
+                <!-- WIDGET DE VALORACIÓN SEO -->
+                <div id="company-rating-widget" style="margin: 2rem 0; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; text-align: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                    <h3 style="font-size: 1.2rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">¿Te ha sido útil esta información?</h3>
+                    <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 1rem;">Valora la ficha de <?= esc($companyName) ?></p>
+                    
+                    <div class="rating-stars" style="display: flex; justify-content: center; gap: 8px; margin-bottom: 1rem; cursor: pointer;">
+                        <?php for($i=1; $i<=5; $i++): ?>
+                            <svg class="star-icon" data-value="<?= $i ?>" width="32" height="32" viewBox="0 0 24 24" fill="<?= ($i <= round($ratingAvg ?? 0)) ? '#fbbf24' : 'none' ?>" stroke="<?= ($i <= round($ratingAvg ?? 0)) ? '#fbbf24' : '#cbd5e1' ?>" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: all 0.2s;">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        <?php endfor; ?>
+                    </div>
+
+                    <div id="rating-stats-display" style="font-size: 0.9rem; color: #475569; font-weight: 600;">
+                        <?php if(isset($ratingCount) && $ratingCount > 0): ?>
+                            Puntuación media: <span id="avg-rating-val" style="color: #0f172a;"><?= number_format($ratingAvg, 1) ?></span>/5 (<span id="count-rating-val"><?= $ratingCount ?></span> votos)
+                        <?php else: ?>
+                            Sé el primero en valorar esta empresa.
+                        <?php endif; ?>
+                    </div>
+                    <div id="rating-message" style="margin-top: 10px; font-size: 0.9rem; font-weight: 600; display: none;"></div>
+                </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const stars = document.querySelectorAll('.star-icon');
+                        const widget = document.getElementById('company-rating-widget');
+                        const msgDiv = document.getElementById('rating-message');
+                        const avgSpan = document.getElementById('avg-rating-val');
+                        const countSpan = document.getElementById('count-rating-val');
+                        let hasVoted = false;
+
+                        // Hover effects
+                        stars.forEach(star => {
+                            star.addEventListener('mouseenter', function() {
+                                if(hasVoted) return;
+                                const val = this.getAttribute('data-value');
+                                stars.forEach(s => {
+                                    if(s.getAttribute('data-value') <= val) {
+                                        s.style.fill = '#fcd34d'; // hover color
+                                        s.style.stroke = '#fcd34d';
+                                    } else {
+                                        s.style.fill = 'none';
+                                        s.style.stroke = '#cbd5e1';
+                                    }
+                                });
+                            });
+
+                            star.addEventListener('mouseleave', function() {
+                                if(hasVoted) return;
+                                // Reset to initial state based on PHP data is hard without keeping it in JS, 
+                                // so we just clear hover effect unless we already voted
+                                const currentAvg = <?= round($ratingAvg ?? 0) ?>;
+                                stars.forEach(s => {
+                                    if(s.getAttribute('data-value') <= currentAvg) {
+                                        s.style.fill = '#fbbf24';
+                                        s.style.stroke = '#fbbf24';
+                                    } else {
+                                        s.style.fill = 'none';
+                                        s.style.stroke = '#cbd5e1';
+                                    }
+                                });
+                            });
+
+                            star.addEventListener('click', function() {
+                                if(hasVoted) return;
+                                const val = this.getAttribute('data-value');
+                                const companyId = <?= (int)($company['id'] ?? 0) ?>;
+                                
+                                // Lock UI
+                                hasVoted = true;
+                                stars.forEach(s => s.style.cursor = 'default');
+
+                                // Send AJAX
+                                fetch('<?= site_url('company/rate') ?>', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded',
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    },
+                                    body: new URLSearchParams({
+                                        'company_id': companyId,
+                                        'rating': val,
+                                        '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    msgDiv.style.display = 'block';
+                                    if(data.status === 'success') {
+                                        msgDiv.style.color = '#16a34a';
+                                        msgDiv.innerText = data.message;
+                                        
+                                        // Update stars visually to the given vote
+                                        stars.forEach(s => {
+                                            if(s.getAttribute('data-value') <= val) {
+                                                s.style.fill = '#fbbf24';
+                                                s.style.stroke = '#fbbf24';
+                                            } else {
+                                                s.style.fill = 'none';
+                                                s.style.stroke = '#cbd5e1';
+                                            }
+                                        });
+
+                                        // Update text
+                                        let statsDisplay = document.getElementById('rating-stats-display');
+                                        statsDisplay.innerHTML = `Puntuación media: <span id="avg-rating-val" style="color: #0f172a;">${data.new_avg}</span>/5 (<span id="count-rating-val">${data.new_count}</span> votos)`;
+
+                                    } else {
+                                        msgDiv.style.color = '#dc2626';
+                                        msgDiv.innerText = data.message || 'Error al procesar la valoración';
+                                        // Re-enable voting if it wasn't a "already voted" error
+                                        if (data.message !== 'Ya has valorado esta empresa anteriormente') {
+                                            hasVoted = false;
+                                        }
+                                    }
+                                })
+                                .catch(err => {
+                                    msgDiv.style.display = 'block';
+                                    msgDiv.style.color = '#dc2626';
+                                    msgDiv.innerText = 'Error de conexión';
+                                    hasVoted = false;
+                                });
+                            });
+                        });
+                    });
+                </script>
 
                 <?php if (!session('logged_in')): ?>
                 <div style="margin: 2rem 0; background: #e0e7ff; border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;">

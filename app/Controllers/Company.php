@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\CompanyModel;
 use App\Models\BormePostsModel;
 use App\Models\CompanyAdministratorModel;
+use App\Models\CompanyRatingModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -254,6 +255,9 @@ class Company extends BaseController
             $desc = character_limiter($cleanDesc, 155, '...');
         }
 
+        $ratingModel = new \App\Models\CompanyRatingModel();
+        $ratingStats = $ratingModel->getRatingStats((int)$company['id']);
+
         return [
             'company'          => $company,
             'statusRaw'        => $statusRaw,
@@ -262,6 +266,8 @@ class Company extends BaseController
             'title'            => $title,
             'meta_description' => $desc,
             'robots'           => $robots,
+            'ratingAvg'        => $ratingStats['avg'],
+            'ratingCount'      => $ratingStats['count'],
             'related'          => $related,
             'bormePosts'       => $this->bormePostsModel->getByCompanyId((int)$company['id']),
             'administrators'   => $filteredAdmins,
@@ -515,5 +521,45 @@ class Company extends BaseController
                               ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
                               ->setHeader('X-Robots-Tag', 'noindex, nofollow')
                               ->setBody($dompdf->output());
+    }
+
+    /**
+     * Endpoint AJAX para guardar la valoración de una empresa
+     */
+    public function submitRating()
+    {
+        $request = service('request');
+        if (!$request->isAJAX()) {
+            return $this->response->setStatusCode(403)->setJSON(['status' => 'error', 'message' => 'Acceso denegado']);
+        }
+
+        $companyId = (int)$request->getPost('company_id');
+        $rating = (int)$request->getPost('rating');
+        $ipAddress = $request->getIPAddress();
+
+        if ($companyId <= 0 || $rating < 1 || $rating > 5) {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Datos inválidos']);
+        }
+
+        $ratingModel = new CompanyRatingModel();
+
+        if ($ratingModel->hasRated($companyId, $ipAddress)) {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Ya has valorado esta empresa anteriormente']);
+        }
+
+        $ratingModel->insert([
+            'company_id' => $companyId,
+            'rating' => $rating,
+            'ip_address' => $ipAddress
+        ]);
+
+        $stats = $ratingModel->getRatingStats($companyId);
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => '¡Gracias por tu valoración!',
+            'new_avg' => round($stats['avg'], 1),
+            'new_count' => $stats['count']
+        ]);
     }
 }
