@@ -193,7 +193,7 @@ class Company extends BaseController
         }
 
         // Calcular datos para el CTA B2B (Movido desde la vista)
-        $companyProv = $company['registro_mercantil'] ?? '';
+        $companyProv = !empty($company['province']) ? $company['province'] : (!empty($company['registro_mercantil']) ? $company['registro_mercantil'] : 'España');
         $cnaeCodeStr = substr($company['cnae_code'] ?? $company['cnae'] ?? '', 0, 4);
         $cnaeUrlParam = urlencode($cnaeCodeStr);
         $provUrlParam = urlencode($companyProv);
