@@ -277,14 +277,35 @@ class Billing extends BaseController
                 $count = (int) ($postData['total_count'] ?? 0);
                 $amount = (float) ($postData['price'] ?? 0);
                 $cnae = $postData['cnae'] ?? '';
+                $cnae_text = $postData['cnae_text'] ?? '';
                 $sect = $postData['sector'] ?? '';
+                $estado = $postData['estado'] ?? '';
                 
                 // Fallback si no vinieran
                 if ($count <= 0 || $amount <= 0) {
                     $db = \Config\Database::connect();
                     $builder = $db->table('companies');
+                    if ($estado !== '') {
+                        $builder->where('estado', $estado);
+                    }
                     if ($cnae !== '') {
-                        $builder->where('cnae_code', $cnae);
+                        $builder->where('cnae_code LIKE', $cnae . '%');
+                        if (strtolower($prov) !== 'españa') {
+                            if (in_array(strtolower($prov), ['alicante', 'alacant', 'alicante/alacant'])) {
+                                $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
+                            } else {
+                                $builder->where('registro_mercantil', $prov);
+                            }
+                        }
+                    } elseif ($cnae_text !== '') {
+                        $builder->like('cnae_label', $cnae_text, 'both');
+                        if (strtolower($prov) !== 'españa') {
+                            if (in_array(strtolower($prov), ['alicante', 'alacant', 'alicante/alacant'])) {
+                                $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
+                            } else {
+                                $builder->where('registro_mercantil', $prov);
+                            }
+                        }
                     } else {
                         if (strtolower($prov) !== 'españa') {
                             if (in_array(strtolower($prov), ['alicante', 'alacant', 'alicante/alacant'])) {
@@ -302,7 +323,9 @@ class Billing extends BaseController
                     'type'        => 'directory_excel',
                     'provincia'   => $prov,
                     'cnae'        => $cnae,
+                    'cnae_text'   => $cnae_text,
                     'sector'      => $sect,
+                    'estado'      => $estado,
                     'total_count' => $count
                 ]);
 
@@ -459,6 +482,13 @@ class Billing extends BaseController
                     'plan' => $plan,
                     'period' => $period,
                 ],
+                'subscription_data' => [
+                    'metadata' => [
+                        'user_id' => (string) $userId,
+                        'plan' => $plan,
+                        'period' => $period,
+                    ]
+                ],
             ];
         }
 
@@ -519,14 +549,24 @@ class Billing extends BaseController
     {
         $province = $this->request->getGet('provincia') ?? 'España';
         $cnae = $this->request->getGet('cnae') ?? '';
+        $cnae_text = $this->request->getGet('cnae_text') ?? '';
         $sector = $this->request->getGet('sector') ?? '';
+        $estado = $this->request->getGet('estado') ?? '';
         
         $params = [];
         if ($cnae !== '') {
             $params['cnae'] = $cnae;
             $params['sector'] = $sector;
+            $params['provincia'] = $province;
+        } elseif ($cnae_text !== '') {
+            $params['cnae_text'] = $cnae_text;
+            $params['sector'] = $sector;
+            $params['provincia'] = $province;
         } else {
             $params['provincia'] = $province;
+        }
+        if ($estado !== '') {
+            $params['estado'] = $estado;
         }
         
         return redirect()->to(site_url('checkout/directory-export?' . http_build_query($params)));
@@ -541,17 +581,42 @@ class Billing extends BaseController
     {
         $province = $this->request->getGet('provincia') ?? 'España';
         $cnae = $this->request->getGet('cnae') ?? '';
+        $cnae_text = $this->request->getGet('cnae_text') ?? '';
         $sector = $this->request->getGet('sector') ?? '';
+        $estado = $this->request->getGet('estado') ?? '';
 
         $db = \Config\Database::connect();
         $builder = $db->table('companies');
 
+        if ($estado !== '') {
+            $builder->where('estado', $estado);
+        }
+
         if ($cnae !== '') {
-            $builder->where('cnae_code', $cnae);
+            $builder->where('cnae_code LIKE', $cnae . '%');
+            if (strtolower($province) !== 'españa') {
+                if (in_array(strtolower($province), ['alicante', 'alacant', 'alicante/alacant'])) {
+                    $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
+                } else {
+                    $builder->where('registro_mercantil', $province);
+                }
+                $displayName = $sector ? ($sector . ' en ' . $province) : ("CNAE {$cnae} en {$province}");
+            } else {
+                $displayName = $sector ?: "CNAE {$cnae}";
+            }
             $totalCount = $builder->countAllResults();
-            $titleName = $sector ?: "CNAE {$cnae}";
-            $displayName = $titleName; 
-            // Do not overwrite $province, it should remain 'España' for national CNAE
+        } elseif ($cnae_text !== '') {
+            $builder->like('cnae_label', $cnae_text, 'both');
+            if (strtolower($province) !== 'españa') {
+                if (in_array(strtolower($province), ['alicante', 'alacant', 'alicante/alacant'])) {
+                    $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
+                } else {
+                    $builder->where('registro_mercantil', $province);
+                }
+            }
+            $totalCount = $builder->countAllResults();
+            $titleName = $sector ?: $cnae_text;
+            $displayName = $titleName . ' en ' . $province; 
         } else {
             if (strtolower($province) !== 'españa') {
                 if (in_array(strtolower($province), ['alicante', 'alacant', 'alicante/alacant'])) {
@@ -575,7 +640,9 @@ class Billing extends BaseController
             'price'       => $price,
             'tax'         => $tax,
             'cnae'        => $cnae,
-            'sector'      => $sector
+            'cnae_text'   => $cnae_text,
+            'sector'      => $sector,
+            'estado'      => $estado
         ]);
     }
 
@@ -680,6 +747,12 @@ class Billing extends BaseController
                     'period'    => $isDir ? 'general' : ($checkoutData['period'] ?? '30days'),
                     'is_historical' => $isDir ? '1' : '0'
                 ];
+                if (!empty($checkoutData['cnae_text'])) {
+                    $exportParams['cnae_text'] = $checkoutData['cnae_text'];
+                }
+                if (!empty($checkoutData['estado'])) {
+                    $exportParams['estado'] = $checkoutData['estado'];
+                }
                 $totalCount = $checkoutData['total_count'] ?? 0;
 
                 // Guardamos info de la última compra para persistencia en refresh

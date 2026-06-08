@@ -78,6 +78,13 @@ class QuickUnlock extends BaseController
                 'logged_in' => true,
             ]);
 
+            $emailService->sendRegistrationAdminNotification([
+                'user_id' => $user_id,
+                'name'    => explode('@', $email)[0],
+                'email'   => $email,
+                'company' => 'N/A (Quick Unlock)'
+            ]);
+            
             $emailService->sendSetPasswordEmail($email, $token);
         }
 

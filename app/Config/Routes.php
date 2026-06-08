@@ -149,7 +149,10 @@ $routes->get('api/docs/openapi.json', 'Api\Docs::json');
 $routes->get('documentation', 'Documentation::index');
 
 
-$routes->get('map/companies', 'CompanyMapV2Controller::index');
+// SEO Map Route
+$routes->get('base-de-datos-de-empresas', 'CompanyMapV2Controller::index');
+$routes->addRedirect('map/companies', 'base-de-datos-de-empresas');
+$routes->addRedirect('comprar-base-de-datos-empresas', 'base-de-datos-de-empresas');
 $routes->get('api/geo/provinces', 'CompanyMapV2Controller::provinces');
 $routes->get('api/geo/municipalities', 'CompanyMapV2Controller::municipalities');
 $routes->get('api/cnae/sections', 'CompanyMapV2Controller::cnaeSections');
@@ -158,6 +161,7 @@ $routes->get('api/cnae/classes', 'CompanyMapV2Controller::cnaeClasses');
 $routes->get('api/cnae/subclasses', 'CompanyMapV2Controller::cnaeSubclasses');
 $routes->get('api/map/search', 'CompanyMapV2Controller::search');
 $routes->get('api/map/export', 'CompanyMapV2Controller::export');
+$routes->post('api/map/request-sample', 'CompanyMapV2Controller::requestFreeSample');
 
 
 // Alerts

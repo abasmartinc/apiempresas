@@ -259,8 +259,14 @@
                         <?php if(!empty($cnae)): ?>
                         <input type="hidden" name="cnae"         value="<?= esc($cnae) ?>">
                         <?php endif; ?>
+                        <?php if(!empty($cnae_text)): ?>
+                        <input type="hidden" name="cnae_text"    value="<?= esc($cnae_text) ?>">
+                        <?php endif; ?>
                         <?php if(!empty($sector)): ?>
                         <input type="hidden" name="sector"       value="<?= esc($sector) ?>">
+                        <?php endif; ?>
+                        <?php if(!empty($estado)): ?>
+                        <input type="hidden" name="estado"       value="<?= esc($estado) ?>">
                         <?php endif; ?>
                         <input type="hidden" name="total_count"  value="<?= (int) $total_count ?>">
                         <input type="hidden" name="price"        value="<?= $price ?>">

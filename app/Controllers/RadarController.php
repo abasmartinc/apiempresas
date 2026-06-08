@@ -1020,6 +1020,8 @@ class RadarController extends BaseController
         $province = $params['provincia'] ?? 'España';
         $period   = $params['period']   ?? $params['rango'] ?? '30days';
         $cnae     = $params['cnae']     ?? '';
+        $cnae_text = $params['cnae_text'] ?? '';
+        $estado   = $params['estado']   ?? '';
 
         $allowedPeriods = ['7', '30', '90', 'hoy', 'semana', 'mes', '30days', 'general'];
         if (($params['is_historical'] ?? '0') === '1') {
@@ -1035,6 +1037,12 @@ class RadarController extends BaseController
 
         if ($cnae !== '') {
             $builder->where('cnae_code LIKE', $cnae . '%');
+        } elseif ($cnae_text !== '') {
+            $builder->like('cnae_label', $cnae_text, 'both');
+        }
+
+        if ($estado !== '') {
+            $builder->where('estado', $estado);
         }
 
         if ($province && mb_strtolower($province, 'UTF-8') !== 'españa' && $province !== $sector) {
