@@ -864,7 +864,7 @@
                                                 <polyline points="7 10 12 15 17 10"></polyline>
                                                 <line x1="12" y1="15" x2="12" y2="3"></line>
                                             </svg>
-                                            Descargar Excel
+                                            Descargar CSV
                                         </a></li>
                                 <?php endif; ?>
                                 <li><a href="#api-dev-section">
@@ -1539,7 +1539,7 @@
                             </div>
                             
                             <p style="position: relative; z-index: 1; color: #475569; font-size: 1.1rem; max-width: 700px; margin: 0 auto 2rem; line-height: 1.6; font-weight: 400;">
-                                Descarga ahora mismo el listado completo en Excel con información financiera y de contacto de 
+                                Descarga ahora mismo el listado completo en CSV con información financiera y de contacto de 
                                 <strong style="color: #0f172a; font-weight: 700;"><?= $countFormatted ?> empresas</strong> del sector <strong style="color: #0f172a; font-weight: 700;"><?= esc(trim(explode('INFORME', $sectorName)[0])) ?></strong> en <strong style="color: #0f172a; font-weight: 700;"><?= esc(!empty($targetProv) ? $targetProv : ($company['province'] ?? $company['registro_mercantil'] ?? 'España')) ?></strong>. 
                                 Ideal para acelerar tus campañas de marketing y dotar a tu equipo de ventas de leads cualificados.
                             </p>
@@ -1557,7 +1557,7 @@
                                     <path d="M14 13h2"></path>
                                     <path d="M14 17h2"></path>
                                 </svg>
-                                Descargar Excel completo por <?= $priceStr ?>€
+                                Descargar CSV completo por <?= $priceStr ?>€
                             </a>
                             
                             <div style="position: relative; z-index: 1; margin-top: 2rem; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px; color: #64748b; font-size: 0.9rem; font-weight: 500;">
@@ -1565,7 +1565,7 @@
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Descarga Inmediata
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 6px;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Formato Excel .XLSX
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Formato CSV (Delimitado por comas)
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 6px;">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Datos Verificados

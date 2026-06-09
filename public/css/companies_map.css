@@ -99,6 +99,11 @@ body {
     border: 1px solid var(--b2b-border);
 }
 
+#resultsTitle::after {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+}
+
 .b2b-data-list {
     display: flex;
     flex-direction: column;

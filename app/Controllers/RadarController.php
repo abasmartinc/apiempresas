@@ -949,19 +949,17 @@ class RadarController extends BaseController
      */
     public function exportExcel()
     {
-        // Permitir descarga sin login si hay token de simulador en sesión (BILLING_MODE=simulator)
         $hasSimulatorToken = session('simulator_excel_token') !== null || session('just_bought_excel') !== null;
         if (!session('logged_in') && !$hasSimulatorToken) {
             return redirect()->to(site_url('enter'))->with('error', 'Debes iniciar sesión para descargar el listado.');
         }
 
         $params = $this->request->getGet();
-        $companies = $this->getExportData($params);
         $filename = $this->getExportFilename($params);
 
         if (ob_get_length()) ob_clean();
 
-        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Cache-Control: no-cache, no-store, must-revalidate');
         header('Pragma: no-cache');
@@ -971,7 +969,9 @@ class RadarController extends BaseController
             setcookie('dl_token', $params['dl_token'], time() + 120, '/');
         }
         
-        echo $this->generateExcelHtml($companies);
+        $fp = fopen('php://output', 'w');
+        $this->streamExportData($params, $fp);
+        fclose($fp);
         exit();
     }
 
@@ -986,24 +986,21 @@ class RadarController extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Email no válido.']);
         }
 
-        // Guardar email en sesión para futuros usos
         session()->set('last_export_email', $email);
 
         $params = $this->request->getGet();
-        $companies = $this->getExportData($params);
-        $html = $this->generateExcelHtml($companies);
         $filename = $this->getExportFilename($params);
 
-        // Envío de email
+        $tempFile = tempnam(sys_get_temp_dir(), 'export');
+        $fp = fopen($tempFile, 'w');
+        $this->streamExportData($params, $fp);
+        fclose($fp);
+
         $emailService = \Config\Services::email();
         $emailService->setTo($email);
         $emailService->setSubject('Tu listado de empresas - Radar APIEmpresas');
-        $emailService->setMessage('Adjunto encontrarás el listado de empresas solicitado en formato Excel.');
-        
-        // Adjuntar como archivo temporal
-        $tempFile = tempnam(sys_get_temp_dir(), 'export');
-        file_put_contents($tempFile, $html);
-        $emailService->attach($tempFile, 'attachment', $filename, 'application/vnd.ms-excel');
+        $emailService->setMessage('Adjunto encontrarás el listado de empresas solicitado en formato CSV.');
+        $emailService->attach($tempFile, 'attachment', $filename, 'text/csv');
 
         if ($emailService->send()) {
             unlink($tempFile);
@@ -1033,7 +1030,7 @@ class RadarController extends BaseController
 
         $db = \Config\Database::connect();
         $builder = $db->table('companies');
-        $builder->select('id, company_name as name, cif, fecha_constitucion, cnae_label, registro_mercantil, municipality, address, objeto_social');
+        $builder->select('id, company_name as name, cif, fecha_constitucion, cnae_label, registro_mercantil, municipality, address, objeto_social, phone');
 
         if ($cnae !== '') {
             $builder->where('cnae_code LIKE', $cnae . '%');
@@ -1169,17 +1166,59 @@ class RadarController extends BaseController
         $isHistorical = ($params['is_historical'] ?? '0') === '1';
 
         if ($cnae !== '') {
-            return "Directorio_" . preg_replace('/[^A-Za-z0-9_]/', '_', $cnae) . "_" . str_replace(' ', '_', $province) . ".xls";
+            return "Directorio_" . preg_replace('/[^A-Za-z0-9_]/', '_', $cnae) . "_" . str_replace(' ', '_', $province) . ".csv";
         }
         
         if ($isHistorical) {
-            return "Directorio_Historico_" . str_replace(' ', '_', $province) . ".xls";
+            return "Directorio_Historico_" . str_replace(' ', '_', $province) . ".csv";
         }
         
-        return "Listado_Nuevas_Empresas_" . str_replace(' ', '_', $sector) . "_" . str_replace(' ', '_', $province) . ".xls";
+        return "Listado_Nuevas_Empresas_" . str_replace(' ', '_', $sector) . "_" . str_replace(' ', '_', $province) . ".csv";
     }
 
-    private function generateExcelHtml(array $companies): string
+    private function streamExportData($params, $fp)
+    {
+        // BOM for Excel compatibility with UTF-8
+        fprintf($fp, chr(0xEF).chr(0xBB).chr(0xBF));
+        
+        $companies = $this->getExportData($params);
+        
+        // Headers
+        fputcsv($fp, [
+            'Empresa',
+            'CIF',
+            'Constitución',
+            'Sector CNAE',
+            'Municipio',
+            'Provincia',
+            'Teléfono',
+            'Dirección',
+            'Objeto Social',
+            'Capital Social',
+            'Socio Único',
+            'Administradores'
+        ]);
+
+        foreach ($companies as $c) {
+            fputcsv($fp, [
+                $c['name'] ?? '',
+                $c['cif'] ?? '',
+                $c['fecha_constitucion'] ?? '',
+                $c['cnae_label'] ?? '',
+                $c['municipality'] ?? '',
+                $c['registro_mercantil'] ?? '',
+                $c['phone'] ?? '',
+                $c['address'] ?? '',
+                $c['objeto_social'] ?? '',
+                $c['capital_social'] ?? '',
+                $c['socio_unico'] ?? '',
+                $c['administrators'] ?? ''
+            ]);
+        }
+    }
+
+    // REMOVED OLD METHODS:
+private function generateExcelHtml(array $companies): string
     {
         ob_start();
         echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';

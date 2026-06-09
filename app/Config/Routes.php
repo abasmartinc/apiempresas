@@ -284,6 +284,7 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
 $routes->post('webhook/stripe', 'Webhook::stripe');
 $routes->post('api/chat', 'AiChat::sendMessage');
 $routes->post('api/chat/reset', 'AiChat::resetChat');
+$routes->post('api/chat/assistant', 'Api\ChatAssistantController::handle');
 
 // Sitemap
 $routes->get('sitemap.xml', 'Sitemap::index');

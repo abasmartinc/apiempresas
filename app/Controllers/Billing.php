@@ -286,8 +286,18 @@ class Billing extends BaseController
                     $db = \Config\Database::connect();
                     $builder = $db->table('companies');
                     if ($estado !== '') {
-                        $builder->where('estado', $estado);
-                    }
+            $builder->where('estado', $estado);
+        }
+        if ($has_phone == '1') {
+            $builder->groupStart()
+                    ->groupStart()->where('phone IS NOT NULL', null, false)->where('phone !=', '')->groupEnd()
+                    ->orGroupStart()->where('phone_mobile IS NOT NULL', null, false)->where('phone_mobile !=', '')->groupEnd()
+                    ->groupEnd();
+        }
+        $date_min = $this->request->getGet('date_min') ?? '';
+        $date_max = $this->request->getGet('date_max') ?? '';
+        if ($date_min !== '') $builder->where('estado_fecha >=', $date_min);
+        if ($date_max !== '') $builder->where('estado_fecha <=', $date_max);
                     if ($cnae !== '') {
                         $builder->where('cnae_code LIKE', $cnae . '%');
                         if (strtolower($prov) !== 'españa') {
@@ -326,6 +336,7 @@ class Billing extends BaseController
                     'cnae_text'   => $cnae_text,
                     'sector'      => $sect,
                     'estado'      => $estado,
+            'has_phone'   => $has_phone,
                     'total_count' => $count
                 ]);
 
@@ -552,6 +563,7 @@ class Billing extends BaseController
         $cnae_text = $this->request->getGet('cnae_text') ?? '';
         $sector = $this->request->getGet('sector') ?? '';
         $estado = $this->request->getGet('estado') ?? '';
+        $has_phone = $this->request->getGet('has_phone') ?? '';
         
         $params = [];
         if ($cnae !== '') {
@@ -568,6 +580,13 @@ class Billing extends BaseController
         if ($estado !== '') {
             $params['estado'] = $estado;
         }
+        if ($has_phone !== '') {
+            $params['has_phone'] = $has_phone;
+        }
+        $date_min = $this->request->getGet('date_min') ?? '';
+        $date_max = $this->request->getGet('date_max') ?? '';
+        if ($date_min !== '') $params['date_min'] = $date_min;
+        if ($date_max !== '') $params['date_max'] = $date_max;
         
         return redirect()->to(site_url('checkout/directory-export?' . http_build_query($params)));
     }
@@ -584,6 +603,7 @@ class Billing extends BaseController
         $cnae_text = $this->request->getGet('cnae_text') ?? '';
         $sector = $this->request->getGet('sector') ?? '';
         $estado = $this->request->getGet('estado') ?? '';
+        $has_phone = $this->request->getGet('has_phone') ?? '';
 
         $db = \Config\Database::connect();
         $builder = $db->table('companies');
@@ -591,6 +611,16 @@ class Billing extends BaseController
         if ($estado !== '') {
             $builder->where('estado', $estado);
         }
+        if ($has_phone == '1') {
+            $builder->groupStart()
+                    ->groupStart()->where('phone IS NOT NULL', null, false)->where('phone !=', '')->groupEnd()
+                    ->orGroupStart()->where('phone_mobile IS NOT NULL', null, false)->where('phone_mobile !=', '')->groupEnd()
+                    ->groupEnd();
+        }
+        $date_min = $this->request->getGet('date_min') ?? '';
+        $date_max = $this->request->getGet('date_max') ?? '';
+        if ($date_min !== '') $builder->where('estado_fecha >=', $date_min);
+        if ($date_max !== '') $builder->where('estado_fecha <=', $date_max);
 
         if ($cnae !== '') {
             $builder->where('cnae_code LIKE', $cnae . '%');
@@ -642,7 +672,8 @@ class Billing extends BaseController
             'cnae'        => $cnae,
             'cnae_text'   => $cnae_text,
             'sector'      => $sector,
-            'estado'      => $estado
+            'estado'      => $estado,
+            'has_phone'   => $has_phone
         ]);
     }
 

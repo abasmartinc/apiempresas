@@ -52,7 +52,7 @@
             <nav class="desktop-only" aria-label="Principal" style="display:flex; align-items:center; gap: 20px;">
                 <div class="nav-dropdown">
                     <button class="nav-dropdown-trigger">
-                        Productos
+                        Soluciones
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                     </button>
                     <div class="nav-dropdown-menu">
@@ -74,6 +74,13 @@
                             <div>
                                 <strong>Directorio Histórico</strong>
                                 <span>Bases de datos por provincia y sector</span>
+                            </div>
+                        </a>
+                        <a href="<?= site_url('base-de-datos-de-empresas') ?>">
+                            <div class="nav-item-icon">📊</div>
+                            <div>
+                                <strong>Descarga de Listados</strong>
+                                <span>Bases de datos B2B a medida</span>
                             </div>
                         </a>
                     </div>
@@ -187,7 +194,7 @@
                 </div>
                 <nav class="mobile-nav">
                     <div class="mobile-nav-group">
-                        <div class="mobile-nav-label">Productos</div>
+                        <div class="mobile-nav-label">Soluciones</div>
                         <a href="<?=site_url('api-empresas') ?>" class="mobile-nav-link">
                             <span>API Empresas</span>
                         </a>
@@ -196,6 +203,9 @@
                         </a>
                         <a href="<?=site_url('directorio') ?>" class="mobile-nav-link">
                             <span>Directorio Histórico</span>
+                        </a>
+                        <a href="<?=site_url('base-de-datos-de-empresas') ?>" class="mobile-nav-link">
+                            <span>Descarga de Listados</span>
                         </a>
                     </div>
 

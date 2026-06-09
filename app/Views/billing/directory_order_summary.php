@@ -3,7 +3,7 @@
 <head>
     <?= view('partials/head', [
         'title'       => 'Descarga Base de Datos de Empresas en ' . esc($display_name ?? $province) . ' | APIEmpresas',
-        'excerptText' => 'Descarga el listado completo de ' . number_format($total_count, 0, ',', '.') . ' empresas registradas en ' . esc($display_name ?? $province) . ' en formato Excel.',
+        'excerptText' => 'Descarga el listado completo de ' . number_format($total_count, 0, ',', '.') . ' empresas registradas en ' . esc($display_name ?? $province) . ' en formato CSV.',
         'robots'      => 'noindex, nofollow',
     ]) ?>
     <style>
@@ -143,7 +143,7 @@
                 <div class="main-card">
                     <div class="product-badge">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Base de Datos Histórica · Excel
+                        Base de Datos Histórica · CSV
                     </div>
 
                     <h1 style="font-size: 1.8rem; font-weight: 900; color: #1e293b; margin-bottom: 8px; letter-spacing: -0.03em; line-height: 1.15;">
@@ -164,7 +164,7 @@
                         </div>
                         <div class="stat-box">
                             <div class="stat-box-label">Formato</div>
-                            <div class="stat-box-value">Excel .xlsx</div>
+                            <div class="stat-box-value">CSV (Delimitado por comas)</div>
                             <div class="stat-box-sub">Descarga tras el pago</div>
                         </div>
                         <div class="stat-box">
@@ -182,7 +182,7 @@
                     <!-- Campos incluidos -->
                     <div style="background: #f8fafc; border-radius: 12px; padding: 16px 20px; border: 1px solid #e2e8f0;">
                         <h3 style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">
-                            Campos incluidos en el Excel
+                            Campos incluidos en el CSV
                         </h3>
                         <div class="cols-grid">
                             <?php foreach ([
@@ -204,12 +204,19 @@
                         </div>
                     </div>
 
-                    <!-- Aviso NO incluye -->
+                    <!-- Aviso NO/SI incluye teléfono -->
+                    <?php if (isset($has_phone) && $has_phone == '1'): ?>
+                    <div class="disclaimer-box" style="background-color: #f0fdf4; border-color: #bbf7d0; color: #166534;">
+                        ✅ <strong>Este listado SÍ incluye teléfono de contacto.</strong><br>
+                        Has seleccionado el filtro exclusivo de empresas con teléfono. Contiene datos registrales oficiales (identificadores, razón social, actividad) y los números de teléfono recopilados (fijos y móviles).
+                    </div>
+                    <?php else: ?>
                     <div class="disclaimer-box">
                         ⚠️ <strong>Este listado NO incluye teléfono ni email de contacto.</strong><br>
                         Contiene únicamente datos registrales oficiales: identificadores, razón social, actividad económica y fecha de constitución.
                         Es perfecto para cruzar con otras fuentes, validar CIFs o analizar el tejido empresarial de una zona.
                     </div>
+                    <?php endif; ?>
 
                     <div class="guarantee-box" style="margin-top: 16px;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
@@ -276,7 +283,7 @@
                             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 14px 30px rgba(16, 185, 129, 0.45)';"
                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(16, 185, 129, 0.35)';">
                             <span style="font-size: 1.1rem; letter-spacing: -0.01em; pointer-events: none;">
-                                Pagar <?= number_format($price + $tax, 2, ',', '.') ?>€ y Descargar Excel
+                                Pagar <?= number_format($price + $tax, 2, ',', '.') ?>€ y Descargar CSV
                             </span>
                         </button>
                     </form>

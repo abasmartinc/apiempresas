@@ -55,6 +55,7 @@ class Sitemap extends Controller
     {
         $urls = [
             ['loc' => site_url('/'), 'priority' => '1.0', 'freq' => 'daily'],
+            ['loc' => site_url('base-de-datos-de-empresas'), 'priority' => '1.0', 'freq' => 'daily'],
             ['loc' => site_url('leads-empresas-nuevas'), 'priority' => '0.8', 'freq' => 'monthly'],
             ['loc' => site_url('contact'), 'priority' => '0.5', 'freq' => 'monthly'],
             ['loc' => site_url('documentation'), 'priority' => '0.9', 'freq' => 'weekly'],

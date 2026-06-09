@@ -201,44 +201,64 @@ class Company extends BaseController
         
         $db = \Config\Database::connect();
         
-        // 1. Intentar Sector + Provincia
-        $builder = $db->table('companies');
-        if ($cnaeCodeStr) $builder->where('cnae_code LIKE', $cnaeCodeStr . '%');
-        $builder->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
-        if ($companyProv && strtolower($companyProv) !== 'españa') {
-            if (strtolower($companyProv) === 'alicante') {
-                $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
-            } else {
-                $builder->where('registro_mercantil', $companyProv);
-            }
-        }
-        $listCount = $builder->countAllResults();
-        $targetProv = $companyProv;
+        // Caching the count query results to avoid Database connections exhaustion
+        $cacheKey = 'count_cta_' . md5($companyProv . '_' . $cnaeCodeStr);
+        $cachedData = cache($cacheKey);
 
-        // 2. Fallback: Si hay menos de 50 empresas, ampliar a TODA ESPAÑA para ese sector
-        if ($listCount < 50 && $cnaeCodeStr) {
-            $builder2 = $db->table('companies');
-            $builder2->where('cnae_code LIKE', $cnaeCodeStr . '%');
-            $builder2->where('fecha_constitucion IS NOT NULL');
-            $listCount = $builder2->countAllResults();
-            $targetProv = 'toda España';
-            $provUrlParam = 'España';
-        }
-
-        // 3. Fallback: Si AÚN hay menos de 50 (sector rarísimo), ofrecer TODA LA PROVINCIA (sin sector)
-        if ($listCount < 50 && $companyProv && strtolower($companyProv) !== 'españa') {
-            $builder3 = $db->table('companies');
-            $builder3->where('fecha_constitucion IS NOT NULL');
-            if (strtolower($companyProv) === 'alicante') {
-                $builder3->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
-            } else {
-                $builder3->where('registro_mercantil', $companyProv);
+        if ($cachedData !== null) {
+            $listCount = $cachedData['count'];
+            $targetProv = $cachedData['targetProv'];
+            $provUrlParam = $cachedData['provUrlParam'];
+            $cnaeUrlParam = $cachedData['cnaeUrlParam'];
+            $sectorName = $cachedData['sectorName'];
+        } else {
+            // 1. Intentar Sector + Provincia
+            $builder = $db->table('companies');
+            if ($cnaeCodeStr) $builder->where('cnae_code LIKE', $cnaeCodeStr . '%');
+            $builder->where('fecha_constitucion IS NOT NULL'); // Consistente con el export
+            if ($companyProv && strtolower($companyProv) !== 'españa') {
+                if (strtolower($companyProv) === 'alicante') {
+                    $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+                } else {
+                    $builder->where('registro_mercantil', $companyProv);
+                }
             }
-            $listCount = $builder3->countAllResults();
+            $listCount = $builder->countAllResults();
             $targetProv = $companyProv;
-            $provUrlParam = urlencode($companyProv);
-            $cnaeUrlParam = ''; // Quitamos el filtro de sector
-            $sectorName = 'todos los sectores';
+
+            // 2. Fallback: Si hay menos de 50 empresas, ampliar a TODA ESPAÑA para ese sector
+            if ($listCount < 50 && $cnaeCodeStr) {
+                $builder2 = $db->table('companies');
+                $builder2->where('cnae_code LIKE', $cnaeCodeStr . '%');
+                $builder2->where('fecha_constitucion IS NOT NULL');
+                $listCount = $builder2->countAllResults();
+                $targetProv = 'toda España';
+                $provUrlParam = 'España';
+            }
+
+            // 3. Fallback: Si AÚN hay menos de 50 (sector rarísimo), ofrecer TODA LA PROVINCIA (sin sector)
+            if ($listCount < 50 && $companyProv && strtolower($companyProv) !== 'españa') {
+                $builder3 = $db->table('companies');
+                $builder3->where('fecha_constitucion IS NOT NULL');
+                if (strtolower($companyProv) === 'alicante') {
+                    $builder3->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+                } else {
+                    $builder3->where('registro_mercantil', $companyProv);
+                }
+                $listCount = $builder3->countAllResults();
+                $targetProv = $companyProv;
+                $provUrlParam = urlencode($companyProv);
+                $cnaeUrlParam = ''; // Quitamos el filtro de sector
+                $sectorName = 'todos los sectores';
+            }
+
+            cache()->save($cacheKey, [
+                'count' => $listCount,
+                'targetProv' => $targetProv,
+                'provUrlParam' => $provUrlParam,
+                'cnaeUrlParam' => $cnaeUrlParam,
+                'sectorName' => $sectorName
+            ], 86400 * 7); // Cache for 7 days
         }
 
         $sectorUrlParam = urlencode($sectorName);

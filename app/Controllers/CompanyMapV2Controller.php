@@ -13,7 +13,7 @@ class CompanyMapV2Controller extends Controller
         helper('radar');
         return view('map/companies_map', [
             'title' => 'Base de datos de empresas | Compra listados B2B',
-            'meta_description' => 'Descarga al instante tu base de datos de empresas españolas. Filtra por provincia y sector. Listados B2B extraídos del BORME listos para tu CRM o telemarketing.',
+            'excerptText' => 'Descarga al instante tu base de datos de empresas españolas. Filtra por provincia y sector. Listados B2B extraídos del BORME listos para tu CRM o telemarketing.',
         ]);
     }
 
@@ -80,11 +80,9 @@ class CompanyMapV2Controller extends Controller
 
     public function cnaeGroups()
     {
-        $sectionId = (int)($this->request->getGet('section_id') ?? 0);
-
         try {
             $db = Database::connect();
-            $sql = "SELECT cnae_2009 as slug, ANY_VALUE(label_2009) as name 
+            $sql = "SELECT cnae_2009 as slug, MAX(label_2009) as name 
                     FROM cnae_2009_2025 
                     WHERE LENGTH(cnae_2009) = 2 
                     GROUP BY cnae_2009 
@@ -168,10 +166,12 @@ class CompanyMapV2Controller extends Controller
         $cnaePrefix = trim((string)($req->getGet('cnae_prefix') ?? ''));
         $cnaeText   = trim((string)($req->getGet('cnae_text') ?? ''));
         $hasPhone = (int)($req->getGet('has_phone') ?? 0);
+        $dateMin = $req->getPost('date_min') ?? $req->getGet('date_min') ?? '';
+        $dateMax = $req->getPost('date_max') ?? $req->getGet('date_max') ?? '';
 
         try {
             $db = Database::connect();
-            $applyFilters = function($b) use ($provinceName, $municipalityName, $estado, $cnaePrefix, $cnaeText, $hasPhone) {
+            $applyFilters = function($b) use ($provinceName, $municipalityName, $estado, $cnaePrefix, $cnaeText, $hasPhone, $dateMin, $dateMax) {
                 if ($provinceName !== '') $b->where('registro_mercantil', $provinceName);
                 if ($municipalityName !== '') $b->like('address', $municipalityName, 'both');
                 if ($estado !== '') $b->where('estado', $estado);
@@ -182,6 +182,9 @@ class CompanyMapV2Controller extends Controller
                 } elseif ($cnaeText !== '') {
                     $b->like('cnae_label', $cnaeText, 'both');
                 }
+
+                if ($dateMin !== '') $b->where('estado_fecha >=', $dateMin);
+                if ($dateMax !== '') $b->where('estado_fecha <=', $dateMax);
 
                 if ($hasPhone === 1) {
                     $b->groupStart()

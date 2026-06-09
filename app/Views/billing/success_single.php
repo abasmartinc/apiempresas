@@ -107,7 +107,7 @@
                     <div style="background: #f8fafc; border-radius: 12px; padding: 12px 16px; margin-bottom: 14px; border: 1px solid #e2e8f0; text-align: left;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                             <div>
-                                <h4 style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin: 0 0 6px;">Tu Excel</h4>
+                                <h4 style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin: 0 0 6px;">Tu archivo CSV</h4>
                                 <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.82rem; color: #475569;">
                                     <li style="margin-bottom: 3px;">✅ <?= number_format($total_count ?? 0, 0, ',', '.') ?> empresas</li>
                                     <li>❌ Datos estáticos (hoy)</li>
@@ -137,7 +137,7 @@
                     </div>
 
                     <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #f1f5f9; color: #94a3b8; font-size: 0.75rem; font-weight: 600;">
-                        REF: #<?= esc($order_ref) ?> | Formato: Microsoft Excel / CSV
+                        REF: #<?= esc($order_ref) ?> | Formato: CSV (Delimitado por comas)
                     </div>
                 </div>
             </div>

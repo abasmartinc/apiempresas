@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
     <style>
         .dir-hero {
-            padding: 60px 0 60px;
+            padding: 30px 0 90px;
             background: linear-gradient(180deg, #090d16 0%, #0f172a 100%);
             color: #fff;
             position: relative;
@@ -58,9 +58,20 @@
             Base de Datos de <span class="grad">Empresas Españolas</span>
         </h1>
         
-        <p style="font-size: 1.2rem; color: #cbd5e1; max-width: 750px; margin: 0 auto 2.5rem auto; line-height: 1.6;">
+        <p style="font-size: 1.2rem; color: #cbd5e1; max-width: 750px; margin: 0 auto 1.5rem auto; line-height: 1.6;">
             Filtra por provincia, municipio y sector. Configura y descarga tu <strong>base de datos de empresas</strong> al instante. Listados B2B oficiales extraídos del BORME y listos para tu CRM.
         </p>
+
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 2rem;">
+            <div style="display: flex; color: #fbbf24;">
+                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </div>
+            <span style="color: #94a3b8; font-size: 0.95rem;">Usado por <strong>+2.500</strong> equipos de ventas en España</span>
+        </div>
 
         <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;">
             <span style="display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.15); color: #34D399; padding: 6px 14px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.25);">
@@ -73,63 +84,163 @@
             </span>
             <span style="display: inline-flex; align-items: center; gap: 6px; background: rgba(192, 132, 252, 0.15); color: #c084fc; padding: 6px 14px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; border: 1px solid rgba(192, 132, 252, 0.25);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                Descarga Segura (Excel)
+                Descarga Segura (CSV)
             </span>
         </div>
     </div>
 </header>
 
-    <main style="padding: 40px 0 100px 0; background-color: #f8fafc; min-height: 100vh;">
-        <section class="container" style="max-width: 1200px;">
+    <main style="padding: 0 0 100px 0; background-color: #f8fafc; min-height: 100vh;">
+        <section class="container" style="max-width: 1200px; margin-top: -50px; position: relative; z-index: 10;">
 
             <div class="map2-layout">
                 <!-- LEFT: Filters -->
                 <aside class="filters">
-                    <section class="b2b-card" style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; padding: 12px 16px 14px 16px; margin-bottom: 16px;">
-                        <div class="field" style="margin-top: 0;">
-                            <label>Provincia</label>
-                            <select id="f_province" class="input">
-                                <option value="">— Selecciona —</option>
-                            </select>
+                    <section class="b2b-card" style="display: flex; flex-direction: column; gap: 16px; padding: 16px 20px; margin-bottom: 16px; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                        <!-- TOP ROW: Filters -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; align-items: flex-end;">
+                            <div class="field" style="margin: 0;">
+                                <label style="font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">Provincia <span style="color: #ef4444; font-size: 1rem; line-height: 0;">*</span></label>
+                                <select id="f_province" class="input" style="width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 8px 12px; background-color: #f8fafc;">
+                                    <option value="">— Selecciona —</option>
+                                </select>
+                            </div>
+
+                            <div class="field" style="margin: 0;">
+                                <label style="font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">Municipio</label>
+                                <select id="f_municipality" class="input" style="width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 8px 12px; background-color: #f8fafc;" disabled>
+                                    <option value="">— Prov. antes —</option>
+                                </select>
+                            </div>
+
+                            <div class="field" style="margin: 0;">
+                                <label style="font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">Sector</label>
+                                <select id="c_sector" class="input" style="width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 8px 12px; background-color: #f8fafc;">
+                                    <option value="">— Todos —</option>
+                                </select>
+                            </div>
+
+                            <div class="field" style="margin: 0;">
+                                <label style="font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">Estado</label>
+                                <select id="f_estado" class="input" style="width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 8px 12px; background-color: #f8fafc;">
+                                    <option value="">— Todos —</option>
+                                    <option value="ACTIVA">Activa</option>
+                                    <option value="INACTIVA">Inactiva</option>
+                                    <option value="DISUELTA">Disuelta</option>
+                                    <option value="EXTINGUIDA">Extinguida</option>
+                                    <option value="CIERRE HOJA REGISTRAL">Cierre Hoja Registral</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <div class="field" style="margin-top: 0;">
-                            <label>Municipio (opcional)</label>
-                            <select id="f_municipality" class="input" disabled>
-                                <option value="">— Selecciona provincia antes —</option>
-                            </select>
+                        <!-- BOTTOM ROW: Checkbox & Actions -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; padding-top: 16px; border-top: 1px solid #f1f5f9; align-items: end;">
+                            <div style="margin: 0;">
+                                <label style="display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; user-select: none; background: #eff6ff; padding: 0 16px; border-radius: 8px; border: 1px solid #bfdbfe; transition: all 0.2s; height: 44px; margin: 0; width: 100%;">
+                                    <input type="checkbox" id="f_has_phone" value="1" style="width: 16px; height: 16px; accent-color: #2563eb; cursor: pointer; margin: 0;">
+                                    <span style="font-size: 0.85rem; font-weight: 700; color: #1e40af; line-height: 1;">Solo con Teléfono</span>
+                                </label>
+                            </div>
+                            
+                            <div class="date-span" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0 16px; height: 44px;">
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase;">Creadas:</span>
+                                <input type="date" id="f_date_min" style="flex: 1; border: none; background: transparent; font-size: 0.85rem; color: #334155; outline: none; cursor: pointer; text-align: center; width: 100%;">
+                                <span style="color: #94a3b8; font-weight: bold;">-</span>
+                                <input type="date" id="f_date_max" style="flex: 1; border: none; background: transparent; font-size: 0.85rem; color: #334155; outline: none; cursor: pointer; text-align: center; width: 100%;">
+                            </div>
+                            
+                            <div style="margin: 0;">
+                                <button id="btnSearch" class="b2b-btn b2b-btn--primary" type="button" style="padding: 0 24px; height: 44px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); transition: transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0; width: 100%;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                    <span>Buscar</span>
+                                </button>
+                            </div>
                         </div>
 
-                        <div class="field" style="margin-top: 0;">
-                            <label>Sector (opcional)</label>
-                            <select id="c_sector" class="input">
-                                <option value="">— Todos —</option>
-                            </select>
-                        </div>
-
-                        <div class="field" style="margin-top: 0;">
-                            <label>Estado (opcional)</label>
-                            <select id="f_estado" class="input">
-                                <option value="">— Todos —</option>
-                                <option value="ACTIVA">Activa</option>
-                                <option value="INACTIVA">Inactiva</option>
-                                <option value="DISUELTA">Disuelta</option>
-                                <option value="EXTINGUIDA">Extinguida</option>
-                                <option value="CIERRE HOJA REGISTRAL">Cierre Hoja Registral</option>
-                            </select>
-                        </div>
-
-                        <div class="actions">
-                            <button id="btnSearch" class="b2b-btn b2b-btn--primary" type="button">
-                                Buscar
+                        <!-- AI Assistant Row -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; background: #f5f3ff; border: 1px solid #ddd6fe; padding: 12px 16px; border-radius: 8px; margin-top: 16px; gap: 16px;">
+                            <div style="font-size: 0.9rem; color: #5b21b6; font-weight: 500; flex: 1; line-height: 1.4;">
+                                ¿No tienes claro qué buscar?<br>
+                                <span style="font-size: 0.85rem; color: #7c3aed; font-weight: 400;">Pídele a nuestro asistente inteligente que prepare los filtros por ti (ej: "Constructoras en Valencia").</span>
+                            </div>
+                            <button id="btnToggleAi" class="b2b-btn" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; border: none; padding: 0 20px; height: 40px; font-weight: bold; font-size: 0.9rem; border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.3); transition: transform 0.2s, box-shadow 0.2s; display: flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; margin: 0;" type="button" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 8px -1px rgba(139, 92, 246, 0.4)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px -1px rgba(139, 92, 246, 0.3)';">
+                                <span style="font-size: 1rem;">✨</span> Usar Inteligencia Artificial
                             </button>
                         </div>
                     </section>
                 </aside>
 
-                <!-- RIGHT: Map + List -->
-                <section class="map-area">
-                    <div class="b2b-card" style="padding: 0; overflow: hidden; margin-bottom: 24px;">
+                
+                <!-- Wrapper for Chat and Map side-by-side -->
+                <div id="chatMapWrapper" style="display: flex; gap: 24px; align-items: stretch; transition: all 0.3s;">
+                    <style>
+                        @media (min-width: 768px) {
+                            .date-span { grid-column: span 2; }
+                        }
+                        @media (max-width: 767px) {
+                            .date-span { grid-column: span 1; }
+                        }
+                        @keyframes spin { 100% { transform: rotate(360deg); } }
+                        .icon-spin { animation: spin 1s linear infinite; }
+                        #aiChatPanel {
+                            flex-direction: column; 
+                            flex-shrink: 0; 
+                            height: 100%; 
+                            padding: 0; 
+                            overflow: hidden; 
+                            box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.2);
+                            
+                            /* Animación de apertura */
+                            width: 0;
+                            opacity: 0;
+                            visibility: hidden;
+                            margin-right: -24px;
+                            transform: translateX(-20px);
+                            border: 0px solid #c4b5fd;
+                            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+                        }
+                        #aiChatPanel.is-open {
+                            width: 450px;
+                            min-height: 600px;
+                            opacity: 1;
+                            visibility: visible;
+                            margin-right: 0;
+                            transform: translateX(0);
+                            border-width: 1px;
+                        }
+                    </style>
+                    <!-- AI Chat Panel -->
+                    <section id="aiChatPanel" class="b2b-card" style="display: flex;">
+                        <div style="width: 450px; flex: 1; display: flex; flex-direction: column; height: 100%;">
+                        <div style="background: linear-gradient(135deg, #1e1b4b, #4c1d95); padding: 16px; color: white; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 1.5rem;">✨</span>
+                                <div>
+                                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; letter-spacing: -0.01em;">Asistente B2B</h3>
+                                    <div style="font-size: 0.75rem; opacity: 0.8;">Búsqueda conversacional</div>
+                                </div>
+                            </div>
+                            <button id="btnCloseAi" style="background: transparent; border: none; color: white; font-size: 1.2rem; cursor: pointer; opacity: 0.7; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">✕</button>
+                        </div>
+                        
+                        <div id="aiChatMessages" style="flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; background: #f8fafc;">
+                            <div style="padding: 12px 16px; border-radius: 12px 12px 12px 0; align-self: flex-start; max-width: 90%; font-size: 0.95rem; line-height: 1.5; box-shadow: 0 2px 4px rgba(0,0,0,0.02); background: white; border: 1px solid #e2e8f0; color: #334155;">
+                                ¡Hola! Soy tu asistente de IA. Dime qué empresas buscas (por ej: "Empresas de Madrid", "Talleres mecánicos", "Empresas activas") y prepararé el filtro por ti.
+                            </div>
+                        </div>
+                        
+                        <div style="padding: 16px; background: white; border-top: 1px solid #e2e8f0;">
+                            <div style="display: flex; gap: 8px; position: relative;">
+                                <input type="text" id="aiChatInput" placeholder="Ej: Constructoras en Valencia..." style="flex: 1; padding: 12px 16px; padding-right: 48px; border: 1px solid #cbd5e1; border-radius: 99px; font-size: 0.95rem; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#cbd5e1'">
+                                <button id="aiChatSend" style="position: absolute; right: 6px; top: 6px; bottom: 6px; width: 34px; border: none; border-radius: 50%; background: #8b5cf6; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#7c3aed'" onmouseout="this.style.background='#8b5cf6'">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: -2px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                                </button>
+                            </div>
+                        </div>
+                        </div>
+                    </section>
+<section class="map-area" style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
+                    <div id="mapContainerWrapper" class="b2b-card" style="display: none; padding: 0; overflow: hidden; margin-bottom: 24px; flex: 1;">
                         <div style="background: #f8fafc; padding: 12px 16px; font-size: 0.95rem; font-weight: 700; color: #111827; display: flex; justify-content: space-between; border-bottom: 1px solid #e5e7eb;">
                             <span>Área de búsqueda</span>
                             <span style="font-weight: 400; color: #6b7280; font-size: 0.85rem;" id="statusText">Configura filtros y pulsa “Buscar”.</span>
@@ -143,8 +254,7 @@
                                     <div class="eo-pill">Base de Datos de Empresas</div>
                                     <div class="eo-title">Acota tu segmento B2B</div>
                                     <div class="eo-text">
-                                        Selecciona una provincia (y si quieres, un CNAE) y luego pulsa <strong>Buscar</strong>.
-                                        Esto evita ruido, mejora rendimiento y genera listados exportables.
+                                        Selecciona los filtros arriba y pulsa <strong>Buscar</strong>, o haz clic en <strong>✨ IA</strong> para pedirle a nuestro asistente conversacional que configure la búsqueda por ti.
                                     </div>
                                 </div>
                             </div>
@@ -156,19 +266,34 @@
                             </div>
                             <div style="display: flex; gap: 10px; align-items: flex-start; background: #eff6ff; padding: 10px 12px; border-radius: 8px; border: 1px solid #bfdbfe;">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                                <span style="color: #1e3a8a; line-height: 1.4;"><strong>Nota sobre el mapa:</strong> El listado de resultados y la descarga de Excel contienen siempre el 100% del censo. El mapa visual solo dibuja los pines de aquellas empresas de las que disponemos de coordenadas geográficas exactas.</span>
+                                <span style="color: #1e3a8a; line-height: 1.4;"><strong>Nota sobre el mapa:</strong> El listado de resultados y la descarga en CSV contienen siempre el 100% del censo. El mapa visual solo dibuja los pines de aquellas empresas de las que disponemos de coordenadas geográficas exactas.</span>
                             </div>
                         </div>
-                    </div>
+                    
+                    </div> <!-- end mapContainerWrapper -->
 
-                    <div id="resultsCardWrapper" style="display: none; margin-bottom: 24px;">
-                        <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 16px;">
-                            <h2 id="resultsTitle" style="font-size: 1.4rem; font-weight: 800; color: #0f172a; margin: 0;">Resultados</h2>
+<div id="resultsCardWrapper" class="b2b-card" style="display: block; margin-bottom: 24px; padding: 0; overflow: hidden; background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                        <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; padding: 16px 20px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+                            <h2 id="resultsTitle" style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0;">Directorio y Buscador de Empresas</h2>
+                            <button id="toggleMapBtn" style="background: white; color: #334155; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 99px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" onclick="toggleMapVisibility()" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'white\'">
+                                📍 Mostrar Mapa
+                            </button>
                         </div>
-                        <div id="results" class="b2b-data-list results" style="display: flex; flex-direction: column; gap: 4px;"></div>
+                        
+                        <div id="initialPlaceholder" style="padding: 60px 20px; text-align: center; color: #64748b; font-size: 1.1rem;">
+                            <span style="font-size: 2rem; margin-bottom: 12px; display: block;">✨</span>
+                            Pulsa el botón <strong>✨ Inteligencia Artificial</strong> de arriba o usa los filtros manuales<br>para empezar a extraer empresas aquí.
+                        </div>
+
+                        <div id="results" class="b2b-data-list results" style="display: none; flex-direction: column; padding: 16px; gap: 4px; background: white;"></div>
                     </div>
 
-                    <!-- SEO & FAQ Section Moved Here -->
+                    
+
+                </section> <!-- end map-area -->
+            </div> <!-- end chatMapWrapper -->
+
+            <!-- SEO & FAQ Section Moved Here -->
                     <div class="b2b-card" style="padding: 40px 32px; background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; margin-top: 32px; margin-bottom: 24px;">
                         <!-- Benefits -->
                         <h2 style="font-size: 1.8rem; font-weight: 900; color: #0f172a; text-align: center; margin-bottom: 40px; letter-spacing: -0.03em; line-height: 1.2;">Exporta al instante tu base de datos B2B de empresas españolas</h2>
@@ -203,7 +328,7 @@
                             
                             <div style="margin-bottom: 16px;">
                                 <h4 style="font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 6px;">¿En qué formato se descarga la base de datos?</h4>
-                                <p style="color: #475569; font-size: 0.9rem; line-height: 1.6; margin: 0;">El listado se exporta automáticamente en formato Excel (.xlsx), estructurado en columnas ordenadas y limpias, compatible de forma nativa con Excel, Google Sheets y cualquier CRM.</p>
+                                <p style="color: #475569; font-size: 0.9rem; line-height: 1.6; margin: 0;">El listado se exporta automáticamente en formato CSV (delimitado por comas), estructurado en columnas ordenadas y limpias, compatible de forma nativa con Excel, Google Sheets y cualquier CRM.</p>
                             </div>
                             
                             <div style="margin-bottom: 16px;">
@@ -216,26 +341,31 @@
                                 <p style="color: #475569; font-size: 0.9rem; line-height: 1.6; margin: 0;">Procesamos de forma ininterrumpida las actas del BORME. Si una empresa se disuelve o cambia de actividad, lo verás reflejado. Por eso nuestro mapa te permite filtrar exclusivamente por empresas con Estado "ACTIVA".</p>
                             </div>
                         </div>
-                    </div>
-                </section>
-            </div>
-        </section>
-    </section>
 
-    <!-- Sticky CTA Footer -->
+        </div>
+
+        </div> <!-- end map2-layout -->
+    </section> <!-- end container -->
+</main>
+
+<!-- Sticky CTA Footer -->
     <div id="stickyCtaFooter" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); padding: 16px; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); z-index: 9990; border-top: 1px solid #e2e8f0; display: flex; justify-content: center;">
         <div id="checkoutBtnContainer" style="display: flex; gap: 12px; align-items: center; justify-content: center; flex-wrap: wrap; max-width: 1200px; width: 100%;"></div>
     </div>
 
     <!-- Lead Magnet Modal -->
-    <div id="leadModal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 99999; align-items: center; justify-content: center;">
+                    
+
+                
+
+<div id="leadModal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 99999; align-items: center; justify-content: center;">
         <div style="background: #fff; border-radius: 16px; padding: 32px; width: 100%; max-width: 450px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative; margin: 16px;">
             <button onclick="closeLeadModal()" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; padding: 0; line-height: 1;">&times;</button>
             <div style="width: 48px; height: 48px; background: #eff6ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
             </div>
             <h3 style="font-size: 1.4rem; font-weight: 800; color: #0f172a; margin: 0 0 12px 0;">Consigue una muestra gratis</h3>
-            <p style="color: #475569; font-size: 0.95rem; line-height: 1.5; margin: 0 0 24px 0;">Te enviamos ahora mismo un Excel con 20 empresas reales de esta búsqueda para que compruebes la calidad de los datos.</p>
+            <p style="color: #475569; font-size: 0.95rem; line-height: 1.5; margin: 0 0 24px 0;">Te enviamos ahora mismo un archivo CSV con 20 empresas reales de esta búsqueda para que compruebes la calidad de los datos.</p>
             <form id="leadForm" onsubmit="submitLeadForm(event)">
                 <div style="margin-bottom: 16px;">
                     <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 6px;">Tu correo electrónico</label>
@@ -253,6 +383,66 @@
 
 
 
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "¿En qué formato se descarga la base de datos?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "El listado se exporta automáticamente en formato CSV, estructurado en columnas ordenadas y limpias, compatible de forma nativa con Excel, Google Sheets y cualquier CRM."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Incluye emails de las empresas?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Para cumplir rigurosamente con la Ley Orgánica de Protección de Datos (RGPD) en España, nuestra base de datos prioriza los datos registrales públicos: teléfonos fijos/móviles corporativos, dirección física y datos de constitución (CNAE)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cada cuánto se actualizan los datos?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Procesamos de forma ininterrumpida las actas del BORME. Si una empresa se disuelve o cambia de actividad, lo verás reflejado. Por eso nuestro mapa te permite filtrar exclusivamente por empresas con Estado ACTIVA."
+          }
+        }
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Dataset",
+      "name": "Base de Datos de Empresas Españolas",
+      "description": "Listado oficial y actualizado de empresas de España, procesado desde el BORME. Incluye razón social, CIF, CNAE, cargos directivos, teléfonos y estado actual para campañas B2B.",
+      "keywords": [
+        "empresas españolas",
+        "base de datos B2B",
+        "directorio de empresas",
+        "listado de empresas",
+        "CNAE",
+        "BORME"
+      ],
+      "creator": {
+        "@type": "Organization",
+        "name": "APIEmpresas"
+      },
+      "inLanguage": "es-ES",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "distribution": [
+        {
+          "@type": "DataDownload",
+          "encodingFormat": "text/csv"
+        }
+      ]
+    }
+    </script>
     <?=view('partials/footer') ?>
 </div>
 
@@ -336,6 +526,7 @@
 
         // ---------- Map init ----------
         const map = L.map('map', { preferCanvas: true }).setView([40.4168, -3.7038], 6);
+        window.map = map; // Export to global scope for toggleMapVisibility
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; OpenStreetMap'
@@ -410,7 +601,14 @@
         }
 
         function getEffectiveBbox() {
-            // Siempre limitamos al área visible por defecto para rendimiento en mapa
+            // Si el mapa está oculto, devolvemos el área completa de España
+            // para no restringir artificialmente los resultados a un punto 0x0
+            const mapContainer = document.getElementById('mapContainerWrapper');
+            if (!mapContainer || mapContainer.style.display === 'none') {
+                return getSpainBbox();
+            }
+
+            // Si está visible, limitamos al área que está viendo el usuario en pantalla
             const b = map.getBounds();
             return {
                 north: b.getNorth(),
@@ -493,6 +691,7 @@
             const sectorOptionText = cSector.options[cSector.selectedIndex]?.text;
             const cnaeTextValue = (sectorOptionText && sectorOptionText !== '— Todos —') ? sectorOptionText : '';
             const estadoText = document.getElementById('f_estado').value;
+            const hasPhone = document.getElementById('f_has_phone').checked ? 1 : 0;
 
             const params = new URLSearchParams({
                 north: bbox.north,
@@ -508,20 +707,42 @@
                 cnae_text: cnaeTextValue,
 
                 estado: estadoText,
-                has_phone: 0,
+                has_phone: hasPhone,
                 only_geocoded: 1,
 
                 use_bbox: 1,
                 page: page
             });
-
+            const fDateMin = document.getElementById('f_date_min').value;
+            const fDateMax = document.getElementById('f_date_max').value;
+            if (fDateMin) params.append('date_min', fDateMin);
+            if (fDateMax) params.append('date_max', fDateMax);
+            
             statusText.textContent = 'Buscando empresas…';
             btnSearch.disabled = true;
+            btnSearch.innerHTML = `<svg class="icon-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg> <span>Buscando...</span>`;
+
+            const initialPlaceholder = document.getElementById('initialPlaceholder');
+            if (initialPlaceholder) {
+                initialPlaceholder.style.display = 'none';
+            }
 
             if (resultsEl) {
-                resultsEl.style.opacity = '0.4';
+                resultsEl.style.display = 'flex';
+                resultsEl.style.opacity = '1';
                 resultsEl.style.pointerEvents = 'none';
                 resultsEl.style.transition = 'opacity 0.2s';
+                
+                if (resultsEl.innerHTML.trim() === '') {
+                    resultsEl.innerHTML = `<div style="padding: 60px 20px; text-align: center; color: #8b5cf6;">
+                        <svg style="animation: spin 1s linear infinite; width: 40px; height: 40px; margin: 0 auto 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg>
+                        <div style="font-weight: 800; font-size: 1.1rem; color: #0f172a;">Analizando base de datos...</div>
+                        <div style="font-size: 0.9rem; color: #64748b; margin-top: 8px;">Extrayendo empresas con tus criterios</div>
+                    </div>
+                    <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>`;
+                } else {
+                    resultsEl.style.opacity = '0.4';
+                }
             }
 
             try {
@@ -604,16 +825,34 @@
                     if (fEstado && fEstado.value) {
                         checkoutUrl += `&estado=${encodeURIComponent(fEstado.value)}`;
                     }
+                    const fHasPhone = document.getElementById('f_has_phone');
+                    if (fHasPhone && fHasPhone.checked) {
+                        checkoutUrl += `&has_phone=1`;
+                    }
+                    if (fDateMin) {
+                        checkoutUrl += `&date_min=${encodeURIComponent(fDateMin)}`;
+                    }
+                    if (fDateMax) {
+                        checkoutUrl += `&date_max=${encodeURIComponent(fDateMax)}`;
+                    }
 
                     checkoutBtnContainer.innerHTML = `
-                            <a href="${checkoutUrl}" onclick="if(window.trackEvent) trackEvent('map_checkout_click');" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #10b981; color: #fff; padding: 12px 28px; border-radius: 99px; font-weight: 800; font-size: 1.05rem; text-decoration: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.2s; white-space: nowrap;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)';">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                Descargar Excel (${new Intl.NumberFormat('es-ES').format(meta.total_count)}) · ${meta.dynamic_price}€ + IVA
-                            </a>
-                            <button type="button" onclick="openLeadModal()" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #fff; color: #1e40af; border: 2px solid #e0e7ff; padding: 10px 24px; border-radius: 99px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.05);" onmouseover="this.style.borderColor='#1e40af'; this.style.backgroundColor='#eff6ff'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='#e0e7ff'; this.style.backgroundColor='#fff'; this.style.transform='translateY(0)';">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                                Muestra Gratuita
-                            </button>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                            <div style="display: flex; gap: 12px; align-items: center; justify-content: center; flex-wrap: wrap;">
+                                <a href="${checkoutUrl}" onclick="if(window.trackEvent) trackEvent('map_checkout_click');" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #10b981; color: #fff; padding: 12px 28px; border-radius: 99px; font-weight: 800; font-size: 1.05rem; text-decoration: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.2s; white-space: nowrap;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)';">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                    Descargar CSV (${new Intl.NumberFormat('es-ES').format(meta.total_count)} <span style="font-size: 0.85rem; font-weight: 600; opacity: 0.9;">empresas</span>) · ${meta.dynamic_price}€ + IVA
+                                </a>
+                                <button type="button" onclick="openLeadModal()" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #fff; color: #1e40af; border: 2px solid #e0e7ff; padding: 10px 24px; border-radius: 99px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.05);" onmouseover="this.style.borderColor='#1e40af'; this.style.backgroundColor='#eff6ff'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='#e0e7ff'; this.style.backgroundColor='#fff'; this.style.transform='translateY(0)';">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+                                    Muestra Gratuita
+                                </button>
+                            </div>
+                            <div style="font-size: 0.8rem; color: #64748b; font-weight: 500;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" style="margin-right: 4px; vertical-align: -2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                Tu archivo CSV incluirá: <strong>Razón social, CIF, Administradores, Teléfonos, Dirección, CNAE y Estado.</strong>
+                            </div>
+                        </div>
                     `;
                     document.getElementById('stickyCtaFooter').style.display = 'flex';
                 } else {
@@ -626,10 +865,21 @@
                 statusText.textContent = 'Error de red al buscar.';
             } finally {
                 btnSearch.disabled = false;
+                btnSearch.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> <span>Buscar</span>`;
             }
         }
 
         btnSearch.addEventListener('click', () => {
+            const f_province = document.getElementById('f_province').value;
+            if (!f_province) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Provincia requerida',
+                    text: 'Por favor, selecciona una Provincia para poder buscar empresas.',
+                    confirmButtonColor: '#2563eb'
+                });
+                return;
+            }
             if(window.trackEvent) trackEvent('map_search_clicked');
             search(1);
         });
@@ -788,10 +1038,7 @@
                 formData.append('cnae_text', cnaeTextValue);
                 formData.append('estado', estadoText);
 
-                // Fix for local environments accessing via localhost instead of configured baseURL
-                const currentPath = window.location.pathname;
-                const basePath = currentPath.replace(/\/map\/companies\/?$/, '');
-                const targetUrl = basePath + '/api/map/request-sample';
+                const targetUrl = "<?= site_url('api/map/request-sample') ?>";
                 
                 const response = await fetch(targetUrl, {
                     method: 'POST',
@@ -810,11 +1057,21 @@
                     document.getElementById('leadForm').style.display = 'none';
                     document.getElementById('leadSuccess').style.display = 'block';
                 } else {
-                    alert('Error del servidor: ' + (data.message || 'No se pudo enviar la muestra.'));
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Error del servidor: ' + (data.message || 'No se pudo enviar la muestra.'),
+                        confirmButtonColor: '#2152ff'
+                    });
                 }
             } catch (err) {
                 console.error(err);
-                alert('Error de conexión o validación: ' + err.message);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error de conexión o validación: ' + err.message,
+                    confirmButtonColor: '#2152ff'
+                });
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -846,6 +1103,262 @@
             loadProvinces();
             loadSectors();
         });
+    
+        // ---------- AI Chat Assistant Logic ----------
+        let aiChatHistory = [];
+        
+        const btnToggleAi = document.getElementById('btnToggleAi');
+        const btnCloseAi = document.getElementById('btnCloseAi');
+        const aiChatPanel = document.getElementById('aiChatPanel');
+        const aiChatInput = document.getElementById('aiChatInput');
+        const aiChatSend = document.getElementById('aiChatSend');
+        const aiChatMessages = document.getElementById('aiChatMessages');
+
+        if(btnToggleAi) {
+            btnToggleAi.addEventListener('click', () => {
+                aiChatPanel.classList.toggle('is-open');
+                setTimeout(() => {
+                    if (typeof map !== 'undefined') {
+                        map.invalidateSize();
+                    }
+                }, 400);
+            });
+        }
+        if(btnCloseAi) {
+            btnCloseAi.addEventListener('click', () => {
+                aiChatPanel.classList.remove('is-open');
+                setTimeout(() => {
+                    if (typeof map !== 'undefined') {
+                        map.invalidateSize();
+                    }
+                }, 400);
+            });
+        }
+
+        function addChatMessage(role, content, isHtml = false, id = null) {
+            const div = document.createElement('div');
+            if (id) div.id = id;
+            div.style.padding = '12px 16px';
+            div.style.borderRadius = role === 'user' ? '12px 12px 0 12px' : '12px 12px 12px 0';
+            div.style.alignSelf = role === 'user' ? 'flex-end' : 'flex-start';
+            div.style.maxWidth = '90%';
+            div.style.fontSize = '0.95rem';
+            div.style.lineHeight = '1.5';
+            div.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)';
+            
+            if (role === 'user') {
+                div.style.background = '#4c1d95';
+                div.style.color = 'white';
+                div.textContent = content;
+            } else {
+                div.style.background = 'white';
+                div.style.border = '1px solid #e2e8f0';
+                div.style.color = '#334155';
+                if (isHtml) {
+                    div.innerHTML = content;
+                } else {
+                    div.textContent = content;
+                }
+            }
+            aiChatMessages.appendChild(div);
+            aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+        }
+
+        async function sendAiMessage() {
+            const text = aiChatInput.value.trim();
+            if (!text) return;
+
+            aiChatInput.value = '';
+            addChatMessage('user', text);
+            aiChatHistory.push({ role: 'user', content: text });
+
+            const loadingId = 'ai-loading-' + Date.now();
+            addChatMessage('assistant', `⏳ Procesando...`, false, loadingId);
+
+            try {
+                const response = await fetch('<?= site_url("api/chat/assistant") ?>', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: aiChatHistory })
+                });
+
+                const data = await response.json();
+                const loadingEl = document.getElementById(loadingId);
+                if (loadingEl) loadingEl.remove();
+
+                if (data.assistant_message) {
+                    const aiReply = data.assistant_message;
+                    aiChatHistory.push({ role: 'assistant', content: JSON.stringify(aiReply) });
+                    
+                    let replyHtml = aiReply.reply_text;
+                    
+                    if (data.real_count !== undefined) {
+                        replyHtml += `<div style="margin-top:12px; padding-top:12px; border-top:1px solid #e2e8f0; font-size:0.9rem;">
+                            <strong>🎯 Encontradas:</strong> ${new Intl.NumberFormat('es-ES').format(data.real_count)} empresas<br>
+                        </div>`;
+                    }
+
+                    if (aiReply.is_ready_for_checkout && data.checkout_url) {
+                        replyHtml += `<div style="margin-top:12px; background: #f0fdf4; padding:12px; border-radius:8px; border:1px solid #bbf7d0;">
+                            <div style="font-weight:bold; color:#166534; margin-bottom:8px;">¡Listado preparado! (${data.price}€ + IVA)</div>
+                            <a href="${data.checkout_url}" style="display:block; text-align:center; background:#10b981; color:white; padding:8px; border-radius:6px; font-weight:bold; text-decoration:none;">💳 Pagar y Descargar</a>
+                        </div>`;
+                    }
+
+                    addChatMessage('assistant', replyHtml, true);
+
+                    if (aiReply.filters) {
+                        await syncFiltersToMap(aiReply.filters);
+                    }
+                } else {
+                    addChatMessage('assistant', 'Ha ocurrido un error al procesar tu solicitud.');
+                }
+            } catch (error) {
+                console.error('AI Error:', error);
+                const loadingEl = document.getElementById(loadingId);
+                if (loadingEl) loadingEl.remove();
+                addChatMessage('assistant', 'Error de conexión con la IA o procesando la respuesta.');
+            }
+        }
+
+        async function syncFiltersToMap(filters) {
+            let changed = false;
+            let provinceChanged = false;
+            
+            if (filters.province !== undefined) {
+                const provSelect = document.getElementById('f_province');
+                if (filters.province === null) {
+                    provSelect.selectedIndex = 0;
+                    changed = true;
+                    provinceChanged = true;
+                } else {
+                    for(let i=0; i<provSelect.options.length; i++) {
+                        if(provSelect.options[i].text.toUpperCase() === filters.province.toUpperCase()) {
+                            if (provSelect.selectedIndex !== i) {
+                                provSelect.selectedIndex = i;
+                                changed = true;
+                                provinceChanged = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (provinceChanged && window.$) {
+                    const provId = $(provSelect).val();
+                    if(provId) {
+                        await loadMunicipalities(provId);
+                    } else {
+                        const m = document.getElementById('f_municipality');
+                        m.innerHTML = '<option value="">— Selecciona provincia antes —</option>';
+                        m.disabled = true;
+                    }
+                    $(provSelect).trigger({ type: 'change', aiTrigger: true });
+                }
+            }
+            
+            if (filters.municipality !== undefined && filters.municipality !== null) {
+                const mSelect = document.getElementById('f_municipality');
+                let munFound = false;
+                for (let i = 0; i < mSelect.options.length; i++) {
+                    if (mSelect.options[i].text.toUpperCase() === filters.municipality.toUpperCase()) {
+                        mSelect.selectedIndex = i;
+                        munFound = true;
+                        changed = true;
+                        break;
+                    }
+                }
+                if (munFound && window.$) {
+                    $(mSelect).trigger('change');
+                }
+            } else if (filters.municipality === null) {
+                const mSelect = document.getElementById('f_municipality');
+                if (mSelect.selectedIndex !== 0) {
+                    mSelect.selectedIndex = 0;
+                    changed = true;
+                    if (window.$) $(mSelect).trigger('change');
+                }
+            }
+            
+            if (filters.date_min !== undefined) document.getElementById('f_date_min').value = filters.date_min || '';
+            if (filters.date_max !== undefined) document.getElementById('f_date_max').value = filters.date_max || '';
+            
+            if (filters.has_phone !== undefined) {
+                const phoneCheckbox = document.getElementById('f_has_phone');
+                phoneCheckbox.checked = filters.has_phone === true;
+            }
+            if (filters.estado !== undefined) {
+                const estSelect = document.getElementById('f_estado');
+                if (filters.estado === null) {
+                    estSelect.selectedIndex = 0;
+                } else {
+                    estSelect.value = filters.estado.toUpperCase();
+                }
+                if (window.$) $(estSelect).trigger('change');
+            }
+            
+            if (filters.cnae_prefix !== undefined || filters.cnae_text !== undefined) {
+                const cSector = document.getElementById('c_sector');
+                if (filters.cnae_prefix === null && filters.cnae_text === null) {
+                    cSector.selectedIndex = 0;
+                } else {
+                    let found = false;
+                    if (filters.cnae_prefix) {
+                        for(let i=0; i<cSector.options.length; i++) {
+                            const val = cSector.options[i].value || '';
+                            if(val.startsWith(filters.cnae_prefix)) {
+                                cSector.selectedIndex = i;
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!found && filters.cnae_text) {
+                        for(let i=0; i<cSector.options.length; i++) {
+                            if(cSector.options[i].text.toLowerCase().includes(filters.cnae_text.toLowerCase())) {
+                                cSector.selectedIndex = i;
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!found) {
+                        const newOption = document.createElement("option");
+                        newOption.value = filters.cnae_prefix || "";
+                        newOption.text = filters.cnae_text || ("CNAE " + filters.cnae_prefix);
+                        newOption.selected = true;
+                        cSector.appendChild(newOption);
+                    }
+                }
+                if (window.$) $(cSector).trigger("change");
+            }
+            
+            const btn = document.getElementById('btnSearch');
+            if (btn) btn.click();
+        }
+
+        if(aiChatSend) aiChatSend.addEventListener('click', sendAiMessage);
+        if(aiChatInput) aiChatInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendAiMessage(); });
+        // Toggle Map Visibility
+        window.toggleMapVisibility = function() {
+            const mapContainer = document.getElementById('mapContainerWrapper');
+            const toggleBtn = document.getElementById('toggleMapBtn');
+            
+            if (mapContainer.style.display === 'none') {
+                mapContainer.style.display = 'flex';
+                mapContainer.style.flexDirection = 'column';
+                toggleBtn.innerHTML = '🙈 Ocultar Mapa';
+                // Need to invalidate size so Leaflet tiles load correctly after being hidden
+                if (window.map) {
+                    setTimeout(() => {
+                        window.map.invalidateSize();
+                    }, 400);
+                }
+            } else {
+                mapContainer.style.display = 'none';
+                toggleBtn.innerHTML = '📍 Mostrar Mapa';
+            }
+        };
     })();
 </script>
 

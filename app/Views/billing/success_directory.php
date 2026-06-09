@@ -89,7 +89,7 @@
                     }
                 ?>
                 <p style="color: #475569; font-size: 1.05rem; line-height: 1.6; margin: 0 0 24px;">
-                    Tu archivo Excel con el histórico de <strong><?= number_format($total_count ?? 0, 0, ',', '.') ?> empresas</strong> en <strong><?= esc($displayArea) ?></strong> ya está disponible para descargar.
+                    Tu archivo CSV con el histórico de <strong><?= number_format($total_count ?? 0, 0, ',', '.') ?> empresas</strong> en <strong><?= esc($displayArea) ?></strong> ya está disponible para descargar.
                 </p>
 
                 <div style="background: #f1f5f9; border-radius: 12px; padding: 16px; margin-bottom: 24px; text-align: left; border: 1px solid #e2e8f0;">
@@ -103,13 +103,13 @@
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span style="font-size: 0.85rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Formato</span>
-                        <span style="font-size: 0.9rem; color: #0f172a; font-weight: 800;">Excel (.xlsx)</span>
+                        <span style="font-size: 0.9rem; color: #0f172a; font-weight: 800;">CSV (Delimitado por comas)</span>
                     </div>
                 </div>
 
                 <a href="<?= esc($download_url) ?>" class="btn-download" id="excel_main_download_btn">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Descargar Excel Ahora
+                    Descargar CSV Ahora
                 </a>
                 
                 <p style="margin-top: 16px; font-size: 0.85rem; color: #94a3b8;">
@@ -168,7 +168,7 @@
                 var finalUrl = downloadUrl + sep + 'dl_token=' + token;
                 
                 Swal.fire({
-                    title: '¡Preparando tu Excel!',
+                    title: '¡Preparando tu archivo CSV!',
                     html: `
                         <div style="margin-top: 5px; margin-bottom: 30px; color: #64748b; font-size: 1.1rem; line-height: 1.6;">
                             Recopilando y formateando miles de registros.<br>
@@ -216,7 +216,7 @@
                                         <h4 style="margin: 0; font-weight: 800; color: #1e293b; font-size: 1.1rem;">Ya tienes el pasado. ¿Quieres el futuro?</h4>
                                     </div>
                                     <p style="margin: 0 0 15px 0; color: #64748b; font-size: 0.95rem; line-height: 1.5;">
-                                        Tu Excel tiene las empresas creadas hasta hoy. Mantente actualizado automáticamente con nuestro <strong>Radar B2B</strong> y recibe las nuevas empresas de España cada mañana.
+                                        Tu archivo CSV tiene las empresas creadas hasta hoy. Mantente actualizado automáticamente con nuestro <strong>Radar B2B</strong> y recibe las nuevas empresas de España cada mañana.
                                     </p>
                                     <a href="${'<?= site_url('radar/preview') ?>'}" style="display: block; text-align: center; background: #4f46e5; color: white; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: 700; transition: background 0.2s;">
                                         Descubrir Radar B2B

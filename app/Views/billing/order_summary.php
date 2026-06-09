@@ -179,7 +179,7 @@
                             <div class="stat-box">
                                 <div class="stat-box-label">Exportación</div>
                                 <div class="stat-box-value">Ilimitada</div>
-                                <div class="stat-box-sub">Excel y CSV sin restricciones</div>
+                                <div class="stat-box-sub">CSV sin restricciones</div>
                             </div>
                         </div>
 
@@ -200,7 +200,7 @@
                     <?php else: ?>
                         <div class="product-badge">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                            Descarga Inmediata · Excel
+                            Descarga Inmediata · CSV
                         </div>
 
                         <h1 style="font-size: 1.8rem; font-weight: 900; color: #1e293b; margin-bottom: 8px; letter-spacing: -0.03em; line-height: 1.15;">
@@ -218,9 +218,9 @@
 
                         <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5; margin-bottom: 14px;">
                             <?php if ($isHistorical): ?>
-                                Listado completo y actualizado, procesado desde el BORME y listo para descargar en Excel.
+                                Listado completo y actualizado, procesado desde el BORME y listo para descargar en CSV.
                             <?php else: ?>
-                                Listado oficial BORME procesado y listo para descargar en Excel.
+                                Listado oficial BORME procesado y listo para descargar en CSV.
                             <?php endif; ?>
                         </p>
 
@@ -254,7 +254,7 @@
                             </div>
                             <div class="stat-box">
                                 <div class="stat-box-label">Formato</div>
-                                <div class="stat-box-value">Excel .xlsx</div>
+                                <div class="stat-box-value">CSV (Excel)</div>
                                 <div class="stat-box-sub">Descarga directa tras el pago</div>
                             </div>
                         </div>
@@ -263,7 +263,7 @@
                             <h3 style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">¿Por qué la mayoría elige Radar PRO?</h3>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: white; padding: 12px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                                 <div style="font-size: 0.75rem;">
-                                    <span style="display: block; font-weight: 800; color: #64748b; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">Listado Excel</span>
+                                    <span style="display: block; font-weight: 800; color: #64748b; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">Listado CSV</span>
                                     <ul style="list-style: none; padding: 0; margin: 0; color: #64748b; display: flex; flex-direction: column; gap: 6px;">
                                         <li><span style="color: #94a3b8; font-weight: bold;">✔</span> Foto actual (<?= date('M Y') ?>)</li>
                                         <li><span style="color: #94a3b8; font-weight: bold;">✔</span> 1 única descarga</li>
@@ -306,7 +306,7 @@
                         </div>
                     <?php else: ?>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: #64748b; font-size: 0.88rem;">
-                            <span>Listado Excel (<?= number_format($total_count ?? 0, 0, ',', '.') ?> empresas)</span>
+                            <span>Listado CSV (<?= number_format($total_count ?? 0, 0, ',', '.') ?> empresas)</span>
                             <span style="font-weight: 700; color: #0f172a;"><?= number_format($price, 2, ',', '.') ?> €</span>
                         </div>
                         <?php if ($total_count > 0 && $price > 0): ?>
@@ -363,7 +363,7 @@
                                 <?php if ($type === 'subscription'): ?>
                                     <span style="font-size: 1.1rem; letter-spacing: -0.01em; pointer-events: none;">Activar Radar PRO</span>
                                 <?php else: ?>
-                                    <span style="font-size: 1.1rem; letter-spacing: -0.01em; pointer-events: none;">Pagar y Descargar Excel</span>
+                                    <span style="font-size: 1.1rem; letter-spacing: -0.01em; pointer-events: none;">Pagar y Descargar CSV</span>
                                 <?php endif; ?>
                             </button>
                         </div>
