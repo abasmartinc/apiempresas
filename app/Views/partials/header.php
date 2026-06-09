@@ -55,32 +55,33 @@
                         Soluciones
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                     </button>
-                    <div class="nav-dropdown-menu">
+                    <div class="nav-dropdown-menu nav-dropdown-mega">
                         <a href="<?=site_url('api-empresas') ?>">
                             <div class="nav-item-icon">🔌</div>
                             <div>
                                 <strong>API Empresas</strong>
-                                <span>Verificación y datos oficiales</span>
+                                <span>Integra datos oficiales del Registro Mercantil en tu software. Verifica CIFs al instante y automatiza el alta de clientes B2B.</span>
                             </div>
                         </a>
                         <a href="<?= getRadarRedirect('header') ?>">
-    <div class="nav-item-icon">📡</div>
-    <div>
-        <strong>Radar Inteligente</strong>
-        <span>Nuevas empresas en tiempo real</span>
-    </div>
+                            <div class="nav-item-icon">📡</div>
+                            <div>
+                                <strong>Radar Inteligente</strong>
+                                <span>Detecta en tiempo real empresas de reciente creación publicadas en el BORME y contacta antes que tu competencia.</span>
+                            </div>
+                        </a>
                         <a href="<?= site_url('directorio') ?>">
                             <div class="nav-item-icon">🗂️</div>
                             <div>
                                 <strong>Directorio Histórico</strong>
-                                <span>Bases de datos por provincia y sector</span>
+                                <span>Explora nuestro directorio B2B clasificado por todas las provincias y sectores (CNAE) con fichas completas de empresas.</span>
                             </div>
                         </a>
                         <a href="<?= site_url('base-de-datos-de-empresas') ?>">
                             <div class="nav-item-icon">📊</div>
                             <div>
-                                <strong>Descarga de Listados</strong>
-                                <span>Bases de datos B2B a medida</span>
+                                <strong>Descargas de BBDD</strong>
+                                <span>Filtra y exporta al instante bases de datos en formato CSV listas para tus campañas de telemarketing o cold mailing.</span>
                             </div>
                         </a>
                     </div>
@@ -527,6 +528,55 @@
             color: #64748b;
             font-size: 12px;
             font-weight: 500;
+        }
+
+        /* Mega Menu Modification */
+        .nav-dropdown-mega {
+            width: 720px !important;
+            padding: 24px !important;
+            display: grid !important;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .nav-dropdown-mega a {
+            align-items: flex-start;
+            padding: 16px;
+            border: 1px solid transparent;
+        }
+
+        .nav-dropdown-mega a:hover {
+            border-color: #e2e8f0;
+            background: #f8fafc;
+        }
+
+        .nav-dropdown-mega .nav-item-icon {
+            width: 44px;
+            height: 44px;
+            font-size: 22px;
+            flex-shrink: 0;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+
+        .nav-dropdown-mega strong {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .nav-dropdown-mega span {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #475569;
+            white-space: normal;
+        }
+        
+        .nav-dropdown-mega a:hover .nav-item-icon {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            transform: scale(1.05);
         }
 
         /* Mobile Adjustments */

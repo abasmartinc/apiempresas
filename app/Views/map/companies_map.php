@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
     <style>
         .dir-hero {
-            padding: 30px 0 90px;
+            padding: 30px 0 130px;
             background: linear-gradient(180deg, #090d16 0%, #0f172a 100%);
             color: #fff;
             position: relative;
@@ -91,12 +91,12 @@
 </header>
 
     <main style="padding: 0 0 100px 0; background-color: #f8fafc; min-height: 100vh;">
-        <section class="container" style="max-width: 1200px; margin-top: -50px; position: relative; z-index: 10;">
+        <section class="container map-main-card" style="max-width: 1200px; margin-top: -80px; position: relative; z-index: 10; background: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); padding: 40px; border: 1px solid #e2e8f0;">
 
             <div class="map2-layout">
                 <!-- LEFT: Filters -->
                 <aside class="filters">
-                    <section class="b2b-card" style="display: flex; flex-direction: column; gap: 16px; padding: 16px 20px; margin-bottom: 16px; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                    <section class="b2b-card" style="display: flex; flex-direction: column; gap: 16px; padding: 16px 20px; margin-bottom: 16px; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0;">
                         <!-- TOP ROW: Filters -->
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; align-items: flex-end;">
                             <div class="field" style="margin: 0;">

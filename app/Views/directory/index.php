@@ -16,7 +16,7 @@
 
         /* 1. Hero Refinado (High Contrast + Search Integration) */
         .dir-hero {
-            padding: 95px 0 75px;
+            padding: 60px 0 130px;
             background: linear-gradient(180deg, #090d16 0%, #0f172a 100%);
             color: #fff;
             text-align: center;
@@ -80,6 +80,18 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 2rem;
+        }
+
+        .dir-main-card {
+            margin-top: -80px;
+            position: relative;
+            z-index: 10;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            padding: 40px;
+            margin-bottom: 60px;
+            border: 1px solid #e2e8f0;
         }
 
         .dir-section {
@@ -218,6 +230,11 @@
             .section-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
             .section-header h2 { font-size: 1.75rem; white-space: normal; }
             .dir-grid { gap: 1.25rem; }
+            .dir-main-card {
+                padding: 24px;
+                margin-top: -60px;
+                border-radius: 20px;
+            }
         }
     </style>
 </head>
@@ -247,7 +264,7 @@
 </header>
 
 <main class="dir-main">
-    <div class="container" style="padding-top: 40px; padding-bottom: 40px;">
+    <div class="container dir-main-card">
         
         <section class="dir-section" id="provincias-section">
             <div class="section-header" style="margin-bottom: 2rem;">
