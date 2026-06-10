@@ -11,21 +11,155 @@
     <link rel="stylesheet"
         href="<?= base_url('public/css/precios_radar.css?v=' . (file_exists(FCPATH . 'public/css/precios_radar.css') ? filemtime(FCPATH . 'public/css/precios_radar.css') : time())) ?>" />
     <style>
-        /* Overrides y estilos específicos para la landing de API */
-        .api-hero__badge {
-            background: #eff6ff !important;
-            border-color: #dbeafe !important;
-            color: #1e40af !important;
+        /* ── API HERO UNIFICADO ── */
+        .api-unified-hero {
+            padding: 44px 0 72px;
+            background: linear-gradient(160deg, #060a14 0%, #0c1428 50%, #0f172a 100%);
+            color: #fff;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-
-        .api-hero__badge-dot {
-            background: #3b82f6 !important;
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.35) !important;
+        .api-unified-hero::before {
+            content: '';
+            position: absolute;
+            top: -20%; right: -8%;
+            width: 42%; height: 85%;
+            background: radial-gradient(circle, rgba(59,130,246,0.14) 0%, transparent 70%);
+            pointer-events: none;
         }
-
-        .radar-hero {
-            border-bottom: none !important;
+        .api-unified-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -10%; left: -5%;
+            width: 35%; height: 60%;
+            background: radial-gradient(circle, rgba(99,102,241,0.09) 0%, transparent 70%);
+            pointer-events: none;
         }
+        .api-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(59,130,246,0.15);
+            color: #60A5FA;
+            padding: 6px 16px;
+            border-radius: 99px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-bottom: 1.75rem;
+            border: 1px solid rgba(59,130,246,0.25);
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+        .api-hero-badge-dot {
+            display: inline-block;
+            width: 7px; height: 7px;
+            background: #34D399;
+            border-radius: 99px;
+            box-shadow: 0 0 8px #34D399;
+            animation: heroPulse 2s ease-in-out infinite;
+        }
+        @keyframes heroPulse {
+            0%,100% { opacity:1; transform:scale(1); }
+            50% { opacity:0.7; transform:scale(1.3); }
+        }
+        .api-hero-title {
+            font-size: clamp(2.2rem, 4vw, 3.4rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: #fff;
+            line-height: 1.1;
+            margin-bottom: 1.25rem;
+        }
+        .api-hero-title span {
+            background: linear-gradient(135deg, #60A5FA 0%, #818cf8 60%, #34D399 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .api-hero-sub {
+            font-size: 1.15rem;
+            color: #cbd5e1;
+            max-width: 680px;
+            margin: 0 auto 1.5rem;
+            line-height: 1.65;
+        }
+        .api-hero-stars {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 1.25rem;
+        }
+        .api-hero-badges {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 2.25rem;
+        }
+        .api-hero-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            border: 1px solid;
+        }
+        .api-hero-chip--green  { background: rgba(16,185,129,0.15); color: #34D399; border-color: rgba(16,185,129,0.25); }
+        .api-hero-chip--blue   { background: rgba(96,165,250,0.15); color: #60A5FA; border-color: rgba(96,165,250,0.25); }
+        .api-hero-chip--purple { background: rgba(129,140,248,0.15); color: #a5b4fc; border-color: rgba(129,140,248,0.25); }
+        .api-hero-actions {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+        .api-hero-btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+            padding: 14px 32px;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 1rem;
+            text-decoration: none;
+            box-shadow: 0 10px 30px rgba(37,99,235,0.35);
+            transition: all 0.25s;
+        }
+        .api-hero-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 40px rgba(37,99,235,0.45);
+            color: #fff;
+        }
+        .api-hero-btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.07);
+            color: #e2e8f0;
+            padding: 14px 28px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            transition: all 0.25s;
+        }
+        .api-hero-btn-ghost:hover {
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.3);
+            color: #fff;
+        }
+        /* Keep radar-hero for other pages */
+        .radar-hero { border-bottom: none !important; }
 
         @keyframes mesh-glow-3 {
 
@@ -732,112 +866,92 @@
 
     <main class="radar-page">
 
-        <!-- HERO SECTION -->
-        <section class="radar-hero">
-            <div class="container">
-                <div class="radar-hero__shell" style="margin-bottom: 60px;">
-                    <div class="radar-hero__badge api-hero__badge">
-                        <span class="radar-hero__badge-dot api-hero__badge-dot"></span>
-                        INFRAESTRUCTURA DE DATOS A ESCALA
+        <!-- HERO SECTION UNIFICADO -->
+        <header class="api-unified-hero">
+            <div class="container" style="max-width:1100px; margin:0 auto; padding:0 2rem;">
+
+                <!-- Badge -->
+                <div class="api-hero-badge">
+                    <span class="api-hero-badge-dot"></span>
+                    API REST · Infraestructura de Datos a Escala
+                </div>
+
+                <!-- H1 -->
+                <h1 class="api-hero-title">
+                    API REST de Datos Mercantiles<br>
+                    <span>Registro Mercantil y BORME</span>
+                </h1>
+
+                <!-- Subtitle -->
+                <p class="api-hero-sub">
+                    Endpoints JSON para consulta por CIF/NIF, enriquecimiento B2B masivo,
+                    webhooks de alertas BORME y onboarding KYB automatizado.
+                    Latencia &lt;200ms &middot; 99.9% SLA.
+                </p>
+
+                <!-- Stars -->
+                <div class="api-hero-stars">
+                    <div style="display:flex; color:#fbbf24;">
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                     </div>
+                    <span style="color:#94a3b8; font-size:0.92rem;">Usado por <strong>+1.200</strong> desarrolladores y equipos SaaS</span>
+                </div>
 
-                    <h1 class="radar-hero__title">
-                        Infraestructura de Datos Mercantiles para <span>Integración en CRM, ERP y Onboarding KYB</span>
-                    </h1>
+                <!-- Badges -->
+                <div class="api-hero-badges">
+                    <span class="api-hero-chip api-hero-chip--green">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        Datos Oficiales BORME
+                    </span>
+                    <span class="api-hero-chip api-hero-chip--blue">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        REST API · &lt;200ms
+                    </span>
+                    <span class="api-hero-chip api-hero-chip--purple">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        KYB &amp; Compliance Listo
+                    </span>
+                </div>
 
-                    <p class="radar-hero__subtitle">
-                        Enriquece tu stack tecnológico con datos oficiales del Registro Mercantil y alertas del BORME. Automatiza procesos de alta, valida proveedores y prioriza leads en milisegundos.
-                    </p>
-                    <p style="margin-top: -10px; font-weight: 700; color: #1e40af; opacity: 0.8; font-size: 1rem;">
-                        API REST de alta disponibilidad optimizada para ingesta masiva y enriquecimiento de datos empresariales en tiempo real.
-                    </p>
+                <!-- CTAs -->
+                <div class="api-hero-actions">
+                    <a href="<?= site_url('register') ?>" class="api-hero-btn-primary">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                        Probar API gratis
+                    </a>
+                    <a href="<?= site_url('documentation') ?>" class="api-hero-btn-ghost">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        Ver documentación
+                    </a>
+                </div>
 
-                    <div class="radar-hero__proof">
-                        <div class="radar-hero__proof-item">
-                            <strong>Sincronización BORME</strong>
-                            <span>Detección de cambios</span>
-                        </div>
-                        <div class="radar-hero__proof-item">
-                            <strong>Enriquecimiento B2B</strong>
-                            <span>Lead Intelligence</span>
-                        </div>
-                        <div class="radar-hero__proof-item">
-                            <strong>Ecosistema KYB</strong>
-                            <span>Compliance Seguro</span>
-                        </div>
+                <!-- Proof items -->
+                <div style="display:flex; gap:32px; justify-content:center; flex-wrap:wrap; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.07);">
+                    <div style="text-align:center;">
+                        <div style="font-size:1.6rem; font-weight:900; color:#fff; letter-spacing:-0.04em;">+3.5M</div>
+                        <div style="font-size:0.78rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-top:2px;">Empresas indexadas</div>
                     </div>
-
-                    <div class="radar-hero__actions">
-                        <a href="<?= site_url('register') ?>" class="radar-btn radar-btn--primary">
-                            Probar API gratis
-                        </a>
-                        <a href="<?= site_url('documentation') ?>" class="radar-btn radar-btn--ghost">
-                            Ver documentación
-                        </a>
+                    <div style="text-align:center;">
+                        <div style="font-size:1.6rem; font-weight:900; color:#fff; letter-spacing:-0.04em;">&lt;200ms</div>
+                        <div style="font-size:0.78rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-top:2px;">Latencia media</div>
                     </div>
-
-                    <!-- API HERO TWO-COLUMN PANEL -->
-                    <div class="radar-hero__feature-panel" style="max-width: 1040px; margin-top: 40px;">
-                        <div class="radar-hero__feature-copy">
-                            <h2>Orquestra tus decisiones con datos societarios oficiales</h2>
-                            <ul style="display: grid; gap: 16px;">
-                                <li><strong>Normalización y Data Cleansing:</strong> Automatiza la validación de CIF/NIF y el parseo de razones sociales en tiempo real para asegurar la integridad de tu base de datos desde el <code>POST</code>.</li>
-                                <li><strong>Event-Driven Architecture (Webhooks):</strong> Implementa flujos asíncronos recibiendo notificaciones HTTP cada vez que el BORME publique un cambio de estado o cargo societario relevante para tu sistema.</li>
-                                <li><strong>Enriquecimiento Programático:</strong> Accede a payloads JSON estructurados con CNAE 2025, capital social y vinculaciones directivas para alimentar tus modelos de scoring o lógica de negocio.</li>
-                            </ul>
-                        </div>
-
-                        <div class="api-preview-card">
-                            <div class="api-preview-card__header">
-                                <div class="api-preview-card__logo">TS</div>
-                                <div class="api-preview-card__info">
-                                    <h4>Tech Flow Solutions SL</h4>
-                                    <span>B12345678 • Madrid</span>
-                                </div>
-                                <div class="api-preview-card__status">ACTIVA</div>
-                            </div>
-
-                            <div class="api-preview-card__body">
-                                <div class="api-score-sector" style="margin-bottom: 20px;">
-                                    <div class="api-score-main">
-                                        <div class="api-score-label">PROPENSITY_INDEX</div>
-                                        <div class="api-score-value" style="font-size: 1.8rem;">0.94<span>/1.0</span>
-                                        </div>
-                                    </div>
-                                    <div class="api-score-bar">
-                                        <div class="api-score-progress" style="width: 94%;"></div>
-                                    </div>
-                                </div>
-
-                                <div class="api-insights-grid" style="grid-template-columns: 1fr; gap: 20px;">
-                                    <div class="api-insight-item">
-                                        <label>IA_SIGNAL_ANALYTICS</label>
-                                        <p style="font-size: 0.78rem; margin-bottom: 12px;"><strong>Trend:</strong> Positive Growth. <strong>Signal:</strong> Capital Expansion detected. <strong>Tech_Affinity:</strong> 0.94.</p>
-                                        
-                                        <div class="api-signals-tags">
-                                            <span>AMPLIACIÓN_CAPITAL</span>
-                                            <span>NUEVO_ADMINISTRADOR</span>
-                                            <span>SOLVENCIA_ALTA</span>
-                                        </div>
-                                    </div>
-
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-top: 16px; border-top: 1px dashed #e2e8f0;">
-                                        <div class="api-insight-item">
-                                            <label>CNAE_OFFICIAL</label>
-                                            <p style="font-size: 0.78rem; font-family: monospace;">6201 - Software Dev</p>
-                                        </div>
-                                        <div class="api-insight-item">
-                                            <label>LAST_SYNC</label>
-                                            <p style="font-size: 0.78rem; font-family: monospace;">2024-05-06T08:22Z</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div style="text-align:center;">
+                        <div style="font-size:1.6rem; font-weight:900; color:#fff; letter-spacing:-0.04em;">99.9%</div>
+                        <div style="font-size:0.78rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-top:2px;">Uptime garantizado</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div style="font-size:1.6rem; font-weight:900; color:#fff; letter-spacing:-0.04em;">Diario</div>
+                        <div style="font-size:0.78rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-top:2px;">Sincronización BORME</div>
                     </div>
                 </div>
+
             </div>
-        </section>
+        </header>
+
 
         <!-- SEO BLOCK: CÓMO FUNCIONA -->
         <section class="radar-section" style="padding: 120px 0; background: #fbfcfe;">
