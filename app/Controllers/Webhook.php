@@ -64,7 +64,7 @@ class Webhook extends Controller
         }
 
         // 0. Only process as subscription if mode is 'subscription'
-        // If mode is 'payment', it's a one-time purchase (Excel list) so we don't grant periodic access.
+        // If mode is 'payment', it's a one-time purchase (Excel list or Custom Bonus)
         if (($session->mode ?? '') !== 'subscription') {
             log_message('info', "[Webhook::stripe] One-time payment completed for user {$userId}. No subscription created.");
             
@@ -101,6 +101,29 @@ class Webhook extends Controller
                     $userModel->update($userId, ['stripe_customer_id' => $stripeCustomerId]);
                 }
             }
+
+            // CUSTOM BONUS WALLET RECHARGE
+            if ($planSlug === 'custom_bonus') {
+                $credits = (int) ($session->metadata->credits ?? 0);
+                if ($credits > 0 && $userId > 0) {
+                    $db = \Config\Database::connect();
+                    
+                    // 1. Añadir saldo al wallet
+                    $db->query("INSERT INTO user_wallets (user_id, balance) VALUES (?, ?) ON DUPLICATE KEY UPDATE balance = balance + ?", [$userId, $credits, $credits]);
+                    
+                    // 2. Registrar transacción
+                    $db->table('user_wallet_transactions')->insert([
+                        'user_id' => $userId,
+                        'amount' => $credits,
+                        'type' => 'recharge',
+                        'description' => 'Recarga Stripe Checkout (' . $session->id . ')',
+                        'reference_id' => $session->id,
+                        'created_at' => date('Y-m-d H:i:s')
+                    ]);
+                    log_message('info', "[Webhook::stripe] Added {$credits} credits to wallet for user {$userId}");
+                }
+            }
+
             return;
         }
 

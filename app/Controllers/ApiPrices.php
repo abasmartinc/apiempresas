@@ -13,4 +13,12 @@ class ApiPrices extends BaseController
 
         return view('seo/api_prices', ['freeLimit' => $freeLimit]);
     }
+
+    /**
+     * Muestra el Wizard interactivo para crear un bono de créditos a medida
+     */
+    public function customBonusWizard()
+    {
+        return view('seo/api_custom_bonus');
+    }
 }

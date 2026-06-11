@@ -1596,11 +1596,33 @@
 
             </div>
 
-            <div
-                style="margin-top: 40px; text-align: center; background: #f8fafc; padding: 24px; border-radius: 20px; border: 1px dashed #cbd5e1;">
-                <p style="color: #64748b; font-weight: 700; margin: 0;">¿Necesitas más de 20.000 consultas o soporte
-                    Enterprise? <a href="<?= site_url('contact') ?>"
-                        style="color: #3b82f6; text-decoration: none;">Hablemos de tu proyecto →</a></p>
+            <div style="margin-top: 60px; background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #f0fdf4 100%); padding: 48px 32px; border-radius: 24px; text-align: center; position: relative; overflow: hidden; border: 1px solid rgba(59, 130, 246, 0.15); box-shadow: 0 20px 40px -15px rgba(37, 99, 235, 0.1); max-width: 900px; margin-left: auto; margin-right: auto;">
+                
+                <!-- Patrón de puntos decorativo de fondo -->
+                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.4; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px; pointer-events: none;"></div>
+                
+                <!-- Efectos de luz suaves -->
+                <div style="position: absolute; top: -30%; left: -10%; width: 50%; height: 160%; background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 60%); pointer-events: none;"></div>
+                <div style="position: absolute; bottom: -30%; right: -10%; width: 50%; height: 160%; background: radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 60%); pointer-events: none;"></div>
+
+                <div style="position: relative; z-index: 1;">
+                    <div style="display: inline-block; background: #ffffff; color: #2563eb; font-size: 0.8rem; font-weight: 800; padding: 6px 16px; border-radius: 99px; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 16px; box-shadow: 0 4px 6px -1px rgba(37,99,235,0.1); border: 1px solid rgba(59,130,246,0.1);">Nuevo Plan a Medida</div>
+                    <h3 style="color: #0f172a; font-size: 2.1rem; font-weight: 900; margin: 0 0 12px; letter-spacing: -0.03em;">¿No quieres ataduras mensuales?</h3>
+                    <p style="color: #475569; font-size: 1.15rem; max-width: 600px; margin: 0 auto 32px; line-height: 1.6;">Diseña tu propio <strong style="color: #0f172a;">Bono de Créditos Prepago</strong>. Paga una sola vez, consúmelo a tu ritmo y consigue descuentos automáticos por volumen.</p>
+                    
+                    <a href="<?= site_url('crear-bono-api') ?>" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; padding: 18px 40px; border-radius: 16px; font-weight: 800; font-size: 1.1rem; text-decoration: none; box-shadow: 0 10px 25px rgba(37,99,235,0.4); transition: all 0.3s ease; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 10h12" />
+                            <path d="M4 14h9" />
+                            <path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2" />
+                        </svg>
+                        Crear mi Bono Personalizado
+                    </a>
+                </div>
+            </div>
+
+            <div style="margin-top: 24px; text-align: center; padding: 16px;">
+                <p style="color: #64748b; font-weight: 700; margin: 0; font-size: 0.95rem;">¿Necesitas soporte Enterprise o facturación anual a medida? <a href="<?= site_url('contact') ?>" style="color: #3b82f6; text-decoration: none;">Hablemos de tu proyecto →</a></p>
             </div>
             </div>
         </section>

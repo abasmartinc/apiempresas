@@ -13,6 +13,24 @@ class ApiKeyFilter implements FilterInterface
     public static string $apiRequestId = '';
     public static bool $apiSkipBilling = false;
 
+    private function getEndpointCost(string $path): int
+    {
+        // Endpoints que no deben costar
+        if (strpos($path, 'api/v1/webhooks') !== false) return 0;
+        if (strpos($path, 'api/v1/usage') !== false) return 0;
+
+        // "vamos a dejar los dos primeros a 1 credito y los otros a 3"
+        // 2. api/v1/companies/search
+        if (strpos($path, 'api/v1/companies/search') !== false) return 1;
+        // 1. api/v1/companies (Exact match ignoring query params and trailing slash)
+        if (preg_match('#api/v1/companies/?$#', $path)) return 1;
+
+        // Los demás (api/v1/*) a 3 créditos
+        if (strpos($path, 'api/v1/') !== false) return 3;
+
+        return 1; // Fallback
+    }
+
     public function before(RequestInterface $request, $arguments = null)
     {
         helper('api');
@@ -23,7 +41,6 @@ class ApiKeyFilter implements FilterInterface
         // 1) Leer API key (header recomendado)
         $apiKey = trim((string) $request->getHeaderLine('X-API-KEY'));
 
-        // 2) Alternativa: permitir también "Authorization: Bearer <APIKEY>"
         if ($apiKey === '') {
             $auth = trim((string) $request->getHeaderLine('Authorization'));
             if (stripos($auth, 'Bearer ') === 0) {
@@ -32,9 +49,7 @@ class ApiKeyFilter implements FilterInterface
         }
 
         if ($apiKey === '') {
-            return service('response')
-                ->setStatusCode(401)
-                ->setJSON(['error' => 'Falta la API key (X-API-KEY).']);
+            return service('response')->setStatusCode(401)->setJSON(['error' => 'Falta la API key (X-API-KEY).']);
         }
 
         // 3) Validar contra DB
@@ -48,24 +63,18 @@ class ApiKeyFilter implements FilterInterface
             ->getRow();
 
         if (!$row) {
-            return service('response')
-                ->setStatusCode(401)
-                ->setJSON(['error' => 'API key inválida']);
+            return service('response')->setStatusCode(401)->setJSON(['error' => 'API key inválida']);
         }
 
         if ((int)$row->is_active !== 1 || (int)$row->user_active !== 1) {
-            return service('response')
-                ->setStatusCode(403)
-                ->setJSON(['error' => 'API key inactiva o usuario inactivo']);
+            return service('response')->setStatusCode(403)->setJSON(['error' => 'API key inactiva o usuario inactivo']);
         }
 
         // 4) Registrar uso (con throttling para evitar bloqueos en ráfagas)
         try {
             $lastUsed = $row->last_used_at ? strtotime($row->last_used_at) : 0;
             if (time() - $lastUsed > 300) { // Solo actualizar cada 5 minutos
-                $db->table('api_keys')
-                    ->where('id', (int)$row->api_key_id)
-                    ->update(['last_used_at' => date('Y-m-d H:i:s')]);
+                $db->table('api_keys')->where('id', (int)$row->api_key_id)->update(['last_used_at' => date('Y-m-d H:i:s')]);
             }
         } catch (\Throwable $e) {
             log_message('error', '[ApiKeyFilter::before:last_used_at] ' . $e->getMessage());
@@ -93,8 +102,6 @@ class ApiKeyFilter implements FilterInterface
 
                 if ($sub) {
                     $now = date('Y-m-d H:i:s');
-                    // Perpetual Free Plan: If slug is 'free', it never expires.
-                    // For others, we check the date.
                     if ($sub->plan_slug === 'free' || $sub->current_period_end > $now) {
                         $subscriptionId = (int)$sub->subscription_id;
                         $planId         = (int)$sub->plan_id;
@@ -116,7 +123,6 @@ class ApiKeyFilter implements FilterInterface
                     ->getRow();
 
                 if ($sub) {
-                    // For the legacy/fallback table, we just assume active means valid if found
                     $subscriptionId = (int)$sub->subscription_id;
                     $planId         = (int)$sub->plan_id;
                     $planSlug       = $sub->plan_slug;
@@ -126,88 +132,86 @@ class ApiKeyFilter implements FilterInterface
             log_message('error', '[ApiKeyFilter::before:subscription] ' . $e->getMessage());
         }
 
+        // 4.1.5) Determinar Coste (Universal Credits) y Saldo
+        $endpointPath = (string) $request->getUri()->getPath();
+        $creditCost = $this->getEndpointCost($endpointPath);
+
+        if ($creditCost === 0) {
+            self::$apiSkipBilling = true;
+        }
+
+        $walletBalance = 0;
+        if ($creditCost > 0 && $db->tableExists('user_wallets')) {
+            $walletRow = $db->table('user_wallets')->where('user_id', (int)$row->user_id)->get()->getRow();
+            if ($walletRow) {
+                $walletBalance = (int)$walletRow->balance;
+            }
+        }
+
+        $subCost = 0;
+        $walletCost = 0;
+
         // 4.2) Verificar Límites de Consumo
         try {
-            $planRow = $db->table('api_plans')
-                ->select('monthly_quota')
-                ->where('id', (int)$planId)
-                ->get()
-                ->getRow();
-            
+            $planRow = $db->table('api_plans')->select('monthly_quota')->where('id', (int)$planId)->get()->getRow();
             $monthlyQuota = $planRow ? (int)$planRow->monthly_quota : get_free_plan_limit();
 
             $currentMonth = date('Y-m');
-            // Cache key adaptado: si es plan Free, es lifetime, si no, es mensual
-            $cacheKey = ((int)$planId === 1) 
-                ? "api_usage_lifetime_{$row->user_id}" 
-                : "api_usage_{$row->user_id}_{$currentMonth}";
-            
+            $cacheKey = ((int)$planId === 1) ? "api_usage_lifetime_{$row->user_id}" : "api_usage_{$row->user_id}_{$currentMonth}";
             $currentUsage = cache()->get($cacheKey);
 
             if ($currentUsage === null) {
                 if ((int)$planId === 1) {
-                    // Plan Free: Bono 100 consultas Lifetime (desde hoy 2026-05-28)
-                    $usageRow = $db->table('api_usage_daily')
-                        ->selectSum('requests_count')
-                        ->where('user_id', (int)$row->user_id)
-                        ->where('date >=', '2026-05-28')
-                        ->get()
-                        ->getRow();
+                    $usageRow = $db->table('api_usage_daily')->selectSum('requests_count')->where('user_id', (int)$row->user_id)->where('date >=', '2026-05-28')->get()->getRow();
                 } else {
-                    // Planes de Pago: Consumo Mensual
-                    $usageRow = $db->table('api_usage_daily')
-                        ->selectSum('requests_count')
-                        ->where('user_id', (int)$row->user_id)
-                        ->like('date', $currentMonth, 'after')
-                        ->get()
-                        ->getRow();
+                    $usageRow = $db->table('api_usage_daily')->selectSum('requests_count')->where('user_id', (int)$row->user_id)->like('date', $currentMonth, 'after')->get()->getRow();
                 }
                 $currentUsage = $usageRow ? (int)$usageRow->requests_count : 0;
-                
-                // Cacheamos el uso por 30 segundos para aliviar la DB en ráfagas Enterprise
                 cache()->save($cacheKey, $currentUsage, 30);
             }
 
-            if ($currentUsage >= $monthlyQuota) {
-                $errorMsg = ((int)$planId === 1)
-                    ? 'Has consumido las ' . $monthlyQuota . ' consultas gratuitas garantizadas. Por favor, actualiza tu plan a Pro para continuar usando la API.'
-                    : 'Has superado el límite mensual de consultas de tu plan (' . $monthlyQuota . ').';
+            // Waterfall Billing Logic: Suscripciones pagan 1 petición, Monedero paga el peso en créditos (1 o 3)
+            if (!self::$apiSkipBilling && $creditCost > 0) {
+                $monthlyRemaining = max(0, $monthlyQuota - $currentUsage);
+                $requestCost = 1; // Para la suscripción, 1 llamada = 1 petición
+                
+                if ($monthlyRemaining >= $requestCost) {
+                    // Queda cuota mensual, se cobra 1 petición de la suscripción
+                    $subCost = $requestCost;
+                } else {
+                    // Cuota agotada, se cobra del monedero el peso completo en créditos
+                    $walletCost = $creditCost;
+                }
 
-                return service('response')
-                    ->setStatusCode(429)
-                    ->setJSON([
+                if ($walletCost > $walletBalance) {
+                    $errorMsg = ((int)$planId === 1)
+                        ? 'Has consumido las ' . $monthlyQuota . ' consultas gratuitas garantizadas y no tienes saldo suficiente en el monedero. Recarga créditos o actualiza a un plan de pago.'
+                        : 'Has superado el límite de consultas de tu plan (' . $monthlyQuota . ') y no tienes saldo suficiente en el monedero. Recarga créditos para continuar.';
+
+                    return service('response')->setStatusCode(429)->setJSON([
                         'success' => false,
                         'error'   => 'Quota Exceeded',
                         'message' => $errorMsg,
                         'current_usage' => $currentUsage,
-                        'upgrade_url' => site_url('billing'),
-                        'payment_link' => site_url('billing')
+                        'wallet_balance' => $walletBalance,
+                        'cost_required' => $creditCost,
+                        'upgrade_url' => site_url('billing')
                     ]);
+                }
             }
 
-            // Limit free plan by IP address to 100 requests (Lifetime since migration)
+            // IP Limits for free plan
             if ((int)$planId === 1 && $db->tableExists('api_requests')) {
                 $ipAddress = $request->getIPAddress();
                 $subscriptionTable = $db->tableExists('user_subscriptions') ? 'user_subscriptions' : 'usersuscriptions';
-                
-                $ipUsage = $db->table('api_requests r')
-                    ->join($subscriptionTable . ' us', 'us.user_id = r.user_id')
-                    ->where('us.plan_id', 1)
-                    ->where('us.status', 'active')
-                    ->where('r.ip_address', $ipAddress)
-                    ->where('r.created_at >=', '2026-05-28 00:00:00')
-                    ->countAllResults();
+                $ipUsage = $db->table('api_requests r')->join($subscriptionTable . ' us', 'us.user_id = r.user_id')->where('us.plan_id', 1)->where('us.status', 'active')->where('r.ip_address', $ipAddress)->where('r.created_at >=', '2026-05-28 00:00:00')->countAllResults();
 
                 if ($ipUsage >= 100) {
-                    return service('response')
-                        ->setStatusCode(429)
-                        ->setJSON([
-                            'success' => false,
-                            'error'   => 'Quota Exceeded',
-                            'message' => 'Límite de seguridad por IP alcanzado. Has consumido el bono de 100 consultas gratuitas. Actualiza tu plan.',
-                            'upgrade_url' => site_url('billing'),
-                            'payment_link' => site_url('billing')
-                        ]);
+                    return service('response')->setStatusCode(429)->setJSON([
+                        'success' => false,
+                        'error'   => 'Quota Exceeded',
+                        'message' => 'Límite de seguridad por IP alcanzado. Actualiza tu plan.',
+                    ]);
                 }
             }
 
@@ -219,23 +223,16 @@ class ApiKeyFilter implements FilterInterface
             log_message('error', '[ApiKeyFilter::before:limit_check] ' . $e->getMessage());
         }
 
-        // 4.3) Resolver slug del plan (if not already resolved in step 4.1)
+        // 4.3) Resolver slug del plan
         if ($planId !== 1 && $planSlug === 'free') {
             try {
-                $planRow = $db->table('api_plans')
-                    ->select('slug')
-                    ->where('id', (int)$planId)
-                    ->get()
-                    ->getRow();
-                if ($planRow) {
-                    $planSlug = $planRow->slug;
-                }
+                $planRow = $db->table('api_plans')->select('slug')->where('id', (int)$planId)->get()->getRow();
+                if ($planRow) $planSlug = $planRow->slug;
             } catch (\Throwable $e) {
                 log_message('error', '[ApiKeyFilter::before:plan_slug] ' . $e->getMessage());
             }
         }
 
-        // Capture search term
         $searchTerm = $request->getGet('cif');
         if (!$searchTerm) $searchTerm = $request->getGet('q');
         if (!$searchTerm) $searchTerm = $request->getGet('name');
@@ -248,9 +245,10 @@ class ApiKeyFilter implements FilterInterface
             'plan_slug'       => $planSlug,
             'request_id'      => (string)self::$apiRequestId,
             'search_term'     => $searchTerm ? (string)$searchTerm : null,
+            'sub_cost'        => $subCost,
+            'wallet_cost'     => $walletCost,
         ];
 
-        // 5) Exponer el user_id
         $request->setGlobal('get', array_merge($request->getGet(), [
             '__auth_user_id'    => (int)$row->user_id,
             '__auth_api_key_id' => (int)$row->api_key_id,
@@ -285,9 +283,6 @@ class ApiKeyFilter implements FilterInterface
             if (strlen($ua) > 255) $ua = substr($ua, 0, 255);
 
             $isSearch = (strpos($endpoint, 'api/v1/professional/search') !== false);
-
-            // Optimización Enterprise/Search: No loguear peticiones en la tabla pesada api_requests
-            // si es un cliente Enterprise (solo fallos) o es el endpoint de búsqueda (nunca), para ahorrar I/O.
             $isEnterprise = ($meta['plan_slug'] === 'enterprise');
             
             if ($db->tableExists('api_requests')) {
@@ -310,25 +305,32 @@ class ApiKeyFilter implements FilterInterface
             }
 
             $skipBilling = self::$apiSkipBilling;
-            if (!$skipBilling && $isSearch) {
-                $skipBilling = true;
-            }
 
-            if ($db->tableExists('api_usage_daily') && !$skipBilling) {
+            if ($db->tableExists('api_usage_daily') && !$skipBilling && ($meta['sub_cost'] > 0 || $meta['wallet_cost'] > 0)) {
                 $sqlDaily = "
-                    INSERT INTO api_usage_daily (user_id, plan_id, date, requests_count, created_at, updated_at)
-                    VALUES (?, ?, ?, 1, ?, ?)
+                    INSERT INTO api_usage_daily (user_id, plan_id, date, requests_count, credits_used, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
                     ON DUPLICATE KEY UPDATE
-                      requests_count = requests_count + 1,
+                      requests_count = requests_count + VALUES(requests_count),
+                      credits_used = credits_used + VALUES(credits_used),
                       updated_at = VALUES(updated_at)
                 ";
                 $db->query($sqlDaily, [
                     (int)$meta['user_id'],
                     (int)$meta['plan_id'],
                     $today,
+                    (int)$meta['sub_cost'], 
+                    (int)$meta['wallet_cost'],
                     $now,
                     $now,
                 ]);
+
+                if ((int)$meta['wallet_cost'] > 0) {
+                    $db->table('user_wallets')
+                       ->where('user_id', (int)$meta['user_id'])
+                       ->set('balance', 'balance - ' . (int)$meta['wallet_cost'], false)
+                       ->update();
+                }
             }
 
             $response->setHeader('X-Request-Id', (string)$meta['request_id']);

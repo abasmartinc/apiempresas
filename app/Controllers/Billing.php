@@ -530,6 +530,131 @@ class Billing extends BaseController
     }
 
     /**
+     * POST /billing/checkout_bonus
+     * Checkout dinámico para la venta de bonos de créditos prepago.
+     */
+    public function checkout_bonus()
+    {
+        $postData = $this->request->getPost();
+        
+        if (!session('logged_in')) {
+            // Guardar contexto para después del registro rápido
+            session()->set('pending_checkout_bonus', $postData);
+            return redirect()->to(site_url('register/quick'));
+        }
+
+        if (empty($postData) || !isset($postData['credits'])) {
+            $postData = session('pending_checkout_bonus') ?? [];
+            session()->remove('pending_checkout_bonus');
+        }
+
+        $userId = (int) session('user_id');
+        $credits = (int) ($postData['credits'] ?? 0);
+
+        if ($credits < 10000) {
+            return redirect()->back()->with('error', 'La cantidad mínima de créditos es 10.000.');
+        }
+
+        // Lógica de Precios (Igual a la de Javascript por seguridad)
+        $price = 49;
+        $tiers = [
+            ['qty' => 10000, 'price' => 49],
+            ['qty' => 50000, 'price' => 199],
+            ['qty' => 100000, 'price' => 349],
+            ['qty' => 500000, 'price' => 999],
+            ['qty' => 1000000, 'price' => 1499]
+        ];
+
+        if ($credits >= 1000000) {
+            $price = 1499;
+        } else {
+            for ($i = 0; $i < count($tiers) - 1; $i++) {
+                if ($credits >= $tiers[$i]['qty'] && $credits <= $tiers[$i+1]['qty']) {
+                    $range = $tiers[$i+1]['qty'] - $tiers[$i]['qty'];
+                    $priceRange = $tiers[$i+1]['price'] - $tiers[$i]['price'];
+                    $progress = ($credits - $tiers[$i]['qty']) / $range;
+                    $price = (int) round($tiers[$i]['price'] + ($progress * $priceRange));
+                    break;
+                }
+            }
+        }
+
+        $secretKey = env('STRIPE_SECRET_KEY');
+        if (!$secretKey) {
+            return redirect()->back()->with('error', 'Stripe no está configurado.');
+        }
+
+        \Stripe\Stripe::setApiKey($secretKey);
+
+        try {
+            $successUrl = site_url('billing/success') . '?session_id={CHECKOUT_SESSION_ID}';
+            $cancelUrl = site_url('crear-bono-api');
+            $taxRateId = env('STRIPE_TAX_RATE_ID');
+
+            $lineItem = [
+                'quantity' => 1,
+                'price_data' => [
+                    'currency' => 'eur',
+                    'unit_amount' => (int)($price * 100),
+                    'product_data' => [
+                        'name' => 'Bono ' . number_format($credits, 0, ',', '.') . ' Créditos API',
+                        'description' => 'Paquete prepago de créditos universales sin caducidad.'
+                    ]
+                ]
+            ];
+
+            if ($taxRateId) {
+                $lineItem['tax_rates'] = [$taxRateId];
+            }
+
+            $metadata = [
+                'user_id' => (string) $userId,
+                'plan' => 'custom_bonus',
+                'credits' => (string) $credits,
+            ];
+
+            $sessionParams = [
+                'mode' => 'payment',
+                'line_items' => [$lineItem],
+                'success_url' => $successUrl,
+                'cancel_url' => $cancelUrl,
+                'customer_creation' => 'if_required',
+                'invoice_creation' => [
+                    'enabled' => true,
+                    'invoice_data' => [
+                        'metadata' => $metadata
+                    ]
+                ],
+                'metadata' => $metadata,
+                'client_reference_id' => (string) $userId,
+            ];
+
+            $user = clone $this->userModel; // Use clone or fresh model just to be safe
+            $user_row = clone $this->userModel->find($userId);
+            if (!empty($user_row->stripe_customer_id)) {
+                $sessionParams['customer'] = $user_row->stripe_customer_id;
+            } else {
+                $sessionParams['customer_email'] = $user_row->email ?? null;
+            }
+
+            // Guardar contexto para la success page
+            session()->set('checkout_context', [
+                'type' => 'custom_bonus',
+                'credits' => $credits,
+                'price' => $price
+            ]);
+
+            $session = \Stripe\Checkout\Session::create($sessionParams);
+
+            return redirect()->to($session->url);
+
+        } catch (\Throwable $e) {
+            log_message('error', '[Billing::checkout_bonus] ' . $e->getMessage());
+            return redirect()->back()->with('error', 'No se pudo iniciar el pago con Stripe.');
+        }
+    }
+
+    /**
      * GET /billing/single_checkout
      * Starts a one-time Stripe payment session directly via GET (e.g. from SEO pages)
      */

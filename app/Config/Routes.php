@@ -75,7 +75,8 @@ $routes->get('billing/paypal/return', 'Billing::paypalReturn');
 
 $routes->get('consumption', 'Usage::index');
 $routes->get('api-empresas', 'ApiPrices::index');
-// $routes->get('radar', 'RadarPrices::index'); // Movido a Radar::index para manejar invitados vs usuarios logueados
+$routes->get('crear-bono-api', 'ApiPrices::customBonusWizard');
+$routes->post('billing/checkout_bonus', 'Billing::checkout_bonus');
 $routes->get('plugin-wordpress-buscador-empresas', 'Plugin::index');
 $routes->get('obtener-plugin-wordpress', 'Plugin::get_plugin');
 $routes->get('descargar/plugin-wp', 'Plugin::download');
