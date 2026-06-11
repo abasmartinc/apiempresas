@@ -204,7 +204,7 @@ class CompanyModel extends Model
     private function fallbackBestByLike(string $qClean): ?array
     {
         $tokens = array_values(array_filter(explode(' ', $qClean)));
-        
+
         // Filtrar primero por longitud mínima (3 caracteres) para evitar grupos vacíos ()
         $validTokens = array_filter($tokens, fn($t) => mb_strlen($t, 'UTF-8') >= 3);
         $validTokens = array_values(array_slice($validTokens, 0, 4));
@@ -342,9 +342,9 @@ class CompanyModel extends Model
         foreach (array_slice($tokens, 0, 6) as $t) {
             $len = mb_strlen($t, 'UTF-8');
             if ($len >= 4) {
-               $out[] = '+' . $t . '*';
+                $out[] = '+' . $t . '*';
             } else {
-               $out[] = $t . '*'; // Not required if short/stopword
+                $out[] = $t . '*'; // Not required if short/stopword
             }
         }
         return implode(' ', $out);
@@ -432,7 +432,7 @@ class CompanyModel extends Model
         $seenCifs = [];
         $page = max(1, $page);
         $offset = ($page - 1) * $limit;
-        
+
         // Fetch one extra item to determine has_more
         $fetchLimit = $limit > 0 ? $limit + ($returnMeta ? 1 : 0) : 0;
         $targetFetch = $fetchLimit > 0 ? $offset + $fetchLimit : 0;
@@ -473,14 +473,14 @@ class CompanyModel extends Model
                             FROM {$this->table}
                             WHERE MATCH(companies.company_name, companies.cnae_label, companies.registro_mercantil) AGAINST (? IN BOOLEAN MODE)
                             ORDER BY score DESC";
-                            
+
                     if ($hasLimit) {
                         $sql .= " LIMIT ?";
                         $query = $this->db->query($sql, [$booleanTerm, $booleanTerm, $targetFetch]);
                     } else {
                         $query = $this->db->query($sql, [$booleanTerm, $booleanTerm]);
                     }
-                    
+
                     foreach ($query->getResultArray() as $row) {
                         if ($hasLimit && count($results) >= $targetFetch)
                             break;
@@ -530,21 +530,21 @@ class CompanyModel extends Model
         $finalData = [];
         if (!empty($results)) {
             $ids = array_column($results, 'id');
-            
+
             $builderData = $this->builder();
             $builderData->select(implode(', ', $this->selectFields));
             $builderData->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
             $builderData->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
             $builderData->whereIn('companies.id', $ids);
-            
+
             $fetchedRows = $builderData->get()->getResultArray();
-            
+
             // Reordenar para que coincidan con el orden de búsqueda original (que respeta el score)
             $rowMap = [];
             foreach ($fetchedRows as $row) {
                 $rowMap[$row['id']] = $row;
             }
-            
+
             foreach ($ids as $id) {
                 if (isset($rowMap[$id])) {
                     $finalData[] = $rowMap[$id];

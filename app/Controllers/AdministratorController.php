@@ -39,7 +39,10 @@ class AdministratorController extends BaseController
         // Check if admin has requested privacy opt-out (Right to be Forgotten)
         $db = \Config\Database::connect();
         $isOptedOut = $db->table('admin_privacy_optouts')->where('slug', $slug)->countAllResults() > 0;
-        $robots = $isOptedOut ? 'noindex,nofollow' : 'index,follow';
+        if ($isOptedOut) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Perfil eliminado por privacidad.');
+        }
+        $robots = 'index,follow';
 
         return view('administrator', [
             'adminName'   => $adminName,

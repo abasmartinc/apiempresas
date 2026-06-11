@@ -61,6 +61,15 @@ class Company extends BaseController
      */
     private function prepareViewData(array $company): array
     {
+        // Check if company has requested privacy opt-out (Right to be Forgotten)
+        if (!empty($company['cif'])) {
+            $db = \Config\Database::connect();
+            $isOptedOut = $db->table('company_privacy_optouts')->where('cif', $company['cif'])->countAllResults() > 0;
+            if ($isOptedOut) {
+                throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Perfil de empresa eliminado por privacidad.');
+            }
+        }
+
         $statusRaw = (string)($company['status'] ?? '');
         $isActive  = strtoupper($statusRaw) === 'ACTIVA';
         

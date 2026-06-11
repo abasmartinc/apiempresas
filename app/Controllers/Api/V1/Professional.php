@@ -57,7 +57,7 @@ class Professional extends ResourceController
         if ($q === '') {
             return $this->respond([
                 'success' => false,
-                'error'   => 'VALIDATION_ERROR',
+                'error' => 'VALIDATION_ERROR',
                 'message' => 'El parámetro "q" es obligatorio.'
             ], ResponseInterface::HTTP_BAD_REQUEST);
         }
@@ -67,12 +67,12 @@ class Professional extends ResourceController
             $results = $this->companyModel->searchMany($q, 20);
 
             // Formateamos la respuesta para que sea ligera (estilo buscador)
-            $formatted = array_map(function($item) {
+            $formatted = array_map(function ($item) {
                 $data = [
-                    'name'    => $item['name'] ?? ($item['company_name'] ?? ''),
-                    'cif'     => $item['cif'] ?? '',
+                    'name' => $item['name'] ?? ($item['company_name'] ?? ''),
+                    'cif' => $item['cif'] ?? '',
                     'address' => $item['address'] ?? '',
-                    'cnae'    => $item['cnae'] ?? '',
+                    'cnae' => $item['cnae'] ?? '',
                 ];
 
                 return $data;
@@ -80,14 +80,14 @@ class Professional extends ResourceController
 
             return $this->respond([
                 'success' => true,
-                'data'    => $formatted
+                'data' => $formatted
             ], ResponseInterface::HTTP_OK);
 
         } catch (\Throwable $e) {
             log_message('error', '[Professional::search] ' . $e->getMessage());
             return $this->respond([
                 'success' => false,
-                'error'   => 'SERVER_ERROR',
+                'error' => 'SERVER_ERROR',
                 'message' => 'Error interno en la búsqueda.'
             ], ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -127,7 +127,7 @@ class Professional extends ResourceController
         if ($cif === '') {
             return $this->respond([
                 'success' => false,
-                'error'   => 'VALIDATION_ERROR',
+                'error' => 'VALIDATION_ERROR',
                 'message' => 'El parámetro "cif" es obligatorio.'
             ], ResponseInterface::HTTP_BAD_REQUEST);
         }
@@ -138,7 +138,7 @@ class Professional extends ResourceController
             if (!$company) {
                 return $this->respond([
                     'success' => false,
-                    'error'   => 'NOT_FOUND',
+                    'error' => 'NOT_FOUND',
                     'message' => 'No se encontró la empresa con el CIF proporcionado.'
                 ], ResponseInterface::HTTP_NOT_FOUND);
             }
@@ -149,14 +149,14 @@ class Professional extends ResourceController
 
             return $this->respond([
                 'success' => true,
-                'data'    => $company
+                'data' => $company
             ], ResponseInterface::HTTP_OK);
 
         } catch (\Throwable $e) {
             log_message('error', '[Professional::details] ' . $e->getMessage());
             return $this->respond([
                 'success' => false,
-                'error'   => 'SERVER_ERROR',
+                'error' => 'SERVER_ERROR',
                 'message' => 'Error al consultar los detalles.'
             ], ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
         }
