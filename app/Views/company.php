@@ -769,6 +769,19 @@
                                         <span><?= esc($statusRaw) ?></span>
                                     </div>
                                     <?php endif; ?>
+
+                                    <?php if (!empty($company['updated_at'])): ?>
+                                    <div style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.85rem;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polyline points="12 6 12 12 16 14"></polyline>
+                                        </svg>
+                                        <span>Última actualización: <?= date('d/m/Y', strtotime($company['updated_at'])) ?></span>
+                                    </div>
+                                    <?php endif; ?>
+
+
                                     
                                     <div style="margin-left: auto;">
                                         <a href="<?= site_url('empresa/export/' . $company['id']) ?>"
@@ -919,6 +932,87 @@
                                     </dd>
                                 </div>
 
+                                <?php if (!empty($company['website_official'])): ?>
+                                <div class="b2b-data-row">
+                                    <dt class="b2b-data-label">
+                                        <div>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                                            </svg>
+                                        </div>
+                                        Página Web
+                                    </dt>
+                                    <dd class="b2b-data-value">
+                                        <?php 
+                                            $hrefUrl = trim($company['website_official']);
+                                            if (!preg_match("~^(?:f|ht)tps?://~i", $hrefUrl)) {
+                                                $hrefUrl = "https://" . ltrim($hrefUrl, '/');
+                                            }
+                                        ?>
+                                        <a href="<?= esc($hrefUrl) ?>" target="_blank" rel="noopener nofollow" style="color: #2563eb; text-decoration: none; font-weight: 600;">
+                                            <?= esc(str_replace(['http://', 'https://', 'www.'], '', $company['website_official'])) ?>
+                                        </a>
+                                    </dd>
+                                </div>
+                                <?php endif; ?>
+
+                                <?php $phoneVal = trim($company['phone'] ?? ''); ?>
+                                <?php if (!empty($phoneVal) && $phoneVal !== '-'): ?>
+                                <div class="b2b-data-row">
+                                    <dt class="b2b-data-label">
+                                        <div>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                            </svg>
+                                        </div>
+                                        Teléfono
+                                    </dt>
+                                    <dd class="b2b-data-value" style="display: flex; flex-wrap: wrap; gap: 12px;">
+                                        <?php 
+                                        $cleanPhones = str_replace([',', ';', '-', '/'], ' ', $phoneVal);
+                                        $phonesList = array_unique(array_filter(explode(' ', $cleanPhones)));
+                                        foreach ($phonesList as $p): ?>
+                                            <a href="tel:<?= esc($p) ?>" style="color: #0f172a; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center;">
+                                                <?= esc($p) ?>
+                                            </a>
+                                        <?php endforeach; ?>
+                                    </dd>
+                                </div>
+                                <?php endif; ?>
+
+                                <?php $mobileVal = trim($company['phone_mobile'] ?? ''); ?>
+                                <?php if (!empty($mobileVal) && $mobileVal !== '-'): ?>
+                                <div class="b2b-data-row">
+                                    <dt class="b2b-data-label">
+                                        <div>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                                                <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                                            </svg>
+                                        </div>
+                                        Teléfono Móvil
+                                    </dt>
+                                    <dd class="b2b-data-value" style="display: flex; flex-wrap: wrap; gap: 12px;">
+                                        <?php 
+                                        $cleanMobiles = str_replace([',', ';', '-', '/'], ' ', $mobileVal);
+                                        $mobilesList = array_unique(array_filter(explode(' ', $cleanMobiles)));
+                                        foreach ($mobilesList as $m): ?>
+                                            <a href="tel:<?= esc($m) ?>" style="color: #0f172a; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center;">
+                                                <?= esc($m) ?>
+                                            </a>
+                                        <?php endforeach; ?>
+                                    </dd>
+                                </div>
+                                <?php endif; ?>
+
                                 <div class="b2b-data-row">
                                     <dt class="b2b-data-label">
                                         <div>
@@ -1008,7 +1102,7 @@
                                         </div>
                                         Constitución
                                     </dt>
-                                    <dd class="b2b-data-value"><time datetime="<?= esc($constVal) ?>"><?= esc($constVal) ?></time></dd>
+                                    <dd class="b2b-data-value"><time datetime="<?= esc($constVal) ?>"><?= date('d/m/Y', strtotime($constVal)) ?></time></dd>
                                 </div>
                                 <?php endif; ?>
                                 <?php $objVal = trim($company['corporate_purpose'] ?? $company['objeto_social'] ?? ''); ?>
@@ -1273,7 +1367,11 @@
 
                                     <p class="seo-text mb-0">
                                         La fecha de constitución de la empresa es el
-                                        <strong><?= esc($company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '-') ?></strong>
+                                        <?php 
+                                            $fnd = $company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '-';
+                                            if ($fnd !== '-' && !empty($fnd)) $fnd = date('d/m/Y', strtotime($fnd));
+                                        ?>
+                                        <strong><?= esc($fnd) ?></strong>
                                         y su estado mercantil actual es <strong><?= esc($statusRaw) ?></strong>.
                                         En esta página podrá consultar el <strong>Informe Mercantil</strong>, el historial
                                         de
@@ -1314,9 +1412,7 @@
                                                     opacity: .5;
                                                 }
                                             }
-                                        </style>
-                                        .bg-halo { display: none; }
-
+                                            .bg-halo { display: none; }
                                         </style>
                                         <svg class="spin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"
                                             stroke="currentColor" stroke-width="2">
