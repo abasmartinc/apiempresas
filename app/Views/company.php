@@ -301,6 +301,139 @@
             }
         }
 
+        @media (max-width: 768px) {
+            main {
+                padding-top: 20px !important;
+            }
+            .container {
+                padding-left: 15px !important;
+                padding-right: 15px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            .b2b-hero {
+                flex-direction: column !important;
+                align-items: center !important;
+                text-align: center;
+                padding: 20px 16px !important;
+                gap: 16px !important;
+                width: 100% !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                box-sizing: border-box !important;
+            }
+            .b2b-header-wrapper {
+                width: 100% !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                box-sizing: border-box !important;
+            }
+            .b2b-hero__avatar {
+                width: 72px !important;
+                height: 72px !important;
+            }
+            .b2b-hero__content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+            }
+            .b2b-hero__content h1 {
+                font-size: 1.25rem !important;
+                word-break: break-word;
+                text-align: center;
+                margin-bottom: 8px !important;
+            }
+            .b2b-hero__meta {
+                justify-content: center !important;
+                flex-wrap: wrap;
+                gap: 8px !important;
+            }
+            .b2b-data-row {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 4px !important;
+            }
+            .b2b-data-label {
+                width: 100% !important;
+            }
+            .b2b-data-value {
+                width: 100%;
+                word-break: break-word;
+            }
+            .b2b-hero > div[style*="rotate(45deg)"] {
+                right: -85px !important;
+                top: 20px !important;
+                font-size: 0.65rem !important;
+                padding: 4px 0 !important;
+            }
+            .b2b-hero__actions {
+                width: 100%;
+                flex-direction: column !important;
+            }
+            .b2b-hero__actions a {
+                width: 100%;
+                justify-content: center;
+            }
+            .b2b-tabs ul {
+                flex-wrap: nowrap;
+                padding-bottom: 8px;
+            }
+            .b2b-card {
+                padding: 16px !important;
+                width: 100% !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                box-sizing: border-box !important;
+            }
+            .api-dev-grid {
+                grid-template-columns: 1fr !important;
+                padding: 1.5rem !important;
+                gap: 1.5rem !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .api-dev-info h3 {
+                font-size: 1.35rem !important;
+                flex-wrap: wrap;
+            }
+            .api-dev-info a {
+                width: 100% !important;
+                justify-content: center;
+                text-align: center;
+                padding: 0.875rem 1rem !important;
+                white-space: normal;
+                box-sizing: border-box !important;
+            }
+            .company-code-card {
+                max-width: 100%;
+                overflow-x: auto !important;
+            }
+            .company-code-card pre {
+                white-space: pre-wrap !important;
+                word-break: break-all !important;
+            }
+            .dash-cta-card {
+                grid-template-columns: 1fr !important;
+                text-align: center;
+                padding: 2rem 1.5rem !important;
+                gap: 1.5rem !important;
+            }
+            .dash-cta-card h3 {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                text-align: center;
+            }
+            .dash-cta-card > div:last-child {
+                min-width: 100% !important;
+                display: flex;
+                justify-content: center;
+            }
+        }
+
 
         /* Cards */
         .b2b-card {
@@ -662,7 +795,7 @@
                     unset($node);
                 }
                 ?>
-                <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0px !important">
+                <div style="max-width: 1200px; margin: 0 auto; padding: 0px;">
                     <!-- HERO SECTION -->
                     <div class="b2b-header-wrapper"
                         style="padding: 0; margin-bottom: 24px;">
@@ -709,7 +842,7 @@
                             <?php endif; ?>
                             
                             <!-- Premium Avatar -->
-                            <div style="flex-shrink: 0; width: 100px; height: 100px; border-radius: 24px; background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 12px 24px -8px rgba(59, 130, 246, 0.5); position: relative; overflow: hidden;">
+                            <div class="b2b-hero__avatar" style="flex-shrink: 0; width: 100px; height: 100px; border-radius: 24px; background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 12px 24px -8px rgba(59, 130, 246, 0.5); position: relative; overflow: hidden;">
                                 <!-- Soft glow overlay inside -->
                                 <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%); transform: rotate(30deg); pointer-events: none;"></div>
                                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -741,7 +874,7 @@
                                     <?= esc($company['name'] ?? '-') ?> - CIF <?= esc($company['cif'] ?? $company['nif'] ?? '') ?>
                                 </h1>
 
-                                <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; color: #475569; font-size: 0.95rem; font-weight: 500;">
+                                <div class="b2b-hero__meta" style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; color: #475569; font-size: 0.95rem; font-weight: 500;">
                                     <div style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                             stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

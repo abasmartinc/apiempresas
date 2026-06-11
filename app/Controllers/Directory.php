@@ -71,7 +71,7 @@ class Directory extends BaseController
 
             // Últimas 10 empresas para la home del directorio (excluyendo fechas futuras erróneas)
             $latest = $this->companyModel->builder()
-                ->select('id, cif, company_name as name, fecha_constitucion as date, registro_mercantil as province')
+                ->select('id, cif, company_name as name, fecha_constitucion as founded, cnae_label, registro_mercantil as province')
                 ->where('fecha_constitucion IS NOT NULL')
                 ->where('fecha_constitucion <=', date('Y-m-d'))
                 ->orderBy('fecha_constitucion', 'DESC')
@@ -132,7 +132,7 @@ class Directory extends BaseController
         $offset = ($page - 1) * $perPage;
 
         $builder = $this->companyModel->builder()
-            ->select('id, cif, company_name as name, registro_mercantil as province');
+            ->select('id, cif, company_name as name, registro_mercantil as province, cnae_label, fecha_constitucion as founded');
             
         if (in_array(strtolower($provinceName), ['alicante', 'alacant', 'alicante/alacant'])) {
             $builder->where('registro_mercantil', 'Alicante');
@@ -311,7 +311,7 @@ class Directory extends BaseController
         $totalPages = max(1, (int) ceil($totalCompanies / $perPage));
 
         $companies = $this->companyModel->builder()
-            ->select('id, cif, company_name as name, cnae_label, registro_mercantil as province')
+            ->select('id, cif, company_name as name, cnae_label, fecha_constitucion as founded, registro_mercantil as province')
             ->where('cnae_code', $cnaeCode)
             ->orderBy('company_name', 'ASC')
             ->limit($perPage, $offset)
@@ -410,7 +410,7 @@ class Directory extends BaseController
         $totalPages = max(1, (int) ceil($totalCompanies / $perPage));
 
         $companies = $this->companyModel->builder()
-            ->select('id, cif, company_name as name, registro_mercantil as province, fecha_constitucion')
+            ->select('id, cif, company_name as name, cnae_label, fecha_constitucion as founded, registro_mercantil as province')
             ->where('fecha_constitucion IS NOT NULL')
             ->where('fecha_constitucion <=', date('Y-m-d'))
             ->where('fecha_constitucion >=', $thirtyDaysAgo)
@@ -458,7 +458,7 @@ class Directory extends BaseController
         $offset = ($page - 1) * $perPage;
 
         $companies = $this->companyModel->builder()
-            ->select('id, cif, company_name as name, cnae_label, registro_mercantil as province')
+            ->select('id, cif, company_name as name, cnae_label, fecha_constitucion as founded, registro_mercantil as province')
             ->where('registro_mercantil', $provinceName)
             ->where('cnae_code', $cnaeCode)
             ->orderBy('company_name', 'ASC')
