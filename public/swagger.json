@@ -1,3 +1,802 @@
 {
-    "openapi": "3.0.0"
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Empresas",
+        "description": "Documentación oficial de la API de Empresas",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/",
+            "description": "Entorno Actual"
+        }
+    ],
+    "paths": {
+        "/api/v1/companies": {
+            "get": {
+                "tags": [
+                    "1. Plan Free / General"
+                ],
+                "summary": "Obtener Empresa por CIF",
+                "description": "Devuelve los datos detallados de una empresa a partir de su CIF exacto. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 1 crédito del monedero (bono prepago). Las respuestas con error (400, 404, etc.) no consumen cuota ni créditos.",
+                "operationId": "3306da725bbecc96cbd63f46540e56ae",
+                "parameters": [
+                    {
+                        "name": "cif",
+                        "in": "query",
+                        "description": "El CIF de la empresa a consultar",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "admin",
+                        "in": "query",
+                        "description": "Si es 'true', incluye los administradores y cargos directivos actuales de la empresa. Exclusivo para planes Pro y Business.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Datos de la empresa",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error de validación o formato de CIF incorrecto",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "description": "Código del error: 'VALIDATION_ERROR' o 'INVALID_CIF_FORMAT'",
+                                            "type": "string",
+                                            "example": "INVALID_CIF_FORMAT"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El CIF proporcionado no tiene un formato válido (debe tener una letra, 7 dígitos y un dígito o letra de control)."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Empresa no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "COMPANY_NOT_FOUND"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/companies/search": {
+            "get": {
+                "tags": [
+                    "1. Plan Free / General"
+                ],
+                "summary": "Búsqueda de Empresas",
+                "description": "Busca empresas por nombre o CIF. Permite búsqueda exacta o paginada. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 1 crédito del monedero (bono prepago). Las respuestas con error (400, 404, etc.) no consumen cuota ni créditos.",
+                "operationId": "7505c6f7c5eb0d2af39a3177326b5617",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Nombre o CIF de la empresa a buscar",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "multiple",
+                        "in": "query",
+                        "description": "Si es true, devuelve una lista paginada de coincidencias. Si es false, devuelve la mejor coincidencia.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Número máximo de resultados por página (solo si multiple=true). Máximo 100.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 20
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número de página (solo si multiple=true).",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resultados de la búsqueda",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/companies/score": {
+            "get": {
+                "tags": [
+                    "2. Plan Professional"
+                ],
+                "summary": "Scoring Comercial",
+                "description": "Obtener la puntuación y desglose de scoring para una empresa. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 3 créditos del monedero (bono prepago). Las respuestas con error (400, 404, 403, etc.) no consumen cuota ni créditos.",
+                "operationId": "9b4661101275cf401d165674ea348e66",
+                "parameters": [
+                    {
+                        "name": "cif",
+                        "in": "query",
+                        "description": "CIF de la empresa",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Datos del scoring comercial",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/companies/signals": {
+            "get": {
+                "tags": [
+                    "2. Plan Professional"
+                ],
+                "summary": "Señales Societarias",
+                "description": "Obtener eventos societarios relevantes (BORME) de una empresa. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 3 créditos del monedero (bono prepago). Las respuestas con error (400, 404, 403, etc.) no consumen cuota ni créditos.",
+                "operationId": "03e9cb58fe9920dd2a821da49ddd7921",
+                "parameters": [
+                    {
+                        "name": "cif",
+                        "in": "query",
+                        "description": "CIF de la empresa",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Señales societarias de la empresa",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/companies/insights": {
+            "get": {
+                "tags": [
+                    "3. Plan Business"
+                ],
+                "summary": "Análisis con Inteligencia Artificial",
+                "description": "Obtener un análisis profundo y perfilado de ventas mediante IA. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 3 créditos del monedero (bono prepago). Las respuestas con error (400, 404, 403, etc.) no consumen cuota ni créditos.",
+                "operationId": "18786d5e2d8d8be91882f39936c5756d",
+                "parameters": [
+                    {
+                        "name": "cif",
+                        "in": "query",
+                        "description": "CIF de la empresa",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Insights generados por IA",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/companies/contact-prep": {
+            "get": {
+                "tags": [
+                    "3. Plan Business"
+                ],
+                "summary": "Preparación de Contacto",
+                "description": "Obtener tácticas recomendadas por la IA para contactar o vender a la empresa. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 3 créditos del monedero (bono prepago). Las respuestas con error (400, 404, 403, etc.) no consumen cuota ni créditos.",
+                "operationId": "85cf72fa9acdc26beeb7147ec1e768b3",
+                "parameters": [
+                    {
+                        "name": "cif",
+                        "in": "query",
+                        "description": "CIF de la empresa",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tácticas de preparación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/companies/match": {
+            "get": {
+                "tags": [
+                    "3. Plan Business"
+                ],
+                "summary": "Calculadora de Match B2B",
+                "description": "Evalúa el encaje comercial entre una empresa prospecto y un sector de ventas.",
+                "operationId": "428873cb6ca45cc2398f1735bfe78ef1",
+                "parameters": [
+                    {
+                        "name": "cif",
+                        "in": "query",
+                        "description": "CIF de la empresa prospecto",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "seller_sector",
+                        "in": "query",
+                        "description": "Sector del vendedor (ej: Software, Marketing, Asesoría)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resultado del match score y argumentario de ventas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/companies/network": {
+            "get": {
+                "tags": [
+                    "2. Plan Professional"
+                ],
+                "summary": "Grafos de Poder Societario",
+                "description": "Obtiene la red de vinculación entre empresas a través de sus administradores. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 3 créditos del monedero (bono prepago). Las respuestas con error no consumen cuota ni créditos.",
+                "operationId": "b5b7a1477c590925db6c3751ca3660ec",
+                "parameters": [
+                    {
+                        "name": "cif",
+                        "in": "query",
+                        "description": "CIF de la empresa base",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Grafo de nodos y conexiones (empresas y administradores)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/professional/search": {
+            "get": {
+                "tags": [
+                    "2. Plan Professional"
+                ],
+                "summary": "Búsqueda Autocompletado Profesional",
+                "description": "Devuelve coincidencias ligeras para autocompletado en búsquedas.",
+                "operationId": "a2461cbe092e786068a34d6fcc0d8eae",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Término de búsqueda",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resultados del autocompletado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/professional/details": {
+            "get": {
+                "tags": [
+                    "2. Plan Professional"
+                ],
+                "summary": "Detalles Profesionales de Empresa",
+                "description": "Devuelve los datos profesionales de una empresa basados en su CIF.",
+                "operationId": "508a95024c235c9cc833d09e22138480",
+                "parameters": [
+                    {
+                        "name": "cif",
+                        "in": "query",
+                        "description": "El CIF de la empresa",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles completos de la empresa",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/companies/radar": {
+            "get": {
+                "tags": [
+                    "3. Plan Business"
+                ],
+                "summary": "Búsqueda Radar (Leads)",
+                "description": "Obtener empresas de reciente creación según la provincia y prioridad. Los resultados están limitados por tu plan. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 3 créditos del monedero (bono prepago). Las respuestas con error no consumen cuota ni créditos.",
+                "operationId": "b31701f7df831631439af15c6b6ed8f8",
+                "parameters": [
+                    {
+                        "name": "province",
+                        "in": "query",
+                        "description": "Filtro por provincia",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "range",
+                        "in": "query",
+                        "description": "Rango de tiempo: 'hoy', '7' días o '30' días",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "hoy"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Leads encontrados",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/usage": {
+            "get": {
+                "tags": [
+                    "1. Plan Free / General"
+                ],
+                "summary": "Obtener Estadísticas de Consumo",
+                "description": "Devuelve el recuento de peticiones del mes actual y el historial reciente de empresas consultadas asociado a la API Key.",
+                "operationId": "3ef076df3688a1cc1a57b1e02a840df6",
+                "responses": {
+                    "200": {
+                        "description": "Estadísticas y datos del historial",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/webhooks": {
+            "get": {
+                "tags": [
+                    "3. Plan Business"
+                ],
+                "summary": "Listar Webhooks",
+                "description": "Obtener todos los webhooks configurados para recibir notificaciones (Requiere Plan Business).",
+                "operationId": "d29beef27f3b961d8b638f50e5f41291",
+                "responses": {
+                    "200": {
+                        "description": "Lista de webhooks",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "3. Plan Business"
+                ],
+                "summary": "Crear Webhook",
+                "description": "Registra una nueva URL para recibir eventos asíncronos.",
+                "operationId": "9f3b040ea012169a4f2fea1c1551f351",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "url": {
+                                        "type": "string",
+                                        "format": "uri"
+                                    },
+                                    "event": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Webhook creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "id": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/webhooks/{id}": {
+            "delete": {
+                "tags": [
+                    "3. Plan Business"
+                ],
+                "summary": "Eliminar Webhook",
+                "description": "Elimina un webhook previamente configurado.",
+                "operationId": "84f636f336a23bc8cc89aa63f8fc601b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del webhook a eliminar",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Webhook eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "ApiKeyAuth": {
+                "type": "apiKey",
+                "description": "Introduce tu API Key privada aquí para autenticarte y poder probar los endpoints en tiempo real.",
+                "name": "X-API-KEY",
+                "in": "header"
+            }
+        }
+    },
+    "security": [
+        {
+            "ApiKeyAuth": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "1. Plan Free / General",
+            "description": "1. Plan Free / General"
+        },
+        {
+            "name": "2. Plan Professional",
+            "description": "2. Plan Professional"
+        },
+        {
+            "name": "3. Plan Business",
+            "description": "3. Plan Business"
+        }
+    ]
 }

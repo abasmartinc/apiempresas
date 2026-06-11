@@ -27,7 +27,7 @@ class CompanyEnrichmentController extends ResourceController
     #[OA\Get(
         path: "/api/v1/companies/score",
         summary: "Scoring Comercial",
-        description: "Obtener la puntuación y desglose de scoring para una empresa.",
+        description: "Obtener la puntuación y desglose de scoring para una empresa. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 3 créditos del monedero (bono prepago). Las respuestas con error (400, 404, 403, etc.) no consumen cuota ni créditos.",
         tags: ["2. Plan Professional"]
     )]
     #[OA\Parameter(
@@ -92,7 +92,7 @@ class CompanyEnrichmentController extends ResourceController
     #[OA\Get(
         path: "/api/v1/companies/signals",
         summary: "Señales Societarias",
-        description: "Obtener eventos societarios relevantes (BORME) de una empresa.",
+        description: "Obtener eventos societarios relevantes (BORME) de una empresa. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 3 créditos del monedero (bono prepago). Las respuestas con error (400, 404, 403, etc.) no consumen cuota ni créditos.",
         tags: ["2. Plan Professional"]
     )]
     #[OA\Parameter(
@@ -147,7 +147,7 @@ class CompanyEnrichmentController extends ResourceController
     #[OA\Get(
         path: "/api/v1/companies/insights",
         summary: "Análisis con Inteligencia Artificial",
-        description: "Obtener un análisis profundo y perfilado de ventas mediante IA.",
+        description: "Obtener un análisis profundo y perfilado de ventas mediante IA. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 3 créditos del monedero (bono prepago). Las respuestas con error (400, 404, 403, etc.) no consumen cuota ni créditos.",
         tags: ["3. Plan Business"]
     )]
     #[OA\Parameter(
@@ -217,7 +217,7 @@ class CompanyEnrichmentController extends ResourceController
     #[OA\Get(
         path: "/api/v1/companies/contact-prep",
         summary: "Preparación de Contacto",
-        description: "Obtener tácticas recomendadas por la IA para contactar o vender a la empresa.",
+        description: "Obtener tácticas recomendadas por la IA para contactar o vender a la empresa. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 3 créditos del monedero (bono prepago). Las respuestas con error (400, 404, 403, etc.) no consumen cuota ni créditos.",
         tags: ["3. Plan Business"]
     )]
     #[OA\Parameter(

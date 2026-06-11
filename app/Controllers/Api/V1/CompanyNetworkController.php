@@ -16,7 +16,7 @@ class CompanyNetworkController extends ResourceController
     #[OA\Get(
         path: "/api/v1/companies/network",
         summary: "Grafos de Poder Societario",
-        description: "Obtiene la red de vinculación entre empresas a través de sus administradores.",
+        description: "Obtiene la red de vinculación entre empresas a través de sus administradores. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 3 créditos del monedero (bono prepago). Las respuestas con error no consumen cuota ni créditos.",
         tags: ["2. Plan Professional"]
     )]
     #[OA\Parameter(

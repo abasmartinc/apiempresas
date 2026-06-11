@@ -532,6 +532,38 @@
                     </div>
                 </div>
 
+                <!-- Custom Bonus Banner -->
+                <div style="margin-top: 60px; background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #f0fdf4 100%); padding: 48px 32px; border-radius: 24px; text-align: center; position: relative; overflow: hidden; border: 1px solid rgba(59, 130, 246, 0.15); box-shadow: 0 20px 40px -15px rgba(37, 99, 235, 0.1); max-width: 900px; margin-left: auto; margin-right: auto;">
+                    
+                    <!-- Patrón de puntos decorativo de fondo -->
+                    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.4; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px; pointer-events: none;"></div>
+                    
+                    <!-- Efectos de luz suaves -->
+                    <div style="position: absolute; top: -30%; left: -10%; width: 50%; height: 160%; background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 60%); pointer-events: none;"></div>
+                    <div style="position: absolute; bottom: -30%; right: -10%; width: 50%; height: 160%; background: radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 60%); pointer-events: none;"></div>
+
+                    <div style="position: relative; z-index: 1;">
+                        <div style="display: inline-block; background: #ffffff; color: #2563eb; font-size: 0.8rem; font-weight: 800; padding: 6px 16px; border-radius: 99px; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 16px; box-shadow: 0 4px 6px -1px rgba(37,99,235,0.1); border: 1px solid rgba(59,130,246,0.1);">Nuevo Plan a Medida</div>
+                        <h3 style="color: #0f172a; font-size: 2.1rem; font-weight: 900; margin: 0 0 12px; letter-spacing: -0.03em;">¿No quieres ataduras mensuales?</h3>
+                        <p style="color: #475569; font-size: 1.15rem; max-width: 600px; margin: 0 auto 32px; line-height: 1.6;">Diseña tu propio <strong style="color: #0f172a;">Bono de Créditos Prepago</strong>. Paga una sola vez, consúmelo a tu ritmo y consigue descuentos automáticos por volumen.</p>
+                        
+                        <a href="<?= site_url('crear-bono-api') ?>" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; padding: 18px 40px; border-radius: 16px; font-weight: 800; font-size: 1.1rem; text-decoration: none; box-shadow: 0 10px 25px rgba(37,99,235,0.4); transition: all 0.3s ease; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="21" y1="4" x2="14" y2="4"></line>
+                                <line x1="10" y1="4" x2="3" y2="4"></line>
+                                <line x1="21" y1="12" x2="12" y2="12"></line>
+                                <line x1="8" y1="12" x2="3" y2="12"></line>
+                                <line x1="21" y1="20" x2="16" y2="20"></line>
+                                <line x1="12" y1="20" x2="3" y2="20"></line>
+                                <line x1="14" y1="1" x2="14" y2="7"></line>
+                                <line x1="8" y1="9" x2="8" y2="15"></line>
+                                <line x1="16" y1="17" x2="16" y2="23"></line>
+                            </svg>
+                            Crear mi Bono Personalizado
+                        </a>
+                    </div>
+                </div>
+
                 <div style="text-align: center; margin-top: 80px; margin-bottom: 40px;">
                     <h3 class="reveal" style="font-size: 1.8rem; font-weight: 850; color: var(--ae-dark);">Comparativa detallada de funciones</h3>
                 </div>

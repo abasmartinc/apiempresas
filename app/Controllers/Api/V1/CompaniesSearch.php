@@ -26,7 +26,7 @@ class CompaniesSearch extends ResourceController
     #[OA\Get(
         path: "/api/v1/companies/search",
         summary: "Búsqueda de Empresas",
-        description: "Busca empresas por nombre o CIF. Permite búsqueda exacta o paginada.",
+        description: "Busca empresas por nombre o CIF. Permite búsqueda exacta o paginada. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 1 crédito del monedero (bono prepago). Las respuestas con error (400, 404, etc.) no consumen cuota ni créditos.",
         tags: ["1. Plan Free / General"]
     )]
     #[OA\Parameter(

@@ -30,7 +30,7 @@ class CompaniesByCif extends ResourceController
     #[OA\Get(
         path: "/api/v1/companies",
         summary: "Obtener Empresa por CIF",
-        description: "Devuelve los datos detallados de una empresa a partir de su CIF exacto.",
+        description: "Devuelve los datos detallados de una empresa a partir de su CIF exacto. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 1 crédito del monedero (bono prepago). Las respuestas con error (400, 404, etc.) no consumen cuota ni créditos.",
         tags: ["1. Plan Free / General"]
     )]
     #[OA\Parameter(

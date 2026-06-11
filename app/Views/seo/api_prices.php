@@ -1612,9 +1612,15 @@
                     
                     <a href="<?= site_url('crear-bono-api') ?>" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; padding: 18px 40px; border-radius: 16px; font-weight: 800; font-size: 1.1rem; text-decoration: none; box-shadow: 0 10px 25px rgba(37,99,235,0.4); transition: all 0.3s ease; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 10h12" />
-                            <path d="M4 14h9" />
-                            <path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2" />
+                            <line x1="21" y1="4" x2="14" y2="4"></line>
+                            <line x1="10" y1="4" x2="3" y2="4"></line>
+                            <line x1="21" y1="12" x2="12" y2="12"></line>
+                            <line x1="8" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="20" x2="16" y2="20"></line>
+                            <line x1="12" y1="20" x2="3" y2="20"></line>
+                            <line x1="14" y1="1" x2="14" y2="7"></line>
+                            <line x1="8" y1="9" x2="8" y2="15"></line>
+                            <line x1="16" y1="17" x2="16" y2="23"></line>
                         </svg>
                         Crear mi Bono Personalizado
                     </a>

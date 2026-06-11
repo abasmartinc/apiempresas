@@ -105,6 +105,8 @@
             margin: 0;
             position: absolute;
             left: 0;
+            top: 50%;
+            transform: translateY(-50%);
             z-index: 3;
         }
         input[type=range]:focus {
@@ -121,6 +123,8 @@
         .slider-progress {
             position: absolute;
             left: 0;
+            top: 50%;
+            transform: translateY(-50%);
             height: 12px;
             background: linear-gradient(90deg, #3b82f6, #10b981);
             border-radius: 99px;
@@ -134,7 +138,7 @@
             background: #ffffff;
             cursor: pointer;
             -webkit-appearance: none;
-            margin-top: -10px; /* (12px / 2) - (32px / 2) = -10 */
+            margin-top: -10px; /* Centra el thumb de 32px en el track de 12px */
             box-shadow: 0 4px 10px rgba(0,0,0,0.15), 0 0 0 4px rgba(59,130,246,0.1);
             border: 2px solid #3b82f6;
             transition: transform 0.1s;
@@ -254,6 +258,218 @@
             font-size: 0.8rem;
             font-weight: 700;
         }
+
+        /* ── CRO Sections ── */
+        .cro-sections {
+            max-width: 900px;
+            margin: 0 auto 80px;
+            padding: 0 20px;
+        }
+        .cro-section {
+            margin-bottom: 64px;
+        }
+        .cro-title {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 32px;
+            letter-spacing: -0.03em;
+        }
+        
+        /* Grid */
+        .cro-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+        }
+        .cro-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 32px 24px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .cro-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.1);
+        }
+        .cro-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+        .cro-card-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 12px;
+        }
+        .cro-card-desc {
+            font-size: 0.9rem;
+            color: #64748b;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* Costs */
+        .cro-table-wrapper {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        .cro-cost-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 32px;
+            border: 1px solid #e2e8f0;
+        }
+        .cro-cost-card.advanced {
+            background: linear-gradient(135deg, #f0fdf4, #ffffff);
+            border-color: #bbf7d0;
+        }
+        .cro-cost-header {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #3b82f6;
+            margin-bottom: 4px;
+        }
+        .cro-cost-card.advanced .cro-cost-header {
+            color: #10b981;
+        }
+        .cro-cost-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .cro-cost-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .cro-cost-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+            color: #475569;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+        }
+        .cro-cost-list li:last-child {
+            border-bottom: none;
+        }
+        .cro-cost-list li::before {
+            content: '✓';
+            color: #3b82f6;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+        .cro-cost-card.advanced .cro-cost-list li::before {
+            color: #10b981;
+        }
+
+        /* FAQs */
+        .cro-faqs {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .cro-faq {
+            background: #ffffff;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        .cro-faq-q {
+            padding: 20px 24px;
+            font-weight: 700;
+            color: #0f172a;
+            cursor: pointer;
+            list-style: none;
+            position: relative;
+        }
+        .cro-faq-q::-webkit-details-marker {
+            display: none;
+        }
+        .cro-faq-q::after {
+            content: '+';
+            position: absolute;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            color: #94a3b8;
+            font-weight: 300;
+        }
+        .cro-faq[open] .cro-faq-q::after {
+            content: '−';
+        }
+        .cro-faq-a {
+            padding: 0 24px 24px;
+            color: #64748b;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .cro-endpoint-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 16px;
+            transition: all 0.2s;
+        }
+        .cro-endpoint-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+        .cro-endpoint-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .cro-endpoint-method {
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-weight: 800;
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: 'Fira Code', monospace;
+            margin-right: 8px;
+        }
+        .cro-endpoint-path {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            color: #0f172a;
+            font-weight: 700;
+        }
+        .cro-endpoint-cost {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #10b981;
+            background: #dcfce7;
+            padding: 6px 12px;
+            border-radius: 99px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .cro-endpoint-desc {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin: 0;
+        }
     </style>
 </head>
 
@@ -327,9 +543,172 @@
                 <button type="submit" class="buy-btn">
                     Comprar Bono Ahora
                 </button>
-                <p style="text-align:center; font-size:0.85rem; color:#94a3b8; margin-top:16px;">Pago seguro gestionado por Stripe. IVA no incluido.</p>
+                <p style="text-align:center; font-size:0.85rem; color:#94a3b8; margin-top:16px;">Pago 100% seguro cifrado por Stripe. Recibirás tu factura al instante.</p>
             </form>
 
+        </div> <!-- End of wizard-container -->
+
+        <!-- CRO Sections -->
+        <div class="cro-sections">
+            <!-- 1. Use Cases Grid -->
+            <div class="cro-section">
+                <h2 class="cro-title">¿Qué puedes hacer con tus créditos?</h2>
+                <div class="cro-grid">
+                    <div class="cro-card">
+                        <div class="cro-icon">⚡</div>
+                        <h3 class="cro-card-title">Enriquecimiento B2B</h3>
+                        <p class="cro-card-desc">Autocompleta datos de empresas en tu CRM o ERP introduciendo solo el CIF o el nombre.</p>
+                    </div>
+                    <div class="cro-card">
+                        <div class="cro-icon">🛡️</div>
+                        <h3 class="cro-card-title">Onboarding Automático</h3>
+                        <p class="cro-card-desc">Valida identidad corporativa y verifica cargos societarios (KYB) en milisegundos.</p>
+                    </div>
+                    <div class="cro-card">
+                        <div class="cro-icon">🧠</div>
+                        <h3 class="cro-card-title">Scoring y IA Comercial</h3>
+                        <p class="cro-card-desc">Calcula el riesgo o detecta empresas en crecimiento (gacelas) antes de cerrar una venta.</p>
+                    </div>
+                </div>
+                
+                <!-- Trust Badges -->
+                <div style="text-align: center; margin-top: 40px; opacity: 0.6;">
+                    <span style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 16px;">Compatible con cualquier stack tecnológico</span>
+                    <div style="display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; font-weight: 800; font-size: 1.1rem; color: #94a3b8; filter: grayscale(100%);">
+                        <span>PHP</span>
+                        <span>Node.js</span>
+                        <span>Python</span>
+                        <span>Make</span>
+                        <span>Zapier</span>
+                        <span>Salesforce</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Guarantees -->
+            <div class="cro-section" style="background: #ffffff; padding: 40px; border-radius: 24px; border: 1px solid #e2e8f0; margin-bottom: 48px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);">
+                <h2 style="font-size: 1.5rem; font-weight: 850; margin-top: 0; margin-bottom: 32px; text-align: center; color: #0f172a;">Garantía de Calidad y Rendimiento</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px;">
+                    <div>
+                        <div style="color: #2563eb; font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            Fuentes Oficiales
+                        </div>
+                        <p style="color: #64748b; font-size: 0.95rem; margin: 0; line-height: 1.6;">Todos los datos provienen del Registro Mercantil Central y el BORME. Se actualizan diariamente a primera hora de la mañana para máxima fiabilidad.</p>
+                    </div>
+                    <div>
+                        <div style="color: #2563eb; font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            Disponibilidad 99.9%
+                        </div>
+                        <p style="color: #64748b; font-size: 0.95rem; margin: 0; line-height: 1.6;">Nuestra infraestructura escalable en la nube garantiza latencias por debajo de 50ms para las validaciones directas por CIF/NIF.</p>
+                    </div>
+                    <div>
+                        <div style="color: #2563eb; font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            Privacidad y Seguridad
+                        </div>
+                        <p style="color: #64748b; font-size: 0.95rem; margin: 0; line-height: 1.6;">Conexiones cifradas TLS 1.3. No almacenamos ni trazamos los datos privados o de clientes que envías en tus peticiones de validación.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Endpoints y Costes -->
+            <div class="cro-section">
+                <h2 class="cro-title">Catálogo de Endpoints y Costes</h2>
+                <p style="text-align:center; color:#64748b; margin-top:-16px; margin-bottom:32px; font-size:1.05rem; max-width: 650px; margin-left: auto; margin-right: auto;">
+                    Con una sola API Key obtienes acceso a <strong>toda nuestra API REST</strong>. El coste se descuenta de tu monedero de forma automática únicamente con cada petición exitosa (HTTP 200 OK). Las llamadas erróneas o de prueba en nuestro Sandbox <strong>no consumen créditos</strong>.
+                </p>
+
+                <div class="cro-endpoint-card">
+                    <div class="cro-endpoint-header">
+                        <div>
+                            <span class="cro-endpoint-method">GET</span>
+                            <span class="cro-endpoint-path">/api/v1/companies</span>
+                        </div>
+                        <div class="cro-endpoint-cost"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg> 1 Crédito</div>
+                    </div>
+                    <p class="cro-endpoint-desc"><strong>Validación y Enriquecimiento CIF:</strong> Devuelve datos completos del Registro Mercantil (Razón Social, Provincia, Municipio, Estado, Sector CNAE, Capital Social, Fecha de constitución). Ideal para limpieza de BBDD.</p>
+                </div>
+
+                <div class="cro-endpoint-card">
+                    <div class="cro-endpoint-header">
+                        <div>
+                            <span class="cro-endpoint-method">GET</span>
+                            <span class="cro-endpoint-path">/api/v1/companies/search</span>
+                        </div>
+                        <div class="cro-endpoint-cost"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg> 1 Crédito</div>
+                    </div>
+                    <p class="cro-endpoint-desc"><strong>Buscador Inteligente:</strong> Permite buscar sociedades por texto parcial (nombre o razón social) usando búsqueda difusa. Pensado para implementar autocompletados en tiempo real en tus formularios de registro.</p>
+                </div>
+
+                <div class="cro-endpoint-card">
+                    <div class="cro-endpoint-header">
+                        <div>
+                            <span class="cro-endpoint-method">GET</span>
+                            <span class="cro-endpoint-path">/api/v1/companies/score</span>
+                        </div>
+                        <div class="cro-endpoint-cost" style="background: #fef3c7; color: #d97706;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg> 3 Créditos</div>
+                    </div>
+                    <p class="cro-endpoint-desc"><strong>Scoring Predictivo con Inteligencia Artificial:</strong> Analiza y evalúa el perfil de riesgo comercial y el potencial de compra de la empresa en una escala del 0 al 100 para priorizar el esfuerzo comercial.</p>
+                </div>
+
+                <div class="cro-endpoint-card">
+                    <div class="cro-endpoint-header">
+                        <div>
+                            <span class="cro-endpoint-method">GET</span>
+                            <span class="cro-endpoint-path">/api/v1/companies/radar</span>
+                        </div>
+                        <div class="cro-endpoint-cost" style="background: #fef3c7; color: #d97706;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg> 3 Créditos</div>
+                    </div>
+                    <p class="cro-endpoint-desc"><strong>Extracción Masiva de Nuevas Empresas:</strong> Recupera lotes masivos de sociedades constituidas "hoy", "ayer" o en la última semana, con opción de filtro por provincia o sector. Diseñado para prospección masiva (Cold Email/Calls).</p>
+                </div>
+
+                <div class="cro-endpoint-card">
+                    <div class="cro-endpoint-header">
+                        <div>
+                            <span class="cro-endpoint-method">GET</span>
+                            <span class="cro-endpoint-path">/api/v1/companies/signals</span>
+                        </div>
+                        <div class="cro-endpoint-cost" style="background: #fef3c7; color: #d97706;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg> 3 Créditos</div>
+                    </div>
+                    <p class="cro-endpoint-desc"><strong>Señales Societarias y BORME:</strong> Obtén de forma estructurada el listado de los últimos actos registrales oficiales (ampliaciones de capital, concursos de acreedores, nombramientos o ceses de cargos) de una sociedad concreta.</p>
+                </div>
+            </div>
+
+            <!-- 4. FAQs -->
+            <div class="cro-section">
+                <h2 class="cro-title">Preguntas Frecuentes</h2>
+                <div class="cro-faqs">
+                    <details class="cro-faq">
+                        <summary class="cro-faq-q">¿Los créditos caducan en algún momento?</summary>
+                        <div class="cro-faq-a">No, nunca caducan. Puedes comprar un bono hoy y consumir los créditos a tu ritmo durante meses o años sin ningún tipo de prisa. Este saldo queda permanentemente ligado a tu cuenta.</div>
+                    </details>
+                    <details class="cro-faq">
+                        <summary class="cro-faq-q">¿Se consumen créditos si la API devuelve un error (ej. 404)?</summary>
+                        <div class="cro-faq-a"><strong>No.</strong> Solo deducimos créditos de tu monedero cuando la petición es 100% exitosa y devuelve un código <code>200 OK</code>. Si buscas una empresa que no existe, te equivocas en el formato o usas nuestra API de Sandbox (pruebas), no consumirás ningún crédito.</div>
+                    </details>
+                    <details class="cro-faq">
+                        <summary class="cro-faq-q">¿Es fácil integrarlo con mi stack tecnológico?</summary>
+                        <div class="cro-faq-a">Completamente. Usamos una arquitectura REST estándar con respuestas JSON ultra rápidas. Dispondrás de documentación completa (Swagger / OpenAPI), ejemplos copiables en PHP, Python, cURL y NodeJS, y soporte técnico directo para resolver cualquier duda en menos de 24 horas.</div>
+                    </details>
+                    <details class="cro-faq">
+                        <summary class="cro-faq-q">¿Puedo pasarme luego a un plan mensual?</summary>
+                        <div class="cro-faq-a">Sí, totalmente. Si ves que tu consumo se vuelve recurrente o muy predecible mes a mes, puedes suscribirte a los planes Pro o Business desde tu panel de control. El saldo que tuvieras en tu bono no se pierde, se suma como respaldo al saldo mensual.</div>
+                    </details>
+                    <details class="cro-faq">
+                        <summary class="cro-faq-q">¿Cómo obtengo mi factura con el IVA desglosado?</summary>
+                        <div class="cro-faq-a">Al instante tras realizar el pago. Utilizamos Stripe como pasarela de pago B2B. Recibirás en tu correo electrónico la factura oficial completa con los datos fiscales (Razón social, CIF, Dirección) que podrás introducir durante el propio proceso de pago en la siguiente pantalla.</div>
+                    </details>
+                </div>
+            </div>
+
+            <!-- 4. Final CTA -->
+            <div style="text-align: center; margin-top: 48px; margin-bottom: 32px;">
+                <button type="button" onclick="window.scrollTo({top: 0, behavior: 'smooth'});" class="buy-btn" style="width: auto; padding: 18px 64px; border-radius: 99px; display: inline-block; margin-top: 0;">
+                    Configurar mi Bono Ahora
+                </button>
+            </div>
         </div>
     </div>
 
@@ -383,7 +762,7 @@
                 creditsOutput.textContent = val.toLocaleString('es-ES');
                 
                 const price = calculatePrice(val);
-                priceOutput.innerHTML = price.toLocaleString('es-ES') + '<span>€</span>';
+                priceOutput.innerHTML = price.toLocaleString('es-ES') + '<span>€</span><span style="font-size: 1.2rem; margin-left: 8px; font-weight: 700; color: #94a3b8;">+ IVA</span>';
 
                 // Calculate price per credit
                 const pricePerCredit = price / val;

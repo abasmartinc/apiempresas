@@ -75,4 +75,31 @@ class BillingSimulator
 
         return true;
     }
+
+    /**
+     * Simula la compra de un bono (wallet recharge) sin pasar por Stripe
+     */
+    public function simulateBonusRecharge(int $userId, int $credits)
+    {
+        $db = \Config\Database::connect();
+        
+        // 1. Añadir saldo al wallet
+        $db->query("INSERT INTO user_wallets (user_id, balance) VALUES (?, ?) ON DUPLICATE KEY UPDATE balance = balance + ?", [$userId, $credits, $credits]);
+        
+        // 2. Registrar transacción si existe la tabla
+        if ($db->tableExists('user_wallet_transactions')) {
+            $db->table('user_wallet_transactions')->insert([
+                'user_id' => $userId,
+                'amount' => $credits,
+                'type' => 'recharge',
+                'description' => 'Recarga simulada local (BILLING_MODE)',
+                'reference_id' => 'sim_bonus_' . bin2hex(random_bytes(8)),
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+        }
+        
+        log_message('info', "[Simulator] Added {$credits} credits to wallet for user {$userId}");
+        return true;
+    }
 }
+

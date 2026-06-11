@@ -25,7 +25,7 @@ class RadarApiController extends ResourceController
     #[OA\Get(
         path: "/api/v1/companies/radar",
         summary: "Búsqueda Radar (Leads)",
-        description: "Obtener empresas de reciente creación según la provincia y prioridad. Los resultados están limitados por tu plan.",
+        description: "Obtener empresas de reciente creación según la provincia y prioridad. Los resultados están limitados por tu plan. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 3 créditos del monedero (bono prepago). Las respuestas con error no consumen cuota ni créditos.",
         tags: ["3. Plan Business"]
     )]
     #[OA\Parameter(

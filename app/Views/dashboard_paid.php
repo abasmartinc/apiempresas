@@ -255,14 +255,14 @@
                     </div>
                 </div>
 
-                <div class="kpi-card-pro">
-                    <div class="kpi-icon-box" style="background: #f0fdf4; color: #16a34a;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                <div class="kpi-card-pro" <?= (($walletBalance ?? 0) === 0) ? 'onclick="window.location.href=\''.site_url('billing').'\'" style="cursor: pointer;"' : '' ?>>
+                    <div class="kpi-icon-box" style="background: #f8fafc; color: #475569;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" /><path d="M4 6v12c0 1.1.9 2 2 2h14v-4" /><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" /></svg>
                     </div>
                     <div class="kpi-content">
-                        <span class="label">Estado</span>
-                        <div class="value" style="color: #10b981;">Operativo</div>
-                        <div class="meta">Disponibilidad 99.9%</div>
+                        <span class="label">Monedero Extra</span>
+                        <div class="value" style="color: #334155;"><?= number_format($walletBalance ?? 0, 0, ',', '.') ?></div>
+                        <div class="meta"><?= (($walletBalance ?? 0) === 0) ? '<strong>Recargar créditos &rarr;</strong>' : 'Créditos sin caducidad' ?></div>
                     </div>
                 </div>
             </div>

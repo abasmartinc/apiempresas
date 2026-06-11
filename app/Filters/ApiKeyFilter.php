@@ -305,6 +305,11 @@ class ApiKeyFilter implements FilterInterface
             }
 
             $skipBilling = self::$apiSkipBilling;
+            
+            // CRO Promise: Solo cobramos si la petición es exitosa (200 OK)
+            if ($statusCode !== 200) {
+                $skipBilling = true;
+            }
 
             if ($db->tableExists('api_usage_daily') && !$skipBilling && ($meta['sub_cost'] > 0 || $meta['wallet_cost'] > 0)) {
                 $sqlDaily = "

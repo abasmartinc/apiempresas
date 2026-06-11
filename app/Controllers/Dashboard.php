@@ -123,6 +123,16 @@ class Dashboard extends BaseController
         $data['isPaid'] = $isPaid;
         $data['maxLimit'] = $maxLimit;
 
+        // Recuperar saldo del monedero (Custom Bonus)
+        $walletBalance = 0;
+        if ($db->tableExists('user_wallets')) {
+            $walletRow = $db->table('user_wallets')->where('user_id', $userId)->get()->getRow();
+            if ($walletRow) {
+                $walletBalance = (int)$walletRow->balance;
+            }
+        }
+        $data['walletBalance'] = $walletBalance;
+
         // Dynamic Usage Message
         $data['usageMessage'] = null;
         if (!$isPaid) {
@@ -147,9 +157,24 @@ class Dashboard extends BaseController
                     'text'  => 'Te quedan pocas consultas gratuitas. Activa Pro para evitar interrupciones.'
                 ];
             } else {
+                if ($walletBalance > 0) {
+                    $data['usageMessage'] = [
+                        'title' => 'Límite gratuito superado',
+                        'text'  => 'Se están consumiendo créditos automáticamente de tu monedero a medida.'
+                    ];
+                } else {
+                    $data['usageMessage'] = [
+                        'title' => 'Has alcanzado el límite gratuito',
+                        'text'  => 'Activa Pro para seguir validando empresas automáticamente.'
+                    ];
+                }
+            }
+        } else {
+            // Plan de Pago superado con wallet
+            if ($requestsUsedThisMonth >= $maxLimit && $walletBalance > 0) {
                 $data['usageMessage'] = [
-                    'title' => 'Has alcanzado el límite gratuito',
-                    'text'  => 'Activa Pro para seguir validando empresas automáticamente.'
+                    'title' => 'Límite mensual superado',
+                    'text'  => 'Se están consumiendo créditos automáticamente de tu monedero a medida.'
                 ];
             }
         }

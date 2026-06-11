@@ -579,6 +579,20 @@ class Billing extends BaseController
             }
         }
 
+        if (env('BILLING_MODE') === 'simulator') {
+            $simulator = new \App\Libraries\BillingSimulator();
+            session()->set('checkout_context', [
+                'type' => 'custom_bonus',
+                'credits' => $credits,
+                'price' => $price
+            ]);
+            if ($simulator->simulateBonusRecharge($userId, $credits)) {
+                return redirect()->to(site_url('billing/success'))->with('message', 'Simulación de recarga completada.');
+            } else {
+                return redirect()->back()->with('error', 'Error en la simulación de recarga.');
+            }
+        }
+
         $secretKey = env('STRIPE_SECRET_KEY');
         if (!$secretKey) {
             return redirect()->back()->with('error', 'Stripe no está configurado.');
