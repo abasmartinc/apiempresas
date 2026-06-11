@@ -40,6 +40,13 @@ class CompaniesByCif extends ResourceController
         description: "El CIF de la empresa a consultar",
         schema: new OA\Schema(type: "string")
     )]
+    #[OA\Parameter(
+        name: "admin",
+        in: "query",
+        required: false,
+        description: "Si es 'true', incluye los administradores y cargos directivos actuales de la empresa. Exclusivo para planes Pro y Business.",
+        schema: new OA\Schema(type: "boolean")
+    )]
     #[OA\Response(
         response: 200,
         description: "Datos de la empresa",
@@ -143,8 +150,20 @@ class CompaniesByCif extends ResourceController
                 $cached = mask_company_data($cached);
             }
 
+            $companyId = $cached['id'] ?? null;
+
             // Apply filtering (remove requested fields)
             $cached = filter_company_data($cached);
+
+            // Administradores y Cargos
+            $includeAdmins = filter_var($this->request->getGet('admin'), FILTER_VALIDATE_BOOLEAN);
+            if ($includeAdmins && (int)$planId > 1 && $companyId) {
+                $db = \Config\Database::connect();
+                $cached['administrators'] = $db->table('company_administrators')
+                    ->select('name, position')
+                    ->where('company_id', $companyId)
+                    ->get()->getResultArray();
+            }
 
             return $this->respond(
                 [
@@ -178,8 +197,20 @@ class CompaniesByCif extends ResourceController
                 $company = mask_company_data($company);
             }
 
+            $companyId = $company['id'] ?? null;
+
             // Apply filtering (remove requested fields)
             $company = filter_company_data($company);
+
+            // Administradores y Cargos
+            $includeAdmins = filter_var($this->request->getGet('admin'), FILTER_VALIDATE_BOOLEAN);
+            if ($includeAdmins && (int)$planId > 1 && $companyId) {
+                $db = \Config\Database::connect();
+                $company['administrators'] = $db->table('company_administrators')
+                    ->select('name, position')
+                    ->where('company_id', $companyId)
+                    ->get()->getResultArray();
+            }
 
             return $this->respond(
                 [

@@ -111,10 +111,16 @@ $routes->get('e/c/(:any)', 'EmailTracking::click/$1');
 
 // ----------- API ----------- //
 $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function ($routes) {
+    $routes->get('api/v1/companies/radar', 'Api\V1\CompaniesRadar::index', ['filter' => 'api']);
+    $routes->post('api/v1/companies/match', 'Api\V1\CompanyMatch::index', ['filter' => 'api']);
+
+    // TEMP
+    $routes->get('temp-upgrade', 'TempUpgrade::index');
+
+    // Auth Webw Commercial Endpoints (Expansion)
     $routes->get('api/v1/companies', 'Api\V1\CompaniesByCif::index');
     $routes->get('api/v1/companies/search', 'Api\V1\CompaniesSearch::index');
 
-    // New Commercial Endpoints (Expansion)
     $routes->get('api/v1/companies/score', 'Api\V1\CompanyEnrichmentController::score');
     $routes->get('api/v1/companies/signals', 'Api\V1\CompanyEnrichmentController::signals');
     $routes->get('api/v1/companies/insights', 'Api\V1\CompanyEnrichmentController::insights');
