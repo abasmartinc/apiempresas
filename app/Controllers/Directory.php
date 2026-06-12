@@ -16,7 +16,7 @@ class Directory extends BaseController
     public function index()
     {
         $cache = \Config\Services::cache();
-        $cacheKey = 'directory_index_data_v3';
+        $cacheKey = 'directory_index_data_v5';
         
         $data = $cache->get($cacheKey);
         
@@ -39,24 +39,9 @@ class Directory extends BaseController
                 ->get()
                 ->getResultArray();
 
-            $provincesMap = [];
-            foreach ($provincesData as $p) {
-                $name = $p['name'];
-                if (in_array(strtolower($name), ['alicante', 'alacant', 'alicante/alacant'])) {
-                    $name = 'ALACANT';
-                } elseif (in_array(mb_strtolower($name, 'UTF-8'), ['araba/álava', 'álava', 'álava-araba', 'araba', 'alava'])) {
-                    $name = 'Araba/Álava';
-                }
-                if (!isset($provincesMap[$name])) {
-                    $provincesMap[$name] = ['name' => $name, 'total' => 0];
-                }
-                $provincesMap[$name]['total'] += $p['total'];
-            }
-            $provinces = array_values($provincesMap);
+            $provinces = $provincesData;
             usort($provinces, function($a, $b) {
-                $search  = ['Á','É','Í','Ó','Ú','á','é','í','ó','ú'];
-                $replace = ['A','E','I','O','U','a','e','i','o','u'];
-                return strcmp(str_replace($search, $replace, $a['name']), str_replace($search, $replace, $b['name']));
+                return $b['total'] <=> $a['total'];
             });
 
             $cnaes = $this->companyModel->builder()
@@ -86,7 +71,7 @@ class Directory extends BaseController
 
             // Últimas 10 empresas para la home del directorio (excluyendo fechas futuras erróneas)
             $latest = $this->companyModel->builder()
-                ->select('id, cif, company_name as name, fecha_constitucion as date, registro_mercantil as province')
+                ->select('id, cif, company_name as name, fecha_constitucion as founded, cnae_label, registro_mercantil as province')
                 ->where('fecha_constitucion IS NOT NULL')
                 ->where('fecha_constitucion <=', date('Y-m-d'))
                 ->orderBy('fecha_constitucion', 'DESC')
@@ -147,12 +132,12 @@ class Directory extends BaseController
         $offset = ($page - 1) * $perPage;
 
         $builder = $this->companyModel->builder()
-            ->select('id, cif, company_name as name, registro_mercantil as province');
+            ->select('id, cif, company_name as name, registro_mercantil as province, cnae_label, fecha_constitucion as founded');
             
         if (in_array(strtolower($provinceName), ['alicante', 'alacant', 'alicante/alacant'])) {
-            $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
+            $builder->where('registro_mercantil', 'Alicante');
         } elseif (in_array(mb_strtolower($provinceName, 'UTF-8'), ['araba/álava', 'álava', 'álava-araba', 'araba', 'alava'])) {
-            $builder->whereIn('registro_mercantil', ['ÁLAVA', 'Álava-Araba', 'Araba/Álava', 'ALAVA']);
+            $builder->where('registro_mercantil', 'Álava');
         } else {
             $builder->where('registro_mercantil', $provinceName);
         }
@@ -171,14 +156,14 @@ class Directory extends BaseController
 
         // Total count (cached per province)
         $cache = \Config\Services::cache();
-        $countKey = 'prov_total_v3_' . urlencode($provinceName);
+        $countKey = 'prov_total_v5_' . urlencode($provinceName);
         $totalCompanies = $cache->get($countKey);
         if ($totalCompanies === null) {
             $countBuilder = $this->companyModel->builder()->selectCount('id', 'total');
             if (in_array(strtolower($provinceName), ['alicante', 'alacant', 'alicante/alacant'])) {
-                $countBuilder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
+                $countBuilder->where('registro_mercantil', 'Alicante');
             } elseif (in_array(mb_strtolower($provinceName, 'UTF-8'), ['araba/álava', 'álava', 'álava-araba', 'araba', 'alava'])) {
-                $countBuilder->whereIn('registro_mercantil', ['ÁLAVA', 'Álava-Araba', 'Araba/Álava', 'ALAVA']);
+                $countBuilder->where('registro_mercantil', 'Álava');
             } else {
                 $countBuilder->where('registro_mercantil', $provinceName);
             }
@@ -188,7 +173,7 @@ class Directory extends BaseController
         $totalPages = max(1, (int) ceil($totalCompanies / $perPage));
 
         // Cross-pollination: Top CNAEs in this province
-        $crossKey = 'cross_cnae_v3_' . urlencode($provinceName);
+        $crossKey = 'cross_cnae_v5_' . urlencode($provinceName);
         $topCnaes = $cache->get($crossKey);
         
         if (!$topCnaes) {
@@ -201,9 +186,9 @@ class Directory extends BaseController
                 ->select('cnae_code as code, cnae_label as label, COUNT(id) as total');
                 
             if (in_array(strtolower($provinceName), ['alicante', 'alacant', 'alicante/alacant'])) {
-                $cnaeBuilder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
+                $cnaeBuilder->where('registro_mercantil', 'Alicante');
             } elseif (in_array(mb_strtolower($provinceName, 'UTF-8'), ['araba/álava', 'álava', 'álava-araba', 'araba', 'alava'])) {
-                $cnaeBuilder->whereIn('registro_mercantil', ['ÁLAVA', 'Álava-Araba', 'Araba/Álava', 'ALAVA']);
+                $cnaeBuilder->where('registro_mercantil', 'Álava');
             } else {
                 $cnaeBuilder->where('registro_mercantil', $provinceName);
             }
@@ -281,7 +266,7 @@ class Directory extends BaseController
 
         // Get the most frequent CNAE label early to validate the slug
         $cache = \Config\Services::cache();
-        $labelKey = 'cnae_label_v3_' . $cnaeCode;
+        $labelKey = 'cnae_label_v5_' . $cnaeCode;
         $cnaeLabel = $cache->get($labelKey);
         if (!$cnaeLabel) {
             $labelRow = $this->companyModel->builder()
@@ -313,7 +298,7 @@ class Directory extends BaseController
             return redirect()->to(site_url($redirectUrl), 301);
         }
 
-        $countKey = 'cnae_total_v3_' . $cnaeCode;
+        $countKey = 'cnae_total_v5_' . $cnaeCode;
         $totalCompanies = $cache->get($countKey);
         
         if ($totalCompanies === null) {
@@ -326,7 +311,7 @@ class Directory extends BaseController
         $totalPages = max(1, (int) ceil($totalCompanies / $perPage));
 
         $companies = $this->companyModel->builder()
-            ->select('id, cif, company_name as name, cnae_label, registro_mercantil as province')
+            ->select('id, cif, company_name as name, cnae_label, fecha_constitucion as founded, registro_mercantil as province')
             ->where('cnae_code', $cnaeCode)
             ->orderBy('company_name', 'ASC')
             ->limit($perPage, $offset)
@@ -342,7 +327,7 @@ class Directory extends BaseController
 
         // Cross-pollination: Provinces for this CNAE
         $cache = \Config\Services::cache();
-        $crossKey = 'cross_prov_v3_' . $cnaeCode;
+        $crossKey = 'cross_prov_v5_' . $cnaeCode;
         $topProvinces = $cache->get($crossKey);
 
         if (!$topProvinces) {
@@ -362,20 +347,7 @@ class Directory extends BaseController
                 ->get()
                 ->getResultArray();
                 
-            $provincesMap = [];
-            foreach ($topProvincesData as $p) {
-                $name = $p['name'];
-                if (in_array(strtolower($name), ['alicante', 'alacant', 'alicante/alacant'])) {
-                    $name = 'ALACANT';
-                } elseif (in_array(mb_strtolower($name, 'UTF-8'), ['araba/álava', 'álava', 'álava-araba', 'araba', 'alava'])) {
-                    $name = 'Araba/Álava';
-                }
-                if (!isset($provincesMap[$name])) {
-                    $provincesMap[$name] = ['name' => $name, 'total' => 0];
-                }
-                $provincesMap[$name]['total'] += $p['total'];
-            }
-            $topProvinces = array_values($provincesMap);
+            $topProvinces = $topProvincesData;
             usort($topProvinces, fn($a, $b) => $b['total'] <=> $a['total']);
             $topProvinces = array_slice($topProvinces, 0, 12);
             $cache->save($crossKey, $topProvinces, 1296000); // 15 días
@@ -438,7 +410,7 @@ class Directory extends BaseController
         $totalPages = max(1, (int) ceil($totalCompanies / $perPage));
 
         $companies = $this->companyModel->builder()
-            ->select('id, cif, company_name as name, registro_mercantil as province, fecha_constitucion')
+            ->select('id, cif, company_name as name, cnae_label, fecha_constitucion as founded, registro_mercantil as province')
             ->where('fecha_constitucion IS NOT NULL')
             ->where('fecha_constitucion <=', date('Y-m-d'))
             ->where('fecha_constitucion >=', $thirtyDaysAgo)
@@ -486,7 +458,7 @@ class Directory extends BaseController
         $offset = ($page - 1) * $perPage;
 
         $companies = $this->companyModel->builder()
-            ->select('id, cif, company_name as name, cnae_label, registro_mercantil as province')
+            ->select('id, cif, company_name as name, cnae_label, fecha_constitucion as founded, registro_mercantil as province')
             ->where('registro_mercantil', $provinceName)
             ->where('cnae_code', $cnaeCode)
             ->orderBy('company_name', 'ASC')

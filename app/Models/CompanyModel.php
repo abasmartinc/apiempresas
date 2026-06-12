@@ -31,6 +31,7 @@ class CompanyModel extends Model
         'companies.estado             AS status',
         'companies.phone',
         'companies.phone_mobile',
+        'companies.updated_at         AS updated_at',
         'company_enrichment.website_official',
         'company_enrichment.email',
         'company_enrichment.phone_enriched',

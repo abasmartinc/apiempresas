@@ -158,101 +158,109 @@
 
         /* ── Table ── */
         .dir-table-wrap {
-            background: #fff;
-            border-radius: 20px;
-            border: 1px solid var(--dir-slate-200);
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            background: transparent;
+            border: none;
+            overflow: visible;
+            box-shadow: none;
         }
         .dir-table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            margin-top: -10px; /* Offset the first top spacing */
         }
-        .dir-table thead th {
-            background: #f8fafc;
-            padding: 0.85rem 1.25rem;
-            text-align: left;
-            font-size: 0.72rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.07em;
-            color: var(--dir-slate-400);
-            border-bottom: 1px solid var(--dir-slate-200);
+        .dir-table thead {
+            display: none;
         }
-        .dir-table thead th:last-child { text-align: right; }
         .dir-table tbody tr {
-            border-bottom: 1px solid #f1f5f9;
-            transition: background 0.15s;
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03), 0 0 0 1px rgba(15, 23, 42, 0.05);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .dir-table tbody tr:last-child { border-bottom: none; }
-        .dir-table tbody tr:hover { background: #f8fafc; }
+        .dir-table tbody tr.blurred-row {
+            box-shadow: none;
+            background: rgba(255,255,255,0.5);
+            border: 1px solid var(--dir-slate-200);
+        }
+        .dir-table tbody tr:first-child { margin-top: 0; }
+        .dir-table tbody tr:hover:not(.blurred-row) { 
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(15, 23, 42, 0.05);
+            z-index: 10;
+            position: relative;
+        }
         .dir-table tbody td {
-            padding: 1rem 1.25rem;
+            padding: 1.2rem 1.5rem;
             vertical-align: middle;
         }
+        .dir-table tbody td:first-child { border-radius: 16px 0 0 16px; }
+        .dir-table tbody td:last-child { border-radius: 0 16px 16px 0; }
 
 
         .company-name {
-            font-size: 0.94rem;
-            font-weight: 700;
+            font-size: 1.05rem;
+            font-weight: 800;
             color: var(--dir-slate-900);
             line-height: 1.3;
-            max-width: 380px;
+            max-width: 450px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            letter-spacing: -0.01em;
         }
         .company-cif {
-            font-size: 0.76rem;
+            font-size: 0.8rem;
             color: var(--dir-slate-400);
             font-weight: 600;
-            font-family: monospace;
-            margin-top: 1px;
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-
-        /* CIF column */
-        .td-cif {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--dir-primary);
-            font-family: monospace;
-            white-space: nowrap;
+        .company-cif svg {
+            color: var(--dir-slate-400);
         }
 
         /* Action button */
         .btn-ficha {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            padding: 7px 14px;
-            background: transparent;
-            border: 1.5px solid var(--dir-slate-200);
-            border-radius: 8px;
-            font-size: 0.8rem;
+            gap: 6px;
+            padding: 9px 18px;
+            background: #fff;
+            border: 1px solid var(--dir-slate-200);
+            border-radius: 10px;
+            font-size: 0.85rem;
             font-weight: 700;
             color: var(--dir-slate-600);
             text-decoration: none;
             white-space: nowrap;
             transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
-        .btn-ficha:hover {
+        .dir-table tbody tr:hover .btn-ficha {
             background: var(--dir-primary);
             border-color: var(--dir-primary);
             color: #fff;
+            box-shadow: 0 4px 12px rgba(33,82,255,0.2);
         }
-        .btn-ficha svg { flex-shrink: 0; }
+        .btn-ficha svg { flex-shrink: 0; transition: transform 0.2s; }
+        .dir-table tbody tr:hover .btn-ficha svg { transform: translateX(2px); }
 
         .td-action { text-align: right; }
 
         /* Hidden row (search filter) */
-        .dir-table tbody tr.hidden-row { display: none; }
+        .dir-table tbody tr.hidden-row { display: none !important; }
 
         /* No results */
         .no-results-row td {
             text-align: center;
-            padding: 3rem;
+            padding: 4rem;
             color: var(--dir-slate-400);
             font-weight: 600;
+            background: transparent !important;
+            box-shadow: none !important;
+            border: 2px dashed var(--dir-slate-200) !important;
+            border-radius: 20px;
         }
 
         /* ── Pagination ── */
@@ -570,7 +578,6 @@
                 <thead>
                     <tr>
                         <th>Empresa</th>
-                        <th class="td-cif">CIF</th>
                         <th style="text-align:right;">Ficha</th>
                     </tr>
                 </thead>
@@ -582,14 +589,36 @@
                     ?>
                     <tr data-name="<?= esc(strtolower($company['name'])) ?>" data-cif="<?= esc(strtolower($company['cif'] ?? '')) ?>">
                         <td>
-                            <div class="company-name" title="<?= esc($company['name']) ?>"><?= esc($company['name']) ?></div>
-                            <div class="company-cif"><?= esc($company['cif'] ?? '—') ?></div>
+                            <div style="display:flex; align-items:center;">
+                                <div>
+                                    <div class="company-name" title="<?= esc($company['name']) ?>"><?= esc($company['name']) ?></div>
+                                    <div class="company-cif">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
+                                        CIF: <?= esc($company['cif'] ?? '—') ?>
+                                    </div>
+                                    <?php if (!empty($company['cnae_label']) || !empty($company['founded'])): ?>
+                                    <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+                                        <?php if (!empty($company['cnae_label'])): ?>
+                                        <span style="font-size:0.75rem; background:#f1f5f9; color:#475569; padding:4px 8px; border-radius:6px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                            <?= esc($company['cnae_label']) ?>
+                                        </span>
+                                        <?php endif; ?>
+                                        <?php if (!empty($company['founded']) && $company['founded'] !== '0000-00-00'): ?>
+                                        <span style="font-size:0.75rem; background:#f0fdf4; color:#16a34a; padding:4px 8px; border-radius:6px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                            Constituida en <?= date('Y', strtotime($company['founded'])) ?>
+                                        </span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
                         </td>
-                        <td class="td-cif"><?= esc($company['cif'] ?? '—') ?></td>
                         <td class="td-action">
                             <a href="<?= esc($url) ?>" class="btn-ficha">
                                 Ver ficha
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                             </a>
                         </td>
                     </tr>
@@ -599,22 +628,23 @@
                         <?php for ($i = 0; $i < 8; $i++): ?>
                         <tr class="blurred-row">
                             <td>
-                                <div class="td-avatar">
-                                    <div class="avatar">?</div>
+                                <div style="display:flex; align-items:center;">
                                     <div>
                                         <div class="company-name">Empresa Restringida S.L.</div>
-                                        <div class="company-cif">A00******</div>
+                                        <div class="company-cif">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
+                                            CIF: A00******
+                                        </div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="td-cif">A00******</td>
-                            <td class="td-action"><span class="btn-ficha">Ver ficha</span></td>
+                            <td class="td-action"><span class="btn-ficha">Ver ficha <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></td>
                         </tr>
                         <?php endfor; ?>
                     <?php endif; ?>
 
                     <tr class="no-results-row" id="noResultsRow" style="display:none;">
-                        <td colspan="3">
+                        <td colspan="2">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 0.75rem; display:block; opacity:0.3;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                             Sin resultados para tu búsqueda en esta página
                         </td>
