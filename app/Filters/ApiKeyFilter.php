@@ -164,7 +164,7 @@ class ApiKeyFilter implements FilterInterface
                 if ((int)$planId === 1) {
                     $usageRow = $db->table('api_usage_daily')->selectSum('requests_count')->where('user_id', (int)$row->user_id)->where('date >=', '2026-05-28')->get()->getRow();
                 } else {
-                    $usageRow = $db->table('api_usage_daily')->selectSum('requests_count')->where('user_id', (int)$row->user_id)->like('date', $currentMonth, 'after')->get()->getRow();
+                    $usageRow = $db->table('api_usage_daily')->selectSum('requests_count')->where('user_id', (int)$row->user_id)->where('plan_id', (int)$planId)->like('date', $currentMonth, 'after')->get()->getRow();
                 }
                 $currentUsage = $usageRow ? (int)$usageRow->requests_count : 0;
                 cache()->save($cacheKey, $currentUsage, 30);
@@ -173,6 +173,11 @@ class ApiKeyFilter implements FilterInterface
             // Waterfall Billing Logic: Suscripciones pagan 1 petición, Monedero paga el peso en créditos (1 o 3)
             if (!self::$apiSkipBilling && $creditCost > 0) {
                 $monthlyRemaining = max(0, $monthlyQuota - $currentUsage);
+                
+                if ((int)$planId === 1 && $walletBalance > 0) {
+                    $monthlyRemaining = 0; // Force wallet billing
+                }
+                
                 $requestCost = 1; // Para la suscripción, 1 llamada = 1 petición
                 
                 if ($monthlyRemaining >= $requestCost) {
@@ -247,6 +252,7 @@ class ApiKeyFilter implements FilterInterface
             'search_term'     => $searchTerm ? (string)$searchTerm : null,
             'sub_cost'        => $subCost,
             'wallet_cost'     => $walletCost,
+            'wallet_balance'  => $walletBalance,
         ];
 
         $request->setGlobal('get', array_merge($request->getGet(), [

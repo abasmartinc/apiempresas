@@ -10,7 +10,7 @@ class EmailAutomationModel extends Model
     protected $primaryKey = 'id';
     protected $returnType = 'array';
 
-    protected $allowedFields = ['user_id', 'email_type', 'message_content', 'sent_at', 'created_at'];
+    protected $allowedFields = ['user_id', 'email_type', 'sent_at', 'created_at'];
 
     public function wasSent(int $userId, string $emailType): bool
     {
@@ -39,7 +39,7 @@ class EmailAutomationModel extends Model
         return $this->insert([
             'user_id'         => $userId,
             'email_type'      => $emailType,
-            'message_content' => $messageContent,
+
             'sent_at'         => date('Y-m-d H:i:s'),
             'created_at'      => date('Y-m-d H:i:s')
         ]) !== false;

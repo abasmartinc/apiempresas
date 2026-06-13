@@ -91,8 +91,7 @@ class BillingSimulator
             $db->table('user_wallet_transactions')->insert([
                 'user_id' => $userId,
                 'amount' => $credits,
-                'type' => 'recharge',
-                'description' => 'Recarga simulada local (BILLING_MODE)',
+                'transaction_type' => 'stripe_payment',
                 'reference_id' => 'sim_bonus_' . bin2hex(random_bytes(8)),
                 'created_at' => date('Y-m-d H:i:s')
             ]);

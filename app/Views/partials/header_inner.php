@@ -1,3 +1,14 @@
+<?php 
+    $db = \Config\Database::connect();
+    $uid = session('user_id');
+    $hasBonusOnly = false;
+    if ($uid && $db->tableExists('user_wallets')) {
+        $wb = $db->table('user_wallets')->where('user_id', $uid)->get()->getRow();
+        if ($wb && $wb->balance > 0) {
+            $hasBonusOnly = true;
+        }
+    }
+?>
 
     <header>
         <?php if (session('impersonator_id')): ?>
@@ -51,8 +62,10 @@
 
             <nav class="desktop-only" aria-label="Principal" style="display:flex; align-items:center;">
                 <a class="minor-nav-link" href="<?=site_url() ?>dashboard">Dashboard</a>
+                <?php if(!$hasBonusOnly): ?>
                 <span class="nav-sep">•</span>
-                <a class="minor-nav-link" href="<?=site_url() ?>billing">Mi Plan</a>
+                <a class="minor-nav-link" href="<?=site_url() ?>billing">Suscripción</a>
+                <?php endif; ?>
                 <span class="nav-sep">•</span>
                 <a class="minor-nav-link" href="<?=site_url() ?>consumption">Consumo</a>
                 <span class="nav-sep">•</span>
@@ -118,10 +131,12 @@
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
                                 Mi Dashboard
                             </a>
+                            <?php if(!$hasBonusOnly): ?>
                             <a href="<?= site_url('billing') ?>" class="dropdown-item">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10"/></svg>
-                                Mi Plan
+                                Suscripción
                             </a>
+                            <?php endif; ?>
                             <div class="dropdown-divider"></div>
                             <a href="<?= site_url('logout') ?>" class="dropdown-item logout-item">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
@@ -147,7 +162,9 @@
                 </div>
                 <nav class="mobile-nav">
                     <a href="<?=site_url() ?>dashboard" class="mobile-nav-link">Dashboard</a>
-                    <a href="<?=site_url() ?>billing" class="mobile-nav-link">Mi Plan</a>
+                    <?php if(!$hasBonusOnly): ?>
+                    <a href="<?=site_url() ?>billing" class="mobile-nav-link">Suscripción</a>
+                    <?php endif; ?>
                     <a href="<?=site_url() ?>consumption" class="mobile-nav-link">Consumo</a>
                     <a href="<?=site_url() ?>documentation" class="mobile-nav-link">Documentación</a>
                     <a href="#" class="mobile-nav-link js-track-wp-cta" style="color: #0369a1;">Plugin WordPress <span style="background: #e0f2fe; color: #0284c7; font-size: 10px; padding: 2px 6px; border-radius: 4px;">NUEVO</span></a>

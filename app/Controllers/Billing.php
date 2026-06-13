@@ -540,8 +540,9 @@ class Billing extends BaseController
         if (!session('logged_in')) {
             // Guardar contexto para después del registro rápido
             session()->set('pending_checkout_bonus', $postData);
-            return redirect()->to(site_url('register/quick'));
+            return redirect()->to(site_url('register/quick?redirect=billing/checkout_bonus'));
         }
+
 
         if (empty($postData) || !isset($postData['credits'])) {
             $postData = session('pending_checkout_bonus') ?? [];
@@ -902,6 +903,17 @@ class Billing extends BaseController
         $checkoutData = session('checkout_context') ?? [];
         $lastInfo = session('last_purchase_info') ?? [];
 
+        // 1.5 Custom Bonus Success
+        if (($checkoutData['type'] ?? '') === 'custom_bonus') {
+            $data = [
+                'credits' => $checkoutData['credits'] ?? 0,
+                'price' => $checkoutData['price'] ?? 0,
+                'order_ref' => 'BONUS-' . date('Ymd') . '-' . rand(1000, 9999),
+            ];
+            session()->remove('checkout_context');
+            return view('billing/success_bonus', $data);
+        }
+
         // 1. Excel Single Purchase Flow (Check context or last info)
         if (($checkoutData['type'] ?? '') === 'excel' || ($checkoutData['type'] ?? '') === 'directory_excel' || (!empty($lastInfo) && empty($subscription))) {
             
@@ -978,7 +990,7 @@ class Billing extends BaseController
         }
 
         // 3. API Subscription Success (Pro/Business)
-        if ($subscription) {
+        if ($subscription && strtolower($subscription->plan_slug ?? '') !== 'free' && (float)($subscription->price_monthly ?? 0) > 0) {
             $data = [
                 'plan_name' => $subscription->plan_name ?? 'Pro',
                 'base_price' => $subscription->price_monthly ?? '19',

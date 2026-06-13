@@ -35,13 +35,7 @@ class Dashboard extends BaseController
         $user   = $userModel->find($userId);
         $data['user'] = $user;
 
-        $data['showMigrationNotice'] = false;
 
-        // Mostrar aviso de migración (solo una vez) para TODOS los usuarios que no lo hayan visto
-        if ((int)$user->migration_notice_shown === 0) {
-            $data['showMigrationNotice'] = true;
-            $userModel->update($userId, ['migration_notice_shown' => 1]);
-        }
 
         // Determinar si hay que mostrar el wizard de onboarding
         $data['show_wizard'] = ((int)($user->wizard_completed ?? 0) === 0);
@@ -98,7 +92,9 @@ class Dashboard extends BaseController
             
             $usageSum = $db->table('api_usage_daily')
                 ->selectSum('requests_count', 'total')
+                ->selectSum('credits_used', 'credits_total')
                 ->where('user_id', $userId)
+                ->where('plan_id', $plan->plan_id)
                 ->where('date >=', date('Y-m-01'))
                 ->get()->getRow();
         } else {
@@ -107,12 +103,13 @@ class Dashboard extends BaseController
             // Plan Free: Bono 100 consultas Lifetime (desde hoy 2026-05-28)
             $usageSum = $db->table('api_usage_daily')
                 ->selectSum('requests_count', 'total')
+                ->selectSum('credits_used', 'credits_total')
                 ->where('user_id', $userId)
                 ->where('date >=', '2026-05-28')
                 ->get()->getRow();
         }
         
-        $requestsUsedThisMonth = (int)($usageSum->total ?? 0);
+        $requestsUsedThisMonth = (int)($usageSum->total ?? 0) + (int)($usageSum->credits_total ?? 0);
         
         $remainingRequests = max(0, $maxLimit - $requestsUsedThisMonth);
         
@@ -123,15 +120,44 @@ class Dashboard extends BaseController
         $data['isPaid'] = $isPaid;
         $data['maxLimit'] = $maxLimit;
 
-        // Recuperar saldo del monedero (Custom Bonus)
+        // Recuperar saldo del monedero y estadísticas
         $walletBalance = 0;
+        $walletSpent = 0;
+        $walletTotal = 0;
+        $walletLowBalance = false;
+        
         if ($db->tableExists('user_wallets')) {
             $walletRow = $db->table('user_wallets')->where('user_id', $userId)->get()->getRow();
             if ($walletRow) {
                 $walletBalance = (int)$walletRow->balance;
             }
+            
+            $spentRow = $db->table('api_usage_daily')->selectSum('credits_used', 'total')->where('user_id', $userId)->get()->getRow();
+            $walletSpent = (int)($spentRow->total ?? 0);
+            
+            $walletTotal = $walletBalance + $walletSpent;
+            
+            // Mostrar CTA de recarga si queda menos del 20% del total o menos de 100 créditos
+            if ($walletTotal > 0 && ($walletBalance <= ($walletTotal * 0.2) || $walletBalance < 100)) {
+                $walletLowBalance = true;
+            }
         }
         $data['walletBalance'] = $walletBalance;
+        $data['walletSpent'] = $walletSpent;
+        $data['walletTotal'] = $walletTotal;
+        $data['walletLowBalance'] = $walletLowBalance;
+        $data['isBonusUser'] = ($walletTotal > 0);
+
+        // --- Mostrar aviso de migración a Free (solo una vez) ---
+        $data['showMigrationNotice'] = false;
+        if ((int)$user->migration_notice_shown === 0) {
+            // Solo se le muestra visualmente a los usuarios Free sin saldo en el monedero
+            if (!$isPaid && $walletBalance == 0) {
+                $data['showMigrationNotice'] = true;
+            }
+            // En cualquier caso (Pro, Bono o Free), lo marcamos como visto en BD para no evaluarlo más
+            $userModel->update($userId, ['migration_notice_shown' => 1]);
+        }
 
         // Dynamic Usage Message
         $data['usageMessage'] = null;
@@ -212,18 +238,12 @@ class Dashboard extends BaseController
                 return redirect()->to(site_url('radar'));
             }
 
-            // Si es un plan de pago real, vamos al dashboard avanzado
-            if ($isPaid) {
-                return view('dashboard_paid', $data);
-            }
+            // Ahora todos los usuarios de pago de la API van al dashboard unificado
+            // (La redirección a dashboard_paid ha sido eliminada)
         }
 
-        // Si tiene acceso API (Free o activado manualmente)
-        if (($user->api_access ?? 0) == 1 || (!$isPaid)) {
-            return view('dashboard', $data);
-        }
-
-        return view('dashboard_construction', $data);
+        // Todos los usuarios convergen en el dashboard unificado
+        return view('dashboard', $data);
     }
 
     /**
@@ -245,12 +265,22 @@ class Dashboard extends BaseController
 
         if (!$kpis) {
             $db = \Config\Database::connect();
-            $usageSum = $db->table('api_usage_daily')
+            
+            $subModel = new \App\Models\UsersuscriptionsModel();
+            $plan = $subModel->getActivePlanByUserId($userId);
+            
+            $builder = $db->table('api_usage_daily')
                 ->selectSum('requests_count', 'total')
+                ->selectSum('credits_used', 'credits_total')
                 ->where('user_id', $userId)
-                ->where('date >=', date('Y-m-01'))
-                ->get()->getRow();
-            $requestCount = (int)($usageSum->total ?? 0);
+                ->where('date >=', date('Y-m-01'));
+                
+            if ($plan && $plan->plan_id) {
+                $builder->where('plan_id', $plan->plan_id);
+            }
+            
+            $usageSum = $builder->get()->getRow();
+            $requestCount = (int)($usageSum->total ?? 0) + (int)($usageSum->credits_total ?? 0);
 
             $kpis = [
                 'api_request_total_month' => $requestCount,

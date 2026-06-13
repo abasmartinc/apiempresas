@@ -50,6 +50,7 @@ class Usage extends BaseController
             if ($freePlan) {
                 // Objeto dummy para la vista
                 $plan = (object)[
+                    'plan_id'              => 1,
                     'plan_name'            => $freePlan->name,
                     'monthly_quota'        => $freePlan->monthly_quota,
                     'status'               => 'inactive',
@@ -58,12 +59,90 @@ class Usage extends BaseController
                 ];
             }
         }
+
+        // --- LÓGICA DE MONEDERO PREPAGO (Igual que Dashboard) ---
+        $db = \Config\Database::connect();
+        $walletBalance = 0;
+        $walletTotal = 0;
+        
+        if ($db->tableExists('user_wallets')) {
+            $walletRow = $db->table('user_wallets')->where('user_id', $userId)->get()->getRow();
+            if ($walletRow) {
+                $walletBalance = (int)$walletRow->balance;
+            }
+            
+            $spentRow = $db->table('api_usage_daily')->selectSum('credits_used', 'total')->where('user_id', $userId)->get()->getRow();
+            $walletSpent = (int)($spentRow->total ?? 0);
+            
+            $walletTotal = $walletBalance + $walletSpent;
+        }
+        
+        // Si el usuario no tiene plan de pago mensual, pero tiene un bono, lo tratamos como Bono
+        $isFreeOrNull = (!$plan || !isset($plan->plan_id) || $plan->plan_id == 1);
+        if ($isFreeOrNull && isset($walletTotal) && $walletTotal > 0) {
+            $plan = (object)[
+                'plan_name'            => 'Bono API Prepago',
+                'monthly_quota'        => null, // Límite mensual no aplica
+                'status'               => 'active',
+                'current_period_start' => null,
+                'current_period_end'   => null,
+                'is_bonus'             => true,
+                'wallet_balance'       => $walletBalance,
+                'wallet_spent'         => $walletSpent ?? 0
+            ];
+        }
         
         $data['plan'] = $plan;
 
-        // KPIs
-        $data['api_request_total_month'] = $this->ApiRequestsModel->countRequestsForMonth(date('Y-m'), ['user_id' => $userId]);
-        $data['api_request_total_today'] = $this->ApiRequestsModel->countRequestsForDay(date('Y-m-d'), ['user_id' => $userId]);
+        // KPIs: Aislar consumo según suscripción/plan actual
+        $db = \Config\Database::connect();
+        $usageMonth = 0;
+        $usageToday = 0;
+
+        if ($plan && isset($plan->plan_id) && !isset($plan->is_bonus) && $plan->plan_id != 1) {
+            // Usuario con plan mensual Activo (Pro, Business)
+            $sumRow = $db->table('api_usage_daily')
+                ->selectSum('requests_count', 'total')
+                ->selectSum('credits_used', 'credits_total')
+                ->where('user_id', $userId)
+                ->where('plan_id', $plan->plan_id)
+                ->where('date >=', date('Y-m-01'))
+                ->get()->getRow();
+            
+            $usageMonth = ($sumRow->total ?? 0) + ($sumRow->credits_total ?? 0);
+
+            $todayRow = $db->table('api_usage_daily')
+                ->selectSum('requests_count', 'total')
+                ->selectSum('credits_used', 'credits_total')
+                ->where('user_id', $userId)
+                ->where('plan_id', $plan->plan_id)
+                ->where('date', date('Y-m-d'))
+                ->get()->getRow();
+            
+            $usageToday = ($todayRow->total ?? 0) + ($todayRow->credits_total ?? 0);
+        } else {
+            // Usuario Free o Usuario con Bono
+            $sumRow = $db->table('api_usage_daily')
+                ->selectSum('requests_count', 'total')
+                ->selectSum('credits_used', 'credits_total')
+                ->where('user_id', $userId)
+                ->where('date >=', date('Y-m-01'))
+                ->get()->getRow();
+            
+            $usageMonth = ($sumRow->total ?? 0) + ($sumRow->credits_total ?? 0);
+
+            $todayRow = $db->table('api_usage_daily')
+                ->selectSum('requests_count', 'total')
+                ->selectSum('credits_used', 'credits_total')
+                ->where('user_id', $userId)
+                ->where('date', date('Y-m-d'))
+                ->get()->getRow();
+            
+            $usageToday = ($todayRow->total ?? 0) + ($todayRow->credits_total ?? 0);
+        }
+
+        $data['api_request_total_month'] = $usageMonth;
+        $data['api_request_total_today'] = $usageToday;
 
         // Log usage page visit
         log_activity('usage_visit');
@@ -128,6 +207,25 @@ class Usage extends BaseController
         unset($ep); // Break reference
         
         $data['endpoint_breakdown'] = $endpointBreakdown;
+
+        // ===== REGISTRO RECIENTE =====
+        $db = \Config\Database::connect();
+        $recentRequests = $db->table('api_requests')
+            ->select('api_requests.endpoint, api_requests.search_term, api_requests.status_code, api_requests.duration_ms, api_requests.created_at, api_plans.name as plan_name')
+            ->join('user_subscriptions', 'user_subscriptions.id = api_requests.subscription_id', 'left')
+            ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id', 'left')
+            ->where('api_requests.user_id', $userId)
+            ->orderBy('api_requests.created_at', 'DESC')
+            ->limit(50)
+            ->get()->getResultArray();
+            
+        $isBonusUser = isset($plan->is_bonus) && $plan->is_bonus;
+        foreach ($recentRequests as &$r) {
+            if (empty($r['plan_name']) || (strtolower($r['plan_name']) === 'free' && $isBonusUser)) {
+                $r['plan_name'] = 'Bono Prepago';
+            }
+        }
+        $data['recent_requests'] = $recentRequests;
 
         return view('usage', $data);
     }

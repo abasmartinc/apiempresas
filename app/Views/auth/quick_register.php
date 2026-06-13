@@ -178,6 +178,17 @@
                         </div>
                     </div>
                 </div>
+            <?php elseif (isset($redirect) && strpos($redirect, 'checkout_bonus') !== false): ?>
+                <!-- VERSION COMPRA BONO API -->
+                <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 24px;">
+                    <div style="width: 56px; height: 56px; background: #eef2ff; color: var(--primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; border: 1px solid #e0e7ff;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"/></svg>
+                    </div>
+                </div>
+                <h1 style="font-size: 1.75rem; font-weight: 900; color: #0f172a; margin-bottom: 12px; letter-spacing: -0.01em;">Crea tu cuenta gratuita</h1>
+                <p style="color: #64748b; margin-bottom: 32px; line-height: 1.6; font-size: 0.95rem;">
+                    Introduce tu correo electrónico para procesar el pago y acceder al instante a tu nueva API Key con el saldo cargado en tu monedero.
+                </p>
             <?php else: ?>
                 <!-- VERSION PASO FINAL / DESCARGA -->
                 <h1 style="font-size: 1.75rem; font-weight: 900; color: #0f172a; margin-bottom: 12px; letter-spacing: -0.01em;">Paso Final</h1>
@@ -218,7 +229,15 @@
                 </div>
 
                 <button type="submit" class="btn-primary" style="<?= (isset($redirect) && strpos($redirect, 'radar') !== false) ? 'background: #2563EB;' : '' ?>">
-                    <?= (isset($redirect) && strpos($redirect, 'radar') !== false) ? 'Acceder a estas empresas ahora' : 'Continuar al Pago' ?>
+                    <?php 
+                        if (isset($redirect) && strpos($redirect, 'radar') !== false) {
+                            echo 'Acceder a estas empresas ahora';
+                        } elseif (isset($redirect) && strpos($redirect, 'checkout_bonus') !== false) {
+                            echo 'Crear cuenta y pagar bono';
+                        } else {
+                            echo 'Continuar al Pago';
+                        }
+                    ?>
                 </button>
             </form>
 
@@ -234,7 +253,11 @@
                 <p style="margin-top: 24px; font-size: 0.9rem; color: #1E293B; font-weight: 800;">
                     "Las primeras empresas en contactar son las que se llevan el cliente"
                 </p>
-<?php else: ?>
+            <?php elseif (isset($redirect) && strpos($redirect, 'checkout_bonus') !== false): ?>
+                <p style="margin-top: 24px; font-size: 0.85rem; color: #94a3b8; line-height: 1.5;">
+                    Al instante tendrás acceso a tu panel de control para gestionar tu API, consultar métricas y contactar con soporte técnico.
+                </p>
+            <?php else: ?>
                 <p style="margin-top: 24px; font-size: 0.85rem; color: #94a3b8; line-height: 1.5;">
                     Recibirás una clave de acceso temporal para descargar el archivo siempre que lo necesites.
                 </p>

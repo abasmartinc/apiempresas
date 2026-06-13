@@ -115,8 +115,7 @@ class Webhook extends Controller
                     $db->table('user_wallet_transactions')->insert([
                         'user_id' => $userId,
                         'amount' => $credits,
-                        'type' => 'recharge',
-                        'description' => 'Recarga Stripe Checkout (' . $session->id . ')',
+                        'transaction_type' => 'stripe_payment',
                         'reference_id' => $session->id,
                         'created_at' => date('Y-m-d H:i:s')
                     ]);

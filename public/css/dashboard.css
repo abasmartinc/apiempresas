@@ -331,9 +331,22 @@
     }
 
     .plan-card--pro {
-        background: linear-gradient(180deg, #1e3a8a 0%, #2563eb 70%);
-        /* Deep Blue */
-        box-shadow: 0 18px 40px rgba(37, 99, 235, .30);
+        background: radial-gradient(120% 120% at 100% 0%, #3b82f6 0%, #1e3a8a 100%);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 20px 40px rgba(37, 99, 235, .35), inset 0 1px 0 rgba(255,255,255,0.15);
+        position: relative;
+        overflow: hidden;
+    }
+    .plan-card--pro::after {
+        content: '';
+        position: absolute;
+        top: -30%;
+        right: -10%;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
     }
 
     .plan-card--business {

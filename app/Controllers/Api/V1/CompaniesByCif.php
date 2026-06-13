@@ -144,9 +144,10 @@ class CompaniesByCif extends ResourceController
         $cached = cache($cacheKey);
 
         if (is_array($cached) && !empty($cached)) {
-            // Apply masking if Free plan
+            // Apply masking if Free plan and no wallet balance
             $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
-            if ((int)$planId === 1) {
+            $walletBalance = \App\Filters\ApiKeyFilter::$apiMeta['wallet_balance'] ?? 0;
+            if ((int)$planId === 1 && $walletBalance <= 0) {
                 $cached = mask_company_data($cached);
             }
 
@@ -157,7 +158,7 @@ class CompaniesByCif extends ResourceController
 
             // Administradores y Cargos
             $includeAdmins = filter_var($this->request->getGet('admin'), FILTER_VALIDATE_BOOLEAN);
-            if ($includeAdmins && (int)$planId > 1 && $companyId) {
+            if ($includeAdmins && ((int)$planId > 1 || $walletBalance > 0) && $companyId) {
                 $db = \Config\Database::connect();
                 $cached['administrators'] = $db->table('company_administrators')
                     ->select('name, position')
@@ -191,9 +192,10 @@ class CompaniesByCif extends ResourceController
             // Guardar SOLO data en cache (completa)
             cache()->save($cacheKey, $company, 86400); // 24h
 
-            // Apply masking if Free plan
+            // Apply masking if Free plan and no wallet balance
             $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
-            if ((int)$planId === 1) {
+            $walletBalance = \App\Filters\ApiKeyFilter::$apiMeta['wallet_balance'] ?? 0;
+            if ((int)$planId === 1 && $walletBalance <= 0) {
                 $company = mask_company_data($company);
             }
 
@@ -204,7 +206,7 @@ class CompaniesByCif extends ResourceController
 
             // Administradores y Cargos
             $includeAdmins = filter_var($this->request->getGet('admin'), FILTER_VALIDATE_BOOLEAN);
-            if ($includeAdmins && (int)$planId > 1 && $companyId) {
+            if ($includeAdmins && ((int)$planId > 1 || $walletBalance > 0) && $companyId) {
                 $db = \Config\Database::connect();
                 $company['administrators'] = $db->table('company_administrators')
                     ->select('name, position')
