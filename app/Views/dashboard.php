@@ -324,7 +324,7 @@ if ($isBonusUser && !($isPaid ?? false)) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Campo vacío',
-                    text: 'Por favor, introduce un CIF o nombre de empresa para buscar.',
+                    text: 'Por favor, introduce un CIF para buscar.',
                     confirmButtonColor: '#2152ff',
                     confirmButtonText: 'Entendido'
                 });
@@ -406,10 +406,22 @@ if ($isBonusUser && !($isPaid ?? false)) {
                     }
                     <?php endif; ?>
                 } else {
-                    alert(data.message || 'No se encontró la empresa.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de validación',
+                        text: data.message || 'No se encontró la empresa.',
+                        confirmButtonColor: '#2152ff',
+                        confirmButtonText: 'Aceptar'
+                    });
                 }
             } catch (e) {
-                alert('Error en la validación. Revisa tu conexión.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de conexión',
+                    text: 'Error en la validación. Revisa tu conexión.',
+                    confirmButtonColor: '#2152ff',
+                    confirmButtonText: 'Aceptar'
+                });
             } finally {
                 btnValidate.disabled = false;
                 btnValidate.textContent = 'Validar empresa ahora';
@@ -570,21 +582,7 @@ function showUpgradeModal() {
     });
 }
 
-<?php if (!empty($showMigrationNotice)): ?>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            title: '¡Mejora del Plan Free!',
-            text: 'Hemos escuchado vuestro feedback. Ahora dispones de <?= $freeLimit ?> consultas garantizadas sin caducidad mensual para probar e integrar la API a tu ritmo.',
-            icon: 'info',
-            confirmButtonText: 'Entendido',
-            confirmButtonColor: '#2152ff',
-            background: '#ffffff',
-            customClass: {
-                popup: 'premium-swal-popup'
-            }
-        });
-    });
-<?php endif; ?>
+
 </script>
 
 </body>

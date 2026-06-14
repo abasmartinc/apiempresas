@@ -12,11 +12,11 @@ $isWarning = ($requestsUsed >= $warningThreshold);
     
     <div class="activation-header" style="margin-top: 10px;">
         <h2><?= $isLimitReached ? ($isPaid ? 'Límite mensual alcanzado' : 'Límite alcanzado') : ($isPaid ? 'Valida empresas en segundos' : 'Prueba la API en segundos') ?></h2>
-        <p><?= $isLimitReached ? 'Has agotado tus ' . number_format($limitToUse, 0, ',', '.') . ' consultas. Activa un plan superior para seguir validando.' : 'Introduce un CIF o nombre y valida una empresa real.' ?></p>
+        <p><?= $isLimitReached ? 'Has agotado tus ' . number_format($limitToUse, 0, ',', '.') . ' consultas. Activa un plan superior para seguir validando.' : 'Introduce un CIF y valida una empresa real.' ?></p>
     </div>
     
     <div class="search-form-dash" style="position: relative;">
-        <input type="text" id="dash_q" class="search-input-dash" placeholder="Ej: B12345678 o Nombre de Empresa" <?= $isLimitReached ? 'readonly style="background: #f8fafc; cursor: not-allowed;"' : '' ?>>
+        <input type="text" id="dash_q" class="search-input-dash" placeholder="Ej: B12345678" <?= $isLimitReached ? 'readonly style="background: #f8fafc; cursor: not-allowed;"' : '' ?>>
         <button id="btnDashValidate" class="btn-validate-dash" <?= $isLimitReached ? 'style="background: #94a3b8;"' : '' ?>>Validar ahora</button>
         
         <?php if ($isLimitReached): ?>

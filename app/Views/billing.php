@@ -193,7 +193,7 @@ $fmt = function ($n) {
                                             </div>
                                             <div class="form-group">
                                                 <label for="bill_vat">NIF/CIF</label>
-                                                <input class="form-control" id="bill_vat" name="vat" type="text" placeholder="B12345678" style="border-radius: 12px; background: #f8fafc;" />
+                                                <input class="form-control" id="bill_vat" name="vat" type="text" style="border-radius: 12px; background: #f8fafc;" />
                                             </div>
                                         </div>
                                     </div>
