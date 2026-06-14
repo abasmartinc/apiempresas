@@ -714,8 +714,8 @@
                 <?php foreach($latest as $company):
                     $url = company_url($company);
                     $initial = esc(mb_strtoupper(mb_substr($company['name'], 0, 1)));
-                    $dateFormatted = date('d/m/Y', strtotime($company['date']));
-                    $isNew = (strtotime($company['date']) >= strtotime('-7 days'));
+                    $dateFormatted = date('d/m/Y', strtotime($company['founded']));
+                    $isNew = (strtotime($company['founded']) >= strtotime('-7 days'));
                 ?>
                 <a href="<?= esc($url) ?>" class="co-card">
                     <div class="co-card__header">
