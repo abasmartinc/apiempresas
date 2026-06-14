@@ -6,6 +6,9 @@ class Home extends BaseController
 {
     public function index()
     {
+        // FORZAR ERROR 500 PARA PRUEBAS
+        throw new \Exception('Prueba de error 500 generada manualmente en Home::index');
+
         if (session('logged_in')) {
             return redirect()->to(site_url('dashboard'));
         }
@@ -16,8 +19,8 @@ class Home extends BaseController
         $posts = $cache->get($cacheKey);
 
         if ($posts === null) {
-            $siteUrl    = 'https://blog.apiempresas.es';
-            $endpoint   = '/index.php?rest_route=/wp/v2/posts&per_page=6';
+            $siteUrl = 'https://blog.apiempresas.es';
+            $endpoint = '/index.php?rest_route=/wp/v2/posts&per_page=6';
             $requestUrl = $siteUrl . $endpoint;
 
             $posts = [];
@@ -25,13 +28,13 @@ class Home extends BaseController
                 $ch = curl_init($requestUrl);
                 curl_setopt_array($ch, [
                     CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_TIMEOUT        => 3, // Fast timeout for home page
-                    CURLOPT_USERAGENT      => 'APIEmpresasHomeSSR/1.0',
-                    CURLOPT_HTTPHEADER     => ['Accept: application/json'],
+                    CURLOPT_TIMEOUT => 3, // Fast timeout for home page
+                    CURLOPT_USERAGENT => 'APIEmpresasHomeSSR/1.0',
+                    CURLOPT_HTTPHEADER => ['Accept: application/json'],
                 ]);
                 $response = curl_exec($ch);
                 curl_close($ch);
-                
+
                 if ($response) {
                     $rawPosts = json_decode($response, true);
                     if (is_array($rawPosts)) {
@@ -40,23 +43,23 @@ class Home extends BaseController
                             if (mb_strlen($excerpt, 'UTF-8') > 190) {
                                 $excerpt = mb_substr($excerpt, 0, 187, 'UTF-8') . '…';
                             }
-                            
+
                             $contentText = strip_tags($post['content']['rendered'] ?? '');
-                            $wordCount   = str_word_count($contentText);
-                            $minutes     = max(3, min(15, (int)ceil($wordCount / 220)));
+                            $wordCount = str_word_count($contentText);
+                            $minutes = max(3, min(15, (int) ceil($wordCount / 220)));
 
                             $posts[] = [
-                                'title'   => $post['title']['rendered'] ?? '',
-                                'slug'    => $post['slug'] ?? '',
+                                'title' => $post['title']['rendered'] ?? '',
+                                'slug' => $post['slug'] ?? '',
                                 'excerpt' => $excerpt,
-                                'date'    => isset($post['date']) ? date('d/m/Y', strtotime($post['date'])) : '',
+                                'date' => isset($post['date']) ? date('d/m/Y', strtotime($post['date'])) : '',
                                 'reading' => $minutes . ' min de lectura',
-                                'url'     => site_url('blog/' . ($post['slug'] ?? ''))
+                                'url' => site_url('blog/' . ($post['slug'] ?? ''))
                             ];
                         }
                     }
                 }
-                
+
                 // Cache the results for 1 hour
                 $cache->save($cacheKey, $posts, 3600);
             } catch (\Exception $e) {
@@ -70,18 +73,18 @@ class Home extends BaseController
         $showReviewModal = false;
         $db = \Config\Database::connect();
         $ip = $this->request->getIPAddress();
-        
+
         // Check if user already submitted a review
         $alreadyReviewed = $db->table('user_reviews')
-                              ->where('ip_address', $ip)
-                              ->countAllResults();
-                              
+            ->where('ip_address', $ip)
+            ->countAllResults();
+
         if ($alreadyReviewed == 0) {
             // Check if user has >= 3 searches
             $searchCount = $db->table('company_search_logs')
-                              ->where('ip', $ip)
-                              ->countAllResults();
-                              
+                ->where('ip', $ip)
+                ->countAllResults();
+
             if ($searchCount >= 3) {
                 $showReviewModal = true;
             }
@@ -94,12 +97,12 @@ class Home extends BaseController
 
         if ($socialProofText === null) {
             $apiRequestsModel = new \App\Models\ApiRequestsModel();
-            $searchLogModel   = new \App\Models\SearchLogModel();
-            $today            = date('Y-m-d');
-            
+            $searchLogModel = new \App\Models\SearchLogModel();
+            $today = date('Y-m-d');
+
             $apiValidationsToday = $apiRequestsModel->countRequestsForDay($today);
             $webValidationsToday = $searchLogModel->countLogsForDay($today);
-            $totalReal           = $apiValidationsToday + $webValidationsToday;
+            $totalReal = $apiValidationsToday + $webValidationsToday;
 
             if ($totalReal <= 0) {
                 $socialProofText = ''; // No data, hide block
@@ -111,7 +114,7 @@ class Home extends BaseController
             } else {
                 $socialProofText = "Hoy se han validado " . number_format($totalReal, 0, ',', '.') . " empresas automáticamente";
             }
-            
+
             // Save to cache for 5 minutes (short cache)
             $cache->save($cacheKey, $socialProofText, 300);
         }
@@ -120,10 +123,10 @@ class Home extends BaseController
         $freeLimit = get_free_plan_limit();
 
         return view('home', [
-            'latest_posts'    => $posts,
+            'latest_posts' => $posts,
             'showReviewModal' => $showReviewModal,
             'socialProofText' => $socialProofText,
-            'freeLimit'       => $freeLimit
+            'freeLimit' => $freeLimit
         ]);
     }
 
@@ -136,7 +139,7 @@ class Home extends BaseController
 
         $rating = (int) $this->request->getPost('rating');
         $comment = (string) $this->request->getPost('comment');
-        
+
         if ($rating < 1 || $rating > 5) {
             return $this->response->setStatusCode(400)->setJSON(['error' => 'Invalid rating']);
         }
@@ -146,9 +149,9 @@ class Home extends BaseController
 
         // Check if already reviewed
         $alreadyReviewed = $db->table('user_reviews')
-                              ->where('ip_address', $ip)
-                              ->countAllResults();
-                              
+            ->where('ip_address', $ip)
+            ->countAllResults();
+
         if ($alreadyReviewed > 0) {
             return $this->response->setJSON(['success' => true]);
         }
@@ -156,11 +159,11 @@ class Home extends BaseController
         // Insert review
         $data = [
             'ip_address' => $ip,
-            'rating'     => $rating,
-            'comment'    => $comment ? esc($comment) : null,
+            'rating' => $rating,
+            'comment' => $comment ? esc($comment) : null,
             'created_at' => date('Y-m-d H:i:s')
         ];
-        
+
         $db->table('user_reviews')->insert($data);
 
         // Send email notification
