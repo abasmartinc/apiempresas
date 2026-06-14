@@ -114,7 +114,7 @@
                     <td style="padding: 12px;">
                         <div style="display: flex; gap: 5px;">
                             <a href="<?= site_url('admin/subscriptions/edit/' . $s->id) ?>" class="btn ghost" style="padding: 4px 8px; font-size: 0.75rem;" title="Editar">✏️</a>
-                            <a href="<?= site_url('admin/subscriptions/delete/' . $s->id) ?>" class="btn ghost" style="padding: 4px 8px; font-size: 0.75rem; color: #ef4444; border-color: #fee2e2;" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar esta suscripción?')">🗑️</a>
+                            <a href="<?= site_url('admin/subscriptions/delete/' . $s->id) ?>" class="btn ghost" style="padding: 4px 8px; font-size: 0.75rem; color: #ef4444; border-color: #fee2e2;" title="Eliminar" data-confirm="¿Estás seguro de eliminar esta suscripción?">🗑️</a>
                         </div>
                     </td>
                 </tr>

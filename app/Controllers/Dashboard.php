@@ -76,6 +76,11 @@ class Dashboard extends BaseController
             $data['online_users_html'] = $html;
             // --------------------------
 
+            // --- Pending Tickets Count ---
+            $ticketModel = new \App\Models\TicketModel();
+            $data['pending_tickets_count'] = $ticketModel->where('status', 'open')->countAllResults();
+            // --------------------------
+
             return view('admin/dashboard', $data);
         }
 
@@ -158,6 +163,12 @@ class Dashboard extends BaseController
         // Fast query just to know whether to show onboarding strip or not
         $data['has_first_request'] = $requestsUsedThisMonth > 0;
         $data['requestsUsed'] = $requestsUsedThisMonth; // Alias for convenience in view
+
+        // Comprobar si hay tickets respondidos por el admin
+        $ticketModel = new \App\Models\TicketModel();
+        $data['answeredTickets'] = $ticketModel->where('user_id', $userId)
+                                               ->where('status', 'answered')
+                                               ->findAll();
 
         // Si tiene plan activo, va al dashboard correspondiente
         if ($data['plan']) {

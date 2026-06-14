@@ -213,19 +213,39 @@
                 }
             ?>
 
-            <div class="dash-header">
-                <h1>Bienvenido, <?= htmlspecialchars($userName) ?></h1>
+            <div class="dash-header-wrap" style="margin-bottom: 24px;">
+                <div class="dash-header" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; margin: 24px 0 16px 0; width: 100%;">
+                    <h1 style="margin: 0; font-size: 1.8rem; color: #0f172a;">Bienvenido, <?= htmlspecialchars($userName) ?></h1>
+                    <span style="background: #94a3b8; color: white; padding: 4px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                        Panel de Control Free
+                    </span>
+                </div>
                 
                 <?php if (!empty($usageMessage)): ?>
-                    <div class="usage-alert-card" style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 16px; padding: 20px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 16px;">
-                        <div style="background: #2152ff; color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    <div class="usage-alert-card" style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 16px; margin: 0 0 16px 0; display: flex; align-items: flex-start; gap: 16px;">
+                        <div style="background: #2152ff; color: white; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                         </div>
                         <div>
-                            <h3 style="margin: 0 0 4px; font-size: 1.1rem; font-weight: 800; color: #0c4a6e;"><?= esc($usageMessage['title']) ?></h3>
-                            <p style="margin: 0; font-size: 0.95rem; color: #0369a1; font-weight: 600;"><?= esc($usageMessage['text']) ?></p>
+                            <h3 style="margin: 0 0 4px; font-size: 1rem; font-weight: 800; color: #0c4a6e;"><?= esc($usageMessage['title']) ?></h3>
+                            <p style="margin: 0; font-size: 0.9rem; color: #0369a1; font-weight: 600;"><?= esc($usageMessage['text']) ?></p>
                         </div>
                     </div>
+                <?php endif; ?>
+
+                <?php if (!empty($answeredTickets)): ?>
+                    <?php foreach($answeredTickets as $t): ?>
+                        <div class="usage-alert-card" style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px; margin: 0 0 16px 0; display: flex; align-items: flex-start; gap: 16px;">
+                            <div style="background: #10b981; color: white; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            </div>
+                            <div style="flex: 1;">
+                                <h3 style="margin: 0 0 4px; font-size: 1rem; font-weight: 800; color: #065f46;">Respuesta de Soporte al Ticket #<?= $t['id'] ?></h3>
+                                <p style="margin: 0 0 8px; font-size: 0.9rem; color: #047857; font-weight: 600;">El equipo de soporte ha respondido a tu ticket: <strong><?= esc($t['subject']) ?></strong></p>
+                                <a href="<?= site_url('tickets/'.$t['id']) ?>" style="display: inline-block; background: #10b981; color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-decoration: none; transition: all 0.2s;">Ver respuesta</a>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
                 <?php endif; ?>
             </div>
 
@@ -641,19 +661,19 @@ print(response.json())</div>
                         </div>
                     </section>
 
-                    <section class="dash-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px;">
-                        <div style="display: flex; align-items: flex-start; gap: 16px;">
-                            <div style="background: #eff6ff; color: #2152ff; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <section class="dash-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
+                        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                            <div style="background: #eff6ff; color: #2152ff; padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line></svg>
                             </div>
                             <div>
-                                <h3 style="font-size: 1rem; font-weight: 900; color: #0f172a; margin: 0 0 4px !important;">¿Necesitas ayuda?</h3>
-                                <p style="font-size: 0.8rem; color: #64748b; font-weight: 600; margin: 0 0 12px !important; line-height: 1.4;">Nuestro equipo técnico te ayudará con cualquier duda o integración.</p>
-                                <a href="mailto:soporte@apiempresas.es" style="display: inline-block; color: #2152ff; font-weight: 800; font-size: 0.85rem; text-decoration: none; border-bottom: 2px solid rgba(33, 82, 255, 0.1); transition: all 0.2s;" onmouseover="this.style.borderColor='#2152ff'" onmouseout="this.style.borderColor='rgba(33, 82, 255, 0.1)'">
-                                    soporte@apiempresas.es
-                                </a>
+                                <h3 style="font-size: 1.1rem; font-weight: 900; color: #0f172a; margin: 0 0 4px !important;">Soporte Técnico</h3>
+                                <p style="font-size: 0.85rem; color: #64748b; font-weight: 600; margin: 0 !important; line-height: 1.4;">¿Necesitas ayuda con la API o tu cuenta?</p>
                             </div>
                         </div>
+                        <a href="<?= site_url('tickets') ?>" style="display: block; width: 100%; text-align: center; background: #f8fafc; color: #0f172a; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; font-weight: 800; font-size: 0.95rem; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.borderColor='#cbd5e1';" onmouseout="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0';">
+                            Abrir un Ticket
+                        </a>
                     </section>
                 </aside>
             </div>

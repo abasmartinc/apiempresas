@@ -225,7 +225,7 @@
                             <a href="<?= site_url('admin/users/impersonate/' . $user->id) ?>" class="btn secondary btn-impersonate btn-impersonate-style" data-name="<?= esc($user->name) ?>" title="Entrar como este usuario (Impersonate)">🔑</a>
                             <a href="<?= site_url('admin/users/email/' . $user->id) ?>" class="btn secondary btn-sm" title="Enviar Email">✉️</a>
                             <a href="<?= site_url('admin/users/edit/' . $user->id) ?>" class="btn ghost btn-sm" title="Editar">✏️</a>
-                            <a href="<?= site_url('admin/users/delete/' . $user->id) ?>" class="btn ghost btn-danger-ghost" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar este usuario?')">🗑️</a>
+                            <a href="<?= site_url('admin/users/delete/' . $user->id) ?>" class="btn ghost btn-danger-ghost" title="Eliminar" data-confirm="¿Estás seguro de eliminar este usuario?">🗑️</a>
                         </div>
                     </td>
                 </tr>
