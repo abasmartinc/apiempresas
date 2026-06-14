@@ -21,43 +21,25 @@
         .tkt-back-link:hover { color: #2152ff; }
         
         /* Main Area */
-        .tkt-main { display: flex; flex-direction: column; gap: 24px; }
+        /* Chat Area (Admin Style) */
+        .chat-area { background: white; border-radius: 20px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .chat-header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9; }
+        .chat-header h1 { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0; }
         
-        /* Message Cards */
-        .tkt-msg-card { background: white; border-radius: 20px; padding: 28px; box-shadow: 0 4px 20px -5px rgba(0,0,0,0.03); border: 1px solid rgba(226, 232, 240, 0.6); display: flex; gap: 24px; transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
-        .tkt-msg-card:hover { box-shadow: 0 8px 30px -5px rgba(0,0,0,0.06); transform: translateY(-2px); }
+        .chat-container { display: flex; flex-direction: column; gap: 20px; margin-bottom: 32px; max-height: 500px; overflow-y: auto; padding-right: 10px; }
+        .message-bubble { max-width: 85%; padding: 16px 20px; border-radius: 16px; text-align: left !important; }
+        .message-user { align-self: flex-end; background: #2152ff; color: white; border-bottom-right-radius: 4px; }
+        .message-admin { align-self: flex-start; background: #f8fafc; border: 1px solid #e2e8f0; color: #0f172a; border-bottom-left-radius: 4px; }
         
-        /* Distinct look for Admin */
-        .tkt-msg-admin { background: #fafcff; border-color: #dbeafe; }
-        .tkt-msg-admin::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%); border-radius: 4px 0 0 4px; }
+        .message-meta { font-size: 0.75rem; font-weight: 600; margin-bottom: 8px; opacity: 0.8; display: flex; justify-content: space-between; gap: 16px; }
+        .message-content { font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; text-align: left !important; }
         
-        /* Avatars */
-        .tkt-avatar { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-family: 'Outfit', sans-serif; font-size: 1.1rem; color: white; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .tkt-avatar-user { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); }
-        .tkt-avatar-admin { background: linear-gradient(135deg, #2152ff 0%, #0ea5e9 100%); }
+        .reply-box { border-top: 1px solid #f1f5f9; padding-top: 24px; }
+        .form-control { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid #cbd5e1; font-family: 'Inter', sans-serif; font-size: 1rem; color: #0f172a; transition: all 0.2s; background: #f8fafc; margin-bottom: 16px; resize: vertical; min-height: 120px; }
+        .form-control:focus { outline: none; border-color: #2152ff; box-shadow: 0 0 0 4px rgba(33, 82, 255, 0.1); background: white; }
         
-        /* Message Content */
-        .tkt-msg-content { flex: 1; min-width: 0; }
-        .tkt-msg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .tkt-sender { font-family: 'Outfit', sans-serif; font-weight: 700; color: #0f172a; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
-        .tkt-admin-badge { background: #dbeafe; color: #1d4ed8; font-family: 'Inter', sans-serif; font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
-        .tkt-time { font-size: 0.85rem; color: #94a3b8; font-weight: 500; }
-        .tkt-body { font-size: 1rem; color: #334155; line-height: 1.7; white-space: pre-wrap; }
-        
-        /* Reply Box (Rich Editor Style) */
-        .tkt-reply-card { background: white; border-radius: 20px; box-shadow: 0 10px 40px -10px rgba(33, 82, 255, 0.08); border: 1px solid #e2e8f0; overflow: hidden; margin-top: 16px; transition: all 0.3s ease; position: relative; }
-        .tkt-reply-card:focus-within { border-color: #93c5fd; box-shadow: 0 15px 50px -10px rgba(33, 82, 255, 0.15); transform: translateY(-2px); }
-        .tkt-reply-header { padding: 16px 24px; background: #f8fafc; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #475569; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
-        
-        .tkt-textarea { width: 100%; border: none; padding: 24px; font-family: 'Inter', sans-serif; font-size: 1.05rem; color: #0f172a; resize: vertical; min-height: 140px; outline: none; line-height: 1.6; background: transparent; }
-        .tkt-textarea::placeholder { color: #cbd5e1; }
-        
-        .tkt-reply-footer { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-top: 1px solid #f1f5f9; background: white; }
-        
-        /* Premium Buttons */
-        .tkt-btn-send { background: linear-gradient(135deg, #2152ff 0%, #0369a1 100%); color: white; border: none; padding: 14px 32px; border-radius: 12px; font-weight: 800; font-family: 'Outfit', sans-serif; font-size: 1rem; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(33, 82, 255, 0.3); }
-        .tkt-btn-send:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(33, 82, 255, 0.4); }
-        .tkt-btn-send svg { transition: transform 0.3s; }
+        .btn-submit { background: #2152ff; color: white; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.2s; }
+        .btn-submit:hover { background: #1e3a8a; }
         .tkt-btn-send:hover svg { transform: translateX(4px) translateY(-4px); }
 
         /* Sidebar */
@@ -129,65 +111,71 @@
                     </script>
                 <?php endif; ?>
 
-                <h1 class="tkt-h1">#<?= $ticket['id'] ?> - <?= esc($ticket['subject']) ?></h1>
+                <div class="chat-area">
+                    <div class="chat-header">
+                        <h1>#<?= $ticket['id'] ?> - <?= esc($ticket['subject']) ?></h1>
+                    </div>
 
-                <div class="tkt-main" style="margin-top: 32px;">
-                    <?php foreach($replies as $reply): ?>
-                        <div class="tkt-msg-card <?= $reply['is_admin'] ? 'tkt-msg-admin' : '' ?>">
-                            <div class="tkt-avatar <?= $reply['is_admin'] ? 'tkt-avatar-admin' : 'tkt-avatar-user' ?>">
-                                <?= $reply['is_admin'] ? 'ST' : 'TÚ' ?>
-                            </div>
-                            <div class="tkt-msg-content">
-                                <div class="tkt-msg-header">
-                                    <div class="tkt-sender">
-                                        <?= $reply['is_admin'] ? 'Soporte Técnico' : 'Tú' ?>
-                                        <?php if($reply['is_admin']): ?>
-                                            <span class="tkt-admin-badge">
-                                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 2px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                                Staff
-                                            </span>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="tkt-time"><?= date('d M Y, H:i', strtotime($reply['created_at'])) ?></div>
+                    <div class="chat-container">
+                        <?php foreach($replies as $reply): ?>
+                            <?php if(isset($reply['is_private']) && $reply['is_private']) continue; ?>
+                            <div class="message-bubble <?= $reply['is_admin'] ? 'message-admin' : 'message-user' ?>">
+                                <div class="message-meta">
+                                    <span><?= $reply['is_admin'] ? 'Soporte Técnico' : 'Tú' ?></span>
+                                    <span><?= date('d/m/Y H:i', strtotime($reply['created_at'])) ?></span>
                                 </div>
-                                <div class="tkt-body"><?= nl2br(esc($reply['message'])) ?></div>
+                                <div class="message-content"><?= nl2br(esc($reply['message'])) ?><?php if(!empty($reply['attachment'])): ?>
+                                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.2);">
+                                            <a href="<?= base_url($reply['attachment']) ?>" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 700; color: inherit; text-decoration: underline;">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                                                Ver archivo adjunto
+                                            </a>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                             </div>
-                        </div>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    </div>
 
                     <?php if($ticket['status'] !== 'closed'): ?>
-                        <form action="<?= site_url('tickets/'.$ticket['id'].'/reply') ?>" method="POST">
-                            <?= csrf_field() ?>
-                            <div class="tkt-reply-card">
-                                <div class="tkt-reply-header">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                                    Añadir una respuesta
-                                </div>
-                                <textarea name="message" class="tkt-textarea" placeholder="Describe tu consulta o añade más detalles aquí..." required></textarea>
-                                <div class="tkt-reply-footer">
-                                    <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 500;">Soporta texto simple. Nos llegará al instante.</span>
-                                    <button type="submit" class="tkt-btn-send">
-                                        Enviar Mensaje
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    <?php elseif($ticket['status'] === 'closed' && empty($ticket['rating'])): ?>
-                        <div class="tkt-rating-card">
-                            <h3 class="tkt-rating-title">¿Qué te ha parecido la atención recibida?</h3>
-                            <p class="tkt-rating-desc">Tu valoración nos ayuda a mejorar continuamente el soporte de APIEmpresas.</p>
-                            <form action="<?= site_url('tickets/'.$ticket['id'].'/rate') ?>" method="POST">
+                        <div class="reply-box">
+                            <form action="<?= site_url('tickets/'.$ticket['id'].'/reply') ?>" method="POST" enctype="multipart/form-data">
                                 <?= csrf_field() ?>
-                                <div class="tkt-stars">
-                                    <input type="radio" id="star5" name="rating" value="5" /><label for="star5"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
-                                    <input type="radio" id="star4" name="rating" value="4" /><label for="star4"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
-                                    <input type="radio" id="star3" name="rating" value="3" /><label for="star3"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
-                                    <input type="radio" id="star2" name="rating" value="2" /><label for="star2"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
-                                    <input type="radio" id="star1" name="rating" value="1" /><label for="star1"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
+                                <textarea name="message" class="form-control" placeholder="Describe tu consulta o añade más detalles aquí..." required></textarea>
+                                
+                                <div style="margin-bottom: 16px;">
+                                    <label style="font-size: 0.85rem; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">Adjuntar archivo (opcional)</label>
+                                    <input type="file" name="attachment" accept=".jpg,.jpeg,.png,.pdf,.txt,.json" style="width: 100%; padding: 8px; border: 1px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; font-size: 0.85rem;">
                                 </div>
-                                <button type="submit" class="tkt-btn-rate">Enviar Valoración ⭐</button>
+
+                                <div style="display: flex; justify-content: flex-end; align-items: center;">
+                                    <button type="submit" class="btn-submit">Enviar Mensaje</button>
+                                </div>
                             </form>
+                        </div>
+                    <?php else: ?>
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; text-align: center; margin-top: 24px;">
+                            <h3 style="margin: 0 0 8px 0; color: #0f172a; font-family: 'Outfit', sans-serif;">Este ticket está cerrado</h3>
+                            <p style="margin: 0; color: #64748b; font-size: 0.95rem;">Si necesitas más ayuda, por favor crea un nuevo ticket desde el panel principal.</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                
+                <?php if($ticket['status'] === 'closed' && empty($ticket['rating'])): ?>
+                    <div class="tkt-rating-card">
+                        <h3 class="tkt-rating-title">¿Qué te ha parecido la atención recibida?</h3>
+                        <p class="tkt-rating-desc">Tu valoración nos ayuda a mejorar continuamente el soporte de APIEmpresas.</p>
+                        <form action="<?= site_url('tickets/'.$ticket['id'].'/rate') ?>" method="POST">
+                            <?= csrf_field() ?>
+                            <div class="tkt-stars">
+                                <input type="radio" id="star5" name="rating" value="5" /><label for="star5"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
+                                <input type="radio" id="star4" name="rating" value="4" /><label for="star4"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
+                                <input type="radio" id="star3" name="rating" value="3" /><label for="star3"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
+                                <input type="radio" id="star2" name="rating" value="2" /><label for="star2"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
+                                <input type="radio" id="star1" name="rating" value="1" /><label for="star1"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
+                            </div>
+                            <button type="submit" class="tkt-btn-rate">Enviar Valoración ⭐</button>
+                        </form>
                         </div>
                     <?php elseif(!empty($ticket['rating'])): ?>
                          <div class="tkt-rating-card" style="background: #ffffff; border-color: #e2e8f0;">
@@ -198,7 +186,6 @@
                             <p style="margin: 12px 0 0 0; color: #64748b; font-size: 0.95rem; font-weight: 500;">Esta solicitud se encuentra cerrada.</p>
                          </div>
                     <?php endif; ?>
-                </div>
             </div>
 
             <!-- Columna Derecha: Sidebar Sticky -->

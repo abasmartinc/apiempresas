@@ -63,11 +63,20 @@ class Tickets extends BaseController
         ]);
 
         if ($ticketId) {
+            $attachmentPath = null;
+            $file = $this->request->getFile('attachment');
+            if ($file && $file->isValid() && !$file->hasMoved()) {
+                $newName = $file->getRandomName();
+                $file->move(FCPATH . 'uploads/tickets', $newName);
+                $attachmentPath = 'uploads/tickets/' . $newName;
+            }
+
             $this->ticketReplyModel->insert([
                 'ticket_id' => $ticketId,
                 'user_id' => $userId,
                 'is_admin' => 0,
                 'message' => $message,
+                'attachment' => $attachmentPath
             ]);
 
             // Notificar por correo al administrador
@@ -141,14 +150,39 @@ class Tickets extends BaseController
             return redirect()->back()->with('error', 'El mensaje no puede estar vacío.');
         }
 
+        $attachmentPath = null;
+        $file = $this->request->getFile('attachment');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $newName = $file->getRandomName();
+            $file->move(FCPATH . 'uploads/tickets', $newName);
+            $attachmentPath = 'uploads/tickets/' . $newName;
+        }
+
         $this->ticketReplyModel->insert([
             'ticket_id' => $id,
             'user_id' => $userId,
             'is_admin' => 0,
             'message' => $message,
+            'attachment' => $attachmentPath
         ]);
 
         $this->ticketModel->update($id, ['status' => 'open']);
+
+        // Notificar al admin sobre la respuesta
+        $emailService = \Config\Services::email();
+        $emailService->setFrom('no-reply@apiempresas.es', 'APIEmpresas Sistema');
+        $emailService->setTo('soporte@apiempresas.es'); // Or an env variable
+        $emailService->setSubject('Nueva respuesta en Ticket #' . $id);
+        
+        $body = "<h2>El usuario ha respondido al ticket (#$id)</h2>";
+        $body .= "<p><strong>Asunto:</strong> " . esc($ticket['subject']) . "</p>";
+        $body .= "<h3>Mensaje del usuario:</h3>";
+        $body .= "<p>".nl2br(esc($message))."</p>";
+        $body .= "<hr><p><a href='".site_url('admin/tickets/'.$id)."'>Ver Ticket en el Panel de Admin</a></p>";
+        
+        $emailService->setMessage($body);
+        $emailService->setMailType('html');
+        $emailService->send();
 
         return redirect()->back()->with('success', 'Respuesta enviada.');
     }

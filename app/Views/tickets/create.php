@@ -55,8 +55,9 @@
             <?php endif; ?>
 
             <div class="create-form-card">
-                <form action="<?= site_url('tickets/store') ?>" method="POST">
+                <form action="<?= site_url('tickets/store') ?>" method="POST" enctype="multipart/form-data">
                     <?= csrf_field() ?>
+                    
                     <div class="form-group">
                         <label class="form-label" for="subject">Asunto</label>
                         <input type="text" id="subject" name="subject" class="form-control" placeholder="Ej. Problema con la facturación, Duda sobre la API..." required>
@@ -87,6 +88,12 @@
                     <div class="form-group">
                         <label class="form-label" for="message">Mensaje / Descripción</label>
                         <textarea id="message" name="message" class="form-control" placeholder="Describe tu problema con el mayor detalle posible..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="attachment">Archivo adjunto (opcional)</label>
+                        <input type="file" id="attachment" name="attachment" class="form-control" style="padding: 10px;" accept=".jpg,.jpeg,.png,.pdf,.txt,.json">
+                        <p style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">Formatos permitidos: JPG, PNG, PDF, TXT, JSON.</p>
                     </div>
 
                     <button type="submit" class="btn-submit">Enviar Ticket</button>

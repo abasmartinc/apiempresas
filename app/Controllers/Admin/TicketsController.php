@@ -75,16 +75,50 @@ class TicketsController extends BaseController
             return redirect()->back()->with('error', 'El mensaje no puede estar vacío.');
         }
 
+        $isPrivate = $this->request->getPost('is_private') ? 1 : 0;
+
+        $attachmentPath = null;
+        $file = $this->request->getFile('attachment');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $newName = $file->getRandomName();
+            $file->move(FCPATH . 'uploads/tickets', $newName);
+            $attachmentPath = 'uploads/tickets/' . $newName;
+        }
+
         $this->ticketReplyModel->insert([
             'ticket_id' => $id,
             'user_id' => $adminId,
             'is_admin' => 1,
             'message' => $message,
+            'is_private' => $isPrivate,
+            'attachment' => $attachmentPath
         ]);
 
-        $this->ticketModel->update($id, ['status' => 'answered']);
+        if (!$isPrivate) {
+            $this->ticketModel->update($id, ['status' => 'answered']);
+            
+            // Send email to user
+            $userModel = new \App\Models\UserModel();
+            $user = $userModel->find($ticket['user_id']);
+            if ($user && !empty($user->email)) {
+                $emailService = \Config\Services::email();
+                $emailService->setFrom('no-reply@apiempresas.es', 'APIEmpresas Soporte');
+                $emailService->setTo($user->email);
+                $emailService->setSubject('Respuesta a tu ticket #' . $id);
+                
+                $body = "<h2>Soporte Técnico ha respondido a tu ticket (#$id)</h2>";
+                $body .= "<p><strong>Asunto:</strong> " . esc($ticket['subject']) . "</p>";
+                $body .= "<h3>Mensaje:</h3>";
+                $body .= "<p>".nl2br(esc($message))."</p>";
+                $body .= "<hr><p><a href='".site_url('tickets/'.$id)."'>Ver Ticket en tu Panel</a></p>";
+                
+                $emailService->setMessage($body);
+                $emailService->setMailType('html');
+                $emailService->send();
+            }
+        }
 
-        return redirect()->back()->with('success', 'Respuesta enviada.');
+        return redirect()->back()->with('success', $isPrivate ? 'Nota interna guardada.' : 'Respuesta enviada.');
     }
 
     public function updateStatus($id)
@@ -108,6 +142,27 @@ class TicketsController extends BaseController
 
         if (!empty($updateData)) {
             $this->ticketModel->update($id, $updateData);
+
+            if ($status === 'closed' && $ticket['status'] !== 'closed') {
+                // Notificar al usuario que su ticket se ha cerrado
+                $userModel = new \App\Models\UserModel();
+                $user = $userModel->find($ticket['user_id']);
+                if ($user && !empty($user->email)) {
+                    $emailService = \Config\Services::email();
+                    $emailService->setFrom('no-reply@apiempresas.es', 'APIEmpresas Soporte');
+                    $emailService->setTo($user->email);
+                    $emailService->setSubject('Tu ticket #' . $id . ' ha sido cerrado');
+                    
+                    $body = "<h2>Ticket Cerrado (#$id)</h2>";
+                    $body .= "<p>Tu ticket con asunto <strong>" . esc($ticket['subject']) . "</strong> ha sido marcado como cerrado.</p>";
+                    $body .= "<hr><p>Puedes valorar la atención recibida y ver los detalles haciendo clic aquí: <br><a href='".site_url('tickets/'.$id)."'>Ver Ticket y Valorar</a></p>";
+                    
+                    $emailService->setMessage($body);
+                    $emailService->setMailType('html');
+                    $emailService->send();
+                }
+            }
+
             return redirect()->back()->with('success', 'Ticket actualizado correctamente.');
         }
 

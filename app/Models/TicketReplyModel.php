@@ -12,7 +12,7 @@ class TicketReplyModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['ticket_id', 'user_id', 'is_admin', 'message'];
+    protected $allowedFields    = ['ticket_id', 'user_id', 'is_admin', 'message', 'is_private', 'attachment'];
 
     // Dates
     protected $useTimestamps = true;

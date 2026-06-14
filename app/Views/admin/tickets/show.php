@@ -18,12 +18,13 @@
         .chat-header h1 { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0; }
         
         .chat-container { display: flex; flex-direction: column; gap: 20px; margin-bottom: 32px; max-height: 500px; overflow-y: auto; padding-right: 10px; }
-        .message-bubble { max-width: 85%; padding: 16px 20px; border-radius: 16px; }
+        .message-bubble { max-width: 85%; padding: 16px 20px; border-radius: 16px; text-align: left !important; }
         .message-user { align-self: flex-start; background: #f8fafc; border: 1px solid #e2e8f0; color: #0f172a; border-bottom-left-radius: 4px; }
         .message-admin { align-self: flex-end; background: #2152ff; color: white; border-bottom-right-radius: 4px; }
+        .message-private { align-self: flex-end; background: #fef3c7; color: #92400e; border: 1px solid #fde68a; border-bottom-right-radius: 4px; }
         
         .message-meta { font-size: 0.75rem; font-weight: 600; margin-bottom: 8px; opacity: 0.8; display: flex; justify-content: space-between; }
-        .message-content { font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; }
+        .message-content { font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; text-align: left !important; }
         
         .reply-box { border-top: 1px solid #f1f5f9; padding-top: 24px; }
         .form-control { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid #cbd5e1; font-family: 'Inter', sans-serif; font-size: 1rem; color: #0f172a; transition: all 0.2s; background: #f8fafc; margin-bottom: 16px; resize: vertical; min-height: 120px; }
@@ -93,22 +94,37 @@
                 
                 <div class="chat-container">
                     <?php foreach($replies as $reply): ?>
+                        <?php if(isset($reply['is_private']) && $reply['is_private']) continue; ?>
                         <div class="message-bubble <?= $reply['is_admin'] ? 'message-admin' : 'message-user' ?>">
                             <div class="message-meta">
                                 <span><?= $reply['is_admin'] ? 'Tú (Admin)' : esc($reply['sender_name'] ?? 'Usuario') ?></span>
                                 <span><?= date('d/m/Y H:i', strtotime($reply['created_at'])) ?></span>
                             </div>
-                            <div class="message-content"><?= nl2br(esc($reply['message'])) ?></div>
+                            <div class="message-content"><?= nl2br(esc($reply['message'])) ?><?php if(!empty($reply['attachment'])): ?>
+                                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.2);">
+                                        <a href="<?= base_url($reply['attachment']) ?>" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 700; color: inherit; text-decoration: underline;">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                                            Ver archivo adjunto
+                                        </a>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
 
                 <div class="reply-box">
-                    <form action="<?= site_url('admin/tickets/'.$ticket['id'].'/reply') ?>" method="POST">
+                    <form action="<?= site_url('admin/tickets/'.$ticket['id'].'/reply') ?>" method="POST" enctype="multipart/form-data">
                         <?= csrf_field() ?>
                         <textarea name="message" class="form-control" placeholder="Escribe tu respuesta al usuario aquí..." required></textarea>
-                        <div style="text-align: right;">
-                            <button type="submit" class="btn-submit">Enviar Respuesta</button>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="font-size: 0.85rem; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">Adjuntar archivo (opcional)</label>
+                            <input type="file" name="attachment" accept=".jpg,.jpeg,.png,.pdf,.txt,.json" style="width: 100%; padding: 8px; border: 1px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; font-size: 0.85rem;">
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; align-items: center;">
+                            <button type="submit" class="btn-submit">Enviar Respuesta Pública</button>
                         </div>
                     </form>
                 </div>
@@ -162,6 +178,39 @@
 
                 <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 24px 0;">
                 
+                <h3 style="display: flex; justify-content: space-between; align-items: center;">
+                    Notas Internas
+                    <button type="button" onclick="document.getElementById('noteModal').style.display='block'" style="background: #f59e0b; color: white; border: none; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; cursor: pointer;">+ Poner nota</button>
+                </h3>
+                
+                <div style="margin-bottom: 24px; max-height: 300px; overflow-y: auto;">
+                    <?php $hasNotes = false; ?>
+                    <?php foreach($replies as $reply): ?>
+                        <?php if(isset($reply['is_private']) && $reply['is_private']): $hasNotes = true; ?>
+                            <div style="background: #fef3c7; border: 1px solid #fde68a; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+                                <div style="font-size: 0.7rem; font-weight: 800; color: #d97706; margin-bottom: 4px; display: flex; justify-content: space-between;">
+                                    <span>Tú (Admin)</span>
+                                    <span><?= date('d/m H:i', strtotime($reply['created_at'])) ?></span>
+                                </div>
+                                <div style="font-size: 0.85rem; color: #92400e; line-height: 1.5;">
+                                    <?= nl2br(esc($reply['message'])) ?>
+                                </div>
+                                <?php if(!empty($reply['attachment'])): ?>
+                                    <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(146,64,14,0.2);">
+                                        <a href="<?= base_url($reply['attachment']) ?>" target="_blank" style="font-size: 0.75rem; font-weight: 700; color: #b45309; text-decoration: underline;">Ver adjunto</a>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                    
+                    <?php if(!$hasNotes): ?>
+                        <p style="font-size: 0.85rem; color: #94a3b8; font-style: italic;">No hay notas internas.</p>
+                    <?php endif; ?>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 24px 0;">
+                
                 <h3>Gestionar Ticket</h3>
                 <form action="<?= site_url('admin/tickets/'.$ticket['id'].'/status') ?>" method="POST">
                     <?= csrf_field() ?>
@@ -190,5 +239,35 @@
             </div>
         </div>
     </main>
+
+    <!-- Modal for Internal Note -->
+    <div id="noteModal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.5); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: white; width: 100%; max-width: 500px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); margin: 10vh auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a;">Añadir Nota Interna</h3>
+                <button type="button" onclick="document.getElementById('noteModal').style.display='none'" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+            </div>
+            
+            <form action="<?= site_url('admin/tickets/'.$ticket['id'].'/reply') ?>" method="POST" enctype="multipart/form-data">
+                <?= csrf_field() ?>
+                <input type="hidden" name="is_private" value="1">
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px;">Mensaje de la nota</label>
+                    <textarea name="message" class="form-control" style="min-height: 100px; margin-bottom: 0;" placeholder="Escribe tu nota aquí..." required></textarea>
+                </div>
+                
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px;">Adjuntar archivo (opcional)</label>
+                    <input type="file" name="attachment" accept=".jpg,.jpeg,.png,.pdf,.txt,.json" style="width: 100%; padding: 8px; border: 1px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; font-size: 0.85rem;">
+                </div>
+                
+                <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                    <button type="button" onclick="document.getElementById('noteModal').style.display='none'" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">Cancelar</button>
+                    <button type="submit" style="background: #f59e0b; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">Guardar Nota</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
