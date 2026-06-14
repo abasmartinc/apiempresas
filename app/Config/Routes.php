@@ -58,6 +58,7 @@ $routes->get('tickets/(:num)', 'Tickets::show/$1');
 $routes->post('tickets/(:num)/reply', 'Tickets::reply/$1');
 $routes->post('tickets/(:num)/close', 'Tickets::close/$1');
 $routes->post('tickets/(:num)/rate', 'Tickets::rate/$1');
+$routes->post('tickets/(:num)/priority', 'Tickets::updatePriority/$1');
 
 // Billing
 $routes->get('billing', 'Billing::index');

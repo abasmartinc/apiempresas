@@ -147,6 +147,8 @@ class Directory extends BaseController
             ->get()
             ->getResultArray();
 
+        log_message('error', 'PROVINCE_DEBUG - provinceName: ' . var_export($provinceName, true) . ' - count: ' . count($companies));
+
         if (empty($companies)) {
              if ($page > 1) {
                  return redirect()->to(site_url("directorio/provincia/{$provinceName}"));
