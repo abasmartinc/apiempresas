@@ -6,8 +6,6 @@ class Home extends BaseController
 {
     public function index()
     {
-        // FORZAR ERROR 500 PARA PRUEBAS
-        throw new \Exception('Prueba de error 500 generada manualmente en Home::index');
 
         if (session('logged_in')) {
             return redirect()->to(site_url('dashboard'));
