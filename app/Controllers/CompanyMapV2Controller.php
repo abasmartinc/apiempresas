@@ -411,6 +411,7 @@ class CompanyMapV2Controller extends Controller
         echo '<thead><tr>';
         echo '<th style="' . $thStyle . '">Nombre de la Empresa</th>';
         echo '<th style="' . $thStyle . '">CIF</th>';
+        echo '<th style="' . $thStyle . '">Teléfono</th>';
         echo '<th style="' . $thStyle . '">Dirección</th>';
         echo '<th style="' . $thStyle . '">Municipio</th>';
         echo '<th style="' . $thStyle . '">Provincia</th>';
@@ -430,6 +431,7 @@ class CompanyMapV2Controller extends Controller
             echo '<tr>';
             echo '<td style="' . $tdStyle . '">' . esc($company['name'] ?? '') . '</td>';
             echo '<td style="' . $textStyle . '">' . esc($company['cif'] ?? '') . '</td>';
+            echo '<td style="' . $textStyle . '">' . esc($company['phone'] ?? '') . '</td>';
             echo '<td style="' . $tdStyle . '">' . esc($company['address'] ?? '') . '</td>';
             echo '<td style="' . $tdStyle . '">' . esc($company['municipality'] ?? '') . '</td>';
             echo '<td style="' . $tdStyle . '">' . esc($company['registro_mercantil'] ?? '') . '</td>';

@@ -212,8 +212,8 @@
                     </div>
                     <?php else: ?>
                     <div class="disclaimer-box">
-                        ⚠️ <strong>Este listado NO incluye teléfono ni email de contacto.</strong><br>
-                        Contiene únicamente datos registrales oficiales: identificadores, razón social, actividad económica y fecha de constitución.
+                        ⚠️ <strong>Puede haber empresas en este listado sin teléfono.</strong><br>
+                        Contiene datos registrales oficiales y teléfonos (cuando están disponibles).
                         Es perfecto para cruzar con otras fuentes, validar CIFs o analizar el tejido empresarial de una zona.
                     </div>
                     <?php endif; ?>

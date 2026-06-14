@@ -550,7 +550,7 @@
                     <?php endif; ?>
                 </a>
                 <div style="font-size: 0.75rem; color: #94a3b8; max-width: 280px; margin-left: auto;">
-                    Incluye: CIF, Razón social, Dirección, CNAE, Provincia, Fecha constitución, Capital Social, Socio Único y Cargos. <strong style="color: #64748b; font-weight: 600;">(No incluye email ni teléfono)</strong>.
+                    Incluye: CIF, Razón social, Dirección, CNAE, Provincia, Fecha constitución, Capital Social, Socio Único y Cargos. <strong style="color: #64748b; font-weight: 600;">(Puede haber empresas sin teléfono)</strong>.
                 </div>
             </div>
             <?php endif; ?>
