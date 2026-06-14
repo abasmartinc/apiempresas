@@ -7,6 +7,13 @@
         'robots'      => 'noindex, nofollow',
     ]) ?>
     <style>
+        /* Encapsulate checkout (hide nav & footer) */
+        header .nav .desktop-only,
+        header .nav .mobile-nav-btn,
+        header .nav .btn-enter,
+        header .nav .login-btn { display: none !important; }
+        footer { display: none !important; }
+
         .page-summary {
             max-width: 1280px;
             margin: 0 auto;
@@ -195,6 +202,7 @@
                                 'Capital Social',
                                 'Socio Único',
                                 'Forma jurídica',
+                                'Teléfono ⚠️',
                             ] as $field): ?>
                             <div class="col-item">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
