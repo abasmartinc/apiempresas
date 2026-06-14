@@ -27,6 +27,14 @@ $fmt = function ($n) {
 
 <div class="auth-wrapper">
     <?= view('partials/header_inner') ?>
+    <style>
+        /* Aislamiento del checkout */
+        header .nav nav.desktop-only,
+        header .nav .auth-buttons,
+        header .nav .mobile-menu-toggle {
+            display: none !important;
+        }
+    </style>
 
     <main class="billing-main">
         <div class="container">
@@ -77,7 +85,7 @@ $fmt = function ($n) {
                             </div>
                             
                             <div class="plan-price">
-                                <div class="amount" data-monthly="19" data-annual="170">19</div>
+                                <div class="amount" data-monthly="19" data-annual="182">19</div>
                                 <div class="currency">€ / <span class="per">mes</span> + IVA</div>
                             </div>
                             
@@ -276,7 +284,7 @@ $fmt = function ($n) {
                         </div>
                         
                         <div class="summary-row total" style="margin-top: 0; padding-top: 24px; border-top: 2px dashed #cbd5e1; align-items: center;">
-                            <span style="font-size: 1.1rem; color: #0f172a; font-weight: 900;">Total estimado</span>
+                            <span style="font-size: 1.1rem; color: #0f172a; font-weight: 900;">Total</span>
                             <span class="value" style="color: #2152ff; font-size: 1.4rem; font-weight: 900;"><span id="sumPrice">59,29</span> €</span>
                         </div>
 
@@ -365,7 +373,7 @@ $fmt = function ($n) {
                             </div>
                             
                             <div id="review-slider" style="transition: opacity 0.4s ease-in-out; opacity: 1;">
-                                <p id="review-text" style="font-size: 0.9rem; color: #0f172a; text-align: center; line-height: 1.5; margin: 0 0 16px; font-weight: 500;">La integración con APIEmpresas es brutal. Puedes ver parámetros clave y mucho más. Todo muy rápido y fiable.</p>
+                                <p id="review-text" style="font-size: 0.95rem; color: #0f172a; text-align: center; line-height: 1.6; margin: 0 0 16px; font-weight: 500;">La integración con APIEmpresas es brutal. Puedes ver parámetros clave y mucho más. Todo muy rápido y fiable.</p>
                                 <div style="font-size: 0.85rem; text-align: center; color: #475569;">
                                     <span id="review-author" style="font-weight: 900; color: #0f172a;">Alex S.</span> · <span id="review-role">CTO en SaaS B2B</span>
                                 </div>
