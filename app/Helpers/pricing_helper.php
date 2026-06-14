@@ -1,43 +1,36 @@
 <?php
-use App\Models\RadarPriceModel;
 
-if (!function_exists('calculate_radar_price')) {
+if (!function_exists('calculate_core_price')) {
     /**
-     * Calcula el precio dinámico según la escala de volumen
-     * Escala:
-     * 1 – 10: 2€
-     * 11 – 50: 4€
-     * 51 – 150: 7€
-     * 151 – 500: 9€
-     * 501 – 1000: 12€
-     * 1001 – 2000: 15€
-     * 2001 – 5000: 20€
-     * 5000+: 25€
+     * Core pricing logic to ensure consistency across Radar and Directory.
+     * Math:
+     * - First 1,000 companies: 9€
+     * - From 1,001 to 10,000: +5€ per 1,000
+     * - Over 10,000: +1€ per 1,000
+     * - Premium multiplier (Recent data): x1.5
      */
-    function calculate_radar_price(int $count): array
+    function calculate_core_price(int $count, bool $isPremium): array
     {
-        try {
-            $model = new RadarPriceModel();
-            $basePrice = $model->getBasePrice($count);
-        } catch (\Exception $e) {
-            // Fallback hardcoded logic if database is unavailable
-            if ($count <= 10) {
-                $basePrice = 2.00;
-            } elseif ($count <= 50) {
-                $basePrice = 4.00;
-            } elseif ($count <= 150) {
-                $basePrice = 7.00;
-            } elseif ($count <= 500) {
-                $basePrice = 9.00;
-            } elseif ($count <= 1000) {
-                $basePrice = 12.00;
-            } elseif ($count <= 2000) {
-                $basePrice = 15.00;
-            } elseif ($count <= 5000) {
-                $basePrice = 39.00;
-            } else {
-                $basePrice = 49.00;
+        $basePrice = 9.00;
+
+        if ($count > 1000) {
+            $extraCount = $count - 1000;
+            
+            // Calculate tier 2: 1,001 to 10,000 (max 9 blocks of 1,000)
+            $tier2Count = min($extraCount, 9000);
+            $tier2Blocks = ceil($tier2Count / 1000);
+            $basePrice += $tier2Blocks * 5.00;
+            
+            // Calculate tier 3: Over 10,000
+            if ($extraCount > 9000) {
+                $tier3Count = $extraCount - 9000;
+                $tier3Blocks = ceil($tier3Count / 1000);
+                $basePrice += $tier3Blocks * 1.00;
             }
+        }
+
+        if ($isPremium) {
+            $basePrice = round($basePrice * 1.5, 2);
         }
 
         $tax = round($basePrice * 0.21, 2);
@@ -50,19 +43,22 @@ if (!function_exists('calculate_radar_price')) {
     }
 }
 
+if (!function_exists('calculate_radar_price')) {
+    /**
+     * Calcula el precio dinámico para el radar (siempre es Premium)
+     */
+    function calculate_radar_price(int $count): array
+    {
+        return calculate_core_price($count, true);
+    }
+}
+
 if (!function_exists('calculate_directory_price')) {
     /**
      * Calcula el precio dinámico para listas de directorios
      */
-    function calculate_directory_price(int $count): array
+    function calculate_directory_price(int $count, bool $isPremium = false): array
     {
-        $basePrice = round(19 + (($count / 1000) * 1.00), 2);
-        $tax = round($basePrice * 0.21, 2);
-
-        return [
-            'base_price' => $basePrice,
-            'tax'        => $tax,
-            'total'      => $basePrice + $tax
-        ];
+        return calculate_core_price($count, $isPremium);
     }
 }

@@ -129,7 +129,11 @@ Reglas:
             $sampleData = $bList->get()->getResultArray();
 
             helper('pricing');
-            $priceData = calculate_directory_price($totalCount);
+            $isPremium = false;
+            if (!empty($filters['date_min']) && strtotime($filters['date_min']) >= strtotime('-90 days')) {
+                $isPremium = true;
+            }
+            $priceData = calculate_directory_price($totalCount, $isPremium);
             $price = $priceData['base_price'] ?? 9;
 
             $params = [];

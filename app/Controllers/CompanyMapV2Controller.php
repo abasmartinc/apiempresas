@@ -235,7 +235,12 @@ class CompanyMapV2Controller extends Controller
             $listData = $bList->get()->getResultArray();
 
             helper('pricing');
-            $priceData = calculate_directory_price($totalCount);
+            
+            $isPremium = false;
+            if (!empty($dateMin) && strtotime($dateMin) >= strtotime('-90 days')) {
+                $isPremium = true;
+            }
+            $priceData = calculate_directory_price($totalCount, $isPremium);
 
             $meta = [
                 'total_count'   => $totalCount,
