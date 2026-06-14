@@ -3,9 +3,8 @@
 <head>
     <?=view('partials/head') ?>
     <link rel="stylesheet" href="<?= base_url('public/css/dashboard.css') ?>" />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        .tkt-wrapper { font-family: 'Inter', sans-serif; background-color: #f3f6f9; min-height: calc(100vh - 80px); padding: 40px 0 80px; }
+        .tkt-wrapper { background-color: #f3f6f9; min-height: calc(100vh - 80px); padding: 40px 0 80px; }
         
         /* Modern Wide Layout */
         .tkt-container { max-width: 1280px; width: 95%; margin: 0 auto; display: grid; grid-template-columns: 1fr 340px; gap: 40px; align-items: start; }
@@ -15,21 +14,20 @@
         }
 
         /* Typography & Links */
-        .tkt-h1 { font-family: 'Outfit', sans-serif; font-size: 2.25rem; font-weight: 800; color: #0f172a; margin: 0 0 16px 0; letter-spacing: -0.03em; line-height: 1.2; }
+        .tkt-h1 { font-size: 2.25rem; font-weight: 900; color: #0f172a; margin: 0 0 16px 0; letter-spacing: -0.03em; line-height: 1.2; }
         
-        .tkt-back-link { display: inline-flex; align-items: center; gap: 8px; color: #64748b; text-decoration: none; font-weight: 600; margin-bottom: 32px; transition: color 0.2s; font-size: 0.95rem; }
-        .tkt-back-link:hover { color: #2152ff; }
+        .tkt-back-link { display: inline-flex; align-items: center; gap: 8px; color: #475569; text-decoration: none; font-weight: 600; padding: 10px 20px; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc; transition: all 0.2s; font-size: 0.95rem; }
+        .tkt-back-link:hover { color: #0f172a; border-color: #94a3b8; background: #f1f5f9; }
         
         /* Main Area */
-        /* Chat Area (Admin Style) */
         .chat-area { background: white; border-radius: 20px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         .chat-header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9; }
-        .chat-header h1 { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0; }
+        .chat-header h1 { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0; }
         
-        .chat-container { display: flex; flex-direction: column; gap: 20px; margin-bottom: 32px; max-height: 500px; overflow-y: auto; padding-right: 10px; }
+        .chat-container { display: flex; flex-direction: column; gap: 20px; margin-bottom: 32px; padding-right: 10px; }
         .message-bubble { max-width: 85%; padding: 16px 20px; border-radius: 16px; text-align: left !important; }
-        .message-user { align-self: flex-end; background: #2152ff; color: white; border-bottom-right-radius: 4px; }
-        .message-admin { align-self: flex-start; background: #f8fafc; border: 1px solid #e2e8f0; color: #0f172a; border-bottom-left-radius: 4px; }
+        .message-user { align-self: flex-end; background: #f8fafc; border: 1px solid #e2e8f0; color: #0f172a; border-bottom-right-radius: 4px; }
+        .message-admin { align-self: flex-start; background: #f0f9ff; border: 1px solid #bae6fd; color: #0c4a6e; border-bottom-left-radius: 4px; }
         
         .message-meta { font-size: 0.75rem; font-weight: 600; margin-bottom: 8px; opacity: 0.8; display: flex; justify-content: space-between; gap: 16px; }
         .message-content { font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; text-align: left !important; }
@@ -87,13 +85,10 @@
     <?=view('partials/header_inner') ?>
 
     <main class="tkt-wrapper">
+
         <div class="tkt-container">
             <!-- Columna Izquierda: Mensajes -->
             <div>
-                <a href="<?= site_url('tickets') ?>" class="tkt-back-link">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                    Volver a Tickets
-                </a>
                 
                 <?php if(session()->getFlashdata('success')): ?>
                     <script>
@@ -112,8 +107,12 @@
                 <?php endif; ?>
 
                 <div class="chat-area">
-                    <div class="chat-header">
+                    <div class="chat-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <h1>#<?= $ticket['id'] ?> - <?= esc($ticket['subject']) ?></h1>
+                        <a href="<?= site_url('tickets') ?>" class="tkt-back-link" style="margin-bottom: 0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                            Volver a Tickets
+                        </a>
                     </div>
 
                     <div class="chat-container">
@@ -125,8 +124,8 @@
                                     <span><?= date('d/m/Y H:i', strtotime($reply['created_at'])) ?></span>
                                 </div>
                                 <div class="message-content"><?= nl2br(esc($reply['message'])) ?><?php if(!empty($reply['attachment'])): ?>
-                                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.2);">
-                                            <a href="<?= base_url($reply['attachment']) ?>" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 700; color: inherit; text-decoration: underline;">
+                                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); white-space: normal;">
+                                            <a href="<?= base_url($reply['attachment']) ?>" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 700; color: #2152ff; text-decoration: none;">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
                                                 Ver archivo adjunto
                                             </a>
@@ -220,13 +219,30 @@
 
                     <div class="tkt-info-group">
                         <span class="tkt-info-label">Prioridad</span>
-                        <div class="tkt-badge" style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
-                            <?php 
-                                $priorities = ['low' => 'Baja', 'medium' => 'Media', 'high' => 'Alta', 'urgent' => 'Urgente'];
-                                echo $priorities[$ticket['priority']] ?? 'Normal';
-                            ?>
-                        </div>
+                        <?php if($ticket['status'] !== 'closed'): ?>
+                            <form action="<?= site_url('tickets/'.$ticket['id'].'/priority') ?>" method="POST" style="display: block;">
+                                <?= csrf_field() ?>
+                                <div style="position: relative;">
+                                    <select name="priority" onchange="this.form.submit()" style="width: 100%; appearance: none; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 32px 8px 12px; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600; color: #334155; cursor: pointer;">
+                                        <option value="low" <?= $ticket['priority'] === 'low' ? 'selected' : '' ?>>Baja</option>
+                                        <option value="medium" <?= $ticket['priority'] === 'medium' ? 'selected' : '' ?>>Media</option>
+                                        <option value="high" <?= $ticket['priority'] === 'high' ? 'selected' : '' ?>>Alta</option>
+                                        <option value="urgent" <?= $ticket['priority'] === 'urgent' ? 'selected' : '' ?>>Urgente</option>
+                                    </select>
+                                    <div style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #64748b;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                    </div>
+                                </div>
+                            </form>
+                        <?php else: ?>
+                            <div class="tkt-badge" style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+                                <?php 
+                                    $priorities = ['low' => 'Baja', 'medium' => 'Media', 'high' => 'Alta', 'urgent' => 'Urgente'];
+                                    echo $priorities[$ticket['priority']] ?? 'Normal';
+                                ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                     <?php if($ticket['status'] !== 'closed'): ?>

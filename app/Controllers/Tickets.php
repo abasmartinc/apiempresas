@@ -227,4 +227,30 @@ class Tickets extends BaseController
 
         return redirect()->back()->with('error', 'Valoración no válida.');
     }
+
+    public function updatePriority($id)
+    {
+        $userId = session()->get('user_id');
+        if (!$userId) {
+            return redirect()->to('/enter');
+        }
+
+        $ticket = $this->ticketModel->where('id', $id)->where('user_id', $userId)->first();
+        
+        if (!$ticket) {
+            return redirect()->to('/tickets')->with('error', 'Ticket no encontrado.');
+        }
+
+        if ($ticket['status'] === 'closed') {
+            return redirect()->back()->with('error', 'No puedes cambiar la prioridad de un ticket cerrado.');
+        }
+
+        $priority = $this->request->getPost('priority');
+        if (in_array($priority, ['low', 'medium', 'high', 'urgent'])) {
+            $this->ticketModel->update($id, ['priority' => $priority]);
+            return redirect()->back()->with('success', 'Prioridad actualizada correctamente.');
+        }
+
+        return redirect()->back()->with('error', 'Prioridad no válida.');
+    }
 }

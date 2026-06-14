@@ -3,15 +3,14 @@
 <head>
     <?=view('partials/head') ?>
     <link rel="stylesheet" href="<?= base_url('public/css/dashboard.css') ?>" />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        .tkt-wrapper { font-family: 'Inter', sans-serif; background-color: #f3f6f9; min-height: calc(100vh - 80px); padding: 40px 0 80px; }
+        .tkt-wrapper { background-color: #f3f6f9; min-height: calc(100vh - 80px); padding: 40px 0 80px; }
         .tkt-container { max-width: 1200px; width: 95%; margin: 0 auto; }
         
         .tkt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
-        .tkt-header h1 { font-family: 'Outfit', sans-serif; font-size: 2.25rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.03em; }
+        .tkt-header h1 { font-size: 2.25rem; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.03em; }
         
-        .tkt-btn-create { background: linear-gradient(135deg, #2152ff 0%, #0369a1 100%); color: white; border: none; padding: 12px 28px; border-radius: 12px; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.05rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(33, 82, 255, 0.25); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+        .tkt-btn-create { background: linear-gradient(135deg, #2152ff 0%, #0369a1 100%); color: white; border: none; padding: 12px 28px; border-radius: 12px; font-weight: 800; font-size: 1.05rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(33, 82, 255, 0.25); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
         .tkt-btn-create:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(33, 82, 255, 0.35); color: white; }
         
         .tkt-list-card { background: white; border-radius: 20px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; overflow: hidden; }
@@ -21,12 +20,12 @@
         .tkt-list-item:hover { background: #f8fafc; }
         
         .tkt-item-main { flex: 1; }
-        .tkt-item-title { font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 700; color: #0f172a; margin: 0 0 10px 0; display: flex; align-items: center; gap: 12px; }
+        .tkt-item-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0 0 10px 0; display: flex; align-items: center; gap: 12px; }
         
         .tkt-item-meta { display: flex; gap: 16px; align-items: center; font-size: 0.9rem; color: #64748b; font-weight: 500; flex-wrap: wrap; }
         
         /* Badges (isolated) */
-        .tkt-badge { padding: 4px 12px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 6px; }
+        .tkt-badge { padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 6px; }
         .tkt-badge-open { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
         .tkt-badge-in_progress { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
         .tkt-badge-answered { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }

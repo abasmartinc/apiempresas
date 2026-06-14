@@ -5,18 +5,16 @@
     <link rel="stylesheet" href="<?= base_url('public/css/dashboard.css') ?>" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        body { background-color: #f8fafc; }
         .dash-main { padding-top: 40px; padding-bottom: 60px; }
-        .tickets-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
-        .tickets-header h1 { font-size: 2rem; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.02em; }
-        .btn-back { display: inline-flex; align-items: center; gap: 8px; color: #64748b; text-decoration: none; font-weight: 600; margin-bottom: 16px; transition: color 0.2s; }
-        .btn-back:hover { color: #0f172a; }
+        .btn-back { display: inline-flex; align-items: center; gap: 8px; color: #475569; text-decoration: none; font-weight: 600; padding: 10px 20px; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc; transition: all 0.2s; font-size: 0.95rem; }
+        .btn-back:hover { color: #0f172a; border-color: #94a3b8; background: #f1f5f9; }
         
-        .create-form-card { background: white; border-radius: 20px; padding: 32px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .create-form-card { background: white; border-radius: 20px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; overflow: hidden; }
         
         .form-group { margin-bottom: 24px; }
         .form-label { display: block; font-weight: 700; color: #334155; margin-bottom: 8px; font-size: 0.95rem; }
-        .form-control { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid #cbd5e1; font-family: 'Inter', sans-serif; font-size: 1rem; color: #0f172a; transition: all 0.2s; background: #f8fafc; }
+        .form-control { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid #cbd5e1; font-size: 1rem; color: #0f172a; transition: all 0.2s; background: #f8fafc; }
         .form-control:focus { outline: none; border-color: #2152ff; box-shadow: 0 0 0 4px rgba(33, 82, 255, 0.1); background: white; }
         textarea.form-control { resize: vertical; min-height: 150px; }
         
@@ -30,13 +28,6 @@
 
     <main class="dash-main">
         <div class="container">
-            <a href="<?= site_url('tickets') ?>" class="btn-back">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                Volver a tickets
-            </a>
-            <div class="tickets-header">
-                <h1>Crear Nuevo Ticket</h1>
-            </div>
 
             <?php if(session()->getFlashdata('error')): ?>
                 <script>
@@ -55,7 +46,15 @@
             <?php endif; ?>
 
             <div class="create-form-card">
-                <form action="<?= site_url('tickets/store') ?>" method="POST" enctype="multipart/form-data">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 32px; border-bottom: 1px solid #e2e8f0;">
+                    <h1 style="font-size: 2rem; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.02em;">Crear Nuevo Ticket</h1>
+                    <a href="<?= site_url('tickets') ?>" class="btn-back">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                        Volver a tickets
+                    </a>
+                </div>
+                <div style="padding: 32px;">
+                    <form action="<?= site_url('tickets/store') ?>" method="POST" enctype="multipart/form-data">
                     <?= csrf_field() ?>
                     
                     <div class="form-group">
@@ -97,7 +96,8 @@
                     </div>
 
                     <button type="submit" class="btn-submit">Enviar Ticket</button>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </main>
