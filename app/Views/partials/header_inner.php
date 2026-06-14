@@ -76,7 +76,6 @@
                     <button class="minor-nav-link" id="mainNavDropdownTrigger" style="display: flex; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; padding: 6px 4px;">
                         Integraciones 
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.8; margin-top: 1px;"><path d="m6 9 6 6 6-6"/></svg>
-                        <span style="background: #e0f2fe; color: #0284c7; font-size: 9px; padding: 1px 4px; border-radius: 4px; font-weight: 800; margin-left: 2px;">NUEVO</span>
                     </button>
                     
                     <div class="main-nav-dropdown-menu" id="mainNavDropdownMenu">

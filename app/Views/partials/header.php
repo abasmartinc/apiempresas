@@ -91,7 +91,6 @@
                     <button class="nav-dropdown-trigger">
                         Integraciones
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                        <span style="background: #e0f2fe; color: #0284c7; font-size: 9px; padding: 1px 4px; border-radius: 4px; font-weight: 800; margin-left: 2px;">NUEVO</span>
                     </button>
                     <div class="nav-dropdown-menu">
                         <a href="#" class="js-track-wp-cta">
@@ -215,7 +214,7 @@
                     </div>
 
                     <div class="mobile-nav-group" style="margin-top: 16px;">
-                        <div class="mobile-nav-label">Integraciones <span style="background: #e0f2fe; color: #0284c7; font-size: 9px; padding: 1px 4px; border-radius: 4px; font-weight: 800; margin-left: 6px;">NUEVO</span></div>
+                        <div class="mobile-nav-label">Integraciones</div>
                         <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Plugin WordPress</span></a>
                         <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Google Sheets</span></a>
                         <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Zapier / Make</span></a>
