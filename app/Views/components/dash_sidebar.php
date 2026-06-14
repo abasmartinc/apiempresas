@@ -109,3 +109,18 @@
 <?php endif; ?>
 <?php endif; ?>
 
+<section class="dash-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-top: 24px;">
+    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+        <div style="background: #eff6ff; color: #2152ff; padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line></svg>
+        </div>
+        <div>
+            <h3 style="font-size: 1.1rem; font-weight: 900; color: #0f172a; margin: 0 0 4px !important;">Soporte Técnico</h3>
+            <p style="font-size: 0.85rem; color: #64748b; font-weight: 600; margin: 0 !important; line-height: 1.4;">¿Necesitas ayuda con la API o tu cuenta?</p>
+        </div>
+    </div>
+    <a href="<?= site_url('tickets') ?>" style="display: block; width: 100%; text-align: center; background: #f8fafc; color: #0f172a; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; font-weight: 800; font-size: 0.95rem; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.borderColor='#cbd5e1';" onmouseout="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0';">
+        Abrir un Ticket
+    </a>
+</section>
+

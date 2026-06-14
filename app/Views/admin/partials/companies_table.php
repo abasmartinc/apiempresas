@@ -29,7 +29,7 @@
                 <td>
                     <div class="flex-gap-5">
                         <a href="<?= site_url('admin/companies/edit/' . $company->id) ?>" class="btn ghost btn-sm" title="Editar">✏️</a>
-                        <a href="<?= site_url('admin/companies/delete/' . $company->id) ?>" class="btn ghost btn-danger-ghost" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar esta empresa?')">🗑️</a>
+                        <a href="<?= site_url('admin/companies/delete/' . $company->id) ?>" class="btn ghost btn-danger-ghost" title="Eliminar" data-confirm="¿Estás seguro de eliminar esta empresa?">🗑️</a>
                     </div>
                 </td>
             </tr>

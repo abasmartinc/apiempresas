@@ -50,6 +50,15 @@ $routes->post('search_company', 'Search::search_company_post');
 $routes->match(['get', 'post'], 'search', 'Search::index');
 $routes->get('administrador/(:any)', 'AdministratorController::show/$1');
 
+// User Tickets
+$routes->get('tickets', 'Tickets::index');
+$routes->get('tickets/create', 'Tickets::create');
+$routes->post('tickets/store', 'Tickets::store');
+$routes->get('tickets/(:num)', 'Tickets::show/$1');
+$routes->post('tickets/(:num)/reply', 'Tickets::reply/$1');
+$routes->post('tickets/(:num)/close', 'Tickets::close/$1');
+$routes->post('tickets/(:num)/rate', 'Tickets::rate/$1');
+
 // Billing
 $routes->get('billing', 'Billing::index');
 $routes->get('billing/purchase_success', 'Billing::purchase_success');
@@ -183,6 +192,13 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('dashboard', 'Admin\Dashboard::index');
     $routes->get('metrics', 'Admin\MetricsController::index');
     $routes->get('event-tracking', 'Admin\MetricsController::eventTracking');
+
+    // Tickets
+    $routes->get('tickets', 'Admin\TicketsController::index');
+    $routes->get('tickets/(:num)', 'Admin\TicketsController::show/$1');
+    $routes->post('tickets/(:num)/reply', 'Admin\TicketsController::reply/$1');
+    $routes->post('tickets/(:num)/status', 'Admin\TicketsController::updateStatus/$1');
+
     $routes->get('users', 'Admin\Dashboard::index');
     $routes->get('users/create', 'Admin\Dashboard::create');
     $routes->post('users/store', 'Admin\Dashboard::store');

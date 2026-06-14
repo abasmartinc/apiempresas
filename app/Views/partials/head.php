@@ -302,3 +302,67 @@ if ($isHome):
 }
     </script>
 <?php endif; ?>
+
+<!-- Global SweetAlert2 Confirmations -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.body.addEventListener('click', function(e) {
+        let target = e.target.closest('[data-confirm]');
+        if (!target) return;
+        
+        e.preventDefault();
+        const message = target.getAttribute('data-confirm');
+        
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: message,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Sí, continuar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if (target.tagName === 'A') {
+                    window.location.href = target.href;
+                } else if (target.tagName === 'FORM') {
+                    target.removeAttribute('data-confirm');
+                    target.submit();
+                } else if (target.tagName === 'BUTTON' || target.tagName === 'INPUT') {
+                    let form = target.closest('form');
+                    if (form) {
+                        form.removeAttribute('data-confirm'); // prevent reshowing
+                        form.submit();
+                    }
+                }
+            }
+        });
+    });
+
+    document.querySelectorAll('form[data-confirm]').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            if (this.hasAttribute('data-confirm')) {
+                e.preventDefault();
+                const message = this.getAttribute('data-confirm');
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: message,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#10b981',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Sí, continuar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.removeAttribute('data-confirm');
+                        form.submit();
+                    }
+                });
+            }
+        });
+    });
+});
+</script>

@@ -212,3 +212,5 @@
     window.ae_user_id = <?= session()->get('user_id') ? session()->get('user_id') : 'null' ?>;
 </script>
 <script src="<?= base_url('public/js/tracking.js') ?>?v=<?= time() ?>"></script>
+
+<!-- SweetAlert loaded in head -->

@@ -95,7 +95,7 @@
                     <td style="padding: 12px;">
                         <div style="display: flex; gap: 5px;">
                             <a href="<?= site_url('admin/plans/edit/' . $plan->id) ?>" class="btn ghost" style="padding: 4px 8px; font-size: 0.75rem;" title="Editar">✏️</a>
-                            <a href="<?= site_url('admin/plans/delete/' . $plan->id) ?>" class="btn ghost" style="padding: 4px 8px; font-size: 0.75rem; color: #ef4444; border-color: #fee2e2;" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar este plan?')">🗑️</a>
+                            <a href="<?= site_url('admin/plans/delete/' . $plan->id) ?>" class="btn ghost" style="padding: 4px 8px; font-size: 0.75rem; color: #ef4444; border-color: #fee2e2;" title="Eliminar" data-confirm="¿Estás seguro de eliminar este plan?">🗑️</a>
                         </div>
                     </td>
                 </tr>

@@ -236,6 +236,21 @@ if ($isBonusUser && !($isPaid ?? false)) {
                         </div>
                     </div>
                 <?php endif; ?>
+
+                <?php if (!empty($answeredTickets)): ?>
+                    <?php foreach($answeredTickets as $t): ?>
+                          <div class="usage-alert-card" style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px; margin: 0 0 24px 0; display: flex; align-items: flex-start; gap: 16px;">
+                              <div style="background: #10b981; color: white; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                              </div>
+                              <div style="flex: 1;">
+                                <h3 style="margin: 0 0 4px; font-size: 1rem; font-weight: 800; color: #065f46;">Respuesta de Soporte al Ticket #<?= $t['id'] ?></h3>
+                                <p style="margin: 0 0 8px; font-size: 0.9rem; color: #047857; font-weight: 600;">El equipo de soporte ha respondido a tu ticket: <strong><?= esc($t['subject']) ?></strong></p>
+                                <a href="<?= site_url('tickets/'.$t['id']) ?>" style="display: inline-block; background: #10b981; color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-decoration: none; transition: all 0.2s;">Ver respuesta</a>
+                              </div>
+                          </div>
+                      <?php endforeach; ?>
+                  <?php endif; ?>
             </div>
             <?= view('components/dash_kpis', get_defined_vars()) ?>
 

@@ -780,9 +780,7 @@
                             });
                         } else {
                             // Fallback if Swal not present
-                            if (confirm('¿Cerrar sesión?')) {
-                                window.location.href = targetUrl;
-                            }
+                            window.location.href = targetUrl;
                         }
                     });
                 });

@@ -58,7 +58,7 @@
                 </div>
 
                 <div style="display: flex; gap: 1rem; align-items: center;">
-                    <button type="submit" class="btn" onclick="return confirm('¿Estás seguro de enviar este correo a <?= $count ?> usuarios?');">Enviar a <?= $count ?> usuarios</button>
+                    <button type="submit" class="btn" data-confirm="¿Estás seguro de enviar este correo a <?= $count ?> usuarios?">Enviar a <?= $count ?> usuarios</button>
                     <a href="javascript:history.back()" class="btn ghost">Cancelar</a>
                 </div>
             </form>
