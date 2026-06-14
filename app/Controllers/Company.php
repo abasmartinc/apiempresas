@@ -132,21 +132,6 @@ class Company extends BaseController
             $provinceCnaeUrl = site_url('directorio/provincia/' . urlencode($prov) . '/cnae/' . $cnaeCode);
         }
 
-        // --- DINAMIC SEO INDEXING ---
-        $indexable = shouldIndexCompany($company);
-        $robots    = $indexable ? 'index, follow' : 'noindex, follow';
-        
-        // Si no es indexable, añadir cabecera HTTP (X-Robots-Tag)
-        if (!$indexable) {
-            // Nota: CodeIgniter 4 maneja la respuesta mediante el servicio response
-            service('response')->setHeader('X-Robots-Tag', 'noindex, follow');
-        }
-        
-        // Añadir flag al objeto empresa para uso en sitemaps/logs
-        $company['seo_indexable'] = $indexable;
-        $company['seo_score']     = calculateCompanySeoScore($company);
-        // --- DINAMIC SEO INDEXING ---
-
         // --- BOT DETECTION & SYNCHRONOUS AI SEO TEXT GENERATION ---
         if (empty($company['ai_seo_text'])) {
             $agent = service('request')->getUserAgent();
@@ -172,6 +157,21 @@ class Company extends BaseController
             }
         }
         // --- BOT DETECTION & SYNCHRONOUS AI SEO TEXT GENERATION ---
+
+        // --- DINAMIC SEO INDEXING ---
+        $indexable = shouldIndexCompany($company);
+        $robots    = $indexable ? 'index, follow' : 'noindex, follow';
+        
+        // Si no es indexable, añadir cabecera HTTP (X-Robots-Tag)
+        if (!$indexable) {
+            // Nota: CodeIgniter 4 maneja la respuesta mediante el servicio response
+            service('response')->setHeader('X-Robots-Tag', 'noindex, follow');
+        }
+        
+        // Añadir flag al objeto empresa para uso en sitemaps/logs
+        $company['seo_indexable'] = $indexable;
+        $company['seo_score']     = calculateCompanySeoScore($company);
+        // --- DINAMIC SEO INDEXING ---
 
         // Administrators
         $adminsRaw = $this->adminModel->getByCompanyId((int)$company['id']);

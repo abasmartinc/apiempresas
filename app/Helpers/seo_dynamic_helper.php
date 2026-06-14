@@ -42,6 +42,11 @@ if (!function_exists('calculateCompanySeoScore')) {
             $score += 1;
         }
 
+        // 7. Textos IA (+3) - Contenido original y extenso
+        if (!empty($company['ai_seo_text'])) {
+            $score += 3;
+        }
+
         return $score;
     }
 }
@@ -49,11 +54,11 @@ if (!function_exists('calculateCompanySeoScore')) {
 if (!function_exists('shouldIndexCompany')) {
     /**
      * Determina si una empresa debe ser indexada.
-     * Subimos el umbral a 6 para ser más estrictos con el contenido.
+     * Umbral a 4 para incluir empresas básicas completas (Nombre+CIF+Provincia+CNAE).
      */
     function shouldIndexCompany(array $company): bool
     {
-        return calculateCompanySeoScore($company) >= 6;
+        return calculateCompanySeoScore($company) >= 4;
     }
 }
 
