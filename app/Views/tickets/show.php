@@ -60,7 +60,15 @@
         .tkt-btn-resolve { width: 100%; background: white; color: #10b981; border: 2px solid #34d399; padding: 14px 20px; border-radius: 12px; font-weight: 800; font-family: 'Outfit', sans-serif; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 16px; }
         .tkt-btn-resolve:hover { background: #f0fdf4; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15); transform: translateY(-2px); }
 
-        /* Rating Card Premium */
+        /* Rating Modal Styles */
+        .tkt-swal-popup { border-radius: 20px; padding: 24px 24px 40px; border-top: 6px solid #2152ff; }
+        .tkt-swal-title { font-size: 1.5rem; font-weight: 900; color: #0f172a; margin-bottom: 8px; margin-top: 16px; padding-left: 24px; padding-right: 24px; line-height: 1.3; }
+        .tkt-swal-html { margin: 0; }
+        .tkt-swal-popup .swal2-close { position: absolute; top: 12px !important; right: 12px !important; background: transparent !important; border: none !important; box-shadow: none !important; outline: none !important; color: #94a3b8 !important; border-radius: 8px !important; transition: all 0.2s; }
+        .tkt-swal-popup .swal2-close:hover { background: #f1f5f9 !important; color: #0f172a !important; }
+        .tkt-swal-popup .swal2-close:focus { outline: none !important; box-shadow: none !important; border: none !important; }
+        
+        /* Rating Card Premium (For completed state) */
         .tkt-rating-card { background: #ffffff; border-radius: 20px; padding: 40px; text-align: center; border: 1px solid #e2e8f0; box-shadow: 0 10px 40px -10px rgba(33, 82, 255, 0.08); position: relative; overflow: hidden; margin-top: 16px; }
         .tkt-rating-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #2152ff 0%, #0ea5e9 100%); }
         .tkt-rating-title { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 0 0 8px; }
@@ -71,10 +79,6 @@
         .tkt-stars label { cursor: pointer; color: #cbd5e1; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .tkt-stars label svg { width: 56px; height: 56px; fill: currentColor; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.02)); }
         .tkt-stars input:checked ~ label, .tkt-stars label:hover, .tkt-stars label:hover ~ label { color: #f59e0b; transform: scale(1.15) translateY(-4px); filter: drop-shadow(0 8px 15px rgba(245, 158, 11, 0.3)); }
-        
-        .tkt-btn-rate { background: white; color: #0f172a; border: 2px solid #e2e8f0; padding: 14px 40px; border-radius: 100px; font-weight: 800; font-family: 'Outfit', sans-serif; font-size: 1.05rem; cursor: pointer; transition: all 0.3s ease; margin-top: 32px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); display: inline-flex; align-items: center; gap: 8px;}
-        .tkt-btn-rate:hover { background: #f8fafc; border-color: #cbd5e1; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06); }
-
         
         .tkt-alert { background: #f0fdf4; border-left: 5px solid #10b981; padding: 20px 24px; border-radius: 12px; margin-bottom: 32px; color: #166534; font-weight: 600; font-size: 1.05rem; display: flex; align-items: center; gap: 16px; box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.2); }
         .tkt-alert svg { width: 28px; height: 28px; background: #dcfce7; padding: 4px; border-radius: 50%; color: #10b981; }
@@ -161,21 +165,42 @@
                 </div>
                 
                 <?php if($ticket['status'] === 'closed' && empty($ticket['rating'])): ?>
-                    <div class="tkt-rating-card">
-                        <h3 class="tkt-rating-title">¿Qué te ha parecido la atención recibida?</h3>
-                        <p class="tkt-rating-desc">Tu valoración nos ayuda a mejorar continuamente el soporte de APIEmpresas.</p>
-                        <form action="<?= site_url('tickets/'.$ticket['id'].'/rate') ?>" method="POST">
-                            <?= csrf_field() ?>
-                            <div class="tkt-stars">
-                                <input type="radio" id="star5" name="rating" value="5" /><label for="star5"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
-                                <input type="radio" id="star4" name="rating" value="4" /><label for="star4"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
-                                <input type="radio" id="star3" name="rating" value="3" /><label for="star3"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
-                                <input type="radio" id="star2" name="rating" value="2" /><label for="star2"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
-                                <input type="radio" id="star1" name="rating" value="1" /><label for="star1"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
-                            </div>
-                            <button type="submit" class="tkt-btn-rate">Enviar Valoración ⭐</button>
-                        </form>
-                        </div>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({
+                                title: '¿Qué te ha parecido la atención recibida?',
+                                html: `
+                                    <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 32px; margin-top: 0;">Tu valoración nos ayuda a mejorar continuamente el soporte de APIEmpresas.</p>
+                                    <form id="ratingForm" action="<?= site_url('tickets/'.$ticket['id'].'/rate') ?>" method="POST">
+                                        <?= csrf_field() ?>
+                                        <div class="tkt-stars" style="margin-bottom: 0;">
+                                            <input type="radio" id="star5" name="rating" value="5" /><label for="star5"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
+                                            <input type="radio" id="star4" name="rating" value="4" /><label for="star4"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
+                                            <input type="radio" id="star3" name="rating" value="3" /><label for="star3"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
+                                            <input type="radio" id="star2" name="rating" value="2" /><label for="star2"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
+                                            <input type="radio" id="star1" name="rating" value="1" /><label for="star1"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></label>
+                                        </div>
+                                    </form>
+                                `,
+                                showConfirmButton: false,
+                                showCloseButton: true,
+                                allowOutsideClick: false,
+                                customClass: {
+                                    popup: 'tkt-swal-popup',
+                                    title: 'tkt-swal-title',
+                                    htmlContainer: 'tkt-swal-html'
+                                },
+                                didOpen: () => {
+                                    const radios = document.querySelectorAll('input[name="rating"]');
+                                    radios.forEach(radio => {
+                                        radio.addEventListener('change', () => {
+                                            document.getElementById('ratingForm').submit();
+                                        });
+                                    });
+                                }
+                            });
+                        });
+                    </script>
                     <?php elseif(!empty($ticket['rating'])): ?>
                          <div class="tkt-rating-card" style="background: #ffffff; border-color: #e2e8f0;">
                             <h3 class="tkt-rating-title" style="color: #0f172a; margin:0; display: flex; align-items: center; justify-content: center; gap: 12px;">
