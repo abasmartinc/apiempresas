@@ -349,7 +349,7 @@
 </main>
 
 <!-- Sticky CTA Footer -->
-    <div id="stickyCtaFooter" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); padding: 16px; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); z-index: 9990; border-top: 1px solid #e2e8f0; display: flex; justify-content: center;">
+    <div id="stickyCtaFooter" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); padding: 16px; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); z-index: 9990; border-top: 1px solid #e2e8f0; justify-content: center;">
         <div id="checkoutBtnContainer" style="display: flex; gap: 12px; align-items: center; justify-content: center; flex-wrap: wrap; max-width: 1200px; width: 100%;"></div>
     </div>
 
@@ -826,8 +826,10 @@
                         checkoutUrl += `&estado=${encodeURIComponent(fEstado.value)}`;
                     }
                     const fHasPhone = document.getElementById('f_has_phone');
+                    let phoneIncludeText = '';
                     if (fHasPhone && fHasPhone.checked) {
                         checkoutUrl += `&has_phone=1`;
+                        phoneIncludeText = ', Teléfonos';
                     }
                     if (fDateMin) {
                         checkoutUrl += `&date_min=${encodeURIComponent(fDateMin)}`;
@@ -850,7 +852,7 @@
                             </div>
                             <div style="font-size: 0.8rem; color: #64748b; font-weight: 500;">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" style="margin-right: 4px; vertical-align: -2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                Tu archivo CSV incluirá: <strong>Razón social, CIF, Administradores, Teléfonos, Dirección, CNAE y Estado.</strong>
+                                Tu archivo CSV incluirá: <strong>Razón social, CIF, Administradores${phoneIncludeText}, Dirección, CNAE y Estado.</strong>
                             </div>
                         </div>
                     `;
