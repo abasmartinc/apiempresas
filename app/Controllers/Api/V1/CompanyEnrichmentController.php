@@ -8,7 +8,7 @@ use App\Services\CompanyScoringService;
 use App\Services\CompanyAiService;
 use OpenApi\Attributes as OA;
 
-class CompanyEnrichmentController extends ResourceController
+class CompanyEnrichmentController extends BaseApiController
 {
     protected PlanAccessService    $planAccess;
     protected CompanyScoringService $scoringService;

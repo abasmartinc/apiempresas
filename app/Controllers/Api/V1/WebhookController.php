@@ -7,7 +7,7 @@ use App\Services\PlanAccessService;
 use App\Services\WebhookService;
 use OpenApi\Attributes as OA;
 
-class WebhookController extends ResourceController
+class WebhookController extends BaseApiController
 {
     protected PlanAccessService $planAccess;
     protected WebhookService   $webhookService;

@@ -6,9 +6,9 @@ use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\HTTP\ResponseInterface;
 
-class SandboxController extends ResourceController
+class SandboxController extends \App\Controllers\Api\V1\BaseApiController
 {
-    use ResponseTrait;
+
 
     protected $format = 'json';
 

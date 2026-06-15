@@ -7,7 +7,7 @@ use App\Services\PlanAccessService;
 use App\Services\CompanyRadarService;
 use OpenApi\Attributes as OA;
 
-class RadarApiController extends ResourceController
+class RadarApiController extends BaseApiController
 {
     protected PlanAccessService  $planAccess;
     protected CompanyRadarService $radarService;

@@ -8,9 +8,9 @@ use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\CompanyModel;
 use OpenApi\Attributes as OA;
 
-class CompaniesByCif extends ResourceController
+class CompaniesByCif extends BaseApiController
 {
-    use ResponseTrait;
+
 
     protected $format = 'json';
 

@@ -8,9 +8,9 @@ use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\CompanyModel;
 use OpenApi\Attributes as OA;
 
-class CompaniesSearch extends ResourceController
+class CompaniesSearch extends BaseApiController
 {
-    use ResponseTrait;
+
 
     protected $format = 'json';
 

@@ -9,7 +9,7 @@ use App\Services\PlanAccessService;
 use App\Services\ApiRequestLogger;
 use OpenApi\Attributes as OA;
 
-class CompanyNetworkController extends ResourceController
+class CompanyNetworkController extends BaseApiController
 {
     protected $format = 'json';
 

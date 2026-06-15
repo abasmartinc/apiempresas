@@ -9,9 +9,9 @@ use App\Models\CompanyModel;
 use App\Models\ApiRequestsModel;
 use OpenApi\Attributes as OA;
 
-class UsageController extends ResourceController
+class UsageController extends BaseApiController
 {
-    use ResponseTrait;
+
 
     protected $format = 'json';
 

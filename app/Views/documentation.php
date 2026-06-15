@@ -90,6 +90,12 @@
                     <h3>Recursos</h3>
                     <ul class="docs-nav">
                         <li>
+                            <a href="#errores">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                Gestión de Errores
+                            </a>
+                        </li>
+                        <li>
                             <a href="#examples">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
                                 Ejemplos
@@ -688,9 +694,26 @@ print(response.json())</code></pre>
                     </div>
                 </section>
 
+                <!-- ERRORES -->
+                <section class="docs-section" id="errores">
+                    <h2>10. Gestión de Errores (RFC 7807)</h2>
+                    <p>Las respuestas de error de la API incluyen los campos legacy (<code>success</code>, <code>error</code>, <code>message</code>) y además implementan el estándar moderno <strong>RFC 7807 (Problem Details)</strong>. Si hay un error, el código de estado HTTP será diferente a 200 y recibirás un JSON detallado.</p>
+                    <pre><code class="language-json">{
+  "success": false,
+  "error": "COMPANY_NOT_FOUND",
+  "message": "Empresa no encontrada.",
+  "type": "https://apiempresas.com/docs/errors/company_not_found",
+  "title": "COMPANY_NOT_FOUND",
+  "status": 404,
+  "detail": "Empresa no encontrada.",
+  "instance": "req_8f73b1a2c9"
+}</code></pre>
+                    <p>El campo <code>instance</code> es único para cada petición y resulta muy útil si necesitas reportar un problema a soporte.</p>
+                </section>
+
                 <!-- POSTMAN -->
                 <section class="docs-section" id="postman">
-                    <h2>10. Postman Collection</h2>
+                    <h2>11. Postman Collection</h2>
                     <p>Si prefieres probar la API directamente en Postman, puedes descargarte nuestra colección oficial e importarla con un clic.</p>
                     
                     <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px dashed #cbd5e1; text-align: center; margin-top: 20px;">

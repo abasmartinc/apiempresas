@@ -9,9 +9,9 @@ use App\Models\CompanyModel;
 use App\Services\PlanAccessService;
 use OpenApi\Attributes as OA;
 
-class CompaniesBatch extends ResourceController
+class CompaniesBatch extends BaseApiController
 {
-    use ResponseTrait;
+
 
     protected $format = 'json';
 

@@ -6,7 +6,7 @@ use CodeIgniter\Controller;
 use OpenApi\Generator;
 use OpenApi\Attributes as OA;
 
-#[OA\Info(title: "API Empresas", version: "1.0.0", description: "Documentación oficial de la API de Empresas")]
+#[OA\Info(title: "API Empresas", version: "1.0.0", description: "Documentación oficial de la API de Empresas. Soporte nativo para el estándar de errores RFC 7807 (Problem Details).")]
 #[OA\Server(url: "/", description: "Entorno de Producción (Consume Créditos)")]
 #[OA\Server(url: "/api/sandbox/v1", description: "Entorno Sandbox de Pruebas (Gratis. Usa CIF: A15075062)")]
 #[OA\SecurityScheme(
