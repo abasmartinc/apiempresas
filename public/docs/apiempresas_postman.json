@@ -159,6 +159,27 @@
 							]
 						}
 					}
+				},
+				{
+					"name": "Consulta Múltiples Empresas (Batch)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" },
+							{ "key": "Accept", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"cifs\": [\"B12345678\", \"A87654321\"],\n  \"admin\": true\n}"
+						},
+						"url": {
+							"raw": "https://apiempresas.es/api/v1/companies/batch",
+							"protocol": "https",
+							"host": ["apiempresas", "es"],
+							"path": ["api", "v1", "companies", "batch"]
+						}
+					}
 				}
 			]
 		},

@@ -77,6 +77,12 @@
                                 Webhooks <span class="sidebar-badge biz">Biz</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="#endpoint-usage">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="18" y="3" width="4" height="18"></rect><rect x="10" y="8" width="4" height="13"></rect><rect x="2" y="13" width="4" height="8"></rect></svg>
+                                Consumo
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
@@ -200,6 +206,11 @@ Accept: application/json</code></pre>
                                 <td>string</td>
                                 <td><strong>Requerido.</strong> El CIF/NIF de la empresa (ej: B12345678).</td>
                             </tr>
+                            <tr>
+                                <td><code>admin</code></td>
+                                <td>boolean</td>
+                                <td><strong>Opcional.</strong> Si es <code>true</code>, incluye los administradores y cargos directivos actuales. <span class="plan-badge pro" style="margin-left: 5px; display: inline-block;">Pro</span></td>
+                            </tr>
                         </tbody>
                     </table>
 
@@ -212,9 +223,16 @@ Accept: application/json</code></pre>
     "status": "ACTIVA",
     "province": "MADRID",
     "cnae": "6201",
-    "cnae_label": "Actividades de programación informática"
+    "cnae_label": "Actividades de programación informática",
+    "administrators": [
+      {
+        "name": "JUAN PÉREZ GARCÍA",
+        "position": "Administrador Único"
+      }
+    ]
   }
 }</code></pre>
+                    <p style="font-size: 13px; color: #64748b; margin-top: 5px;">* El array <code>administrators</code> solo se incluye si envías el parámetro <code>admin=true</code> y tu plan lo permite.</p>
 
 
                 </section>
@@ -249,7 +267,23 @@ Accept: application/json</code></pre>
 
                     </table>
 
-
+                    <h4>Respuesta de éxito (200 OK)</h4>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": [
+    {
+      "cif": "B12345678",
+      "name": "EMPRESA DE EJEMPLO SL",
+      "status": "ACTIVA",
+      "province": "MADRID"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 20,
+    "has_more": false
+  }
+}</code></pre>
                 </section>
 
                 <!-- EXPANDED -->
@@ -285,6 +319,20 @@ Accept: application/json</code></pre>
                             <span class="plan-badge pro">Pro</span>
                         </div>
                         <p>Eventos y actos societarios detectados recientemente.</p>
+                        <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "cif": "B12345678",
+    "signals": [
+      {
+        "type": "borme_event",
+        "label": "CONSTITUCION",
+        "date": "2023-10-01",
+        "probability": "Alta"
+      }
+    ]
+  }
+}</code></pre>
                     </div>
 
                     <!-- INSIGHTS -->
@@ -301,7 +349,8 @@ Accept: application/json</code></pre>
     "profile": "Servicios de Tecnología",
     "summary": "Empresa enfocada en desarrollo software...",
     "needs": ["Presencia Web", "Gestión Cloud"],
-    "conversion_probability": "Alta"
+    "conversion_probability": "Alta",
+    "estimated_ticket": "Medio-Alto"
   }
 }</code></pre>
                     </div>
@@ -314,6 +363,15 @@ Accept: application/json</code></pre>
                             <span class="plan-badge business">Business</span>
                         </div>
                         <p>Pitch de venta sugerido y manejo de objeciones generado por IA.</p>
+                        <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "sales_approach": "Enfoque consultivo y directo...",
+    "suggested_message": "Hola, he notado el reciente crecimiento de...",
+    "likely_objection": "Falta de presupuesto temporal",
+    "attack_angle": "Demostrar el ROI inmediato..."
+  }
+}</code></pre>
                     </div>
 
                     <!-- NETWORK -->
@@ -324,6 +382,22 @@ Accept: application/json</code></pre>
                             <span class="plan-badge pro">Pro</span>
                         </div>
                         <p>Obtiene la red de vinculación entre empresas a través de sus administradores. Requiere el parámetro <code>cif</code>.</p>
+                        <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "nodes": [
+      { "id": "C_123", "type": "company", "label": "EMPRESA DE EJEMPLO SL", "cif": "B12345678", "root": true },
+      { "id": "A_abc", "type": "administrator", "label": "JUAN PEREZ GARCIA" }
+    ],
+    "edges": [
+      { "source": "A_abc", "target": "C_123", "label": "Administrador" }
+    ],
+    "stats": {
+      "total_administrators": 1,
+      "total_linked_companies": 1
+    }
+  }
+}</code></pre>
                     </div>
 
                     <!-- MATCH -->
@@ -334,6 +408,56 @@ Accept: application/json</code></pre>
                             <span class="plan-badge business">Business</span>
                         </div>
                         <p>Calculadora de Match B2B. Requiere los parámetros <code>cif</code> y <code>seller_sector</code>. Devuelve el nivel de encaje comercial y un argumentario personalizado.</p>
+                        <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "match_score": 85,
+    "fit_level": "Alto",
+    "pain_points_addressed": ["Ineficiencia operativa", "Falta de digitalización"],
+    "sales_argument": "Nuestro software elimina el trabajo manual...",
+    "recommendation": "Contactar de inmediato."
+  }
+}</code></pre>
+                    </div>
+
+                    <!-- BATCH -->
+                    <div style="margin-top: 32px;">
+                        <div class="endpoint-header">
+                            <span class="http-badge post">POST</span>
+                            <code>/companies/batch</code>
+                            <span class="plan-badge pro">Pro</span>
+                            <span class="plan-badge business">Business</span>
+                        </div>
+                        <p>Consulta hasta 100 empresas de una sola vez enviando un array de CIFs. El coste es variable: 1 consulta de tu cuota mensual o monedero por cada empresa <strong>encontrada</strong> (código 200). Si no tienes suficientes créditos para cubrir el lote entero, la respuesta se recortará automáticamente hasta el número de empresas que puedas pagar.</p>
+                        
+                        <h5>Cuerpo de la Petición (JSON)</h5>
+                        <pre><code class="language-json">{
+  "cifs": ["B12345678", "A87654321", "B00000000"],
+  "admin": true
+}</code></pre>
+
+                        <h5>Respuesta de éxito</h5>
+                        <pre><code class="language-json">{
+  "success": true,
+  "data": [
+    {
+      "cif": "B12345678",
+      "name": "EMPRESA DE EJEMPLO SL",
+      "status": "ACTIVA"
+    },
+    {
+      "cif": "A87654321",
+      "name": "OTRA EMPRESA SA",
+      "status": "ACTIVA"
+    }
+  ],
+  "meta": {
+    "requested": 3,
+    "found": 2,
+    "cost": 2,
+    "truncated": false
+  }
+}</code></pre>
                     </div>
                 </section>
 
@@ -371,6 +495,25 @@ Accept: application/json</code></pre>
                             </tr>
                         </tbody>
                     </table>
+
+                    <h4>Respuesta de éxito (200 OK)</h4>
+                    <pre><code class="language-json">{
+  "success": true,
+  "meta": {
+    "plan": "business",
+    "count": 50,
+    "limit": 1000,
+    "total_disponibles": 50
+  },
+  "data": [
+    {
+      "cif": "B12345678",
+      "company_name": "NUEVA EMPRESA SL",
+      "registro_mercantil": "MADRID",
+      "fecha_constitucion": "2023-11-01"
+    }
+  ]
+}</code></pre>
                 </section>
 
                 <!-- WEBHOOKS -->
@@ -383,16 +526,69 @@ Accept: application/json</code></pre>
                         <code>/webhooks</code>
                         <span class="plan-badge business">Business</span>
                     </div>
-                    <div class="endpoint-header">
+                    <div class="endpoint-header" style="margin-bottom: 5px;">
                         <span class="http-badge post">POST</span>
                         <code>/webhooks</code>
                         <span class="plan-badge business">Business</span>
                     </div>
+                    <div class="endpoint-header">
+                        <span class="http-badge" style="background: #f93e3e;">DELETE</span>
+                        <code>/webhooks/{id}</code>
+                        <span class="plan-badge business">Business</span>
+                    </div>
+
+                    <h4>Ejemplo de respuesta (GET)</h4>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "url": "https://midominio.com/webhook",
+      "event": "company.updated",
+      "created_at": "2023-11-01 10:00:00"
+    }
+  ]
+}</code></pre>
+
+                    <h4>Ejemplo de respuesta (POST / DELETE)</h4>
+                    <pre><code class="language-json">{
+  "success": true,
+  "message": "Webhook creado correctamente",
+  "id": 1
+}</code></pre>
+                </section>
+
+                <!-- USAGE -->
+                <section class="docs-section" id="endpoint-usage">
+                    <h2>8. Estadísticas de Consumo</h2>
+                    <p>Obtén el recuento de peticiones del mes actual y el historial de empresas consultadas asociado a tu API Key.</p>
+                    
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/usage</code>
+                    </div>
+
+                    <h4>Respuesta de éxito (200 OK)</h4>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "stats": {
+      "monthly_queries": 150,
+      "total_queries": 1250
+    },
+    "history": [
+      {
+        "cif": "B12345678",
+        "name": "EMPRESA DE EJEMPLO SL"
+      }
+    ]
+  }
+}</code></pre>
                 </section>
 
                 <!-- EXAMPLES -->
                 <section class="docs-section" id="examples">
-                    <h2>8. Ejemplos de Código</h2>
+                    <h2>9. Ejemplos de Código</h2>
                     <p>Implementa la conexión en minutos con estos ejemplos listos para usar.</p>
 
                     <div class="code-tabs">
@@ -475,7 +671,7 @@ print(response.json())</code></pre>
 
                 <!-- POSTMAN -->
                 <section class="docs-section" id="postman">
-                    <h2>9. Postman Collection</h2>
+                    <h2>10. Postman Collection</h2>
                     <p>Si prefieres probar la API directamente en Postman, puedes descargarte nuestra colección oficial e importarla con un clic.</p>
                     
                     <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px dashed #cbd5e1; text-align: center; margin-top: 20px;">

@@ -62,6 +62,24 @@ class CompanyModel extends Model
         return null;
     }
 
+    public function getByCifs(array $cifs): array
+    {
+        $cifs = array_map('trim', $cifs);
+        $cifs = array_filter($cifs);
+        if (empty($cifs)) {
+            return [];
+        }
+
+        return $this->asArray()
+            ->select(implode(', ', $this->selectFields))
+            ->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left')
+            ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left')
+            ->whereIn('companies.cif', $cifs)
+            ->limit(100)
+            ->get()
+            ->getResultArray();
+    }
+
     public function getById(int $id): ?array
     {
         return $this->asArray()

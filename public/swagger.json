@@ -12,6 +12,81 @@
         }
     ],
     "paths": {
+        "/api/v1/companies/batch": {
+            "post": {
+                "tags": [
+                    "2. Plan Pro",
+                    "3. Plan Business"
+                ],
+                "summary": "Consultar múltiples empresas por CIF",
+                "description": "Devuelve los datos de múltiples empresas enviando un array de CIFs (máximo 100 por petición). El coste es de 1 consulta por cada empresa encontrada. Si no tienes saldo suficiente, la respuesta se recortará hasta el número de empresas que puedas pagar.",
+                "operationId": "ab63d5b004ffec1d0ccdeb1319290ed6",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "cifs": {
+                                        "description": "Array de CIFs a consultar (Max 100)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "admin": {
+                                        "description": "Si es 'true', incluye los administradores (Exclusivo Pro/Business)",
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Resultados encontrados",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "requested": {
+                                                    "type": "integer"
+                                                },
+                                                "found": {
+                                                    "type": "integer"
+                                                },
+                                                "cost": {
+                                                    "type": "integer"
+                                                },
+                                                "truncated": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/companies": {
             "get": {
                 "tags": [
@@ -787,16 +862,20 @@
     ],
     "tags": [
         {
+            "name": "2. Plan Pro",
+            "description": "2. Plan Pro"
+        },
+        {
+            "name": "3. Plan Business",
+            "description": "3. Plan Business"
+        },
+        {
             "name": "1. Plan Free / General",
             "description": "1. Plan Free / General"
         },
         {
             "name": "2. Plan Professional",
             "description": "2. Plan Professional"
-        },
-        {
-            "name": "3. Plan Business",
-            "description": "3. Plan Business"
         }
     ]
 }

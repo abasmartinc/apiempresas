@@ -130,6 +130,7 @@ $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function
 
     // Auth Webw Commercial Endpoints (Expansion)
     $routes->get('api/v1/companies', 'Api\V1\CompaniesByCif::index');
+    $routes->post('api/v1/companies/batch', 'Api\V1\CompaniesBatch::index');
     $routes->get('api/v1/companies/search', 'Api\V1\CompaniesSearch::index');
 
     $routes->get('api/v1/companies/score', 'Api\V1\CompanyEnrichmentController::score');

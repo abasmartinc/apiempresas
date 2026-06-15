@@ -18,6 +18,7 @@ class ApiKeyFilter implements FilterInterface
         // Endpoints que no deben costar
         if (strpos($path, 'api/v1/webhooks') !== false) return 0;
         if (strpos($path, 'api/v1/usage') !== false) return 0;
+        if (strpos($path, 'api/v1/companies/batch') !== false) return 0;
 
         // "vamos a dejar los dos primeros a 1 credito y los otros a 3"
         // 2. api/v1/companies/search

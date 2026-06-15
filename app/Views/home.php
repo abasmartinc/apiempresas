@@ -608,6 +608,19 @@
                             <tr>
                                 <td>
                                     <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Consulta Múltiple (Batch)</div>
+                                        <div class="cap-feature-endpoint">POST /api/v1/companies/batch</div>
+                                        <div class="cap-feature-desc">Consulta hasta 100 CIFs en una única petición ahorrando tiempos de red.</div>
+                                        <a href="/docs#endpoint-batch" class="btn-json-preview" style="text-decoration:none; display:inline-block; margin-top:8px;">Ver Documentación</a>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
                                         <div class="cap-feature-name">Scoring Comercial IA</div>
                                         <div class="cap-feature-endpoint">GET /api/v1/companies/score</div>
                                         <div class="cap-feature-desc">Clasifica empresas por potencial de compra y salud financiera mediante nuestro algoritmo.</div>

@@ -1246,6 +1246,29 @@
                                 </td>
                             </tr>
 
+                            <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 18px 20px;">
+                                    <div
+                                        style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">
+                                        POST /companies/batch</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">JSON Array: cifs[]</div>
+                                </td>
+                                <td style="padding: 18px 20px;">
+                                    <strong
+                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Consulta Múltiple (Batch)</strong>
+                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
+                                        Consulta de golpe hasta 100 CIFs en una única petición ahorrando latencia de red. El consumo se calcula dinámicamente por cada CIF encontrado.
+                                    </p>
+                                </td>
+                                <td style="padding: 18px 20px; text-align: center;"><span
+                                        style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO
+                                        / BUS</span>
+                                </td>
+                                <td style="padding: 18px 20px; text-align: center;">
+                                    <button type="button" onclick="event.preventDefault(); window.location.href='/docs#endpoint-batch';" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER DOCS</button>
+                                </td>
+                            </tr>
+
                             <!-- ENRICHMENT & IA -->
                             <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
                                 <td style="padding: 18px 20px;">
