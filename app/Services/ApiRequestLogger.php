@@ -17,6 +17,11 @@ class ApiRequestLogger
      */
     public static function log(?int $userId, string $action, string $status, string $message): void
     {
+        // Skip logging completely for the internal Status Monitor (ID: 376)
+        if ($userId === 376) {
+            return;
+        }
+
         // 1) Log to system log file
         $logLevel = ($status === 'error') ? 'error' : 'info';
         log_message($logLevel, "[API Request] User: " . ($userId ?? 'Guest') . " | Action: {$action} | Status: {$status} | Message: {$message}");
