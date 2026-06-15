@@ -158,6 +158,12 @@ $routes->group('api/sandbox/v1', ['filter' => ['apikey']], static function ($rou
     $routes->get('companies/search', 'Api\V1\Sandbox\SandboxController::search');
     $routes->get('companies/score', 'Api\V1\Sandbox\SandboxController::score');
     $routes->get('companies/signals', 'Api\V1\Sandbox\SandboxController::signals');
+    $routes->get('companies/insights', 'Api\V1\Sandbox\SandboxController::insights');
+    $routes->get('companies/contact-prep', 'Api\V1\Sandbox\SandboxController::contactPrep');
+    $routes->get('companies/radar', 'Api\V1\Sandbox\SandboxController::radar');
+    $routes->get('companies/match', 'Api\V1\Sandbox\SandboxController::match');
+    $routes->get('companies/network', 'Api\V1\Sandbox\SandboxController::network');
+    $routes->post('companies/batch', 'Api\V1\Sandbox\SandboxController::batch');
 });
 // ----------- API SANDBOX ----------- //
 

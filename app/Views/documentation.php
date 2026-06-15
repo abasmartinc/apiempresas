@@ -179,6 +179,12 @@
                             <li><code>B00000000</code>: Simula un error 404 de empresa no encontrada.</li>
                             <li><code>C11111111</code>: Simula un error 404 de empresa encolada asíncronamente.</li>
                         </ul>
+                        <strong style="font-size: 13px; color: #92400e; display: block; margin-top: 10px;">Cómo probar otros endpoints en Sandbox:</strong>
+                        <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 13px; color: #b45309;">
+                            <li><strong>Búsqueda (/search):</strong> Puedes enviar cualquier texto en el parámetro <code>q=</code>. Siempre te devolverá datos ficticios de Inditex para que valides el parseo de listas.</li>
+                            <li><strong>Por Lotes (/batch):</strong> Envía un JSON mezclando CIFs mágicos (ej. <code>{"cifs": ["A15075062", "B00000000"]}</code>) para probar cómo tu código maneja múltiples respuestas.</li>
+                            <li><strong>Endpoints Premium (/score, /network, /insights, etc.):</strong> Llama a cualquiera de ellos pasando el CIF <code>A15075062</code> por parámetro GET para recibir la estructura de datos simulada y validar la integración de tu lado.</li>
+                        </ul>
                     </div>
                 </section>
 
