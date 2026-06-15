@@ -1,6 +1,6 @@
 <?php
 // Unified limits logic
-$limitToUse = $isPaid ? ($maxLimitVal ?? 3000) : ($freeLimit ?? 20);
+$limitToUse = $isPaid ? ($maxLimit ?? 3000) : ($freeLimit ?? 20);
 $isLimitReached = ($requestsUsed >= $limitToUse);
 $warningThreshold = $isPaid ? ($limitToUse * 0.8) : ($limitToUse * 0.7);
 $isWarning = ($requestsUsed >= $warningThreshold);
