@@ -691,7 +691,7 @@
                 // Sobrescribir con FAQs de IA si existen
                 if (!empty($company['ai_faqs'])) {
                     $aiFaqsDecoded = json_decode($company['ai_faqs'], true);
-                    if (json_last_error() === JSON_ERROR_NONE && !empty($aiFaqsDecoded)) {
+                    if (json_last_error() === JSON_ERROR_NONE && !empty($aiFaqsDecoded) && is_array($aiFaqsDecoded)) {
                         $faqs = $aiFaqsDecoded;
                     }
                 }

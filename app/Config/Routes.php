@@ -122,8 +122,7 @@ $routes->get('e/c/(:any)', 'EmailTracking::click/$1');
 
 // ----------- API ----------- //
 $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function ($routes) {
-    $routes->get('api/v1/companies/radar', 'Api\V1\CompaniesRadar::index', ['filter' => 'api']);
-    $routes->post('api/v1/companies/match', 'Api\V1\CompanyMatch::index', ['filter' => 'api']);
+
 
     // TEMP
     $routes->get('temp-upgrade', 'TempUpgrade::index');
