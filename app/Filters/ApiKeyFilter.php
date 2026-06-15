@@ -16,6 +16,7 @@ class ApiKeyFilter implements FilterInterface
     private function getEndpointCost(string $path): int
     {
         // Endpoints que no deben costar
+        if (strpos($path, 'api/sandbox/v1') !== false) return 0;
         if (strpos($path, 'api/v1/webhooks') !== false) return 0;
         if (strpos($path, 'api/v1/usage') !== false) return 0;
         if (strpos($path, 'api/v1/companies/batch') !== false) return 0;

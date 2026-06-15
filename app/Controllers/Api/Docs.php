@@ -7,7 +7,8 @@ use OpenApi\Generator;
 use OpenApi\Attributes as OA;
 
 #[OA\Info(title: "API Empresas", version: "1.0.0", description: "Documentación oficial de la API de Empresas")]
-#[OA\Server(url: "/", description: "Entorno Actual")]
+#[OA\Server(url: "/", description: "Entorno de Producción (Consume Créditos)")]
+#[OA\Server(url: "/api/sandbox/v1", description: "Entorno Sandbox de Pruebas (Gratis. Usa CIF: A15075062)")]
 #[OA\SecurityScheme(
     securityScheme: "ApiKeyAuth",
     type: "apiKey",

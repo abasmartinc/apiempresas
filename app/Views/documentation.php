@@ -165,7 +165,20 @@
                         La API está diseñada siguiendo principios REST. Todas las respuestas se devuelven en formato JSON y requieren una conexión segura vía HTTPS.
                     </p>
                     <div class="api-info-card">
-                        <strong>Base URL:</strong> <code>https://apiempresas.es/api/v1</code>
+                        <strong>URL Producción:</strong> <code>https://apiempresas.es/api/v1</code><br>
+                        <strong>URL Sandbox:</strong> <code>https://apiempresas.es/api/sandbox/v1</code>
+                    </div>
+                    <div class="api-info-card" style="background: #fffbeb; border-left-color: #f59e0b; margin-top: 15px;">
+                        <h4 style="margin: 0 0 10px 0; color: #92400e; font-weight: 800;">Entorno de Pruebas (Sandbox)</h4>
+                        <p style="margin: 0 0 10px 0; font-size: 14px; color: #b45309;">
+                            Para hacer pruebas <strong>sin consumir saldo ni cuota</strong>, envía tus peticiones a la URL de Sandbox usando tu API Key habitual.
+                        </p>
+                        <strong style="font-size: 13px; color: #92400e;">CIFs mágicos permitidos en el Sandbox:</strong>
+                        <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 13px; color: #b45309;">
+                            <li><code>A15075062</code>: Simula una consulta exitosa (Inditex).</li>
+                            <li><code>B00000000</code>: Simula un error 404 de empresa no encontrada.</li>
+                            <li><code>C11111111</code>: Simula un error 404 de empresa encolada asíncronamente.</li>
+                        </ul>
                     </div>
                 </section>
 

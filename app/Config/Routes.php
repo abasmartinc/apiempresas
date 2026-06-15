@@ -152,6 +152,15 @@ $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function
 });
 // ----------- API ----------- //
 
+// ----------- API SANDBOX ----------- //
+$routes->group('api/sandbox/v1', ['filter' => ['apikey']], static function ($routes) {
+    $routes->get('companies', 'Api\V1\Sandbox\SandboxController::companies');
+    $routes->get('companies/search', 'Api\V1\Sandbox\SandboxController::search');
+    $routes->get('companies/score', 'Api\V1\Sandbox\SandboxController::score');
+    $routes->get('companies/signals', 'Api\V1\Sandbox\SandboxController::signals');
+});
+// ----------- API SANDBOX ----------- //
+
 // Triggers & Usage API (Session Auth)
 $routes->get('api/user/usage-status', 'Api\UsageStatus::index');
 $routes->post('api/user/log-event', 'Api\EventTracker::log');
