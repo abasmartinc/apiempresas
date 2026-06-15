@@ -134,6 +134,35 @@ class ApiKeyFilter implements FilterInterface
             log_message('error', '[ApiKeyFilter::before:subscription] ' . $e->getMessage());
         }
 
+        // 4.1.2) Rate Limiting (Throttling per second)
+        try {
+            $maxRequestsPerSecond = ((int)$planId === 1) ? 2 : 20;
+            
+            $rateLimitKey = 'throttle_' . (int)$row->api_key_id . '_' . time();
+            $requestsThisSecond = (int) cache()->get($rateLimitKey);
+            
+            if ($requestsThisSecond >= $maxRequestsPerSecond) {
+                return service('response')->setStatusCode(429)->setJSON([
+                    'success' => false,
+                    'error'   => 'TOO_MANY_REQUESTS',
+                    'message' => 'Has superado el límite de ' . $maxRequestsPerSecond . ' peticiones por segundo. Por favor, reduce la velocidad de tus peticiones o utiliza el endpoint /batch.',
+                    'type'    => 'https://apiempresas.com/docs/errors/too_many_requests',
+                    'title'   => 'TOO_MANY_REQUESTS',
+                    'status'  => 429,
+                    'detail'  => 'Has superado el límite de ' . $maxRequestsPerSecond . ' peticiones por segundo. Por favor, reduce la velocidad de tus peticiones o utiliza el endpoint /batch.',
+                    'instance'=> self::$apiRequestId
+                ]);
+            }
+            
+            if ($requestsThisSecond === 0) {
+                cache()->save($rateLimitKey, 1, 2); // TTL 2 segundos
+            } else {
+                cache()->increment($rateLimitKey, 1);
+            }
+        } catch (\Throwable $e) {
+            log_message('error', '[ApiKeyFilter::before:throttling] ' . $e->getMessage());
+        }
+
         // 4.1.5) Determinar Coste (Universal Credits) y Saldo
         $endpointPath = (string) $request->getUri()->getPath();
         $creditCost = $this->getEndpointCost($endpointPath);

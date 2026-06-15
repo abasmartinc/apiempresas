@@ -44,6 +44,13 @@ class CompaniesSearch extends BaseApiController
         schema: new OA\Schema(type: "boolean", default: false)
     )]
     #[OA\Parameter(
+        name: "cursor",
+        in: "query",
+        required: false,
+        description: "Cursor opaco para paginación (recomendado para integraciones nuevas). Si se proporciona, sobrescribe el parámetro `page`.",
+        schema: new OA\Schema(type: "string")
+    )]
+    #[OA\Parameter(
         name: "limit",
         in: "query",
         required: false,
@@ -95,8 +102,18 @@ class CompaniesSearch extends BaseApiController
             $limit = 100;
         }
 
+        $cursorParam = $this->request->getGet('cursor');
         $pageParam = $this->request->getGet('page');
-        $page = $pageParam !== null ? max(1, (int)$pageParam) : 1;
+
+        $page = 1;
+        if ($cursorParam) {
+            $decoded = json_decode(base64_decode((string)$cursorParam), true);
+            if (is_array($decoded) && isset($decoded['p'])) {
+                $page = max(1, (int)$decoded['p']);
+            }
+        } elseif ($pageParam !== null) {
+            $page = max(1, (int)$pageParam);
+        }
 
         // Cache interno por query normalizada (1h)
         if ($multiple) {
@@ -139,6 +156,12 @@ class CompaniesSearch extends BaseApiController
             
             if ($multiple && !$isOldFormat && isset($cachedData['meta'])) {
                 $response['meta'] = $cachedData['meta'];
+                if (!empty($response['meta']['has_more'])) {
+                    $nextPage = (int)$response['meta']['page'] + 1;
+                    $response['meta']['next_cursor'] = base64_encode(json_encode(['p' => $nextPage]));
+                } else {
+                    $response['meta']['next_cursor'] = null;
+                }
             }
 
             return $this->respond($response, ResponseInterface::HTTP_OK);
@@ -212,6 +235,12 @@ class CompaniesSearch extends BaseApiController
             
             if ($multiple && isset($results['meta'])) {
                 $response['meta'] = $results['meta'];
+                if (!empty($response['meta']['has_more'])) {
+                    $nextPage = (int)$response['meta']['page'] + 1;
+                    $response['meta']['next_cursor'] = base64_encode(json_encode(['p' => $nextPage]));
+                } else {
+                    $response['meta']['next_cursor'] = null;
+                }
             }
 
             return $this->respond($response, ResponseInterface::HTTP_OK);

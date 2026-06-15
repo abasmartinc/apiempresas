@@ -96,6 +96,18 @@
                             </a>
                         </li>
                         <li>
+                            <a href="#throttling">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                Rate Limiting
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#paginacion">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                Paginación
+                            </a>
+                        </li>
+                        <li>
                             <a href="#examples">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
                                 Ejemplos
@@ -711,9 +723,33 @@ print(response.json())</code></pre>
                     <p>El campo <code>instance</code> es único para cada petición y resulta muy útil si necesitas reportar un problema a soporte.</p>
                 </section>
 
+                <!-- THROTTLING -->
+                <section class="docs-section" id="throttling">
+                    <h2>11. Límites de Peticiones (Rate Limiting)</h2>
+                    <p>Para proteger la estabilidad de la API, aplicamos límites de peticiones por segundo (Throttling) utilizando un algoritmo de ventana deslizante en memoria caché.</p>
+                    <ul>
+                        <li><strong>Plan Free:</strong> Límite de 2 peticiones por segundo.</li>
+                        <li><strong>Planes de Pago (Pro, Business, Enterprise):</strong> Límite de 20 peticiones por segundo.</li>
+                    </ul>
+                    <p>Si superas este límite, recibirás un error <code>429 Too Many Requests</code>. Si necesitas procesar muchas empresas de golpe, te recomendamos utilizar el endpoint <a href="#batch">Batch</a>, que permite enviar hasta 100 empresas en una sola petición.</p>
+                </section>
+
+                <!-- PAGINACION -->
+                <section class="docs-section" id="paginacion">
+                    <h2>12. Paginación por Cursores</h2>
+                    <p>En el endpoint de búsqueda múltiple (<code>/api/v1/companies/search?multiple=true</code>), puedes utilizar el parámetro <code>page</code> tradicional o el parámetro <code>cursor</code> para paginar los resultados de forma más segura.</p>
+                    <p>Si la respuesta contiene más páginas, el objeto <code>meta</code> incluirá un <code>next_cursor</code>. Solo tienes que enviar ese valor exacto en tu siguiente petición para obtener la siguiente página de resultados de manera automática:</p>
+                    <pre><code class="language-json">"meta": {
+  "page": 1,
+  "limit": 20,
+  "has_more": true,
+  "next_cursor": "eyJwIjoyfQ=="
+}</code></pre>
+                </section>
+
                 <!-- POSTMAN -->
                 <section class="docs-section" id="postman">
-                    <h2>11. Postman Collection</h2>
+                    <h2>13. Postman Collection</h2>
                     <p>Si prefieres probar la API directamente en Postman, puedes descargarte nuestra colección oficial e importarla con un clic.</p>
                     
                     <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px dashed #cbd5e1; text-align: center; margin-top: 20px;">
