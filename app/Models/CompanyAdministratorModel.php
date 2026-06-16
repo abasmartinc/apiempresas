@@ -58,6 +58,12 @@ class CompanyAdministratorModel extends Model
             return null;
         }
 
+        $cacheKey = 'admin_profile_' . md5($slug);
+        $cached = cache($cacheKey);
+        if ($cached !== null) {
+            return $cached;
+        }
+
         $searchName = str_replace('-', ' ', $slug);
         $db = \Config\Database::connect();
 
@@ -81,9 +87,13 @@ class CompanyAdministratorModel extends Model
         arsort($counts);
         $bestName = array_key_first($counts);
 
-        return [
+        $result = [
             'admin_name' => $bestName,
             'companies'  => $companies
         ];
+
+        cache()->save($cacheKey, $result, 86400 * 30); // Cache for 30 days
+
+        return $result;
     }
 }
