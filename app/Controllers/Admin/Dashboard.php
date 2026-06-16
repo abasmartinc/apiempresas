@@ -1332,7 +1332,27 @@ class Dashboard extends BaseController
             'plans' => $this->planModel->orderBy('name', 'ASC')->findAll(),
             'user_id' => $userId,
             'plan_id' => $planId,
-            'status' => $status
+            'status' => $status,
+        ];
+
+        // Calcular stats por plan (suscripciones activas)
+        $freeCount = 0; $proCount = 0; $businessCount = 0;
+        $activeSubs = $this->subscriptionModel->select('api_plans.name as plan_name')
+            ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id', 'left')
+            ->where('user_subscriptions.status', 'active')
+            ->findAll();
+
+        foreach ($activeSubs as $s) {
+            $name = strtolower($s->plan_name ?: '');
+            if (strpos($name, 'free') !== false) $freeCount++;
+            elseif (strpos($name, 'pro') !== false) $proCount++;
+            elseif (strpos($name, 'business') !== false) $businessCount++;
+        }
+
+        $data['stats'] = [
+            'free' => $freeCount,
+            'pro' => $proCount,
+            'business' => $businessCount,
         ];
 
         return view('admin/subscriptions', $data);

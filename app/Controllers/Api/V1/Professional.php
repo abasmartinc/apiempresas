@@ -62,6 +62,22 @@ class Professional extends BaseApiController
             ], ResponseInterface::HTTP_BAD_REQUEST);
         }
 
+        // Ignorar búsquedas muy cortas por rendimiento (autocompletado)
+        if (mb_strlen($q, 'UTF-8') < 3) {
+            return $this->respond([
+                'success' => true,
+                'data' => []
+            ], ResponseInterface::HTTP_OK);
+        }
+        
+        $cacheKey = 'prof_search_' . md5($q);
+        if ($cached = cache()->get($cacheKey)) {
+            return $this->respond([
+                'success' => true,
+                'data' => $cached
+            ], ResponseInterface::HTTP_OK);
+        }
+
         try {
             // Utilizamos searchMany para obtener hasta 20 coincidencias (estilo autocompletado)
             $results = $this->companyModel->searchMany($q, 20);
@@ -77,6 +93,8 @@ class Professional extends BaseApiController
 
                 return $data;
             }, $results);
+
+            cache()->save($cacheKey, $formatted, 3600); // Guardar por 1 hora
 
             return $this->respond([
                 'success' => true,

@@ -133,33 +133,31 @@
                 </select>
             </div>
             <div>
-                <label class="input-label">Rol</label>
-                <select name="is_admin" class="input w-full">
-                    <option value="">Todos</option>
-                    <option value="1" <?= $is_admin === '1' ? 'selected' : '' ?>>Admin</option>
-                    <option value="0" <?= $is_admin === '0' ? 'selected' : '' ?>>Usuario</option>
-                </select>
+                <label class="input-label">&nbsp;</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="submit" class="btn primary" title="Buscar">Buscar</button>
+                    <a href="<?= site_url('admin/users') ?>" class="btn ghost" title="Limpiar filtros">🔄</a>
+                </div>
             </div>
-                <a href="<?= site_url('admin/users') ?>" class="btn ghost" title="Limpiar filtros">🔄</a>
-            </div>
-            <?php if (isset($pager) && $pager->getTotal() > 0): ?>
-            <div class="bulk-actions">
-                <form action="<?= site_url('admin/users/email/bulk') ?>" method="post" style="display: inline;">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="q" value="<?= esc($q) ?>">
-                    <input type="hidden" name="is_active" value="<?= esc($is_active) ?>">
-                    <input type="hidden" name="is_admin" value="<?= esc($is_admin) ?>">
-                    <input type="hidden" name="select_all_filtered" value="1">
-                    <button type="submit" class="btn secondary btn-sm">
-                        ✉️ Enviar Email a toda la lista (<?= $pager->getTotal() ?> usuarios)
-                    </button>
-                    <span class="text-xs text-slate ml-2">
-                        (Incluye a todos los usuarios de todas las páginas que coincidan con el filtro)
-                    </span>
-                </form>
-            </div>
-            <?php endif; ?>
         </form>
+
+        <?php if (isset($pager) && $pager->getTotal() > 0): ?>
+        <div class="bulk-actions" style="margin-top: 1rem;">
+            <form action="<?= site_url('admin/users/email/bulk') ?>" method="post" style="display: inline;">
+                <?= csrf_field() ?>
+                <input type="hidden" name="q" value="<?= esc($q) ?>">
+                <input type="hidden" name="is_active" value="<?= esc($is_active) ?>">
+                <input type="hidden" name="is_admin" value="<?= esc($is_admin) ?>">
+                <input type="hidden" name="select_all_filtered" value="1">
+                <button type="submit" class="btn secondary btn-sm">
+                    ✉️ Enviar Email a toda la lista (<?= $pager->getTotal() ?> usuarios)
+                </button>
+                <span class="text-xs text-slate ml-2">
+                    (Incluye a todos los usuarios de todas las páginas que coincidan con el filtro)
+                </span>
+            </form>
+        </div>
+        <?php endif; ?>
     </div>
 
     <?php if (session()->getFlashdata('message')): ?>
@@ -198,8 +196,6 @@
                         <div class="text-xs text-slate"><?= esc($user->company ?: '-') ?></div>
                         <?php if (isset($user->source_app) && $user->source_app === 'alertaempresas'): ?>
                             <span class="pill pill-sm" style="background: #fff1f2; color: #be123c; border: 1px solid #fda4af;">Alertas 🔔</span>
-                        <?php else: ?>
-                            <span class="pill pill-sm" style="background: #fdf4ff; color: #86198f; border: 1px solid #f0abfc;">API 🚀</span>
                         <?php endif; ?>
                     </td>
                     <td class="text-slate-darker"><?= esc($user->email) ?></td>
@@ -212,13 +208,7 @@
                         <?php else: ?>
                             <span class="pill estado--inactiva pill-sm">Inactivo</span>
                         <?php endif; ?>
-                        <a href="<?= site_url('admin/users/toggle-api-access/' . $user->id) ?>" class="no-underline" title="Alternar Acceso API">
-                            <?php if ($user->api_access ?? false): ?>
-                                <span class="pill pill-api-ok">API OK ✅</span>
-                            <?php else: ?>
-                                <span class="pill pill-api-off">API OFF ❌</span>
-                            <?php endif; ?>
-                        </a>
+
                     </td>
                     <td style="padding: 12px;">
                         <div class="flex-gap-5">

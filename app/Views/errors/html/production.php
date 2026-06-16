@@ -1,25 +1,35 @@
 <?php
 try {
-    $email = \Config\Services::email();
-    $email->setTo('soporte@apiempresas.es');
-    $email->setSubject('🚨 Alerta Crítica: Error 500 en Producción');
-    
+    $sendEmail = true;
     $errorMsg = 'No se pudo obtener el detalle del error en la vista.';
+    
     if (isset($exception) && $exception instanceof \Throwable) {
         $errorMsg = "Mensaje: " . $exception->getMessage() . "\n" . 
                     "Archivo: " . $exception->getFile() . "\n" .
                     "Línea: " . $exception->getLine();
+                    
+        // No enviar correos por errores 400 (Bad Request) o 404 (Not Found)
+        if ($exception instanceof \CodeIgniter\HTTP\Exceptions\BadRequestException ||
+            $exception instanceof \CodeIgniter\Exceptions\PageNotFoundException) {
+            $sendEmail = false;
+        }
     }
     
-    $message = "Se ha producido un error 500 en la plataforma.\n\n";
-    $message .= "URL: " . current_url() . "\n";
-    $message .= "Fecha: " . date('Y-m-d H:i:s') . "\n";
-    $message .= "IP Cliente: " . \Config\Services::request()->getIPAddress() . "\n";
-    $message .= "User Agent: " . \Config\Services::request()->getUserAgent()->getAgentString() . "\n\n";
-    $message .= "--- DETALLES DEL ERROR ---\n" . $errorMsg . "\n";
-    
-    $email->setMessage($message);
-    $email->send();
+    if ($sendEmail) {
+        $email = \Config\Services::email();
+        $email->setTo('soporte@apiempresas.es');
+        $email->setSubject('🚨 Alerta Crítica: Error 500 en Producción');
+        
+        $message = "Se ha producido un error 500 en la plataforma.\n\n";
+        $message .= "URL: " . current_url() . "\n";
+        $message .= "Fecha: " . date('Y-m-d H:i:s') . "\n";
+        $message .= "IP Cliente: " . \Config\Services::request()->getIPAddress() . "\n";
+        $message .= "User Agent: " . \Config\Services::request()->getUserAgent()->getAgentString() . "\n\n";
+        $message .= "--- DETALLES DEL ERROR ---\n" . $errorMsg . "\n";
+        
+        $email->setMessage($message);
+        $email->send();
+    }
 } catch (\Throwable $e) {
     // Ignorar si el envío de correo falla para evitar un bucle de errores
 }

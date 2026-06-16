@@ -131,7 +131,7 @@
             </div>
             <div>
                 <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Usuario</label>
-                <select name="user_id" id="user-select" style="width: 100%;">
+                <select name="user_id" id="user-select" class="input" style="width: 100%;">
                     <option value="">Todos los usuarios</option>
                     <?php foreach ($users as $u): ?>
                         <option value="<?= $u->id ?>" <?= $user_id == $u->id ? 'selected' : '' ?>>
@@ -250,24 +250,39 @@
         box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         font-size: 0.85rem;
     }
+    .select2-search--dropdown {
+        padding: 8px !important;
+    }
     .select2-search--dropdown .select2-search__field {
         border-radius: 4px;
         border: 1px solid #e2e8f0;
+        width: 100% !important;
+        min-height: 34px !important;
+        padding: 4px 8px !important;
+        box-sizing: border-box;
     }
     .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
         background-color: #2152ff;
     }
 </style>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        var options = {
+            width: '100%'
+        };
+
         if(document.getElementById('user-select')) {
-            $('#user-select').select2({
-                placeholder: "Buscar usuario...",
-                width: '100%'
-            });
+            $('#user-select').select2(Object.assign({}, options, { placeholder: "Buscar usuario..." }));
         }
+
+        // Parche definitivo: obligar a mostrar la caja de búsqueda cuando Select2 la oculta
+        $(document).on('select2:open', function() {
+            setTimeout(function() {
+                $('.select2-search--hide').removeClass('select2-search--hide');
+            }, 10);
+        });
     });
 </script>
 

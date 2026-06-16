@@ -481,7 +481,7 @@ class CompanyModel extends Model
                     if ($len >= 4) {
                         $booleanTerm .= '+' . $p . '* ';
                     } elseif ($len >= 2) {
-                        $booleanTerm .= $p . '* ';
+                        $booleanTerm .= '+' . $p . ' '; // Solo coincidencia exacta para palabras cortas
                     }
                 }
                 $booleanTerm = trim($booleanTerm);
@@ -519,7 +519,7 @@ class CompanyModel extends Model
             if (mb_strlen($term) >= 3) {
                 $builderFallback = $this->builder();
                 $builderFallback->select('companies.id, companies.cif');
-                $builderFallback->like('companies.company_name', $term, 'both');
+                $builderFallback->like('companies.company_name', $term, 'after'); // Cambiado a 'after' para usar B-Tree Index
 
                 if (!empty($seenCifs)) {
                     $builderFallback->whereNotIn('companies.cif', array_keys($seenCifs));

@@ -424,10 +424,7 @@
                         <span class="link-icon icon-sub-blue"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" /></svg></span>
                         <div class="link-text"><strong>Usuarios</strong><p>Gestión de cuentas y perfiles.</p></div>
                     </a>
-                    <a href="<?= site_url('admin/companies') ?>" class="group-link">
-                        <span class="link-icon icon-sub-indigo"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" /></svg></span>
-                        <div class="link-text"><strong>Empresas</strong><p>Base de datos maestra de empresas.</p></div>
-                    </a>
+
                     <a href="<?= site_url('admin/tickets') ?>" class="group-link">
                         <span class="link-icon icon-sub-sky"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.974 0-5.699-1.08-7.843-2.882m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"/></svg></span>
                         <div class="link-text">
@@ -471,14 +468,7 @@
                     </div>
                 </div>
                 <div style="padding: 8px 0;">
-                    <a href="<?= site_url('admin/activity-logs') ?>" class="group-link">
-                        <span class="link-icon icon-sub-slate"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg></span>
-                        <div class="link-text"><strong>Logs de Actividad</strong><p>Acciones críticas del panel administrativo.</p></div>
-                    </a>
-                    <a href="<?= site_url('admin/logs') ?>" class="group-link">
-                        <span class="link-icon icon-sub-amber"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /><path d="M12 18.75V16.5m0-4.5V9m0-4.5V3" /></svg></span>
-                        <div class="link-text"><strong>Logs de Búsqueda</strong><p>Historial de consultas de usuarios.</p></div>
-                    </a>
+
                     <a href="<?= site_url('admin/email-logs') ?>" class="group-link">
                         <span class="link-icon icon-sub-pink"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg></span>
                         <div class="link-text"><strong>Logs de Emails</strong><p>Trazabilidad de correos del sistema.</p></div>

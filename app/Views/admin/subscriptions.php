@@ -2,6 +2,52 @@
 <html lang="es">
 <head>
     <?= view('partials/head', ['title' => $title]) ?>
+    <style>
+        :root {
+            --kpi-free: #5c6370;
+            --kpi-pro: #4f46e5;
+            --kpi-biz: #4b9a69;
+        }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+        .kpi-card { 
+            position: relative;
+            overflow: hidden;
+            background: white; 
+            border-radius: 24px; 
+            padding: 2rem; 
+            border: 1px solid rgba(255, 255, 255, 0.7); 
+            display: flex; 
+            flex-direction: column; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); 
+        }
+        .kpi-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1); 
+        }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 100px; height: 100px;
+            background: var(--kpi-color);
+            opacity: 0.05;
+            border-radius: 0 0 0 100%;
+            pointer-events: none;
+        }
+        .kpi-icon-wrapper {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            background: var(--kpi-color);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 1.5rem;
+            color: white;
+            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+        }
+        .kpi-label { font-size: 0.85rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        .kpi-value { font-size: 2.5rem; font-weight: 900; color: #1e293b; letter-spacing: -0.02em; margin-bottom: 0.5rem; line-height: 1; }
+        .kpi-sub { font-size: 0.85rem; color: #94a3b8; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+    </style>
 </head>
 <body class="admin-body">
 <div class="bg-halo" aria-hidden="true"></div>
@@ -14,6 +60,33 @@
         <div style="display: flex; gap: 10px;">
             <a href="<?= site_url('admin/subscriptions/create') ?>" class="btn">Nueva Suscripción</a>
             <a href="<?= site_url('dashboard') ?>" class="btn ghost">Volver al Dashboard</a>
+        </div>
+    </div>
+
+    <div class="kpi-grid">
+        <div class="kpi-card" style="--kpi-color: var(--kpi-free);">
+            <div class="kpi-icon-wrapper" style="background: var(--kpi-free);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <span class="kpi-label">Plan Free</span>
+            <span class="kpi-value"><?= number_format($stats['free'] ?? 0, 0, ',', '.') ?></span>
+            <span class="kpi-sub">Usuarios activos en Free</span>
+        </div>
+        <div class="kpi-card" style="--kpi-color: var(--kpi-pro);">
+            <div class="kpi-icon-wrapper" style="background: var(--kpi-pro);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            </div>
+            <span class="kpi-label">Plan Pro</span>
+            <span class="kpi-value"><?= number_format($stats['pro'] ?? 0, 0, ',', '.') ?></span>
+            <span class="kpi-sub">Usuarios activos en Pro</span>
+        </div>
+        <div class="kpi-card" style="--kpi-color: var(--kpi-biz);">
+            <div class="kpi-icon-wrapper" style="background: var(--kpi-biz);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            </div>
+            <span class="kpi-label">Plan Business</span>
+            <span class="kpi-value"><?= number_format($stats['business'] ?? 0, 0, ',', '.') ?></span>
+            <span class="kpi-sub">Usuarios activos en Business</span>
         </div>
     </div>
 
@@ -89,7 +162,19 @@
                         <div style="font-size: 0.75rem; color: #64748b;"><?= esc($s->user_email ?: '-') ?></div>
                     </td>
                     <td style="padding: 12px;">
-                        <span class="pill" style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;">
+                        <?php 
+                        $planNameLow = strtolower($s->plan_name ?: '');
+                        if (strpos($planNameLow, 'free') !== false) {
+                            $badgeBg = '#5c6370'; $badgeColor = '#ffffff'; $badgeBorder = '#5c6370';
+                        } elseif (strpos($planNameLow, 'pro') !== false) {
+                            $badgeBg = '#4f46e5'; $badgeColor = '#ffffff'; $badgeBorder = '#4f46e5';
+                        } elseif (strpos($planNameLow, 'business') !== false) {
+                            $badgeBg = '#4b9a69'; $badgeColor = '#ffffff'; $badgeBorder = '#4b9a69';
+                        } else {
+                            $badgeBg = '#f1f5f9'; $badgeColor = '#475569'; $badgeBorder = '#e2e8f0';
+                        }
+                        ?>
+                        <span class="pill" style="background: <?= $badgeBg ?>; color: <?= $badgeColor ?>; border: 1px solid <?= $badgeBorder ?>; font-weight: 600;">
                             <?= esc($s->plan_name ?: 'Plan #' . $s->plan_id) ?>
                         </span>
                     </td>
@@ -130,7 +215,7 @@
 
 <?= view('partials/footer') ?>
 <!-- Select2 para hacer el select buscable -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 <style>
     /* Ajustes para Select2 encaje con el .input */
     .select2-container--default .select2-selection--single {
@@ -156,24 +241,41 @@
         box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         font-size: 0.85rem;
     }
+    .select2-search--dropdown {
+        padding: 8px !important;
+    }
     .select2-search--dropdown .select2-search__field {
         border-radius: 4px;
         border: 1px solid #e2e8f0;
+        width: 100% !important;
+        min-height: 34px !important;
+        padding: 4px 8px !important;
+        box-sizing: border-box;
     }
     .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
         background-color: #2152ff;
     }
 </style>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        var options = {
+            width: '100%'
+        };
+
         if(document.getElementById('user-select')) {
-            $('#user-select').select2({
-                placeholder: "Buscar usuario...",
-                width: '100%'
-            });
+            $('#user-select').select2(Object.assign({}, options, { placeholder: "Buscar usuario..." }));
         }
+        $('select[name="plan_id"]').select2(Object.assign({}, options, { placeholder: "Buscar plan..." }));
+        $('select[name="status"]').select2(Object.assign({}, options, { placeholder: "Buscar estado..." }));
+
+        // Parche definitivo: obligar a mostrar la caja de búsqueda cuando Select2 la oculta
+        $(document).on('select2:open', function() {
+            setTimeout(function() {
+                $('.select2-search--hide').removeClass('select2-search--hide');
+            }, 10);
+        });
     });
 </script>
 

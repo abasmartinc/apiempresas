@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Autocompletado Profesional</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f3f4f6; color: #1f2937; padding: 2rem; max-width: 800px; margin: 0 auto; }
+        .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        input { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 4px; font-size: 1rem; box-sizing: border-box; }
+        input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .results { margin-top: 1rem; border: 1px solid #e5e7eb; border-radius: 4px; max-height: 400px; overflow-y: auto; background: white; }
+        .result-item { padding: 1rem; border-bottom: 1px solid #e5e7eb; }
+        .result-item:last-child { border-bottom: none; }
+        .company-name { font-weight: bold; color: #111827; }
+        .company-meta { font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem; }
+        .loader { display: none; margin-top: 1rem; color: #6b7280; font-size: 0.875rem; }
+        .raw-json { background: #1f2937; color: #f3f4f6; padding: 1rem; border-radius: 4px; overflow-x: auto; margin-top: 2rem; font-family: monospace; font-size: 0.875rem; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Prueba del Endpoint de Autocompletado</h2>
+        <p style="color: #6b7280; margin-bottom: 2rem; font-size: 0.9rem;">Esta página conecta directamente con la API local (http://apiempresas.test) para simular cómo un frontend consumiría el autocompletado.</p>
+        
+        <div class="form-group">
+            <label for="apiUrl">URL base de tu API (ajústala si es diferente en tu local)</label>
+            <input type="text" id="apiUrl" value="http://apiempresas.test/api/v1/professional/search">
+        </div>
+
+        <div class="form-group">
+            <label for="apiKey">Tu API Key Local</label>
+            <input type="text" id="apiKey" placeholder="Pega aquí tu X-API-KEY de desarrollo local">
+        </div>
+
+        <div class="form-group">
+            <label for="searchQuery">Buscar Empresa</label>
+            <input type="text" id="searchQuery" placeholder="Ej. construccion, madrid...">
+        </div>
+
+        <div id="loader" class="loader">Buscando en la API local...</div>
+        
+        <div id="results" class="results" style="display: none;"></div>
+
+        <h3 style="margin-top: 2rem; font-size: 1.1rem;">Respuesta en Bruto (JSON)</h3>
+        <pre id="rawJson" class="raw-json">Esperando consulta...</pre>
+    </div>
+
+    <script>
+        const searchInput = document.getElementById('searchQuery');
+        const apiKeyInput = document.getElementById('apiKey');
+        const apiUrlInput = document.getElementById('apiUrl');
+        const resultsDiv = document.getElementById('results');
+        const loader = document.getElementById('loader');
+        const rawJson = document.getElementById('rawJson');
+
+        let timeoutId;
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            const apiKey = apiKeyInput.value.trim();
+            const apiUrl = apiUrlInput.value.trim();
+
+            // Limpiar timeout anterior (Debounce)
+            clearTimeout(timeoutId);
+
+            if (query.length === 0) {
+                resultsDiv.style.display = 'none';
+                resultsDiv.innerHTML = '';
+                rawJson.textContent = 'Esperando consulta...';
+                return;
+            }
+
+            // Petición con debounce de 300ms
+            timeoutId = setTimeout(() => {
+                performSearch(query, apiKey, apiUrl);
+            }, 300);
+        });
+
+        async function performSearch(query, apiKey, apiUrl) {
+            if (!apiKey) {
+                rawJson.textContent = 'Error: Por favor, introduce tu API Key arriba.';
+                resultsDiv.style.display = 'none';
+                return;
+            }
+
+            loader.style.display = 'block';
+            
+            try {
+                const startTime = performance.now();
+                const response = await fetch(`${apiUrl}?q=${encodeURIComponent(query)}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-API-KEY': apiKey,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                const endTime = performance.now();
+                const timeTaken = (endTime - startTime).toFixed(0);
+                
+                loader.style.display = 'none';
+
+                // Mostrar JSON bruto con el tiempo
+                rawJson.textContent = `// Status: ${response.status} | Tiempo de respuesta: ${timeTaken}ms\n\n` + JSON.stringify(data, null, 2);
+
+                if (data.success && data.data) {
+                    renderResults(data.data);
+                } else {
+                    resultsDiv.style.display = 'block';
+                    resultsDiv.innerHTML = `<div class="result-item" style="color: red;">Error en la API o no se encontraron datos. Revisa el JSON abajo.</div>`;
+                }
+
+            } catch (error) {
+                loader.style.display = 'none';
+                rawJson.textContent = 'Error de red o CORS:\\n' + error.message;
+            }
+        }
+
+        function renderResults(items) {
+            if (items.length === 0) {
+                resultsDiv.style.display = 'block';
+                resultsDiv.innerHTML = '<div class="result-item" style="color: #6b7280;">No hay coincidencias / Array vacío.</div>';
+                return;
+            }
+
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = items.map(item => `
+                <div class="result-item">
+                    <div class="company-name">${item.name || 'Sin Nombre'} <span style="font-weight: normal; color: #6b7280; font-size: 0.85em;">(${item.cif || 'Sin CIF'})</span></div>
+                    <div class="company-meta">
+                        📍 ${item.address || 'Sin dirección'} <br>
+                        🏢 CNAE: ${item.cnae || 'N/A'}
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
