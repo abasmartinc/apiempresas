@@ -360,6 +360,9 @@ class Company extends BaseController
             $this->response->setHeader('X-Robots-Tag', 'noindex, follow');
         }
 
+        // Cachear durante 24 horas (86400 segundos) para mitigar carga en BBDD
+        $this->cachePage(86400);
+
         return $this->response->setBody(view('company', $data));
     }
     
@@ -409,6 +412,9 @@ class Company extends BaseController
         if (isset($company['seo_indexable']) && $company['seo_indexable'] === false) {
             $this->response->setHeader('X-Robots-Tag', 'noindex, follow');
         }
+
+        // Cachear durante 24 horas (86400 segundos) para mitigar carga en BBDD
+        $this->cachePage(86400);
 
         return $this->response->setBody(view('company', $data));
     }

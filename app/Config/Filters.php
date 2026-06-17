@@ -42,6 +42,7 @@ class Filters extends BaseFilters
         'botprotection' => \App\Filters\BotProtectionFilter::class,
         'user_activity' => \App\Filters\UserActivityFilter::class,
         'subscription'  => \App\Filters\SubscriptionFilter::class,
+        'throttle'      => \App\Filters\ThrottleFilter::class,
     ];
 
     /**
@@ -77,6 +78,7 @@ class Filters extends BaseFilters
      */
     public array $globals = [
         'before' => [
+             'throttle',      // Limitar la tasa de peticiones por IP
              'botprotection', // Check blocked IPs first
              'honeypot' => ['except' => ['admin/*']],
              'user_activity',
