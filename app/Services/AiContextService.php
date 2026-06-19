@@ -309,8 +309,8 @@ Funcionalidades:
 - Filtrado instantáneo por provincia o sector dentro de la página.
 - Botón 'Ver más' para expandir más de 12 provincias/sectores.
 Ideal para: Consultas de validación mercantil, investigar el tejido empresarial por zona o sector.
-URL formato provincia: https://apiempresas.es/directorio/provincia/[nombre-provincia]
-URL formato sector: https://apiempresas.es/directorio/cnae/[codigo]/[slug-nombre]
+URL formato provincia: https://apiempresas.es/listado-de-empresas/[nombre-provincia]
+URL formato sector: https://apiempresas.es/listado-de-empresas/sector-[codigo]/[slug-nombre]
 
 ## /base-de-datos-de-empresas (Base de Datos de Empresas - Herramienta de Descarga)
 URL: https://apiempresas.es/base-de-datos-de-empresas

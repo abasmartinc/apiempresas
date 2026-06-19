@@ -751,7 +751,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
 
                 <div class="ae-radar-page__seo-content">
                     <p>
-                        España es uno de los principales hubs empresariales de Europa. Cada mes se registran miles de <a href="<?= site_url('directorio') ?>">empresas en España</a>, incluyendo nuevas sociedades creadas recientemente, lo que genera un ecosistema dinámico de oportunidades B2B.
+                        España es uno de los principales hubs empresariales de Europa. Cada mes se registran miles de <a href="<?= site_url('listado-de-empresas') ?>">empresas en España</a>, incluyendo nuevas sociedades creadas recientemente, lo que genera un ecosistema dinámico de oportunidades B2B.
                     </p>
 
                     <p>

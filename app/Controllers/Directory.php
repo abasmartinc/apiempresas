@@ -107,10 +107,10 @@ class Directory extends BaseController
             'max_province'     => $maxProvince,
             'max_cnae'         => $maxCnae,
             'dynamic_price'    => $dynamicPrice,
-            'title'            => "Directorio de Empresas en España | {$totalFormatted} Sociedades Registradas",
-            'meta_description' => "Directorio completo de {$totalFormatted} empresas españolas organizadas por {$numProvinces} provincias y sectores CNAE. Datos oficiales actualizados del Registro Mercantil.",
-            'excerptText'      => "Directorio completo de {$totalFormatted} empresas españolas organizadas por {$numProvinces} provincias y sectores CNAE. Datos oficiales actualizados del Registro Mercantil.",
-            'canonical'        => site_url('directorio'),
+            'title'            => "Listado de Empresas en España | {$totalFormatted} Sociedades Registradas",
+            'meta_description' => "Listado completo de {$totalFormatted} empresas españolas organizadas por {$numProvinces} provincias y sectores CNAE. Datos oficiales actualizados del Registro Mercantil.",
+            'excerptText'      => "Listado completo de {$totalFormatted} empresas españolas organizadas por {$numProvinces} provincias y sectores CNAE. Datos oficiales actualizados del Registro Mercantil.",
+            'canonical'        => site_url('listado-de-empresas'),
         ]);
     }
 
@@ -151,9 +151,9 @@ class Directory extends BaseController
 
         if (empty($companies)) {
              if ($page > 1) {
-                 return redirect()->to(site_url("directorio/provincia/{$provinceName}"));
+                 return redirect()->to(site_url("listado-de-empresas/{$provinceName}"));
              }
-             return redirect()->to(site_url('directorio'));
+             return redirect()->to(site_url('listado-de-empresas'));
         }
 
         // Total count (cached per province)
@@ -218,11 +218,11 @@ class Directory extends BaseController
             'dynamic_price'   => $dynamicPrice,
             'province_name'   => $provinceName,
             'robots'          => ($page > 1) ? 'noindex, follow' : 'index, follow',
-            'canonical'       => site_url("directorio/provincia/" . urlencode($provinceName)), // siempre pág 1
-            'title'           => "{$totalFormatted} Empresas en {$provinceName} | Directorio Oficial",
-            'excerptText'     => "Consulta el directorio completo de {$totalFormatted} empresas registradas en {$provinceName}. Datos oficiales actualizados.",
-            'header'          => "Directorio de empresas en {$provinceName}",
-            'meta_description'=> "Directorio de {$totalFormatted} empresas en {$provinceName}. Busca por nombre, consulta CIF y accede a la ficha oficial de cada sociedad.",
+            'canonical'       => site_url("listado-de-empresas/" . urlencode($provinceName)), // siempre pág 1
+            'title'           => "{$totalFormatted} Empresas en {$provinceName} | Listado Oficial",
+            'excerptText'     => "Consulta el listado completo de {$totalFormatted} empresas registradas en {$provinceName}. Datos oficiales actualizados.",
+            'header'          => "Listado de empresas en {$provinceName}",
+            'meta_description'=> "Listado de {$totalFormatted} empresas en {$provinceName}. Busca por nombre, consulta CIF y accede a la ficha oficial de cada sociedad.",
             'cross_links' => [
                 'type'     => 'cnae',
                 'title'    => "Principales sectores en {$provinceName}",
@@ -232,9 +232,9 @@ class Directory extends BaseController
             'pagination' => [
                 'current' => $page,
                 'total'   => $totalPages,
-                'next'    => ($page < $totalPages) ? site_url("directorio/provincia/" . urlencode($provinceName) . "/" . ($page + 1)) : null,
-                'prev'    => ($page > 1) ? site_url("directorio/provincia/" . urlencode($provinceName) . "/" . ($page - 1)) : null,
-                'base'    => site_url("directorio/provincia/" . urlencode($provinceName))
+                'next'    => ($page < $totalPages) ? site_url("listado-de-empresas/" . urlencode($provinceName) . "/" . ($page + 1)) : null,
+                'prev'    => ($page > 1) ? site_url("listado-de-empresas/" . urlencode($provinceName) . "/" . ($page - 1)) : null,
+                'base'    => site_url("listado-de-empresas/" . urlencode($provinceName))
             ]
         ]);
     }
@@ -242,7 +242,7 @@ class Directory extends BaseController
     public function cnae(...$args)
     {
         if (empty($args)) {
-            return redirect()->to(site_url('directorio'));
+            return redirect()->to(site_url('listado-de-empresas'));
         }
 
         $cnaeCode = $args[0];
@@ -250,7 +250,7 @@ class Directory extends BaseController
         $page = 1;
 
         if (count($args) === 1) {
-            // URL: /directorio/cnae/6920
+            // URL: /listado-de-empresas/sector-6920
         } elseif (count($args) === 2) {
             if (is_numeric($args[1])) {
                 $page = (int)$args[1];
@@ -293,7 +293,7 @@ class Directory extends BaseController
 
         // Redirect if slug is missing or incorrect
         if ($slug !== $correctSlug) {
-            $redirectUrl = "directorio/cnae/{$cnaeCode}/{$correctSlug}";
+            $redirectUrl = "listado-de-empresas/sector-{$cnaeCode}/{$correctSlug}";
             if ($page > 1) {
                 $redirectUrl .= "/{$page}";
             }
@@ -322,9 +322,9 @@ class Directory extends BaseController
 
         if (empty($companies)) {
              if ($page > 1) {
-                 return redirect()->to(site_url("directorio/cnae/{$cnaeCode}/{$correctSlug}"));
+                 return redirect()->to(site_url("listado-de-empresas/sector-{$cnaeCode}/{$correctSlug}"));
              }
-             return redirect()->to(site_url('directorio'));
+             return redirect()->to(site_url('listado-de-empresas'));
         }
 
         // Cross-pollination: Provinces for this CNAE
@@ -381,9 +381,9 @@ class Directory extends BaseController
             'pagination' => [
                 'current' => $page,
                 'total'   => $totalPages,
-                'next'    => ($page < $totalPages) ? site_url("directorio/cnae/{$cnaeCode}/{$correctSlug}/" . ($page + 1)) : null,
-                'prev'    => ($page > 1) ? site_url("directorio/cnae/{$cnaeCode}/{$correctSlug}/" . ($page - 1)) : null,
-                'base'    => site_url("directorio/cnae/{$cnaeCode}/{$correctSlug}")
+                'next'    => ($page < $totalPages) ? site_url("listado-de-empresas/sector-{$cnaeCode}/{$correctSlug}/" . ($page + 1)) : null,
+                'prev'    => ($page > 1) ? site_url("listado-de-empresas/sector-{$cnaeCode}/{$correctSlug}/" . ($page - 1)) : null,
+                'base'    => site_url("listado-de-empresas/sector-{$cnaeCode}/{$correctSlug}")
             ]
         ]);
     }
@@ -422,7 +422,7 @@ class Directory extends BaseController
             ->getResultArray();
 
         if (empty($companies) && $page > 1) {
-            return redirect()->to(site_url("directorio/ultimas-empresas-registradas"));
+            return redirect()->to(site_url("empresas-nuevas"));
         }
 
         helper('pricing');
@@ -444,9 +444,9 @@ class Directory extends BaseController
             'pagination' => [
                 'current' => $page,
                 'total'   => $totalPages,
-                'next'    => ($page < $totalPages) ? site_url("directorio/ultimas-empresas-registradas/" . ($page + 1)) : null,
-                'prev'    => ($page > 1) ? site_url("directorio/ultimas-empresas-registradas/" . ($page - 1)) : null,
-                'base'    => site_url("directorio/ultimas-empresas-registradas")
+                'next'    => ($page < $totalPages) ? site_url("empresas-nuevas/" . ($page + 1)) : null,
+                'prev'    => ($page > 1) ? site_url("empresas-nuevas/" . ($page - 1)) : null,
+                'base'    => site_url("empresas-nuevas")
             ]
         ]);
     }
@@ -470,9 +470,9 @@ class Directory extends BaseController
 
         if (empty($companies)) {
              if ($page > 1) {
-                 return redirect()->to(site_url("directorio/provincia/" . urlencode($provinceName) . "/cnae/{$cnaeCode}"));
+                 return redirect()->to(site_url("listado-de-empresas/" . urlencode($provinceName) . "/sector-{$cnaeCode}"));
              }
-             return redirect()->to(site_url("directorio/provincia/" . urlencode($provinceName)));
+             return redirect()->to(site_url("listado-de-empresas/" . urlencode($provinceName)));
         }
 
         $cnaeLabel = $companies[0]['cnae_label'] ?? "CNAE {$cnaeCode}";
@@ -486,9 +486,9 @@ class Directory extends BaseController
             'meta_description' => "Descubre empresas de {$cnaeLabel} en {$provinceName} detectadas hoy. Oportunidades reales listas para contactar antes que tu competencia.",
             'pagination' => [
                 'current' => $page,
-                'next'    => site_url("directorio/provincia/" . urlencode($provinceName) . "/cnae/{$cnaeCode}/" . ($page + 1)),
-                'prev'    => ($page > 1) ? site_url("directorio/provincia/" . urlencode($provinceName) . "/cnae/{$cnaeCode}/" . ($page - 1)) : null,
-                'base'    => site_url("directorio/provincia/" . urlencode($provinceName) . "/cnae/{$cnaeCode}")
+                'next'    => site_url("listado-de-empresas/" . urlencode($provinceName) . "/sector-{$cnaeCode}/" . ($page + 1)),
+                'prev'    => ($page > 1) ? site_url("listado-de-empresas/" . urlencode($provinceName) . "/sector-{$cnaeCode}/" . ($page - 1)) : null,
+                'base'    => site_url("listado-de-empresas/" . urlencode($provinceName) . "/sector-{$cnaeCode}")
             ]
         ]);
     }
@@ -520,9 +520,9 @@ class Directory extends BaseController
 
         if (empty($companies)) {
              if ($page > 1) {
-                 return redirect()->to(site_url("directorio/etiqueta/{$tagSlug}"));
+                 return redirect()->to(site_url("listado-de-empresas/etiqueta/{$tagSlug}"));
              }
-             return redirect()->to(site_url('directorio'));
+             return redirect()->to(site_url('listado-de-empresas'));
         }
 
         $totalFormatted = number_format($totalCompanies, 0, ',', '.');
@@ -539,16 +539,16 @@ class Directory extends BaseController
             'dynamic_price'   => $dynamicPrice,
             'province_name'   => $titleTag,
             'robots'    => ($page > 1) ? 'noindex, follow' : 'index, follow',
-            'title'     => "{$totalFormatted} Empresas etiquetadas como {$titleTag} | Directorio",
+            'title'     => "{$totalFormatted} Empresas etiquetadas como {$titleTag} | Listado",
             'excerptText' => "Descubre nuestro listado de {$totalFormatted} empresas relacionadas con {$titleTag}.",
             'header'    => "Empresas de " . $titleTag,
-            'meta_description' => "Accede al listado de {$totalFormatted} empresas con la etiqueta {$titleTag}. Directorio de sociedades oficiales B2B.",
+            'meta_description' => "Accede al listado de {$totalFormatted} empresas con la etiqueta {$titleTag}. Listado de sociedades oficiales B2B.",
             'pagination' => [
                 'current' => $page,
                 'total'   => $totalPages,
-                'next'    => ($page < $totalPages) ? site_url("directorio/etiqueta/{$tagSlug}/" . ($page + 1)) : null,
-                'prev'    => ($page > 1) ? site_url("directorio/etiqueta/{$tagSlug}/" . ($page - 1)) : null,
-                'base'    => site_url("directorio/etiqueta/{$tagSlug}")
+                'next'    => ($page < $totalPages) ? site_url("listado-de-empresas/etiqueta/{$tagSlug}/" . ($page + 1)) : null,
+                'prev'    => ($page > 1) ? site_url("listado-de-empresas/etiqueta/{$tagSlug}/" . ($page - 1)) : null,
+                'base'    => site_url("listado-de-empresas/etiqueta/{$tagSlug}")
             ]
         ]);
     }

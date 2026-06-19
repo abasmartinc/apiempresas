@@ -218,7 +218,7 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
                         Radar Hub
                     </a>
-                    <a href="<?= site_url('directorio') ?>" class="nav-link">
+                    <a href="<?= site_url('listado-de-empresas') ?>" class="nav-link">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path><path d="M8 7h6"></path><path d="M8 11h8"></path></svg>
                         Directorio empresas
                     </a>

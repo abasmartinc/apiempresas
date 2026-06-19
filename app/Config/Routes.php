@@ -380,21 +380,40 @@ $routes->get('empresas-nuevas/(:any)', 'RadarController::province/$1'); // Provi
 $routes->get('empresas-(:any)-en-(:any)', 'RadarController::sectorProvince/$1/$2');
 // --- Programmatic SEO Routes ---
 
-// Directorios SEO (Legacy)
-$routes->get('directorio', 'Directory::index');
-$routes->get('directorio/provincia/(:any)', 'Directory::province/$1');
-$routes->get('directorio/provincia/(:any)/(:num)', 'Directory::province/$1/$2');
-$routes->get('directorio/cnae/(:segment)', 'Directory::cnae/$1');
-$routes->get('directorio/cnae/(:segment)/(:num)', 'Directory::cnae/$1/$2');
-$routes->get('directorio/cnae/(:segment)/(:segment)', 'Directory::cnae/$1/$2');
-$routes->get('directorio/cnae/(:segment)/(:segment)/(:num)', 'Directory::cnae/$1/$2/$3');
+// Directorios SEO (Listado de empresas)
+$routes->get('listado-de-empresas', 'Directory::index');
+
+// CNAE / Sectores
+$routes->get('listado-de-empresas/sector-(:segment)', 'Directory::cnae/$1');
+$routes->get('listado-de-empresas/sector-(:segment)/(:segment)', 'Directory::cnae/$1/$2');
+$routes->get('listado-de-empresas/sector-(:segment)/(:segment)/(:num)', 'Directory::cnae/$1/$2/$3');
+
+// Provincias
+$routes->get('listado-de-empresas/(:any)', 'Directory::province/$1');
+$routes->get('listado-de-empresas/(:any)/(:num)', 'Directory::province/$1/$2');
+
+// Provincia + Sector
+$routes->get('listado-de-empresas/(:any)/sector-(:segment)', 'Directory::provinceCnae/$1/$2');
+$routes->get('listado-de-empresas/(:any)/sector-(:segment)/(:num)', 'Directory::provinceCnae/$1/$2/$3');
+
+// Etiquetas
+$routes->get('listado-de-empresas/etiqueta/(:any)', 'Directory::tag/$1');
+$routes->get('listado-de-empresas/etiqueta/(:any)/(:num)', 'Directory::tag/$1/$2');
+
+// --- 301 Redirects desde el antiguo /directorio/ ---
+$routes->addRedirect('directorio', 'listado-de-empresas', 301);
+$routes->addRedirect('directorio/provincia/(:any)', 'listado-de-empresas/$1', 301);
+$routes->addRedirect('directorio/provincia/(:any)/(:num)', 'listado-de-empresas/$1/$2', 301);
+$routes->addRedirect('directorio/cnae/(:segment)', 'listado-de-empresas/sector-$1', 301);
+$routes->addRedirect('directorio/cnae/(:segment)/(:segment)', 'listado-de-empresas/sector-$1/$2', 301);
+$routes->addRedirect('directorio/cnae/(:segment)/(:segment)/(:num)', 'listado-de-empresas/sector-$1/$2/$3', 301);
+$routes->addRedirect('directorio/provincia/(:any)/cnae/(:segment)', 'listado-de-empresas/$1/sector-$2', 301);
+$routes->addRedirect('directorio/provincia/(:any)/cnae/(:segment)/(:num)', 'listado-de-empresas/$1/sector-$2/$3', 301);
+$routes->addRedirect('directorio/etiqueta/(:any)', 'listado-de-empresas/etiqueta/$1', 301);
+$routes->addRedirect('directorio/etiqueta/(:any)/(:num)', 'listado-de-empresas/etiqueta/$1/$2', 301);
+
 $routes->addRedirect('directorio/ultimas-empresas-registradas', 'empresas-nuevas', 301);
 $routes->addRedirect('directorio/ultimas-empresas-registradas/(:num)', 'empresas-nuevas', 301);
-$routes->get('directorio/provincia/(:any)/cnae/(:any)', 'Directory::provinceCnae/$1/$2');
-$routes->get('directorio/provincia/(:any)/cnae/(:any)/(:num)', 'Directory::provinceCnae/$1/$2/$3');
-
-$routes->get('directorio/etiqueta/(:any)', 'Directory::tag/$1');
-$routes->get('directorio/etiqueta/(:any)/(:num)', 'Directory::tag/$1/$2');
 
 // Company SEO Pages (Regex: Letter + 7 Digits + Char + optional slug)
 // Must be last to avoid conflicts

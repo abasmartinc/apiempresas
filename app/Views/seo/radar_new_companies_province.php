@@ -248,7 +248,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                                     </div>
                                     <h4 class="ae-radar-page__empty-card-title">Directorio de <?= esc(ucfirst(mb_strtolower($province))) ?></h4>
                                     <p class="ae-radar-page__empty-card-text">Explora el listado histórico completo de todas las empresas constituidas en esta provincia.</p>
-                                    <a href="<?= site_url('directorio/provincia/' . url_title($province, '-', true)) ?>" class="ae-radar-page__btn ae-radar-page__btn--primary">Ver directorio provincial</a>
+                                    <a href="<?= site_url('listado-de-empresas/' . url_title($province, '-', true)) ?>" class="ae-radar-page__btn ae-radar-page__btn--primary">Ver directorio provincial</a>
                                 </div>
 
                                 <div id="avisarme-seccion" class="ae-radar-page__empty-card ae-radar-page__empty-card--accent">
@@ -704,7 +704,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                         <h3>Directorio histórico</h3>
                     </div>
                     <ul>
-                        <li><a href="<?= site_url('directorio/provincia/' . url_title($province, '-', true)) ?>">Todas las empresas en <?= esc($province) ?></a></li>
+                        <li><a href="<?= site_url('listado-de-empresas/' . url_title($province, '-', true)) ?>">Todas las empresas en <?= esc($province) ?></a></li>
                     </ul>
                 </div>
             </section>
@@ -720,7 +720,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
 
                 <div class="ae-radar-page__seo-content">
                     <p>
-                        <?= esc($province) ?> es un hub empresarial clave. Cada mes se registran decenas de <a href="<?= site_url('directorio/provincia/' . url_title($province, '-', true)) ?>">empresas en <?= esc($province) ?></a>, incluyendo nuevas sociedades creadas recientemente.
+                        <?= esc($province) ?> es un hub empresarial clave. Cada mes se registran decenas de <a href="<?= site_url('listado-de-empresas/' . url_title($province, '-', true)) ?>">empresas en <?= esc($province) ?></a>, incluyendo nuevas sociedades creadas recientemente.
                     </p>
 
                     <p>

@@ -114,7 +114,7 @@ class Company extends BaseController
         // Breadcrumb Links
         $provinceUrl = '';
         if ($prov) {
-            $provinceUrl = site_url('directorio/provincia/' . urlencode($prov));
+            $provinceUrl = site_url('listado-de-empresas/' . urlencode($prov));
         }
         
         $cnaeCode = '';
@@ -128,12 +128,12 @@ class Company extends BaseController
         if ($cnaeCode) {
              helper('text');
              $cnaeSlug = url_title($company['cnae_label'] ?? "CNAE {$cnaeCode}", '-', true);
-             $cnaeUrl = site_url('directorio/cnae/' . $cnaeCode . '/' . $cnaeSlug);
+             $cnaeUrl = site_url('listado-de-empresas/sector-' . $cnaeCode . '/' . $cnaeSlug);
         }
 
         $provinceCnaeUrl = '';
         if ($prov && $cnaeCode) {
-            $provinceCnaeUrl = site_url('directorio/provincia/' . urlencode($prov) . '/cnae/' . $cnaeCode);
+            $provinceCnaeUrl = site_url('listado-de-empresas/' . urlencode($prov) . '/sector-' . $cnaeCode);
         }
 
         // --- ASYNC AI SEO TEXT GENERATION (QUEUE) ---

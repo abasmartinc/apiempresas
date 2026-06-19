@@ -251,7 +251,7 @@ $slugProvince = url_title($province, '-', true);
                                     </div>
                                     <h4 class="ae-radar-page__empty-card-title">Directorio de <?= esc($province) ?></h4>
                                     <p class="ae-radar-page__empty-card-text">Explora el listado histórico completo de todas las empresas de esta provincia.</p>
-                                    <a href="<?= site_url('directorio/provincia/' . $slugProvince) ?>" class="ae-radar-page__btn ae-radar-page__btn--primary">Ver directorio provincial</a>
+                                    <a href="<?= site_url('listado-de-empresas/' . $slugProvince) ?>" class="ae-radar-page__btn ae-radar-page__btn--primary">Ver directorio provincial</a>
                                 </div>
 
                                 <div class="ae-radar-page__empty-card ae-radar-page__empty-card--accent" id="avisarme-seccion">
@@ -417,7 +417,7 @@ $slugProvince = url_title($province, '-', true);
                     </div>
                     <ul>
                         <li><a href="<?= site_url('empresas-nuevas/' . $slugProvince) ?>">Nuevas constituciones hoy</a></li>
-                        <li><a href="<?= site_url('directorio/provincia/' . $slugProvince) ?>">Directorio histórico completo</a></li>
+                        <li><a href="<?= site_url('listado-de-empresas/' . $slugProvince) ?>">Directorio histórico completo</a></li>
                     </ul>
                 </div>
 

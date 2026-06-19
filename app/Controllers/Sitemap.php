@@ -214,11 +214,11 @@ class Sitemap extends Controller
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
         // Home del directorio
-        $xml .= '<url><loc>' . site_url('directorio') . '</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>';
+        $xml .= '<url><loc>' . site_url('listado-de-empresas') . '</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>';
 
         foreach ($provinces as $p) {
             $xml .= '<url>';
-            $xml .= '<loc>' . site_url('directorio/provincia/' . urlencode($p['name'])) . '</loc>';
+            $xml .= '<loc>' . site_url('listado-de-empresas/' . urlencode($p['name'])) . '</loc>';
             $xml .= '<changefreq>weekly</changefreq><priority>0.8</priority>';
             $xml .= '</url>';
         }
@@ -228,7 +228,7 @@ class Sitemap extends Controller
             $label = $cnaeMap[$c['code']] ?? "CNAE {$c['code']}";
             $slug = url_title($label, '-', true);
             $xml .= '<url>';
-            $xml .= '<loc>' . site_url('directorio/cnae/' . $c['code'] . '/' . $slug) . '</loc>';
+            $xml .= '<loc>' . site_url('listado-de-empresas/sector-' . $c['code'] . '/' . $slug) . '</loc>';
             $xml .= '<changefreq>weekly</changefreq><priority>0.8</priority>';
             $xml .= '</url>';
         }

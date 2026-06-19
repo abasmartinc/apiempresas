@@ -70,7 +70,7 @@
                                 <span>Detecta en tiempo real empresas de reciente creación publicadas en el BORME y contacta antes que tu competencia.</span>
                             </div>
                         </a>
-                        <a href="<?= site_url('directorio') ?>">
+                        <a href="<?= site_url('listado-de-empresas') ?>">
                             <div class="nav-item-icon">🗂️</div>
                             <div>
                                 <strong>Directorio Histórico</strong>
@@ -205,7 +205,7 @@
                         <a href="<?= getRadarRedirect('mobile_header') ?>" class="mobile-nav-link">
                             <span>Radar Inteligente</span>
                         </a>
-                        <a href="<?=site_url('directorio') ?>" class="mobile-nav-link">
+                        <a href="<?=site_url('listado-de-empresas') ?>" class="mobile-nav-link">
                             <span>Directorio Histórico</span>
                         </a>
                         <a href="<?=site_url('base-de-datos-de-empresas') ?>" class="mobile-nav-link">

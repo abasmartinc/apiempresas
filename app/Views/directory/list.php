@@ -490,7 +490,7 @@
         <nav class="breadcrumb" style="padding:0; border:none; margin-bottom:1.5rem; background:transparent; color:#64748b; text-transform:uppercase; font-size:0.75rem; letter-spacing:0.06em;">
             <a href="<?= site_url() ?>" style="color:#60a5fa; text-decoration:none;">Inicio</a>
             <span style="color:#334155;">/</span>
-            <a href="<?= site_url('directorio') ?>" style="color:#60a5fa; text-decoration:none;">Directorio</a>
+            <a href="<?= site_url('listado-de-empresas') ?>" style="color:#60a5fa; text-decoration:none;">Listado</a>
             <span style="color:#334155;">/</span>
             <span style="color:#94a3b8;"><?= esc($province_name ?? $header) ?></span>
         </nav>
@@ -504,7 +504,7 @@
                 Información actualizada diariamente desde el BORME y el Registro Mercantil Central.
             </p>
         <?php else: ?>
-            <h1><?= esc($header ?? 'Directorio de Empresas') ?></h1>
+            <h1><?= esc($header ?? 'Listado de Empresas') ?></h1>
             <p class="hero-sub" style="margin-bottom: 0.5rem;"><?= esc($excerptText ?? '') ?></p>
             <p style="color: #94a3b8; max-width: 700px; font-size: 0.95rem; line-height: 1.5; margin-bottom: 2.5rem;">
                 <?= esc($meta_description ?? '') ?>
@@ -727,10 +727,10 @@
                         if($cross_links['type'] === 'cnae') {
                             helper('text');
                             $cnaeSlug = url_title($cl['label'] ?: "CNAE {$cl['code']}", '-', true);
-                            $clUrl  = site_url('directorio/cnae/' . $cl['code'] . '/' . $cnaeSlug);
+                            $clUrl  = site_url('listado-de-empresas/sector-' . $cl['code'] . '/' . $cnaeSlug);
                             $clName = $cl['label'] ?: "CNAE {$cl['code']}";
                         } else {
-                            $clUrl  = site_url('directorio/provincia/' . urlencode($cl['name']));
+                            $clUrl  = site_url('listado-de-empresas/' . urlencode($cl['name']));
                             $clName = $cl['name'];
                         }
                     ?>
@@ -744,6 +744,24 @@
             </div>
         </div>
         <?php endif; ?>
+
+        <!-- ── SEO TEXT & FAQ (Dynamic) ── -->
+        <section class="dir-section" style="margin-top: 4rem; padding-top: 3rem; border-top: 1px solid var(--dir-slate-200); margin-bottom: 2rem;">
+            <div style="color: #475569; font-size: 0.95rem; line-height: 1.7;">
+                <h2 style="font-size: 1.4rem; color: #0f172a; margin-bottom: 1rem; font-weight: 800;">Acerca del listado de empresas <?php if (!empty($province_name)) echo "en " . esc($province_name); elseif (!empty($header)) echo "de " . esc(str_replace('Empresas de ', '', $header)); ?></h2>
+                <p style="margin-bottom: 1.25rem;">
+                    Este <strong>listado oficial de empresas <?php if (!empty($province_name)) echo "en " . esc($province_name); ?></strong> te proporciona acceso a una base de datos estructurada con <strong><?= esc($total_formatted ?? count($items)) ?> sociedades</strong> registradas. Los datos proceden directamente de fuentes públicas como el BORME (Boletín Oficial del Registro Mercantil) y el Registro Mercantil Central, asegurando una calidad y actualización constante indispensable para cualquier estrategia B2B.
+                </p>
+                <h3 style="font-size: 1.15rem; color: #0f172a; margin-top: 1.5rem; margin-bottom: 0.75rem; font-weight: 700;">¿Cómo descargar la base de datos de <?php if (!empty($province_name)) echo esc($province_name); else echo "este sector"; ?>?</h3>
+                <p style="margin-bottom: 1.25rem;">
+                    Para equipos de ventas y análisis de mercado, facilitamos la descarga completa de este segmento. Puedes <strong>descargar la base de datos de empresas <?php if (!empty($province_name)) echo "de " . esc($province_name); ?></strong> en formato Excel o CSV desde el botón superior de descarga. El archivo está perfectamente estructurado y listo para importar a tu CRM, incluyendo información vital como el CIF, razón social, CNAE, fecha de constitución y domicilio social.
+                </p>
+                <h3 style="font-size: 1.15rem; color: #0f172a; margin-top: 1.5rem; margin-bottom: 0.75rem; font-weight: 700;">Inteligencia Comercial y Ventas B2B</h3>
+                <p style="margin-bottom: 0;">
+                    Analizar el tejido empresarial <?php if (!empty($province_name)) echo "de " . esc($province_name); ?> a través de nuestro directorio te permite segmentar tu mercado objetivo, realizar validaciones mercantiles (KYC) y potenciar tus campañas de prospección. Accediendo a la ficha de cada mercantil podrás descubrir los cargos directivos actuales, el historial de actos y el estado registral de la sociedad.
+                </p>
+            </div>
+        </section>
 
         <!-- Radar CTA personalizado -->
         <div class="radar-cta">
@@ -760,7 +778,7 @@
             <p>Nuestro buscador avanzado permite localizar cualquier sociedad en España por nombre, CIF o ubicación.</p>
             <div class="cta-btn-row">
                 <a href="<?= site_url('search_company') ?>" class="btn primary" style="padding: 0.9rem 2rem;">Buscador Avanzado</a>
-                <a href="<?= site_url('directorio') ?>" class="btn secondary" style="padding: 0.9rem 2rem;">Volver al Directorio</a>
+                <a href="<?= site_url('listado-de-empresas') ?>" class="btn secondary" style="padding: 0.9rem 2rem;">Volver al Listado</a>
             </div>
         </div>
 
@@ -791,7 +809,7 @@
                 "@type"    => "BreadcrumbList",
                 "itemListElement" => [
                     ["@type" => "ListItem", "position" => 1, "name" => "Inicio",      "item" => site_url()],
-                    ["@type" => "ListItem", "position" => 2, "name" => "Directorio",  "item" => site_url('directorio')],
+                    ["@type" => "ListItem", "position" => 2, "name" => "Listado",  "item" => site_url('listado-de-empresas')],
                     ["@type" => "ListItem", "position" => 3, "name" => $province_name ?? $header, "item" => current_url()]
                 ]
             ];

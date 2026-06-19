@@ -135,7 +135,7 @@
                 foreach ($provinces as $p): ?>
                     <a href="#" class="pill top" style="text-decoration:none; background:#ffffff; border-color:var(--border); color:var(--primary);"><?= $p ?></a>
                 <?php endforeach; ?>
-                <a href="<?= site_url('directorio') ?>" class="pill top" style="text-decoration:none; background:var(--primary); color:white; border:none;">Ver todas las provincias &rarr;</a>
+                <a href="<?= site_url('listado-de-empresas') ?>" class="pill top" style="text-decoration:none; background:var(--primary); color:white; border:none;">Ver todas las provincias &rarr;</a>
             </div>
         </section>
 

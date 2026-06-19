@@ -458,7 +458,7 @@
             <span style="display: inline-block; width: 6px; height: 6px; background: #34D399; border-radius: 99px; box-shadow: 0 0 8px #34D399;"></span>
             Base de Datos Oficial en Tiempo Real
         </div>
-        <h1>Directorio de <span class="grad">Empresas Españolas</span></h1>
+        <h1>Listado de <span class="grad">Empresas Españolas</span></h1>
         <p>Valide información mercantil en tiempo real con acceso a la base de datos más completa de sociedades en España.</p>
 
         <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 1.5rem; margin-bottom: 1.25rem;">
@@ -578,7 +578,7 @@
                                 </span>
                             </td>
                             <td>
-                                <a href="<?= site_url('directorio/provincia/' . urlencode($prov['name'])) ?>" style="font-weight:700; color:#0f172a; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:color 0.2s;" onmouseover="this.style.color='#2152FF'" onmouseout="this.style.color='#0f172a'">
+                                <a href="<?= site_url('listado-de-empresas/' . urlencode($prov['name'])) ?>" style="font-weight:700; color:#0f172a; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:color 0.2s;" onmouseover="this.style.color='#2152FF'" onmouseout="this.style.color='#0f172a'">
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2152FF" stroke-width="2.5" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                                     <?= esc($prov['name']) ?>
                                 </a>
@@ -593,7 +593,7 @@
                                 </div>
                             </td>
                             <td style="text-align:right;">
-                                <a href="<?= site_url('directorio/provincia/' . urlencode($prov['name'])) ?>" class="action-link action-link--blue">
+                                <a href="<?= site_url('listado-de-empresas/' . urlencode($prov['name'])) ?>" class="action-link action-link--blue">
                                     Ver provincia
                                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                                 </a>
@@ -660,7 +660,7 @@
                                 </span>
                             </td>
                             <td>
-                                <a href="<?= site_url('directorio/cnae/' . $cnae['cnae'] . '/' . $cnaeSlug) ?>" style="font-weight:700; color:#0f172a; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:color 0.2s;" title="<?= esc($cnae['name']) ?>" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='#0f172a'">
+                                <a href="<?= site_url('listado-de-empresas/sector-' . $cnae['cnae'] . '/' . $cnaeSlug) ?>" style="font-weight:700; color:#0f172a; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:color 0.2s;" title="<?= esc($cnae['name']) ?>" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='#0f172a'">
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" style="flex-shrink:0;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
                                     <span style="max-width:440px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:inline-block;"><?= esc($label) ?></span>
                                 </a>
@@ -675,7 +675,7 @@
                                 </div>
                             </td>
                             <td style="text-align:right;">
-                                <a href="<?= site_url('directorio/cnae/' . $cnae['cnae'] . '/' . $cnaeSlug) ?>" class="action-link action-link--green">
+                                <a href="<?= site_url('listado-de-empresas/sector-' . $cnae['cnae'] . '/' . $cnaeSlug) ?>" class="action-link action-link--green">
                                     Ver sector
                                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                                 </a>
@@ -746,6 +746,24 @@
         </section>
         <?php endif; ?>
 
+        <!-- ── SEO TEXT & FAQ ── -->
+        <section class="dir-section" style="margin-top: 4rem; padding-top: 3rem; border-top: 1px solid #e2e8f0; margin-bottom: 2rem;">
+            <div style="color: #475569; font-size: 0.95rem; line-height: 1.7;">
+                <h2 style="font-size: 1.4rem; color: #0f172a; margin-bottom: 1rem; font-weight: 800;">Acerca de este Listado de Empresas Españolas</h2>
+                <p style="margin-bottom: 1.25rem;">
+                    Nuestro <strong>listado de empresas españolas</strong> proporciona acceso estructurado y oficial a la base de datos B2B más completa del país. Diariamente sincronizamos millones de registros procedentes de fuentes públicas como el BORME (Boletín Oficial del Registro Mercantil) y el Registro Mercantil Central para asegurar la máxima calidad y frescura de los datos societarios.
+                </p>
+                <h3 style="font-size: 1.15rem; color: #0f172a; margin-top: 1.5rem; margin-bottom: 0.75rem; font-weight: 700;">¿Cómo descargar la base de datos de empresas?</h3>
+                <p style="margin-bottom: 1.25rem;">
+                    Si eres un equipo de ventas, marketing o análisis, puedes utilizar nuestro buscador avanzado o navegar por las provincias y sectores CNAE (Clasificación Nacional de Actividades Económicas) para localizar nichos específicos. En cada sección provincial y sectorial de este listado, así como en nuestra <a href="<?= site_url('base-de-datos-de-empresas') ?>" style="color: #2152FF; text-decoration: underline; font-weight: 600;">base de datos general</a>, ofrecemos la opción de descargar los registros en formatos estructurados como Excel, perfectos para integrarse en tu CRM y listos para trabajar.
+                </p>
+                <h3 style="font-size: 1.15rem; color: #0f172a; margin-top: 1.5rem; margin-bottom: 0.75rem; font-weight: 700;">¿Qué incluye la ficha de cada sociedad?</h3>
+                <p style="margin-bottom: 0;">
+                    Al consultar cualquier mercantil dentro de este listado, accederás a un resumen oficial que incluye su NIF/CIF, domicilio social actual, provincia de registro, actividad principal (CNAE), fecha de constitución y eventos recientes publicados. Esta transparencia es clave para procesos de validación mercantil, prospección comercial (Sales Intelligence) y estudios de mercado sectoriales.
+                </p>
+            </div>
+        </section>
+
     </div>
 </main>
 
@@ -763,8 +781,8 @@
                 [
                     "@type" => "ListItem",
                     "position" => 2,
-                    "name" => "Directorio",
-                    "item" => site_url('directorio')
+                    "name" => "Listado de empresas",
+                    "item" => site_url('listado-de-empresas')
                 ]
             ]
         ];

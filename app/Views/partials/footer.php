@@ -22,7 +22,7 @@
                     <li><a href="<?=site_url('empresas-nuevas/valencia') ?>">Nuevas en Valencia</a></li>
                     <li><a href="<?=site_url('empresas-nuevas/sevilla') ?>">Nuevas en Sevilla</a></li>
                     <li><a href="<?=site_url('empresas-nuevas/malaga') ?>">Nuevas en Málaga</a></li>
-                    <li><a href="<?=site_url('directorio') ?>">Ver todas las provincias</a></li>
+                    <li><a href="<?=site_url('listado-de-empresas') ?>">Ver todas las provincias</a></li>
                 </ul>
             </div>
             <!-- Radar by Sector -->
@@ -41,7 +41,7 @@
             <div>
                 <h4 class="foot-title">Directorio y API</h4>
                 <ul class="foot-links">
-                    <li><a href="<?=site_url('directorio') ?>">Directorio Histórico Completo</a></li>
+                    <li><a href="<?=site_url('listado-de-empresas') ?>">Directorio Histórico Completo</a></li>
                     <li><a href="<?= getRadarRedirect('footer') ?>">Beneficios de Radar Pro</a></li>
                     <li><a href="https://alertaempresas.es/" target="_blank">Portal AlertaEmpresas</a></li>
                     <li><a href="<?=site_url('plugin-wordpress-buscador-empresas') ?>">Plugin de WordPress</a></li>

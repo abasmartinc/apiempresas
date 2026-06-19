@@ -235,7 +235,7 @@ $premiumLeads = array_slice($companies, $freeCount);
                                 </div>
                                 <h4 class="ae-radar-page__empty-card-title">Cerrar Sector</h4>
                                 <p class="ae-radar-page__empty-card-text">Consulta todas las empresas constituidas históricamente en esta actividad.</p>
-                                <a href="<?= $general_directory_url ?? site_url('directorio') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary">Ver directorio sectorial</a>
+                                <a href="<?= $general_directory_url ?? site_url('listado-de-empresas') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary">Ver directorio sectorial</a>
                             </div>
 
                             <div class="ae-radar-page__empty-card ae-radar-page__empty-card--accent" id="avisarme-seccion">
