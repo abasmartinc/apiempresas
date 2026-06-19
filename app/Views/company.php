@@ -1865,27 +1865,30 @@
                                 <?php if (count($bormeTimeline) > 1): ?>
                                     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
                                         <h3 style="font-size: 0.9rem; font-weight: 700; color: #64748b; margin-top: 0; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Evolución de Actividad</h3>
-                                        <div style="display: flex; align-items: flex-end; gap: 6px; height: 100px; padding-bottom: 28px; border-bottom: 1px solid #f1f5f9; margin-bottom: 8px; overflow-x: auto;">
-                                            <?php foreach ($bormeTimeline as $my => $data): 
-                                                $count = $data['count'];
-                                                // Min 8% height so even 1 act is visible, max 100%
-                                                $heightPct = max(($count / $maxActsTimeline) * 100, 8); 
-                                                list($y, $m) = explode('-', $my);
-                                                $label = $monthsEs[$m] . " " . substr($y, 2) . "'";
-                                                $tooltipYear = $monthsEs[$m] . " " . $y;
-                                                
-                                                $tooltip = "{$count} acto" . ($count > 1 ? 's' : '') . " en {$tooltipYear}:&#10;";
-                                                arsort($data['types']);
-                                                foreach($data['types'] as $t => $c) {
-                                                    $tooltip .= "- {$t}: {$c}&#10;";
-                                                }
-                                            ?>
-                                                <div style="flex: 1; min-width: 32px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative; cursor: crosshair;" title="<?= $tooltip ?>">
-                                                    <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px;"><?= $count ?></div>
-                                                    <div style="width: 100%; max-width: 24px; background: linear-gradient(to top, #8b5cf6, #a78bfa); border-radius: 4px 4px 0 0; height: <?= $heightPct ?>%; min-height: 6px; transition: all 0.2s;" onmouseover="this.style.filter='brightness(1.1)'; this.style.transform='scaleY(1.05)';" onmouseout="this.style.filter='none'; this.style.transform='none';"></div>
-                                                    <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 600; position: absolute; bottom: -24px; white-space: nowrap; text-align: center; line-height: 1.1;"><?= $monthsEs[$m] ?><br><?= substr($y, 2) ?>'</div>
-                                                </div>
-                                            <?php endforeach; ?>
+                                        
+                                        <div style="overflow-x: auto; padding-bottom: 12px; margin-bottom: 8px;">
+                                            <div style="display: flex; align-items: flex-end; gap: 6px; height: 100px; border-bottom: 1px solid #e2e8f0;">
+                                                <?php foreach ($bormeTimeline as $my => $data): 
+                                                    $count = $data['count'];
+                                                    // Min 8% height so even 1 act is visible, max 100%
+                                                    $heightPct = max(($count / $maxActsTimeline) * 100, 8); 
+                                                    list($y, $m) = explode('-', $my);
+                                                    $label = $monthsEs[$m] . " " . substr($y, 2) . "'";
+                                                    $tooltipYear = $monthsEs[$m] . " " . $y;
+                                                    
+                                                    $tooltip = "{$count} acto" . ($count > 1 ? 's' : '') . " en {$tooltipYear}:&#10;";
+                                                    arsort($data['types']);
+                                                    foreach($data['types'] as $t => $c) {
+                                                        $tooltip .= "- {$t}: {$c}&#10;";
+                                                    }
+                                                ?>
+                                                    <div style="flex: 1; min-width: 32px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative; cursor: crosshair;" title="<?= $tooltip ?>">
+                                                        <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px;"><?= $count ?></div>
+                                                        <div style="width: 100%; max-width: 24px; background: linear-gradient(to top, #8b5cf6, #a78bfa); border-radius: 4px 4px 0 0; height: <?= $heightPct ?>%; min-height: 6px; transition: all 0.2s;" onmouseover="this.style.filter='brightness(1.1)'; this.style.transform='scaleY(1.05)';" onmouseout="this.style.filter='none'; this.style.transform='none';"></div>
+                                                        <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 600; position: absolute; bottom: -28px; white-space: nowrap; text-align: center; line-height: 1.1;"><?= $monthsEs[$m] ?><br><?= substr($y, 2) ?>'</div>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
                                         </div>
                                     </div>
                                 <?php endif; ?>
