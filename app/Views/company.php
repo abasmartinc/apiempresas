@@ -1805,8 +1805,8 @@
                             foreach ($bormePosts as $post) {
                                 // Count by year
                                 $year = date('Y', strtotime($post['borme_date']));
-                                if (!isset($bormeYears[$year])) $bormeYears[$year] = 0;
-                                $bormeYears[$year]++;
+                                if (!isset($bormeYears[$year])) $bormeYears[$year] = ['count' => 0, 'types' => []];
+                                $bormeYears[$year]['count']++;
 
                                 // Count by type
                                 $types = array_map('trim', explode(',', strtolower($post['act_types'] ?? '')));
@@ -1826,6 +1826,10 @@
                                     
                                     if (!isset($actCounts[$t])) $actCounts[$t] = 0;
                                     $actCounts[$t]++;
+                                    
+                                    if (!isset($bormeYears[$year]['types'][$t])) $bormeYears[$year]['types'][$t] = 0;
+                                    $bormeYears[$year]['types'][$t]++;
+                                    
                                     $totalActs++;
                                 }
                             }
@@ -1833,7 +1837,11 @@
                             ksort($bormeYears);
                             // Take top 4
                             $topActs = array_slice($actCounts, 0, 4, true);
-                            $maxActsYear = !empty($bormeYears) ? max($bormeYears) : 1;
+                            
+                            $maxActsYear = 1;
+                            foreach ($bormeYears as $data) {
+                                if ($data['count'] > $maxActsYear) $maxActsYear = $data['count'];
+                            }
                             ?>
 
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
@@ -1856,10 +1864,18 @@
                                     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
                                         <h3 style="font-size: 0.9rem; font-weight: 700; color: #64748b; margin-top: 0; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Evolución de Actividad (Actos/Año)</h3>
                                         <div style="display: flex; align-items: flex-end; gap: 10px; height: 100px; padding-bottom: 24px; border-bottom: 1px solid #f1f5f9; margin-bottom: 8px;">
-                                            <?php foreach ($bormeYears as $year => $count): 
+                                            <?php foreach ($bormeYears as $year => $data): 
+                                                $count = $data['count'];
                                                 $heightPct = max(($count / $maxActsYear) * 100, 5); // min 5% height
+                                                
+                                                $tooltip = "{$count} acto" . ($count > 1 ? 's' : '') . " en {$year}:&#10;";
+                                                arsort($data['types']);
+                                                foreach($data['types'] as $t => $c) {
+                                                    $tooltip .= "- {$t}: {$c}&#10;";
+                                                }
                                             ?>
-                                                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; cursor: crosshair;" title="<?= $count ?> actos en <?= $year ?>">
+                                                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; cursor: crosshair;" title="<?= $tooltip ?>">
+                                                    <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px;"><?= $count ?></div>
                                                     <div style="width: 100%; max-width: 30px; background: linear-gradient(to top, #8b5cf6, #a78bfa); border-radius: 4px 4px 0 0; height: <?= $heightPct ?>%; min-height: 4px; transition: all 0.2s;" onmouseover="this.style.filter='brightness(1.1)'; this.style.transform='scaleY(1.05)';" onmouseout="this.style.filter='none'; this.style.transform='none';"></div>
                                                     <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 600; position: absolute; bottom: -24px;"><?= substr($year, 2) ?>'</div>
                                                 </div>
