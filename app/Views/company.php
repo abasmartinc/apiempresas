@@ -1834,7 +1834,7 @@
                             </div>
 
                             <!-- Columna Derecha: Consola / Code Snippet -->
-                            <div class="api-dev-console"
+                            <div class="console-wrapper ai-box-glow"
                                 style="background: #0f172a; border-radius: 16px; overflow: hidden; box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.4); border: 1px solid #1e293b;">
                                 <div class="console-header"
                                     style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #1e293b; border-bottom: 1px solid #334155;">
