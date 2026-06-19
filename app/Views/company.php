@@ -1798,15 +1798,33 @@
                             </h2>
 
                             <?php 
-                            // Process BORME data for the chart
-                            $bormeYears = [];
+                            // Process BORME data for types of acts
+                            $actCounts = [];
+                            $totalActs = 0;
                             foreach ($bormePosts as $post) {
-                                $year = date('Y', strtotime($post['borme_date']));
-                                if (!isset($bormeYears[$year])) $bormeYears[$year] = 0;
-                                $bormeYears[$year]++;
+                                $types = array_map('trim', explode(',', strtolower($post['act_types'] ?? '')));
+                                foreach ($types as $t) {
+                                    if (empty($t)) continue;
+                                    // Normalize some common types for better grouping
+                                    if (strpos($t, 'nombramiento') !== false) $t = 'Nombramientos';
+                                    elseif (strpos($t, 'cese') !== false || strpos($t, 'dimision') !== false || strpos($t, 'revocacion') !== false) $t = 'Ceses/Dimisiones';
+                                    elseif (strpos($t, 'capital') !== false) $t = 'Modific. de Capital';
+                                    elseif (strpos($t, 'domicilio') !== false) $t = 'Cambio de Domicilio';
+                                    elseif (strpos($t, 'estatutos') !== false || strpos($t, 'objeto social') !== false) $t = 'Modific. Estatutos';
+                                    elseif (strpos($t, 'constitucion') !== false) $t = 'Constitución';
+                                    elseif (strpos($t, 'unipersonalidad') !== false) $t = 'Unipersonalidad';
+                                    elseif (strpos($t, 'cuentas') !== false) $t = 'Cuentas Anuales';
+                                    elseif (strpos($t, 'socio unico') !== false) $t = 'Socio Único';
+                                    else $t = 'Otros Actos';
+                                    
+                                    if (!isset($actCounts[$t])) $actCounts[$t] = 0;
+                                    $actCounts[$t]++;
+                                    $totalActs++;
+                                }
                             }
-                            ksort($bormeYears);
-                            $maxActs = !empty($bormeYears) ? max($bormeYears) : 1;
+                            arsort($actCounts);
+                            // Take top 4
+                            $topActs = array_slice($actCounts, 0, 4, true);
                             ?>
 
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
@@ -1825,16 +1843,21 @@
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if (count($bormeYears) > 1): ?>
+                                <?php if (!empty($topActs)): ?>
                                     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
-                                        <h3 style="font-size: 0.9rem; font-weight: 700; color: #64748b; margin-top: 0; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Evolución de Actividad (Actos por Año)</h3>
-                                        <div style="display: flex; align-items: flex-end; gap: 10px; height: 100px; padding-bottom: 24px; border-bottom: 1px solid #f1f5f9; margin-bottom: 8px;">
-                                            <?php foreach ($bormeYears as $year => $count): 
-                                                $heightPct = max(($count / $maxActs) * 100, 5); // min 5% height
+                                        <h3 style="font-size: 0.9rem; font-weight: 700; color: #64748b; margin-top: 0; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Distribución de Actos</h3>
+                                        <div style="display: flex; flex-direction: column; gap: 14px;">
+                                            <?php foreach ($topActs as $type => $count): 
+                                                $pct = $totalActs > 0 ? round(($count / $totalActs) * 100) : 0;
                                             ?>
-                                                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; cursor: crosshair;" title="<?= $count ?> actos en <?= $year ?>">
-                                                    <div style="width: 100%; max-width: 30px; background: linear-gradient(to top, #3b82f6, #60a5fa); border-radius: 4px 4px 0 0; height: <?= $heightPct ?>%; min-height: 4px; transition: all 0.2s;" onmouseover="this.style.filter='brightness(1.1)'; this.style.transform='scaleY(1.05)';" onmouseout="this.style.filter='none'; this.style.transform='none';"></div>
-                                                    <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 600; position: absolute; bottom: -24px;"><?= substr($year, 2) ?>'</div>
+                                                <div>
+                                                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 6px; color: #475569; font-weight: 600;">
+                                                        <span><?= esc($type) ?></span>
+                                                        <span style="color: #94a3b8;"><?= $count ?> acto<?= $count > 1 ? 's' : '' ?> (<?= $pct ?>%)</span>
+                                                    </div>
+                                                    <div style="width: 100%; background: #f1f5f9; border-radius: 99px; height: 6px; overflow: hidden;">
+                                                        <div style="width: <?= $pct ?>%; background: linear-gradient(90deg, #3b82f6, #0ea5e9); height: 100%; border-radius: 99px;"></div>
+                                                    </div>
                                                 </div>
                                             <?php endforeach; ?>
                                         </div>
