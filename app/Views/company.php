@@ -1942,7 +1942,7 @@
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if (count($bormeTimeline) > 1): ?>
+                                <?php if (!empty($bormeTimeline)): ?>
                                     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
                                         <h3 style="font-size: 0.9rem; font-weight: 700; color: #64748b; margin-top: 0; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Evolución de Actividad</h3>
                                         
