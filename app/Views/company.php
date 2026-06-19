@@ -1633,7 +1633,8 @@
                     <!-- SECCIÓN DE ADMINISTRADORES Y CARGOS -->
                     <?php if (!empty($administrators)): ?>
                         <div id="administradores" style="margin-top: 4rem;">
-                            <h2
+                            <style>.no-after-line::after { content: none !important; display: none !important; }</style>
+                            <h2 class="no-after-line"
                                 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 2rem; display: flex; align-items: center; gap: 12px;">
                                 <span
                                     style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color: #fff; padding: 8px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);">
@@ -1688,7 +1689,7 @@
                     <!-- BORME TIMELINE SECTION -->
                     <?php if (!empty($bormePosts)): ?>
                         <div id="borme" style="margin-top: 4rem;">
-                            <h2
+                            <h2 class="no-after-line"
                                 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 2.5rem; display: flex; align-items: center; gap: 12px;">
                                 <span
                                     style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #fff; padding: 8px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2);">
