@@ -1782,7 +1782,7 @@
                     <?php if (!empty($bormePosts)): ?>
                         <div id="borme" style="margin-top: 4rem;">
                             <h2 class="no-after-line"
-                                style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 2.5rem; display: flex; align-items: center; gap: 12px;">
+                                style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 2rem; display: flex; align-items: center; gap: 12px;">
                                 <span
                                     style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #fff; padding: 8px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2);">
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -1796,6 +1796,51 @@
                                 </span>
                                 Actos del Registro Mercantil (BORME) de <?= esc($companyName) ?>
                             </h2>
+
+                            <?php 
+                            // Process BORME data for the chart
+                            $bormeYears = [];
+                            foreach ($bormePosts as $post) {
+                                $year = date('Y', strtotime($post['borme_date']));
+                                if (!isset($bormeYears[$year])) $bormeYears[$year] = 0;
+                                $bormeYears[$year]++;
+                            }
+                            ksort($bormeYears);
+                            $maxActs = !empty($bormeYears) ? max($bormeYears) : 1;
+                            ?>
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+                                <?php if (!empty($company['ai_borme_summary'])): ?>
+                                    <div style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
+                                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: #0f172a; font-weight: 800; font-size: 1.05rem;">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+                                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                            </svg>
+                                            Resumen del BORME con IA
+                                        </div>
+                                        <p style="margin: 0; color: #475569; line-height: 1.6; font-size: 0.95rem;">
+                                            <?= nl2br(esc($company['ai_borme_summary'])) ?>
+                                        </p>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if (count($bormeYears) > 1): ?>
+                                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
+                                        <h3 style="font-size: 0.9rem; font-weight: 700; color: #64748b; margin-top: 0; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Evolución de Actividad (Actos por Año)</h3>
+                                        <div style="display: flex; align-items: flex-end; gap: 10px; height: 100px; padding-bottom: 24px; border-bottom: 1px solid #f1f5f9; margin-bottom: 8px;">
+                                            <?php foreach ($bormeYears as $year => $count): 
+                                                $heightPct = max(($count / $maxActs) * 100, 5); // min 5% height
+                                            ?>
+                                                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; cursor: crosshair;" title="<?= $count ?> actos en <?= $year ?>">
+                                                    <div style="width: 100%; max-width: 30px; background: linear-gradient(to top, #3b82f6, #60a5fa); border-radius: 4px 4px 0 0; height: <?= $heightPct ?>%; min-height: 4px; transition: all 0.2s;" onmouseover="this.style.filter='brightness(1.1)'; this.style.transform='scaleY(1.05)';" onmouseout="this.style.filter='none'; this.style.transform='none';"></div>
+                                                    <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 600; position: absolute; bottom: -24px;"><?= substr($year, 2) ?>'</div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
 
                             <div class="borme-timeline">
                                 <?php foreach ($bormePosts as $post):

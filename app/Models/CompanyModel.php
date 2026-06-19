@@ -40,6 +40,7 @@ class CompanyModel extends Model
         'company_enrichment.ai_faqs',
         'company_enrichment.ai_tags',
         'company_enrichment.ai_pitch',
+        'company_enrichment.ai_borme_summary',
     ];
 
     public function getByCif(string $cif): ?array

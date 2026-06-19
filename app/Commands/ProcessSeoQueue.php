@@ -5,6 +5,7 @@ namespace App\Commands;
 use CodeIgniter\CLI\BaseCommand;
 use CodeIgniter\CLI\CLI;
 use App\Models\CompanyModel;
+use App\Models\BormePostsModel;
 
 class ProcessSeoQueue extends BaseCommand
 {
@@ -63,7 +64,10 @@ class ProcessSeoQueue extends BaseCommand
 
             // 4. Llamar a OpenAI
             try {
-                $seoData = getOrGenerateAiSeoData($company);
+                // Obtenemos los actos del BORME para que la IA haga el resumen
+                $bormeModel = new BormePostsModel();
+                $bormePosts = $bormeModel->getByCompanyId((int)$companyId);
+                $seoData = getOrGenerateAiSeoData($company, $bormePosts);
                 
                 if ($seoData && $seoData['status'] === 'generated') {
                     CLI::write("Texto generado con éxito para ID {$companyId}.", 'green');

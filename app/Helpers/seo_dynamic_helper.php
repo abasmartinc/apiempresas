@@ -67,9 +67,10 @@ if (!function_exists('getOrGenerateAiSeoData')) {
      * Obtiene los textos SEO de la IA y preguntas frecuentes si ya están cacheados,
      * o los genera de forma síncrona si no existen y hay API Key de OpenAI.
      */
-    function getOrGenerateAiSeoData(array $company): ?array
+    function getOrGenerateAiSeoData(array $company, array $bormePosts = []): ?array
     {
-        // 1. Si ya tiene texto, devolverlo
+        // 1. Si ya tiene texto y faqs (asumimos que si tiene ai_seo_text, está generado, pero validamos borme_summary si hace falta)
+        // Para simplificar, si ai_seo_text existe, asumimos caché (aunque falte borme_summary, se rellenará en un script antiguo si hace falta).
         if (!empty($company['ai_seo_text'])) {
             $faqs = null;
             if (!empty($company['ai_faqs'])) {
@@ -105,11 +106,23 @@ if (!function_exists('getOrGenerateAiSeoData')) {
             
             $purpose = $company['corporate_purpose'] ?? '';
             
+            $bormeText = '';
+            if (!empty($bormePosts)) {
+                $actsArr = [];
+                foreach (array_slice($bormePosts, 0, 20) as $post) {
+                    $actsArr[] = "- Fecha: " . ($post['borme_date'] ?? '') . " | Acto: " . ($post['act_types'] ?? '');
+                }
+                $bormeText = implode("\n", $actsArr);
+            }
+            
             $prompt = "Genera un objeto JSON que contenga los siguientes campos obligatorios:
             1. 'seo_text': Un texto descriptivo de la empresa '{$name}' altamente optimizado para SEO. Escribe exactamente 2 párrafos redactados con excelente estilo periodístico y de negocios. El primer párrafo debe presentar a la empresa, integrando de forma natural su sector de actividad (CNAE: {$cnae}) y su trayectoria (ubicación: {$prov}, fundación: {$founded}) de forma fluida. Evita empezar con plantillas robóticas como 'La empresa X es...'. El segundo párrafo debe sintetizar su objeto social ({$purpose}) detallando sus servicios, valor diferencial en el mercado y operaciones. No uses Markdown, asteriscos, negritas ni viñetas. Separa los párrafos con un salto de línea doble.
             2. 'faqs': Una lista de exactamente 3 preguntas frecuentes ('q') y respuestas ('a') personalizadas y de alta calidad para esta empresa. Las preguntas deben ser específicas sobre la actividad, servicios o sector de la empresa basándose en su objeto social y CNAE (evita preguntas totalmente genéricas). Las respuestas deben ser profesionales, informativas y en formato de texto plano sin Markdown ni negritas.
             3. 'seo_tags': Un array de strings con 5 a 8 palabras clave o servicios específicos extraídos de su objeto social (ej: [\"Construcción\", \"Reformas\", \"Albañilería\"]). Ideal para SEO.
             4. 'seo_pitch': Una sola frase comercial atractiva de máximo 150 caracteres que resuma lo que hace la empresa. Ideal para la meta description.
+            5. 'borme_summary': Un resumen ejecutivo, jurídico y narrativo (máximo 40 palabras) del historial del registro mercantil de esta empresa, basado SOLO en los siguientes actos registrales (ordenados del más reciente al más antiguo). Si no hay actos relevantes, devuelve un string vacío. 
+            Actos:
+            {$bormeText}
             
             Formato de salida JSON estricto esperado:
             {
@@ -121,7 +134,8 @@ if (!function_exists('getOrGenerateAiSeoData')) {
                 }
               ],
               \"seo_tags\": [\"Tag1\", \"Tag2\", \"Tag3\"],
-              \"seo_pitch\": \"Frase comercial corta...\"
+              \"seo_pitch\": \"Frase comercial corta...\",
+              \"borme_summary\": \"Resumen ejecutivo del BORME...\"
             }";
 
             $responseJson = $aiService->getChatResponse([
@@ -141,6 +155,7 @@ if (!function_exists('getOrGenerateAiSeoData')) {
                 $faqsJson      = null;
                 $seoTagsJson   = null;
                 $seoPitch      = null;
+                $bormeSummary  = null;
             } else {
                 $generatedText = trim($data['seo_text']);
                 $faqsData      = $data['faqs'] ?? [];
@@ -148,6 +163,7 @@ if (!function_exists('getOrGenerateAiSeoData')) {
                 $seoTags       = $data['seo_tags'] ?? [];
                 $seoTagsJson   = !empty($seoTags) ? json_encode($seoTags, JSON_UNESCAPED_UNICODE) : null;
                 $seoPitch      = !empty($data['seo_pitch']) ? trim($data['seo_pitch']) : null;
+                $bormeSummary  = !empty($data['borme_summary']) ? trim($data['borme_summary']) : null;
             }
             
             if (empty($generatedText) || strpos($generatedText, 'Hubo un error') !== false) {
@@ -162,21 +178,23 @@ if (!function_exists('getOrGenerateAiSeoData')) {
                 $db->table('company_enrichment')
                    ->where('company_id', $company['id'])
                    ->update([
-                       'ai_seo_text' => $generatedText,
-                       'ai_faqs'     => $faqsJson,
-                       'ai_tags'     => $seoTagsJson,
-                       'ai_pitch'    => $seoPitch,
-                       'updated_at'  => date('Y-m-d H:i:s')
+                       'ai_seo_text'      => $generatedText,
+                       'ai_faqs'          => $faqsJson,
+                       'ai_tags'          => $seoTagsJson,
+                       'ai_pitch'         => $seoPitch,
+                       'ai_borme_summary' => $bormeSummary,
+                       'updated_at'       => date('Y-m-d H:i:s')
                    ]);
             } else {
                 $db->table('company_enrichment')->insert([
-                    'company_id'  => $company['id'],
-                    'ai_seo_text' => $generatedText,
-                    'ai_faqs'     => $faqsJson,
-                    'ai_tags'     => $seoTagsJson,
-                    'ai_pitch'    => $seoPitch,
-                    'created_at'  => date('Y-m-d H:i:s'),
-                    'updated_at'  => date('Y-m-d H:i:s'),
+                    'company_id'       => $company['id'],
+                    'ai_seo_text'      => $generatedText,
+                    'ai_faqs'          => $faqsJson,
+                    'ai_tags'          => $seoTagsJson,
+                    'ai_pitch'         => $seoPitch,
+                    'ai_borme_summary' => $bormeSummary,
+                    'created_at'       => date('Y-m-d H:i:s'),
+                    'updated_at'       => date('Y-m-d H:i:s'),
                 ]);
             }
 
