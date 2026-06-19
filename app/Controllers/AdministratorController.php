@@ -8,8 +8,6 @@ class AdministratorController extends BaseController
 {
     public function show($slug)
     {
-        // Cache the page for 30 days to prevent DB connection exhaustion from crawlers
-        $this->cachePage(86400 * 30);
 
         $adminModel = new CompanyAdministratorModel();
         $adminData = $adminModel->getAdminInfoAndCompanies($slug);

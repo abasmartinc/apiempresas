@@ -128,17 +128,129 @@
                 <h1>Documentación de la API</h1>
                 <p>Bienvenido a la documentación oficial de <strong>APIEmpresas.es</strong>. Nuestra API te permite consultar datos mercantiles actualizados de empresas españolas de forma rápida y sencilla.</p>
 
-                <!-- SWAGGER CTA -->
-                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 20px; padding: 28px; margin: 32px 0; display: flex; align-items: center; justify-content: space-between; gap: 24px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);">
-                    <div>
-                        <h3 style="margin: 0 0 8px 0; color: #1e40af; font-size: 1.2rem; font-weight: 800;">🚀 Consola de Pruebas Interactiva</h3>
-                        <p style="margin: 0; color: #1e40af; font-size: 1rem; opacity: 0.85;">¿Quieres probar los endpoints ahora mismo? Accede a Swagger UI y lánzalos en tiempo real con tu API Key.</p>
+                <!-- API PLAYGROUND -->
+                <div class="api-playground" style="margin: 40px 0; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); background: #ffffff;">
+                    <div style="padding: 20px 24px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <h3 style="margin: 0; font-size: 1.1rem; color: #0f172a; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                                Probar API Interactivamente
+                            </h3>
+                            <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: #64748b;">Lanza peticiones en tiempo real al entorno Sandbox. No requiere API Key.</p>
+                        </div>
+                        <a href="<?= site_url('api/docs') ?>" style="font-size: 0.85rem; color: #3b82f6; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                            Ir a Swagger UI completo <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </a>
                     </div>
-                    <a href="<?= site_url('api/docs') ?>" class="btn primary" style="background: #2563eb; color: white !important; white-space: nowrap; padding: 14px 28px; border-radius: 14px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
-                        <span>Ir a Swagger UI</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                    </a>
+
+                    <div style="display: flex; flex-wrap: wrap; background: #fff;">
+                        <!-- Left Panel: Form -->
+                        <div style="flex: 1; min-width: 300px; padding: 24px; border-right: 1px solid #e2e8f0;">
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">1. Selecciona el Endpoint</label>
+                                <select id="pg-endpoint" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; color: #0f172a; background: #f8fafc; cursor: pointer; outline: none; transition: border-color 0.2s;">
+                                    <option value="/api/sandbox/v1/companies">GET /companies (Consulta CIF)</option>
+                                    <option value="/api/sandbox/v1/companies/score">GET /companies/score (Score Comercial)</option>
+                                    <option value="/api/sandbox/v1/companies/insights">GET /companies/insights (Análisis IA)</option>
+                                </select>
+                            </div>
+
+                            <div style="margin-bottom: 24px;">
+                                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">2. Parámetros</label>
+                                <div style="display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #cbd5e1; padding: 4px 4px 4px 12px; border-radius: 8px; transition: border-color 0.2s;" id="pg-param-container">
+                                    <span style="color: #64748b; font-weight: 600; font-family: monospace;">?cif=</span>
+                                    <input type="text" id="pg-cif" value="A15075062" placeholder="Ej: B12345678" style="flex: 1; border: none; padding: 8px 0; outline: none; font-size: 0.95rem; color: #0f172a; font-family: monospace;">
+                                </div>
+                                <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 8px;">Usa <code style="background: #f1f5f9; padding: 2px 4px; border-radius: 4px; color: #e11d48; font-family: monospace;">A15075062</code> para probar el Sandbox.</p>
+                            </div>
+
+                            <button id="pg-run" style="width: 100%; background: #2563eb; color: #fff; border: none; padding: 14px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; box-shadow: 0 4px 12px rgba(37,99,235,0.2);">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                Lanzar Petición
+                            </button>
+                        </div>
+
+                        <!-- Right Panel: Code Editor -->
+                        <div style="flex: 1.5; min-width: 350px; background: #0f172a; position: relative; display: flex; flex-direction: column;">
+                            <div style="background: #1e293b; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155;">
+                                <div style="display: flex; gap: 6px;">
+                                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444;"></div>
+                                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #eab308;"></div>
+                                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #22c55e;"></div>
+                                </div>
+                                <span id="pg-status" style="font-family: monospace; font-size: 0.8rem; color: #10b981; font-weight: bold; background: rgba(16,185,129,0.1); padding: 2px 8px; border-radius: 4px; display: none;">200 OK</span>
+                            </div>
+                            <pre style="margin: 0; padding: 24px; flex: 1; overflow-y: auto; max-height: 400px; font-family: 'Fira Code', monospace; font-size: 0.85rem; color: #e2e8f0; background: transparent;"><code id="pg-response" class="language-json">// Pulsa "Lanzar Petición" para ver la respuesta JSON en vivo.
+// Sandbox configurado por defecto para el CIF mágico: A15075062.</code></pre>
+                            
+                            <div id="pg-loader" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.8); display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+                                <svg style="animation: spin 1s linear infinite; color: #3b82f6;" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <style>
+                @keyframes spin { 100% { transform: rotate(360deg); } }
+                .api-playground #pg-run:hover { background: #1d4ed8; }
+                </style>
+
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const btnRun = document.getElementById('pg-run');
+                    const endpointSelect = document.getElementById('pg-endpoint');
+                    const inputCif = document.getElementById('pg-cif');
+                    const responseBlock = document.getElementById('pg-response');
+                    const statusBadge = document.getElementById('pg-status');
+                    const loader = document.getElementById('pg-loader');
+
+                    btnRun.addEventListener('click', async function() {
+                        const baseUrl = '<?= rtrim(site_url(), "/") ?>';
+                        const url = `${baseUrl}${endpointSelect.value}?cif=${inputCif.value}`;
+                        
+                        loader.style.display = 'flex';
+                        statusBadge.style.display = 'none';
+                        
+                        try {
+                            const start = performance.now();
+                            const res = await fetch(url, {
+                                headers: {
+                                    'Accept': 'application/json'
+                                }
+                            });
+                            const end = performance.now();
+                            const ms = Math.round(end - start);
+                            
+                            const data = await res.json();
+                            
+                            statusBadge.textContent = `${res.status} ${res.statusText} - ${ms}ms`;
+                            statusBadge.style.display = 'block';
+                            
+                            if (res.ok) {
+                                statusBadge.style.color = '#10b981';
+                                statusBadge.style.background = 'rgba(16,185,129,0.1)';
+                            } else {
+                                statusBadge.style.color = '#ef4444';
+                                statusBadge.style.background = 'rgba(239,68,68,0.1)';
+                            }
+                            
+                            responseBlock.textContent = JSON.stringify(data, null, 2);
+                            
+                            if (window.Prism) {
+                                Prism.highlightElement(responseBlock);
+                            }
+                        } catch (e) {
+                            responseBlock.textContent = `Error: ${e.message}`;
+                            statusBadge.textContent = 'Network Error';
+                            statusBadge.style.display = 'block';
+                            statusBadge.style.color = '#ef4444';
+                            statusBadge.style.background = 'rgba(239,68,68,0.1)';
+                        } finally {
+                            loader.style.display = 'none';
+                        }
+                    });
+                });
+                </script>
 
                 <!-- USE CASES -->
                 <div class="use-case-box" style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border: 1px solid #e2e8f0; padding: 40px; border-radius: 24px; margin: 40px 0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);">

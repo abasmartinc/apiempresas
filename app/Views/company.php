@@ -1059,6 +1059,17 @@
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
                                             </button>
                                         </div>
+                                        <button type="button" onclick="document.getElementById('crm-modal').style.display='flex';"
+                                            style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #0f172a; color: #ffffff; font-size: 0.9rem; font-weight: 700; text-decoration: none; border-radius: 10px; border: 1px solid #0f172a; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer;"
+                                            onmouseover="this.style.background='#1e293b'; this.style.transform='translateY(-2px)';"
+                                            onmouseout="this.style.background='#0f172a'; this.style.transform='translateY(0)';">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                                            </svg>
+                                            Enviar a CRM
+                                        </button>
                                         <a href="<?= site_url('empresa/export/' . $company['id']) ?>"
                                             rel="nofollow noindex"
                                             aria-label="Descargar Informe PDF de <?= esc($companyName) ?>"
@@ -2616,6 +2627,44 @@
             });
         });
     </script>
+
+    <!-- CRM Modal -->
+    <div id="crm-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: #ffffff; border-radius: 24px; width: 100%; max-width: 500px; padding: 32px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); position: relative; animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+            <button onclick="document.getElementById('crm-modal').style.display='none';" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: #64748b; cursor: pointer; padding: 4px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.color='#0f172a';" onmouseout="this.style.background='none'; this.style.color='#64748b';">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            
+            <div style="width: 56px; height: 56px; background: #eff6ff; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #2563eb; margin-bottom: 24px;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+            </div>
+            
+            <h3 style="margin: 0 0 12px 0; font-size: 1.4rem; color: #0f172a; font-weight: 800; line-height: 1.3;">Automatiza tu flujo de ventas</h3>
+            <p style="margin: 0 0 24px 0; font-size: 1rem; color: #475569; line-height: 1.6;">
+                Conecta APIEmpresas con tu CRM favorito (HubSpot, Salesforce, Pipedrive) utilizando nuestra <strong>API REST</strong> o integraciones como <strong>Make.com</strong>.<br><br>
+                Enriquece tu base de datos automáticamente sin teclear nada.
+            </p>
+            
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <a href="<?= site_url('documentation') ?>" style="flex: 1; min-width: 150px; text-align: center; background: #2563eb; color: #ffffff; text-decoration: none; padding: 14px 20px; border-radius: 12px; font-weight: 700; font-size: 1rem; box-shadow: 0 4px 12px rgba(37,99,235,0.2); transition: background 0.2s;" onmouseover="this.style.background='#1d4ed8';" onmouseout="this.style.background='#2563eb';">
+                    Descubrir la API
+                </a>
+                <button onclick="document.getElementById('crm-modal').style.display='none';" style="flex: 1; min-width: 150px; text-align: center; background: #f8fafc; color: #475569; text-decoration: none; padding: 14px 20px; border-radius: 12px; font-weight: 700; font-size: 1rem; border: 1px solid #cbd5e1; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#f8fafc';">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+    <style>
+    @keyframes modalIn {
+        from { opacity: 0; transform: translateY(20px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    </style>
 </body>
 
 </html>
