@@ -137,6 +137,69 @@
             align-items: center;
             gap: 6px;
         }
+        
+        /* Micro-animaciones premium */
+        @keyframes custom-ping {
+            0% { transform: scale(1); opacity: 0.8; }
+            70%, 100% { transform: scale(2.5); opacity: 0; }
+        }
+        .status-dot-ping {
+            animation: custom-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        
+        .ai-box-glow {
+            position: relative;
+            transition: all 0.4s ease;
+            z-index: 1;
+        }
+        .ai-box-glow::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6, #3b82f6);
+            z-index: -1;
+            border-radius: 18px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .ai-box-glow:hover::before {
+            opacity: 0.25;
+        }
+        .ai-box-glow:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1), 0 8px 10px -6px rgba(59, 130, 246, 0.1) !important;
+        }
+
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform;
+        }
+        .reveal-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .btn-share-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            color: #64748b;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            text-decoration: none;
+        }
+        .btn-share-icon:hover {
+            background: #ffffff;
+            color: #2563eb;
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
 
         .b2b-hero__actions {
             display: flex;
@@ -962,7 +1025,13 @@
                                     <?php endif; ?>
                                     
                                     <?php if (!empty($statusRaw)): ?>
-                                    <div class="<?= str_replace('company-status', 'b2b-status', esc($statusClass)) ?>" style="margin: 0;">
+                                    <div class="<?= str_replace('company-status', 'b2b-status', esc($statusClass)) ?>" style="margin: 0; display: flex; align-items: center; gap: 6px;">
+                                        <?php if ($isActive): ?>
+                                            <span style="position: relative; display: flex; width: 8px; height: 8px;">
+                                                <span class="status-dot-ping" style="position: absolute; display: inline-flex; height: 100%; width: 100%; border-radius: 50%; background-color: #4ade80;"></span>
+                                                <span style="position: relative; display: inline-flex; border-radius: 50%; height: 8px; width: 8px; background-color: #22c55e;"></span>
+                                            </span>
+                                        <?php endif; ?>
                                         <span><?= esc($statusRaw) ?></span>
                                     </div>
                                     <?php endif; ?>
@@ -978,7 +1047,18 @@
                                     </div>
                                     <?php endif; ?>
 
-                                    <div style="margin-left: auto;">
+                                    <div style="margin-left: auto; display: flex; gap: 12px; align-items: center;">
+                                        <div style="display: flex; gap: 6px;">
+                                            <a href="https://www.linkedin.com/shareArticle?mini=true&url=<?= urlencode(current_url()) ?>&title=<?= urlencode('Ficha de empresa: ' . $companyName) ?>" target="_blank" rel="noopener noreferrer" class="btn-share-icon" title="Compartir en LinkedIn">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                                            </a>
+                                            <a href="https://api.whatsapp.com/send?text=<?= urlencode('Mira esta empresa: ' . $companyName . ' - ' . current_url()) ?>" target="_blank" rel="noopener noreferrer" class="btn-share-icon" title="Compartir por WhatsApp">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                                            </a>
+                                            <button onclick="navigator.clipboard.writeText('<?= current_url() ?>'); alert('Enlace copiado al portapapeles');" class="btn-share-icon" title="Copiar enlace" style="cursor: pointer;">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                                            </button>
+                                        </div>
                                         <a href="<?= site_url('empresa/export/' . $company['id']) ?>"
                                             rel="nofollow noindex"
                                             aria-label="Descargar Informe PDF de <?= esc($companyName) ?>"
@@ -1665,7 +1745,7 @@
 
                     <!-- SECCIÓN DE ADMINISTRADORES Y CARGOS -->
                     <?php if (!empty($administrators)): ?>
-                        <div id="administradores" style="margin-top: 4rem;">
+                        <div id="administradores" class="reveal-on-scroll" style="margin-top: 4rem;">
                             <style>.no-after-line::after { content: none !important; display: none !important; }</style>
                             <h2 class="no-after-line"
                                 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 2rem; display: flex; align-items: center; gap: 12px;">
@@ -1721,7 +1801,7 @@
 
                     <!-- SECCIÓN PARA DESARROLLADORES (API Banner Nativo) -->
                     <section id="api-dev-section" class="api-dev-section"
-                        style="margin-top: 4rem; padding: 2rem; background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);">
+                        class="reveal-on-scroll" style="margin-top: 4rem; padding: 2rem; background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);">
                         <div class="api-dev-grid"
                             style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center;">
 
@@ -1780,7 +1860,7 @@
 
                     <!-- BORME TIMELINE SECTION -->
                     <?php if (!empty($bormePosts)): ?>
-                        <div id="borme" style="margin-top: 4rem;">
+                        <div id="borme" class="reveal-on-scroll" style="margin-top: 4rem;">
                             <h2 class="no-after-line"
                                 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 2rem; display: flex; align-items: center; gap: 12px;">
                                 <span
@@ -1848,7 +1928,7 @@
 
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
                                 <?php if (!empty($company['ai_borme_summary'])): ?>
-                                    <div style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
+                                    <div class="ai-box-glow" style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
                                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: #0f172a; font-weight: 800; font-size: 1.05rem;">
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
@@ -2512,6 +2592,28 @@
                         }
                     });
             <?php endif; ?>
+        });
+
+        // Micro-animaciones (Scroll Reveal)
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+                observer.observe(el);
+            });
         });
     </script>
 </body>
