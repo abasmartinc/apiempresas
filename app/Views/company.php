@@ -697,25 +697,37 @@
                 }
 
                 // Schema.org Data
+                $organizationSchema = [
+                    "@type" => "Organization",
+                    "@id" => $canonical . "#organization",
+                    "name" => $companyName,
+                    "taxID" => $companyCif,
+                    "url" => $canonical,
+                    "address" => [
+                        "@type" => "PostalAddress",
+                        "streetAddress" => $rawAddr ?: null,
+                        "addressRegion" => $companyProv,
+                        "addressCountry" => "ES"
+                    ],
+                    "foundingDate" => $company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '',
+                    "description" => $meta_description ?? '',
+                    "logo" => site_url('logo.png')
+                ];
+
+                if (!empty($ratingCount) && $ratingCount > 0) {
+                    $organizationSchema['aggregateRating'] = [
+                        "@type" => "AggregateRating",
+                        "ratingValue" => round($ratingAvg, 1),
+                        "reviewCount" => $ratingCount,
+                        "bestRating" => 5,
+                        "worstRating" => 1
+                    ];
+                }
+
                 $schemaOrg = [
                     "@context" => "https://schema.org",
                     "@graph" => [
-                        [
-                            "@type" => "Organization",
-                            "@id" => $canonical . "#organization",
-                            "name" => $companyName,
-                            "taxID" => $companyCif,
-                            "url" => $canonical,
-                            "address" => [
-                                "@type" => "PostalAddress",
-                                "streetAddress" => $rawAddr ?: null,
-                                "addressRegion" => $companyProv,
-                                "addressCountry" => "ES"
-                            ],
-                            "foundingDate" => $company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '',
-                            "description" => $meta_description ?? '',
-                            "logo" => site_url('logo.png')
-                        ],
+                        $organizationSchema,
                         (!empty($company['lat']) && !empty($company['lng'])) ? [
                             "@type" => "LocalBusiness",
                             "@id" => $canonical . "#localbusiness",
@@ -858,16 +870,26 @@
                             </div>
 
                             <div class="b2b-hero__content" style="flex: 1;">
-                                <div style="display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; color: #2563eb; padding: 6px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 12px; border: 1px solid #bfdbfe;">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2.5">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                        <polyline points="14 2 14 8 20 8"></polyline>
-                                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                                        <polyline points="10 9 9 9 8 9"></polyline>
-                                    </svg>
-                                    FICHA DE EMPRESA
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                                    <div style="display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; color: #3b82f6; padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; border: 1px solid #bfdbfe; letter-spacing: 0.5px;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                        FICHA DE EMPRESA
+                                    </div>
+
+                                    <div style="display: inline-flex; align-items: center; gap: 4px; background: #ecfdf5; color: #059669; padding: 4px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; border: 1px solid #a7f3d0; letter-spacing: 0.5px; text-transform: uppercase;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                            <path d="M9 12l2 2 4-4"></path>
+                                        </svg>
+                                        Datos oficiales Reg. Mercantil
+                                    </div>
                                 </div>
 
                                 <h1 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.25; letter-spacing: -0.01em; text-wrap: balance;">
@@ -891,14 +913,16 @@
                                 ?>
                                 <?php if (!empty($aiTags)): ?>
                                 <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
-                                    <?php foreach ($aiTags as $tag): ?>
-                                    <span style="background: #f5f3f3; color: #475569; padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; border: 1px solid #e8e4e4; letter-spacing: 0.5px; text-transform: uppercase; box-shadow: 0 1px 2px rgba(0,0,0,0.02); display: inline-flex; align-items: center; gap: 4px;">
+                                    <?php foreach ($aiTags as $tag): 
+                                        $tagSlug = url_title($tag, '-', true);
+                                    ?>
+                                    <a href="<?= site_url('directorio/etiqueta/' . esc($tagSlug)) ?>" style="background: #f5f3f3; color: #475569; padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; border: 1px solid #e8e4e4; letter-spacing: 0.5px; text-transform: uppercase; box-shadow: 0 1px 2px rgba(0,0,0,0.02); display: inline-flex; align-items: center; gap: 4px; text-decoration: none; transition: all 0.2s ease;" onmouseover="this.style.background='#e2e8f0'; this.style.borderColor='#cbd5e1';" onmouseout="this.style.background='#f5f3f3'; this.style.borderColor='#e8e4e4';">
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.8;">
                                             <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
                                             <line x1="7" y1="7" x2="7.01" y2="7"></line>
                                         </svg>
                                         <?= esc($tag) ?>
-                                    </span>
+                                    </a>
                                     <?php endforeach; ?>
                                 </div>
                                 <?php endif; ?>
@@ -943,8 +967,6 @@
                                     </div>
                                     <?php endif; ?>
 
-
-                                    
                                     <div style="margin-left: auto;">
                                         <a href="<?= site_url('empresa/export/' . $company['id']) ?>"
                                             rel="nofollow noindex"

@@ -393,6 +393,9 @@ $routes->addRedirect('directorio/ultimas-empresas-registradas/(:num)', 'empresas
 $routes->get('directorio/provincia/(:any)/cnae/(:any)', 'Directory::provinceCnae/$1/$2');
 $routes->get('directorio/provincia/(:any)/cnae/(:any)/(:num)', 'Directory::provinceCnae/$1/$2/$3');
 
+$routes->get('directorio/etiqueta/(:any)', 'Directory::tag/$1');
+$routes->get('directorio/etiqueta/(:any)/(:num)', 'Directory::tag/$1/$2');
+
 // Company SEO Pages (Regex: Letter + 7 Digits + Char + optional slug)
 // Must be last to avoid conflicts
 // Company Rating

@@ -492,4 +492,65 @@ class Directory extends BaseController
             ]
         ]);
     }
+
+    public function tag($tagSlug, $page = 1)
+    {
+        $page = (int)$page;
+        if ($page < 1) $page = 1;
+        $perPage = 50;
+        $offset = ($page - 1) * $perPage;
+
+        // Limpiar el slug para la búsqueda y mostrarlo
+        $tagName = str_replace('-', ' ', $tagSlug);
+
+        // Usamos un builder nativo conectando el modelo base a la tabla de enrichment
+        $builder = $this->companyModel->builder('companies')
+            ->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_label, companies.fecha_constitucion as founded, companies.registro_mercantil as province, company_enrichment.ai_tags')
+            ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'inner')
+            ->like('company_enrichment.ai_tags', $tagName, 'both');
+
+        $totalCompanies = clone $builder;
+        $totalCompanies = $totalCompanies->countAllResults(false);
+        $totalPages = max(1, (int) ceil($totalCompanies / $perPage));
+
+        $companies = $builder->orderBy('companies.company_name', 'ASC')
+            ->limit($perPage, $offset)
+            ->get()
+            ->getResultArray();
+
+        if (empty($companies)) {
+             if ($page > 1) {
+                 return redirect()->to(site_url("directorio/etiqueta/{$tagSlug}"));
+             }
+             return redirect()->to(site_url('directorio'));
+        }
+
+        $totalFormatted = number_format($totalCompanies, 0, ',', '.');
+        helper('pricing');
+        $priceData = calculate_directory_price($totalCompanies);
+        $dynamicPrice = $priceData['base_price'];
+
+        $titleTag = ucwords($tagName);
+
+        return view('directory/list', [
+            'items'     => $companies,
+            'total_companies' => $totalCompanies,
+            'total_formatted' => $totalFormatted,
+            'dynamic_price'   => $dynamicPrice,
+            'province_name'   => $titleTag,
+            'robots'    => ($page > 1) ? 'noindex, follow' : 'index, follow',
+            'title'     => "{$totalFormatted} Empresas etiquetadas como {$titleTag} | Directorio",
+            'excerptText' => "Descubre nuestro listado de {$totalFormatted} empresas relacionadas con {$titleTag}.",
+            'header'    => "Empresas de " . $titleTag,
+            'meta_description' => "Accede al listado de {$totalFormatted} empresas con la etiqueta {$titleTag}. Directorio de sociedades oficiales B2B.",
+            'pagination' => [
+                'current' => $page,
+                'total'   => $totalPages,
+                'next'    => ($page < $totalPages) ? site_url("directorio/etiqueta/{$tagSlug}/" . ($page + 1)) : null,
+                'prev'    => ($page > 1) ? site_url("directorio/etiqueta/{$tagSlug}/" . ($page - 1)) : null,
+                'base'    => site_url("directorio/etiqueta/{$tagSlug}")
+            ]
+        ]);
+    }
 }
+
