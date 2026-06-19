@@ -132,8 +132,8 @@ class Company extends BaseController
             $provinceCnaeUrl = site_url('directorio/provincia/' . urlencode($prov) . '/cnae/' . $cnaeCode);
         }
 
-        // --- BOT DETECTION & SYNCHRONOUS AI SEO TEXT GENERATION ---
-        if (empty($company['ai_seo_text'])) {
+        // --- ASYNC AI SEO TEXT GENERATION (QUEUE) ---
+        if (empty($company['ai_seo_text']) && !empty($company['id'])) {
             $agent = service('request')->getUserAgent();
             $isBot = $agent->isRobot();
             if (!$isBot) {
@@ -147,16 +147,14 @@ class Company extends BaseController
                 }
             }
 
+            // Apuntar en la cola en lugar de llamar a OpenAI para no bloquear la respuesta
             if ($isBot) {
-                helper('seo_dynamic_helper');
-                $seoData = getOrGenerateAiSeoData($company);
-                if ($seoData) {
-                    $company['ai_seo_text'] = $seoData['text'];
-                    $company['ai_faqs'] = json_encode($seoData['faqs'], JSON_UNESCAPED_UNICODE);
-                }
+                $db = \Config\Database::connect();
+                // Usamos IGNORE para no duplicar si ya está en cola
+                $db->query("INSERT IGNORE INTO seo_generation_queue (company_id, requested_at, status) VALUES (?, ?, 'pending')", [$company['id'], date('Y-m-d H:i:s')]);
             }
         }
-        // --- BOT DETECTION & SYNCHRONOUS AI SEO TEXT GENERATION ---
+        // --- ASYNC AI SEO TEXT GENERATION (QUEUE) ---
 
         // --- DINAMIC SEO INDEXING ---
         $indexable = shouldIndexCompany($company);
