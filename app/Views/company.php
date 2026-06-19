@@ -714,6 +714,17 @@
                     "logo" => site_url('logo.png')
                 ];
 
+                if (!empty($administrators)) {
+                    $organizationSchema['employee'] = [];
+                    foreach (array_slice($administrators, 0, 10) as $adm) {
+                        $organizationSchema['employee'][] = [
+                            "@type" => "Person",
+                            "name" => $adm['name'],
+                            "jobTitle" => $adm['position']
+                        ];
+                    }
+                }
+
                 if (!empty($ratingCount) && $ratingCount > 0) {
                     $organizationSchema['aggregateRating'] = [
                         "@type" => "AggregateRating",
@@ -1707,6 +1718,65 @@
                             </div>
                         </div>
                     <?php endif; ?>
+
+                    <!-- SECCIÓN PARA DESARROLLADORES (API Banner Nativo) -->
+                    <section id="api-dev-section" class="api-dev-section"
+                        style="margin-top: 4rem; padding: 2rem; background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);">
+                        <div class="api-dev-grid"
+                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center;">
+
+                            <!-- Columna Izquierda: Mensaje y CTA -->
+                            <div class="api-dev-info">
+                                <h3 style="display: flex; align-items: center; gap: 1rem; margin: 0 0 1rem; font-size: 1.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.025em;">
+                                    <div style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: #eff6ff; color: #3b82f6; border-radius: 12px; flex-shrink: 0;">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="16 18 22 12 16 6"></polyline>
+                                            <polyline points="8 6 2 12 8 18"></polyline>
+                                        </svg>
+                                    </div>
+                                    ¿Eres desarrollador?
+                                </h3>
+                                <p style="margin: 0 0 2rem; color: #64748b; line-height: 1.6; font-size: 1.05rem;">
+                                    Integra la información oficial de <strong><?= esc($companyName) ?></strong>
+                                    directamente
+                                    en tu software mediante nuestra API REST robusta y documentada.
+                                </p>
+                                <a href="<?= site_url('register') ?>" class="btn secondary"
+                                    style="display: inline-flex; align-items: center; padding: 0.875rem 2rem; font-weight: 700; border-radius: 12px; transition: all 0.2s; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); text-decoration: none;"
+                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(16, 185, 129, 0.4)';"
+                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)';">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 8px;">
+                                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+                                    </svg>
+                                    Obtener API Key Gratuitamente
+                                </a>
+                            </div>
+
+                            <!-- Columna Derecha: Consola / Code Snippet -->
+                            <div class="api-dev-console"
+                                style="background: #0f172a; border-radius: 16px; overflow: hidden; box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.4); border: 1px solid #1e293b;">
+                                <div class="console-header"
+                                    style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #1e293b; border-bottom: 1px solid #334155;">
+                                    <div class="mac-buttons" style="display: flex; gap: 8px;">
+                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444;"></div>
+                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #f59e0b;"></div>
+                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #10b981;"></div>
+                                    </div>
+                                    <span style="font-size: 0.75rem; color: #94a3b8; font-family: monospace; font-weight: 600;">Ver respuesta JSON</span>
+                                </div>
+                                <div class="console-body"
+                                    style="padding: 1.5rem; font-family: 'Fira Code', 'Courier New', Courier, monospace; font-size: 0.85rem; color: #e2e8f0; line-height: 1.7; overflow-x: auto;">
+                                    <div style="color: #64748b; margin-bottom: 8px;"># Petición cURL para <?= esc($companyCif) ?></div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <span style="color: #ec4899;">curl</span>
+                                        <span style="color: #a7f3d0; word-break: break-all;">"https://apiempresas.es/api/v1/companies?cif=<?= esc($companyCif) ?>"</span>
+                                    </div>
+                                    <div style="padding-left: 2rem; color: #fde047;">-H "Authorization: Bearer TU_API_KEY"</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
                     <!-- BORME TIMELINE SECTION -->
                     <?php if (!empty($bormePosts)): ?>
