@@ -150,15 +150,21 @@
                                 <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">1. Selecciona el Endpoint</label>
                                 <select id="pg-endpoint" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; color: #0f172a; background: #f8fafc; cursor: pointer; outline: none; transition: border-color 0.2s;">
                                     <option value="/api/sandbox/v1/companies">GET /companies (Consulta CIF)</option>
+                                    <option value="/api/sandbox/v1/companies/search">GET /companies/search (Buscador)</option>
                                     <option value="/api/sandbox/v1/companies/score">GET /companies/score (Score Comercial)</option>
+                                    <option value="/api/sandbox/v1/companies/signals">GET /companies/signals (Señales de Cambio)</option>
                                     <option value="/api/sandbox/v1/companies/insights">GET /companies/insights (Análisis IA)</option>
+                                    <option value="/api/sandbox/v1/companies/contact-prep">GET /companies/contact-prep (Prep. Contacto)</option>
+                                    <option value="/api/sandbox/v1/companies/match">GET /companies/match (Match B2B)</option>
+                                    <option value="/api/sandbox/v1/companies/network">GET /companies/network (Red Vínculos)</option>
+                                    <option value="/api/sandbox/v1/companies/radar">GET /companies/radar (Radar Pro)</option>
                                 </select>
                             </div>
 
                             <div style="margin-bottom: 24px;">
                                 <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">2. Parámetros</label>
                                 <div style="display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #cbd5e1; padding: 4px 4px 4px 12px; border-radius: 8px; transition: border-color 0.2s;" id="pg-param-container">
-                                    <span style="color: #64748b; font-weight: 600; font-family: monospace;">?cif=</span>
+                                    <span id="pg-param-label" style="color: #64748b; font-weight: 600; font-family: monospace;">?cif=</span>
                                     <input type="text" id="pg-cif" value="A15075062" placeholder="Ej: B12345678" style="flex: 1; border: none; padding: 8px 0; outline: none; font-size: 0.95rem; color: #0f172a; font-family: monospace;">
                                 </div>
                                 <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 8px;">Usa <code style="background: #f1f5f9; padding: 2px 4px; border-radius: 4px; color: #e11d48; font-family: monospace;">A15075062</code> para probar el Sandbox.</p>
@@ -203,10 +209,27 @@
                     const responseBlock = document.getElementById('pg-response');
                     const statusBadge = document.getElementById('pg-status');
                     const loader = document.getElementById('pg-loader');
+                    const paramLabel = document.getElementById('pg-param-label');
+
+                    endpointSelect.addEventListener('change', function() {
+                        if (this.value.includes('search')) {
+                            paramLabel.textContent = '?q=';
+                            inputCif.placeholder = 'Ej: Inditex';
+                            if(inputCif.value === 'A15075062') inputCif.value = 'Inditex';
+                        } else {
+                            paramLabel.textContent = '?cif=';
+                            inputCif.placeholder = 'Ej: B12345678';
+                            if(inputCif.value === 'Inditex') inputCif.value = 'A15075062';
+                        }
+                    });
 
                     btnRun.addEventListener('click', async function() {
                         const baseUrl = '<?= rtrim(site_url(), "/") ?>';
-                        const url = `${baseUrl}${endpointSelect.value}?cif=${inputCif.value}`;
+                        let endpoint = endpointSelect.value;
+                        let val = inputCif.value;
+                        let paramName = endpoint.includes('search') ? 'q' : 'cif';
+                        
+                        const url = `${baseUrl}${endpoint}?${paramName}=${encodeURIComponent(val)}`;
                         
                         loader.style.display = 'flex';
                         statusBadge.style.display = 'none';

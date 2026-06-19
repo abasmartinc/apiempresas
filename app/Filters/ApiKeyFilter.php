@@ -40,6 +40,23 @@ class ApiKeyFilter implements FilterInterface
         self::$apiT0 = microtime(true);
         self::$apiRequestId = bin2hex(random_bytes(16)); // 32 hex chars
 
+        $endpointPath = (string) $request->getUri()->getPath();
+        
+        // 0) Bypass para Sandbox ÚNICAMENTE desde el Playground (Nuestra Web)
+        if (strpos($endpointPath, 'api/sandbox/v1') !== false) {
+            self::$apiSkipBilling = true; // El sandbox nunca cobra
+            
+            $referer = (string) $request->getHeaderLine('Referer');
+            $origin  = (string) $request->getHeaderLine('Origin');
+            $host    = (string) $request->getHeaderLine('Host');
+            
+            // Si la petición viene desde nuestra web (Playground), no exigimos API Key
+            if ($host !== '' && (strpos($referer, $host) !== false || strpos($origin, $host) !== false)) {
+                return null; 
+            }
+            // Si viene desde Postman o cURL, caerá al flujo normal y exigirá una API Key válida (que se comprobará abajo)
+        }
+
         // 1) Leer API key (header recomendado)
         $apiKey = trim((string) $request->getHeaderLine('X-API-KEY'));
 
