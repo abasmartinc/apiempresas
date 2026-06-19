@@ -912,12 +912,12 @@
                                 }
                                 ?>
                                 <?php if (!empty($aiTags)): ?>
-                                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
+                                <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
                                     <?php foreach ($aiTags as $tag): 
                                         $tagSlug = url_title($tag, '-', true);
                                     ?>
-                                    <a href="<?= site_url('directorio/etiqueta/' . esc($tagSlug)) ?>" style="background: #f5f3f3; color: #475569; padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; border: 1px solid #e8e4e4; letter-spacing: 0.5px; text-transform: uppercase; box-shadow: 0 1px 2px rgba(0,0,0,0.02); display: inline-flex; align-items: center; gap: 4px; text-decoration: none; transition: all 0.2s ease;" onmouseover="this.style.background='#e2e8f0'; this.style.borderColor='#cbd5e1';" onmouseout="this.style.background='#f5f3f3'; this.style.borderColor='#e8e4e4';">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.8;">
+                                    <a href="<?= site_url('directorio/etiqueta/' . esc($tagSlug)) ?>" style="color: #64748b; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; text-decoration: none; transition: all 0.2s ease;" onmouseover="this.style.color='#2563eb';" onmouseout="this.style.color='#64748b';">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.7;">
                                             <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
                                             <line x1="7" y1="7" x2="7.01" y2="7"></line>
                                         </svg>
