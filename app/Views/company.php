@@ -1800,13 +1800,13 @@
                             <?php 
                             // Process BORME data for types of acts
                             $actCounts = [];
-                            $bormeYears = [];
+                            $bormeTimeline = [];
                             $totalActs = 0;
                             foreach ($bormePosts as $post) {
-                                // Count by year
-                                $year = date('Y', strtotime($post['borme_date']));
-                                if (!isset($bormeYears[$year])) $bormeYears[$year] = ['count' => 0, 'types' => []];
-                                $bormeYears[$year]['count']++;
+                                // Count by month-year
+                                $monthYear = date('Y-m', strtotime($post['borme_date']));
+                                if (!isset($bormeTimeline[$monthYear])) $bormeTimeline[$monthYear] = ['count' => 0, 'types' => []];
+                                $bormeTimeline[$monthYear]['count']++;
 
                                 // Count by type
                                 $types = array_map('trim', explode(',', strtolower($post['act_types'] ?? '')));
@@ -1827,21 +1827,23 @@
                                     if (!isset($actCounts[$t])) $actCounts[$t] = 0;
                                     $actCounts[$t]++;
                                     
-                                    if (!isset($bormeYears[$year]['types'][$t])) $bormeYears[$year]['types'][$t] = 0;
-                                    $bormeYears[$year]['types'][$t]++;
+                                    if (!isset($bormeTimeline[$monthYear]['types'][$t])) $bormeTimeline[$monthYear]['types'][$t] = 0;
+                                    $bormeTimeline[$monthYear]['types'][$t]++;
                                     
                                     $totalActs++;
                                 }
                             }
                             arsort($actCounts);
-                            ksort($bormeYears);
+                            ksort($bormeTimeline);
                             // Take top 4
                             $topActs = array_slice($actCounts, 0, 4, true);
                             
-                            $maxActsYear = 1;
-                            foreach ($bormeYears as $data) {
-                                if ($data['count'] > $maxActsYear) $maxActsYear = $data['count'];
+                            $maxActsTimeline = 1;
+                            foreach ($bormeTimeline as $data) {
+                                if ($data['count'] > $maxActsTimeline) $maxActsTimeline = $data['count'];
                             }
+                            
+                            $monthsEs = ['01'=>'Ene','02'=>'Feb','03'=>'Mar','04'=>'Abr','05'=>'May','06'=>'Jun','07'=>'Jul','08'=>'Ago','09'=>'Sep','10'=>'Oct','11'=>'Nov','12'=>'Dic'];
                             ?>
 
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
@@ -1860,24 +1862,27 @@
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if (count($bormeYears) > 1): ?>
+                                <?php if (count($bormeTimeline) > 1): ?>
                                     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
-                                        <h3 style="font-size: 0.9rem; font-weight: 700; color: #64748b; margin-top: 0; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Evolución de Actividad (Actos/Año)</h3>
-                                        <div style="display: flex; align-items: flex-end; gap: 10px; height: 100px; padding-bottom: 24px; border-bottom: 1px solid #f1f5f9; margin-bottom: 8px;">
-                                            <?php foreach ($bormeYears as $year => $data): 
+                                        <h3 style="font-size: 0.9rem; font-weight: 700; color: #64748b; margin-top: 0; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Evolución de Actividad</h3>
+                                        <div style="display: flex; align-items: flex-end; gap: 6px; height: 100px; padding-bottom: 28px; border-bottom: 1px solid #f1f5f9; margin-bottom: 8px; overflow-x: auto;">
+                                            <?php foreach ($bormeTimeline as $my => $data): 
                                                 $count = $data['count'];
-                                                $heightPct = max(($count / $maxActsYear) * 100, 5); // min 5% height
+                                                $heightPct = max(($count / $maxActsTimeline) * 100, 5); // min 5% height
+                                                list($y, $m) = explode('-', $my);
+                                                $label = $monthsEs[$m] . " " . substr($y, 2) . "'";
+                                                $tooltipYear = $monthsEs[$m] . " " . $y;
                                                 
-                                                $tooltip = "{$count} acto" . ($count > 1 ? 's' : '') . " en {$year}:&#10;";
+                                                $tooltip = "{$count} acto" . ($count > 1 ? 's' : '') . " en {$tooltipYear}:&#10;";
                                                 arsort($data['types']);
                                                 foreach($data['types'] as $t => $c) {
                                                     $tooltip .= "- {$t}: {$c}&#10;";
                                                 }
                                             ?>
-                                                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; cursor: crosshair;" title="<?= $tooltip ?>">
+                                                <div style="flex: 1; min-width: 32px; display: flex; flex-direction: column; align-items: center; position: relative; cursor: crosshair;" title="<?= $tooltip ?>">
                                                     <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px;"><?= $count ?></div>
-                                                    <div style="width: 100%; max-width: 30px; background: linear-gradient(to top, #8b5cf6, #a78bfa); border-radius: 4px 4px 0 0; height: <?= $heightPct ?>%; min-height: 4px; transition: all 0.2s;" onmouseover="this.style.filter='brightness(1.1)'; this.style.transform='scaleY(1.05)';" onmouseout="this.style.filter='none'; this.style.transform='none';"></div>
-                                                    <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 600; position: absolute; bottom: -24px;"><?= substr($year, 2) ?>'</div>
+                                                    <div style="width: 100%; max-width: 24px; background: linear-gradient(to top, #8b5cf6, #a78bfa); border-radius: 4px 4px 0 0; height: <?= $heightPct ?>%; min-height: 4px; transition: all 0.2s;" onmouseover="this.style.filter='brightness(1.1)'; this.style.transform='scaleY(1.05)';" onmouseout="this.style.filter='none'; this.style.transform='none';"></div>
+                                                    <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 600; position: absolute; bottom: -24px; white-space: nowrap; text-align: center; line-height: 1.1;"><?= $monthsEs[$m] ?><br><?= substr($y, 2) ?>'</div>
                                                 </div>
                                             <?php endforeach; ?>
                                         </div>
