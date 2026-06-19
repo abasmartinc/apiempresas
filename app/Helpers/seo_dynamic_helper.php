@@ -108,6 +108,8 @@ if (!function_exists('getOrGenerateAiSeoData')) {
             $prompt = "Genera un objeto JSON que contenga los siguientes campos obligatorios:
             1. 'seo_text': Un texto descriptivo de la empresa '{$name}' altamente optimizado para SEO. Escribe exactamente 2 párrafos redactados con excelente estilo periodístico y de negocios. El primer párrafo debe presentar a la empresa, integrando de forma natural su sector de actividad (CNAE: {$cnae}) y su trayectoria (ubicación: {$prov}, fundación: {$founded}) de forma fluida. Evita empezar con plantillas robóticas como 'La empresa X es...'. El segundo párrafo debe sintetizar su objeto social ({$purpose}) detallando sus servicios, valor diferencial en el mercado y operaciones. No uses Markdown, asteriscos, negritas ni viñetas. Separa los párrafos con un salto de línea doble.
             2. 'faqs': Una lista de exactamente 3 preguntas frecuentes ('q') y respuestas ('a') personalizadas y de alta calidad para esta empresa. Las preguntas deben ser específicas sobre la actividad, servicios o sector de la empresa basándose en su objeto social y CNAE (evita preguntas totalmente genéricas). Las respuestas deben ser profesionales, informativas y en formato de texto plano sin Markdown ni negritas.
+            3. 'seo_tags': Un array de strings con 5 a 8 palabras clave o servicios específicos extraídos de su objeto social (ej: [\"Construcción\", \"Reformas\", \"Albañilería\"]). Ideal para SEO.
+            4. 'seo_pitch': Una sola frase comercial atractiva de máximo 150 caracteres que resuma lo que hace la empresa. Ideal para la meta description.
             
             Formato de salida JSON estricto esperado:
             {
@@ -116,16 +118,10 @@ if (!function_exists('getOrGenerateAiSeoData')) {
                 {
                   \"q\": \"¿Pregunta específica 1?\",
                   \"a\": \"Respuesta específica 1...\"
-                },
-                {
-                  \"q\": \"¿Pregunta específica 2?\",
-                  \"a\": \"Respuesta específica 2...\"
-                },
-                {
-                  \"q\": \"¿Pregunta específica 3?\",
-                  \"a\": \"Respuesta específica 3...\"
                 }
-              ]
+              ],
+              \"seo_tags\": [\"Tag1\", \"Tag2\", \"Tag3\"],
+              \"seo_pitch\": \"Frase comercial corta...\"
             }";
 
             $responseJson = $aiService->getChatResponse([
@@ -143,10 +139,15 @@ if (!function_exists('getOrGenerateAiSeoData')) {
                 $generatedText = $responseJson;
                 $faqsData      = [];
                 $faqsJson      = null;
+                $seoTagsJson   = null;
+                $seoPitch      = null;
             } else {
                 $generatedText = trim($data['seo_text']);
                 $faqsData      = $data['faqs'] ?? [];
                 $faqsJson      = !empty($faqsData) ? json_encode($faqsData, JSON_UNESCAPED_UNICODE) : null;
+                $seoTags       = $data['seo_tags'] ?? [];
+                $seoTagsJson   = !empty($seoTags) ? json_encode($seoTags, JSON_UNESCAPED_UNICODE) : null;
+                $seoPitch      = !empty($data['seo_pitch']) ? trim($data['seo_pitch']) : null;
             }
             
             if (empty($generatedText) || strpos($generatedText, 'Hubo un error') !== false) {
@@ -163,6 +164,8 @@ if (!function_exists('getOrGenerateAiSeoData')) {
                    ->update([
                        'ai_seo_text' => $generatedText,
                        'ai_faqs'     => $faqsJson,
+                       'ai_tags'     => $seoTagsJson,
+                       'ai_pitch'    => $seoPitch,
                        'updated_at'  => date('Y-m-d H:i:s')
                    ]);
             } else {
@@ -170,6 +173,8 @@ if (!function_exists('getOrGenerateAiSeoData')) {
                     'company_id'  => $company['id'],
                     'ai_seo_text' => $generatedText,
                     'ai_faqs'     => $faqsJson,
+                    'ai_tags'     => $seoTagsJson,
+                    'ai_pitch'    => $seoPitch,
                     'created_at'  => date('Y-m-d H:i:s'),
                     'updated_at'  => date('Y-m-d H:i:s'),
                 ]);
@@ -178,7 +183,9 @@ if (!function_exists('getOrGenerateAiSeoData')) {
             return [
                 'status' => 'generated',
                 'text'   => $generatedText,
-                'faqs'   => $faqsData
+                'faqs'   => $faqsData,
+                'tags'   => $seoTags ?? [],
+                'pitch'  => $seoPitch
             ];
 
         } catch (\Throwable $e) {

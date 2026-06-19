@@ -89,16 +89,20 @@ class Company extends BaseController
         if ($prov) $title .= " | {$prov}";
         $title .= " - APIEmpresas.es";
 
-        $desc = "Consulte el CIF {$cif}, dirección, teléfono y cargos de {$name}";
-        if ($prov) $desc .= " en {$prov}";
-        $desc .= ". ";
-        
-        $act = $company['cnae_label'] ?? '';
-        if ($act) {
-            $desc .= "Su actividad es " . character_limiter($act, 100) . ". ";
+        if (!empty($company['ai_pitch'])) {
+            $desc = $company['ai_pitch'] . " Consulte el CIF {$cif}, dirección, teléfono y cargos de administradores.";
+        } else {
+            $desc = "Consulte el CIF {$cif}, dirección, teléfono y cargos de {$name}";
+            if ($prov) $desc .= " en {$prov}";
+            $desc .= ". ";
+            
+            $act = $company['cnae_label'] ?? '';
+            if ($act) {
+                $desc .= "Su actividad es " . character_limiter($act, 100) . ". ";
+            }
+            
+            $desc .= "Consulte su balance, cuentas anuales y últimos actos inscritos en el Resgistro Mercantil (BORME).";
         }
-        
-        $desc .= "Consulte su balance, cuentas anuales y últimos actos inscritos en el Resgistro Mercantil (BORME).";
 
         // Related companies
         $related = $this->companyModel->getRelated(

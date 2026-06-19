@@ -874,6 +874,31 @@
                                     <?= esc($company['name'] ?? '-') ?> - CIF <?= esc($company['cif'] ?? $company['nif'] ?? '') ?>
                                 </h1>
 
+                                <?php if (!empty($company['ai_pitch'])): ?>
+                                <p style="font-size: 1.05rem; color: #475569; margin: 0 0 16px 0; line-height: 1.4; text-wrap: balance; font-weight: 500;">
+                                    <?= esc($company['ai_pitch']) ?>
+                                </p>
+                                <?php endif; ?>
+
+                                <?php 
+                                $aiTags = [];
+                                if (!empty($company['ai_tags'])) {
+                                    $aiTagsDecoded = json_decode($company['ai_tags'], true);
+                                    if (json_last_error() === JSON_ERROR_NONE && is_array($aiTagsDecoded)) {
+                                        $aiTags = $aiTagsDecoded;
+                                    }
+                                }
+                                ?>
+                                <?php if (!empty($aiTags)): ?>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
+                                    <?php foreach ($aiTags as $tag): ?>
+                                    <span style="background: #f8fafc; color: #64748b; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; border: 1px solid #e2e8f0; letter-spacing: 0.5px; text-transform: uppercase;">
+                                        <?= esc($tag) ?>
+                                    </span>
+                                    <?php endforeach; ?>
+                                </div>
+                                <?php endif; ?>
+
                                 <div class="b2b-hero__meta" style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; color: #475569; font-size: 0.95rem; font-weight: 500;">
                                     <div style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
