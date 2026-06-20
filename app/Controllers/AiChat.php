@@ -68,8 +68,9 @@ class AiChat extends Controller
 
             $session->set('chat_history', $history);
             
-            // Asegurar que la respuesta es UTF-8 válida antes de setJSON para evitar errores de Malformed UTF-8
-            $finalResponseClean = iconv('UTF-8', 'UTF-8//IGNORE', $finalResponse);
+            // Asegurar que la respuesta es string para evitar TypeError en iconv si OpenAI devuelve null
+            $finalResponseStr = is_string($finalResponse) ? $finalResponse : '';
+            $finalResponseClean = iconv('UTF-8', 'UTF-8//IGNORE', $finalResponseStr);
 
             // 5. Registrar en base de datos
             $userId = session('user_id');
@@ -81,7 +82,7 @@ class AiChat extends Controller
                 'reply'  => $finalResponseClean
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             log_message('error', 'Chat Controller Error: ' . $e->getMessage());
             return $this->response->setJSON([
                 'status' => 'success',
@@ -111,7 +112,7 @@ class AiChat extends Controller
      */
     protected function runChatOrchestration(array $messages)
     {
-        $apiKey = env('OPENAI_API_KEY');
+        $apiKey = env('OPENAI_API_KEY') ?? '';
         $httpClient = new \GuzzleHttp\Client(['verify' => false]);
         $client = OpenAI::factory()
             ->withApiKey($apiKey)
