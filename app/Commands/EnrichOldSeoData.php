@@ -70,13 +70,15 @@ class EnrichOldSeoData extends BaseCommand
                     CLI::write("Éxito ID {$row['company_id']}", 'green');
                 } else {
                     CLI::write("Respuesta JSON inválida para ID {$row['company_id']}", 'red');
-                    // Marcamos con un tag temporal para que no se quede en bucle infinito si falla una
                     $db->table('company_enrichment')
                         ->where('company_id', $row['company_id'])
-                        ->update(['ai_pitch' => 'Error API']);
+                        ->update(['ai_pitch' => null]);
                 }
             } catch (\Exception $e) {
                 CLI::write("Error API en ID {$row['company_id']}: " . $e->getMessage(), 'red');
+                $db->table('company_enrichment')
+                    ->where('company_id', $row['company_id'])
+                    ->update(['ai_pitch' => null]);
             }
 
             // Pequeña pausa para no saturar OpenAI

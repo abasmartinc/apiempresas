@@ -97,10 +97,13 @@ class EnrichBormeSummary extends BaseCommand
                     CLI::write("Respuesta JSON inválida para ID {$row['company_id']}", 'red');
                     $db->table('company_enrichment')
                         ->where('company_id', $row['company_id'])
-                        ->update(['ai_borme_summary' => 'Error API']);
+                        ->update(['ai_borme_summary' => null]);
                 }
             } catch (\Exception $e) {
                 CLI::write("Error API en ID {$row['company_id']}: " . $e->getMessage(), 'red');
+                $db->table('company_enrichment')
+                    ->where('company_id', $row['company_id'])
+                    ->update(['ai_borme_summary' => null]);
             }
 
             // Pequeña pausa para no saturar OpenAI

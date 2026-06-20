@@ -83,7 +83,10 @@ class AiChat extends Controller
 
         } catch (\Exception $e) {
             log_message('error', 'Chat Controller Error: ' . $e->getMessage());
-            return $this->response->setJSON(['error' => 'Error interno del servidor.'])->setStatusCode(500);
+            return $this->response->setJSON([
+                'status' => 'success',
+                'reply'  => 'Lo siento, en este momento el asistente no está disponible debido a un problema temporal de conexión. Por favor, inténtalo más tarde.'
+            ]);
         }
     }
 
