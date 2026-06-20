@@ -967,7 +967,7 @@
                                 </div>
 
                                 <h1 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.25; letter-spacing: -0.01em; text-wrap: balance;">
-                                    <?= esc($company['name'] ?? '-') ?> - CIF <?= esc($company['cif'] ?? $company['nif'] ?? '') ?>
+                                    <?= esc($company['name'] ?? '-') ?><?php if (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-'): ?> - CIF <?= esc($companyCif) ?><?php endif; ?>
                                 </h1>
 
                                 <?php if (!empty($company['ai_pitch'])): ?>
@@ -1002,6 +1002,7 @@
                                 <?php endif; ?>
 
                                 <div class="b2b-hero__meta" style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; color: #475569; font-size: 0.95rem; font-weight: 500;">
+                                    <?php if (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-'): ?>
                                     <div style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                             stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1009,8 +1010,9 @@
                                             <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
                                         </svg>
                                         <span style="color: #0f172a; font-weight: 700;">CIF</span>
-                                        <span><?= esc($company['cif'] ?? $company['nif'] ?? '-') ?></span>
+                                        <span><?= esc($companyCif) ?></span>
                                     </div>
+                                    <?php endif; ?>
 
                                     <?php $provinceVal = trim($company['province'] ?? $company['provincia'] ?? ''); ?>
                                     <?php if (!empty($provinceVal) && $provinceVal !== '-'): ?>
@@ -1183,6 +1185,7 @@
                     <div class="b2b-grid-2col">
                         <section id="datos-generales" class="b2b-card" style="height: 100%;">
                             <dl class="b2b-data-list">
+                                <?php if (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-'): ?>
                                 <div class="b2b-data-row">
                                     <dt class="b2b-data-label">
                                         <div>
@@ -1217,6 +1220,7 @@
                                         </a>
                                     </dd>
                                 </div>
+                                <?php endif; ?>
 
                                 <?php if (!empty($company['website_official'])): ?>
                                 <div class="b2b-data-row">
@@ -1299,6 +1303,8 @@
                                 </div>
                                 <?php endif; ?>
 
+                                <?php $cnaeVal = trim($cnaeFull ?? ''); ?>
+                                <?php if (!empty($cnaeVal) && $cnaeVal !== '-'): ?>
                                 <div class="b2b-data-row">
                                     <dt class="b2b-data-label">
                                         <div>
@@ -1314,6 +1320,7 @@
                                         <?= esc($cnaeFull ?: '-') ?>
                                     </dd>
                                 </div>
+                                <?php endif; ?>
 
                                 <?php if (!empty($company['cnae_2025'])): ?>
                                     <div class="b2b-data-row">
@@ -1618,8 +1625,7 @@
                             <?php else: ?>
                                 <div id="fallback-seo-text" style="display: none;">
                                     <p class="seo-text mb-4">
-                                        La empresa <strong><?= esc($companyName) ?></strong> cuenta con el <strong>CIF
-                                            <?= esc($companyCif) ?></strong> y mantiene su
+                                        La empresa <strong><?= esc($companyName) ?></strong> <?php if (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-'): ?>cuenta con el <strong>CIF <?= esc($companyCif) ?></strong> y <?php endif; ?>mantiene su
                                         <strong>domicilio social</strong> en
                                         <?php if (!empty($provinceUrl)): ?>
                                             <a href="<?= esc($provinceUrl) ?>"
@@ -1631,15 +1637,17 @@
                                         Esta sociedad desarrolla su actividad en el sector de
                                         <?php if (!empty($provinceCnaeUrl)): ?>
                                             <a href="<?= esc($provinceCnaeUrl) ?>"
-                                                style="color: inherit; font-weight: 700;"><?= esc($companyAct) ?></a>,
+                                                style="color: inherit; font-weight: 700;"><?= esc($companyAct) ?></a><?php if (!empty($company['cnae']) || !empty($company['cnae_code'])): ?>,<?php else: ?>.<?php endif; ?>
                                         <?php elseif (!empty($cnaeUrl)): ?>
                                             <a href="<?= esc($cnaeUrl) ?>"
-                                                style="color: inherit; font-weight: 700;"><?= esc($companyAct) ?></a>,
+                                                style="color: inherit; font-weight: 700;"><?= esc($companyAct) ?></a><?php if (!empty($company['cnae']) || !empty($company['cnae_code'])): ?>,<?php else: ?>.<?php endif; ?>
                                         <?php else: ?>
-                                            <em><?= esc($companyAct) ?></em>,
+                                            <em><?= esc($companyAct) ?></em><?php if (!empty($company['cnae']) || !empty($company['cnae_code'])): ?>,<?php else: ?>.<?php endif; ?>
                                         <?php endif; ?>
+                                        <?php if (!empty($company['cnae']) || !empty($company['cnae_code'])): ?>
                                         registrada bajo el código <strong>CNAE
                                             <?= esc($company['cnae'] ?? ($company['cnae_code'] ?? '-')) ?></strong>.
+                                        <?php endif; ?>
                                     </p>
 
                                     <?php
@@ -1652,19 +1660,20 @@
                                     <?php endif; ?>
 
                                     <p class="seo-text mb-0">
-                                        La fecha de constitución de la empresa es el
                                         <?php 
                                             $fnd = $company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '-';
-                                            if ($fnd !== '-' && !empty($fnd)) $fnd = date('d/m/Y', strtotime($fnd));
+                                            if ($fnd !== '-' && !empty($fnd)) {
+                                                $fndDate = date('d/m/Y', strtotime($fnd));
+                                                echo "La fecha de constitución de la empresa es el <strong>" . esc($fndDate) . "</strong>";
+                                                if (!empty($statusRaw)) echo " y su estado mercantil actual es <strong>" . esc($statusRaw) . "</strong>.";
+                                                else echo ".";
+                                            } elseif (!empty($statusRaw)) {
+                                                echo "Su estado mercantil actual es <strong>" . esc($statusRaw) . "</strong>.";
+                                            }
                                         ?>
-                                        <strong><?= esc($fnd) ?></strong>
-                                        y su estado mercantil actual es <strong><?= esc($statusRaw) ?></strong>.
                                         En esta página podrá consultar el <strong>Informe Mercantil</strong>, el historial
-                                        de
-                                        <strong>Actos del BORME</strong>,
-                                        sus <strong>administradores</strong> y la validación de su <strong>CIF</strong> para
-                                        fines
-                                        comerciales y financieros.
+                                        de <strong>Actos del BORME</strong>,
+                                        sus <strong>administradores</strong><?php if (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-'): ?> y la validación de su <strong>CIF</strong> para fines comerciales y financieros<?php endif; ?>.
                                     </p>
                                 </div>
 
