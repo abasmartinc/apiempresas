@@ -214,7 +214,12 @@ class Company extends BaseController
         
         // Caching the count query results to avoid Database connections exhaustion
         $cacheKey = 'count_cta_' . md5($companyProv . '_' . $cnaeCodeStr);
-        $cachedData = cache($cacheKey);
+        $cachedData = null;
+        try {
+            $cachedData = cache($cacheKey);
+        } catch (\Throwable $e) {
+            log_message('error', 'Cache read error for ' . $cacheKey . ': ' . $e->getMessage());
+        }
 
         if ($cachedData !== null) {
             $listCount = $cachedData['count'];
