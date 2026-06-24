@@ -26,6 +26,8 @@ class ApiKeyFilter implements FilterInterface
         if (strpos($path, 'api/v1/companies/search') !== false) return 1;
         // 1. api/v1/companies (Exact match ignoring query params and trailing slash)
         if (preg_match('#api/v1/companies/?$#', $path)) return 1;
+        // 3. Custom Client endpoints
+        if (preg_match('#api/v1/custom/.+/companies/?$#', $path)) return 1;
 
         // Los demás (api/v1/*) a 3 créditos
         if (strpos($path, 'api/v1/') !== false) return 3;

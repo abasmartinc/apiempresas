@@ -131,6 +131,7 @@ $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function
     $routes->get('api/v1/companies', 'Api\V1\CompaniesByCif::index');
     $routes->post('api/v1/companies/batch', 'Api\V1\CompaniesBatch::index');
     $routes->get('api/v1/companies/search', 'Api\V1\CompaniesSearch::index');
+    $routes->get('api/v1/custom/(:segment)/companies', 'Api\V1\CustomClientController::companies/$1');
 
     $routes->get('api/v1/companies/score', 'Api\V1\CompanyEnrichmentController::score');
     $routes->get('api/v1/companies/signals', 'Api\V1\CompanyEnrichmentController::signals');
