@@ -23,6 +23,26 @@ class SubvifyTransformer implements ClientTransformerInterface
                           ->get()
                           ->getRow();
                 
+                // Fallback 1: Si es una pedanía, el municipio principal suele estar entre paréntesis en la dirección (ej: "EL RAAL (MURCIA)")
+                if (!$row && !empty($companyData['address'])) {
+                    if (preg_match('/\((.*?)\)/', $companyData['address'], $matches)) {
+                        $fallbackName = trim($matches[1]);
+                        $fallbackName = rtrim($fallbackName, '.');
+                        $row = $db->table('municipalities_suvify')
+                                  ->where('municpality', $fallbackName)
+                                  ->get()
+                                  ->getRow();
+                    }
+                }
+
+                // Fallback 2: Usar el registro mercantil / provincia como último recurso
+                if (!$row && !empty($companyData['province'])) {
+                    $row = $db->table('municipalities_suvify')
+                              ->where('municpality', $companyData['province'])
+                              ->get()
+                              ->getRow();
+                }
+                
                 if ($row) {
                     $customMunicipalityId = $row->id ?? null;
                     $customProvinceId = $row->id_province ?? null;

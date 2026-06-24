@@ -74,21 +74,21 @@ class ProcessSeoQueue extends BaseCommand
                     // 5. Eliminar de la cola al terminar con éxito
                     $db->table('seo_generation_queue')->where('company_id', $companyId)->delete();
                 } else {
-                    CLI::write("Fallo al generar texto para ID {$companyId}.", 'red');
-                    // Marcar como failed
+                    CLI::write("Fallo al generar texto para ID {$companyId}. Devolviendo a pending.", 'red');
+                    // Devolver a pending para que lo intente en la próxima ejecución
                     $db->table('seo_generation_queue')
                         ->where('company_id', $companyId)
-                        ->update(['status' => 'failed']);
+                        ->update(['status' => 'pending']);
                 }
             } catch (\Exception $e) {
                 CLI::write("Excepción en ID {$companyId}: " . $e->getMessage(), 'red');
                 $db->table('seo_generation_queue')
                     ->where('company_id', $companyId)
-                    ->update(['status' => 'failed']);
+                    ->update(['status' => 'pending']);
             }
             
             // Pequeña pausa para no saturar los límites de rate limit de OpenAI
-            sleep(1);
+            sleep(3);
         }
 
         CLI::write("Proceso finalizado.", 'cyan');
