@@ -56,7 +56,11 @@ if (!function_exists('filter_company_data')) {
             'phone_enriched',
             'phone_mobile_enriched',
             'ai_seo_text',
-            'ai_faqs'
+            'ai_faqs',
+            'ai_tags',
+            'ai_pitch',
+            'ai_borme_summary',
+            'updated_at'
         ];
 
         foreach ($toRemove as $field) {
