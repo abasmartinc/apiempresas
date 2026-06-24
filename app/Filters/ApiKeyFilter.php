@@ -254,7 +254,7 @@ class ApiKeyFilter implements FilterInterface
             }
 
             // IP Limits for free plan
-            if ((int)$planId === 1 && $db->tableExists('api_requests')) {
+            if ((int)$planId === 1 && $walletBalance <= 0 && $db->tableExists('api_requests')) {
                 $ipAddress = $request->getIPAddress();
                 $subscriptionTable = $db->tableExists('user_subscriptions') ? 'user_subscriptions' : 'usersuscriptions';
                 $ipUsage = $db->table('api_requests r')->join($subscriptionTable . ' us', 'us.user_id = r.user_id')->where('us.plan_id', 1)->where('us.status', 'active')->where('r.ip_address', $ipAddress)->where('r.created_at >=', '2026-05-28 00:00:00')->countAllResults();
