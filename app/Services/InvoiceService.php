@@ -76,7 +76,7 @@ class InvoiceService
         return $invoice;
     }
 
-    private function generatePdf($invoice, $planName)
+    public function generatePdf($invoice, $planName)
     {
         $options = new Options();
         $options->set('isHtml5ParserEnabled', true);

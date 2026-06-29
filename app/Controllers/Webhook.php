@@ -295,19 +295,26 @@ class Webhook extends Controller
                  $billingVat = $invoice->metadata->nif;
             }
 
-            // PRIORIDAD DB LOCAL: Nombre y Empresa
+            // PRIORIDAD STRIPE: Nombre y Correo
             $userModel = new \App\Models\UserModel();
             $dbUser = $userModel->find($sub->user_id);
             
-            $billingName = $invoice->customer_name ?? 'Cliente';
-            
-            if ($dbUser) {
-                // Usar nombre de la BD
+            // Usamos el nombre de Stripe si existe, si no, fallback a BD
+            $billingName = $invoice->customer_name;
+            if (empty($billingName) && $dbUser) {
                 $billingName = $dbUser->name;
-                // Concatenar empresa si existe
                 if (!empty($dbUser->company)) {
                     $billingName .= " (" . $dbUser->company . ")";
                 }
+            }
+            if (empty($billingName)) {
+                $billingName = 'Cliente';
+            }
+            
+            // Usamos el correo de Stripe si existe, si no, fallback a BD
+            $billingEmail = $invoice->customer_email;
+            if (empty($billingEmail) && $dbUser) {
+                $billingEmail = $dbUser->email;
             }
 
             // Generar Factura
@@ -317,7 +324,7 @@ class Webhook extends Controller
                 (int)$sub->plan_id, 
                 [
                     'name'    => $billingName,
-                    'email'   => ($dbUser ? $dbUser->email : null) ?? ($invoice->customer_email ?? null),
+                    'email'   => $billingEmail,
                     'address' => $billingAddress,
                     'vat'     => $billingVat
                 ],
@@ -408,12 +415,21 @@ class Webhook extends Controller
             $billingVat = $metadata->nif;
         }
 
-        $billingName = $invoice->customer_name ?? 'Cliente';
-        if ($dbUser) {
+        // PRIORIDAD STRIPE: Nombre y Correo
+        $billingName = $invoice->customer_name;
+        if (empty($billingName) && $dbUser) {
             $billingName = $dbUser->name;
             if (!empty($dbUser->company)) {
                 $billingName .= " (" . $dbUser->company . ")";
             }
+        }
+        if (empty($billingName)) {
+            $billingName = 'Cliente';
+        }
+        
+        $billingEmail = $invoice->customer_email;
+        if (empty($billingEmail) && $dbUser) {
+            $billingEmail = $dbUser->email;
         }
 
         $invoiceService = new \App\Services\InvoiceService();
@@ -422,7 +438,7 @@ class Webhook extends Controller
             (int)($plan->id ?? 5),
             [
                 'name'    => $billingName,
-                'email'   => ($dbUser ? $dbUser->email : null) ?? ($invoice->customer_email ?? null),
+                'email'   => $billingEmail,
                 'address' => $billingAddress,
                 'vat'     => $billingVat
             ],
