@@ -7,7 +7,7 @@ use CodeIgniter\Controller;
 
 class Sitemap extends Controller
 {
-    protected $perPage = 40000;
+    protected $perPage = 10000;
 
     /**
      * Índice del sitemap (sitemap.xml)
