@@ -267,29 +267,66 @@
         const endDateInput = document.getElementById('end_date');
         const filterForm = document.getElementById('filter-form');
 
+        function formatDateLocal(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        const todayDate = new Date();
+        const todayStr = formatDateLocal(todayDate);
+        
+        let start7dDate = new Date();
+        start7dDate.setDate(todayDate.getDate() - 7);
+        const start7dStr = formatDateLocal(start7dDate);
+        
+        let start30dDate = new Date();
+        start30dDate.setDate(todayDate.getDate() - 30);
+        const start30dStr = formatDateLocal(start30dDate);
+        
+        let startMonthDate = new Date(todayDate.getFullYear(), todayDate.getMonth(), 1);
+        const startMonthStr = formatDateLocal(startMonthDate);
+
+        // Highlight active button based on current inputs
+        const currentStart = startDateInput.value;
+        const currentEnd = endDateInput.value;
+        
+        if (currentEnd === todayStr || currentEnd === '') {
+            if (currentStart === todayStr) {
+                document.querySelector('.btn-quick[data-range="today"]')?.classList.add('active');
+            } else if (currentStart === start7dStr) {
+                document.querySelector('.btn-quick[data-range="7d"]')?.classList.add('active');
+            } else if (currentStart === start30dStr) {
+                document.querySelector('.btn-quick[data-range="30d"]')?.classList.add('active');
+            } else if (currentStart === startMonthStr) {
+                document.querySelector('.btn-quick[data-range="month"]')?.classList.add('active');
+            }
+        }
+
         quickButtons.forEach(btn => {
             btn.addEventListener('click', function() {
                 const range = this.getAttribute('data-range');
-                const today = new Date();
-                let start = new Date();
-                let end = new Date();
+                let startStr = todayStr;
+                let endStr = todayStr;
 
                 switch(range) {
                     case 'today':
+                        startStr = todayStr;
                         break;
                     case '7d':
-                        start.setDate(today.getDate() - 7);
+                        startStr = start7dStr;
                         break;
                     case '30d':
-                        start.setDate(today.getDate() - 30);
+                        startStr = start30dStr;
                         break;
                     case 'month':
-                        start = new Date(today.getFullYear(), today.getMonth(), 1);
+                        startStr = startMonthStr;
                         break;
                 }
 
-                startDateInput.value = start.toISOString().split('T')[0];
-                endDateInput.value = end.toISOString().split('T')[0];
+                startDateInput.value = startStr;
+                endDateInput.value = endStr;
                 
                 filterForm.submit();
             });

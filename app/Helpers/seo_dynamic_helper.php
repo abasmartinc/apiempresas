@@ -17,11 +17,11 @@ if (!function_exists('calculateCompanySeoScore')) {
 
         // 1. Identificación (+2)
         if ($isValid($company['name'] ?? null)) $score += 1;
-        if ($isValid($company['cif'] ?? null)) $score += 1;
+        if ($isValid($company['cif'] ?? $company['nif'] ?? null)) $score += 1;
 
         // 2. Datos Geográficos y Actividad (+2)
-        if ($isValid($company['province'] ?? null)) $score += 1;
-        if ($isValid($company['cnae'] ?? null)) $score += 1;
+        if ($isValid($company['province'] ?? $company['provincia'] ?? null)) $score += 1;
+        if ($isValid($company['cnae'] ?? $company['cnae_code'] ?? $company['cnae_label'] ?? null)) $score += 1;
 
         // 3. Objeto Social (+2) - Factor de peso
         if ($isValid($company['corporate_purpose'] ?? null)) $score += 2;
