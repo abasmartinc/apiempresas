@@ -54,11 +54,11 @@ if (!function_exists('calculateCompanySeoScore')) {
 if (!function_exists('shouldIndexCompany')) {
     /**
      * Determina si una empresa debe ser indexada.
-     * Umbral a 4 para incluir empresas básicas completas (Nombre+CIF+Provincia+CNAE).
+     * Umbral a 3 para incluir empresas básicas (Nombre+CIF+Provincia).
      */
     function shouldIndexCompany(array $company): bool
     {
-        return calculateCompanySeoScore($company) >= 4;
+        return calculateCompanySeoScore($company) >= 3;
     }
 }
 
