@@ -78,6 +78,7 @@ class Filters extends BaseFilters
      */
     public array $globals = [
         'before' => [
+             'cors',          // Permitir peticiones Cross-Origin (Preflight OPTIONS)
              'throttle',      // Limitar la tasa de peticiones por IP
              'botprotection', // Check blocked IPs first
              'honeypot' => ['except' => ['admin/*']],
