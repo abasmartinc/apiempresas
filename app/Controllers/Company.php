@@ -89,20 +89,16 @@ class Company extends BaseController
         if ($prov) $title .= " | {$prov}";
         $title .= " - APIEmpresas.es";
 
-        if (!empty($company['ai_pitch'])) {
-            $desc = $company['ai_pitch'] . " Consulte el CIF {$cif}, dirección, teléfono y cargos de administradores.";
-        } else {
-            $desc = "Consulte el CIF {$cif}, dirección, teléfono y cargos de {$name}";
-            if ($prov) $desc .= " en {$prov}";
-            $desc .= ". ";
-            
-            $act = $company['cnae_label'] ?? '';
-            if ($act) {
-                $desc .= "Su actividad es " . character_limiter($act, 100) . ". ";
-            }
-            
-            $desc .= "Consulte su balance, cuentas anuales y últimos actos inscritos en el Resgistro Mercantil (BORME).";
+        $desc = "Toda la información mercantil de {$name}";
+        if ($cif) {
+            $desc .= " (CIF {$cif})";
         }
+        if ($prov) {
+            $desc .= " en {$prov}";
+        }
+        $desc .= ". Conoce su teléfono, dirección, cargos directivos, balances y actos en el BORME.";
+        
+        $desc = character_limiter($desc, 155, '');
 
         // Related companies
         $related = $this->companyModel->getRelated(
@@ -285,11 +281,7 @@ class Company extends BaseController
         $priceStr = number_format($pricing['base_price'], 0, ',', '.');
         $countFormatted = number_format($listCount, 0, ',', '.');
 
-        // Optimizar la meta descripción si disponemos de texto generado por la IA
-        if (!empty($company['ai_seo_text'])) {
-            $cleanDesc = strip_tags(str_replace(["\r", "\n"], ' ', $company['ai_seo_text']));
-            $desc = character_limiter($cleanDesc, 155, '...');
-        }
+        // (Eliminada la sobreescritura de meta_description con ai_seo_text para proteger el CIF)
 
         $ratingModel = new \App\Models\CompanyRatingModel();
         $ratingStats = $ratingModel->getRatingStats((int)$company['id']);
