@@ -359,7 +359,7 @@ class Company extends BaseController
             $this->response->setHeader('X-Robots-Tag', 'noindex, follow');
         }
 
-        $this->cachePage(86400); // 24 horas de caché para mitigar errores 500 por bots
+        // $this->cachePage(86400); // Cache temporalmente desactivada
 
         return $this->response->setBody(view('company', $data));
     }
@@ -411,7 +411,7 @@ class Company extends BaseController
             $this->response->setHeader('X-Robots-Tag', 'noindex, follow');
         }
 
-        $this->cachePage(86400); // 24 horas de caché para mitigar errores 500 por bots
+        // $this->cachePage(86400); // Cache temporalmente desactivada
 
         return $this->response->setBody(view('company', $data));
     }

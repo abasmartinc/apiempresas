@@ -91,7 +91,6 @@ class UsageController extends BaseApiController
 
             $history = [];
             foreach ($cifs as $cif) {
-                // We use getByCif but we could also use a lighter search if needed
                 $details = $this->companyModel->getByCif($cif);
                 if ($details) {
                     $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
@@ -99,16 +98,42 @@ class UsageController extends BaseApiController
                         $details = mask_company_data($details);
                     }
                     $details = filter_company_data($details);
+                    $details['found'] = true;
                     $history[] = $details;
+                } else {
+                    $history[] = [
+                        'cif'        => $cif,
+                        'name'       => 'Empresa no encontrada',
+                        'province'   => '-',
+                        'cnae_label' => '-',
+                        'found'      => false
+                    ];
                 }
             }
+
+            // Get Plan Info and Limits
+            $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
+            $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
+            $walletBalance = \App\Filters\ApiKeyFilter::$apiMeta['wallet_balance'] ?? 0;
+            
+            $db = \Config\Database::connect('default');
+            $planRow = $db->table('api_plans')->select('name, monthly_quota')->where('id', (int)$planId)->get()->getRow();
+            
+            $monthlyQuota = $planRow ? (int)$planRow->monthly_quota : get_free_plan_limit();
+            $planName = $planRow ? $planRow->name : 'Free';
+            $remainingCalls = max(0, $monthlyQuota - $monthlyCount);
 
             return $this->respond([
                 'success' => true,
                 'data'    => [
                     'stats' => [
                         'monthly_queries' => $monthlyCount,
-                        'total_queries'   => $totalCount
+                        'total_queries'   => $totalCount,
+                        'monthly_quota'   => $monthlyQuota,
+                        'remaining_calls' => $remainingCalls,
+                        'wallet_balance'  => $walletBalance,
+                        'plan_name'       => $planName,
+                        'plan_slug'       => $planSlug,
                     ],
                     'history' => $history
                 ]
