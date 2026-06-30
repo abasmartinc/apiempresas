@@ -143,8 +143,10 @@ class TrackingController extends BaseController
             }
 
             // Aceptar tanto JSON como POST estándar para máxima compatibilidad
-            $data_raw = $this->request->getJSON(true);
-            if (!$data_raw) {
+            $contentType = $this->request->getHeaderLine('Content-Type');
+            if (strpos($contentType, 'application/json') !== false) {
+                $data_raw = $this->request->getJSON(true);
+            } else {
                 $data_raw = $this->request->getPost();
             }
             

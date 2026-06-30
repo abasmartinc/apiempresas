@@ -64,27 +64,27 @@
         <span class="vertice-top-banner-highlight">¡NUEVO!</span>
         No te la juegues al abrir un local. Analiza la viabilidad de cualquier municipio con IA.
     </span>
-    <a href="https://vertice.apiempresas.es" target="_blank" class="vertice-top-banner-btn"
-        id="vertice-top-banner-link">
+    <a href="https://vertice.apiempresas.es" target="_blank" class="vertice-top-banner-btn" id="vertice-top-banner-link">
         Probar Vértice gratis 🚀
     </a>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const verticeLink = document.getElementById('vertice-top-banner-link');
-            if (verticeLink) {
-                verticeLink.addEventListener('click', function () {
-                    fetch('<?= site_url("api/tracking/event") ?>', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: new URLSearchParams({
-                            event_type: 'cta_click',
-                            source: 'vertice_top_banner'
-                        })
-                    }).catch(err => console.error('Error tracking vertice click:', err));
+        document.addEventListener('DOMContentLoaded', function() {
+            // Utilizamos jQuery.post exactamente igual que en el resto de la web
+            if (typeof jQuery !== 'undefined') {
+                jQuery(document).on('click', '#vertice-top-banner-link', function() {
+                    console.log('Sending tracking event para Vértice...');
+                    jQuery.post('<?= site_url("api/tracking/event") ?>', {
+                        event_type: 'cta_click',
+                        source: 'vertice_top_banner',
+                        page: window.location.pathname
+                    }).done(function(res) {
+                        console.log('Tracking guardado:', res);
+                    }).fail(function(err) {
+                        console.error('Error guardando tracking:', err);
+                    });
                 });
+            } else {
+                console.error('jQuery no está cargado, no se puede trackear el click.');
             }
         });
     </script>
