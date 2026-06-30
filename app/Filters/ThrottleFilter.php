@@ -19,9 +19,9 @@ class ThrottleFilter implements FilterInterface
     {
         $throttler = Services::throttler();
 
-        // Restringir a 60 peticiones por minuto por IP (60 peticiones cada 60 segundos)
+        // Restringir a 120 peticiones por minuto por IP (120 peticiones cada 60 segundos)
         // Puedes ajustar estos valores según necesites
-        if ($throttler->check(md5($request->getIPAddress()), 60, 60) === false) {
+        if ($throttler->check(md5($request->getIPAddress()), 120, 60) === false) {
             return Services::response()->setStatusCode(429)->setBody('Too Many Requests');
         }
     }

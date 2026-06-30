@@ -124,9 +124,9 @@ class Search extends BaseController
             return $this->failForbidden('Tu IP ha sido bloqueada por actividad sospechosa.');
         }
 
-        // 2. Rate limiting estándar: 10 búsquedas por minuto -> 429 Too Many Requests (SIN BLOQUEO)
+        // 2. Rate limiting estándar: 30 búsquedas por minuto -> 429 Too Many Requests (SIN BLOQUEO)
         // Solo le decimos que espere, no le baneamos la IP
-        if ($throttler->check(md5($this->request->getIPAddress()), 10, 60) === false) {
+        if ($throttler->check(md5($this->request->getIPAddress()), 30, 60) === false) {
             return $this->respond([
                 'success' => false,
                 'message' => 'Demasiadas solicitudes. Por favor espera un minuto.'
