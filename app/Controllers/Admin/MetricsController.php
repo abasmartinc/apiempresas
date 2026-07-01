@@ -190,6 +190,7 @@ class MetricsController extends BaseController
             LEFT JOIN user_subscriptions s ON (s.user_id = u.id AND s.status = 'active')
             LEFT JOIN api_plans p ON s.plan_id = p.id
             WHERE (s.plan_id IS NULL OR s.plan_id = 1)
+            AND (u.unsuscribe IS NULL OR u.unsuscribe != 1)
             AND u.id NOT IN (
                 SELECT user_id FROM email_logs 
                 WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
@@ -336,6 +337,7 @@ class MetricsController extends BaseController
         
         $successCount = 0;
         $errorCount = 0;
+        $skippedCount = 0;
         $lastError = null;
 
         foreach ($userIds as $userId) {
@@ -345,6 +347,7 @@ class MetricsController extends BaseController
             // Skip if unsubscribed
             if (isset($user->unsuscribe) && (int)$user->unsuscribe === 1) {
                 log_message('info', "[MetricsController] Email manual saltado para {$user->email} por unsuscribe=1");
+                $skippedCount++;
                 continue;
             }
 
@@ -396,6 +399,11 @@ class MetricsController extends BaseController
             return $this->response->setJSON([
                 'status' => 'success', 
                 'message' => $successCount . ' mensajes enviados correctamente' . ($errorCount > 0 ? ". ($errorCount fallidos)" : "")
+            ]);
+        } elseif ($skippedCount > 0 && $errorCount === 0) {
+            return $this->response->setJSON([
+                'status' => 'error', 
+                'message' => 'No se ha enviado ningún mensaje porque los usuarios seleccionados están dados de baja de la lista de correos (unsuscribe = 1).'
             ]);
         } else {
             return $this->response->setJSON([
