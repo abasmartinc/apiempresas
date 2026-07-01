@@ -157,7 +157,7 @@ class ApiKeyFilter implements FilterInterface
         try {
             $maxRequestsPerSecond = ((int)$planId === 1) ? 2 : 20;
             
-            $rateLimitKey = 'throttle_' . (int)$row->api_key_id . '_' . time();
+            $rateLimitKey = 'throttle_' . (int)$row->api_key_id . '_' . date('s');
             $requestsThisSecond = (int) cache()->get($rateLimitKey);
             
             if ($requestsThisSecond >= $maxRequestsPerSecond) {
