@@ -277,6 +277,38 @@ class Company extends BaseController
         $radarCheckoutUrl = site_url("checkout/radar-export?type=single&provincia={$provUrlParam}&cnae={$cnaeUrlParam}&sector={$sectorUrlParam}");
         
         helper('pricing');
+        
+        // Fallback en caso de que el helper de CodeIgniter falle silenciosamente
+        if (!function_exists('calculate_directory_price')) {
+            $helperPath = APPPATH . 'Helpers/pricing_helper.php';
+            if (file_exists($helperPath)) {
+                require_once $helperPath;
+            } else {
+                log_message('error', 'pricing_helper.php no se encontró en ' . $helperPath);
+            }
+        }
+
+        // Definición inline de emergencia por si el archivo físico no existe en producción
+        if (!function_exists('calculate_directory_price')) {
+            function calculate_directory_price(int $count, bool $isPremium = false): array {
+                $basePrice = 9.00;
+                if ($count > 1000) {
+                    $extraCount = $count - 1000;
+                    $tier2Count = min($extraCount, 9000);
+                    $basePrice += ceil($tier2Count / 1000) * 5.00;
+                    if ($extraCount > 9000) {
+                        $basePrice += ceil(($extraCount - 9000) / 1000) * 1.00;
+                    }
+                }
+                if ($isPremium) $basePrice = round($basePrice * 1.5, 2);
+                return [
+                    'base_price' => $basePrice,
+                    'tax' => round($basePrice * 0.21, 2),
+                    'total' => $basePrice + round($basePrice * 0.21, 2)
+                ];
+            }
+        }
+
         $pricing = calculate_directory_price($listCount);
         $priceStr = number_format($pricing['base_price'], 0, ',', '.');
         $countFormatted = number_format($listCount, 0, ',', '.');
