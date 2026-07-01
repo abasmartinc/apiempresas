@@ -175,12 +175,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                 </div>
                 <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.75rem; font-weight: 500; text-align: center;">La mayoría de usuarios consigue su primer cliente en días</p>
 
-                <!-- Bloque Económico (Conversion Tier) -->
-                <div class="ae-radar-page__economic-block" style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 2.5rem; border-radius: 1.25rem; color: white; margin: 3rem 0; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);">
-                    <p style="font-size: 1.25rem; margin-bottom: 0.75rem; opacity: 0.9; font-weight: 500;">Se han detectado <strong style="color: #4ade80;"><?= number_format($conversion_count ?? 0, 0, ',', '.') ?></strong> empresas nuevas <?= $conversion_label ?? 'recientemente' ?> con potencial comercial</p>
-                    <h3 style="font-size: 1.85rem; font-weight: 900; line-height: 1.2; background: linear-gradient(to right, #4ade80, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Estas empresas pueden generarte entre <?= $potential_revenue_min ?? '900' ?>€ y <?= $potential_revenue_max ?? '4.500' ?>€ en ventas reales en los próximos días</h3>
-                    <p style="color: #94a3b8; font-size: 1.1rem; margin-top: 1rem; font-weight: 500;">Con 1 cliente cubres el coste mensual</p>
-                </div>
+
 
                 </section>
 
@@ -363,33 +358,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                                 </a>
                         </article>
 
-                        <?php if ($index === 4 && !empty($premiumLeads)): ?>
-                            <div class="ae-radar-page__premium-strip-wrap">
-                                <div class="ae-radar-page__premium-strip" style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1d4ed8 100%); border: none; padding: 40px; position: relative; overflow: hidden; box-shadow: 0 30px 60px -15px rgba(30, 58, 138, 0.45);">
-                                    <!-- Glassmorphism accents -->
-                                    <div style="position: absolute; top: -20px; right: -20px; width: 150px; height: 150px; background: rgba(255,255,255,0.05); border-radius: 50%; blur: 20px;"></div>
-                                    
-                                    <div class="ae-radar-page__premium-strip-copy" style="position: relative; z-index: 2;">
-                                        <h3 style="font-size: 1.8rem; font-weight: 900; color: #fff; margin-bottom: 15px; letter-spacing: -0.02em;">Desbloquea el listado completo en <?= esc($province) ?></h3>
-                                        <p style="font-size: 1.05rem; color: rgba(255,255,255,0.9); line-height: 1.6; margin-bottom: 25px;">
-                                            Accede a todas las sociedades detectadas en <?= esc($province) ?>, filtra por sector e identifica oportunidades antes que otros proveedores.
-                                        </p>
 
-                                        <div class="ae-radar-page__premium-points" style="display: flex; gap: 15px; flex-wrap: wrap;">
-                                            <span style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; color: #fff;">Filtros sectoriales</span>
-                                            <span style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; color: #fff;">Exportación Excel</span>
-                                            <span style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; color: #fff;">Datos BORME</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="ae-radar-page__premium-strip-actions" style="position: relative; z-index: 2;">
-                                        <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__premium-btn" style="background: #fff; color: #1e3a8a; padding: 16px 32px; border-radius: 12px; font-size: 1rem; font-weight: 800; box-shadow: 0 10px 20px rgba(0,0,0,0.1); white-space: nowrap;">
-                                            Acceder al listado completo
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endif; ?>
                         <?php endforeach; ?>
                     </div>
 
@@ -434,22 +403,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                                         </p>
                                     </div>
 
-                                    <div class="ae-radar-page__paywall-stats">
-                                        <div class="ae-radar-page__paywall-stat">
-                                            <div class="ae-radar-page__paywall-stat-value"><?= number_format($total_context_count ?? 0, 0, ',', '.') ?></div>
-                                            <div class="ae-radar-page__paywall-stat-label">Empresas detectadas</div>
-                                        </div>
 
-                                        <div class="ae-radar-page__paywall-stat">
-                                            <div class="ae-radar-page__paywall-stat-value"><?= number_format($stats['semana'] ?? 0, 0, ',', '.') ?></div>
-                                            <div class="ae-radar-page__paywall-stat-label">Últimos 7 días</div>
-                                        </div>
-
-                                        <div class="ae-radar-page__paywall-stat">
-                                            <div class="ae-radar-page__paywall-stat-value"><?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?></div>
-                                            <div class="ae-radar-page__paywall-stat-label">Últimos 30 días</div>
-                                        </div>
-                                    </div>
 
                                     <div class="ae-radar-page__paywall-actions" style="display: flex; justify-content: center; margin-top: 0.5rem;">
                                     <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--primary" style="background: linear-gradient(135deg, #3b82f6, #6366f1); border: none; padding: 1.1rem 3rem; font-size: 1.15rem; font-weight: 800; border-radius: 100px; box-shadow: 0 8px 24px rgba(99,102,241,0.45), 0 2px 8px rgba(59,130,246,0.3); letter-spacing: -0.01em; transition: all 0.25s ease; display: inline-block; min-width: 280px; text-align: center;">
@@ -729,20 +683,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                 </div>
             </section>
 
-        <!-- Final CTA Section -->
-    <section class="ae-radar-page__section container" style="background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; margin-top: 3rem !important;" style="margin-top: 4rem; padding-bottom: 6rem;">
-            <div style="background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 1.5rem; padding: 4rem 2rem; text-align: center; color: white; position: relative; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
-                <div style="position: relative; z-index: 2;">
-                    <h2 style="font-size: 2.5rem; font-weight: 900; margin-bottom: 1.5rem; letter-spacing: -0.02em; color: white;">Si no accedes ahora, estas oportunidades desaparecerán en horas</h2>
-                    <p style="font-size: 1.25rem; opacity: 0.8; max-width: 700px; margin: 0 auto 1.5rem; color: white;">Más de 40 empresas nuevas aparecen cada día — quienes detectan primero son quienes cierran</p>
-                    <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary" style="padding: 1.25rem 3.5rem; font-size: 1.25rem; font-weight: 700; border-radius: 100px; background: white; color: #0f172a; box-shadow: 0 0 30px rgba(255,255,255,0.2);">
-                        Acceder ahora y detectar estas empresas antes que otros
-                    </a>
-                    <p style="font-size: 0.95rem; color: rgba(255,255,255,0.7); margin-top: 1.25rem; font-weight: 500;">La mayoría de usuarios consigue su primer cliente en días</p>
-                </div>
-                <!-- Subtle background glow -->
-                <div style="position: absolute; top: -50%; left: -20%; width: 100%; height: 200%; background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);"></div>
-            </section>
+
 
         <script type="application/ld+json">
         {
@@ -789,28 +730,27 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
     
     <!-- Modal Conversion -->
     <div id="radarConversionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); z-index: 99999; backdrop-filter: blur(8px); align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
-        <div style="background: white; border-radius: 1.25rem; padding: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); max-width: 600px; width: 90%; position: relative; text-align: center; transform: translateY(20px); transition: transform 0.3s ease;" class="radar-modal-content">
+        <div style="background: white; border-radius: 1.25rem; padding: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); max-width: 500px; width: 90%; position: relative; text-align: center; transform: translateY(20px); transition: transform 0.3s ease;" class="radar-modal-content">
             <button onclick="closeRadarModal()" style="position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; font-size: 1.75rem; cursor: pointer; color: #94a3b8; line-height: 1;">&times;</button>
             
-            <div style="width: 56px; height: 56px; background: #fef2f2; color: #dc2626; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V8a5 5 0 0 1 10 0v3"></path></svg>
+            <div style="width: 56px; height: 56px; background: #eff6ff; color: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
             </div>
             
-            <p style="font-weight: 800; color: #0f172a; margin-bottom: 0.5rem; font-size: 1.5rem; letter-spacing: -0.02em;">Estas empresas están activas ahora mismo</p>
-            <p style="color: #475569; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 500;">Otros proveedores ya están cerrando estas oportunidades</p>
-            <p style="color: #dc2626; margin-bottom: 0.75rem; font-size: 1.1rem; font-weight: 700;">Si no actúas ahora, perderás estas oportunidades</p>
-            <p style="color: #dc2626; margin-bottom: 2rem; font-size: 1.05rem; font-weight: 600;">Cada minuto que pasa, aumenta la probabilidad de perder estas oportunidades</p>
-            <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary" style="width: 100%; justify-content: center; padding: 1.15rem; font-size: 1.2rem; box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4); border-radius: 0.75rem;">
-                Acceder ahora y detectar antes que otros proveedores
+            <p style="font-weight: 800; color: #0f172a; margin-bottom: 0.75rem; font-size: 1.6rem; letter-spacing: -0.02em; line-height: 1.2;">¿Listo para empezar a prospectar?</p>
+            <p style="color: #475569; margin-bottom: 2rem; font-size: 1.1rem; line-height: 1.5;">Accede al listado completo de empresas, filtra por provincia y sector, y exporta tus leads directamente a Excel.</p>
+            
+            <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary" style="width: 100%; justify-content: center; padding: 1.15rem; font-size: 1.15rem; font-weight: 700; box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4); border-radius: 0.75rem;">
+                Desbloquear Radar Completo
             </a>
             
-            <p style="font-size: 0.95rem; color: #64748b; margin-top: 1.25rem; font-weight: 500;">La mayoría de usuarios consigue su primer cliente en días</p>
+            <a href="<?= site_url('excel/preview') ?>" style="display: block; color: #64748b; font-size: 0.95rem; text-decoration: underline; margin-top: 1.25rem; font-weight: 500;">O descargar muestra en Excel</a>
         </div>
     </div>
 
     <script>
     let modalTriggered = false;
-    function showRadarModal() {
+    function showRadarModal(trigger = 'unknown') {
         if (modalTriggered) return;
         modalTriggered = true;
         const modal = document.getElementById('radarConversionModal');
@@ -820,6 +760,10 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                 modal.style.opacity = '1';
                 modal.querySelector('.radar-modal-content').style.transform = 'translateY(0)';
             }, 10);
+
+            if (window.trackEvent) {
+                window.trackEvent('radar_modal_view', { trigger: trigger, page: 'radar_province_landing' });
+            }
         }
     }
 
@@ -831,6 +775,10 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
             setTimeout(() => {
                 modal.style.display = 'none';
             }, 300);
+
+            if (window.trackEvent) {
+                window.trackEvent('radar_modal_close', { page: 'radar_province_landing' });
+            }
         }
     }
 
@@ -840,20 +788,18 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
         blurredCards.forEach(card => {
             card.addEventListener('click', (e) => {
                 e.preventDefault();
-                setTimeout(showRadarModal, 300);
+                setTimeout(() => showRadarModal('blurred_card'), 300);
             });
         });
 
-        // Intercept clicks on primary CTAs to show modal instead of direct redirect?
-        // Wait, the user said: "Mostrar modal SOLO cuando: el usuario hace clic en CTA principal".
-        // If they click the primary CTA, it should show the modal instead of navigating immediately?
-        // Yes, that adds friction but increases the "pressure".
+        // Intercept clicks on primary CTAs
         const mainCtas = document.querySelectorAll('.ae-radar-page__btn--primary:not(#radarConversionModal .ae-radar-page__btn--primary)');
         mainCtas.forEach(cta => {
             cta.addEventListener('click', (e) => {
                 if(!modalTriggered) {
                     e.preventDefault();
-                    setTimeout(showRadarModal, 300);
+                    const eventName = cta.getAttribute('data-track-event') || 'primary_cta';
+                    setTimeout(() => showRadarModal(eventName), 300);
                 }
             });
         });
@@ -861,8 +807,8 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
         // Scroll > 60%
         window.addEventListener('scroll', () => {
             const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
-            if (scrollPercent > 60) {
-                setTimeout(showRadarModal, 300);
+            if (scrollPercent > 60 && !modalTriggered) {
+                setTimeout(() => showRadarModal('scroll_60'), 300);
             }
         });
     });
