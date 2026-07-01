@@ -331,6 +331,7 @@ class MetricsController extends BaseController
         $db = \Config\Database::connect();
         $emailService = \Config\Services::email();
         $emailConfig = config('Email');
+        $emailService->initialize($emailConfig);
         $emailLogModel = new \App\Models\EmailLogModel();
         
         $successCount = 0;
@@ -369,9 +370,10 @@ class MetricsController extends BaseController
             $status = 'success';
             $errorMsg = null;
             
-            if (!$emailService->send()) {
+            if (!$emailService->send(false)) {
                 $status = 'error';
-                $errorMsg = $emailService->printDebugger(['headers']);
+                $errorMsg = $emailService->printDebugger();
+                log_message('error', '[MetricsController::sendMessage] Error: ' . $errorMsg);
                 $errorCount++;
                 $lastError = $errorMsg;
             } else {
@@ -398,7 +400,7 @@ class MetricsController extends BaseController
         } else {
             return $this->response->setJSON([
                 'status' => 'error', 
-                'message' => 'Error al enviar los mensajes. ' . $lastError
+                'message' => 'Error al enviar los mensajes. ' . strip_tags((string)$lastError)
             ]);
         }
     }
