@@ -420,6 +420,7 @@ $routes->addRedirect('directorio/ultimas-empresas-registradas/(:num)', 'empresas
 // Must be last to avoid conflicts
 // Company Rating
 $routes->post('company/rate', 'Company::submitRating');
+$routes->post('company/rate_feedback', 'Company::submitRatingFeedback');
 
 $routes->get('empresa/export/(:num)', 'Company::exportPdf/$1');
 $routes->get('empresa/(:num)-(:any)', 'Company::showById/$1/$2');

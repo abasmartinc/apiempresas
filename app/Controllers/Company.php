@@ -626,4 +626,42 @@ class Company extends BaseController
             'new_count' => $stats['count']
         ]);
     }
+
+    /**
+     * Endpoint AJAX para guardar el feedback de una valoración < 5
+     */
+    public function submitRatingFeedback()
+    {
+        $request = service('request');
+        if (!$request->isAJAX()) {
+            return $this->response->setStatusCode(403)->setJSON(['status' => 'error', 'message' => 'Acceso denegado']);
+        }
+
+        $companyId = (int)$request->getPost('company_id');
+        $feedback = trim((string)$request->getPost('feedback'));
+        $ipAddress = $request->getIPAddress();
+
+        if ($companyId <= 0 || empty($feedback)) {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Datos inválidos']);
+        }
+
+        $ratingModel = new CompanyRatingModel();
+
+        // Buscar la valoración previa de esta IP y empresa
+        $ratingRow = $ratingModel->where('company_id', $companyId)
+                                 ->where('ip_address', $ipAddress)
+                                 ->first();
+
+        if (!$ratingRow) {
+            return $this->response->setStatusCode(404)->setJSON(['status' => 'error', 'message' => 'No se encontró la valoración previa']);
+        }
+
+        // Actualizar el feedback
+        $ratingModel->update($ratingRow['id'], ['feedback' => $feedback]);
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => '¡Gracias por ayudarnos a mejorar!'
+        ]);
+    }
 }

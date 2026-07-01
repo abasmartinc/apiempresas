@@ -16,6 +16,7 @@ class CompanyRatingModel extends Model
     protected $allowedFields    = [
         'company_id',
         'rating',
+        'feedback',
         'ip_address',
         'created_at'
     ];

@@ -1478,6 +1478,13 @@
                                 </div>
                                 <div id="rating-message"
                                     style="margin-top: 10px; font-size: 0.9rem; font-weight: 600; display: none;"></div>
+
+                                <div id="feedback-block" style="display: none; margin-top: 15px; text-align: left; padding-top: 15px; border-top: 1px solid #cbd5e1;">
+                                    <p id="feedback-prompt" style="font-size: 0.9rem; color: #475569; margin-bottom: 8px; font-weight: 600;"></p>
+                                    <textarea id="feedback-text" rows="3" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; resize: vertical; box-sizing: border-box;" placeholder="Escribe aquí tus comentarios..."></textarea>
+                                    <button id="submit-feedback-btn" style="margin-top: 10px; width: 100%; background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">Enviar sugerencia</button>
+                                    <div id="feedback-message" style="margin-top: 10px; font-size: 0.85rem; font-weight: 600; display: none; text-align: center;"></div>
+                                </div>
                             </div>
 
                             <script>
@@ -1565,6 +1572,76 @@
                                                         let statsDisplay = document.getElementById('rating-stats-display');
                                                         statsDisplay.innerHTML = `Puntuación media: <span id="avg-rating-val" style="color: #0f172a;">${data.new_avg}</span>/5 (<span id="count-rating-val">${data.new_count}</span> votos)`;
 
+                                                        if (val < 5) {
+                                                            const feedbackBlock = document.getElementById('feedback-block');
+                                                            const feedbackPrompt = document.getElementById('feedback-prompt');
+                                                            feedbackBlock.style.display = 'block';
+                                                            
+                                                            if (val == 4) {
+                                                                feedbackPrompt.innerText = 'Casi perfecto. ¿Qué detalle podríamos mejorar de la ficha?';
+                                                            } else if (val == 3) {
+                                                                feedbackPrompt.innerText = 'Gracias por tu valoración. ¿En qué consideras que deberíamos mejorar la ficha?';
+                                                            } else if (val == 2) {
+                                                                feedbackPrompt.innerText = 'Lamentamos no cumplir tus expectativas. ¿Qué información echas en falta o consideras incorrecta?';
+                                                            } else if (val == 1) {
+                                                                feedbackPrompt.innerText = 'Sentimos mucho tu mala experiencia. Por favor, indícanos qué errores graves has encontrado en la ficha para solucionarlos de inmediato.';
+                                                            }
+
+                                                            const submitBtn = document.getElementById('submit-feedback-btn');
+                                                            submitBtn.onclick = function() {
+                                                                const text = document.getElementById('feedback-text').value;
+                                                                const msg = document.getElementById('feedback-message');
+                                                                if (!text.trim()) {
+                                                                    msg.style.display = 'block';
+                                                                    msg.style.color = '#dc2626';
+                                                                    msg.innerText = 'Por favor, escribe un comentario.';
+                                                                    return;
+                                                                }
+
+                                                                submitBtn.disabled = true;
+                                                                submitBtn.innerText = 'Enviando...';
+                                                                submitBtn.style.opacity = '0.7';
+
+                                                                fetch('<?= site_url('company/rate_feedback') ?>', {
+                                                                    method: 'POST',
+                                                                    headers: {
+                                                                        'Content-Type': 'application/x-www-form-urlencoded',
+                                                                        'X-Requested-With': 'XMLHttpRequest'
+                                                                    },
+                                                                    body: new URLSearchParams({
+                                                                        'company_id': companyId,
+                                                                        'feedback': text,
+                                                                        '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                                                                    })
+                                                                })
+                                                                .then(res => res.json())
+                                                                .then(fData => {
+                                                                    msg.style.display = 'block';
+                                                                    if (fData.status === 'success') {
+                                                                        msg.style.color = '#16a34a';
+                                                                        msg.innerText = fData.message;
+                                                                        setTimeout(() => {
+                                                                            feedbackBlock.style.display = 'none';
+                                                                        }, 3000);
+                                                                    } else {
+                                                                        msg.style.color = '#dc2626';
+                                                                        msg.innerText = fData.message || 'Error al enviar sugerencia';
+                                                                        submitBtn.disabled = false;
+                                                                        submitBtn.innerText = 'Enviar sugerencia';
+                                                                        submitBtn.style.opacity = '1';
+                                                                    }
+                                                                })
+                                                                .catch(err => {
+                                                                    msg.style.display = 'block';
+                                                                    msg.style.color = '#dc2626';
+                                                                    msg.innerText = 'Error de conexión';
+                                                                    submitBtn.disabled = false;
+                                                                    submitBtn.innerText = 'Enviar sugerencia';
+                                                                    submitBtn.style.opacity = '1';
+                                                                });
+                                                            };
+                                                        }
+
                                                     } else {
                                                         msgDiv.style.color = '#dc2626';
                                                         msgDiv.innerText = data.message || 'Error al procesar la valoración';
@@ -1585,30 +1662,26 @@
                                 });
                             </script>
 
-                            <!-- CTA RADAR PRO (Sidebar Light & Compact) -->
-                            <a href="<?= site_url('radar') ?>" style="display: block; background: linear-gradient(135deg, #ffffff 0%, #f4f7fb 100%); border-radius: 12px; padding: 1.25rem; text-decoration: none; position: relative; overflow: hidden; border: 1px solid rgba(59, 130, 246, 0.2); box-shadow: 0 4px 15px -3px rgba(37, 99, 235, 0.05); transition: transform 0.2s, box-shadow 0.2s;"
-                               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px -5px rgba(37, 99, 235, 0.1)';"
-                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px -3px rgba(37, 99, 235, 0.05)';">
+                            <!-- CTA VERTICE (Sidebar) -->
+                            <a href="https://vertice.apiempresas.es" target="_blank" rel="noopener noreferrer" style="display: block; background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); border-radius: 12px; padding: 1.5rem 1.25rem; text-decoration: none; position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.5); transition: transform 0.2s, box-shadow 0.2s;"
+                               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 30px -5px rgba(15, 23, 42, 0.6)';"
+                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px -5px rgba(15, 23, 42, 0.5)';">
                                 
-                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.75rem;">
-                                    <div style="background: rgba(37, 99, 235, 0.1); padding: 6px; border-radius: 6px; color: #2563eb; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <circle cx="12" cy="12" r="6"></circle>
-                                            <circle cx="12" cy="12" r="2"></circle>
-                                        </svg>
-                                    </div>
-                                    <h3 style="font-size: 1rem; font-weight: 800; color: #0f172a; margin: 0; line-height: 1.2;">
-                                        Alertas Radar B2B
-                                    </h3>
+                                <!-- Decorative element -->
+                                <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(249, 115, 22, 0.2); filter: blur(30px); border-radius: 50%;"></div>
+                                
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.85rem; position: relative; z-index: 1;">
+                                    <span style="background: #22c55e; color: #ffffff; font-size: 0.7rem; font-weight: 800; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px; text-transform: uppercase; box-shadow: 0 2px 5px rgba(34, 197, 94, 0.3);">
+                                        ¡NUEVO!
+                                    </span>
                                 </div>
                                 
-                                <p style="color: #475569; font-size: 0.85rem; line-height: 1.4; margin: 0 0 1rem 0;">
-                                    Monitoriza el BORME y recibe notificaciones de nuevas empresas similares a <strong><?= esc($companyName) ?></strong>.
+                                <p style="color: #f8fafc; font-size: 1rem; line-height: 1.5; margin: 0 0 1.25rem 0; font-weight: 600; position: relative; z-index: 1;">
+                                    No te la juegues al abrir un local. Analiza la viabilidad de cualquier municipio con IA.
                                 </p>
 
-                                <div style="display: flex; align-items: center; justify-content: center; width: 100%; background: #2563eb; color: #ffffff; font-weight: 600; font-size: 0.95rem; padding: 10px 0; border-radius: 6px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);">
-                                    Activar Radar PRO &rarr;
+                                <div style="display: flex; align-items: center; justify-content: center; width: 100%; background: linear-gradient(to right, #f97316, #ea580c); color: #ffffff; font-weight: 700; font-size: 1rem; padding: 12px 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); transition: all 0.2s; position: relative; z-index: 1;">
+                                    Probar Vértice gratis 🚀
                                 </div>
                             </a>
 
