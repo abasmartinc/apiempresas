@@ -269,31 +269,7 @@ $province = 'España';
                         </a>
                     </article>
 
-                    <?php if ($index === 4 && !empty($premiumLeads)): ?>
-                        <div class="ae-radar-page__premium-strip-wrap">
-                            <div class="ae-radar-page__premium-strip">
-                                <div class="ae-radar-page__premium-strip-copy">
-                                    <h3>Desbloquea el radar completo de España</h3>
-                                    <p>
-                                        Accede a todas las sociedades detectadas en territorio nacional, filtra por sector y provincia e identifica oportunidades directas a Excel.
-                                    </p>
 
-                                    <div class="ae-radar-page__premium-points">
-                                        <span>Filtros avanzados</span>
-                                        <span>Exportación Excel</span>
-                                        <span>Alertas diarias</span>
-                                    </div>
-                                </div>
-
-                                <div class="ae-radar-page__premium-strip-actions">
-                                        <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__premium-btn ae-radar-page__premium-btn--light">
-                                            Desbloquear listado completo
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endif; ?>
                 <?php endforeach; ?>
             </div>
 
@@ -324,22 +300,6 @@ $province = 'España';
                                     </p>
                                 </div>
 
-                                <div class="ae-radar-page__paywall-stats">
-                                    <div class="ae-radar-page__paywall-stat">
-                                        <div class="ae-radar-page__paywall-stat-value"><?= number_format($total_context_count ?? 0, 0, ',', '.') ?></div>
-                                        <div class="ae-radar-page__paywall-stat-label">Empresas este mes</div>
-                                    </div>
-
-                                    <div class="ae-radar-page__paywall-stat">
-                                        <div class="ae-radar-page__paywall-stat-value"><?= number_format($stats['semana'] ?? 0, 0, ',', '.') ?></div>
-                                        <div class="ae-radar-page__paywall-stat-label">Últimos 7 días</div>
-                                    </div>
-
-                                    <div class="ae-radar-page__paywall-stat">
-                                        <div class="ae-radar-page__paywall-stat-value"><?= number_format($stats['hoy'] ?? 0, 0, ',', '.') ?></div>
-                                        <div class="ae-radar-page__paywall-stat-label">Nuevas hoy</div>
-                                    </div>
-                                </div>
 
                                 <div class="ae-radar-page__paywall-actions" style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-top: 0.5rem;">
                                     <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--primary" style="background: linear-gradient(135deg, #3b82f6, #6366f1); border: none; padding: 1.1rem 3rem; font-size: 1.15rem; font-weight: 800; border-radius: 100px; box-shadow: 0 8px 24px rgba(99,102,241,0.45), 0 2px 8px rgba(59,130,246,0.3); letter-spacing: -0.01em; transition: all 0.25s ease; display: inline-block; min-width: 280px; text-align: center;">
@@ -598,31 +558,6 @@ $province = 'España';
     <?php
     $baseJsonUrl = rtrim(site_url('/'), '/');
     ?>
-    <!-- Final CTA Section -->
-    <section class="ae-radar-page__section container" style="background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; margin-top: 3rem !important;" style="margin-top: 4rem; padding-bottom: 6rem;">
-            <div style="background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 1.5rem; padding: 4rem 2rem; text-align: center; color: white; position: relative; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
-                <div style="position: relative; z-index: 2;">
-                    <h2 style="font-size: 2.5rem; font-weight: 900; margin-bottom: 1.5rem; letter-spacing: -0.02em; color: white;">Tu competencia ya está prospectando estas cuentas. Adelántate.</h2>
-                    <p style="font-size: 1.25rem; opacity: 0.8; max-width: 700px; margin: 0 auto 1.5rem; color: white;">Ahorra decenas de horas en prospección manual y dota a tu equipo comercial de un pipeline cualificado a diario.</p>
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
-                        <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary" style="padding: 1.25rem 3.5rem; font-size: 1.25rem; font-weight: 700; border-radius: 100px; background: white; color: #0f172a; box-shadow: 0 0 30px rgba(255,255,255,0.2);">
-                            Desbloquear el Radar Completo
-                        </a>
-                        <?php 
-                            $excelParams = [];
-                            if (isset($province)) $excelParams['provincia'] = $province;
-                            if (isset($period)) $excelParams['period'] = $period;
-                            if (isset($sector)) $excelParams['sector'] = json_encode($sector);
-                        ?>
-                        <a href="<?= site_url('excel/preview?' . http_build_query($excelParams)) ?>" style="color: rgba(255,255,255,0.8); font-size: 0.95rem; text-decoration: underline; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='rgba(255,255,255,0.8)'">
-                            O solo descargar este listado en Excel
-                        </a>
-                    </div>
-                    <p style="font-size: 0.95rem; color: rgba(255,255,255,0.7); margin-top: 1.25rem; font-weight: 500;">La mayoría de usuarios consigue su primer cliente en días</p>
-                </div>
-                <!-- Subtle background glow -->
-                <div style="position: absolute; top: -50%; left: -20%; width: 100%; height: 200%; background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);"></div>
-            </section>
 
 <?php
 /* Script LD+JSON */
@@ -671,22 +606,21 @@ $province = 'España';
     
     <!-- Modal Conversion -->
     <div id="radarConversionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); z-index: 99999; backdrop-filter: blur(8px); align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
-        <div style="background: white; border-radius: 1.25rem; padding: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); max-width: 600px; width: 90%; position: relative; text-align: center; transform: translateY(20px); transition: transform 0.3s ease;" class="radar-modal-content">
+        <div style="background: white; border-radius: 1.25rem; padding: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); max-width: 500px; width: 90%; position: relative; text-align: center; transform: translateY(20px); transition: transform 0.3s ease;" class="radar-modal-content">
             <button onclick="closeRadarModal()" style="position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; font-size: 1.75rem; cursor: pointer; color: #94a3b8; line-height: 1;">&times;</button>
             
-            <div style="width: 56px; height: 56px; background: #fef2f2; color: #dc2626; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V8a5 5 0 0 1 10 0v3"></path></svg>
+            <div style="width: 56px; height: 56px; background: #eff6ff; color: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
             </div>
             
-            <p style="font-weight: 800; color: #0f172a; margin-bottom: 0.5rem; font-size: 1.5rem; letter-spacing: -0.02em;">Estas empresas están activas ahora mismo</p>
-            <p style="color: #475569; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 500;">Otros proveedores ya están cerrando estas oportunidades</p>
-            <p style="color: #dc2626; margin-bottom: 0.75rem; font-size: 1.1rem; font-weight: 700;">Si no actúas ahora, perderás estas oportunidades</p>
-            <p style="color: #dc2626; margin-bottom: 2rem; font-size: 1.05rem; font-weight: 600;">Cada minuto que pasa, aumenta la probabilidad de perder estas oportunidades</p>
-            <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary" style="width: 100%; justify-content: center; padding: 1.15rem; font-size: 1.2rem; box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4); border-radius: 0.75rem;">
-                Acceder ahora y detectar antes que otros proveedores
+            <p style="font-weight: 800; color: #0f172a; margin-bottom: 0.75rem; font-size: 1.6rem; letter-spacing: -0.02em; line-height: 1.2;">¿Listo para empezar a prospectar?</p>
+            <p style="color: #475569; margin-bottom: 2rem; font-size: 1.1rem; line-height: 1.5;">Accede al listado completo de empresas, filtra por provincia y sector, y exporta tus leads directamente a Excel.</p>
+            
+            <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary" style="width: 100%; justify-content: center; padding: 1.15rem; font-size: 1.15rem; font-weight: 700; box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4); border-radius: 0.75rem;">
+                Desbloquear Radar Completo
             </a>
             
-            <p style="font-size: 0.95rem; color: #64748b; margin-top: 1.25rem; font-weight: 500;">La mayoría de usuarios consigue su primer cliente en días</p>
+            <a href="<?= site_url('excel/preview') ?>" style="display: block; color: #64748b; font-size: 0.95rem; text-decoration: underline; margin-top: 1.25rem; font-weight: 500;">O descargar muestra en Excel</a>
         </div>
     </div>
 
@@ -748,7 +682,7 @@ $province = 'España';
             });
         });
 
-        // Scroll > 60%
+        // Scroll > 60% (restored trigger as requested)
         window.addEventListener('scroll', () => {
             const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
             if (scrollPercent > 60 && !modalTriggered) {
