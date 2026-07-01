@@ -577,7 +577,16 @@ class RadarController extends BaseController
                 ->groupBy('registro_mercantil')->orderBy('total', 'DESC')->limit(12)->get()->getResultArray();
         }
 
-        $relatedSectors = $db->query("SELECT cnae_label as label FROM seo_stats_cnae WHERE LENGTH(cnae_label) < 100 ORDER BY total_companies DESC LIMIT 12")->getResultArray();
+        $relatedSectors = [
+            ['label' => 'Construcción'],
+            ['label' => 'Hostelería'],
+            ['label' => 'Comercio al por mayor'],
+            ['label' => 'Transporte y logística'],
+            ['label' => 'Programación e informática'],
+            ['label' => 'Actividades inmobiliarias'],
+            ['label' => 'Consultoría empresarial'],
+            ['label' => 'Servicios a edificios']
+        ];
 
         // Final Title Sanitization: Aggressive length management for SEO (Max 60 chars)
         if (mb_strlen($seoTitle) > 60) {
@@ -763,18 +772,7 @@ class RadarController extends BaseController
         $row = $db->query("SELECT cnae_2009 as code, label_2009 as label FROM cnae_2009_2025 WHERE label_2009 LIKE ? LIMIT 1", ["%$searchTerm%"])->getRowArray();
         if ($row) return ['codes' => [$row['code']], 'label' => $this->normalizeLabel($row['label'])];
 
-        $statRow = $db->query("
-            SELECT cnae_code, cnae_label 
-            FROM seo_stats_cnae 
-            WHERE cnae_label LIKE ? 
-            AND cnae_label NOT LIKE '% S.L.%' 
-            AND cnae_label NOT LIKE '% SL%'
-            AND cnae_label NOT LIKE '% S.A.%' 
-            AND cnae_label NOT LIKE '% SA%'
-            LIMIT 1
-        ", ["%$searchTerm%"])->getRowArray();
-        
-        if ($statRow) return ['codes' => [$statRow['cnae_code']], 'label' => $this->normalizeLabel($statRow['cnae_label'])];
+        // seo_stats_cnae fallback removed due to corrupted data
 
         return null;
     }
@@ -899,46 +897,14 @@ class RadarController extends BaseController
             $provincesCount++;
         }
 
-        // 2. Sincronizar CNAE
-        $cnaes = $db->query("SELECT DISTINCT cnae_code, cnae_label FROM companies WHERE cnae_code IS NOT NULL AND cnae_label IS NOT NULL AND cnae_label != ''")->getResultArray();
-
-        foreach ($cnaes as $row) {
-            $cnaeCode = $row['cnae_code'];
-            $cnaeLabel = $row['cnae_label'];
-
-            if (empty($cnaeCode) || strlen($cnaeCode) > 6) continue;
-
-            $totalRow = $db->query("SELECT COUNT(*) as total FROM companies WHERE cnae_code = ?", [$cnaeCode])->getRow();
-            $total = $totalRow->total;
-
-            if ($total == 0) continue;
-
-            $topProvinces = $db->query("
-                SELECT registro_mercantil as provincia, COUNT(id) as total 
-                FROM companies 
-                WHERE cnae_code = ? AND registro_mercantil IS NOT NULL AND registro_mercantil != ''
-                AND fecha_constitucion >= ?
-                GROUP BY registro_mercantil 
-                ORDER BY total DESC 
-                LIMIT 8
-            ", [$cnaeCode, date('Y-m-d', strtotime('-90 days'))])->getResultArray();
-
-            $sql = "INSERT INTO seo_stats_cnae (cnae_code, cnae_label, total_companies, top_provinces) 
-                    VALUES (?, ?, ?, ?) 
-                    ON DUPLICATE KEY UPDATE 
-                        cnae_label = VALUES(cnae_label),
-                        total_companies = VALUES(total_companies), 
-                        top_provinces = VALUES(top_provinces)";
-            $db->query($sql, [$cnaeCode, $cnaeLabel, $total, json_encode($topProvinces)]);
-            $sectorsCount++;
-        }
+        // 2. Sincronizar CNAE has been removed due to deprecation of seo_stats_cnae table
 
         return $this->response->setJSON([
             'status' => 'success',
             'message' => 'Sincronización SEO completada',
             'stats' => [
                 'provinces_updated' => $provincesCount,
-                'sectors_updated' => $sectorsCount
+                'sectors_updated' => 0
             ],
             'timestamp' => date('Y-m-d H:i:s')
         ]);

@@ -42,7 +42,6 @@ class SeoStatsSync extends BaseCommand
         $db = \Config\Database::connect();
         
         $this->syncProvinces($db);
-        $this->syncSectors($db);
         
         CLI::write("Sincronización completada exitosamente.", 'green');
     }
@@ -101,54 +100,5 @@ class SeoStatsSync extends BaseCommand
         CLI::newLine();
     }
 
-    private function syncSectors($db)
-    {
-        CLI::write("2/2 Procesando vistas por CNAE...", 'yellow');
-        
-        // Extraer listado de códigos CNAE limpios
-        $cnaes = $db->query("SELECT DISTINCT cnae_code, cnae_label FROM companies WHERE cnae_code IS NOT NULL AND cnae_label IS NOT NULL AND cnae_label != ''")->getResultArray();
-        $totalCnaes = count($cnaes);
-        
-        CLI::write("Encontrados {$totalCnaes} grupos CNAE.", 'white');
-
-        foreach ($cnaes as $index => $row) {
-            $cnaeCode = $row['cnae_code'];
-            $cnaeLabel = $row['cnae_label'];
-            
-            // Evitar procesar CNAE numéricos corruptos o muy largos/nulos
-            if (empty($cnaeCode) || strlen($cnaeCode) > 6) continue;
-
-            $totalRow = $db->query("SELECT COUNT(*) as total FROM companies WHERE cnae_code = ?", [$cnaeCode])->getRow();
-            $total = $totalRow->total;
-            
-            if ($total == 0) continue;
-
-            // Top Provincias para este CNAE
-            $topProvinces = $db->query("
-                SELECT registro_mercantil as provincia, COUNT(id) as total 
-                FROM companies 
-                WHERE cnae_code = ? AND registro_mercantil IS NOT NULL AND registro_mercantil != ''
-                GROUP BY registro_mercantil 
-                ORDER BY total DESC 
-                LIMIT 10
-            ", [$cnaeCode])->getResultArray();
-
-            $sql = "INSERT INTO seo_stats_cnae (cnae_code, cnae_label, total_companies, top_provinces) 
-                    VALUES (?, ?, ?, ?) 
-                    ON DUPLICATE KEY UPDATE 
-                        cnae_label = VALUES(cnae_label),
-                        total_companies = VALUES(total_companies), 
-                        top_provinces = VALUES(top_provinces)";
-                        
-            $db->query($sql, [$cnaeCode, $cnaeLabel, $total, json_encode($topProvinces)]);
-            
-             if ($index > 0 && $index % 50 === 0) {
-                 CLI::newLine();
-                 CLI::write("Progreso de Sectores: " . $index . " / " . $totalCnaes, 'white');
-            } else {
-                 CLI::print('.', 'white');
-            }
-        }
-        CLI::newLine();
-    }
+    // syncSectors removed due to deprecation of seo_stats_cnae table
 }
