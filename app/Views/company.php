@@ -1665,7 +1665,8 @@
                             <!-- CTA VERTICE (Sidebar) -->
                             <a href="https://vertice.apiempresas.es" target="_blank" rel="noopener noreferrer" style="display: block; background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); border-radius: 12px; padding: 1.5rem 1.25rem; text-decoration: none; position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.5); transition: transform 0.2s, box-shadow 0.2s;"
                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 30px -5px rgba(15, 23, 42, 0.6)';"
-                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px -5px rgba(15, 23, 42, 0.5)';">
+                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px -5px rgba(15, 23, 42, 0.5)';"
+                               onclick="if(window.trackEvent) trackEvent('click_vertice_banner', { source: 'company_sidebar' });">
                                 
                                 <!-- Decorative element -->
                                 <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(249, 115, 22, 0.2); filter: blur(30px); border-radius: 50%;"></div>
