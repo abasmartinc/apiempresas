@@ -28,7 +28,7 @@ class CompanyEnrichmentController extends BaseApiController
         path: "/api/v1/companies/score",
         summary: "Scoring Comercial",
         description: "Obtener la puntuación y desglose de scoring para una empresa. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 3 créditos del monedero (bono prepago). Las respuestas con error (400, 404, 403, etc.) no consumen cuota ni créditos.",
-        tags: ["2. Plan Professional"]
+        tags: ["2. Plan Pro"]
     )]
     #[OA\Parameter(
         name: "cif",
@@ -93,7 +93,7 @@ class CompanyEnrichmentController extends BaseApiController
         path: "/api/v1/companies/signals",
         summary: "Señales Societarias",
         description: "Obtener eventos societarios relevantes (BORME) de una empresa. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 3 créditos del monedero (bono prepago). Las respuestas con error (400, 404, 403, etc.) no consumen cuota ni créditos.",
-        tags: ["2. Plan Professional"]
+        tags: ["2. Plan Pro"]
     )]
     #[OA\Parameter(
         name: "cif",

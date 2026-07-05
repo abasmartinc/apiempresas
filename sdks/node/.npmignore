@@ -1,0 +1,12 @@
+# Tests
+tests/
+jest.config.js
+
+# Source map & types source if not needed
+# src/ (optional, let's keep it just in case source maps need it, but generally good to ignore if we don't ship source maps)
+# Let's ignore it to save space
+src/
+tsconfig.json
+
+# Local files
+test_run.js

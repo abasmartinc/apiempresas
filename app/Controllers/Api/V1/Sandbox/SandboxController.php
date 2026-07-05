@@ -348,4 +348,41 @@ class SandboxController extends \App\Controllers\Api\V1\BaseApiController
             ]
         ]);
     }
+    // =========================================================================
+    // ENDPOINT: /api/sandbox/v1/companies/borme
+    // =========================================================================
+    public function borme()
+    {
+        $cifRaw = $this->request->getGet('cif');
+        if (!$cifRaw) return $this->respond(['success' => false, 'error' => 'VALIDATION_ERROR', 'message' => 'CIF es requerido'], 400);
+
+        $cif = $this->validateMagicCif($cifRaw);
+        if (!$cif) return $this->getForbiddenResponse();
+
+        if ($cif !== 'A15075062') {
+            return $this->respond(['success' => false, 'error' => 'COMPANY_NOT_FOUND', 'message' => 'Empresa no encontrada.'], 404);
+        }
+
+        return $this->respond([
+            'success' => true,
+            'data' => [
+                'cif' => $cif,
+                'company_name' => 'INDUSTRIA DE DISENO TEXTIL SA',
+                'events' => [
+                    [
+                        'date' => '2023-11-01',
+                        'act_types' => 'Nombramientos, Ceses',
+                        'description' => 'Ceses/Dimisiones. Administrador único: JUAN PEREZ...',
+                        'url_pdf' => 'https://www.boe.es/borme/dias/2023/11/01/pdfs/BORME-A-2023-100-28.pdf'
+                    ],
+                    [
+                        'date' => '2022-05-14',
+                        'act_types' => 'Constitución',
+                        'description' => 'Constitución de la sociedad. Capital: 3000 Euros.',
+                        'url_pdf' => 'https://www.boe.es/borme/dias/2022/05/14/pdfs/BORME-A-2022-50-28.pdf'
+                    ]
+                ]
+            ]
+        ]);
+    }
 }

@@ -1,0 +1,29 @@
+{
+  "name": "apiempresas",
+  "version": "1.0.1",
+  "description": "SDK oficial de APIEmpresas.es para Node.js y TypeScript",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "apiempresas",
+    "empresas",
+    "cif",
+    "borme",
+    "registro mercantil",
+    "españa"
+  ],
+  "author": "APIEmpresas",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.19",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.3.3"
+  }
+}

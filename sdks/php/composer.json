@@ -1,0 +1,30 @@
+{
+    "name": "apiempresas/apiempresas-php",
+    "description": "SDK oficial de APIEmpresas.es para PHP",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "APIEmpresas",
+            "email": "soporte@apiempresas.es"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "ext-curl": "*",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "ApiEmpresas\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ApiEmpresas\\Tests\\": "tests/"
+        }
+    }
+}

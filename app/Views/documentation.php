@@ -21,22 +21,28 @@
             <!-- SIDEBAR -->
             <aside class="docs-sidebar">
                 <div class="docs-sidebar-section">
-                    <h3>General</h3>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <h3 style="margin: 0;">General</h3>
+                        <button id="theme-toggle" class="theme-toggle-btn" title="Alternar modo oscuro">
+                            <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                            <svg class="sun-icon" style="display:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                        </button>
+                    </div>
                     <ul class="docs-nav">
                         <li>
                             <a href="#intro" class="active">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                                Introducción
+                                <span class="nav-num">1.</span> Introducción
                             </a>
                         </li>
                         <li>
                             <a href="#auth">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                                Autenticación
+                                <span class="nav-num">2.</span> Autenticación
                             </a>
                         </li>
                         <li>
-                            <a href="<?= site_url('api/docs') ?>" style="color: #2563eb; font-weight: 800;">
+                            <a href="<?= site_url('api/docs') ?>" target="_blank">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
                                 Swagger UI (Interactivo)
                             </a>
@@ -50,37 +56,43 @@
                         <li>
                             <a href="#endpoint-by-cif">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                                Consulta por CIF
+                                <span class="nav-num">3.</span> Consulta por CIF
                             </a>
                         </li>
                         <li>
                             <a href="#endpoint-search">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                                Búsqueda
+                                <span class="nav-num">4.</span> Búsqueda
                             </a>
                         </li>
                         <li>
                             <a href="#endpoint-expanded">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                                Comercial <span class="sidebar-badge pro">Pro</span>
+                                <span class="nav-num">5.</span> Comercial <span class="sidebar-badge pro">Pro</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#endpoint-borme">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                <span class="nav-num">6.</span> Historial BORME <span class="sidebar-badge pro">Pro</span>
                             </a>
                         </li>
                         <li>
                             <a href="#endpoint-radar">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                                Radar <span class="sidebar-badge pro">Pro</span>
+                                <span class="nav-num">7.</span> Radar <span class="sidebar-badge pro">Pro</span>
                             </a>
                         </li>
                         <li>
                             <a href="#endpoint-webhooks">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
-                                Webhooks <span class="sidebar-badge biz">Biz</span>
+                                <span class="nav-num">8.</span> Webhooks <span class="sidebar-badge biz">Biz</span>
                             </a>
                         </li>
                         <li>
                             <a href="#endpoint-usage">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="18" y="3" width="4" height="18"></rect><rect x="10" y="8" width="4" height="13"></rect><rect x="2" y="13" width="4" height="8"></rect></svg>
-                                Consumo
+                                <span class="nav-num">9.</span> Consumo
                             </a>
                         </li>
                     </ul>
@@ -92,31 +104,37 @@
                         <li>
                             <a href="#errores">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                                Gestión de Errores
+                                <span class="nav-num">10.</span> Gestión de Errores
                             </a>
                         </li>
                         <li>
                             <a href="#throttling">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                                Rate Limiting
+                                <span class="nav-num">11.</span> Rate Limiting
                             </a>
                         </li>
                         <li>
                             <a href="#paginacion">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                                Paginación
+                                <span class="nav-num">12.</span> Paginación
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#sdks">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+                                <span class="nav-num">13.</span> SDKs Oficiales
                             </a>
                         </li>
                         <li>
                             <a href="#examples">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                                Ejemplos
+                                <span class="nav-num">14.</span> Ejemplos
                             </a>
                         </li>
                         <li>
                             <a href="#postman">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                                Postman
+                                <span class="nav-num">15.</span> Postman
                             </a>
                         </li>
                     </ul>
@@ -126,7 +144,32 @@
             <!-- CONTENIDO -->
             <div class="docs-content">
                 <h1>Documentación de la API</h1>
-                <p>Bienvenido a la documentación oficial de <strong>APIEmpresas.es</strong>. Nuestra API te permite consultar datos mercantiles actualizados de empresas españolas de forma rápida y sencilla.</p>
+                <p class="docs-intro-lead" style="font-size: 1.1rem; color: #334155; line-height: 1.7; margin-bottom: 24px;">
+                    Bienvenido a la documentación oficial de <strong>APIEmpresas.es</strong>. Nuestra API RESTful está diseñada para equipos de desarrollo que necesitan integrar inteligencia mercantil española (datos, BORME, contactos, scoring y vínculos) en sus propios sistemas de forma rápida y sin fricción.
+                </p>
+                <div class="docs-intro-highlights" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 0 0 40px 0;">
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.01);">
+                        <div style="font-weight: 800; color: #0f172a; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                            Arquitectura RESTful
+                        </div>
+                        <div style="font-size: 0.9rem; color: #475569; line-height: 1.5;">Respuestas siempre en formato JSON estándar con URLs predecibles orientadas a recursos.</div>
+                    </div>
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.01);">
+                        <div style="font-weight: 800; color: #0f172a; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            Alta Disponibilidad
+                        </div>
+                        <div style="font-size: 0.9rem; color: #475569; line-height: 1.5;">Protección nativa con Rate Limiting Inteligente y paginación ultra rápida por cursores.</div>
+                    </div>
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.01);">
+                        <div style="font-weight: 800; color: #0f172a; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                            Errores RFC 7807
+                        </div>
+                        <div style="font-size: 0.9rem; color: #475569; line-height: 1.5;">Implementamos el estándar Problem Details para un tipado de errores estricto y predecible.</div>
+                    </div>
+                </div>
 
                 <!-- API PLAYGROUND -->
                 <div class="api-playground" style="margin: 40px 0; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); background: #ffffff;">
@@ -157,6 +200,7 @@
                                     <option value="/api/sandbox/v1/companies/contact-prep">GET /companies/contact-prep (Prep. Contacto)</option>
                                     <option value="/api/sandbox/v1/companies/match">GET /companies/match (Match B2B)</option>
                                     <option value="/api/sandbox/v1/companies/network">GET /companies/network (Red Vínculos)</option>
+                                    <option value="/api/sandbox/v1/companies/borme">GET /companies/borme (Historial BORME)</option>
                                     <option value="/api/sandbox/v1/companies/radar">GET /companies/radar (Radar Pro)</option>
                                 </select>
                             </div>
@@ -275,41 +319,7 @@
                 });
                 </script>
 
-                <!-- USE CASES -->
-                <div class="use-case-box" style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border: 1px solid #e2e8f0; padding: 40px; border-radius: 24px; margin: 40px 0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 32px;">
-                        <div style="width: 40px; height: 40px; background: #eff6ff; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #2563eb;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-                        </div>
-                        <h3 style="margin: 0; color: #0f172a; font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em;">Casos de Uso Principales</h3>
-                    </div>
-                    
-                    <div class="use-case-grid">
-                        <div class="use-case-card" style="background: white; border: 1px solid #f1f5f9; padding: 24px; border-radius: 18px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
-                            <div style="margin-bottom: 16px; color: #2563eb; background: #f0f7ff; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                            </div>
-                            <h4 style="margin: 0 0 12px 0; color: #1e293b; font-size: 1.1rem; font-weight: 800;">Validación de Empresas</h4>
-                            <p style="margin: 0; color: #64748b; font-size: 0.95rem; line-height: 1.6; font-weight: 500;">Automatiza la verificación de datos mercantiles por CIF/NIF en tiempo real para tus procesos de onboarding y KYC.</p>
-                        </div>
 
-                        <div class="use-case-card" style="background: white; border: 1px solid #f1f5f9; padding: 24px; border-radius: 18px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
-                            <div style="margin-bottom: 16px; color: #8b5cf6; background: #f5f3ff; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
-                            </div>
-                            <h4 style="margin: 0 0 12px 0; color: #1e293b; font-size: 1.1rem; font-weight: 800;">Enriquecimiento de CRM</h4>
-                            <p style="margin: 0; color: #64748b; font-size: 0.95rem; line-height: 1.6; font-weight: 500;">Mantén tu base de datos siempre actualizada con información oficial: CNAE, provincias, estados mercantiles y más.</p>
-                        </div>
-
-                        <div class="use-case-card" style="background: white; border: 1px solid #f1f5f9; padding: 24px; border-radius: 18px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
-                            <div style="margin-bottom: 16px; color: #10b981; background: #ecfdf5; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-                            </div>
-                            <h4 style="margin: 0 0 12px 0; color: #1e293b; font-size: 1.1rem; font-weight: 800;">Generación de Leads</h4>
-                            <p style="margin: 0; color: #64748b; font-size: 0.95rem; line-height: 1.6; font-weight: 500;">Utiliza el endpoint de Radar para recibir alertas de nuevas empresas constituidas y actuar antes que tu competencia.</p>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- INTRO -->
                 <section class="docs-section" id="intro">
@@ -317,27 +327,55 @@
                     <p>
                         La API está diseñada siguiendo principios REST. Todas las respuestas se devuelven en formato JSON y requieren una conexión segura vía HTTPS.
                     </p>
-                    <div class="api-info-card">
-                        <strong>URL Producción:</strong> <code>https://apiempresas.es/api/v1</code><br>
-                        <strong>URL Sandbox:</strong> <code>https://apiempresas.es/api/sandbox/v1</code>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin: 24px 0;">
+                        <div style="background: #1e293b; border: 1px solid #334155; padding: 20px; border-radius: 12px; position: relative;">
+                            <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div> Entorno de Producción
+                            </div>
+                            <code style="color: #e2e8f0; font-family: 'Fira Code', monospace; font-size: 0.95rem; background: transparent; padding: 0;">https://apiempresas.es/api/v1</code>
+                        </div>
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; position: relative;">
+                            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;"></div> Entorno Sandbox (Gratis)
+                            </div>
+                            <code style="color: #0f172a; font-family: 'Fira Code', monospace; font-size: 0.95rem; background: transparent; padding: 0;">https://apiempresas.es/api/sandbox/v1</code>
+                        </div>
                     </div>
-                    <div class="api-info-card" style="background: #fffbeb; border-left-color: #f59e0b; margin-top: 15px;">
-                        <h4 style="margin: 0 0 10px 0; color: #92400e; font-weight: 800;">Entorno de Pruebas (Sandbox)</h4>
-                        <p style="margin: 0 0 10px 0; font-size: 14px; color: #b45309;">
-                            Para hacer pruebas <strong>sin consumir saldo ni cuota</strong>, envía tus peticiones a la URL de Sandbox usando tu API Key habitual.
-                        </p>
-                        <strong style="font-size: 13px; color: #92400e;">CIFs mágicos permitidos en el Sandbox:</strong>
-                        <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 13px; color: #b45309;">
-                            <li><code>A15075062</code>: Simula una consulta exitosa (Inditex).</li>
-                            <li><code>B00000000</code>: Simula un error 404 de empresa no encontrada.</li>
-                            <li><code>C11111111</code>: Simula un error 404 de empresa encolada asíncronamente.</li>
-                        </ul>
-                        <strong style="font-size: 13px; color: #92400e; display: block; margin-top: 10px;">Cómo probar otros endpoints en Sandbox:</strong>
-                        <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 13px; color: #b45309;">
-                            <li><strong>Búsqueda (/search):</strong> Puedes enviar cualquier texto en el parámetro <code>q=</code>. Siempre te devolverá datos ficticios de Inditex para que valides el parseo de listas.</li>
-                            <li><strong>Por Lotes (/batch):</strong> Envía un JSON mezclando CIFs mágicos (ej. <code>{"cifs": ["A15075062", "B00000000"]}</code>) para probar cómo tu código maneja múltiples respuestas.</li>
-                            <li><strong>Endpoints Premium (/score, /network, /insights, etc.):</strong> Llama a cualquiera de ellos pasando el CIF <code>A15075062</code> por parámetro GET para recibir la estructura de datos simulada y validar la integración de tu lado.</li>
-                        </ul>
+
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-top: 32px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);">
+                        <div style="background: #f8fafc; padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 10px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            <h4 style="margin: 0; color: #0f172a; font-weight: 800; font-size: 1.05rem;">Guía del Sandbox (Entorno de Pruebas)</h4>
+                        </div>
+                        <div style="padding: 24px;">
+                            <p style="margin: 0 0 24px 0; font-size: 0.95rem; color: #475569; line-height: 1.6;">
+                                Para hacer pruebas <strong>sin consumir saldo ni cuota</strong>, envía tus peticiones a la URL de Sandbox usando tu API Key habitual. Hemos habilitado varios "CIFs mágicos" que te permitirán simular diferentes flujos en tu aplicación:
+                            </p>
+                            
+                            <h5 style="margin: 0 0 16px 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b;">🎯 CIFs Mágicos Permitidos</h5>
+                            <ul style="margin: 0 0 32px 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px;">
+                                <li style="display: flex; gap: 16px; align-items: flex-start;">
+                                    <code style="background: #f1f5f9; color: #0f172a; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #cbd5e1; font-weight: 700; min-width: 90px; text-align: center;">A15075062</code>
+                                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.5; padding-top: 4px;">Simula una consulta exitosa (Devuelve datos reales de Inditex).</span>
+                                </li>
+                                <li style="display: flex; gap: 16px; align-items: flex-start;">
+                                    <code style="background: #fef2f2; color: #dc2626; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #fecaca; font-weight: 700; min-width: 90px; text-align: center;">B00000000</code>
+                                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.5; padding-top: 4px;">Simula un error HTTP 404 estandarizado de "empresa no encontrada".</span>
+                                </li>
+                                <li style="display: flex; gap: 16px; align-items: flex-start;">
+                                    <code style="background: #fffbeb; color: #d97706; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #fde68a; font-weight: 700; min-width: 90px; text-align: center;">C11111111</code>
+                                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.5; padding-top: 4px;">Simula un error HTTP 404 indicando que la empresa está encolada asíncronamente para extracción profunda.</span>
+                                </li>
+                            </ul>
+
+                            <h5 style="margin: 0 0 16px 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b;">⚡ Simulación de Endpoints Complejos</h5>
+                            <ul style="margin: 0; padding-left: 20px; color: #334155; font-size: 0.95rem; line-height: 1.7; display: flex; flex-direction: column; gap: 10px;">
+                                <li><strong>Búsqueda (/search):</strong> Envía cualquier texto en <code>q=</code>. Siempre devuelve datos de Inditex para validar el parseo de listas en tu frontend.</li>
+                                <li><strong>Por Lotes (/batch):</strong> Envía un JSON con CIFs mágicos (ej. <code>{"cifs": ["A15075062", "B00000000"]}</code>) para probar cómo tu código maneja respuestas parciales.</li>
+                                <li><strong>Endpoints Premium (/score, /insights):</strong> Llama a cualquiera usando <code>A15075062</code> para recibir su estructura de datos simulada y validar la integración.</li>
+                            </ul>
+                        </div>
                     </div>
                 </section>
 
@@ -404,7 +442,53 @@ Accept: application/json</code></pre>
     ]
   }
 }</code></pre>
-                    <p style="font-size: 13px; color: #64748b; margin-top: 5px;">* El array <code>administrators</code> solo se incluye si envías el parámetro <code>admin=true</code> y tu plan lo permite.</p>
+                    <p style="font-size: 13px; color: #64748b; margin-top: 5px; margin-bottom: 24px;">* El array <code>administrators</code> solo se incluye si envías el parámetro <code>admin=true</code> y tu plan lo permite.</p>
+
+                    <h4 style="margin-bottom: 12px; font-size: 1.1rem; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                        Diccionario de Datos (Schema)
+                    </h4>
+                    <table class="docs-table" style="margin-bottom: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <thead style="background: #f8fafc;">
+                            <tr>
+                                <th style="width: 25%;">Campo</th>
+                                <th style="width: 15%;">Tipo</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">cif</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td>
+                                <td style="color: #475569;">El Código de Identificación Fiscal normalizado.</td>
+                            </tr>
+                            <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">name</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td>
+                                <td style="color: #475569;">La razón social oficial de la empresa registrada en el BORME.</td>
+                            </tr>
+                            <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">status</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">enum</span></td>
+                                <td style="color: #475569;">Estado mercantil actual. Puede ser: <code style="font-size: 0.8rem;">ACTIVA</code>, <code style="font-size: 0.8rem;">CESADA</code>, <code style="font-size: 0.8rem;">LIQUIDACION</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">province</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td>
+                                <td style="color: #475569;">Provincia de registro de la sede social principal.</td>
+                            </tr>
+                            <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">cnae</code> / <code style="background: transparent; color: #2563eb; font-weight: 600;">cnae_label</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td>
+                                <td style="color: #475569;">Código CNAE de su actividad económica principal y su descripción descriptiva completa.</td>
+                            </tr>
+                            <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">administrators[]</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td>
+                                <td style="color: #475569;">Lista de administradores actuales. Cada objeto contiene <code style="font-size: 0.8rem;">name</code> y su cargo oficial (<code style="font-size: 0.8rem;">position</code>).</td>
+                            </tr>
+                        </tbody>
+                    </table>
 
 
                 </section>
@@ -456,6 +540,21 @@ Accept: application/json</code></pre>
     "has_more": false
   }
 }</code></pre>
+                    <h4 style="margin-top: 24px; margin-bottom: 12px; font-size: 1.1rem; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                        Diccionario de Datos (Search)
+                    </h4>
+                    <table class="docs-table" style="margin-bottom: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <thead style="background: #f8fafc;">
+                            <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">Lista de empresas coincidentes. Contiene campos básicos como <code style="font-size: 0.8rem;">cif</code>, <code style="font-size: 0.8rem;">name</code>, <code style="font-size: 0.8rem;">status</code>, <code style="font-size: 0.8rem;">province</code>.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">meta.page</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Página actual de los resultados de búsqueda.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">meta.limit</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Número máximo de resultados por página.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">meta.has_more</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">boolean</span></td><td style="color: #475569;">Indica si existen más resultados para la búsqueda actual.</td></tr>
+                        </tbody>
+                    </table>
                 </section>
 
                 <!-- EXPANDED -->
@@ -481,6 +580,15 @@ Accept: application/json</code></pre>
     "last_signal": { "type": "CONSTITUCION", "date": "2023-10-01" }
   }
 }</code></pre>
+                        <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <thead style="background: #f8fafc;">
+                                <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.score</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Puntuación de 0 a 100 indicando el nivel de actividad comercial.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.priority</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">enum</span></td><td style="color: #475569;">Nivel de prioridad de prospección: Alta, Media, Baja.</td></tr>
+                            </tbody>
+                        </table>
                     </div>
 
                     <!-- SIGNALS -->
@@ -505,6 +613,15 @@ Accept: application/json</code></pre>
     ]
   }
 }</code></pre>
+                        <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <thead style="background: #f8fafc;">
+                                <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">signals[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">Lista de eventos recientes. Cada objeto tiene un `type` y `label`.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">signals[].probability</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Fiabilidad del evento detectado basado en nuestro modelo.</td></tr>
+                            </tbody>
+                        </table>
                     </div>
 
                     <!-- INSIGHTS -->
@@ -525,6 +642,15 @@ Accept: application/json</code></pre>
     "estimated_ticket": "Medio-Alto"
   }
 }</code></pre>
+                        <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <thead style="background: #f8fafc;">
+                                <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">needs[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[string]</span></td><td style="color: #475569;">Lista de necesidades de software detectadas mediante inferencia IA.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">conversion_probability</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Estimación de probabilidad de venta cruzada B2B.</td></tr>
+                            </tbody>
+                        </table>
                     </div>
 
                     <!-- CONTACT PREP -->
@@ -544,6 +670,15 @@ Accept: application/json</code></pre>
     "attack_angle": "Demostrar el ROI inmediato..."
   }
 }</code></pre>
+                        <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <thead style="background: #f8fafc;">
+                                <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">sales_approach</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Estrategia de acercamiento comercial sugerida.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">likely_objection</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Objeción principal esperada por parte del cliente.</td></tr>
+                            </tbody>
+                        </table>
                     </div>
 
                     <!-- NETWORK -->
@@ -570,6 +705,15 @@ Accept: application/json</code></pre>
     }
   }
 }</code></pre>
+                        <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <thead style="background: #f8fafc;">
+                                <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">nodes[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">Nodos del grafo (empresas o administradores).</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">edges[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">Conexiones (vínculos) entre los nodos.</td></tr>
+                            </tbody>
+                        </table>
                     </div>
 
                     <!-- MATCH -->
@@ -590,6 +734,15 @@ Accept: application/json</code></pre>
     "recommendation": "Contactar de inmediato."
   }
 }</code></pre>
+                        <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <thead style="background: #f8fafc;">
+                                <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">match_score</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Nivel de encaje B2B (0-100).</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">sales_argument</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Argumentario de venta adaptado al match.</td></tr>
+                            </tbody>
+                        </table>
                     </div>
 
                     <!-- BATCH -->
@@ -630,12 +783,78 @@ Accept: application/json</code></pre>
     "truncated": false
   }
 }</code></pre>
+                        <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <thead style="background: #f8fafc;">
+                                <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">meta.requested</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Número de CIFs enviados en la petición.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">meta.cost</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Créditos deducidos de tu plan por las empresas encontradas.</td></tr>
+                            </tbody>
+                        </table>
                     </div>
+                </section>
+
+                <!-- BORME -->
+                <section class="docs-section" id="endpoint-borme">
+                    <h2>6. Historial de Actos del BORME</h2>
+                    <p>Obtén el historial cronológico completo de publicaciones en el Registro Mercantil (BORME) para una empresa.</p>
+                    
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/companies/borme</code>
+                        <span class="plan-badge pro">Pro</span>
+                    </div>
+
+                    <h4>Parámetros</h4>
+                    <table class="docs-table">
+                        <thead>
+                            <tr>
+                                <th>Campo</th>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>cif</code></td>
+                                <td>string</td>
+                                <td><strong>Requerido.</strong> El CIF/NIF de la empresa (ej: B12345678).</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Respuesta de éxito (200 OK)</h4>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "cif": "B12345678",
+    "company_name": "EMPRESA DE EJEMPLO SL",
+    "events": [
+      {
+        "date": "2023-11-01",
+        "act_types": "Nombramientos, Ceses",
+        "description": "Ceses/Dimisiones. Administrador único: JUAN PEREZ...",
+        "url_pdf": "https://www.boe.es/borme/dias/2023/11/01/pdfs/BORME-A-2023-100-28.pdf"
+      }
+    ]
+  }
+}</code></pre>
+                    <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <thead style="background: #f8fafc;">
+                            <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">events[].date</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Fecha de publicación oficial en el BORME (Formato YYYY-MM-DD).</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">events[].act_types</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Tipo de acto mercantil categorizado (ej: Nombramientos, Ampliación).</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">events[].url_pdf</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">URL directa al escaneo PDF original del Boletín Oficial.</td></tr>
+                        </tbody>
+                    </table>
                 </section>
 
                 <!-- RADAR -->
                 <section class="docs-section" id="endpoint-radar">
-                    <h2>6. Radar de Empresas</h2>
+                    <h2>7. Radar de Empresas</h2>
                     <p>Consulta programáticamente el listado de nuevas empresas detectadas por nuestro radar.</p>
                     
                     <div class="endpoint-header">
@@ -686,11 +905,20 @@ Accept: application/json</code></pre>
     }
   ]
 }</code></pre>
+                    <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <thead style="background: #f8fafc;">
+                            <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data[].fecha_constitucion</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Fecha en que se ha procesado y publicado en la API.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">meta.total_disponibles</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Número total de empresas en el Radar. Si tu plan está limitado a `limit`, verás el total real aquí.</td></tr>
+                        </tbody>
+                    </table>
                 </section>
 
                 <!-- WEBHOOKS -->
                 <section class="docs-section" id="endpoint-webhooks">
-                    <h2>7. Webhooks (Solo Business)</h2>
+                    <h2>8. Webhooks (Solo Business)</h2>
                     <p>Recibe notificaciones automáticas en tiempo real en tu sistema cuando detectemos nuevas empresas o señales.</p>
                     
                     <div class="endpoint-header" style="margin-bottom: 5px;">
@@ -728,11 +956,20 @@ Accept: application/json</code></pre>
   "message": "Webhook creado correctamente",
   "id": 1
 }</code></pre>
+                    <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <thead style="background: #f8fafc;">
+                            <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">event</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Tipo de evento suscrito (ej: `company.updated`, `radar.new`).</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">url</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">URL de tu servidor donde enviaremos el payload (POST).</td></tr>
+                        </tbody>
+                    </table>
                 </section>
 
                 <!-- USAGE -->
                 <section class="docs-section" id="endpoint-usage">
-                    <h2>8. Estadísticas de Consumo</h2>
+                    <h2>9. Estadísticas de Consumo</h2>
                     <p>Obtén el recuento de peticiones del mes actual y el historial de empresas consultadas asociado a tu API Key.</p>
                     
                     <div class="endpoint-header">
@@ -756,15 +993,95 @@ Accept: application/json</code></pre>
     ]
   }
 }</code></pre>
+                    <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <thead style="background: #f8fafc;">
+                            <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.monthly_queries</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Número de llamadas realizadas en el ciclo de facturación actual.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">history[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">Histórico de consultas individuales con su fecha y CIF.</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- SDKS -->
+                <section class="docs-section" id="sdks">
+                    <h2>13. SDKs Oficiales (Publicados)</h2>
+                    <p>Agiliza la integración en tus aplicaciones utilizando nuestras librerías oficiales con tipado estático y manejo de errores nativo. Estos SDKs están listos para usarse en entornos de producción.</p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 20px; margin-top: 24px;">
+                        
+                        <!-- PHP SDK -->
+                        <div style="background: #ffffff; padding: 25px; border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                                <h3 style="display:flex; align-items:center; gap:10px; font-size:1.2rem; color:#0f172a; margin:0;">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4f5b93" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                                    PHP SDK
+                                </h3>
+                                <span style="background: #e0e7ff; color: #4338ca; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">Oficial</span>
+                            </div>
+                            <p style="color:#475569; font-size:0.95rem; margin-bottom: 10px;">Instalación vía Composer:</p>
+                            <pre style="background: #0f172a; padding: 10px 15px; border-radius: 8px; margin: 0;"><code class="language-bash" style="color: #e2e8f0;">composer require apiempresas/php</code></pre>
+                            <p style="color:#475569; font-size:0.95rem; margin-top:15px; margin-bottom: 10px;">Ejemplo de uso:</p>
+                            <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0;"><code class="language-php" style="color: #e2e8f0;">require_once 'vendor/autoload.php';
+
+use ApiEmpresas\ApiEmpresas;
+
+$api = new ApiEmpresas('tu_api_key');
+$empresa = $api->companies()->getByCif('B12345678');
+echo $empresa->name;</code></pre>
+                        </div>
+
+                        <!-- Node.js SDK -->
+                        <div style="background: #ffffff; padding: 25px; border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                                <h3 style="display:flex; align-items:center; gap:10px; font-size:1.2rem; color:#0f172a; margin:0;">
+                                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg" width="28" height="28" alt="Node.js" />
+                                    Node.js / TS
+                                </h3>
+                                <span style="background: #e0e7ff; color: #4338ca; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">Oficial</span>
+                            </div>
+                            <p style="color:#475569; font-size:0.95rem; margin-bottom: 10px;">Instalación vía NPM:</p>
+                            <pre style="background: #0f172a; padding: 10px 15px; border-radius: 8px; margin: 0;"><code class="language-bash" style="color: #e2e8f0;">npm install apiempresas</code></pre>
+                            <p style="color:#475569; font-size:0.95rem; margin-top:15px; margin-bottom: 10px;">Ejemplo de uso con TypeScript:</p>
+                            <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0;"><code class="language-typescript" style="color: #e2e8f0;">import { ApiEmpresas } from 'apiempresas';
+
+const api = new ApiEmpresas('tu_api_key');
+const empresa = await api.companies.getByCif('B12345678');
+console.log(empresa.name);</code></pre>
+                        </div>
+
+                        <!-- Python SDK -->
+                        <div style="background: #ffffff; padding: 25px; border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                                <h3 style="display:flex; align-items:center; gap:10px; font-size:1.2rem; color:#0f172a; margin:0;">
+                                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" width="28" height="28" alt="Python" />
+                                    Python SDK
+                                </h3>
+                                <span style="background: #e0e7ff; color: #4338ca; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">Oficial</span>
+                            </div>
+                            <p style="color:#475569; font-size:0.95rem; margin-bottom: 10px;">Instalación vía PIP:</p>
+                            <pre style="background: #0f172a; padding: 10px 15px; border-radius: 8px; margin: 0;"><code class="language-bash" style="color: #e2e8f0;">pip install apiempresas</code></pre>
+                            <p style="color:#475569; font-size:0.95rem; margin-top:15px; margin-bottom: 10px;">Ejemplo de uso:</p>
+                            <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0;"><code class="language-python" style="color: #e2e8f0;">from apiempresas import ApiEmpresas
+
+api = ApiEmpresas('tu_api_key')
+empresa = api.companies.get_by_cif('B12345678')
+print(empresa.name)</code></pre>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- EXAMPLES -->
                 <section class="docs-section" id="examples">
-                    <h2>9. Ejemplos de Código</h2>
+                    <h2>14. Ejemplos de Código Manual</h2>
                     <p>Implementa la conexión en minutos con estos ejemplos listos para usar.</p>
 
                     <div class="code-tabs">
-                        <h3>PHP (cURL)</h3>
+                        <h3 style="display:flex; align-items:center; gap:10px;">
+                            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/php/php-original.svg" width="24" height="24" alt="PHP" />
+                            PHP (cURL)
+                        </h3>
                         <pre><code class="language-php">&lt;?php
 $apiKey = 'TU_API_KEY';
 $cif = 'B12345678';
@@ -782,7 +1099,10 @@ $data = json_decode($response, true);
 print_r($data);
 ?&gt;</code></pre>
 
-                        <h3>Laravel (HTTP Client)</h3>
+                        <h3 style="display:flex; align-items:center; gap:10px;">
+                            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/laravel/laravel-original.svg" width="24" height="24" alt="Laravel" />
+                            Laravel (HTTP Client)
+                        </h3>
                         <pre><code class="language-php">use Illuminate\Support\Facades\Http;
 
 $response = Http::withHeaders([
@@ -795,7 +1115,10 @@ if ($response->successful()) {
     $data = $response->json();
 }</code></pre>
 
-                        <h3>CodeIgniter 4</h3>
+                        <h3 style="display:flex; align-items:center; gap:10px;">
+                            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/codeigniter/codeigniter-plain.svg" width="24" height="24" alt="CodeIgniter" />
+                            CodeIgniter 4
+                        </h3>
                         <pre><code class="language-php">$client = \Config\Services::curlrequest();
 
 $response = $client->request('GET', 'https://apiempresas.es/api/v1/companies', [
@@ -808,7 +1131,10 @@ $response = $client->request('GET', 'https://apiempresas.es/api/v1/companies', [
 
 $data = json_decode($response->getBody(), true);</code></pre>
 
-                        <h3>Node.js (Fetch)</h3>
+                        <h3 style="display:flex; align-items:center; gap:10px;">
+                            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg" width="24" height="24" alt="Node.js" />
+                            Node.js (Fetch)
+                        </h3>
                         <pre><code class="language-js">const fetch = require('node-fetch');
 
 const getCompany = async (cif) => {
@@ -819,7 +1145,10 @@ const getCompany = async (cif) => {
   console.log(data);
 };</code></pre>
 
-                        <h3>Python (Requests)</h3>
+                        <h3 style="display:flex; align-items:center; gap:10px;">
+                            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" width="24" height="24" alt="Python" />
+                            Python (Requests)
+                        </h3>
                         <pre><code class="language-python">import requests
 
 url = "https://apiempresas.es/api/v1/companies"
@@ -829,7 +1158,10 @@ headers = {"X-API-KEY": "TU_API_KEY"}
 response = requests.get(url, params=params, headers=headers)
 print(response.json())</code></pre>
 
-                        <h3>JavaScript (Fetch Browser)</h3>
+                        <h3 style="display:flex; align-items:center; gap:10px;">
+                            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" width="24" height="24" alt="JavaScript" />
+                            JavaScript (Fetch Browser)
+                        </h3>
                         <pre><code class="language-js">fetch('https://apiempresas.es/api/v1/companies?cif=B12345678', {
   headers: {
     'X-API-KEY': 'TU_API_KEY',
@@ -884,7 +1216,7 @@ print(response.json())</code></pre>
 
                 <!-- POSTMAN -->
                 <section class="docs-section" id="postman">
-                    <h2>13. Postman Collection</h2>
+                    <h2>15. Postman Collection</h2>
                     <p>Si prefieres probar la API directamente en Postman, puedes descargarte nuestra colección oficial e importarla con un clic.</p>
                     
                     <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px dashed #cbd5e1; text-align: center; margin-top: 20px;">
@@ -894,6 +1226,9 @@ print(response.json())</code></pre>
                             <span>📥 Descargar Colección Postman</span>
                         </a>
                     </div>
+                </section>
+
+
 
                     <div style="margin-top: 80px; text-align: center; background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%); color: white; padding: 60px 40px; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(30, 58, 138, 0.25);">
                         <h2 style="color: white; font-size: 2.3rem; font-weight: 900; margin-bottom: 16px; letter-spacing: -0.02em;">🚀 ¿Listo para empezar?</h2>
@@ -1129,6 +1464,95 @@ print(response.json())</code></pre>
                     event_type: 'api_to_radar_click',
                     source: 'api_docs'
                 });
+            });
+
+            // Scrollspy para el menú lateral
+            const sections = document.querySelectorAll('.docs-section');
+            const navLinks = document.querySelectorAll('.docs-nav a[href^="#"]');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-20% 0px -60% 0px',
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        navLinks.forEach(link => link.classList.remove('active'));
+                        const activeLink = document.querySelector(`.docs-nav a[href="#${id}"]`);
+                        if (activeLink) activeLink.classList.add('active');
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            // --- Copy to Clipboard Buttons for <pre> blocks ---
+            const preTags = document.querySelectorAll('pre');
+            preTags.forEach(pre => {
+                // Ignore pre tags that are just single-line inline styles if any
+                if(pre.innerText.trim() === '') return;
+
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-code-btn';
+                copyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar';
+                
+                // Keep default styling if pre doesn't have position relative/absolute
+                const computedStyle = window.getComputedStyle(pre);
+                if (computedStyle.position === 'static') {
+                    pre.style.position = 'relative';
+                }
+
+                copyBtn.addEventListener('click', () => {
+                    const code = pre.querySelector('code');
+                    const textToCopy = code ? code.innerText : pre.innerText;
+                    
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        const originalHtml = copyBtn.innerHTML;
+                        copyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Copiado!';
+                        copyBtn.classList.add('copied');
+                        setTimeout(() => {
+                            copyBtn.innerHTML = originalHtml;
+                            copyBtn.classList.remove('copied');
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Failed to copy text: ', err);
+                    });
+                });
+                
+                pre.appendChild(copyBtn);
+            });
+
+            // --- Theme Toggle Logic ---
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const moonIcon = document.querySelector('.moon-icon');
+            const sunIcon = document.querySelector('.sun-icon');
+            
+            // Check saved preference or system preference
+            const savedTheme = localStorage.getItem('api_docs_theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.body.classList.add('dark-mode');
+                moonIcon.style.display = 'none';
+                sunIcon.style.display = 'block';
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                const isDark = document.body.classList.contains('dark-mode');
+                
+                if (isDark) {
+                    moonIcon.style.display = 'none';
+                    sunIcon.style.display = 'block';
+                    localStorage.setItem('api_docs_theme', 'dark');
+                } else {
+                    moonIcon.style.display = 'block';
+                    sunIcon.style.display = 'none';
+                    localStorage.setItem('api_docs_theme', 'light');
+                }
             });
         });
     </script>

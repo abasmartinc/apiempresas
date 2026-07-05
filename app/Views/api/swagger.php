@@ -22,6 +22,7 @@
             font-family: 'Inter', sans-serif;
             margin-top: 0;
             padding-top: 0;
+            padding-bottom: 100px;
         }
         
         /* Ocultar el Topbar original de Swagger */
@@ -32,6 +33,55 @@
         /* Títulos e Información (Ocultos) */
         .swagger-ui .info {
             display: none !important;
+        }
+
+        /* --- Custom Hero Card --- */
+        .api-docs-hero {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #eef2ff 100%);
+            border-bottom: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        }
+        .api-docs-hero::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            background: radial-gradient(circle at top right, rgba(33, 82, 255, 0.05), transparent 60%);
+            pointer-events: none;
+        }
+        .plan-inheritance-card {
+            width: 100%;
+            max-width: 1460px;
+            padding: 45px 20px;
+            margin: 0 auto;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1;
+        }
+        .plan-inheritance-card h3 {
+            color: #0f172a;
+            font-size: 26px;
+            font-weight: 800;
+            margin-top: 0;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+        .plan-inheritance-card p, .plan-inheritance-card ul {
+            color: #475569;
+            font-size: 16px;
+            line-height: 1.7;
+            margin: 0 0 12px 0;
+        }
+        .plan-inheritance-card ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+        .plan-inheritance-card li {
+            margin-bottom: 8px;
         }
 
         /* Compactar sección de esquemas y servidor */
@@ -85,16 +135,37 @@
             letter-spacing: -0.03em;
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             cursor: pointer;
-            display: flex;
+            
+            /* Grid Layout to handle title, button, and full-width description */
+            display: grid;
+            grid-template-columns: 1fr auto;
+            grid-template-areas: 
+                "title button"
+                "desc desc";
             align-items: center;
-            justify-content: space-between;
+        }
+        .swagger-ui .opblock-tag > a {
+            grid-area: title;
+            margin: 0;
+        }
+        .swagger-ui .opblock-tag > button {
+            grid-area: button;
+        }
+        .swagger-ui .opblock-tag > small {
+            grid-area: desc;
+            display: block;
+            width: 100%;
+            font-size: 15px;
+            font-weight: 400;
+            line-height: 1.6;
+            color: #475569;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
         }
         .swagger-ui .opblock-tag:hover {
             box-shadow: 0 12px 30px rgba(33, 82, 255, 0.1);
             border-color: #cbd5e1;
-        }
-        .swagger-ui .opblock-tag small {
-            display: none !important;
         }
 
         /* Bloques de Operaciones (Endpoints) */
@@ -137,6 +208,17 @@
 <body>
 
 <?= view('partials/header') ?>
+
+<div class="api-docs-hero">
+    <div class="plan-inheritance-card">
+        <h3>💎 Herencia de Planes y Endpoints</h3>
+        <p>Nuestra API está diseñada de forma acumulativa para que siempre tengas lo máximo posible según tu tarifa:</p>
+        <ul>
+            <li>El <strong>Plan Pro</strong> incluye por defecto todo lo del Plan Free + endpoints Avanzados.</li>
+            <li>El <strong>Plan Business</strong> incluye todo lo del Plan Pro + endpoints Premium (IA & Webhooks).</li>
+        </ul>
+    </div>
+</div>
 
 <div id="swagger-ui"></div>
 <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js"> </script>

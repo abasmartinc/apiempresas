@@ -35,7 +35,7 @@ class UsageController extends BaseApiController
         path: "/api/v1/usage",
         summary: "Obtener Estadísticas de Consumo",
         description: "Devuelve el recuento de peticiones del mes actual y el historial reciente de empresas consultadas asociado a la API Key.",
-        tags: ["1. Plan Free / General"]
+        tags: ["1. Plan Free"]
     )]
     #[OA\Response(
         response: 200,

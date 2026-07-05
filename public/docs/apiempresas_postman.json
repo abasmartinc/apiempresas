@@ -1,324 +1,608 @@
 {
-	"info": {
-		"_postman_id": "8c5e2a1b-7d3a-4f5a-9e2c-1b2a3d4f5g6h",
-		"name": "APIEmpresas.es - API V1",
-		"description": "Colección completa de la API de APIEmpresas.es organizada por planes de acceso (Free, Professional y Business).",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "1. Plan Free / General",
-			"description": "Endpoints accesibles para todos los planes, incluido el plan Free.",
-			"item": [
-				{
-					"name": "Consulta por CIF",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" },
-							{ "key": "Accept", "value": "application/json", "type": "text" }
-						],
-						"url": {
-							"raw": "https://apiempresas.es/api/v1/companies?cif=B12345678",
-							"protocol": "https",
-							"host": ["apiempresas", "es"],
-							"path": ["api", "v1", "companies"],
-							"query": [
-								{ "key": "cif", "value": "B12345678" }
-							]
-						}
-					}
-				},
-				{
-					"name": "Búsqueda por Nombre",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" },
-							{ "key": "Accept", "value": "application/json", "type": "text" }
-						],
-						"url": {
-							"raw": "https://apiempresas.es/api/v1/companies/search?q=Telefónica",
-							"protocol": "https",
-							"host": ["apiempresas", "es"],
-							"path": ["api", "v1", "companies", "search"],
-							"query": [
-								{ "key": "q", "value": "Telefónica" }
-							]
-						}
-					}
-				},
-				{
-					"name": "Estadísticas de Consumo",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" },
-							{ "key": "Accept", "value": "application/json", "type": "text" }
-						],
-						"url": {
-							"raw": "https://apiempresas.es/api/v1/usage",
-							"protocol": "https",
-							"host": ["apiempresas", "es"],
-							"path": ["api", "v1", "usage"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "2. Plan Professional",
-			"description": "Endpoints que requieren suscripción activa al Plan Professional o superior.",
-			"item": [
-				{
-					"name": "Scoring Comercial",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
-						],
-						"url": {
-							"raw": "https://apiempresas.es/api/v1/companies/score?cif=B12345678",
-							"protocol": "https",
-							"host": ["apiempresas", "es"],
-							"path": ["api", "v1", "companies", "score"],
-							"query": [
-								{ "key": "cif", "value": "B12345678" }
-							]
-						}
-					}
-				},
-				{
-					"name": "Señales Societarias",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
-						],
-						"url": {
-							"raw": "https://apiempresas.es/api/v1/companies/signals?cif=B12345678",
-							"protocol": "https",
-							"host": ["apiempresas", "es"],
-							"path": ["api", "v1", "companies", "signals"],
-							"query": [
-								{ "key": "cif", "value": "B12345678" }
-							]
-						}
-					}
-				},
-				{
-					"name": "Grafos de Poder Societario",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
-						],
-						"url": {
-							"raw": "https://apiempresas.es/api/v1/companies/network?cif=B79359220",
-							"protocol": "https",
-							"host": ["apiempresas", "es"],
-							"path": ["api", "v1", "companies", "network"],
-							"query": [
-								{ "key": "cif", "value": "B79359220" }
-							]
-						}
-					}
-				},
-				{
-					"name": "Búsqueda Autocompletado Profesional",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
-						],
-						"url": {
-							"raw": "https://apiempresas.es/api/v1/professional/search?q=Telefónica",
-							"protocol": "https",
-							"host": ["apiempresas", "es"],
-							"path": ["api", "v1", "professional", "search"],
-							"query": [
-								{ "key": "q", "value": "Telefónica" }
-							]
-						}
-					}
-				},
-				{
-					"name": "Detalles Profesionales de Empresa",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
-						],
-						"url": {
-							"raw": "https://apiempresas.es/api/v1/professional/details?cif=B12345678",
-							"protocol": "https",
-							"host": ["apiempresas", "es"],
-							"path": ["api", "v1", "professional", "details"],
-							"query": [
-								{ "key": "cif", "value": "B12345678" }
-							]
-						}
-					}
-				},
-				{
-					"name": "Consulta Múltiples Empresas (Batch)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" },
-							{ "key": "Content-Type", "value": "application/json", "type": "text" },
-							{ "key": "Accept", "value": "application/json", "type": "text" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"cifs\": [\"B12345678\", \"A87654321\"],\n  \"admin\": true\n}"
-						},
-						"url": {
-							"raw": "https://apiempresas.es/api/v1/companies/batch",
-							"protocol": "https",
-							"host": ["apiempresas", "es"],
-							"path": ["api", "v1", "companies", "batch"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "3. Plan Business",
-			"description": "Endpoints premium exclusivos del Plan Business o superior.",
-			"item": [
-				{
-					"name": "Insights IA",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
-						],
-						"url": {
-							"raw": "https://apiempresas.es/api/v1/companies/insights?cif=B12345678",
-							"protocol": "https",
-							"host": ["apiempresas", "es"],
-							"path": ["api", "v1", "companies", "insights"],
-							"query": [
-								{ "key": "cif", "value": "B12345678" }
-							]
-						}
-					}
-				},
-				{
-					"name": "Preparación de Contacto (Contact Prep)",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
-						],
-						"url": {
-							"raw": "https://apiempresas.es/api/v1/companies/contact-prep?cif=B12345678",
-							"protocol": "https",
-							"host": ["apiempresas", "es"],
-							"path": ["api", "v1", "companies", "contact-prep"],
-							"query": [
-								{ "key": "cif", "value": "B12345678" }
-							]
-						}
-					}
-				},
-				{
-					"name": "Búsqueda Radar (Leads)",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
-						],
-						"url": {
-							"raw": "https://apiempresas.es/api/v1/companies/radar?province=MADRID&range=7",
-							"protocol": "https",
-							"host": ["apiempresas", "es"],
-							"path": ["api", "v1", "companies", "radar"],
-							"query": [
-								{ "key": "province", "value": "MADRID" },
-								{ "key": "range", "value": "7" }
-							]
-						}
-					}
-				},
-				{
-					"name": "Calculadora de Match B2B",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
-						],
-						"url": {
-							"raw": "https://apiempresas.es/api/v1/companies/match?cif=B12345678&seller_sector=Software",
-							"protocol": "https",
-							"host": ["apiempresas", "es"],
-							"path": ["api", "v1", "companies", "match"],
-							"query": [
-								{ "key": "cif", "value": "B12345678" },
-								{ "key": "seller_sector", "value": "Software" }
-							]
-						}
-					}
-				},
-				{
-					"name": "Listar Webhooks",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
-						],
-						"url": {
-							"raw": "https://apiempresas.es/api/v1/webhooks",
-							"protocol": "https",
-							"host": ["apiempresas", "es"],
-							"path": ["api", "v1", "webhooks"]
-						}
-					}
-				},
-				{
-					"name": "Crear Webhook",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" },
-							{ "key": "Content-Type", "value": "application/json", "type": "text" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"url\": \"https://tu-dominio.com/webhook\",\n  \"event\": \"company_created\"\n}"
-						},
-						"url": {
-							"raw": "https://apiempresas.es/api/v1/webhooks",
-							"protocol": "https",
-							"host": ["apiempresas", "es"],
-							"path": ["api", "v1", "webhooks"]
-						}
-					}
-				},
-				{
-					"name": "Eliminar Webhook",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{ "key": "X-API-KEY", "value": "{{API_KEY}}", "type": "text" }
-						],
-						"url": {
-							"raw": "https://apiempresas.es/api/v1/webhooks/123",
-							"protocol": "https",
-							"host": ["apiempresas", "es"],
-							"path": ["api", "v1", "webhooks", "123"]
-						}
-					}
-				}
-			]
-		}
-	],
-	"variable": [
-		{
-			"key": "API_KEY",
-			"value": "tu_api_key_aqui",
-			"type": "string"
-		}
-	]
+    "info": {
+        "_postman_id": "8c5e2a1b-7d3a-4f5a-9e2c-1b2a3d4f5g6h",
+        "name": "APIEmpresas.es - API V1",
+        "description": "Colección completa de la API de APIEmpresas.es organizada por planes de acceso (Free, Professional y Business).",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Plan Free",
+            "description": "Endpoints accesibles para todos los planes, incluido el plan Free.",
+            "item": [
+                {
+                    "name": "Consulta por CIF",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies?cif=B12345678",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "B12345678"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Búsqueda por Nombre",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/search?q=Telefónica",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "q",
+                                    "value": "Telefónica"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Estadísticas de Consumo",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/usage",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "usage"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2. Plan Pro",
+            "description": "Endpoints que requieren suscripción activa al Plan Professional o superior.",
+            "item": [
+                {
+                    "name": "Scoring Comercial",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/score?cif=B12345678",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "score"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "B12345678"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Señales Societarias",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/signals?cif=B12345678",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "signals"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "B12345678"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Historial Actos BORME",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/borme?cif=B12345678",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "borme"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "B12345678"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Grafos de Poder Societario",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/network?cif=B79359220",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "network"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "B79359220"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Búsqueda Autocompletado Profesional",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/professional/search?q=Telefónica",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "professional",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "q",
+                                    "value": "Telefónica"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Detalles Profesionales de Empresa",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/professional/details?cif=B12345678",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "professional",
+                                "details"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "B12345678"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Consulta Múltiples Empresas (Batch)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"cifs\": [\"B12345678\", \"A87654321\"],\n  \"admin\": true\n}"
+                        },
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/batch",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "batch"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3. Plan Business",
+            "description": "Endpoints premium exclusivos del Plan Business o superior.",
+            "item": [
+                {
+                    "name": "Insights IA",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/insights?cif=B12345678",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "insights"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "B12345678"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Preparación de Contacto (Contact Prep)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/contact-prep?cif=B12345678",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "contact-prep"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "B12345678"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Búsqueda Radar (Leads)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/radar?province=MADRID&range=7",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "radar"
+                            ],
+                            "query": [
+                                {
+                                    "key": "province",
+                                    "value": "MADRID"
+                                },
+                                {
+                                    "key": "range",
+                                    "value": "7"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Calculadora de Match B2B",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/match?cif=B12345678&seller_sector=Software",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "match"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "B12345678"
+                                },
+                                {
+                                    "key": "seller_sector",
+                                    "value": "Software"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Listar Webhooks",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/webhooks",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "webhooks"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Crear Webhook",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"url\": \"https://tu-dominio.com/webhook\",\n  \"event\": \"company_created\"\n}"
+                        },
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/webhooks",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "webhooks"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Eliminar Webhook",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/webhooks/123",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "webhooks",
+                                "123"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "API_KEY",
+            "value": "tu_api_key_aqui",
+            "type": "string"
+        }
+    ]
 }

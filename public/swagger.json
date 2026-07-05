@@ -2,13 +2,17 @@
     "openapi": "3.0.0",
     "info": {
         "title": "API Empresas",
-        "description": "Documentación oficial de la API de Empresas",
+        "description": "",
         "version": "1.0.0"
     },
     "servers": [
         {
             "url": "/",
-            "description": "Entorno Actual"
+            "description": "Entorno de Producción (Consume Créditos)"
+        },
+        {
+            "url": "/api/sandbox/v1",
+            "description": "Entorno Sandbox de Pruebas (Gratis. Usa CIF: A15075062)"
         }
     ],
     "paths": {
@@ -90,7 +94,7 @@
         "/api/v1/companies": {
             "get": {
                 "tags": [
-                    "1. Plan Free / General"
+                    "1. Plan Free"
                 ],
                 "summary": "Obtener Empresa por CIF",
                 "description": "Devuelve los datos detallados de una empresa a partir de su CIF exacto. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 1 crédito del monedero (bono prepago). Las respuestas con error (400, 404, etc.) no consumen cuota ni créditos.",
@@ -189,7 +193,7 @@
         "/api/v1/companies/search": {
             "get": {
                 "tags": [
-                    "1. Plan Free / General"
+                    "1. Plan Free"
                 ],
                 "summary": "Búsqueda de Empresas",
                 "description": "Busca empresas por nombre o CIF. Permite búsqueda exacta o paginada. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 1 crédito del monedero (bono prepago). Las respuestas con error (400, 404, etc.) no consumen cuota ni créditos.",
@@ -212,6 +216,15 @@
                         "schema": {
                             "type": "boolean",
                             "default": false
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "description": "Cursor opaco para paginación (recomendado para integraciones nuevas). Si se proporciona, sobrescribe el parámetro `page`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     {
@@ -261,10 +274,157 @@
                 }
             }
         },
+        "/api/v1/companies/borme": {
+            "get": {
+                "tags": [
+                    "2. Plan Pro"
+                ],
+                "summary": "Historial de Actos del BORME",
+                "description": "Devuelve el historial cronológico completo de publicaciones en el Registro Mercantil (BORME) para una empresa. **Coste:** 1 llamada. Exclusivo para planes Pro y Business.",
+                "operationId": "f655ee02cbbfc1cc1de85653490940b2",
+                "parameters": [
+                    {
+                        "name": "cif",
+                        "in": "query",
+                        "description": "El CIF de la empresa a consultar",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Historial del BORME de la empresa",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "cif": {
+                                                    "type": "string",
+                                                    "example": "B12345678"
+                                                },
+                                                "company_name": {
+                                                    "type": "string",
+                                                    "example": "EMPRESA DE EJEMPLO SL"
+                                                },
+                                                "events": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "date": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "2023-11-01"
+                                                            },
+                                                            "act_types": {
+                                                                "type": "string",
+                                                                "example": "Nombramientos, Ceses"
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "Ceses/Dimisiones. Administrador único: JUAN PEREZ..."
+                                                            },
+                                                            "url_pdf": {
+                                                                "type": "string",
+                                                                "example": "https://www.boe.es/borme/dias/2023/11/01/pdfs/BORME-A-2023-100-28.pdf"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "VALIDATION_ERROR"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Plan insuficiente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "UPGRADE_REQUIRED"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Este endpoint requiere un plan Pro o Business."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Empresa no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "COMPANY_NOT_FOUND"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/companies/score": {
             "get": {
                 "tags": [
-                    "2. Plan Professional"
+                    "2. Plan Pro"
                 ],
                 "summary": "Scoring Comercial",
                 "description": "Obtener la puntuación y desglose de scoring para una empresa. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 3 créditos del monedero (bono prepago). Las respuestas con error (400, 404, 403, etc.) no consumen cuota ni créditos.",
@@ -306,7 +466,7 @@
         "/api/v1/companies/signals": {
             "get": {
                 "tags": [
-                    "2. Plan Professional"
+                    "2. Plan Pro"
                 ],
                 "summary": "Señales Societarias",
                 "description": "Obtener eventos societarios relevantes (BORME) de una empresa. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 3 créditos del monedero (bono prepago). Las respuestas con error (400, 404, 403, etc.) no consumen cuota ni créditos.",
@@ -483,7 +643,7 @@
         "/api/v1/companies/network": {
             "get": {
                 "tags": [
-                    "2. Plan Professional"
+                    "2. Plan Pro"
                 ],
                 "summary": "Grafos de Poder Societario",
                 "description": "Obtiene la red de vinculación entre empresas a través de sus administradores. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 3 créditos del monedero (bono prepago). Las respuestas con error no consumen cuota ni créditos.",
@@ -525,7 +685,7 @@
         "/api/v1/professional/search": {
             "get": {
                 "tags": [
-                    "2. Plan Professional"
+                    "2. Plan Pro"
                 ],
                 "summary": "Búsqueda Autocompletado Profesional",
                 "description": "Devuelve coincidencias ligeras para autocompletado en búsquedas.",
@@ -570,7 +730,7 @@
         "/api/v1/professional/details": {
             "get": {
                 "tags": [
-                    "2. Plan Professional"
+                    "2. Plan Pro"
                 ],
                 "summary": "Detalles Profesionales de Empresa",
                 "description": "Devuelve los datos profesionales de una empresa basados en su CIF.",
@@ -670,7 +830,7 @@
         "/api/v1/usage": {
             "get": {
                 "tags": [
-                    "1. Plan Free / General"
+                    "1. Plan Free"
                 ],
                 "summary": "Obtener Estadísticas de Consumo",
                 "description": "Devuelve el recuento de peticiones del mes actual y el historial reciente de empresas consultadas asociado a la API Key.",
@@ -862,20 +1022,16 @@
     ],
     "tags": [
         {
+            "name": "1. Plan Free",
+            "description": "Endpoints esenciales. **Incluidos en todos los planes** (Free, Pro y Business)."
+        },
+        {
             "name": "2. Plan Pro",
-            "description": "2. Plan Pro"
+            "description": "Endpoints avanzados de inteligencia comercial. Requiere plan **Pro** (También **incluido en Business**)."
         },
         {
             "name": "3. Plan Business",
-            "description": "3. Plan Business"
-        },
-        {
-            "name": "1. Plan Free / General",
-            "description": "1. Plan Free / General"
-        },
-        {
-            "name": "2. Plan Professional",
-            "description": "2. Plan Professional"
+            "description": "Endpoints premium impulsados por IA y Webhooks. **Exclusivos del plan Business**."
         }
     ]
 }

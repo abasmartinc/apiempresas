@@ -140,6 +140,7 @@ $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function
     $routes->get('api/v1/companies/radar', 'Api\V1\RadarApiController::index');
     $routes->get('api/v1/companies/match', 'Api\V1\CompanyMatchController::index');
     $routes->get('api/v1/companies/network', 'Api\V1\CompanyNetworkController::index');
+    $routes->get('api/v1/companies/borme', 'Api\V1\CompanyBormeController::index');
 
     // Webhooks CRUD
     $routes->get('api/v1/webhooks', 'Api\V1\WebhookController::index');
@@ -164,6 +165,7 @@ $routes->group('api/sandbox/v1', ['filter' => ['apikey']], static function ($rou
     $routes->get('companies/radar', 'Api\V1\Sandbox\SandboxController::radar');
     $routes->get('companies/match', 'Api\V1\Sandbox\SandboxController::match');
     $routes->get('companies/network', 'Api\V1\Sandbox\SandboxController::network');
+    $routes->get('companies/borme', 'Api\V1\Sandbox\SandboxController::borme');
     $routes->post('companies/batch', 'Api\V1\Sandbox\SandboxController::batch');
 });
 // ----------- API SANDBOX ----------- //

@@ -1265,7 +1265,7 @@
                                         / BUS</span>
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;">
-                                    <button type="button" onclick="event.preventDefault(); window.location.href='/docs#endpoint-batch';" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER DOCS</button>
+                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('post_batch')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
 
@@ -1316,6 +1316,28 @@
                                         / BUS</span></td>
                                 <td style="padding: 18px 20px; text-align: center;">
                                     <button type="button" onclick="event.preventDefault(); showJsonPreview('get_signals')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                </td>
+                            </tr>
+                            <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 18px 20px;">
+                                    <div
+                                        style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">
+                                        GET /companies/borme</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Parámetro: ?cif=...</div>
+                                </td>
+                                <td style="padding: 18px 20px;">
+                                    <strong
+                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Historial
+                                        de Actos del BORME</strong>
+                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
+                                        Obtén el historial cronológico completo de publicaciones en el Registro Mercantil para una empresa, útil para auditoría KYC y Due Diligence.
+                                    </p>
+                                </td>
+                                <td style="padding: 18px 20px; text-align: center;"><span
+                                        style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO
+                                        / BUS</span></td>
+                                <td style="padding: 18px 20px; text-align: center;">
+                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_borme')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
                             <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
@@ -1564,7 +1586,7 @@
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> Datos completos BORME</li>
+                                </svg> Historial Actos BORME</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
@@ -2097,6 +2119,19 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         status: "ACTIVA"
                     }
                 },
+                post_batch: {
+                    success: true,
+                    data: [
+                        { name: "INDUSTRIA DE DISENO TEXTIL SA", cif: "A15075062" },
+                        { name: "INDITEX LOGISTICA SA", cif: "B00000001" }
+                    ],
+                    meta: {
+                        requested: 2,
+                        found: 2,
+                        cost: 2,
+                        truncated: false
+                    }
+                },
                 get_score: {
                     success: true,
                     data: {
@@ -2120,6 +2155,21 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                                 label: "AMPLIACION_CAPITAL",
                                 date: "2024-05-01",
                                 probability: "MUY_ALTA"
+                            }
+                        ]
+                    }
+                },
+                get_borme: {
+                    success: true,
+                    data: {
+                        cif: "B12345678",
+                        company_name: "EMPRESA DE EJEMPLO SL",
+                        events: [
+                            {
+                                date: "2023-11-01",
+                                act_types: "Nombramientos, Ceses",
+                                description: "Ceses/Dimisiones. Administrador único: JUAN PEREZ...",
+                                url_pdf: "https://www.boe.es/borme/dias/2023/11/01/pdfs/BORME-A-2023-100-28.pdf"
                             }
                         ]
                     }
@@ -2199,8 +2249,10 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                 const names = {
                     get_companies: 'GET /companies',
                     get_search: 'GET /companies/search',
+                    post_batch: 'POST /companies/batch',
                     get_score: 'GET /companies/score',
                     get_signals: 'GET /companies/signals',
+                    get_borme: 'GET /companies/borme',
                     get_insights: 'GET /companies/insights',
                     get_radar: 'GET /companies/radar',
                     get_network: 'GET /companies/network',

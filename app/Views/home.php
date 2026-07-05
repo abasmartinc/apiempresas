@@ -611,7 +611,7 @@
                                         <div class="cap-feature-name">Consulta Múltiple (Batch)</div>
                                         <div class="cap-feature-endpoint">POST /api/v1/companies/batch</div>
                                         <div class="cap-feature-desc">Consulta hasta 100 CIFs en una única petición ahorrando tiempos de red.</div>
-                                        <a href="/docs#endpoint-batch" class="btn-json-preview" style="text-decoration:none; display:inline-block; margin-top:8px;">Ver Documentación</a>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('post_batch')" class="btn-json-preview">Ver Respuesta JSON</button>
                                     </div>
                                 </td>
                                 <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
@@ -638,6 +638,19 @@
                                         <div class="cap-feature-endpoint">GET /api/v1/companies/signals</div>
                                         <div class="cap-feature-desc">Monitoriza eventos reales: ampliaciones de capital, cambios de administrador y más.</div>
                                         <button type="button" onclick="event.preventDefault(); showJsonPreview('get_signals')" class="btn-json-preview">Ver Respuesta JSON</button>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Historial Actos BORME</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies/borme</div>
+                                        <div class="cap-feature-desc">Historial cronológico completo de publicaciones en el Registro Mercantil.</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('get_borme')" class="btn-json-preview">Ver Respuesta JSON</button>
                                     </div>
                                 </td>
                                 <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
@@ -948,6 +961,19 @@
                     status: "ACTIVA"
                 }
             },
+            post_batch: {
+                success: true,
+                data: [
+                    { name: "INDUSTRIA DE DISENO TEXTIL SA", cif: "A15075062" },
+                    { name: "INDITEX LOGISTICA SA", cif: "B00000001" }
+                ],
+                meta: {
+                    requested: 2,
+                    found: 2,
+                    cost: 2,
+                    truncated: false
+                }
+            },
             get_score: {
                 success: true,
                 data: {
@@ -971,6 +997,21 @@
                             label: "AMPLIACION_CAPITAL",
                             date: "2024-05-01",
                             probability: "MUY_ALTA"
+                        }
+                    ]
+                }
+            },
+            get_borme: {
+                success: true,
+                data: {
+                    cif: "B12345678",
+                    company_name: "EMPRESA DE EJEMPLO SL",
+                    events: [
+                        {
+                            date: "2023-11-01",
+                            act_types: "Nombramientos, Ceses",
+                            description: "Ceses/Dimisiones. Administrador único: JUAN PEREZ...",
+                            url_pdf: "https://www.boe.es/borme/dias/2023/11/01/pdfs/BORME-A-2023-100-28.pdf"
                         }
                     ]
                 }
@@ -1049,8 +1090,10 @@
             const names = {
                 get_companies: 'GET /companies',
                 get_search: 'GET /companies/search',
+                post_batch: 'POST /companies/batch',
                 get_score: 'GET /companies/score',
                 get_signals: 'GET /companies/signals',
+                get_borme: 'GET /companies/borme',
                 get_insights: 'GET /companies/insights',
                 get_radar: 'GET /companies/radar',
                 get_network: 'GET /companies/network',

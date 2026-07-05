@@ -31,7 +31,7 @@ class Professional extends BaseApiController
         path: "/api/v1/professional/search",
         summary: "Búsqueda Autocompletado Profesional",
         description: "Devuelve coincidencias ligeras para autocompletado en búsquedas.",
-        tags: ["2. Plan Professional"]
+        tags: ["2. Plan Pro"]
     )]
     #[OA\Parameter(
         name: "q",
@@ -119,7 +119,7 @@ class Professional extends BaseApiController
         path: "/api/v1/professional/details",
         summary: "Detalles Profesionales de Empresa",
         description: "Devuelve los datos profesionales de una empresa basados en su CIF.",
-        tags: ["2. Plan Professional"]
+        tags: ["2. Plan Pro"]
     )]
     #[OA\Parameter(
         name: "cif",
