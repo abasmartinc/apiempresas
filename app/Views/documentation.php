@@ -1193,12 +1193,48 @@ print(response.json())</code></pre>
                 <!-- THROTTLING -->
                 <section class="docs-section" id="throttling">
                     <h2>11. Límites de Peticiones (Rate Limiting)</h2>
-                    <p>Para proteger la estabilidad de la API, aplicamos límites de peticiones por segundo (Throttling) utilizando un algoritmo de ventana deslizante en memoria caché.</p>
-                    <ul>
-                        <li><strong>Plan Free:</strong> Límite de 2 peticiones por segundo.</li>
-                        <li><strong>Planes de Pago (Pro, Business, Enterprise):</strong> Límite de 20 peticiones por segundo.</li>
-                    </ul>
-                    <p>Si superas este límite, recibirás un error <code>429 Too Many Requests</code>. Si necesitas procesar muchas empresas de golpe, te recomendamos utilizar el endpoint <a href="#batch">Batch</a>, que permite enviar hasta 100 empresas en una sola petición.</p>
+                    <p>Para proteger la estabilidad de la API y ayudarte a monitorizar tu consumo, devolvemos <strong>cabeceras HTTP estándar</strong> en cada respuesta que te informan en tiempo real de tu cuota mensual y tu límite de velocidad por segundo.</p>
+                    
+                    <h4 style="margin-top: 24px; margin-bottom: 12px; font-size: 1.1rem; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                        Cabeceras HTTP de Respuesta
+                    </h4>
+                    <table class="docs-table" style="margin-bottom: 24px;">
+                        <thead>
+                            <tr>
+                                <th>Cabecera HTTP</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>X-RateLimit-Limit</code></td>
+                                <td>Peticiones máximas permitidas por segundo (2 en Free, 20 en Pago).</td>
+                            </tr>
+                            <tr>
+                                <td><code>X-RateLimit-Remaining</code></td>
+                                <td>Peticiones por segundo restantes en la ventana de tiempo actual.</td>
+                            </tr>
+                            <tr>
+                                <td><code>X-RateLimit-Reset</code></td>
+                                <td>Timestamp Unix indicando cuándo se reinicia el límite de velocidad.</td>
+                            </tr>
+                            <tr>
+                                <td><code>X-Quota-Limit</code></td>
+                                <td>Límite mensual total de consultas de tu plan actual.</td>
+                            </tr>
+                            <tr>
+                                <td><code>X-Quota-Remaining</code></td>
+                                <td>Consultas mensuales que te quedan antes de empezar a usar saldo del monedero.</td>
+                            </tr>
+                            <tr>
+                                <td><code>X-Request-Id</code></td>
+                                <td>Identificador único de trazabilidad de la petición. Útil para darte soporte técnico rápido.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p>Si superas el límite por segundo, recibirás un error <code>429 Too Many Requests</code> junto con la cabecera <code>Retry-After: 1</code> indicando que esperes 1 segundo. Si necesitas procesar muchas empresas de golpe, te recomendamos utilizar el endpoint <a href="#batch">Batch</a>.</p>
                 </section>
 
                 <!-- PAGINACION -->

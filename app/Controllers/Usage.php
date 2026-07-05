@@ -211,7 +211,7 @@ class Usage extends BaseController
         // ===== REGISTRO RECIENTE =====
         $db = \Config\Database::connect();
         $recentRequests = $db->table('api_requests')
-            ->select('api_requests.endpoint, api_requests.search_term, api_requests.status_code, api_requests.duration_ms, api_requests.created_at, api_plans.name as plan_name')
+            ->select('api_requests.endpoint, api_requests.search_term, api_requests.status_code, api_requests.duration_ms, api_requests.created_at, api_requests.request_id, api_requests.ip_address, api_requests.user_agent, api_requests.http_method, api_plans.name as plan_name')
             ->join('user_subscriptions', 'user_subscriptions.id = api_requests.subscription_id', 'left')
             ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id', 'left')
             ->where('api_requests.user_id', $userId)
@@ -230,5 +230,95 @@ class Usage extends BaseController
         return view('usage', $data);
     }
 
+    public function getRequestDetails($reqId)
+    {
+        $db = \Config\Database::connect();
+        $userId = (int) session('user_id');
+        $req = $db->table('api_requests')
+            ->where('request_id', $reqId)
+            ->where('user_id', $userId)
+            ->get()
+            ->getRowArray();
+
+        if ($req) {
+            return $this->response->setJSON(['success' => true, 'data' => $req]);
+        }
+        return $this->response->setJSON(['success' => false]);
+    }
+
+    public function getLogsAjax()
+    {
+        $db = \Config\Database::connect();
+        $userId = (int) session('user_id');
+        session_write_close();
+
+        $page = (int) $this->request->getGet('page') ?: 1;
+        $limit = (int) $this->request->getGet('limit') ?: 15;
+        $search = $this->request->getGet('search');
+        $endpoint = $this->request->getGet('endpoint');
+        $status = $this->request->getGet('status');
+
+        $builder = $db->table('api_requests')
+            ->select('api_requests.endpoint, api_requests.search_term, api_requests.status_code, api_requests.duration_ms, api_requests.created_at, api_requests.request_id, api_requests.ip_address, api_requests.user_agent, api_requests.http_method, api_plans.name as plan_name')
+            ->join('user_subscriptions', 'user_subscriptions.id = api_requests.subscription_id', 'left')
+            ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id', 'left')
+            ->where('api_requests.user_id', $userId);
+
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('api_requests.search_term', $search)
+                ->orLike('api_requests.request_id', $search)
+                ->groupEnd();
+        }
+
+        if (!empty($endpoint)) {
+            $builder->like('api_requests.endpoint', $endpoint);
+        }
+
+        if ($status === 'success') {
+            $builder->where('api_requests.status_code', 200);
+        } elseif ($status === 'error') {
+            $builder->where('api_requests.status_code !=', 200);
+        }
+
+        $countBuilder = clone $builder;
+        $totalRecords = $countBuilder->countAllResults();
+        $totalPages = ceil($totalRecords / $limit);
+        if ($totalPages == 0) $totalPages = 1;
+        if ($page > $totalPages) $page = $totalPages;
+
+        $offset = ($page - 1) * $limit;
+
+        $requests = $builder->orderBy('api_requests.created_at', 'DESC')
+            ->limit($limit, $offset)
+            ->get()->getResultArray();
+
+        $UsersuscriptionsModel = new \App\Models\UsersuscriptionsModel();
+        $plan = $UsersuscriptionsModel->getActivePlanByUserId($userId);
+        if (!$plan) {
+            $plan = $UsersuscriptionsModel->getUserSubscriptionWithPlan($userId);
+        }
+        $isBonusUser = isset($plan->is_bonus) && $plan->is_bonus;
+
+        foreach ($requests as &$r) {
+            if (empty($r['plan_name']) || (strtolower($r['plan_name']) === 'free' && $isBonusUser)) {
+                $r['plan_name'] = 'Bono Prepago';
+            }
+            $r['short_endpoint'] = str_replace('/apiempresas/api/v1', '', $r['endpoint']);
+            $r['date_display'] = date('d/m/Y H:i', strtotime($r['created_at']));
+            $r['date_iso'] = date('c', strtotime($r['created_at']));
+        }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $requests,
+            'pagination' => [
+                'current_page' => $page,
+                'total_pages' => $totalPages,
+                'total_records' => $totalRecords,
+                'limit' => $limit
+            ]
+        ]);
+    }
 }
 

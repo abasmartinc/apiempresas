@@ -161,7 +161,12 @@ class ApiKeyFilter implements FilterInterface
             $requestsThisSecond = (int) cache()->get($rateLimitKey);
             
             if ($requestsThisSecond >= $maxRequestsPerSecond) {
-                return service('response')->setStatusCode(429)->setJSON([
+                return service('response')->setStatusCode(429)
+                    ->setHeader('X-RateLimit-Limit', (string)$maxRequestsPerSecond)
+                    ->setHeader('X-RateLimit-Remaining', '0')
+                    ->setHeader('X-RateLimit-Reset', (string)(time() + 1))
+                    ->setHeader('Retry-After', '1')
+                    ->setJSON([
                     'success' => false,
                     'error'   => 'TOO_MANY_REQUESTS',
                     'message' => 'Has superado el límite de ' . $maxRequestsPerSecond . ' peticiones por segundo. Por favor, reduce la velocidad de tus peticiones o utiliza el endpoint /batch.',
@@ -243,7 +248,13 @@ class ApiKeyFilter implements FilterInterface
                         ? 'Has consumido las ' . $monthlyQuota . ' consultas gratuitas garantizadas y no tienes saldo suficiente en el monedero. Recarga créditos o actualiza a un plan de pago.'
                         : 'Has superado el límite de consultas de tu plan (' . $monthlyQuota . ') y no tienes saldo suficiente en el monedero. Recarga créditos para continuar.';
 
-                    return service('response')->setStatusCode(429)->setJSON([
+                    return service('response')->setStatusCode(429)
+                        ->setHeader('X-RateLimit-Limit', (string)($maxRequestsPerSecond ?? 2))
+                        ->setHeader('X-RateLimit-Remaining', '0')
+                        ->setHeader('X-RateLimit-Reset', (string)(time() + 1))
+                        ->setHeader('X-Quota-Limit', (string)$monthlyQuota)
+                        ->setHeader('X-Quota-Remaining', '0')
+                        ->setJSON([
                         'success' => false,
                         'error'   => 'Quota Exceeded',
                         'message' => $errorMsg,
@@ -303,6 +314,11 @@ class ApiKeyFilter implements FilterInterface
             'sub_cost'        => $subCost,
             'wallet_cost'     => $walletCost,
             'wallet_balance'  => $walletBalance,
+            'rate_limit'      => $maxRequestsPerSecond ?? 2,
+            'rate_remaining'  => max(0, ($maxRequestsPerSecond ?? 2) - ($requestsThisSecond ?? 0)),
+            'rate_reset'      => time() + 1,
+            'quota_limit'     => $monthlyQuota ?? 0,
+            'quota_remaining' => max(0, ($monthlyQuota ?? 0) - ($currentUsage ?? 0)),
         ];
 
         $request->setGlobal('get', array_merge($request->getGet(), [
@@ -395,6 +411,11 @@ class ApiKeyFilter implements FilterInterface
             }
 
             $response->setHeader('X-Request-Id', (string)$meta['request_id']);
+            $response->setHeader('X-RateLimit-Limit', (string)$meta['rate_limit']);
+            $response->setHeader('X-RateLimit-Remaining', (string)$meta['rate_remaining']);
+            $response->setHeader('X-RateLimit-Reset', (string)$meta['rate_reset']);
+            $response->setHeader('X-Quota-Limit', (string)$meta['quota_limit']);
+            $response->setHeader('X-Quota-Remaining', (string)$meta['quota_remaining']);
         } catch (\Throwable $e) {
             log_message('error', '[ApiKeyFilter::after] ' . $e->getMessage());
         }
