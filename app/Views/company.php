@@ -13,6 +13,25 @@
     <noscript>
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     </noscript>
+
+    <!-- Schema.org para la Empresa -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "<?= esc($companyName ?? $company['name'] ?? 'Empresa') ?>",
+      <?php if (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-'): ?>
+      "vatID": "<?= esc($companyCif) ?>",
+      "taxID": "<?= esc($companyCif) ?>",
+      <?php endif; ?>
+      "url": "<?= esc($canonical ?? current_url()) ?>",
+      "address": {
+        "@type": "PostalAddress",
+        "addressRegion": "<?= esc($company['province'] ?? $company['provincia'] ?? '') ?>",
+        "addressCountry": "ES"
+      }
+    }
+    </script>
     <style>
         html { scroll-behavior: smooth; }
         

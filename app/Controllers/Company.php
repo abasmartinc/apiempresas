@@ -319,6 +319,7 @@ class Company extends BaseController
         $ratingStats = $ratingModel->getRatingStats((int)$company['id']);
 
         return [
+            'companyName'      => $name,
             'company'          => $company,
             'statusRaw'        => $statusRaw,
             'statusClass'      => $isActive ? 'company-status company-status--active' : 'company-status company-status--inactive',
