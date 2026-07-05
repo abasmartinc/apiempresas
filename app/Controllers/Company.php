@@ -393,6 +393,9 @@ class Company extends BaseController
         }
 
         // $this->cachePage(86400); // Cache temporalmente desactivada
+        
+        // Etiqueta secreta para que Cloudflare sepa que ESTA PÁGINA SÍ se puede cachear (1 día)
+        $this->response->setHeader('Cache-Control', 'public, s-maxage=86400, max-age=86400');
 
         return $this->response->setBody(view('company', $data));
     }
@@ -445,6 +448,9 @@ class Company extends BaseController
         }
 
         // $this->cachePage(86400); // Cache temporalmente desactivada
+
+        // Etiqueta secreta para que Cloudflare sepa que ESTA PÁGINA SÍ se puede cachear (1 día)
+        $this->response->setHeader('Cache-Control', 'public, s-maxage=86400, max-age=86400');
 
         return $this->response->setBody(view('company', $data));
     }
