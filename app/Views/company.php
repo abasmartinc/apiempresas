@@ -171,8 +171,8 @@
         }
 
         .reveal-on-scroll {
-            opacity: 0;
-            transform: translateY(30px);
+            opacity: 1; /* SEO Fix: No ocultar contenido inicial a Googlebot */
+            transform: none;
             transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
             will-change: opacity, transform;
         }
@@ -1073,7 +1073,7 @@
                                             Enviar a CRM
                                         </button>
                                         <a href="<?= site_url('empresa/export/' . $company['id']) ?>"
-                                            rel="nofollow noindex"
+                                            rel="nofollow"
                                             aria-label="Descargar Informe PDF de <?= esc($companyName) ?>"
                                             onclick="window.dataLayer = window.dataLayer || []; window.dataLayer.push({'event': 'cta_pdf_click'});"
                                             style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #ffffff; color: #2563eb; font-size: 0.9rem; font-weight: 700; text-decoration: none; border-radius: 10px; border: 1px solid #cbd5e1; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02);"

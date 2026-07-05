@@ -58,7 +58,7 @@ if (!function_exists('shouldIndexCompany')) {
      */
     function shouldIndexCompany(array $company): bool
     {
-        return calculateCompanySeoScore($company) >= 3;
+        return calculateCompanySeoScore($company) >= 2;
     }
 }
 
