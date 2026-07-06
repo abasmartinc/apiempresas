@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="Tests\Unit\BillingServiceTest" file="D:\laragon\www\apiempresas\tests\unit\BillingServiceTest.php" tests="4" assertions="22" errors="0" failures="0" skipped="0" time="0.014354">
-    <testcase name="testCalculateDirectoryPrice" file="D:\laragon\www\apiempresas\tests\unit\BillingServiceTest.php" line="18" class="Tests\Unit\BillingServiceTest" classname="Tests.Unit.BillingServiceTest" assertions="4" time="0.012365"/>
-    <testcase name="testCalculateBonusPrice" file="D:\laragon\www\apiempresas\tests\unit\BillingServiceTest.php" line="34" class="Tests\Unit\BillingServiceTest" classname="Tests.Unit.BillingServiceTest" assertions="6" time="0.000800"/>
-    <testcase name="testBuildSinglePaymentLineItem" file="D:\laragon\www\apiempresas\tests\unit\BillingServiceTest.php" line="56" class="Tests\Unit\BillingServiceTest" classname="Tests.Unit.BillingServiceTest" assertions="6" time="0.000643"/>
-    <testcase name="testBuildSubscriptionLineItem" file="D:\laragon\www\apiempresas\tests\unit\BillingServiceTest.php" line="68" class="Tests\Unit\BillingServiceTest" classname="Tests.Unit.BillingServiceTest" assertions="6" time="0.000546"/>
+  <testsuite name="Tests\Unit\BillingServiceTest" file="D:\laragon\www\apiempresas\tests\unit\BillingServiceTest.php" tests="4" assertions="22" errors="0" failures="0" skipped="0" time="0.014878">
+    <testcase name="testCalculateDirectoryPrice" file="D:\laragon\www\apiempresas\tests\unit\BillingServiceTest.php" line="18" class="Tests\Unit\BillingServiceTest" classname="Tests.Unit.BillingServiceTest" assertions="4" time="0.012192"/>
+    <testcase name="testCalculateBonusPrice" file="D:\laragon\www\apiempresas\tests\unit\BillingServiceTest.php" line="34" class="Tests\Unit\BillingServiceTest" classname="Tests.Unit.BillingServiceTest" assertions="6" time="0.000835"/>
+    <testcase name="testBuildSinglePaymentLineItem" file="D:\laragon\www\apiempresas\tests\unit\BillingServiceTest.php" line="56" class="Tests\Unit\BillingServiceTest" classname="Tests.Unit.BillingServiceTest" assertions="6" time="0.001211"/>
+    <testcase name="testBuildSubscriptionLineItem" file="D:\laragon\www\apiempresas\tests\unit\BillingServiceTest.php" line="68" class="Tests\Unit\BillingServiceTest" classname="Tests.Unit.BillingServiceTest" assertions="6" time="0.000640"/>
   </testsuite>
 </testsuites>
