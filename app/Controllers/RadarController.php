@@ -9,11 +9,13 @@ class RadarController extends BaseController
 {
     protected $companyModel;
     protected $subscriptionModel;
+    protected $radarService;
 
     public function __construct()
     {
         $this->companyModel = new CompanyModel();
         $this->subscriptionModel = new UsersuscriptionsModel();
+        $this->radarService = new \App\Services\RadarService();
         helper(['company', 'pricing']);
     }
 
@@ -33,8 +35,8 @@ class RadarController extends BaseController
     {
         session_write_close();
         $province = $this->deSlugify($provinceSlug);
-        $sector = $this->resolveCnaeCodes($sectorSlug);
-        
+        $sector = $this->radarService->resolveCnaeCodes($sectorSlug);
+
         if (!$sector) {
             return redirect()->to(site_url("empresas-nuevas/{$provinceSlug}"));
         }
@@ -42,47 +44,7 @@ class RadarController extends BaseController
         return $this->renderRadar('general', $province, $sector);
     }
 
-    private function getCombinedData($sectorSlug, $province)
-    {
-        $db = \Config\Database::connect();
-        $resolution = $this->resolveCnaeCodes($sectorSlug);
-        if (!$resolution) return null;
 
-        $codes = $resolution['codes'];
-        $cnaeLabel = $resolution['label'];
-
-        $builder = $this->companyModel->builder();
-        if (strtolower($province) === 'alicante') {
-            $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
-        } else {
-            $builder->where('registro_mercantil', $province);
-        }
-
-        if (count($codes) === 1) $builder->where('cnae_code LIKE', $codes[0] . '%');
-        else {
-            $builder->groupStart();
-            foreach ($codes as $code) $builder->orLike('cnae_code', $code, 'after');
-            $builder->groupEnd();
-        }
-
-        $total = $builder->countAllResults(false);
-        if ($total === 0) return null;
-
-        $companies = $builder->select('id, company_name as name, cif, address, municipality, cnae_code, fecha_constitucion')
-            ->orderBy('fecha_constitucion', 'DESC')
-            ->limit(60)
-            ->get()
-            ->getResultArray();
-
-        return [
-            'province' => $province,
-            'sector_label' => $cnaeLabel,
-            'sector_code' => $codes[0],
-            'total' => $total,
-            'total_formatted' => number_format($total, 0, ',', '.'),
-            'companies' => $companies
-        ];
-    }
 
     public function week()
     {
@@ -99,7 +61,7 @@ class RadarController extends BaseController
     public function sector($sectorSlug)
     {
         session_write_close();
-        $sector = $this->resolveCnaeCodes($sectorSlug);
+        $sector = $this->radarService->resolveCnaeCodes($sectorSlug);
         if (!$sector) {
             return redirect()->to(site_url('empresas-nuevas'));
         }
@@ -109,7 +71,7 @@ class RadarController extends BaseController
     public function newRadarLongTail($sectorSlug, $provinceSlug)
     {
         session_write_close();
-        $sector = $this->resolveCnaeCodes($sectorSlug);
+        $sector = $this->radarService->resolveCnaeCodes($sectorSlug);
         $province = $this->deSlugify($provinceSlug);
 
         if (!$sector) {
@@ -134,7 +96,7 @@ class RadarController extends BaseController
         $data['excerptText'] = "Descubre " . number_format($data['total_context_count'], 0, ',', '.') . " empresas en {$province} detectadas hoy. Oportunidades reales listas para contactar antes que tu competencia.";
         $data['meta_description'] = $data['excerptText'];
         $data['canonical'] = site_url(uri_string());
-        
+
         // SEO Headings
         $data['heading_highlight'] = ucfirst(mb_strtolower($province, 'UTF-8'));
         $data['heading_title'] = "Empresas en " . $data['heading_highlight'];
@@ -173,7 +135,8 @@ class RadarController extends BaseController
     private function renderRadar($period, $province = null, $sector = null)
     {
         $data = $this->getRadarData($province, $sector, $period);
-        if (!$data) return redirect()->to(site_url('empresas-nuevas'));
+        if (!$data)
+            return redirect()->to(site_url('empresas-nuevas'));
 
         // Tracking (Runs every visit, even if data is cached)
         $this->logSeoVariant($data);
@@ -190,29 +153,32 @@ class RadarController extends BaseController
 
     private function logSeoVariant($data)
     {
-        if (!isset($data['variant_id'])) return;
-        
+        if (!isset($data['variant_id']))
+            return;
+
         $db = \Config\Database::connect();
         try {
             $db->table('seo_variant_performance')->insert([
-                'url'           => uri_string(),
-                'variant_id'    => $data['variant_id'],
+                'url' => uri_string(),
+                'variant_id' => $data['variant_id'],
                 'variant_title' => $data['title'] ?? '',
-                'variant_meta'  => $data['excerptText'] ?? '',
-                'created_at'    => date('Y-m-d H:i:s')
+                'variant_meta' => $data['excerptText'] ?? '',
+                'created_at' => date('Y-m-d H:i:s')
             ]);
-        } catch (\Exception $e) { /* Fail silently */ }
+        } catch (\Exception $e) { /* Fail silently */
+        }
     }
 
     public function excel_preview()
     {
         $province = $this->request->getGet('provincia') ?? 'España';
-        $sector   = $this->request->getGet('sector') ?? '';
-        $period   = $this->request->getGet('period') ?? '30days';
-        $cnae     = $this->request->getGet('cnae') ?? '';
+        $sector = $this->request->getGet('sector') ?? '';
+        $period = $this->request->getGet('period') ?? '30days';
+        $cnae = $this->request->getGet('cnae') ?? '';
 
         $data = $this->getRadarData($province, $sector, $period, 15);
-        if (!$data) return redirect()->to(site_url('empresas-nuevas'));
+        if (!$data)
+            return redirect()->to(site_url('empresas-nuevas'));
 
         $data['cnae'] = $cnae;
         // Deterministic Rotation for Excel
@@ -242,7 +208,7 @@ class RadarController extends BaseController
     public function excel_unlock()
     {
         $email = strtolower(trim((string) $this->request->getPost('email')));
-        
+
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Por favor, introduce un email válido.']);
         }
@@ -254,7 +220,7 @@ class RadarController extends BaseController
         if ($user) {
             if (($user->is_admin ?? 0) == 1) {
                 return $this->response->setJSON([
-                    'status' => 'exists', 
+                    'status' => 'exists',
                     'message' => 'Por seguridad, inicia sesión con tu cuenta de administrador.',
                     'redirect' => site_url('enter?redirect=checkout/radar-export&' . http_build_query($this->request->getPost()))
                 ]);
@@ -296,7 +262,7 @@ class RadarController extends BaseController
         $params = $this->request->getPost();
         unset($params['email']);
         $params['type'] = 'single';
-        
+
         return $this->response->setJSON([
             'status' => 'success',
             'redirect' => site_url('checkout/radar-export?' . http_build_query($params))
@@ -306,10 +272,11 @@ class RadarController extends BaseController
 
     public function getRadarData($province, $sectorInput, $period, $limit = 100)
     {
-        $cache    = \Config\Services::cache();
-        $cacheKey = 'radar_' . md5("{$period}_{$province}_{$limit}_" . (is_array($sectorInput) ? implode(',', $sectorInput['codes'] ?? []) : (string) $sectorInput));
+        $cache = \Config\Services::cache();
+        $sectorSlug = is_array($sectorInput) ? null : ($sectorInput ? url_title($sectorInput, '-', true) : null);
+        $sectorCacheKey = is_array($sectorInput) ? implode(',', $sectorInput['codes'] ?? []) : (string) $sectorInput;
+        $cacheKey = 'radar_' . md5("{$period}_{$province}_{$limit}_{$sectorCacheKey}");
 
-        // Permitimos forzar la limpieza del caché vía URL
         $forceNoCache = service('request')->getGet('nocache') === '1';
         if ($forceNoCache) {
             $cache->delete($cacheKey);
@@ -320,301 +287,50 @@ class RadarController extends BaseController
             return $cached;
         }
 
-        $db = \Config\Database::connect();
-        
-        if (is_array($sectorInput)) {
-            $sector = $sectorInput;
-        } else {
-            $slug = $sectorInput ? url_title($sectorInput, '-', true) : null;
-            $sector = $slug ? $this->resolveCnaeCodes($slug) : null;
-        }
+        $sector = is_array($sectorInput) ? $sectorInput : ($sectorSlug ? $this->radarService->resolveCnaeCodes($sectorSlug) : null);
         $sectorLabel = $sector ? $sector['label'] : null;
 
-        $builder = $this->companyModel->builder();
-        $builder->select('id, company_name as name, cif, fecha_constitucion, cnae_label, cnae_code as cnae, registro_mercantil, objeto_social');
-        
-        // Province Filter
-        if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
-            if (strtolower($province) === 'alicante') {
-                $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
-            } else {
-                $builder->where('registro_mercantil', $province);
-            }
-        }
+        $companies = $this->radarService->getCompaniesList($province, $sector, $period, $limit);
+        $stats = $this->radarService->getContextStats($province, $sector);
+        $seoMeta = $this->radarService->getSeoMetadata($province, $sector, $period, $stats, uri_string());
+        $sidebarData = $this->radarService->getTopSidebarLinks($province);
 
-        // Sector Filter
-        if ($sector && !empty($sector['codes'])) {
-            $builder->groupStart();
-            foreach ($sector['codes'] as $code) {
-                $builder->orLike('cnae_code', $code, 'after');
-            }
-            $builder->groupEnd();
-        }
-
-        // Period Filter
-        if ($period === 'hoy') {
-            $builder->where('fecha_constitucion', date('Y-m-d'));
-        } elseif ($period === 'semana') {
-            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')));
-        } elseif ($period === 'mes' || $period === '30days') {
-            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')));
-        } else {
-            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')));
-            $period = 'general';
-        }
-
-        $builder->where('fecha_constitucion IS NOT NULL');
-        $builder->where('fecha_constitucion <=', date('Y-m-d')); // Excluir fechas futuras
-        $builder->orderBy('fecha_constitucion', 'DESC');
-        $companies = $builder->get($limit)->getResultArray();
-
-        // Stats Logic - Optimization: Unified query for current context
-        $statsRaw = $db->table('companies');
-        if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
-            if (strtolower($province) === 'alicante') {
-                $statsRaw->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
-            } else {
-                $statsRaw->where('registro_mercantil', $province);
-            }
-        }
-        if ($sector && !empty($sector['codes'])) {
-            $statsRaw->groupStart();
-            foreach ($sector['codes'] as $code) $statsRaw->orLike('cnae_code', $code, 'after');
-            $statsRaw->groupEnd();
-        }
-        $statsRaw->where('fecha_constitucion IS NOT NULL');
-        
-        $statsQuery = $statsRaw->select("
-            COUNT(CASE WHEN fecha_constitucion = '" . date('Y-m-d') . "' THEN 1 END) as hoy,
-            COUNT(CASE WHEN fecha_constitucion >= '" . date('Y-m-d', strtotime('-7 days')) . "' THEN 1 END) as semana,
-            COUNT(CASE WHEN fecha_constitucion >= '" . date('Y-m-d', strtotime('-30 days')) . "' THEN 1 END) as mes
-        ")->get()->getRowArray();
-
-        $stats = [
-            'hoy'    => (int)($statsQuery['hoy'] ?? 0),
-            'semana' => (int)($statsQuery['semana'] ?? 0),
-            'mes'    => (int)($statsQuery['mes'] ?? 0),
-            '30days' => (int)($statsQuery['mes'] ?? 0)
-        ];
-
-        // Heading Generation
-        $headingTime = "";
-        if ($period === 'hoy') $headingTime = " hoy";
-        elseif ($period === 'semana') $headingTime = " esta semana";
-        elseif ($period === 'mes' || $period === '30days') $headingTime = " en los últimos 30 días";
-
-        if ($sector) {
-            $headingPrefix = "Empresas nuevas";
-            $headingHighlight = mb_strtolower($sector['label'], 'UTF-8');
-            $headingSuffix = " de ";
-            $headingMiddle = " en ";
-            $headingLocation = ($province && mb_strtolower($province, 'UTF-8') !== 'españa') ? ucfirst(mb_strtolower($province, 'UTF-8')) : "España";
-        } elseif ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
-            $headingPrefix = "Nuevas empresas";
-            $headingHighlight = ucfirst(mb_strtolower($province, 'UTF-8'));
-            $headingSuffix = " en ";
-            $headingMiddle = "";
-            $headingLocation = "";
-        } else {
-            $headingPrefix = "Empresas nuevas";
-            $headingHighlight = "";
-            $headingSuffix = "";
-            $headingMiddle = " en ";
-            $headingLocation = "España";
-        }
-
-        // --- SEO OPTIMIZATION: WEIGHTED ROTATION & INTENT SEGMENTATION (CRO FOR SEO) ---
-        $statKey = ($period === 'general' || $period === 'mes' || $period === '30days') ? 'mes' : $period;
-        $totalCount = $stats[$statKey] ?? $stats['mes'];
-        
-        $periodLabel = "ahora";
-        if ($period === 'hoy') $periodLabel = "hoy";
-        if ($period === 'semana') $periodLabel = "esta semana";
-        if ($period === 'mes' || $period === '30days') $periodLabel = "últimos 30 días";
-
-        $displayCount = ($totalCount > 0) ? "+{$totalCount} " : "";
-        // Rule: hoy < semana < mes. If not strictly lower, we remove the number for 'hoy' to avoid looking fake
-        if ($period === 'hoy' && $stats['hoy'] >= $stats['mes'] && $stats['mes'] > 0) {
-            $displayCount = "";
-        }
-
-        $context = $sector ? $sector['label'] : ($province && mb_strtolower($province, 'UTF-8') !== 'españa' ? ucfirst(mb_strtolower($province, 'UTF-8')) : "España");
-        
-        // SEO-friendly short labels for long sectors (to avoid title truncation)
-        $seoContext = $context;
-        if ($sector) {
-            $shortLabels = [
-                'Restaurantes y Puestos de Comidas' => 'Restauración',
-                'Construcción de Edificios Residenciales' => 'Construcción Residencial',
-                'Comercio al por menor en establecimientos no especializados' => 'Gran Consumo',
-            ];
-            $seoContext = $shortLabels[$context] ?? $context;
-        }
-        
-        $type = 'national';
-        if ($sector) $type = 'sector';
-        elseif ($province && mb_strtolower($province, 'UTF-8') !== 'españa') $type = 'province';
-
-        // Intent-based weights (Balanced)
-        $weights = [
-            'A' => 20, 'B' => 20, 'C' => 20, 'D' => 20, 'E' => 20
-        ];
-
-        // Deterministic Hash based on URI
-        $uri = uri_string();
-        $hash = crc32($uri);
-
-        // Weighted Selection
-        $sum = array_sum($weights);
-        $point = $hash % $sum;
-        $current = 0;
-        $variantId = 'A';
-        foreach ($weights as $id => $w) {
-            $current += $w;
-            if ($point < $current) {
-                $variantId = $id;
-                break;
-            }
-        }
-
-        // Titles (A-D Variants - Optimized for length < 60 chars)
-        $tVariants = [
-            'A' => "{$displayCount}Empresas en {$seoContext} buscando proveedores {$periodLabel}",
-            'B' => "{$displayCount}Empresas en {$seoContext} contratando proveedores {$periodLabel}",
-            'C' => "{$displayCount}Empresas en {$seoContext} necesitan proveedores {$periodLabel}",
-            'D' => "{$displayCount}Empresas en {$seoContext} buscan proveedores {$periodLabel}",
-        ];
-        $seoTitle = $tVariants[$variantId] ?? $tVariants['A'];
-
-        // Metas (Balanced Rotation)
-        $mWeights = ['V1' => 34, 'V2' => 33, 'V3' => 33];
-        $mSum = array_sum($mWeights);
-        $mPoint = $hash % $mSum;
-        $mCurrent = 0;
-        $mVariantId = 'action';
-        foreach ($mWeights as $mid => $mw) {
-            $mCurrent += $mw;
-            if ($mPoint < $mCurrent) {
-                $mVariantId = $mid;
-                break;
-            }
-        }
-
-        $mVariants = [
-            'V1' => "Accede a {$displayCount}empresas en {$context} que están buscando proveedores {$periodLabel}. Las primeras en contactar son las que consiguen el cliente.",
-            'V2' => "Accede a {$displayCount}empresas en {$context} que buscan proveedores {$periodLabel} de forma activa. Las primeras en contactar son las que consiguen el cliente.",
-            'V3' => "Accede a {$displayCount}empresas en {$context} con necesidad de proveedores {$periodLabel}. Las primeras en contactar son las que consiguen el cliente.",
-        ];
-
-        if ($period === 'hoy') {
-            $mVariants = [
-                'V1' => "Accede a {$displayCount}empresas en {$context} que están buscando proveedores hoy. Cada día aparecen nuevas oportunidades — las primeras en contactar son las que consiguen el cliente.",
-                'V2' => "Accede a {$displayCount}empresas en {$context} que buscan proveedores hoy. Cada día aparecen nuevas oportunidades — las primeras en contactar son las que consiguen el cliente.",
-                'V3' => "Accede a {$displayCount}empresas en {$context} con necesidad de proveedores hoy. Cada día aparecen nuevas oportunidades — las primeras en contactar son las que consiguen el cliente.",
-            ];
-        }
-        $seoDesc = $mVariants[$mVariantId];
-
-        // --- RESTORE MISSING CALCULATIONS ---
+        $totalCount = $seoMeta['total_context_count'];
         $dynamicPrice = calculate_radar_price($totalCount);
         $isLowResults = $totalCount === 0;
 
-        // Multi-period prices for the current context
         $prices = [
-            'hoy'    => calculate_radar_price($stats['hoy'])['base_price'],
+            'hoy' => calculate_radar_price($stats['hoy'])['base_price'],
             'semana' => calculate_radar_price($stats['semana'])['base_price'],
-            'mes'    => calculate_radar_price($stats['mes'])['base_price'],
+            'mes' => calculate_radar_price($stats['mes'])['base_price'],
             '30days' => calculate_radar_price($stats['30days'])['base_price'],
         ];
 
-        // National stats and prices for cross-context links
         $nationalStats = $stats;
         $nationalPrices = $prices;
 
         if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
-            $nStatsRaw = $db->table('companies');
-            if ($sector && !empty($sector['codes'])) {
-                $nStatsRaw->groupStart();
-                foreach ($sector['codes'] as $code) $nStatsRaw->orLike('cnae_code', $code, 'after');
-                $nStatsRaw->groupEnd();
-            }
-            $nStatsRaw->where('fecha_constitucion IS NOT NULL');
-            
-            $nQuery = $nStatsRaw->select("
-                COUNT(CASE WHEN fecha_constitucion = '" . date('Y-m-d') . "' THEN 1 END) as hoy,
-                COUNT(CASE WHEN fecha_constitucion >= '" . date('Y-m-d', strtotime('-7 days')) . "' THEN 1 END) as semana,
-                COUNT(CASE WHEN fecha_constitucion >= '" . date('Y-m-d', strtotime('-30 days')) . "' THEN 1 END) as mes
-            ")->get()->getRowArray();
-
-            $nationalStats = [
-                'hoy'    => (int)($nQuery['hoy'] ?? 0),
-                'semana' => (int)($nQuery['semana'] ?? 0),
-                'mes'    => (int)($nQuery['mes'] ?? 0),
-                '30days' => (int)($nQuery['mes'] ?? 0),
-            ];
-
+            $nationalStats = $this->radarService->getContextStats(null, $sector);
             $nationalPrices = [
-                'hoy'    => calculate_radar_price($nationalStats['hoy'])['base_price'],
+                'hoy' => calculate_radar_price($nationalStats['hoy'])['base_price'],
                 'semana' => calculate_radar_price($nationalStats['semana'])['base_price'],
-                'mes'    => calculate_radar_price($nationalStats['mes'])['base_price'],
+                'mes' => calculate_radar_price($nationalStats['mes'])['base_price'],
                 '30days' => calculate_radar_price($nationalStats['30days'])['base_price'],
             ];
         }
 
-        // Sectors / Provinces Top
-        if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
-            $topData = $db->table('companies')
-                ->select('MAX(cnae_label) as cnae_label, COUNT(id) as total')
-                ->where('registro_mercantil', $province)
-                ->where('cnae_code IS NOT NULL')->where('cnae_code !=', '')
-                ->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')))
-                ->groupBy('cnae_code')->orderBy('total', 'DESC')->limit(12)->get()->getResultArray();
-        } else {
-            $topData = $db->table('companies')
-                ->select('registro_mercantil as cnae_label, COUNT(id) as total')
-                ->where('registro_mercantil IS NOT NULL')->where('registro_mercantil !=', '')
-                ->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')))
-                ->groupBy('registro_mercantil')->orderBy('total', 'DESC')->limit(12)->get()->getResultArray();
-        }
-
-        $relatedSectors = [
-            ['label' => 'Construcción'],
-            ['label' => 'Hostelería'],
-            ['label' => 'Comercio al por mayor'],
-            ['label' => 'Transporte y logística'],
-            ['label' => 'Programación e informática'],
-            ['label' => 'Actividades inmobiliarias'],
-            ['label' => 'Consultoría empresarial'],
-            ['label' => 'Servicios a edificios']
-        ];
-
-        // Final Title Sanitization: Aggressive length management for SEO (Max 60 chars)
-        if (mb_strlen($seoTitle) > 60) {
-            $seoTitle = mb_substr($seoTitle, 0, 57) . '...';
-        }
-
-        // Dynamic Subtitle for H1 reinforcement
-        $dynamicSubtitle = "{$displayCount}empresas en {$context} están contratando proveedores ahora mismo";
-
-        $freeLimit = get_free_plan_limit();
-
-        $data = [
-            'variant_id' => $variantId . '-' . $mVariantId,
-            'title' => $seoTitle,
-            'excerptText' => $seoDesc,
-            'meta_description' => $seoDesc,
-            'dynamic_subtitle' => $dynamicSubtitle,
+        $data = array_merge($seoMeta, [
+            'meta_description' => $seoMeta['excerptText'],
             'companies' => $companies,
             'stats' => $stats,
             'prices' => $prices,
             'national_stats' => $nationalStats,
             'national_prices' => $nationalPrices,
-            'top_sectors' => $topData, 
-            'related_sectors' => $relatedSectors,
-            'province' => $province, 
+            'top_sectors' => $sidebarData['top_sectors'],
+            'related_sectors' => $sidebarData['related_sectors'],
+            'province' => $province,
             'sector' => $sector,
             'sector_label' => $sectorLabel,
-            'total_context_count' => $totalCount,
             'potential_revenue_min' => number_format(($totalCount > 0 ? $totalCount : ($stats['30days'] ?? 100)) * 300, 0, ',', '.'),
             'potential_revenue_max' => number_format(($totalCount > 0 ? $totalCount : ($stats['30days'] ?? 100)) * 1500, 0, ',', '.'),
             'conversion_count' => $totalCount > 0 ? $totalCount : ($stats['30days'] ?? 100),
@@ -624,15 +340,10 @@ class RadarController extends BaseController
             'is_low_results' => $isLowResults,
             'robots' => $isLowResults ? 'noindex, follow' : 'index, follow',
             'canonical' => site_url(uri_string()),
-            'heading_prefix' => $headingPrefix,
-            'heading_suffix' => $headingSuffix,
-            'heading_highlight' => $headingHighlight,
-            'heading_middle' => $headingMiddle,
-            'heading_location' => $headingLocation,
-            'heading_time' => $headingTime,
             'paywall_level' => 'strong',
-            'freeLimit' => $freeLimit
-        ];
+            'freeLimit' => get_free_plan_limit()
+        ]);
+
         if ($isLowResults) {
             if ($province && $sectorLabel) {
                 $data['national_sector_url'] = site_url("empresas-nuevas-sector/" . url_title($sectorLabel, '-', true));
@@ -642,9 +353,7 @@ class RadarController extends BaseController
             }
         }
 
-        // Store in cache for 23 hours (data only changes once/day via Python import)
         $cache->save($cacheKey, $data, 82800);
-
         return $data;
     }
 
@@ -666,8 +375,8 @@ class RadarController extends BaseController
         log_message('info', '[RadarController] Cache purgado por importador Python - ' . date('Y-m-d H:i:s'));
 
         return $this->response->setJSON([
-            'status'    => 'ok',
-            'message'   => 'Cache de Radar eliminado correctamente',
+            'status' => 'ok',
+            'message' => 'Cache de Radar eliminado correctamente',
             'timestamp' => date('Y-m-d H:i:s'),
         ]);
     }
@@ -738,113 +447,7 @@ class RadarController extends BaseController
         return $provinces[$key] ?? strtoupper(str_replace('-', ' ', $slug));
     }
 
-    private function resolveCnaeCodes($slug)
-    {
-        $db = \Config\Database::connect();
-        
-        // Si el slug empieza por número (formato legacy: 4121-construccion), lo extraemos
-        $parts = explode('-', $slug, 2);
-        if (is_numeric($parts[0])) {
-            $code = $parts[0];
-            $row = $db->query("SELECT label_2009 as label FROM cnae_2009_2025 WHERE cnae_2009 = ? LIMIT 1", [$code])->getRowArray();
-            if ($row) return ['codes' => [$code], 'label' => $this->normalizeLabel($row['label'])];
-            return ['codes' => [$code], 'label' => 'Sector ' . $code];
-        }
 
-        $aliases = [
-            'hosteleria' => ['codes' => ['55', '56'], 'label' => 'Hostelería, Restaurantes y Catering'],
-            'restaurantes' => ['codes' => ['561'], 'label' => 'Restaurantes y Puestos de Comida'],
-            'programacion' => ['codes' => ['62'], 'label' => 'Programación Informática'],
-            'marketing' => ['codes' => ['731'], 'label' => 'Marketing y Publicidad'],
-            'construccion' => ['codes' => ['41', '42', '43'], 'label' => 'Construcción e Inmobiliaria'],
-            'transporte' => ['codes' => ['49', '50', '51', '52', '53'], 'label' => 'Transporte y Logística'],
-            'logistica' => ['codes' => ['52'], 'label' => 'Logística y Almacenamiento'],
-            'finanzas' => ['codes' => ['64', '65', '66'], 'label' => 'Seguros y Finanzas'],
-            'inmobiliaria' => ['codes' => ['68'], 'label' => 'Actividades Inmobiliarias'],
-            'sanidad' => ['codes' => ['86'], 'label' => 'Actividades Sanitarias'],
-            'restauracion' => ['codes' => ['56'], 'label' => 'Hostelería y Restauración'],
-        ];
-
-        $clean = strtr(mb_strtolower($slug), ['á'=>'a','é'=>'e','í'=>'i','ó'=>'o','ú'=>'u','ñ'=>'n']);
-        if (isset($aliases[$clean])) return $aliases[$clean];
-
-        $searchTerm = str_replace('-', ' ', $slug);
-        $row = $db->query("SELECT cnae_2009 as code, label_2009 as label FROM cnae_2009_2025 WHERE label_2009 LIKE ? LIMIT 1", ["%$searchTerm%"])->getRowArray();
-        if ($row) return ['codes' => [$row['code']], 'label' => $this->normalizeLabel($row['label'])];
-
-        // seo_stats_cnae fallback removed due to corrupted data
-
-        return null;
-    }
-
-    private function getProvinceData($province)
-    {
-        $db = \Config\Database::connect();
-        $row = $db->query("SELECT * FROM seo_stats WHERE province = ?", [$province])->getRowArray();
-
-        if (!$row) {
-            $total = $this->companyModel->builder()->where('registro_mercantil', $province)->countAllResults();
-            if ($total === 0) return null;
-
-            $latest = $this->companyModel->builder()
-                ->select('id, company_name as name, cif, fecha_constitucion, cnae_label, objeto_social')
-                ->where('registro_mercantil', $province)
-                ->where('fecha_constitucion IS NOT NULL')
-                ->where('fecha_constitucion <=', date('Y-m-d'))
-                ->orderBy('fecha_constitucion', 'DESC')
-                ->limit(100)
-                ->get()->getResultArray();
-        } else {
-            $total = $row['total_companies'];
-            $latest = $this->companyModel->builder()
-                ->select('id, company_name as name, cif, fecha_constitucion, cnae_label, objeto_social')
-                ->where('registro_mercantil', $province)
-                ->where('fecha_constitucion IS NOT NULL')
-                ->where('fecha_constitucion <=', date('Y-m-d'))
-                ->orderBy('fecha_constitucion', 'DESC')
-                ->limit(100)
-                ->get()->getResultArray();
-        }
-
-        // Stats growth
-        $baseBuilder = function () use ($province, $db) {
-            $b = $db->table('companies');
-            if (mb_strtolower($province, 'UTF-8') === 'alicante') {
-                $b->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
-            } else {
-                $b->where('registro_mercantil', $province);
-            }
-            $b->where('fecha_constitucion IS NOT NULL');
-            return $b;
-        };
-
-        $docsToday = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d'))->countAllResults();
-        $docsWeek = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')))->countAllResults();
-        $docsMonth = $baseBuilder()->where('fecha_constitucion >=', date('Y-m-01'))->countAllResults();
-
-        return [
-            'province' => $row['province'] ?? $province,
-            'total' => $total,
-            'total_formatted' => number_format($total, 0, ',', '.'),
-            'growth_pct' => $row['growth_pct'] ?? 0,
-            'top_sectors' => json_decode($row['top_sectors'] ?? '[]', true),
-            'companies' => $latest,
-            'stats' => [
-                'hoy' => $docsToday,
-                'semana' => $docsWeek,
-                'mes' => $docsMonth
-            ]
-        ];
-    }
-
-
-    private function normalizeLabel($label)
-    {
-        $label = mb_convert_case(mb_strtolower($label), MB_CASE_TITLE, "UTF-8");
-        $label = str_replace([' De ', ' Y ', ' En ', ' Con ', ' Por ', ' Para ', ' Al ', ' La ', ' Los ', ' Las '], 
-                             [' de ', ' y ', ' en ', ' con ', ' por ', ' para ', ' al ', ' la ', ' los ', ' las '], $label);
-        return ucfirst($label);
-    }
 
     /**
      * Webhook CRON (Sincronización Nocturna)
@@ -923,18 +526,19 @@ class RadarController extends BaseController
         $params = $this->request->getGet();
         $filename = $this->getExportFilename($params);
 
-        if (ob_get_length()) ob_clean();
+        if (ob_get_length())
+            ob_clean();
 
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Cache-Control: no-cache, no-store, must-revalidate');
         header('Pragma: no-cache');
         header('Expires: 0');
-        
+
         if (!empty($params['dl_token'])) {
             setcookie('dl_token', $params['dl_token'], time() + 120, '/');
         }
-        
+
         $fp = fopen('php://output', 'w');
         $this->streamExportData($params, $fp);
         fclose($fp);
@@ -979,12 +583,12 @@ class RadarController extends BaseController
 
     private function getExportData($params): array
     {
-        $sector   = $params['sector']   ?? '';
+        $sector = $params['sector'] ?? '';
         $province = $params['provincia'] ?? 'España';
-        $period   = $params['period']   ?? $params['rango'] ?? '30days';
-        $cnae     = $params['cnae']     ?? '';
+        $period = $params['period'] ?? $params['rango'] ?? '30days';
+        $cnae = $params['cnae'] ?? '';
         $cnae_text = $params['cnae_text'] ?? '';
-        $estado   = $params['estado']   ?? '';
+        $estado = $params['estado'] ?? '';
 
         $allowedPeriods = ['7', '30', '90', 'hoy', 'semana', 'mes', '30days', 'general'];
         if (($params['is_historical'] ?? '0') === '1') {
@@ -1019,13 +623,15 @@ class RadarController extends BaseController
         }
 
         if ($sector && mb_strtolower($sector, 'UTF-8') !== 'general') {
-            $resolution = $this->resolveCnaeCodes(url_title($sector, '-', true));
+            $resolution = $this->radarService->resolveCnaeCodes(url_title($sector, '-', true));
             if ($resolution) {
                 $codes = $resolution['codes'];
-                if (count($codes) === 1) $builder->where('cnae_code LIKE', $codes[0] . '%');
+                if (count($codes) === 1)
+                    $builder->where('cnae_code LIKE', $codes[0] . '%');
                 else {
                     $builder->groupStart();
-                    foreach ($codes as $code) $builder->orLike('cnae_code', $code, 'after');
+                    foreach ($codes as $code)
+                        $builder->orLike('cnae_code', $code, 'after');
                     $builder->groupEnd();
                 }
             }
@@ -1050,9 +656,9 @@ class RadarController extends BaseController
         }
 
         $builder->orderBy('fecha_constitucion', 'DESC');
-        
+
         $isHistorical = ($params['is_historical'] ?? '0') === '1' || $period === 'general';
-        
+
         if (!$isHistorical) {
             $builder->limit($cnae !== '' ? 2000 : 5000);
         } else {
@@ -1062,17 +668,17 @@ class RadarController extends BaseController
         }
 
         $companies = $builder->get()->getResultArray();
-        
+
         if (empty($companies)) {
             return [];
         }
 
         $companyIds = array_column($companies, 'id');
-        
+
         $adminRows = [];
         $bormeRows = [];
         $chunks = array_chunk($companyIds, 5000);
-        
+
         foreach ($chunks as $chunk) {
             $chunkAdmin = $db->table('company_administrators')
                 ->select('company_id, position, name')
@@ -1098,16 +704,16 @@ class RadarController extends BaseController
         foreach ($bormeRows as $row) {
             $cid = $row['company_id'];
             $desc = $row['description'] ?? '';
-            
+
             if (!isset($bormeExtracted[$cid])) {
                 $bormeExtracted[$cid] = ['capital' => '', 'socio_unico' => ''];
             }
-            
+
             // Extract Capital
             if (empty($bormeExtracted[$cid]['capital']) && preg_match('/Capital:\s*([\d\.,]+\s*Euros?)/iu', $desc, $matches)) {
                 $bormeExtracted[$cid]['capital'] = trim($matches[1]);
             }
-            
+
             // Extract Socio unico
             if (empty($bormeExtracted[$cid]['socio_unico']) && preg_match('/Socio único:\s*([^.]+)\./iu', $desc, $matches)) {
                 $bormeExtracted[$cid]['socio_unico'] = trim($matches[1]);
@@ -1126,29 +732,29 @@ class RadarController extends BaseController
 
     private function getExportFilename($params): string
     {
-        $sector   = $params['sector']   ?? '';
+        $sector = $params['sector'] ?? '';
         $province = $params['provincia'] ?? 'España';
-        $cnae     = $params['cnae']     ?? '';
+        $cnae = $params['cnae'] ?? '';
         $isHistorical = ($params['is_historical'] ?? '0') === '1';
 
         if ($cnae !== '') {
             return "Directorio_" . preg_replace('/[^A-Za-z0-9_]/', '_', $cnae) . "_" . str_replace(' ', '_', $province) . ".csv";
         }
-        
+
         if ($isHistorical) {
             return "Directorio_Historico_" . str_replace(' ', '_', $province) . ".csv";
         }
-        
+
         return "Listado_Nuevas_Empresas_" . str_replace(' ', '_', $sector) . "_" . str_replace(' ', '_', $province) . ".csv";
     }
 
     private function streamExportData($params, $fp)
     {
         // BOM for Excel compatibility with UTF-8
-        fprintf($fp, chr(0xEF).chr(0xBB).chr(0xBF));
-        
+        fprintf($fp, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
         $companies = $this->getExportData($params);
-        
+
         // Headers
         fputcsv($fp, [
             'Empresa',
@@ -1184,16 +790,16 @@ class RadarController extends BaseController
     }
 
     // REMOVED OLD METHODS:
-private function generateExcelHtml(array $companies): string
+    private function generateExcelHtml(array $companies): string
     {
         ob_start();
         echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
         echo '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body>';
-        
+
         $thStyle = 'background-color: #2563eb; color: #ffffff; font-weight: bold; border: 1px solid #000000; padding: 10px; text-align: center;';
         $tdStyle = 'border: 1px solid #cccccc; padding: 8px; vertical-align: top;';
-        $textStyle = $tdStyle . ' mso-number-format:"\@";'; 
-        
+        $textStyle = $tdStyle . ' mso-number-format:"\@";';
+
         echo '<table border="1">';
         echo '<thead><tr>';
         echo '<th style="' . $thStyle . '">Nombre de la Empresa</th>';
@@ -1210,8 +816,8 @@ private function generateExcelHtml(array $companies): string
         echo '</tr></thead><tbody>';
 
         foreach ($companies as $company) {
-            $rawDate   = $company['fecha_constitucion'] ?? '';
-            $ts        = $rawDate ? strtotime(str_replace('/', '-', $rawDate)) : false;
+            $rawDate = $company['fecha_constitucion'] ?? '';
+            $ts = $rawDate ? strtotime(str_replace('/', '-', $rawDate)) : false;
             $cleanDate = ($ts && $ts >= strtotime('1900-01-01') && $ts <= strtotime('2100-01-01')) ? date('d/m/Y', $ts) : '';
 
             echo '<tr>';
@@ -1228,7 +834,7 @@ private function generateExcelHtml(array $companies): string
             echo '<td style="' . $tdStyle . '">' . esc($company['capital_social'] ?? '') . '</td>';
             echo '</tr>';
         }
-        
+
         echo '</tbody></table></body></html>';
         return ob_get_clean();
     }
