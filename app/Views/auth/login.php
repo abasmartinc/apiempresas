@@ -3,6 +3,7 @@
 <head>
     <?=view('partials/head') ?>
     <link rel="stylesheet" href="<?= base_url('public/css/login.css?v=' . time()) ?>" />
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 
 <body>
@@ -73,6 +74,10 @@
                         class="auth-input"
                         placeholder="••••••••"
                     />
+                </div>
+
+                <div style="margin-top: 10px; margin-bottom: 16px; display: flex; justify-content: center;">
+                    <div class="cf-turnstile" data-sitekey="<?= env('TURNSTILE_SITE_KEY') ?>" data-theme="light"></div>
                 </div>
 
                 <button type="submit" class="auth-btn-primary" id="login-submit">Entrar en el panel</button>

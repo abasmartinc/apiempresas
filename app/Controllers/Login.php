@@ -59,6 +59,12 @@ class Login extends BaseController
                 ->with('error', 'Por favor revisa los datos introducidos.');
         }
 
+        helper('turnstile');
+        $turnstileResponse = $this->request->getPost('cf-turnstile-response');
+        if (!verify_turnstile($turnstileResponse, $this->request->getIPAddress())) {
+            return redirect()->back()->withInput()->with('error', 'Fallo en la verificación de seguridad (Turnstile). Por favor, inténtalo de nuevo.');
+        }
+
         $email = strtolower(trim($this->request->getPost('email')));
         $password = (string) $this->request->getPost('password');
 

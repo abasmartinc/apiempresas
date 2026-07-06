@@ -30,6 +30,7 @@
 
             <h3>4. Destinatarios y Transferencias Internacionales</h3>
             <p>No vendemos tus datos a terceros. Podemos cederlos a proveedores estrictamente necesarios (hosting, analítica, pasarela de pago como Stripe). Algunos de estos proveedores (ej. Google, GitHub) pueden transferir datos fuera del EEE. Nos aseguramos de que cumplan con el RGPD mediante cláusulas contractuales tipo o acuerdos equivalentes.</p>
+            <p><strong>Cloudflare Turnstile:</strong> Utilizamos Cloudflare Turnstile para proteger nuestros formularios contra el spam y el abuso automatizado. El uso de Turnstile está sujeto a la <a href="https://www.cloudflare.com/website-terms/" target="_blank" rel="noopener noreferrer">Política de Privacidad y Términos de Cloudflare</a>.</p>
 
             <h3>5. Tus Derechos (ARCO-POL)</h3>
             <p>Tienes derecho a obtener confirmación sobre si estamos tratando tus datos. También tienes derecho a:</p>
