@@ -371,4 +371,31 @@ class EmailService
         $hash = hash_hmac('sha256', $email, env('encryption.key', 'apiempresas-secret-key'));
         return site_url("unsubscribe/{$hash}?email=" . urlencode($email));
     }
+
+    /**
+     * Send an alert when an API Key is blocked due to a Geo Anomaly.
+     */
+    public function sendApiKeyBlockedAlert(string $userEmail, string $countryCode)
+    {
+        $emailService = \Config\Services::email();
+        $emailService->clear();
+
+        $fromEmail = env('email.fromEmail', 'no-reply@apiempresas.es');
+        $fromName  = env('email.fromName', 'APIEmpresas Seguridad');
+        
+        $emailService->setFrom($fromEmail, $fromName);
+        $emailService->setTo($userEmail);
+        $emailService->setSubject('⚠️ ALERTA DE SEGURIDAD: Tu API Key ha sido bloqueada');
+
+        $body = view('emails/api_key_blocked', ['countryCode' => $countryCode]);
+        $emailService->setMessage($body);
+
+        if ($emailService->send()) {
+            log_message('info', "[EmailService] Alerta Geo-Anomaly enviada a {$userEmail}");
+            return true;
+        } else {
+            log_message('error', "[EmailService] Error al enviar alerta Geo-Anomaly a {$userEmail}: " . $emailService->printDebugger(['headers']));
+            return false;
+        }
+    }
 }
