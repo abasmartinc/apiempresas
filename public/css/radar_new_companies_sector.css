@@ -1442,13 +1442,9 @@
 /* Paywall */
 .ae-radar-page__paywall-zone {
     position: relative;
-    margin-top: 28px;
-    min-height: 520px;
-    border-radius: 30px;
-    overflow: hidden;
-    background: linear-gradient(180deg, #f3f7ff 0%, #fbfdff 100%);
-    border: 1px solid #dbe7ff;
-    box-shadow: 0 20px 46px -30px rgba(15, 23, 42, 0.18);
+    margin-top: -240px;
+    min-height: 380px;
+    z-index: 10;
 }
 
 .ae-radar-page__paywall-grid {
@@ -1573,8 +1569,7 @@
 }
 
 .ae-radar-page__paywall-overlay {
-    position: absolute;
-    inset: 0;
+    position: relative;
     z-index: 3;
     display: flex;
     align-items: center;
