@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="Tests\Feature\PublicRoutesTest" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" tests="6" assertions="47" errors="0" failures="0" skipped="0" time="7.880541">
-    <testcase name="testHeaderNavigation" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="59" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="14" time="2.073392"/>
-    <testcase name="testFooterRadarRoutes" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="73" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="9" time="1.641716"/>
-    <testcase name="testUtilitiesRoutes" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="85" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="6" time="0.858671"/>
-    <testcase name="testProvinceRoutes" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="95" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="8" time="1.291536"/>
-    <testcase name="testBusinessProfiles" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="106" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="8" time="1.693340"/>
-    <testcase name="testDynamicSeoRoutes" file="D:\laragon\www\apiempresas\tests\feature\PublicRoutesTest.php" line="125" class="Tests\Feature\PublicRoutesTest" classname="Tests.Feature.PublicRoutesTest" assertions="2" time="0.321885"/>
+  <testsuite name="Tests\Unit\BillingServiceTest" file="D:\laragon\www\apiempresas\tests\unit\BillingServiceTest.php" tests="4" assertions="22" errors="0" failures="0" skipped="0" time="0.014354">
+    <testcase name="testCalculateDirectoryPrice" file="D:\laragon\www\apiempresas\tests\unit\BillingServiceTest.php" line="18" class="Tests\Unit\BillingServiceTest" classname="Tests.Unit.BillingServiceTest" assertions="4" time="0.012365"/>
+    <testcase name="testCalculateBonusPrice" file="D:\laragon\www\apiempresas\tests\unit\BillingServiceTest.php" line="34" class="Tests\Unit\BillingServiceTest" classname="Tests.Unit.BillingServiceTest" assertions="6" time="0.000800"/>
+    <testcase name="testBuildSinglePaymentLineItem" file="D:\laragon\www\apiempresas\tests\unit\BillingServiceTest.php" line="56" class="Tests\Unit\BillingServiceTest" classname="Tests.Unit.BillingServiceTest" assertions="6" time="0.000643"/>
+    <testcase name="testBuildSubscriptionLineItem" file="D:\laragon\www\apiempresas\tests\unit\BillingServiceTest.php" line="68" class="Tests\Unit\BillingServiceTest" classname="Tests.Unit.BillingServiceTest" assertions="6" time="0.000546"/>
   </testsuite>
 </testsuites>

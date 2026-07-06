@@ -142,7 +142,7 @@ $fmt = function ($n) {
                                 </div>
                                 <h3 style="margin: 0 0 12px; font-size: 1.25rem; font-weight: 900; color: #0f172a;">Acción no procesada</h3>
                                 <p style="margin: 0 0 20px; font-size: 0.95rem; color: #dc2626; line-height: 1.5; font-weight: 600; background: #fef2f2; padding: 12px; border-radius: 8px;">
-                                    No se ha podido establecer conexión segura con la pasarela de pagos. Por la seguridad de tus datos, la operación ha sido cancelada.
+                                    <?= esc(session('error')) ?>
                                 </p>
                                 <p style="margin: 0 0 24px; font-size: 0.85rem; color: #64748b; font-weight: 500; line-height: 1.4;">
                                     Tu cuenta no ha sufrido ningún cargo. Por favor, inténtalo de nuevo en unos minutos o contacta con soporte si el problema persiste.

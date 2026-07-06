@@ -1,8 +1,6 @@
-Public Routes (Tests\Feature\PublicRoutes)
- [x] Header navigation
- [x] Footer radar routes
- [x] Utilities routes
- [x] Province routes
- [x] Business profiles
- [x] Dynamic seo routes
+Billing Service (Tests\Unit\BillingService)
+ [x] Calculate directory price
+ [x] Calculate bonus price
+ [x] Build single payment line item
+ [x] Build subscription line item
 

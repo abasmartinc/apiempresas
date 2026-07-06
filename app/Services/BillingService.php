@@ -1,0 +1,260 @@
+<?php
+
+namespace App\Services;
+
+class BillingService
+{
+    /**
+     * Calcula el precio para descargas de bases de datos de directorio históricas
+     */
+    public function calculateDirectoryPrice(int $totalCount): float
+    {
+        return round(19 + (($totalCount / 1000) * 1.00), 2);
+    }
+
+    /**
+     * Calcula el precio para recargas de créditos API mediante bonos
+     */
+    public function calculateBonusPrice(int $credits): float
+    {
+        $price = 49;
+        $tiers = [
+            ['qty' => 10000, 'price' => 49],
+            ['qty' => 50000, 'price' => 199],
+            ['qty' => 100000, 'price' => 349],
+            ['qty' => 500000, 'price' => 999],
+            ['qty' => 1000000, 'price' => 1499]
+        ];
+
+        if ($credits >= 1000000) {
+            return 1499.0;
+        }
+
+        for ($i = 0; $i < count($tiers) - 1; $i++) {
+            if ($credits >= $tiers[$i]['qty'] && $credits <= $tiers[$i+1]['qty']) {
+                $range = $tiers[$i+1]['qty'] - $tiers[$i]['qty'];
+                $priceRange = $tiers[$i+1]['price'] - $tiers[$i]['price'];
+                $progress = ($credits - $tiers[$i]['qty']) / $range;
+                $price = (int) round($tiers[$i]['price'] + ($progress * $priceRange));
+                break;
+            }
+        }
+
+        return (float) $price;
+    }
+
+    /**
+     * Helper paramétrico para crear el line_item de pago único en Stripe
+     */
+    public function buildSinglePaymentLineItem(string $name, string $description, float $amount, ?string $taxRateId = null): array
+    {
+        $lineItem = [
+            'quantity' => 1,
+            'price_data' => [
+                'currency' => 'eur',
+                'unit_amount' => (int)($amount * 100),
+                'product_data' => [
+                    'name' => $name,
+                    'description' => $description
+                ]
+            ]
+        ];
+
+        if ($taxRateId) {
+            $lineItem['tax_rates'] = [$taxRateId];
+        }
+
+        return $lineItem;
+    }
+
+    /**
+     * Helper paramétrico para crear el line_item de suscripción en Stripe
+     */
+    public function buildSubscriptionLineItem(string $name, string $description, float $amount, string $interval = 'month', ?string $taxRateId = null): array
+    {
+        $lineItem = [
+            'quantity' => 1,
+            'price_data' => [
+                'currency' => 'eur',
+                'unit_amount' => (int)($amount * 100),
+                'recurring' => [
+                    'interval' => $interval
+                ],
+                'product_data' => [
+                    'name' => $name,
+                    'description' => $description
+                ]
+            ]
+        ];
+
+        if ($taxRateId) {
+            $lineItem['tax_rates'] = [$taxRateId];
+        }
+
+        return $lineItem;
+    }
+
+    /**
+     * Cuenta el número de empresas para una descarga de Directorio Histórico
+     */
+    public function countDirectoryCompanies(array $filters): int
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('companies');
+
+        $prov = $filters['provincia'] ?? 'España';
+        $estado = $filters['estado'] ?? '';
+        $has_phone = $filters['has_phone'] ?? '';
+        $date_min = $filters['date_min'] ?? '';
+        $date_max = $filters['date_max'] ?? '';
+        $cnae = $filters['cnae'] ?? '';
+        $cnae_text = $filters['cnae_text'] ?? '';
+
+        if ($estado !== '') {
+            $builder->where('estado', $estado);
+        }
+        if ($has_phone == '1') {
+            $builder->groupStart()
+                    ->groupStart()->where('phone IS NOT NULL', null, false)->where('phone !=', '')->groupEnd()
+                    ->orGroupStart()->where('phone_mobile IS NOT NULL', null, false)->where('phone_mobile !=', '')->groupEnd()
+                    ->groupEnd();
+        }
+        if ($date_min !== '') $builder->where('estado_fecha >=', $date_min);
+        if ($date_max !== '') $builder->where('estado_fecha <=', $date_max);
+        
+        if ($cnae !== '') {
+            $builder->where('cnae_code LIKE', $cnae . '%');
+        } elseif ($cnae_text !== '') {
+            $builder->like('cnae_label', $cnae_text, 'both');
+        }
+        
+        if (strtolower($prov) !== 'españa') {
+            if (in_array(strtolower($prov), ['alicante', 'alacant', 'alicante/alacant'])) {
+                $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
+            } else {
+                $builder->where('registro_mercantil', $prov);
+            }
+        }
+        return $builder->countAllResults();
+    }
+
+    /**
+     * Cuenta el número de empresas para una descarga del Radar B2B
+     */
+    public function countRadarCompanies(array $filters): int
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('companies');
+        
+        $prov = $filters['provincia'] ?? 'España';
+        $cnae = $filters['cnae'] ?? '';
+        
+        $builder->where('cnae_code LIKE', $cnae . '%');
+        $builder->where('fecha_constitucion IS NOT NULL');
+        
+        if (strtolower($prov) !== 'españa') {
+            if (in_array(strtolower($prov), ['alicante', 'alacant', 'alicante/alacant'])) {
+                $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
+            } else {
+                $builder->where('registro_mercantil', $prov);
+            }
+        }
+        return $builder->countAllResults();
+    }
+
+    /**
+     * Extrae y centraliza la lógica de consultas a base de datos y cálculos
+     * de precio para descargas de listados (Radar y Directorio).
+     */
+    public function getExcelDownloadContext(string $plan, array $postData, array $getParams = []): array
+    {
+        $prov = $postData['provincia'] ?? 'España';
+        $count = 0;
+        $amount = 0.0;
+        $context = [];
+        $productName = '';
+        $productDesc = '';
+        $metadataPlan = '';
+
+        if ($plan === 'directory_single') {
+            $count = (int) ($postData['total_count'] ?? 0);
+            $amount = (float) ($postData['price'] ?? 0);
+            $cnae = $postData['cnae'] ?? '';
+            $cnae_text = $postData['cnae_text'] ?? '';
+            $sect = $postData['sector'] ?? '';
+            $estado = $postData['estado'] ?? '';
+            $has_phone = $postData['has_phone'] ?? '';
+            
+            if ($count <= 0 || $amount <= 0) {
+                $filters = [
+                    'provincia' => $prov,
+                    'estado'    => $estado,
+                    'has_phone' => $has_phone,
+                    'date_min'  => $getParams['date_min'] ?? '',
+                    'date_max'  => $getParams['date_max'] ?? '',
+                    'cnae'      => $cnae,
+                    'cnae_text' => $cnae_text
+                ];
+                $count = $this->countDirectoryCompanies($filters);
+                $amount = $this->calculateDirectoryPrice($count);
+            }
+
+            $context = [
+                'type'        => 'directory_excel',
+                'provincia'   => $prov,
+                'cnae'        => $cnae,
+                'cnae_text'   => $cnae_text,
+                'sector'      => $sect,
+                'estado'      => $estado,
+                'has_phone'   => $has_phone,
+                'total_count' => $count
+            ];
+            $productName = 'BBDD Histórica ' . $prov . ' (' . number_format($count, 0, ',', '.') . ' empresas)';
+            $productDesc = 'Descarga en Excel del listado histórico completo.';
+            $metadataPlan = 'directory_single';
+
+        } else {
+            $sect = $postData['sector'] ?? '';
+            $cnae = $postData['cnae'] ?? '';
+            $per  = (isset($postData['period_radar']) && $postData['period_radar'] !== '')
+                ? $postData['period_radar']
+                : ($cnae !== '' ? 'general' : '30days');
+
+            if ($cnae !== '') {
+                $count = $this->countRadarCompanies([
+                    'provincia' => $prov,
+                    'cnae' => $cnae
+                ]);
+            } else {
+                $radar = new \App\Controllers\RadarController();
+                $radarData = $radar->getRadarData($prov, $sect, $per, 1);
+                $count = $radarData['total_context_count'] ?? 0;
+            }
+
+            // Requires 'pricing' helper to be loaded in the caller
+            $pricing = \calculate_radar_price($count); 
+            $amount = $pricing['base_price'];
+
+            $context = [
+                'type'        => 'excel',
+                'sector'      => $sect,
+                'cnae'        => $cnae,
+                'provincia'   => $prov,
+                'period'      => $per,
+                'total_count' => $count
+            ];
+            $productName = 'Descarga Listado Radar B2B (' . $count . ' empresas)';
+            $productDesc = 'Listado completo de nuevas empresas constituidas.';
+            $metadataPlan = 'radar_single';
+        }
+
+        return [
+            'count' => $count,
+            'amount' => $amount,
+            'context' => $context,
+            'product_name' => $productName,
+            'product_desc' => $productDesc,
+            'metadata_plan' => $metadataPlan
+        ];
+    }
+}

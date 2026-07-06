@@ -80,9 +80,6 @@ $routes->get('billing/portal', 'Billing::portal');
 $routes->post('billing/rotate-key', 'Billing::rotate_key');
 $routes->post('billing/cancel-subscription', 'Billing::cancel_subscription');
 
-// PayPal return
-$routes->get('billing/paypal/return', 'Billing::paypalReturn');
-
 $routes->get('consumption', 'Usage::index');
 $routes->get('consumption/request/(:any)', 'Usage::getRequestDetails/$1');
 $routes->get('consumption/logs_ajax', 'Usage::getLogsAjax');
