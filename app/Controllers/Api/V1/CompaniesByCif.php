@@ -190,7 +190,7 @@ class CompaniesByCif extends BaseApiController
             }
 
             // Guardar SOLO data en cache (completa)
-            cache()->save($cacheKey, $company, 86400); // 24h
+            cache()->save($cacheKey, $company, 2592000); // 30 dias
 
             // Apply masking if Free plan and no wallet balance
             $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
