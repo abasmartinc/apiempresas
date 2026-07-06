@@ -162,13 +162,13 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     +<?= number_format($conversion_count ?? 0, 0, ',', '.') ?> empresas en <?= esc($heading_location ?? 'España') ?> listas para ser contactadas antes que tu competencia
                 </p>
 
-                    <p class="ae-radar-page__hero-copy" style="margin-top: 1rem; opacity: 0.8; font-size: 1.1rem; color: #64748b;">
-                    Si no actúas hoy, otro proveedor cerrará estas ventas antes que tú
+                    <p class="ae-radar-page__hero-copy" style="margin-top: 1rem; opacity: 0.8; font-size: 1.1rem; color: #64748b; max-width: 600px; margin-left: auto; margin-right: auto;">
+                    Llega antes de que tus competidores sepan que existen. El 70% de las ventas B2B se las lleva el primer proveedor que contacta.
                 </p>
 
                     <div class="ae-radar-page__hero-actions">
                     <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary">
-                        Acceder ahora y detectar estas oportunidades antes que otros
+                        Desbloquear Radar Completo
                     </a>
                 </div>
                 <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.75rem; font-weight: 500; text-align: center;">La mayoría de usuarios consigue su primer cliente en días</p>
@@ -224,12 +224,13 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     Empresas recién constituidas detectadas en BORME y listas para prospección comercial. Ideal para despachos, software, marketing, seguros, asesoría, financiación y proveedores B2B.
                 </p>
             </div>
-<!-- Bloque de Urgencia -->
-        <div style="background: #fef2f2; border: 1px solid #fecaca; border-left: 5px solid #ef4444; padding: 1.25rem 1.5rem; border-radius: 0.5rem; color: #991b1b; margin: 0 0 2rem 0; display: flex; align-items: center; gap: 1rem; box-shadow: none;">
-            <span style="font-size: 2rem;">⚠️</span>
+            
+        <!-- Bloque de Contexto Competitivo -->
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 5px solid #22c55e; padding: 1.25rem 1.5rem; border-radius: 0.5rem; color: #166534; margin: 0 0 2rem 0; display: flex; align-items: center; gap: 1rem; box-shadow: none;">
+            <span style="font-size: 1.8rem;">💡</span>
             <div>
-                <strong style="font-size: 1.2rem; display: block; margin-bottom: 0.25rem;">Varias de estas oportunidades serán detectadas por otros en las próximas horas</strong>
-                <p style="margin: 0; opacity: 0.9;">Algunas ya están siendo asignadas a otros proveedores</p>
+                <strong style="font-size: 1.2rem; display: block; margin-bottom: 0.25rem;">Ventaja competitiva inmediata (Time-to-Market)</strong>
+                <p style="margin: 0; opacity: 0.9;">Tus competidores suelen tardar semanas en actualizar sus bases de datos. Prospectar hoy te da prioridad exclusiva.</p>
             </div>
         </div>
     
