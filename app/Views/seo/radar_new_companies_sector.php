@@ -164,12 +164,8 @@ $premiumLeads = array_slice($companies, $freeCount);
             </div>
                 <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.75rem; font-weight: 500; text-align: center;">La mayoría de usuarios consigue su primer cliente en días</p>
 
-                <!-- Bloque Económico (Conversion Tier) -->
-                <div class="ae-radar-page__economic-block" style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 2.5rem; border-radius: 1.25rem; color: white; margin: 3rem 0; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);">
-                    <p style="font-size: 1.25rem; margin-bottom: 0.75rem; opacity: 0.9; font-weight: 500;">Se han detectado <strong style="color: #4ade80;"><?= number_format($conversion_count ?? 0, 0, ',', '.') ?></strong> empresas nuevas <?= $conversion_label ?? 'recientemente' ?> con potencial comercial en este sector</p>
-                    <h3 style="font-size: 1.85rem; font-weight: 900; line-height: 1.2; background: linear-gradient(to right, #4ade80, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Estas empresas pueden generarte entre <?= $potential_revenue_min ?? '900' ?>€ y <?= $potential_revenue_max ?? '4.500' ?>€ en ventas reales en los próximos días</h3>
-                    <p style="color: #94a3b8; font-size: 1.1rem; margin-top: 1rem; font-weight: 500;">Con 1 cliente cubres el coste mensual</p>
-                </section>
+            </div>
+        </section>
 
 <section id="leads-sectoriales" class="ae-radar-page__section ae-radar-page__section--leads container">
 
@@ -711,20 +707,7 @@ $premiumLeads = array_slice($companies, $freeCount);
                 </div>
             </section>
 
-        <!-- Final CTA Section -->
-<section class="ae-radar-page__section container" style="background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; margin-top: 3rem !important;" style="margin-top: 4rem; padding-bottom: 6rem;">
-        <div style="background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 1.5rem; padding: 4rem 2rem; text-align: center; color: white; position: relative; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
-            <div style="position: relative; z-index: 2;">
-                <h2 style="font-size: 2.5rem; font-weight: 900; margin-bottom: 1.5rem; letter-spacing: -0.02em; color: white;">Si no accedes ahora, estas oportunidades desaparecerán en horas</h2>
-                <p style="font-size: 1.25rem; opacity: 0.8; max-width: 700px; margin: 0 auto 1.5rem; color: white;">Más de 40 empresas nuevas aparecen cada día — quienes detectan primero son quienes cierran</p>
-                <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary" style="padding: 1.25rem 3.5rem; font-size: 1.25rem; font-weight: 700; border-radius: 100px; background: white; color: #0f172a; box-shadow: 0 0 30px rgba(255,255,255,0.2);">
-                    Detectar estas oportunidades antes que tu competencia
-                </a>
-                    <p style="font-size: 0.95rem; color: rgba(255,255,255,0.7); margin-top: 1.25rem; font-weight: 500;">La mayoría de usuarios consigue su primer cliente en días</p>
-            </div>
-            <!-- Subtle background glow -->
-            <div style="position: absolute; top: -50%; left: -20%; width: 100%; height: 200%; background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);"></div>
-        </section>
+
 
         <script type="application/ld+json">
         {
@@ -771,28 +754,27 @@ $premiumLeads = array_slice($companies, $freeCount);
     
     <!-- Modal Conversion -->
     <div id="radarConversionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); z-index: 99999; backdrop-filter: blur(8px); align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
-        <div style="background: white; border-radius: 1.25rem; padding: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); max-width: 600px; width: 90%; position: relative; text-align: center; transform: translateY(20px); transition: transform 0.3s ease;" class="radar-modal-content">
+        <div style="background: white; border-radius: 1.25rem; padding: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); max-width: 500px; width: 90%; position: relative; text-align: center; transform: translateY(20px); transition: transform 0.3s ease;" class="radar-modal-content">
             <button onclick="closeRadarModal()" style="position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; font-size: 1.75rem; cursor: pointer; color: #94a3b8; line-height: 1;">&times;</button>
             
-            <div style="width: 56px; height: 56px; background: #fef2f2; color: #dc2626; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V8a5 5 0 0 1 10 0v3"></path></svg>
+            <div style="width: 56px; height: 56px; background: #eff6ff; color: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
             </div>
             
-            <p style="font-weight: 800; color: #0f172a; margin-bottom: 0.5rem; font-size: 1.5rem; letter-spacing: -0.02em;">Estas empresas están activas ahora mismo</p>
-            <p style="color: #475569; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 500;">Otros proveedores ya están cerrando estas oportunidades</p>
-            <p style="color: #dc2626; margin-bottom: 0.75rem; font-size: 1.1rem; font-weight: 700;">Si no actúas ahora, perderás estas oportunidades</p>
-            <p style="color: #dc2626; margin-bottom: 2rem; font-size: 1.05rem; font-weight: 600;">Cada minuto que pasa, aumenta la probabilidad de perder estas oportunidades</p>
-            <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary" style="width: 100%; justify-content: center; padding: 1.15rem; font-size: 1.2rem; box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4); border-radius: 0.75rem;">
-                Acceder ahora y detectar antes que otros proveedores
+            <p style="font-weight: 800; color: #0f172a; margin-bottom: 0.75rem; font-size: 1.6rem; letter-spacing: -0.02em; line-height: 1.2;">¿Listo para empezar a prospectar?</p>
+            <p style="color: #475569; margin-bottom: 2rem; font-size: 1.1rem; line-height: 1.5;">Accede al listado completo de empresas, filtra por provincia y sector, y exporta tus leads directamente a Excel.</p>
+            
+            <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary" style="width: 100%; justify-content: center; padding: 1.15rem; font-size: 1.15rem; font-weight: 700; box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4); border-radius: 0.75rem;">
+                Desbloquear Radar Completo
             </a>
             
-            <p style="font-size: 0.95rem; color: #64748b; margin-top: 1.25rem; font-weight: 500;">La mayoría de usuarios consigue su primer cliente en días</p>
+            <a href="<?= site_url('excel/preview') ?>" style="display: block; color: #64748b; font-size: 0.95rem; text-decoration: underline; margin-top: 1.25rem; font-weight: 500;">O descargar muestra en Excel</a>
         </div>
     </div>
 
     <script>
     let modalTriggered = false;
-    function showRadarModal() {
+    function showRadarModal(trigger = 'unknown') {
         if (modalTriggered) return;
         modalTriggered = true;
         const modal = document.getElementById('radarConversionModal');
@@ -802,6 +784,10 @@ $premiumLeads = array_slice($companies, $freeCount);
                 modal.style.opacity = '1';
                 modal.querySelector('.radar-modal-content').style.transform = 'translateY(0)';
             }, 10);
+
+            if (window.trackEvent) {
+                window.trackEvent('radar_modal_view', { trigger: trigger, page: 'radar_sector_landing' });
+            }
         }
     }
 
@@ -813,6 +799,10 @@ $premiumLeads = array_slice($companies, $freeCount);
             setTimeout(() => {
                 modal.style.display = 'none';
             }, 300);
+
+            if (window.trackEvent) {
+                window.trackEvent('radar_modal_close', { page: 'radar_sector_landing' });
+            }
         }
     }
 
@@ -822,30 +812,20 @@ $premiumLeads = array_slice($companies, $freeCount);
         blurredCards.forEach(card => {
             card.addEventListener('click', (e) => {
                 e.preventDefault();
-                setTimeout(showRadarModal, 300);
+                setTimeout(() => showRadarModal('blurred_card'), 300);
             });
         });
 
-        // Intercept clicks on primary CTAs to show modal instead of direct redirect?
-        // Wait, the user said: "Mostrar modal SOLO cuando: el usuario hace clic en CTA principal".
-        // If they click the primary CTA, it should show the modal instead of navigating immediately?
-        // Yes, that adds friction but increases the "pressure".
+        // Intercept clicks on primary CTAs
         const mainCtas = document.querySelectorAll('.ae-radar-page__btn--primary:not(#radarConversionModal .ae-radar-page__btn--primary)');
         mainCtas.forEach(cta => {
             cta.addEventListener('click', (e) => {
                 if(!modalTriggered) {
                     e.preventDefault();
-                    setTimeout(showRadarModal, 300);
+                    const eventName = cta.getAttribute('data-track-event') || 'primary_cta';
+                    setTimeout(() => showRadarModal(eventName), 300);
                 }
             });
-        });
-
-        // Scroll > 60%
-        window.addEventListener('scroll', () => {
-            const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
-            if (scrollPercent > 60) {
-                setTimeout(showRadarModal, 300);
-            }
         });
     });
     </script>
