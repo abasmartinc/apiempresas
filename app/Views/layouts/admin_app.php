@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <?= view('partials/head', ['title' => $title ?? 'Admin Dashboard']) ?>
+    <link rel="stylesheet" href="<?= base_url('public/css/admin.css?v=' . (file_exists(FCPATH . 'public/css/admin.css') ? filemtime(FCPATH . 'public/css/admin.css') : time())) ?>" />
     <?= $this->renderSection('styles') ?>
 </head>
 <body class="admin-body" hx-ext="ajax-header" hx-boost="true" hx-target="#admin-app-content" hx-push-url="true" hx-swap="innerHTML transition:true">
