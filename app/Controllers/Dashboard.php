@@ -167,27 +167,7 @@ class Dashboard extends BaseController
         // Dynamic Usage Message
         $data['usageMessage'] = null;
         if (!$isPaid) {
-            if ($requestsUsedThisMonth == 0) {
-                $data['usageMessage'] = [
-                    'title' => '¡Bienvenido!',
-                    'text'  => 'Empieza validando una empresa para ver cómo funciona la API en tiempo real.'
-                ];
-            } elseif ($requestsUsedThisMonth >= 1 && $requestsUsedThisMonth <= 4) {
-                $data['usageMessage'] = [
-                    'title' => '⚡ Ya has probado la API',
-                    'text'  => 'Haz 2–3 validaciones más para comprobar la calidad real de los datos.'
-                ];
-            } elseif ($requestsUsedThisMonth >= 5 && $requestsUsedThisMonth <= 9) {
-                $data['usageMessage'] = [
-                    'title' => 'Estás viendo el valor',
-                    'text'  => 'El siguiente paso es integrarlo en tu sistema para automatizar procesos.'
-                ];
-            } elseif ($requestsUsedThisMonth >= ($maxLimit * 0.6) && $requestsUsedThisMonth < $maxLimit) {
-                $data['usageMessage'] = [
-                    'title' => 'Límite casi alcanzado',
-                    'text'  => 'Te quedan pocas consultas gratuitas. Activa Pro para evitar interrupciones.'
-                ];
-            } else {
+            if ($requestsUsedThisMonth >= $maxLimit) {
                 if ($walletBalance > 0) {
                     $data['usageMessage'] = [
                         'title' => 'Límite gratuito superado',
@@ -199,6 +179,26 @@ class Dashboard extends BaseController
                         'text'  => 'Activa Pro para seguir validando empresas automáticamente.'
                     ];
                 }
+            } elseif ($requestsUsedThisMonth >= ($maxLimit * 0.6)) {
+                $data['usageMessage'] = [
+                    'title' => 'Límite casi alcanzado',
+                    'text'  => 'Te quedan pocas consultas gratuitas. Activa Pro para evitar interrupciones.'
+                ];
+            } elseif ($requestsUsedThisMonth >= 5) {
+                $data['usageMessage'] = [
+                    'title' => 'Estás viendo el valor',
+                    'text'  => 'El siguiente paso es integrarlo en tu sistema para automatizar procesos.'
+                ];
+            } elseif ($requestsUsedThisMonth >= 1 && $requestsUsedThisMonth <= 4) {
+                $data['usageMessage'] = [
+                    'title' => '⚡ Ya has probado la API',
+                    'text'  => 'Haz 2–3 validaciones más para comprobar la calidad real de los datos.'
+                ];
+            } else {
+                $data['usageMessage'] = [
+                    'title' => '¡Bienvenido!',
+                    'text'  => 'Empieza validando una empresa para ver cómo funciona la API en tiempo real.'
+                ];
             }
         } else {
             // Plan de Pago superado con wallet
@@ -283,11 +283,13 @@ class Dashboard extends BaseController
             $builder = $db->table('api_usage_daily')
                 ->selectSum('requests_count', 'total')
                 ->selectSum('credits_used', 'credits_total')
-                ->where('user_id', $userId)
-                ->where('date >=', date('Y-m-01'));
+                ->where('user_id', $userId);
                 
             if ($plan && $plan->plan_id) {
                 $builder->where('plan_id', $plan->plan_id);
+                $builder->where('date >=', date('Y-m-01'));
+            } else {
+                $builder->where('date >=', '2026-05-28'); // Free limit lifetime
             }
             
             $usageSum = $builder->get()->getRow();
