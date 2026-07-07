@@ -41,6 +41,9 @@ $routes->get('auth/linkedin', 'LinkedinAuth::login');
 $routes->get('auth/linkedin/callback', 'LinkedinAuth::callback');
 
 $routes->get('dashboard', 'Dashboard::index');
+$routes->get('profile', 'Profile::index');
+$routes->post('profile/update', 'Profile::update');
+$routes->post('profile/password', 'Profile::password');
 // $routes->get('empresas-nuevas', 'NewCompanies::index'); // Deprecated route interfering with SeoController::newRadarHub (line 194)
 $routes->get('dashboard/kpis', 'Dashboard::kpis_ajax');
 $routes->post('dashboard/complete-wizard', 'Dashboard::completeWizard');
