@@ -1,7 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head', ['title' => 'Detalle del Ticket | Admin APIEmpresas.es']) ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         .admin-body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
@@ -56,11 +55,9 @@
         .ticket-badge-priority-high { background: #ffedd5; color: #c2410c; }
         .ticket-badge-priority-urgent { background: #fee2e2; color: #b91c1c; }
     </style>
-</head>
-<body class="admin-body">
-    <?= view('partials/header_admin') ?>
+<?= $this->endSection() ?>
 
-    <main class="container-admin">
+<?= $this->section('content') ?>
         <a href="<?= site_url('admin/tickets') ?>" class="btn-back">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Volver al listado
@@ -238,9 +235,10 @@
                 </form>
             </div>
         </div>
-    </main>
+    <?= $this->endSection() ?>
 
-    <!-- Modal for Internal Note -->
+<?= $this->section('scripts') ?>
+<!-- Modal for Internal Note -->
     <div id="noteModal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.5); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
         <div style="background: white; width: 100%; max-width: 500px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); margin: 10vh auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
@@ -269,5 +267,5 @@
             </form>
         </div>
     </div>
-</body>
-</html>
+<?= $this->endSection() ?>
+

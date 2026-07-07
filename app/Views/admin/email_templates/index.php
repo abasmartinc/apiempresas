@@ -1,7 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head', ['title' => $title]) ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
+
     <style>
         .template-grid {
             display: grid;
@@ -78,12 +77,9 @@
             color: #1e293b;
         }
     </style>
-</head>
-<body class="admin-body">
-    <div class="bg-halo" aria-hidden="true"></div>
-    <?= view('partials/header_admin') ?>
+<?= $this->endSection() ?>
 
-    <main class="container-admin" style="padding: 40px 0 80px;">
+<?= $this->section('content') ?>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
             <div>
                 <h1 class="title" style="font-size: 2.5rem; margin-bottom: 8px;">Gestor de <span class="grad">Emails</span></h1>
@@ -124,8 +120,5 @@
                 </div>
             <?php endforeach; ?>
         </div>
-    </main>
+    <?= $this->endSection() ?>
 
-    <?= view('partials/footer') ?>
-</body>
-</html>

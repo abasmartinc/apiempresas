@@ -1,7 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head', ['title' => $title]) ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
+
     <!-- Select2 -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
@@ -94,13 +93,9 @@
         .dot-active { background: #10b981; box-shadow: 0 0 12px rgba(16, 185, 129, 0.5); border: 2px solid #fff; }
         .admin-table-wrapper { background: #fff; border-radius: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05); overflow: hidden; }
     </style>
-</head>
-<body class="admin-body">
-<div class="bg-halo" aria-hidden="true"></div>
+<?= $this->endSection() ?>
 
-<?= view('partials/header_admin') ?>
-
-<main class="container-admin page-padding">
+<?= $this->section('content') ?>
     <div class="page-header">
         <div>
             <h1 class="title" style="color: #0f172a;">KPIs de Email Marketing</h1>
@@ -310,9 +305,9 @@
             <?= $pager->links('default', 'admin_full') ?>
         </div>
     </div>
-</main>
+<?= $this->endSection() ?>
 
-<?= view('partials/footer') ?>
+<?= $this->section('scripts') ?>
 <!-- Scripts Select2 -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -325,5 +320,5 @@ $(document).ready(function() {
     });
 });
 </script>
-</body>
-</html>
+<?= $this->endSection() ?>
+

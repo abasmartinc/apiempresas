@@ -17,27 +17,21 @@ $fmt = function ($n) {
     return number_format((int) $n, 0, ',', '.'); 
 };
 ?>
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head') ?>
-    <link rel="stylesheet" href="<?= base_url('public/css/billing.css') ?>?v=<?= time() ?>" />
-</head>
-<body>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/app' ) ?>
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('public/css/billing.css') ?>?v=<?= time() ?>" />
+<style>
+    /* Aislamiento del checkout */
+    header .nav nav.desktop-only,
+    header .nav .auth-buttons,
+    header .nav .mobile-menu-toggle {
+        display: none !important;
+    }
+</style>
+<?= $this->endSection() ?>
 
-<div class="auth-wrapper">
-    <?= view('partials/header_inner') ?>
-    <style>
-        /* Aislamiento del checkout */
-        header .nav nav.desktop-only,
-        header .nav .auth-buttons,
-        header .nav .mobile-menu-toggle {
-            display: none !important;
-        }
-    </style>
-
-    <main class="billing-main">
-        <div class="container">
+<?= $this->section('content') ?>
+<div class="container billing-main">
             
 
 
@@ -409,7 +403,7 @@ $fmt = function ($n) {
             </div>
 
             <!-- SECCIÓN BOTTOM: GESTIÓN Y FAQS -->
-            <div class="bottom-section">
+            <div class="bottom-section" style="padding-bottom: 80px;">
                 
                 <!-- GESTIÓN DE SUSCRIPCIÓN -->
                 <?php include APPPATH . 'Views/components/manage_subscription.php'; ?>
@@ -452,11 +446,9 @@ $fmt = function ($n) {
             </div>
 
         </div>
-    </main>
+<?= $this->endSection() ?>
 
-    <?= view('partials/footer') ?>
-</div>
-
+<?= $this->section('scripts') ?>
 <script>
     function setSelectedPlan(value) {
         const planCards = document.querySelectorAll('.plan-card');
@@ -588,6 +580,4 @@ $fmt = function ($n) {
         }
     })();
 </script>
-
-</body>
-</html>
+<?= $this->endSection() ?>

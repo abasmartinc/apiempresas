@@ -75,7 +75,7 @@ class Dashboard extends BaseController
             $data['pending_tickets_count'] = $ticketModel->where('status', 'open')->countAllResults();
             // --------------------------
 
-            return view('admin/dashboard', $data);
+            return $this->renderView('admin/dashboard', $data);
         }
 
         // --- Personalization stats for non-admins ---
@@ -254,7 +254,7 @@ class Dashboard extends BaseController
         }
 
         // Todos los usuarios convergen en el dashboard unificado
-        return view('dashboard', $data);
+        return $this->renderView('dashboard', $data);
     }
 
     /**

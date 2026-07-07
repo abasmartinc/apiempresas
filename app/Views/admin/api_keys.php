@@ -1,14 +1,9 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head', ['title' => $title]) ?>
-</head>
-<body class="admin-body">
-<div class="bg-halo" aria-hidden="true"></div>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
 
-<?= view('partials/header_admin') ?>
+<?= $this->endSection() ?>
 
-<main class="container-admin" style="padding: 40px 0;">
+<?= $this->section('content') ?>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h1 class="title">Gestión de API Keys</h1>
         <div style="display: flex; gap: 10px;">
@@ -108,10 +103,9 @@
     <div style="margin-top: 2rem;">
         <?= $pager->links('default', 'admin_full') ?>
     </div>
-</main>
+<?= $this->endSection() ?>
 
-<?= view('partials/footer') ?>
-
+<?= $this->section('scripts') ?>
 <!-- Select2 para hacer el select buscable -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
@@ -159,7 +153,6 @@
         }
     });
 </script>
+<?= $this->endSection() ?>
 
-</body>
-</html>
 

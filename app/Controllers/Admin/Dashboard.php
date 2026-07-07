@@ -89,7 +89,7 @@ class Dashboard extends BaseController
             ]
         ];
 
-        return view('admin/users', $data);
+        return $this->renderView('admin/users', $data);
     }
 
     /**
@@ -175,7 +175,7 @@ class Dashboard extends BaseController
         }
         $data['resolved_cifs'] = $resolvedCifs;
 
-        return view('admin/logs', $data);
+        return $this->renderView('admin/logs', $data);
     }
 
     /**
@@ -260,7 +260,7 @@ class Dashboard extends BaseController
             ]
         ];
 
-        return view('admin/api_requests', $data);
+        return $this->renderView('admin/api_requests', $data);
     }
 
     /**
@@ -304,7 +304,7 @@ class Dashboard extends BaseController
             ]
         ];
 
-        return view('admin/usage_daily', $data);
+        return $this->renderView('admin/usage_daily', $data);
     }
 
     /**
@@ -328,7 +328,7 @@ class Dashboard extends BaseController
             'q' => $q
         ];
 
-        return view('admin/blocked_ips', $data);
+        return $this->renderView('admin/blocked_ips', $data);
     }
 
     /**
@@ -367,7 +367,7 @@ class Dashboard extends BaseController
             'templates' => $marketingConfig->templates,
         ];
 
-        return view('admin/email_compose', $data);
+        return $this->renderView('admin/email_compose', $data);
     }
 
     /**
@@ -380,7 +380,7 @@ class Dashboard extends BaseController
             'user' => null, // Para que la vista sepa que es creación
         ];
 
-        return view('admin/user_form', $data);
+        return $this->renderView('admin/user_form', $data);
     }
 
     /**
@@ -434,7 +434,7 @@ class Dashboard extends BaseController
             'user' => $user,
         ];
 
-        return view('admin/user_form', $data);
+        return $this->renderView('admin/user_form', $data);
     }
 
     /**
@@ -578,7 +578,7 @@ class Dashboard extends BaseController
             ]
         ];
 
-        return view('admin/invoices', $data);
+        return $this->renderView('admin/invoices', $data);
     }
 
     /**
@@ -736,7 +736,7 @@ class Dashboard extends BaseController
             ]
         ];
 
-        return view('admin/email_compose_bulk', $data);
+        return $this->renderView('admin/email_compose_bulk', $data);
     }
 
     /**
@@ -875,7 +875,7 @@ class Dashboard extends BaseController
 
         // Si es una petición AJAX, solo devolvemos la tabla
         if ($this->request->isAJAX()) {
-            return view('admin/partials/companies_table', [
+            return $this->renderView('admin/partials/companies_table', [
                 'companies' => $companies,
                 'pager' => $pager
             ]);
@@ -889,7 +889,7 @@ class Dashboard extends BaseController
             'filters' => $filters
         ];
 
-        return view('admin/companies', $data);
+        return $this->renderView('admin/companies', $data);
     }
 
     /**
@@ -987,7 +987,7 @@ class Dashboard extends BaseController
             'title' => 'Nueva Empresa | APIEmpresas',
             'company' => null
         ];
-        return view('admin/company_form', $data);
+        return $this->renderView('admin/company_form', $data);
     }
 
     /**
@@ -1025,7 +1025,7 @@ class Dashboard extends BaseController
             'title' => 'Editar Empresa | APIEmpresas',
             'company' => $company
         ];
-        return view('admin/company_form', $data);
+        return $this->renderView('admin/company_form', $data);
     }
 
     /**
@@ -1087,7 +1087,7 @@ class Dashboard extends BaseController
             'is_active' => $isActive,
         ];
 
-        return view('admin/plans', $data);
+        return $this->renderView('admin/plans', $data);
     }
 
     /**
@@ -1099,7 +1099,7 @@ class Dashboard extends BaseController
             'title' => 'Nuevo Plan | APIEmpresas',
             'plan' => null
         ];
-        return view('admin/plan_form', $data);
+        return $this->renderView('admin/plan_form', $data);
     }
 
     /**
@@ -1138,7 +1138,7 @@ class Dashboard extends BaseController
             'title' => 'Editar Plan | APIEmpresas',
             'plan' => $plan
         ];
-        return view('admin/plan_form', $data);
+        return $this->renderView('admin/plan_form', $data);
     }
 
     /**
@@ -1211,7 +1211,7 @@ class Dashboard extends BaseController
             'is_active' => $isActive,
         ];
 
-        return view('admin/api_keys', $data);
+        return $this->renderView('admin/api_keys', $data);
     }
 
     /**
@@ -1225,7 +1225,7 @@ class Dashboard extends BaseController
             'users' => $this->userModel->orderBy('name', 'ASC')->findAll(),
             'generated_key' => bin2hex(random_bytes(32)) // Generar una key por defecto
         ];
-        return view('admin/api_key_form', $data);
+        return $this->renderView('admin/api_key_form', $data);
     }
 
     /**
@@ -1264,7 +1264,7 @@ class Dashboard extends BaseController
             'key' => $key,
             'users' => $this->userModel->orderBy('name', 'ASC')->findAll()
         ];
-        return view('admin/api_key_form', $data);
+        return $this->renderView('admin/api_key_form', $data);
     }
 
     /**
@@ -1355,7 +1355,7 @@ class Dashboard extends BaseController
             'business' => $businessCount,
         ];
 
-        return view('admin/subscriptions', $data);
+        return $this->renderView('admin/subscriptions', $data);
     }
 
     /**
@@ -1369,7 +1369,7 @@ class Dashboard extends BaseController
             'users' => $this->userModel->orderBy('name', 'ASC')->findAll(),
             'plans' => $this->planModel->where('is_active', 1)->findAll()
         ];
-        return view('admin/subscription_form', $data);
+        return $this->renderView('admin/subscription_form', $data);
     }
 
     /**
@@ -1411,7 +1411,7 @@ class Dashboard extends BaseController
             'users' => $this->userModel->orderBy('name', 'ASC')->findAll(),
             'plans' => $this->planModel->where('is_active', 1)->findAll()
         ];
-        return view('admin/subscription_form', $data);
+        return $this->renderView('admin/subscription_form', $data);
     }
 
     /**
@@ -1544,7 +1544,7 @@ class Dashboard extends BaseController
         'all_users' => $this->userModel->orderBy('name', 'ASC')->findAll()
     ];
 
-        return view('admin/email_logs', $data);
+        return $this->renderView('admin/email_logs', $data);
     }
     /**
      * Dashboard de IA Marketing: Lead Scoring
@@ -1713,7 +1713,7 @@ class Dashboard extends BaseController
             'available_subjects' => $availableSubjects
         ];
         
-        return view('admin/ia_marketing', $data);
+        return $this->renderView('admin/ia_marketing', $data);
     }
 
     /**
@@ -1725,7 +1725,7 @@ class Dashboard extends BaseController
             'title' => 'Google Search Console | APIEmpresas'
         ];
         
-        return view('admin/search_console', $data);
+        return $this->renderView('admin/search_console', $data);
     }
     
     /**

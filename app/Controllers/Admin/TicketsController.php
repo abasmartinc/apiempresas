@@ -36,7 +36,7 @@ class TicketsController extends BaseController
             'closed' => $this->ticketModel->where('status', 'closed')->countAllResults(),
         ];
 
-        return view('admin/tickets/index', [
+        return $this->renderView('admin/tickets/index', [
             'tickets' => $tickets, 
             'statusFilter' => $statusFilter,
             'kpis' => $kpis
@@ -56,7 +56,7 @@ class TicketsController extends BaseController
 
         $replies = $this->ticketReplyModel->getRepliesWithSender($id);
 
-        return view('admin/tickets/show', ['ticket' => $ticket, 'replies' => $replies]);
+        return $this->renderView('admin/tickets/show', ['ticket' => $ticket, 'replies' => $replies]);
     }
 
     public function reply($id)

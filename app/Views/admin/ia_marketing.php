@@ -1,7 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head', ['title' => $title]) ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
+
     <style>
         :root {
             --kpi-blue: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
@@ -65,14 +64,9 @@
         }
         .pill { padding: 2px 8px; border-radius: 6px; font-weight: 600; }
     </style>
-</head>
-<body class="admin-body">
-<div class="bg-halo" aria-hidden="true"></div>
+<?= $this->endSection() ?>
 
-<!-- Navegación y Header idénticos al resto del Admin -->
-<?= view('partials/header_admin') ?>
-
-<main class="container-admin" style="padding: 40px 0;">
+<?= $this->section('content') ?>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <div>
             <h1 class="title" style="display: flex; align-items: center; gap: 10px;">
@@ -308,8 +302,9 @@
         </form>
     </div>
 
-</main>
+<?= $this->endSection() ?>
 
+<?= $this->section('scripts') ?>
 <!-- Modal Historial Email -->
 <div id="emailHistoryModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; backdrop-filter: blur(4px); align-items: center; justify-content: center;">
     <div style="background: white; width: 90%; max-width: 600px; border-radius: 20px; padding: 30px; position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
@@ -500,7 +495,5 @@
         document.getElementById('emailHistoryModal').style.display = 'none';
     }
 </script>
+<?= $this->endSection() ?>
 
-<?= view('partials/footer') ?>
-</body>
-</html>

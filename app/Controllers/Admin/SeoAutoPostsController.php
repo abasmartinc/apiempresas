@@ -27,7 +27,7 @@ class SeoAutoPostsController extends BaseController
             'keywords' => $this->keywordModel->orderBy('created_at', 'DESC')->findAll(),
         ];
 
-        return view('admin/seo_auto_posts/index', $data);
+        return $this->renderView('admin/seo_auto_posts/index', $data);
     }
 
     public function storeKeyword()

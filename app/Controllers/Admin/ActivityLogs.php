@@ -63,7 +63,7 @@ class ActivityLogs extends BaseController
             'top_action' => $this->activityModel->getActivityStats(date('Y-m-d', strtotime('-24 hours')), date('Y-m-d'))[0]['action'] ?? 'None'
         ];
 
-        return view('admin/activity_logs', $data);
+        return $this->renderView('admin/activity_logs', $data);
     }
 
     /**
@@ -81,7 +81,7 @@ class ActivityLogs extends BaseController
         $data['logs'] = $this->activityModel->getUserActivity($userId, 200);
         $data['user_id'] = $userId;
 
-        return view('admin/user_activity', $data);
+        return $this->renderView('admin/user_activity', $data);
     }
 
     /**

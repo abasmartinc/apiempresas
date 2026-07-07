@@ -1,16 +1,10 @@
-<!doctype html>
-<html lang="es">
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/app' ) ?>
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('public/css/usage.css') ?>" />
+<?= $this->endSection() ?>
 
-<head>
-    <?= view('partials/head') ?>
-    <link rel="stylesheet" href="<?= base_url('public/css/usage.css') ?>" />
-    <link rel="stylesheet" href="<?= base_url('public/css/dashboard.css') ?>" />
-</head>
-
-<body>
+<?= $this->section('content') ?>
     <div class="bg-halo" aria-hidden="true"></div>
-
-    <?= view('partials/header_inner') ?>
 
     <?php
     $get = function ($src, string $key, $default = null) {
@@ -160,7 +154,7 @@
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
     </style>
 
-    <main class="dash-main">
+    
         <div class="container">
 
             <div class="dash-header" style="margin: 10px 0 24px;">
@@ -419,8 +413,6 @@
     </main>>
 
         </div>
-    </main>
-
     <!-- Log Details Slide-over -->
     <div id="logSlideover" class="log-slideover">
         <div class="log-slideover-overlay" onclick="closeLogDetails()"></div>
@@ -485,9 +477,10 @@
         </div>
     </div>
 
-    <?= view('partials/footer') ?>
+    <?= $this->endSection() ?>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<?= $this->section('scripts') ?>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <script>
         (() => {
@@ -851,6 +844,4 @@
         }
     </script>
 
-</body>
-
-</html>
+<?= $this->endSection() ?>

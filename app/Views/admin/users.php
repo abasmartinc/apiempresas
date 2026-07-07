@@ -1,7 +1,5 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head', ['title' => $title]) ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
     <style>
         :root {
             --kpi-blue: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
@@ -64,13 +62,9 @@
             transition: width 1s ease-out;
         }
     </style>
-</head>
-<body class="admin-body">
-<div class="bg-halo" aria-hidden="true"></div>
+<?= $this->endSection() ?>
 
-<?= view('partials/header_admin') ?>
-
-<main class="container-admin page-padding">
+<?= $this->section('content') ?>
     <div class="page-header">
         <h1 class="title">Usuarios Registrados</h1>
         <div class="flex-gap-10">
@@ -228,8 +222,10 @@
     <div style="margin-top: 2rem;">
         <?= $pager->links('default', 'admin_full') ?>
     </div>
-</main>
 
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const impButtons = document.querySelectorAll('.btn-impersonate');
@@ -306,8 +302,5 @@
         }
     });
 </script>
-
-<?= view('partials/footer') ?>
-</body>
-</html>
+<?= $this->endSection() ?>
 

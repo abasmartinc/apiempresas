@@ -1,7 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head', ['title' => $title]) ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
+
     <style>
         .kpi-grid {
             display: grid;
@@ -76,13 +75,9 @@
             100% { background-position: -200% 0; }
         }
     </style>
-</head>
-<body class="admin-body">
-<div class="bg-halo" aria-hidden="true"></div>
+<?= $this->endSection() ?>
 
-<?= view('partials/header_admin') ?>
-
-<main class="container-admin page-padding">
+<?= $this->section('content') ?>
     <div class="page-header">
         <h1 class="title">
             Gestión de Empresas 
@@ -281,9 +276,6 @@
             loadKpis();
         });
     </script>
-</main>
+<?= $this->endSection() ?>
 
-<?= view('partials/footer') ?>
-</body>
-</html>
 

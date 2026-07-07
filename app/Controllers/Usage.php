@@ -227,7 +227,7 @@ class Usage extends BaseController
         }
         $data['recent_requests'] = $recentRequests;
 
-        return view('usage', $data);
+        return $this->renderView('usage', $data);
     }
 
     public function getRequestDetails($reqId)

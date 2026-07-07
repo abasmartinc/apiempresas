@@ -1,7 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head', ['title' => $title]) ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
+
     <style>
         :root {
             --kpi-free: #5c6370;
@@ -48,13 +47,9 @@
         .kpi-value { font-size: 2.5rem; font-weight: 900; color: #1e293b; letter-spacing: -0.02em; margin-bottom: 0.5rem; line-height: 1; }
         .kpi-sub { font-size: 0.85rem; color: #94a3b8; font-weight: 500; display: flex; align-items: center; gap: 6px; }
     </style>
-</head>
-<body class="admin-body">
-<div class="bg-halo" aria-hidden="true"></div>
+<?= $this->endSection() ?>
 
-<?= view('partials/header_admin') ?>
-
-<main class="container-admin" style="padding: 40px 0;">
+<?= $this->section('content') ?>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h1 class="title">Gestión de Suscripciones</h1>
         <div style="display: flex; gap: 10px;">
@@ -211,9 +206,9 @@
     <div style="margin-top: 2rem;">
         <?= $pager->links('default', 'admin_full') ?>
     </div>
-</main>
+<?= $this->endSection() ?>
 
-<?= view('partials/footer') ?>
+<?= $this->section('scripts') ?>
 <!-- Select2 para hacer el select buscable -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 <style>
@@ -278,7 +273,6 @@
         });
     });
 </script>
+<?= $this->endSection() ?>
 
-</body>
-</html>
 

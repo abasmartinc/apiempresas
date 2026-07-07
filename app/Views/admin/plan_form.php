@@ -1,14 +1,9 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head', ['title' => $title]) ?>
-</head>
-<body class="admin-body">
-<div class="bg-halo" aria-hidden="true"></div>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
 
-<?= view('partials/header_admin') ?>
+<?= $this->endSection() ?>
 
-<main class="container-admin" style="padding: 40px 0;">
+<?= $this->section('content') ?>
     <div style="max-width: 700px; margin: 0 auto;">
         <a href="<?= site_url('admin/plans') ?>" class="minor" style="display: inline-block; margin-bottom: 1rem;">← Volver al listado</a>
         
@@ -77,9 +72,6 @@
             </form>
         </div>
     </div>
-</main>
+<?= $this->endSection() ?>
 
-<?= view('partials/footer') ?>
-</body>
-</html>
 

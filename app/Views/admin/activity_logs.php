@@ -1,7 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head') ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
+
     <style>
         
         /* Activity Logs specific styles */
@@ -62,12 +61,9 @@
         .kpi-value { font-size: 2.5rem; font-weight: 900; color: #1e293b; letter-spacing: -0.02em; margin-bottom: 0.5rem; line-height: 1; }
         .kpi-sub { font-size: 0.85rem; color: #94a3b8; font-weight: 500; display: flex; align-items: center; gap: 6px; }
     </style>
-</head>
-<body class="admin-body">
-    <div class="bg-halo" aria-hidden="true"></div>
-    <?= view('partials/header_admin') ?>
+<?= $this->endSection() ?>
 
-    <main class="container-admin" style="padding: 40px 0;">
+<?= $this->section('content') ?>
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
             <div>
@@ -246,10 +242,9 @@
         <p style="margin-top: 20px; color: #64748b; font-size: 0.85rem;">
             Showing <?= count($logs) ?> logs (limit: <?= $limit ?>)
         </p>
-    </main>
+    <?= $this->endSection() ?>
 
-    <?= view('partials/footer') ?>
-
+<?= $this->section('scripts') ?>
 <!-- Select2 para hacer el select buscable -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
@@ -297,6 +292,5 @@
         }
     });
 </script>
+<?= $this->endSection() ?>
 
-</body>
-</html>

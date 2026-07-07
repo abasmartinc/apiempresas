@@ -1,7 +1,5 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <?= view('partials/head') ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/app' ) ?>
+<?= $this->section('styles') ?>
     <style>
         .invoice-container { padding: 40px 20px; max-width: 1000px; margin: 0 auto; min-height: 70vh; }
         .invoice-header { margin-bottom: 30px; }
@@ -39,10 +37,9 @@
         .pagination li.active span { background: #2152ff; color: white; border-color: #2152ff; }
         .pagination li.disabled span { color: #cbd5e1; cursor: not-allowed; }
     </style>
-</head>
-<body style="background-color: #f8fafc;">
+<?= $this->endSection() ?>
 
-    <?= view('partials/header_inner') ?>
+<?= $this->section('content') ?>
 
     <div class="invoice-container">
         <a href="<?= site_url('dashboard') ?>" class="back-link">
@@ -108,7 +105,4 @@
         </div>
     </div>
 
-    <?= view('partials/footer') ?>
-
-</body>
-</html>
+<?= $this->endSection() ?>

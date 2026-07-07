@@ -55,4 +55,21 @@ abstract class BaseController extends Controller
 
         // E.g.: $this->session = \Config\Services::session();
     }
+
+    /**
+     * Devuelve true si la petición es de HTMX
+     */
+    protected function isHtmx(): bool
+    {
+        return $this->request->hasHeader('HX-Request');
+    }
+
+    /**
+     * Renderiza la vista pasando automáticamente la variable $isHtmx
+     */
+    protected function renderView(string $view, array $data = [])
+    {
+        $data['isHtmx'] = $this->isHtmx();
+        return view($view, $data);
+    }
 }

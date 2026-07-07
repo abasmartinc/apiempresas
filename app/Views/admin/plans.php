@@ -1,14 +1,9 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head', ['title' => $title]) ?>
-</head>
-<body class="admin-body">
-<div class="bg-halo" aria-hidden="true"></div>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
 
-<?= view('partials/header_admin') ?>
+<?= $this->endSection() ?>
 
-<main class="container-admin" style="padding: 40px 0;">
+<?= $this->section('content') ?>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h1 class="title">Planes de la API</h1>
         <div style="display: flex; gap: 10px;">
@@ -110,9 +105,6 @@
     </div>
     <?php endif; ?>
 
-</main>
+<?= $this->endSection() ?>
 
-<?= view('partials/footer') ?>
-</body>
-</html>
 

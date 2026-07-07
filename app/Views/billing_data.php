@@ -1,18 +1,12 @@
-<!doctype html>
-<html lang="es">
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/app' ) ?>
+<?= $this->section('styles') ?>
 <head>
-    <head>
-        <?=view('partials/head') ?>
+        
         <link rel="stylesheet" href="<?= base_url('public/css/billing_data.css') ?>" />
-    </head>
-</head>
-<body>
-<div class="bg-halo" aria-hidden="true"></div>
+<?= $this->endSection() ?>
 
-<?=view('partials/header_inner') ?>
-
-<main class="billing-main">
-    <div class="container">
+<?= $this->section('content') ?>
+<div class="container">
         <!-- CABECERA -->
         <div class="billing-header">
             <div>
@@ -148,10 +142,4 @@
         </section>
 
     </div>
-</main>
-
-<?=view('partials/footer') ?>
-
-</body>
-</html>
-
+<?= $this->endSection() ?>

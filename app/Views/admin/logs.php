@@ -1,7 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head', ['title' => $title]) ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
+
     <style>
         :root {
             --kpi-blue: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
@@ -65,13 +64,9 @@
         }
         .pill { padding: 2px 8px; border-radius: 6px; font-weight: 600; }
     </style>
-</head>
-<body class="admin-body">
-<div class="bg-halo" aria-hidden="true"></div>
+<?= $this->endSection() ?>
 
-<?= view('partials/header_admin') ?>
-
-<main class="container-admin" style="padding: 40px 0;">
+<?= $this->section('content') ?>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h1 class="title">Logs de Búsqueda</h1>
         <div style="display: flex; gap: 10px;">
@@ -258,8 +253,9 @@
     <div style="margin-top: 2rem;">
         <?= $pager->links('default', 'admin_full') ?>
     </div>
-</main>
+<?= $this->endSection() ?>
 
+<?= $this->section('scripts') ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const verifyButtons = document.querySelectorAll('.btn-verify');
@@ -298,8 +294,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+<?= $this->endSection() ?>
 
-<?= view('partials/footer') ?>
-</body>
-</html>
 

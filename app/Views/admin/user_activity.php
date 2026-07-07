@@ -1,7 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head') ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
+
     <style>
         .activity-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         .activity-table th, .activity-table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
@@ -18,11 +17,9 @@
         .back-btn { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #2152FF; font-weight: 500; }
         .back-btn:hover { text-decoration: underline; }
     </style>
-</head>
-<body>
-    <?= view('partials/header_inner') ?>
+<?= $this->endSection() ?>
 
-    <main class="container" style="padding: 40px 20px;">
+<?= $this->section('content') ?>
         <a href="<?= site_url('admin/activity-logs') ?>" class="back-btn">&larr; Back to All Logs</a>
 
         <h1>Activity Logs for User #<?= esc($user_id) ?></h1>
@@ -84,8 +81,5 @@
                 <?php endif; ?>
             </tbody>
         </table>
-    </main>
+    <?= $this->endSection() ?>
 
-    <?= view('partials/footer') ?>
-</body>
-</html>

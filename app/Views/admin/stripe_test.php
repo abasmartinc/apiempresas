@@ -1,7 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head') ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
+
     <style>
         .test-card {
             background: #fff;
@@ -59,12 +58,9 @@
             box-shadow: 0 4px 12px rgba(99, 91, 255, 0.3);
         }
     </style>
-</head>
-<body class="admin-body">
-    <div class="bg-halo" aria-hidden="true"></div>
-    <?= view('partials/header_admin') ?>
+<?= $this->endSection() ?>
 
-    <main class="container-admin" style="padding: 60px 0;">
+<?= $this->section('content') ?>
         <div style="margin-bottom: 3rem; text-align: center;">
             <h1 class="title">Prueba de Suscripción Stripe</h1>
             <p class="subtitle">Creación de suscripción dinámica de 1€ para validación de webhooks y flujo en producción.</p>
@@ -105,8 +101,5 @@
                 Esta acción generará un cargo real si usas una tarjeta real.
             </div>
         </div>
-    </main>
+    <?= $this->endSection() ?>
 
-    <?= view('partials/footer') ?>
-</body>
-</html>

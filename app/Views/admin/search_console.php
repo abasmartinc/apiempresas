@@ -1,7 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head', ['title' => $title]) ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .page-padding { padding: 40px 0 80px; }
@@ -233,13 +232,9 @@
         .verdict-neutral { color: #f59e0b; }
         .verdict-danger { color: #dc2626; }
     </style>
-</head>
-<body class="admin-body">
-<div class="bg-halo" aria-hidden="true"></div>
+<?= $this->endSection() ?>
 
-<?= view('partials/header_admin') ?>
-
-<main class="container-admin page-padding">
+<?= $this->section('content') ?>
     <div class="page-header">
         <div>
             <h1 class="title">Google <span class="grad">Search Console</span></h1>
@@ -520,8 +515,9 @@
             </div>
         </div>
     </div>
-</main>
+<?= $this->endSection() ?>
 
+<?= $this->section('scripts') ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let gscChartInstance = null;
@@ -889,7 +885,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+<?= $this->endSection() ?>
 
-<?= view('partials/footer') ?>
-</body>
-</html>

@@ -1,19 +1,11 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?=view('partials/head') ?>
-    <link rel="stylesheet" href="<?= base_url('public/css/billing.css') ?>" />
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/app' ) ?>
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('public/css/billing.css') ?>" />
     <link rel="stylesheet" href="<?= base_url('public/css/billing_manage.css') ?>" />
-</head>
+<?= $this->endSection() ?>
 
-<body>
-<div class="bg-halo" aria-hidden="true"></div>
-
-<div class="auth-wrapper">
-<?=view('partials/header_inner') ?>
-
-    <main class="billing-main">
-        <div class="container">
+<?= $this->section('content') ?>
+<div class="container">
 
             <!-- HERO -->
             <div class="manage-hero">
@@ -238,11 +230,4 @@
 
             </div>
         </div>
-    </main>
-
-    <?=view('partials/footer') ?>
-</div>
-
-</body>
-</html>
-
+<?= $this->endSection() ?>

@@ -1,7 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head', ['title' => $title]) ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
+
     <style>
         .status-pill { padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
         .status-pending { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
@@ -25,13 +24,9 @@
         
         .card-header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
     </style>
-</head>
-<body class="admin-body">
-<div class="bg-halo" aria-hidden="true"></div>
+<?= $this->endSection() ?>
 
-<?= view('partials/header_admin') ?>
-
-<main class="container-admin page-padding">
+<?= $this->section('content') ?>
     <div class="page-header">
         <h1 class="title">SEO Auto Posts</h1>
         <div class="flex-gap-10">
@@ -136,8 +131,9 @@
             </tbody>
         </table>
     </div>
-</main>
+<?= $this->endSection() ?>
 
+<?= $this->section('scripts') ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     const csrfToken = '<?= csrf_hash() ?>';
@@ -224,7 +220,5 @@
         }
     });
 </script>
+<?= $this->endSection() ?>
 
-<?= view('partials/footer') ?>
-</body>
-</html>

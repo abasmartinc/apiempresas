@@ -27,7 +27,7 @@ class EmailTemplates extends BaseController
             'templates' => $this->templateModel->findAll(),
         ];
 
-        return view('admin/email_templates/index', $data);
+        return $this->renderView('admin/email_templates/index', $data);
     }
 
     /**
@@ -46,7 +46,7 @@ class EmailTemplates extends BaseController
             'template' => $template,
         ];
 
-        return view('admin/email_templates/edit', $data);
+        return $this->renderView('admin/email_templates/edit', $data);
     }
 
     /**

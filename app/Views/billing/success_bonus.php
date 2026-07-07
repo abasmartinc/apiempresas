@@ -1,16 +1,10 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?=view('partials/head') ?>
-    <link rel="stylesheet" href="<?= base_url('public/css/billing-success.css?v=' . time()) ?>" />
-</head>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/app' ) ?>
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('public/css/billing-success.css?v=' . time()) ?>" />
+<?= $this->endSection() ?>
 
-<body>
-<div class="auth-wrapper">
-    <?=view('partials/header_inner') ?>
-
-    <main class="success-main">
-        <div class="container">
+<?= $this->section('content') ?>
+<div class="container">
 
             <!-- HERO -->
             <div class="success-hero">
@@ -130,9 +124,4 @@
             </section>
          
         </div>
-    </main>
-
-    <?=view('partials/footer') ?>
-</div>
-</body>
-</html>
+<?= $this->endSection() ?>

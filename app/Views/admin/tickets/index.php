@@ -1,7 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head', ['title' => 'Gestión de Tickets | Admin APIEmpresas.es']) ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
+
     <style>
         :root {
             --kpi-blue: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
@@ -49,13 +48,9 @@
         .tkt-badge-priority-urgent { background: #fee2e2; color: #b91c1c; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
-<body class="admin-body">
-<div class="bg-halo" aria-hidden="true"></div>
+<?= $this->endSection() ?>
 
-<?= view('partials/header_admin') ?>
-
-<main class="container-admin" style="padding: 40px 0;">
+<?= $this->section('content') ?>
     <?php if(session()->getFlashdata('success')): ?>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -200,8 +195,5 @@
             </tbody>
         </table>
     </div>
-</main>
+<?= $this->endSection() ?>
 
-<?= view('partials/footer') ?>
-</body>
-</html>

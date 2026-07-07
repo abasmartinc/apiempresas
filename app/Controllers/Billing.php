@@ -58,7 +58,7 @@ class Billing extends BaseController
         $data['current_plan'] = is_array($data['plan']) ? ($data['plan']['plan_name'] ?? null) : (is_object($data['plan']) ? ($data['plan']->plan_name ?? null) : null);
         $data['stripe_customer_id'] = $user->stripe_customer_id ?? null;
 
-        return view('billing', $data);
+        return $this->renderView('billing', $data);
     }
 
     /**
@@ -529,7 +529,7 @@ class Billing extends BaseController
         $price = $this->billingService->calculateDirectoryPrice($totalCount);
         $tax = round($price * 0.21, 2);
 
-        return view('billing/directory_order_summary', [
+        return $this->renderView('billing/directory_order_summary', [
             'province' => $province,
             'display_name' => $displayName,
             'total_count' => $totalCount,
@@ -598,7 +598,7 @@ class Billing extends BaseController
             'total_count' => $count
         ];
 
-        return view('billing/order_summary', $data);
+        return $this->renderView('billing/order_summary', $data);
     }
 
     /**
@@ -629,7 +629,7 @@ class Billing extends BaseController
                 'order_ref' => 'BONUS-' . date('Ymd') . '-' . rand(1000, 9999),
             ];
             session()->remove('checkout_context');
-            return view('billing/success_bonus', $data);
+            return $this->renderView('billing/success_bonus', $data);
         }
 
         // 1. Excel Single Purchase Flow (Check context or last info)
@@ -694,9 +694,9 @@ class Billing extends BaseController
             ];
 
             if ($isDir ?? false) {
-                return view('billing/success_directory', $data);
+                return $this->renderView('billing/success_directory', $data);
             }
-            return view('billing/success_single', $data);
+            return $this->renderView('billing/success_single', $data);
         }
 
         // 2. Specific View for Full Radar Plan (Only if we haven't just cleared an Excel context)
@@ -704,7 +704,7 @@ class Billing extends BaseController
             $data = [
                 'order_ref' => 'SUB-' . str_pad($subscription->id ?? '0', 6, '0', STR_PAD_LEFT),
             ];
-            return view('billing/success_radar', $data);
+            return $this->renderView('billing/success_radar', $data);
         }
 
         // 3. API Subscription Success (Pro/Business)
@@ -716,7 +716,7 @@ class Billing extends BaseController
                 'payment_method' => 'Tarjeta (Stripe)',
                 'order_ref' => 'SUB-' . str_pad($subscription->id ?? '0', 6, '0', STR_PAD_LEFT),
             ];
-            return view('purchase_success', $data);
+            return $this->renderView('purchase_success', $data);
         }
 
         return redirect()->to(site_url('dashboard'));
@@ -738,7 +738,7 @@ class Billing extends BaseController
         if (!session('logged_in')) {
             return redirect()->to(site_url('dashboard'));
         }
-        return view('purchase_success');
+        return $this->renderView('purchase_success');
     }
 
     public function billing_manage()
@@ -746,7 +746,7 @@ class Billing extends BaseController
         if (!session('logged_in')) {
             return redirect()->to(site_url('dashboard'));
         }
-        return view('billing_manage');
+        return $this->renderView('billing_manage');
     }
 
     /**
@@ -768,7 +768,7 @@ class Billing extends BaseController
             'user' => $this->userModel->find($userId)
         ];
 
-        return view('billing/invoices', $data);
+        return $this->renderView('billing/invoices', $data);
     }
 
     /**

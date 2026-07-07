@@ -1,22 +1,10 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?=view('partials/head') ?>
-    <link rel="stylesheet" href="<?= base_url('public/css/docs.css?v=' . time()) ?>" />
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/app' ) ?>
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('public/css/docs.css?v=' . time()) ?>" />
+<?= $this->endSection() ?>
 
-</head>
-<body>
-<div class="bg-halo" aria-hidden="true"></div>
-
-<?php if(session('logged_in')): ?>
-    <?= view('partials/header_inner') ?>
-<?php else: ?>
-    <?= view('partials/header') ?>
-<?php endif; ?>
-
-
-<main class="docs-main">
-    <div class="container">
+<?= $this->section('content') ?>
+<div class="container docs-main">
         <div class="docs-layout">
             <!-- SIDEBAR -->
             <aside class="docs-sidebar">
@@ -1275,8 +1263,9 @@ print(response.json())</code></pre>
             </div>
         </div>
     </div>
-</main>
+<?= $this->endSection() ?>
 
+<?= $this->section('scripts') ?>
 <style>
     .http-badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; margin-right: 8px; color: white; }
     .http-badge.get { background: #61affe; }
@@ -1491,7 +1480,7 @@ print(response.json())</code></pre>
     }
 </style>
 
-    <?=view('partials/footer') ?>
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
@@ -1592,5 +1581,4 @@ print(response.json())</code></pre>
             });
         });
     </script>
-</body>
-</html>
+<?= $this->endSection() ?>

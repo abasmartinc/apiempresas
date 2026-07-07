@@ -1,7 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head', ['title' => $title]) ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
+
     <style>
         .edit-container {
             background: white;
@@ -79,12 +78,9 @@
             border-top: 1px solid #f1f5f9;
         }
     </style>
-</head>
-<body class="admin-body">
-    <div class="bg-halo" aria-hidden="true"></div>
-    <?= view('partials/header_admin') ?>
+<?= $this->endSection() ?>
 
-    <main class="container-admin" style="padding: 40px 0 80px;">
+<?= $this->section('content') ?>
         <div style="margin-bottom: 40px;">
             <a href="<?= site_url('admin/email-templates') ?>" style="color: #64748b; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-bottom: 15px;">
                 &larr; Volver al listado
@@ -128,9 +124,10 @@
                 </div>
             </div>
         </form>
-    </main>
+    <?= $this->endSection() ?>
 
-    <script>
+<?= $this->section('scripts') ?>
+<script>
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
                 // Opcional: mostrar un toast o aviso
@@ -138,7 +135,5 @@
             });
         }
     </script>
+<?= $this->endSection() ?>
 
-    <?= view('partials/footer') ?>
-</body>
-</html>

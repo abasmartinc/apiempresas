@@ -7,7 +7,7 @@ class Documentation extends BaseController
 {
     public function index()
     {
-        return view('documentation');
+        return $this->renderView('documentation');
     }
 }
 

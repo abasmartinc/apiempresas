@@ -41,7 +41,7 @@ class StripeTest extends BaseController
             'plan' => $testPlan
         ];
 
-        return view('admin/stripe_test', $data);
+        return $this->renderView('admin/stripe_test', $data);
     }
 
     public function checkout()

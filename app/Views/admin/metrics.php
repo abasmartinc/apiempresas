@@ -1,8 +1,6 @@
-<!doctype html>
-<html lang="es">
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
 
-<head>
-    <?= view('partials/head', ['title' => $title]) ?>
     <style>
         .metrics-grid {
             display: grid;
@@ -114,14 +112,9 @@
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
     </style>
-</head>
+<?= $this->endSection() ?>
 
-<body class="admin-body">
-    <div class="bg-halo" aria-hidden="true"></div>
-
-    <?= view('partials/header_admin') ?>
-
-    <main class="container-admin" style="padding: 40px 0 80px;">
+<?= $this->section('content') ?>
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
             <div>
                 <h1 class="title" style="font-size: 2.8rem; margin-bottom: 8px;">Métricas <span class="grad">Monetización</span></h1>
@@ -248,9 +241,5 @@
             </div>
         </div>
 
-    </main>
+    <?= $this->endSection() ?>
 
-    <?= view('partials/footer') ?>
-</body>
-
-</html>

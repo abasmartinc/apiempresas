@@ -141,7 +141,7 @@
                                 Mis tickets
                             </a>
                             <div class="dropdown-divider"></div>
-                            <a href="<?= site_url('logout') ?>" class="dropdown-item logout-item">
+                            <a href="<?= site_url('logout') ?>" class="dropdown-item logout-item" hx-boost="false">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
                                 Cerrar sesión
                             </a>
@@ -188,7 +188,7 @@
                                     <span style="font-size: 12px; color: #64748b; font-weight: 600;">Sesión activa</span>
                                 </div>
                             </div>
-                            <a href="<?=site_url() ?>logout" class="btn btn-full ghost">Cerrar sesión</a>
+                            <a href="<?=site_url() ?>logout" class="btn btn-full ghost" hx-boost="false">Cerrar sesión</a>
                         <?php endif; ?>
                     </div>
                 </nav>

@@ -1,8 +1,6 @@
-<!doctype html>
-<html lang="es">
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
 
-<head>
-    <?= view('partials/head', ['title' => $title]) ?>
     <style>
         :root {
             --kpi-blue: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
@@ -77,13 +75,9 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
     </style>
-</head>
+<?= $this->endSection() ?>
 
-<body class="admin-body">
-    <div class="bg-halo" aria-hidden="true"></div>
-    <?= view('partials/header_admin') ?>
-
-    <main class="container-admin page-padding" style="margin-top: 2rem;">
+<?= $this->section('content') ?>
         <div class="page-header">
             <div>
                 <h1 class="title" style="color: #0f172a;">Conversión & Leads API</h1>
@@ -439,9 +433,10 @@
                 </tbody>
             </table>
         </div>
-    </main>
+    <?= $this->endSection() ?>
 
-    <!-- Modal Requerido por el Usuario -->
+<?= $this->section('scripts') ?>
+<!-- Modal Requerido por el Usuario -->
     <div id="contactModal">
         <div class="modal-box">
             <h3 style="margin-top:0;">Contactar usuario</h3>
@@ -459,7 +454,7 @@
         </div>
     </div>
 
-    <?= view('partials/footer') ?>
+    
     <script>
         document.getElementById('selectAll').addEventListener('change', function() {
             const checkboxes = document.querySelectorAll('.user-checkbox');
@@ -600,6 +595,5 @@
             if (event.key === 'Escape') closeModal();
         }
     </script>
-</body>
+<?= $this->endSection() ?>
 
-</html>

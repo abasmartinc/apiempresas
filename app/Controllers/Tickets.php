@@ -26,7 +26,7 @@ class Tickets extends BaseController
 
         $tickets = $this->ticketModel->where('user_id', $userId)->orderBy('updated_at', 'DESC')->findAll();
 
-        return view('tickets/index', ['tickets' => $tickets]);
+        return $this->renderView('tickets/index', ['tickets' => $tickets]);
     }
 
     public function create()
@@ -35,7 +35,7 @@ class Tickets extends BaseController
             return redirect()->to('/enter');
         }
 
-        return view('tickets/create');
+        return $this->renderView('tickets/create');
     }
 
     public function store()
@@ -124,7 +124,7 @@ class Tickets extends BaseController
 
         $replies = $this->ticketReplyModel->getRepliesWithSender($id);
 
-        return view('tickets/show', ['ticket' => $ticket, 'replies' => $replies]);
+        return $this->renderView('tickets/show', ['ticket' => $ticket, 'replies' => $replies]);
     }
 
     public function reply($id)

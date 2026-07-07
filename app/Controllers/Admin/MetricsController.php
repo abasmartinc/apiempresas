@@ -60,7 +60,7 @@ class MetricsController extends BaseController
             ]
         ];
 
-        return view('admin/metrics', [
+        return $this->renderView('admin/metrics', [
             'title'   => 'Métricas de Negocio',
             'metrics' => $metrics
         ]);
@@ -290,7 +290,7 @@ class MetricsController extends BaseController
             return ((int)($u['total_requests'] ?? 0) == 0 && (int)($u['copied_key'] ?? 0) > 0) || ((int)($u['total_requests'] ?? 0) == 0 && strtotime($u['created_at']) < strtotime('-2 days'));
         }), 0, 5);
 
-        return view('admin/event_tracking', [
+        return $this->renderView('admin/event_tracking', [
             'title'           => 'Leads & Conversión - Admin',
             'kpis'            => $kpis,
             'radarKpis'       => $radarKpis,

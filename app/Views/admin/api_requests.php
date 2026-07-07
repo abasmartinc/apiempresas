@@ -1,7 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?= view('partials/head', ['title' => $title]) ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+<?= $this->section('styles') ?>
+
     <style>
         :root {
             --kpi-blue: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
@@ -65,13 +64,9 @@
         }
         .pill { padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; text-align: center; }
     </style>
-</head>
-<body class="admin-body">
-<div class="bg-halo" aria-hidden="true"></div>
+<?= $this->endSection() ?>
 
-<?= view('partials/header_admin') ?>
-
-<main class="container-admin" style="padding: 40px 0;">
+<?= $this->section('content') ?>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h1 class="title">Peticiones API</h1>
         <a href="<?= site_url('dashboard') ?>" class="btn ghost">Volver al Dashboard</a>
@@ -219,10 +214,9 @@
     <div style="margin-top: 2rem;">
         <?= $pager->links('default', 'admin_full') ?>
     </div>
-</main>
+<?= $this->endSection() ?>
 
-<?= view('partials/footer') ?>
-
+<?= $this->section('scripts') ?>
 <!-- Select2 para hacer el select buscable -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
@@ -285,7 +279,6 @@
         });
     });
 </script>
+<?= $this->endSection() ?>
 
-</body>
-</html>
 

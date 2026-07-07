@@ -1,8 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?=view('partials/head') ?>
-    <link rel="stylesheet" href="<?= base_url('public/css/dashboard.css') ?>" />
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/app' ) ?>
+<?= $this->section('styles') ?>
+" />
     <style>
         .tkt-wrapper { background-color: #f3f6f9; min-height: calc(100vh - 80px); padding: 40px 0 80px; }
         .tkt-container { max-width: 1200px; width: 95%; margin: 0 auto; }
@@ -43,13 +41,10 @@
         
         .tkt-alert { background: #f0fdf4; border-left: 5px solid #10b981; padding: 20px 24px; border-radius: 12px; margin-bottom: 32px; color: #166534; font-weight: 600; font-size: 1.05rem; display: flex; align-items: center; gap: 16px; box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.2); }
     </style>
-</head>
-<body>
-<div class="auth-wrapper">
-    <?=view('partials/header_inner') ?>
+<?= $this->endSection() ?>
 
-    <main class="tkt-wrapper">
-        <div class="tkt-container">
+<?= $this->section('content') ?>
+<div class="tkt-container">
             <?php if(session()->getFlashdata('success')): ?>
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
@@ -143,7 +138,4 @@
                 <?php endif; ?>
             </div>
         </div>
-    </main>
-</div>
-</body>
-</html>
+<?= $this->endSection() ?>

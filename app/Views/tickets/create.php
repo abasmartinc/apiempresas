@@ -1,8 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <?=view('partials/head') ?>
-    <link rel="stylesheet" href="<?= base_url('public/css/dashboard.css') ?>" />
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/app' ) ?>
+<?= $this->section('styles') ?>
+" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         body { background-color: #f8fafc; }
@@ -21,13 +19,10 @@
         .btn-submit { background: linear-gradient(135deg, #2152ff 0%, #0369a1 100%); color: white; border: none; padding: 14px 32px; border-radius: 12px; font-weight: 800; font-size: 1.05rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(33, 82, 255, 0.2); width: 100%; }
         .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(33, 82, 255, 0.3); }
     </style>
-</head>
-<body>
-<div class="auth-wrapper">
-    <?=view('partials/header_inner') ?>
+<?= $this->endSection() ?>
 
-    <main class="dash-main">
-        <div class="container">
+<?= $this->section('content') ?>
+<div class="container">
 
             <?php if(session()->getFlashdata('error')): ?>
                 <script>
@@ -100,7 +95,4 @@
                 </div>
             </div>
         </div>
-    </main>
-</div>
-</body>
-</html>
+<?= $this->endSection() ?>
