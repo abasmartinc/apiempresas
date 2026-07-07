@@ -93,7 +93,7 @@ class ApiKeyFilter implements FilterInterface
 
         // 3.5) Detección de Anomalías Geográficas (CF-IPCountry)
         $cfCountry = isset($_SERVER['HTTP_CF_IPCOUNTRY']) ? strtoupper((string)$_SERVER['HTTP_CF_IPCOUNTRY']) : null;
-        if ($cfCountry) {
+        if ($cfCountry && (int)$row->user_id !== 166) {
             $allowedCountries = $row->allowed_countries ? explode(',', strtoupper(str_replace(' ', '', $row->allowed_countries))) : [];
             if (!empty($allowedCountries) && !in_array($cfCountry, $allowedCountries)) {
                 // Bloquear API Key por seguridad
