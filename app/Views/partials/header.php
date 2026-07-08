@@ -186,6 +186,20 @@
                                 telemarketing o cold mailing.</span>
                         </div>
                     </a>
+                    <a href="<?= site_url('subvenciones-empresas') ?>">
+                        <div class="nav-item-icon">💰</div>
+                        <div>
+                            <strong>Subvenciones Públicas</strong>
+                            <span>Explora las subvenciones adjudicadas a empresas españolas de fondos estatales y europeos.</span>
+                        </div>
+                    </a>
+                    <a href="<?= site_url('licitaciones-del-estado') ?>">
+                        <div class="nav-item-icon">🏛️</div>
+                        <div>
+                            <strong>Licitaciones y Contratos</strong>
+                            <span>Descubre los contratos públicos adjudicados a empresas por todos los órganos del Estado.</span>
+                        </div>
+                    </a>
                     <!-- BANNER VÉRTICE MEGA-MENÚ (HERO VIVO + LOGO REAL) -->
                     <a href="https://vertice.apiempresas.es" target="_blank" class="vertice-vivid-banner">
                         <div class="vertice-vivid-icon">
@@ -521,6 +535,12 @@
                     </a>
                     <a href="<?= site_url('base-de-datos-de-empresas') ?>" class="mobile-nav-link">
                         <span>Descarga de Listados</span>
+                    </a>
+                    <a href="<?= site_url('subvenciones-empresas') ?>" class="mobile-nav-link">
+                        <span>Subvenciones Públicas</span>
+                    </a>
+                    <a href="<?= site_url('licitaciones-del-estado') ?>" class="mobile-nav-link">
+                        <span>Licitaciones y Contratos</span>
                     </a>
                 </div>
 

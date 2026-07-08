@@ -116,7 +116,7 @@ class Billing extends BaseController
         $period = strtolower(trim((string) ($postData['period'] ?? 'single')));
         $pm = strtolower(trim((string) ($postData['payment_method'] ?? 'stripe')));
 
-        if (!in_array($plan, ['pro', 'business', 'radar', 'directory_single'], true)) {
+        if (!in_array($plan, ['pro', 'business', 'radar', 'directory_single', 'subsidies_single', 'contracts_single'], true)) {
             $plan = 'radar'; // default fallback for single downloads
         }
         if (!in_array($period, ['monthly', 'annual', 'single'], true)) {
@@ -197,7 +197,7 @@ class Billing extends BaseController
 
 
 
-            if ($period === 'single' || ($plan === 'radar' && $period === 'single') || $plan === 'directory_single') {
+            if ($period === 'single' || ($plan === 'radar' && $period === 'single') || $plan === 'directory_single' || $plan === 'subsidies_single' || $plan === 'contracts_single') {
                 $downloadData = $this->billingService->getExcelDownloadContext($plan, $postData, $this->request->getGet() ?? []);
                 session()->set('checkout_context', $downloadData['context']);
 
@@ -226,6 +226,8 @@ class Billing extends BaseController
                                 'user_id' => (string) $userId,
                                 'plan' => $metadataPlan,
                                 'period' => 'single',
+                                'total_count' => (string) ($downloadData['context']['total_count'] ?? 0),
+                                'export_context' => json_encode($downloadData['context'] ?? []),
                             ]
                         ]
                     ],
@@ -233,6 +235,8 @@ class Billing extends BaseController
                         'user_id' => (string) $userId,
                         'plan' => $metadataPlan,
                         'period' => 'single',
+                        'total_count' => (string) ($downloadData['context']['total_count'] ?? 0),
+                        'export_context' => json_encode($downloadData['context'] ?? []),
                     ],
                 ];
 
@@ -543,6 +547,68 @@ class Billing extends BaseController
         ]);
     }
 
+    public function subsidies_checkout()
+    {
+        $params = $this->request->getGet();
+        return redirect()->to(site_url('checkout/subsidies-export?' . http_build_query($params)));
+    }
+
+    public function subsidies_order_summary()
+    {
+        $params = $this->request->getGet();
+        $convocatoria = $params['convocatoria'] ?? '';
+        $year = $params['year'] ?? '';
+
+        $totalCount = $this->billingService->countSubsidies($params);
+        $price = $this->billingService->calculatePublicFundsPrice($totalCount);
+        $tax = round($price * 0.21, 2);
+
+        $displayName = 'Subvenciones';
+        if ($convocatoria) $displayName .= ' - ' . ucfirst(str_replace('-', ' ', $convocatoria));
+        if ($year) $displayName .= ' (' . $year . ')';
+
+        return $this->renderView('billing/public_funds_order_summary', [
+            'display_name' => $displayName,
+            'total_count' => $totalCount,
+            'price' => $price,
+            'tax' => $tax,
+            'type' => 'subsidies',
+            'convocatoria' => $convocatoria,
+            'year' => $year
+        ]);
+    }
+
+    public function contracts_checkout()
+    {
+        $params = $this->request->getGet();
+        return redirect()->to(site_url('checkout/contracts-export?' . http_build_query($params)));
+    }
+
+    public function contracts_order_summary()
+    {
+        $params = $this->request->getGet();
+        $year = $params['year'] ?? '';
+        $organo = $params['organo'] ?? '';
+
+        $totalCount = $this->billingService->countContracts($params);
+        $price = $this->billingService->calculatePublicFundsPrice($totalCount);
+        $tax = round($price * 0.21, 2);
+
+        $displayName = 'Licitaciones Públicas';
+        if ($organo) $displayName .= ' - ' . ucfirst(str_replace('-', ' ', $organo));
+        if ($year) $displayName .= ' (' . $year . ')';
+
+        return $this->renderView('billing/public_funds_order_summary', [
+            'display_name' => $displayName,
+            'total_count' => $totalCount,
+            'price' => $price,
+            'tax' => $tax,
+            'type' => 'contracts',
+            'year' => $year,
+            'organo' => $organo
+        ]);
+    }
+
     /**
      * GET /checkout/radar-export
      * Show a pre-checkout summary to build trust
@@ -633,20 +699,28 @@ class Billing extends BaseController
         }
 
         // 1. Excel Single Purchase Flow (Check context or last info)
-        if (($checkoutData['type'] ?? '') === 'excel' || ($checkoutData['type'] ?? '') === 'directory_excel' || (!empty($lastInfo) && empty($subscription))) {
+        $validExcelTypes = ['excel', 'directory_excel', 'subsidies_excel', 'contracts_excel'];
+        if (in_array($checkoutData['type'] ?? '', $validExcelTypes) || (!empty($lastInfo) && empty($subscription))) {
 
             $isDir = false;
             if (($checkoutData['type'] ?? '') === 'directory_excel' || ($lastInfo['export_params']['is_historical'] ?? '0') === '1') {
                 $isDir = true;
             }
 
-            if (($checkoutData['type'] ?? '') === 'excel' || ($checkoutData['type'] ?? '') === 'directory_excel') {
-                $exportParams = [
-                    'sector' => $checkoutData['sector'] ?? 'General',
-                    'provincia' => $checkoutData['provincia'] ?? 'España',
-                    'period' => $isDir ? 'general' : ($checkoutData['period'] ?? '30days'),
-                    'is_historical' => $isDir ? '1' : '0'
-                ];
+            if (in_array($checkoutData['type'] ?? '', $validExcelTypes)) {
+                $exportParams = [];
+                if (($checkoutData['type'] ?? '') === 'subsidies_excel') {
+                    $exportParams = ['convocatoria' => $checkoutData['convocatoria'] ?? '', 'year' => $checkoutData['year'] ?? ''];
+                } elseif (($checkoutData['type'] ?? '') === 'contracts_excel') {
+                    $exportParams = ['year' => $checkoutData['year'] ?? '', 'organo' => $checkoutData['organo'] ?? ''];
+                } else {
+                    $exportParams = [
+                        'sector' => $checkoutData['sector'] ?? 'General',
+                        'provincia' => $checkoutData['provincia'] ?? 'España',
+                        'period' => $isDir ? 'general' : ($checkoutData['period'] ?? '30days'),
+                        'is_historical' => $isDir ? '1' : '0'
+                    ];
+                }
                 if (!empty($checkoutData['cnae_text'])) {
                     $exportParams['cnae_text'] = $checkoutData['cnae_text'];
                 }
@@ -659,7 +733,8 @@ class Billing extends BaseController
                 $lastInfo = [
                     'total_count' => $totalCount,
                     'export_params' => $exportParams,
-                    'cnae' => $checkoutData['cnae'] ?? ''
+                    'cnae' => $checkoutData['cnae'] ?? '',
+                    'type' => $checkoutData['type'] ?? ''
                 ];
                 session()->set('last_purchase_info', $lastInfo);
                 session()->set('just_bought_excel', true);
@@ -682,6 +757,11 @@ class Billing extends BaseController
             }
 
             $downloadUrl = site_url('billing/export-excel?' . http_build_query($exportParams));
+            if (($lastInfo['type'] ?? '') === 'subsidies_excel') {
+                $downloadUrl = site_url('billing/export-subsidies?' . http_build_query($exportParams));
+            } elseif (($lastInfo['type'] ?? '') === 'contracts_excel') {
+                $downloadUrl = site_url('billing/export-contracts?' . http_build_query($exportParams));
+            }
 
             $user = $userId > 0 ? $this->userModel->find($userId) : null;
 
@@ -690,7 +770,8 @@ class Billing extends BaseController
                 'order_ref' => 'EXC-' . date('Ymd') . '-' . rand(1000, 9999),
                 'total_count' => $lastInfo['total_count'] ?? 0,
                 'export_params' => $exportParams,
-                'user_email' => $user->email ?? session('email') ?? ''
+                'user_email' => $user->email ?? session('email') ?? '',
+                'export_type' => $lastInfo['type'] ?? ''
             ];
 
             if ($isDir ?? false) {

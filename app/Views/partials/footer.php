@@ -2,51 +2,48 @@
     <div class="container">
         <!-- TOP ROW: Links in 4 Columns -->
         <div class="foot-top-grid">
-            <!-- Radar by Time -->
+            <!-- Column 1: Radar de Empresas -->
             <div>
-                <h4 class="foot-title">Radar por Tiempo</h4>
+                <h4 class="foot-title">Radar de Empresas</h4>
                 <ul class="foot-links">
+                    <li><a href="<?=site_url('empresas-nuevas') ?>">Radar Nacional (Hub)</a></li>
                     <li><a href="<?=site_url('empresas-nuevas-hoy') ?>">Nuevas empresas hoy</a></li>
                     <li><a href="<?=site_url('empresas-nuevas-semana') ?>">Creadas esta semana</a></li>
                     <li><a href="<?=site_url('empresas-nuevas-mes') ?>">Constituidas este mes</a></li>
-                    <li><a href="<?=site_url('empresas-nuevas') ?>">Radar Nacional (Hub)</a></li>
-                </ul>
-            </div>
-
-            <!-- Radar by Province -->
-            <div>
-                <h4 class="foot-title">Radar por Provincia</h4>
-                <ul class="foot-links">
-                    <li><a href="<?=site_url('empresas-nuevas/madrid') ?>">Nuevas en Madrid</a></li>
-                    <li><a href="<?=site_url('empresas-nuevas/barcelona') ?>">Nuevas en Barcelona</a></li>
-                    <li><a href="<?=site_url('empresas-nuevas/valencia') ?>">Nuevas en Valencia</a></li>
-                    <li><a href="<?=site_url('empresas-nuevas/sevilla') ?>">Nuevas en Sevilla</a></li>
-                    <li><a href="<?=site_url('empresas-nuevas/malaga') ?>">Nuevas en Málaga</a></li>
                     <li><a href="<?=site_url('listado-de-empresas') ?>">Ver todas las provincias</a></li>
-                </ul>
-            </div>
-            <!-- Radar by Sector -->
-            <div>
-                <h4 class="foot-title">Radar por Sector</h4>
-                <ul class="foot-links">
-                    <li><a href="<?=site_url('empresas-nuevas-sector/hosteleria') ?>">Hostelería y Restauración</a></li>
-                    <li><a href="<?=site_url('empresas-nuevas-sector/construccion') ?>">Construcción e Inmobiliaria</a></li>
-                    <li><a href="<?=site_url('empresas-nuevas-sector/programacion-informatica') ?>">Tecnología y Software</a></li>
-                    <li><a href="<?=site_url('empresas-nuevas-sector/marketing') ?>">Marketing y Publicidad</a></li>
-                    <li><a href="<?=site_url('empresas-nuevas-sector/transporte') ?>">Logística y Transporte</a></li>
+                    <li><a href="<?= getRadarRedirect('footer') ?>">Beneficios de Radar Pro</a></li>
                 </ul>
             </div>
 
-            <!-- Products & API -->
+            <!-- Column 2: Directorio B2B -->
             <div>
-                <h4 class="foot-title">Directorio y API</h4>
+                <h4 class="foot-title">Directorio B2B</h4>
                 <ul class="foot-links">
-                    <li><a href="<?=site_url('listado-de-empresas') ?>">Directorio Histórico Completo</a></li>
-                    <li><a href="<?= getRadarRedirect('footer') ?>">Beneficios de Radar Pro</a></li>
-                    <li><a href="https://alertaempresas.es/" target="_blank">Portal AlertaEmpresas</a></li>
-                    <li><a href="<?=site_url('plugin-wordpress-buscador-empresas') ?>">Plugin de WordPress</a></li>
+                    <li><a href="<?=site_url('listado-de-empresas') ?>">Directorio Histórico</a></li>
                     <li><a href="<?=site_url('search_company') ?>">Buscador de Empresas</a></li>
                     <li><a href="<?=site_url('autocompletado-cif-empresas') ?>">Autocompletado Pro</a></li>
+                    <li><a href="<?=site_url('base-de-datos-de-empresas') ?>">Descargas de BBDD</a></li>
+                    <li><a href="https://alertaempresas.es/" target="_blank">Portal AlertaEmpresas</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 3: Fondos Públicos -->
+            <div>
+                <h4 class="foot-title">Fondos Públicos</h4>
+                <ul class="foot-links">
+                    <li><a href="<?=site_url('subvenciones-empresas') ?>">Subvenciones a Empresas</a></li>
+                    <li><a href="<?=site_url('empresas-mas-subvencionadas-espana') ?>">Ranking de Subvencionadas</a></li>
+                    <li><a href="<?=site_url('licitaciones-del-estado') ?>">Licitaciones Públicas</a></li>
+                    <li><a href="<?=site_url('mayores-empresas-contratistas-del-estado') ?>">Contratistas del Estado</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 4: Desarrolladores y Ayuda -->
+            <div>
+                <h4 class="foot-title">Desarrolladores y Ayuda</h4>
+                <ul class="foot-links">
+                    <li><a href="<?=site_url('api-empresas') ?>">API Empresas</a></li>
+                    <li><a href="<?=site_url('plugin-wordpress-buscador-empresas') ?>">Plugin de WordPress</a></li>
                     <li><a href="<?=site_url('documentation') ?>">Documentación API</a></li>
                     <li><a href="<?=site_url('blog') ?>">Blog de Actualidad</a></li>
                     <li><a href="<?=site_url('contact') ?>">Atención al Cliente</a></li>
@@ -55,8 +52,7 @@
         </div>
 
         <!-- SECOND ROW: Informes de Mercado 4 Columns -->
-        <h3 class="foot-title" style="margin: 40px 0 20px; font-size: 0.9rem; letter-spacing: 0.1em; opacity: 0.8;">INFORMES DE MERCADO</h3>
-        <div class="foot-top-grid" style="padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05);">
+        <div class="foot-top-grid">
             <?php
             $wpService = new \App\Services\WordPressService();
             $seoService = new \App\Services\SeoTemplateService();
@@ -81,7 +77,7 @@
             $bestTpl = $bestTpl ?? 'Empresas nuevas de {{sector}} en {{provincia}}';
 
             // Col 1: Madrid
-            echo '<div><h4 class="foot-title" style="color: #5C7CFF">Madrid</h4><ul class="foot-links">';
+            echo '<div><h4 class="foot-title">Madrid</h4><ul class="foot-links">';
             foreach (['Hostelería', 'Construcción', 'Tecnología', 'Comercio'] as $s) {
                 $lt = str_replace(['{{provincia}}', '{{sector}}'], ['Madrid', $s], $bestTpl);
                 $fs = str_replace(['{{provincia}}', '{{sector}}'], ['madrid', $seoService->slugifyWithPlaceholders($s)], $seoService->slugifyWithPlaceholders($bestTpl));
@@ -90,7 +86,7 @@
             echo '</ul></div>';
 
             // Col 2: Barcelona
-            echo '<div><h4 class="foot-title" style="color: #5C7CFF">Barcelona</h4><ul class="foot-links">';
+            echo '<div><h4 class="foot-title">Barcelona</h4><ul class="foot-links">';
             foreach (['Restauración', 'Inmobiliaria', 'Software', 'Servicios'] as $s) {
                 $lt = str_replace(['{{provincia}}', '{{sector}}'], ['Barcelona', $s], $bestTpl);
                 $fs = str_replace(['{{provincia}}', '{{sector}}'], ['barcelona', $seoService->slugifyWithPlaceholders($s)], $seoService->slugifyWithPlaceholders($bestTpl));
@@ -99,7 +95,7 @@
             echo '</ul></div>';
 
             // Col 3: Nacional
-            echo '<div><h4 class="foot-title" style="color: #5C7CFF">Nacional</h4><ul class="foot-links">';
+            echo '<div><h4 class="foot-title">Nacional</h4><ul class="foot-links">';
             foreach (['Hostelería', 'Construcción', 'Informatica', 'Marketing'] as $s) {
                 $lt = str_replace(['{{provincia}}', '{{sector}}'], ['España', $s], $bestTpl);
                 $fs = str_replace(['{{provincia}}', '{{sector}}'], ['espana', $seoService->slugifyWithPlaceholders($s)], $seoService->slugifyWithPlaceholders($bestTpl));
@@ -108,7 +104,7 @@
             echo '</ul></div>';
 
             // Col 4: Provincias
-            echo '<div><h4 class="foot-title" style="color: #5C7CFF">Otras Provincias</h4><ul class="foot-links">';
+            echo '<div><h4 class="foot-title">Otras Provincias</h4><ul class="foot-links">';
             foreach (['Valencia', 'Sevilla', 'Málaga', 'Alicante'] as $p) {
                 $lt = str_replace(['{{provincia}}', '{{sector}}'], [$p, 'General'], $bestTpl);
                 $fs = str_replace(['{{provincia}}', '{{sector}}'], [$seoService->slugifyWithPlaceholders($p), 'general'], $seoService->slugifyWithPlaceholders($bestTpl));

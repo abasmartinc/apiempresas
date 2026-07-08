@@ -107,6 +107,23 @@ class Company extends BaseController
             $company['cif'] ?? 'NO_CIF_' . ($company['id'] ?? 0)
         );
 
+        $db = \Config\Database::connect();
+
+        // Fetch Contracts & Subsidies
+        $contracts = [];
+        $subsidies = [];
+        if (!empty($cif)) {
+            $contracts = $db->table('company_contracts')
+                ->where('company_cif', $cif)
+                ->orderBy('fecha_adjudicacion', 'DESC')
+                ->get()->getResultArray();
+                
+            $subsidies = $db->table('company_subsidies')
+                ->where('company_cif', $cif)
+                ->orderBy('fecha_concesion', 'DESC')
+                ->get()->getResultArray();
+        }
+
         // Breadcrumb Links
         $provinceUrl = '';
         if ($prov) {
@@ -206,7 +223,7 @@ class Company extends BaseController
         $provUrlParam = urlencode($companyProv);
         $sectorName = $company['cnae_label'] ?? 'este sector';
         
-        $db = \Config\Database::connect();
+        // $db is already connected above
         
         // Caching the count query results to avoid Database connections exhaustion
         $cacheKey = 'count_cta_' . md5($companyProv . '_' . $cnaeCodeStr);
@@ -340,6 +357,8 @@ class Company extends BaseController
             'priceStr'         => $priceStr,
             'sectorName'       => $sectorName,
             'targetProv'       => $targetProv,
+            'contracts'        => $contracts,
+            'subsidies'        => $subsidies,
         ];
     }
 

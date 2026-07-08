@@ -213,6 +213,48 @@ class BillingService
             $productDesc = 'Descarga en Excel del listado histórico completo.';
             $metadataPlan = 'directory_single';
 
+        } elseif ($plan === 'subsidies_single') {
+            $convocatoria = $postData['convocatoria'] ?? '';
+            $year = $postData['year'] ?? '';
+            $count = $this->countSubsidies(['convocatoria' => $convocatoria, 'year' => $year]);
+            $amount = $this->calculatePublicFundsPrice($count);
+
+            $context = [
+                'type' => 'subsidies_excel',
+                'convocatoria' => $convocatoria,
+                'year' => $year,
+                'total_count' => $count
+            ];
+            
+            $productName = 'BBDD Subvenciones';
+            if ($convocatoria) $productName .= ' - ' . ucfirst(str_replace('-', ' ', $convocatoria));
+            if ($year) $productName .= ' (' . $year . ')';
+            $productName .= ' (' . number_format($count, 0, ',', '.') . ' registros)';
+            
+            $productDesc = 'Descarga en Excel de empresas subvencionadas con teléfono y CNAE.';
+            $metadataPlan = 'subsidies_single';
+
+        } elseif ($plan === 'contracts_single') {
+            $year = $postData['year'] ?? '';
+            $organo = $postData['organo'] ?? '';
+            $count = $this->countContracts(['year' => $year, 'organo' => $organo]);
+            $amount = $this->calculatePublicFundsPrice($count);
+
+            $context = [
+                'type' => 'contracts_excel',
+                'year' => $year,
+                'organo' => $organo,
+                'total_count' => $count
+            ];
+
+            $productName = 'BBDD Licitaciones Públicas';
+            if ($organo) $productName .= ' - ' . ucfirst(str_replace('-', ' ', $organo));
+            if ($year) $productName .= ' (' . $year . ')';
+            $productName .= ' (' . number_format($count, 0, ',', '.') . ' registros)';
+            
+            $productDesc = 'Descarga en Excel de empresas adjudicatarias con teléfono y CNAE.';
+            $metadataPlan = 'contracts_single';
+
         } else {
             $sect = $postData['sector'] ?? '';
             $cnae = $postData['cnae'] ?? '';
@@ -256,5 +298,62 @@ class BillingService
             'product_desc' => $productDesc,
             'metadata_plan' => $metadataPlan
         ];
+    }
+
+    /**
+     * Calcula el precio para descargas de bases de datos de Subvenciones y Licitaciones
+     */
+    public function calculatePublicFundsPrice(int $totalCount): float
+    {
+        if ($totalCount <= 10000) {
+            return 29.0;
+        } elseif ($totalCount <= 100000) {
+            return 49.0;
+        } elseif ($totalCount <= 500000) {
+            return 99.0;
+        } else {
+            return 149.0;
+        }
+    }
+
+    /**
+     * Cuenta el número de subvenciones para una descarga
+     */
+    public function countSubsidies(array $filters): int
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('company_subsidies');
+        
+        $convocatoria = $filters['convocatoria'] ?? '';
+        $year = $filters['year'] ?? '';
+
+        if ($convocatoria !== '') {
+            $builder->where('slug_convocatoria', $convocatoria);
+        }
+        if ($year !== '') {
+            $builder->where('YEAR(fecha_concesion)', $year);
+        }
+        
+        return $builder->countAllResults();
+    }
+
+    /**
+     * Cuenta el número de contratos para una descarga
+     */
+    public function countContracts(array $filters): int
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('company_contracts');
+        
+        $year = $filters['year'] ?? '';
+        $organo = $filters['organo'] ?? '';
+        if ($year !== '') {
+            $builder->where('YEAR(fecha_adjudicacion)', $year);
+        }
+        if ($organo !== '') {
+            $builder->where('organo_contratacion', $organo);
+        }
+        
+        return $builder->countAllResults();
     }
 }

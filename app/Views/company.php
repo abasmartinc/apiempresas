@@ -606,9 +606,9 @@
         }
 
         .b2b-status--inactive {
-            background: #fef2f2;
-            color: #dc2626;
-            border: 1px solid #fecaca;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
         }
 
         /* Full Width Promo */
@@ -983,6 +983,24 @@
                                         </svg>
                                         Datos oficiales Reg. Mercantil
                                     </div>
+                                    
+                                    <?php if (!empty($contracts)): ?>
+                                    <div style="display: inline-flex; align-items: center; gap: 4px; background: #eef2ff; color: #4f46e5; padding: 4px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; border: 1px solid #c7d2fe; letter-spacing: 0.5px; text-transform: uppercase;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
+                                        </svg>
+                                        Contratista del Estado
+                                    </div>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($subsidies)): ?>
+                                    <div style="display: inline-flex; align-items: center; gap: 4px; background: #fefce8; color: #ca8a04; padding: 4px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; border: 1px solid #fef08a; letter-spacing: 0.5px; text-transform: uppercase;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 100 4h4a2 2 0 110 4H8"/><path d="M12 18V6"/>
+                                        </svg>
+                                        Empresa Subvencionada
+                                    </div>
+                                    <?php endif; ?>
                                 </div>
 
                                 <h1 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.25; letter-spacing: -0.01em; text-wrap: balance;">
@@ -1150,6 +1168,16 @@
                                                 <circle cx="12" cy="10" r="3"></circle>
                                             </svg>
                                             Ubicación
+                                        </a></li>
+                                <?php endif; ?>
+                                <?php if (!empty($contracts) || !empty($subsidies)): ?>
+                                    <li><a href="#financial-data">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                                            </svg>
+                                            Finanzas Públicas
                                         </a></li>
                                 <?php endif; ?>
                                 <li><a href="#preguntas-frecuentes">
@@ -1970,6 +1998,146 @@
                             </div>
                         </div>
                     </section>
+
+                    <!-- CONTRATOS Y SUBVENCIONES SECTION -->
+                    <?php if (!empty($contracts) || !empty($subsidies)): ?>
+                        <div id="financial-data" class="reveal-on-scroll" style="margin-top: 4rem;">
+                            <div class="b2b-card" style="padding: 32px; border-radius: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                                    <div>
+                                        <h2 class="b2b-card__title" style="margin: 0; font-size: 1.4rem;">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                                            </svg>
+                                            Licitaciones Públicas y Subvenciones
+                                        </h2>
+                                        <p style="color: #64748b; margin: 8px 0 0 0; font-size: 0.95rem;">
+                                            Historial oficial de contratos adjudicados por el Estado y subvenciones recibidas por <?= esc($companyName) ?>.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <?php if (!empty($contracts)): ?>
+                                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-top: 32px; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Contratos Públicos Adjudicados</h3>
+                                    <div style="overflow-x: auto; border-radius: 12px; border: 1px solid #e2e8f0;">
+                                        <table style="width: 100%; border-collapse: collapse; min-width: 600px; text-align: left;">
+                                            <thead>
+                                                <tr style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                                                    <th style="padding: 12px 16px; font-weight: 700; font-size: 0.85rem; color: #475569; text-transform: uppercase;">Fecha</th>
+                                                    <th style="padding: 12px 16px; font-weight: 700; font-size: 0.85rem; color: #475569; text-transform: uppercase;">Órgano de Contratación</th>
+                                                    <th style="padding: 12px 16px; font-weight: 700; font-size: 0.85rem; color: #475569; text-transform: uppercase;">Título del Contrato</th>
+                                                    <th style="padding: 12px 16px; font-weight: 700; font-size: 0.85rem; color: #475569; text-transform: uppercase; text-align: right;">Importe</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($contracts as $contract): ?>
+                                                <tr style="border-bottom: 1px solid #e2e8f0;">
+                                                    <td style="padding: 12px 16px; font-size: 0.9rem; color: #64748b; white-space: nowrap; vertical-align: top;">
+                                                        <?= date('d/m/Y', strtotime($contract['fecha_adjudicacion'])) ?>
+                                                    </td>
+                                                    <td style="padding: 12px 16px; font-size: 0.9rem; color: #334155; font-weight: 500; vertical-align: top;">
+                                                        <?= esc($contract['organo_contratacion']) ?>
+                                                    </td>
+                                                    <td style="padding: 12px 16px; font-size: 0.9rem; color: #475569; vertical-align: top;">
+                                                        <?= esc($contract['titulo_contrato']) ?>
+                                                        <?php if (!empty($contract['enlace_licitacion'])): ?>
+                                                            <a href="<?= esc($contract['enlace_licitacion']) ?>" target="_blank" style="color: #2563eb; text-decoration: none; margin-left: 8px; display: inline-block;" title="Ver documento original">
+                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                                                            </a>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td style="padding: 12px 16px; font-size: 0.95rem; font-weight: 700; color: #0f172a; text-align: right; white-space: nowrap; vertical-align: top;">
+                                                        <?= number_format($contract['importe_adjudicacion'], 2, ',', '.') ?> €
+                                                    </td>
+                                                </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if (!empty($subsidies)): ?>
+                                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-top: 32px; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Subvenciones y Ayudas Recibidas</h3>
+                                    <div style="overflow-x: auto; border-radius: 12px; border: 1px solid #e2e8f0;">
+                                        <table style="width: 100%; border-collapse: collapse; min-width: 600px; text-align: left;">
+                                            <thead>
+                                                <tr style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                                                    <th style="padding: 12px 16px; font-weight: 700; font-size: 0.85rem; color: #475569; text-transform: uppercase;">Fecha</th>
+                                                    <th style="padding: 12px 16px; font-weight: 700; font-size: 0.85rem; color: #475569; text-transform: uppercase;">Instrumento</th>
+                                                    <th style="padding: 12px 16px; font-weight: 700; font-size: 0.85rem; color: #475569; text-transform: uppercase;">Convocatoria</th>
+                                                    <th style="padding: 12px 16px; font-weight: 700; font-size: 0.85rem; color: #475569; text-transform: uppercase; text-align: right;">Importe</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($subsidies as $subsidy): ?>
+                                                <tr style="border-bottom: 1px solid #e2e8f0;">
+                                                    <td style="padding: 12px 16px; font-size: 0.9rem; color: #64748b; white-space: nowrap; vertical-align: top;">
+                                                        <?= date('d/m/Y', strtotime($subsidy['fecha_concesion'])) ?>
+                                                    </td>
+                                                    <td style="padding: 12px 16px; font-size: 0.9rem; color: #334155; font-weight: 500; vertical-align: top;">
+                                                        <?= esc($subsidy['instrumento']) ?>
+                                                    </td>
+                                                    <td style="padding: 12px 16px; font-size: 0.9rem; color: #475569; vertical-align: top;">
+                                                        <?= esc($subsidy['convocatoria']) ?>
+                                                    </td>
+                                                    <td style="padding: 12px 16px; font-size: 0.95rem; font-weight: 700; color: #0f172a; text-align: right; white-space: nowrap; vertical-align: top;">
+                                                        <?= number_format($subsidy['importe'], 2, ',', '.') ?> €
+                                                    </td>
+                                                </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <?php endif; ?>
+
+                                <!-- API CTA Developer-First -->
+                                <div style="margin-top: 32px; background: #0f172a; border-radius: 16px; padding: 24px; color: #f8fafc; display: flex; flex-direction: column; gap: 16px; overflow: hidden; position: relative;">
+                                    <div style="position: absolute; top: 0; right: 0; padding: 24px; opacity: 0.05; pointer-events: none;">
+                                        <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="16 18 22 12 16 6"></polyline>
+                                            <polyline points="8 6 2 12 8 18"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div style="position: relative; z-index: 1;">
+                                        <h4 style="margin: 0 0 8px 0; font-size: 1.15rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                            </svg>
+                                            ¿Necesitas procesar estos datos de forma masiva?
+                                        </h4>
+                                        <p style="margin: 0; font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; max-width: 800px;">
+                                            Extrae el historial financiero y de contratos públicos de millones de empresas en milisegundos con nuestra API REST. Ideal para integrarlo en tu CRM, herramientas de scoring o automatizaciones B2B.
+                                        </p>
+                                    </div>
+                                    
+                                    <div style="background: #1e293b; border-radius: 8px; border: 1px solid #334155; padding: 16px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.85rem; color: #e2e8f0; overflow-x: auto; position: relative; z-index: 1;">
+                                        <div style="color: #6ee7b7; margin-bottom: 8px;">GET /api/v1/companies/<?= esc($companyCif) ?>/contracts</div>
+                                        <pre style="margin: 0; padding: 0; background: transparent; border: none; color: inherit; overflow: visible;">{
+  "success": true,
+  "data": [
+    {
+      "fecha": "<?= !empty($contracts) ? date('Y-m-d', strtotime($contracts[0]['fecha_adjudicacion'])) : '2023-11-15' ?>",
+      "organo": "<?= !empty($contracts) ? esc($contracts[0]['organo_contratacion']) : 'Ministerio de Defensa' ?>",
+      "importe": <?= !empty($contracts) ? $contracts[0]['importe_adjudicacion'] : '145000.50' ?>
+    }
+  ]
+}</pre>
+                                    </div>
+                                    
+                                    <div style="position: relative; z-index: 1; display: flex; justify-content: flex-start;">
+                                        <a href="<?= site_url('register') ?>" style="display: inline-flex; align-items: center; gap: 8px; background: #3b82f6; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.95rem; transition: background 0.2s;">
+                                            Obtener mi API Key
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                                <polyline points="12 5 19 12 12 19"></polyline>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
 
                     <!-- BORME TIMELINE SECTION -->
                     <?php if (!empty($bormePosts)): ?>

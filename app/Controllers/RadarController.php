@@ -838,4 +838,167 @@ class RadarController extends BaseController
         echo '</tbody></table></body></html>';
         return ob_get_clean();
     }
+
+    public function exportSubsidiesExcel()
+    {
+        if (!session('logged_in')) {
+            return redirect()->to(site_url('enter'))->with('error', 'Debes iniciar sesión para descargar el listado.');
+        }
+
+        $params = $this->request->getGet();
+        $convocatoria = $params['convocatoria'] ?? '';
+        $year = $params['year'] ?? '';
+
+        $filename = "Subvenciones";
+        if ($convocatoria) $filename .= "_" . substr(preg_replace('/[^A-Za-z0-9_]/', '_', $convocatoria), 0, 30);
+        if ($year) $filename .= "_" . $year;
+        $filename .= ".csv";
+
+        if (ob_get_length()) ob_clean();
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        $fp = fopen('php://output', 'w');
+        fprintf($fp, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM
+
+        fputcsv($fp, [
+            'Empresa',
+            'CIF',
+            'Convocatoria',
+            'Instrumento / Detalle',
+            'Fecha Concesión',
+            'Importe',
+            'Teléfono',
+            'Sector CNAE',
+            'Provincia',
+            'Dirección'
+        ]);
+
+        $db = \Config\Database::connect();
+        $builder = $db->table('company_subsidies s');
+        $builder->select('
+            s.company_name, 
+            s.raw_beneficiario, 
+            s.company_cif, 
+            s.convocatoria, 
+            s.instrumento, 
+            s.fecha_concesion, 
+            s.importe,
+            c.phone,
+            c.cnae_label,
+            c.registro_mercantil,
+            c.address
+        ');
+        $builder->join('companies c', 'c.cif = s.company_cif', 'left');
+
+        if ($convocatoria !== '') {
+            $builder->where('s.slug_convocatoria', $convocatoria);
+        }
+        if ($year !== '') {
+            $builder->where('YEAR(s.fecha_concesion)', $year);
+        }
+
+        $query = $builder->get();
+        foreach ($query->getResultArray() as $row) {
+            $empresa = $row['company_name'] ?: $row['raw_beneficiario'] ?: $row['company_cif'];
+            fputcsv($fp, [
+                $empresa,
+                $row['company_cif'],
+                $row['convocatoria'],
+                $row['instrumento'],
+                $row['fecha_concesion'] ? date('d/m/Y', strtotime($row['fecha_concesion'])) : '',
+                number_format((float)$row['importe'], 2, ',', ''),
+                $row['phone'] ?? '',
+                $row['cnae_label'] ?? '',
+                $row['registro_mercantil'] ?? '',
+                $row['address'] ?? ''
+            ]);
+        }
+
+        fclose($fp);
+        exit();
+    }
+
+    public function exportContractsExcel()
+    {
+        if (!session('logged_in')) {
+            return redirect()->to(site_url('enter'))->with('error', 'Debes iniciar sesión para descargar el listado.');
+        }
+
+        $params = $this->request->getGet();
+        $year = $params['year'] ?? '';
+
+        $filename = "Contratos_Publicos";
+        if ($year) $filename .= "_" . $year;
+        $filename .= ".csv";
+
+        if (ob_get_length()) ob_clean();
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        $fp = fopen('php://output', 'w');
+        fprintf($fp, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM
+
+        fputcsv($fp, [
+            'Empresa Adjudicataria',
+            'CIF',
+            'Órgano de Contratación',
+            'Título del Contrato',
+            'Fecha Adjudicación',
+            'Importe Adjudicación',
+            'Teléfono',
+            'Sector CNAE',
+            'Provincia',
+            'Dirección'
+        ]);
+
+        $db = \Config\Database::connect();
+        $builder = $db->table('company_contracts c_contr');
+        $builder->select('
+            c_contr.company_name, 
+            c_contr.raw_adjudicatario, 
+            c_contr.company_cif, 
+            c_contr.organo_contratacion, 
+            c_contr.titulo_contrato, 
+            c_contr.fecha_adjudicacion, 
+            c_contr.importe_adjudicacion,
+            c.phone,
+            c.cnae_label,
+            c.registro_mercantil,
+            c.address
+        ');
+        $builder->join('companies c', 'c.cif = c_contr.company_cif', 'left');
+
+        if ($year !== '') {
+            $builder->where('YEAR(c_contr.fecha_adjudicacion)', $year);
+        }
+
+        $query = $builder->get();
+        foreach ($query->getResultArray() as $row) {
+            $empresa = $row['company_name'] ?: $row['raw_adjudicatario'] ?: $row['company_cif'];
+            fputcsv($fp, [
+                $empresa,
+                $row['company_cif'],
+                $row['organo_contratacion'],
+                $row['titulo_contrato'],
+                $row['fecha_adjudicacion'] ? date('d/m/Y', strtotime($row['fecha_adjudicacion'])) : '',
+                number_format((float)$row['importe_adjudicacion'], 2, ',', ''),
+                $row['phone'] ?? '',
+                $row['cnae_label'] ?? '',
+                $row['registro_mercantil'] ?? '',
+                $row['address'] ?? ''
+            ]);
+        }
+
+        fclose($fp);
+        exit();
+    }
 }

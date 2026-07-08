@@ -89,6 +89,34 @@
 <body>
     <?= view('partials/header') ?>
 
+<?php
+    $type = $export_type ?? 'excel';
+    $itemLabel = 'empresas';
+    $itemSingular = 'Empresas';
+    $upsellTitle = 'Radar PRO';
+    $upsellFeat1 = 'Oportunidades ilimitadas';
+    $upsellFeat2 = 'Actualización cada hora';
+    $ctaUrl = site_url('radar?source=excel');
+    $ctaText = 'Ver todas las oportunidades ahora';
+    
+    if ($type === 'subsidies_excel') {
+        $itemLabel = 'subvenciones';
+        $itemSingular = 'Subvenciones';
+        $upsellTitle = 'API de Subvenciones';
+        $upsellFeat1 = 'Integración en tiempo real';
+        $upsellFeat2 = 'Automatiza tu CRM';
+        $ctaUrl = site_url('api-empresas');
+        $ctaText = 'Ver Planes API';
+    } elseif ($type === 'contracts_excel') {
+        $itemLabel = 'licitaciones';
+        $itemSingular = 'Licitaciones';
+        $upsellTitle = 'API de Contratos';
+        $upsellFeat1 = 'Alertas de adjudicaciones';
+        $upsellFeat2 = 'Búsqueda por CIF';
+        $ctaUrl = site_url('api-empresas');
+        $ctaText = 'Ver Planes API';
+    }
+?>
     <main class="success-main">
         <div class="success-wrapper">
             <!-- IZQUIERDA: PAGO Y DESCARGA -->
@@ -100,8 +128,10 @@
                     </div>
                     <h1 style="font-size: 1.75rem; font-weight: 900; color: #1e293b; margin: 0 0 6px; letter-spacing: -0.02em;">¡Listado desbloqueado!</h1>
                     <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin: 0 0 14px;">
-                        Este listado incluye <strong><?= number_format($total_count ?? 0, 0, ',', '.') ?> empresas</strong> detectadas hoy.
+                        Este listado incluye <strong><?= number_format($total_count ?? 0, 0, ',', '.') ?> <?= $itemLabel ?></strong>.
+                        <?php if($type === 'excel'): ?>
                         <br><span style="color: #ef4444; font-weight: 700;">Pero mañana habrá nuevas oportunidades disponibles en el Radar.</span>
+                        <?php endif; ?>
                     </p>
 
                     <div style="background: #f8fafc; border-radius: 12px; padding: 12px 16px; margin-bottom: 14px; border: 1px solid #e2e8f0; text-align: left;">
@@ -109,49 +139,74 @@
                             <div>
                                 <h4 style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin: 0 0 6px;">Tu archivo CSV</h4>
                                 <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.82rem; color: #475569;">
-                                    <li style="margin-bottom: 3px;">✅ <?= number_format($total_count ?? 0, 0, ',', '.') ?> empresas</li>
+                                    <li style="margin-bottom: 3px;">✅ <?= number_format($total_count ?? 0, 0, ',', '.') ?> <?= $itemLabel ?></li>
                                     <li>❌ Datos estáticos (hoy)</li>
                                 </ul>
                             </div>
                             <div style="border-left: 1px solid #e2e8f0; padding-left: 12px;">
-                                <h4 style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: #3b82f6; margin: 0 0 6px;">Radar PRO</h4>
+                                <h4 style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: #3b82f6; margin: 0 0 6px;"><?= $upsellTitle ?></h4>
                                 <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.82rem; color: #475569;">
-                                    <li style="margin-bottom: 3px;">🚀 Oportunidades ilimitadas</li>
-                                    <li>⚡ Actualización cada hora</li>
+                                    <li style="margin-bottom: 3px;">🚀 <?= $upsellFeat1 ?></li>
+                                    <li>⚡ <?= $upsellFeat2 ?></li>
                                 </ul>
                             </div>
                         </div>
                     </div>
 
                     <div style="display: flex; flex-direction: column; gap: 8px; max-width: 380px; margin: 0 auto;">
-                        <a href="<?= esc($download_url) ?>" class="btn-download" id="excel_main_download_btn" style="width: 100%; justify-content: center;">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                            Descargar Listado (.xlsx)
-                        </a>
+                        <?php if (($total_count ?? 0) > 100000): ?>
+                            <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+                                <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                </div>
+                                <h3 style="color: #92400e; font-size: 1rem; font-weight: 800; margin: 0 0 6px;">Generando tu archivo...</h3>
+                                <p style="color: #b45309; font-size: 0.85rem; line-height: 1.4; margin: 0;">Debido al gran volumen de datos (<?= number_format($total_count ?? 0, 0, ',', '.') ?> registros), estamos empaquetando el listado. Recibirás un enlace de descarga segura en tu correo electrónico en los próximos minutos.</p>
+                            </div>
+                        <?php else: ?>
+                            <a href="<?= esc($download_url) ?>" class="btn-download" id="excel_main_download_btn" style="width: 100%; justify-content: center;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                Descargar Listado (.zip)
+                            </a>
+                        <?php endif; ?>
 
-                        <a href="<?= site_url('radar?source=excel') ?>" id="excel_to_radar_cta" style="display:inline-flex; justify-content:center; align-items:center; gap:8px; background:radial-gradient(circle at 0% 0%,#fefce8 0,#facc15 35%,#f97316 100%); color:#0f172a; font-weight:800; text-decoration:none; font-size:0.95rem; padding:12px 18px; border-radius:12px; box-shadow:0 10px 24px rgba(249,115,22,0.4); transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
-                            Ver todas las oportunidades ahora
+                        <?php if ($type === 'excel'): ?>
+                        <a href="<?= $ctaUrl ?>" id="excel_to_radar_cta" style="display:inline-flex; justify-content:center; align-items:center; gap:8px; background:radial-gradient(circle at 0% 0%,#fefce8 0,#facc15 35%,#f97316 100%); color:#0f172a; font-weight:800; text-decoration:none; font-size:0.95rem; padding:12px 18px; border-radius:12px; box-shadow:0 10px 24px rgba(249,115,22,0.4); transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                            <?= $ctaText ?>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                         </a>
+                        <?php endif; ?>
 
                     </div>
 
                     <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #f1f5f9; color: #94a3b8; font-size: 0.75rem; font-weight: 600;">
-                        REF: #<?= esc($order_ref) ?> | Formato: CSV (Delimitado por comas)
+                        REF: #<?= esc($order_ref) ?> | Formato: ZIP (.csv)
                     </div>
                 </div>
             </div>
 
-            <!-- DERECHA: UPSELL RADAR -->
+<?php
+                $rightTitle = 'Evita que la competencia contacte antes';
+                $rightText = 'Mientras tú descargas este listado, otros proveedores están recibiendo alertas en tiempo real de nuevas empresas que se crean hoy mismo.';
+                $rightBtn = 'Ver nuevas oportunidades ahora';
+                if ($type === 'subsidies_excel') {
+                    $rightTitle = 'Conecta tu sistema en tiempo real';
+                    $rightText = 'Descargar un archivo estático está bien, pero nuestra API de Subvenciones insertará automáticamente las nuevas ayudas en tu CRM en cuanto se publiquen en el BOE.';
+                    $rightBtn = 'Descubrir Planes API';
+                } elseif ($type === 'contracts_excel') {
+                    $rightTitle = 'Recibe alertas de adjudicaciones';
+                    $rightText = 'Descargar el historial es el primer paso. Con nuestra API de Contratos, podrás monitorizar licitaciones y recibir notificaciones instantáneas para actuar rápido.';
+                    $rightBtn = 'Descubrir Planes API';
+                }
+            ?>
             <div class="upsell-card">
                 <div style="display:inline-block; background:#ef4444; color:white; padding:4px 10px; border-radius:8px; font-size:0.68rem; font-weight:900; text-transform:uppercase; margin-bottom:12px; letter-spacing:0.05em; align-self:flex-start;">
                     ⚠️ No te quedes atrás
                 </div>
 
-                <h3 style="font-size:1.35rem; font-weight:900; margin:0 0 10px; line-height:1.2; color:white;">Evita que la competencia contacte antes</h3>
+                <h3 style="font-size:1.35rem; font-weight:900; margin:0 0 10px; line-height:1.2; color:white;"><?= $rightTitle ?></h3>
 
                 <p style="color:#cbd5e1; line-height:1.5; margin:0 0 16px; font-size:0.875rem;">
-                    Mientras tú descargas este listado, otros proveedores están recibiendo alertas en tiempo real de nuevas empresas que se crean hoy mismo.
+                    <?= $rightText ?>
                 </p>
 
                 <ul style="list-style:none; padding:0; margin:0 0 18px;">
@@ -163,8 +218,8 @@
                     <?php endforeach; ?>
                 </ul>
 
-                <a href="<?= site_url('radar') ?>" style="display:inline-flex; justify-content:center; align-items:center; gap:8px; background:radial-gradient(circle at 0% 0%,#fefce8 0,#facc15 35%,#f97316 100%); color:#0f172a; font-weight:800; text-decoration:none; font-size:0.95rem; padding:13px 18px; border-radius:12px; box-shadow:0 10px 24px rgba(249,115,22,0.4); transition:transform 0.2s; width:100%;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
-                    Ver nuevas oportunidades ahora
+                <a href="<?= $ctaUrl ?>" style="display:inline-flex; justify-content:center; align-items:center; gap:8px; background:radial-gradient(circle at 0% 0%,#fefce8 0,#facc15 35%,#f97316 100%); color:#0f172a; font-weight:800; text-decoration:none; font-size:0.95rem; padding:13px 18px; border-radius:12px; box-shadow:0 10px 24px rgba(249,115,22,0.4); transition:transform 0.2s; width:100%;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                    <?= $rightBtn ?>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                 </a>
             </div>

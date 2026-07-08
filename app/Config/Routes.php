@@ -73,12 +73,21 @@ $routes->get('billing/single_checkout', 'Billing::single_checkout');
 $routes->get('checkout/radar-export', 'Billing::order_summary');
 $routes->get('billing/directory_checkout', 'Billing::directory_checkout');
 $routes->get('checkout/directory-export', 'Billing::directory_order_summary');
+
+$routes->get('billing/subsidies_checkout', 'Billing::subsidies_checkout');
+$routes->get('checkout/subsidies-export', 'Billing::subsidies_order_summary');
+$routes->get('billing/export-subsidies', 'RadarController::exportSubsidiesExcel');
+
+$routes->get('billing/contracts_checkout', 'Billing::contracts_checkout');
+$routes->get('checkout/contracts-export', 'Billing::contracts_order_summary');
+$routes->get('billing/export-contracts', 'RadarController::exportContractsExcel');
 $routes->get('billing/success', 'Billing::success'); // callback Stripe
 $routes->get('billing/cancel', 'Billing::cancel');   // cancel Stripe/PayPal
 $routes->get('billing/purchase-success', 'Billing::purchase_success');
 $routes->get('billing/manage', 'Billing::billing_manage');
 $routes->get('billing/invoices', 'Billing::invoices');
 $routes->get('billing/invoices/download/(:num)', 'Billing::invoice_download/$1');
+$routes->get('download/secure/(:any)', 'DownloadController::secure/$1');
 $routes->get('billing/portal', 'Billing::portal');
 $routes->post('billing/rotate-key', 'Billing::rotate_key');
 $routes->post('billing/cancel-subscription', 'Billing::cancel_subscription');
@@ -184,6 +193,7 @@ $routes->cli('swagger:generate', 'App\Commands\GenerateSwaggerCommand::run');
 $routes->get('api/docs', 'Api\Docs::index');
 $routes->get('api/docs/openapi.json', 'Api\Docs::json');
 $routes->get('documentation', 'Documentation::index');
+$routes->get('docs/errors/(:any)', 'Documentation::error/$1');
 
 
 // SEO Map Route
@@ -352,6 +362,24 @@ $routes->post('checkout/radar-email', 'RadarController::sendExportEmail');
 
 // --- Programmatic SEO Routes ---
 $routes->get('empresas/(:any)', 'RadarController::provinceCatalog/$1');
+
+// Public Finances SEO Clusters
+$routes->get('licitaciones-del-estado', 'PublicFinancesSEO::contractsHub');
+$routes->get('licitaciones-del-estado/organo-(:segment)', 'PublicFinancesSEO::contractsByOrgan/$1');
+$routes->get('licitaciones-del-estado/organo-(:segment)/(:num)', 'PublicFinancesSEO::contractsByOrgan/$1/$2');
+
+$routes->get('subvenciones-empresas', 'PublicFinancesSEO::subsidiesHub');
+$routes->get('subvenciones-empresas/convocatoria-(:segment)', 'PublicFinancesSEO::subsidiesByConvocatoria/$1');
+$routes->get('subvenciones-empresas/convocatoria-(:segment)/(:num)', 'PublicFinancesSEO::subsidiesByConvocatoria/$1/$2');
+
+// Rankings
+$routes->get('mayores-empresas-contratistas-del-estado', 'PublicFinancesSEO::topContractors');
+$routes->get('empresas-mas-subvencionadas-espana',        'PublicFinancesSEO::topSubsidyRecipients');
+
+// Por año
+$routes->get('licitaciones-del-estado/ano-(:num)',  'PublicFinancesSEO::contractsByYear/$1');
+$routes->get('subvenciones-empresas/ano-(:num)',     'PublicFinancesSEO::subsidiesByYear/$1');
+
 
 // Radar Demo (Conversion Page)
 $routes->get('radar-demo', 'Radar::demo');

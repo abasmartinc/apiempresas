@@ -466,6 +466,25 @@ class Webhook extends Controller
                 'pdf_path'       => $dbInvoice->pdf_path
             ]);
             log_message('info', "[Webhook::stripe] One-time payment invoice generated and email sent: {$invoice->id}");
+
+            // If it's a massive download, add to export_jobs queue
+            $totalCount = (int) ($metadata->total_count ?? 0);
+            if ($totalCount > 100000 && in_array($planSlug, ['contracts_single', 'subsidies_single'])) {
+                $exportType = $planSlug === 'contracts_single' ? 'contracts_excel' : 'subsidies_excel';
+                $filtersJson = $metadata->export_context ?? '{}';
+                
+                $db = \Config\Database::connect();
+                $db->table('export_jobs')->insert([
+                    'user_email' => $billingEmail,
+                    'export_type' => $exportType,
+                    'filters' => $filtersJson,
+                    'status' => 'pending',
+                    'total_records' => $totalCount,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+                log_message('info', "[Webhook::stripe] Enqueued massive export job for {$billingEmail} ({$exportType}, {$totalCount} records)");
+            }
         }
     }
 
