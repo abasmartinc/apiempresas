@@ -360,6 +360,7 @@ class Company extends BaseController
             'targetProv'       => $targetProv,
             'contracts'        => $contracts,
             'subsidies'        => $subsidies,
+            'countFormatted'   => $countFormatted,
         ];
     }
 
