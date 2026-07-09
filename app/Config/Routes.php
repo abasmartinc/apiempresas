@@ -348,6 +348,8 @@ $routes->get('sitemap-directories.xml', 'Sitemap::directories');
 $routes->get('sitemap-informes-provincias.xml', 'Sitemap::informesProvincias');
 $routes->get('sitemap-informes-sectores.xml', 'Sitemap::informesSectores');
 $routes->get('sitemap-informes-wp.xml', 'Sitemap::informesWp');
+$routes->get('sitemap-subvenciones.xml', 'Sitemap::subvenciones');
+$routes->get('sitemap-contratos.xml', 'Sitemap::contratos');
 $routes->get('sitemap-companies-(:num).xml', 'Sitemap::companies/$1');
 
 // --- Webhook CRON SEO ---

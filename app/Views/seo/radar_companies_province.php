@@ -103,7 +103,7 @@ $slugProvince = url_title($province, '-', true);
                             </a>
 
                             <a href="<?= site_url('checkout/radar-export?type=single&provincia=' . urlencode($province)) ?>" class="ae-radar-page__btn ae-radar-page__btn--soft js-loading-btn">
-                                Descargar listado (<?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€
+                                Descargar listado (<?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas) · <?php if(isset($dynamic_price['is_discounted']) && $dynamic_price['is_discounted']): ?><s style="opacity:0.65; font-size:0.85em; margin-right:4px;"><?= number_format($dynamic_price['original_price'], 0) ?>€</s><?php endif; ?><?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€ <span style="font-size:0.85em; opacity:0.85; font-weight:600;">+ IVA</span>
                             </a>
                         <?php else: ?>
                             <a href="#avisarme-seccion" class="ae-radar-page__btn ae-radar-page__btn--soft">
@@ -370,7 +370,7 @@ $slugProvince = url_title($province, '-', true);
                                             <div class="ae-radar-page__paywall-stat-label">Crecimiento mes</div>
                                         </div>
                                         <div class="ae-radar-page__paywall-stat">
-                                            <div class="ae-radar-page__paywall-stat-value"><?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€</div>
+                                            <div class="ae-radar-page__paywall-stat-value"><?php if(isset($dynamic_price['is_discounted']) && $dynamic_price['is_discounted']): ?><s style="opacity:0.65; font-size:0.85em; margin-right:4px;"><?= number_format($dynamic_price['original_price'], 0) ?>€</s><?php endif; ?><?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€ <span style="font-size:0.85em; opacity:0.85; font-weight:600;">+ IVA</span></div>
                                             <div class="ae-radar-page__paywall-stat-label">Descarga puntual</div>
                                         </div>
                                     </div>
@@ -386,7 +386,7 @@ $slugProvince = url_title($province, '-', true);
                                         <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
                                             <a href="<?= site_url('billing/single_checkout?provincia=' . urlencode($province)) ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--secondary js-loading-btn">
                                                 <span>Descargar listado completo</span>
-                                                <span class="ae-radar-page__paywall-secondary-price"><?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€</span>
+                                                <span class="ae-radar-page__paywall-secondary-price"><?php if(isset($dynamic_price['is_discounted']) && $dynamic_price['is_discounted']): ?><s style="opacity:0.65; font-size:0.85em; margin-right:4px;"><?= number_format($dynamic_price['original_price'], 0) ?>€</s><?php endif; ?><?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€ <span style="font-size:0.85em; opacity:0.85; font-weight:600;">+ IVA</span></span>
                                             </a>
                                         </div>
 

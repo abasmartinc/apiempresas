@@ -170,8 +170,15 @@ class Usage extends BaseController
             }
         }
 
-        // Serie DB: solo días con requests
-        $rows = $this->ApiRequestsModel->getDailyCountsForRange($from, $to, ['user_id' => $userId]);
+        // Serie DB: solo días con requests (leyendo de api_usage_daily para máxima precisión financiera)
+        $db = \Config\Database::connect();
+        $rows = $db->table('api_usage_daily')
+            ->select('date AS day, SUM(requests_count + credits_used) AS total')
+            ->where('user_id', $userId)
+            ->where('date >=', $from)
+            ->where('date <=', $to)
+            ->groupBy('date')
+            ->get()->getResultArray();
 
         // Rellenar días faltantes con 0 (para una línea continua)
         $map = [];

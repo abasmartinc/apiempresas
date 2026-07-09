@@ -186,6 +186,7 @@
                                 telemarketing o cold mailing.</span>
                         </div>
                     </a>
+                    <?php /* 
                     <a href="<?= site_url('subvenciones-empresas') ?>">
                         <div class="nav-item-icon">💰</div>
                         <div>
@@ -200,6 +201,7 @@
                             <span>Descubre los contratos públicos adjudicados a empresas por todos los órganos del Estado.</span>
                         </div>
                     </a>
+                    */ ?>
                     <!-- BANNER VÉRTICE MEGA-MENÚ (HERO VIVO + LOGO REAL) -->
                     <a href="https://vertice.apiempresas.es" target="_blank" class="vertice-vivid-banner">
                         <div class="vertice-vivid-icon">
@@ -536,12 +538,14 @@
                     <a href="<?= site_url('base-de-datos-de-empresas') ?>" class="mobile-nav-link">
                         <span>Descarga de Listados</span>
                     </a>
+                    <?php /* 
                     <a href="<?= site_url('subvenciones-empresas') ?>" class="mobile-nav-link">
                         <span>Subvenciones Públicas</span>
                     </a>
                     <a href="<?= site_url('licitaciones-del-estado') ?>" class="mobile-nav-link">
                         <span>Licitaciones y Contratos</span>
                     </a>
+                    */ ?>
                 </div>
 
                 <div class="mobile-nav-group" style="margin-top: 16px;">

@@ -20,6 +20,7 @@ class ApiKeyFilter implements FilterInterface
         if (strpos($path, 'api/v1/webhooks') !== false) return 0;
         if (strpos($path, 'api/v1/usage') !== false) return 0;
         if (strpos($path, 'api/v1/companies/batch') !== false) return 0;
+        if (strpos($path, 'api/v1/professional/search') !== false) return 0; // Autocompletado gratuito (mínimo 3 chars), el cobro real es en /professional/details
 
         // "vamos a dejar los dos primeros a 1 credito y los otros a 3"
         // 2. api/v1/companies/search
@@ -28,6 +29,9 @@ class ApiKeyFilter implements FilterInterface
         if (preg_match('#api/v1/companies/?$#', $path)) return 1;
         // 3. Custom Client endpoints
         if (preg_match('#api/v1/custom/.+/companies/?$#', $path)) return 1;
+
+        // Professional Details: 1 crédito (el /search es gratuito, el /details es el que cuenta)
+        if (strpos($path, 'api/v1/professional/details') !== false) return 1;
 
         // Los demás (api/v1/*) a 3 créditos
         if (strpos($path, 'api/v1/') !== false) return 3;

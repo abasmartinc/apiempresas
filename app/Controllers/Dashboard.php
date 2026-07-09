@@ -280,12 +280,19 @@ class Dashboard extends BaseController
             $subModel = new \App\Models\UsersuscriptionsModel();
             $plan = $subModel->getActivePlanByUserId($userId);
             
+            $isPaid = false;
+            if ($plan) {
+                $planNameRaw = $plan->plan_name ?? 'Free';
+                $currentPlanSlug = strtolower(trim($planNameRaw));
+                $isPaid = ($currentPlanSlug !== 'free' && !empty($currentPlanSlug));
+            }
+
             $builder = $db->table('api_usage_daily')
                 ->selectSum('requests_count', 'total')
                 ->selectSum('credits_used', 'credits_total')
                 ->where('user_id', $userId);
                 
-            if ($plan && $plan->plan_id) {
+            if ($isPaid && $plan && $plan->plan_id) {
                 $builder->where('plan_id', $plan->plan_id);
                 $builder->where('date >=', date('Y-m-01'));
             } else {

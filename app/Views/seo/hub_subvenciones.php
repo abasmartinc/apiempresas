@@ -369,13 +369,14 @@
                 <?php 
                     $billingService = new \App\Services\BillingService();
                     $total_subs = $billingService->countSubsidies([]);
-                    $dynamic_price = $billingService->calculatePublicFundsPrice($total_subs);
+                    $pricing = $billingService->getPublicFundsPricingDetails($total_subs);
+                    $dynamic_price = $pricing['base_price'];
                     $checkoutUrl = site_url('billing/subsidies_checkout');
                 ?>
                 <div style="margin-top: 2rem;">
                     <a href="<?= $checkoutUrl ?>" style="display: inline-flex; align-items: center; gap: 8px; background: #10b981; color: #fff; padding: 1.1rem 1.8rem; border-radius: 12px; font-weight: 800; font-size: 1rem; text-decoration: none; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3); transition: all 0.2s; border: 1px solid #34d399;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 35px rgba(16, 185, 129, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(16, 185, 129, 0.3)';">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Descargar BBDD Completa de Subvenciones — <?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
+                        Descargar BBDD Completa de Subvenciones — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
                     </a>
                     <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7); max-width: 480px; margin-top: 10px; margin-left: auto; margin-right: auto; line-height: 1.4;">
                         Incluye todas las subvenciones (<?= number_format($total_subs, 0, ',', '.') ?> registros) cruzadas con los datos del Registro Mercantil: Sector CNAE, Dirección, Provincia y Teléfono (cuando esté disponible).
@@ -542,16 +543,14 @@
                         </tbody>
                     </table>
                 </div>
-            </section>
-            
             <!-- Toolbar: Filters & Pagination BOTTOM -->
-            <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 32px; background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e9eef5;">
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 0; background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e9eef5;">
                 
                 <?php if (empty($searchQuery)): ?>
                 <div style="text-align: right; margin-bottom: 0px;">
                     <a href="<?= $checkoutUrl ?>" style="display: inline-flex; align-items: center; gap: 8px; background: #10b981; color: #fff; padding: 12px 24px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; text-decoration: none; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25); transition: all 0.2s; margin-bottom: 8px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 25px rgba(16, 185, 129, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(16, 185, 129, 0.25)';">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Descargar BBDD Completa de Subvenciones — <?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
+                        Descargar BBDD Completa de Subvenciones — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
                     </a>
                     <div style="font-size: 0.75rem; color: #94a3b8; max-width: 320px; margin-left: auto; line-height: 1.4;">
                         Incluye todas las subvenciones (<?= number_format($total_subs, 0, ',', '.') ?> registros) cruzadas con los datos del Registro Mercantil: Sector CNAE, Dirección, Provincia y Teléfono (cuando esté disponible).
@@ -590,6 +589,8 @@
                 </div>
                 <?php endif; ?>
             </div>
+            
+            </section>
 
             </div> <!-- padding 48px -->
 

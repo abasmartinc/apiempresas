@@ -2402,7 +2402,7 @@
                                     <path d="M14 13h2"></path>
                                     <path d="M14 17h2"></path>
                                 </svg>
-                                Descargar CSV completo por <?= $priceStr ?>€
+                                Descargar CSV completo por <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= $priceStr ?>€ <span style="font-size:0.85em; opacity:0.85; font-weight:600;">+ IVA</span>
                             </a>
                             
                             <div style="position: relative; z-index: 1; margin-top: 2rem; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px; color: #64748b; font-size: 0.9rem; font-weight: 500;">

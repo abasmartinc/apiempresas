@@ -236,22 +236,11 @@ class CompanyMapV2Controller extends Controller
 
             helper('pricing');
             if (!function_exists('calculate_directory_price')) {
-                $helperPath = APPPATH . 'Helpers/pricing_helper.php';
-                if (file_exists($helperPath)) require_once $helperPath;
+            $helperPath = APPPATH . 'Helpers/pricing_helper.php';
+            if (file_exists($helperPath)) {
+                require_once $helperPath;
             }
-            if (!function_exists('calculate_directory_price')) {
-                function calculate_directory_price(int $count, bool $isPremium = false): array {
-                    $basePrice = 9.00;
-                    if ($count > 1000) {
-                        $extraCount = $count - 1000;
-                        $tier2Count = min($extraCount, 9000);
-                        $basePrice += ceil($tier2Count / 1000) * 5.00;
-                        if ($extraCount > 9000) $basePrice += ceil(($extraCount - 9000) / 1000) * 1.00;
-                    }
-                    if ($isPremium) $basePrice = round($basePrice * 1.5, 2);
-                    return [ 'base_price' => $basePrice, 'tax' => round($basePrice * 0.21, 2), 'total' => $basePrice + round($basePrice * 0.21, 2) ];
-                }
-            }
+        }
             
             $isPremium = false;
             if (!empty($dateMin) && strtotime($dateMin) >= strtotime('-90 days')) {
@@ -260,9 +249,11 @@ class CompanyMapV2Controller extends Controller
             $priceData = calculate_directory_price($totalCount, $isPremium);
 
             $meta = [
-                'total_count'   => $totalCount,
-                'dynamic_price' => $priceData['base_price'] ?? 9,
-                'limit'         => $limit,
+                'total_count'    => $totalCount,
+                'dynamic_price'  => $priceData['base_price'] ?? 9,
+                'original_price' => $priceData['original_price'] ?? 9,
+                'is_discounted'  => $priceData['is_discounted'] ?? false,
+                'limit'          => $limit,
                 'with_phone'    => 0,
                 'top_cnae'      => [],
                 'page'          => $page,

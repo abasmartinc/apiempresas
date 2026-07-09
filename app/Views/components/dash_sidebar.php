@@ -98,9 +98,29 @@
         Disfrutas de todas las ventajas del Plan <?= $planName ?>, incluyendo métricas avanzadas, soporte prioritario y SLA garantizado.
     </p>
     
+    <?php
+    $userPlanId = isset($plan) && isset($plan->plan_id) ? (int)$plan->plan_id : null;
+    if ($userPlanId === null) {
+        $uid = session('user_id');
+        if ($uid) {
+            $subModel = new \App\Models\UsersuscriptionsModel();
+            $userPlan = $subModel->getActivePlanByUserId($uid);
+            if (!$userPlan) {
+                $userPlan = $subModel->getUserSubscriptionWithPlan($uid);
+            }
+            if ($userPlan && isset($userPlan->plan_id)) {
+                $userPlanId = (int)$userPlan->plan_id;
+            }
+        }
+    }
+    $userPlanId = $userPlanId ?? 1;
+    $isStandardPlan = in_array($userPlanId, [1, 2, 3, 6]);
+    ?>
+    <?php if ($isStandardPlan): ?>
     <a href="<?= site_url('billing') ?>" style="display: block; text-align: center; background: #ffffff; color: #0f172a; padding: 14px; border-radius: 12px; font-weight: 900; font-size: 0.95rem; text-decoration: none; transition: transform 0.2s;">
         Gestionar suscripción
     </a>
+    <?php endif; ?>
 </section>
 
 <?php if ($currentPlanSlug === 'pro'): ?>

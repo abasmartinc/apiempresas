@@ -33,12 +33,23 @@ if (!function_exists('calculate_core_price')) {
             $basePrice = round($basePrice * 1.5, 2);
         }
 
+        $originalPrice = $basePrice;
+        $isDiscounted = false;
+        
+        $maxCap = 149.00;
+        if ($basePrice > $maxCap) {
+            $basePrice = $maxCap;
+            $isDiscounted = true;
+        }
+
         $tax = round($basePrice * 0.21, 2);
 
         return [
-            'base_price' => $basePrice,
-            'tax'        => $tax,
-            'total'      => $basePrice + $tax
+            'base_price'     => $basePrice,
+            'original_price' => $originalPrice,
+            'is_discounted'  => $isDiscounted,
+            'tax'            => $tax,
+            'total'          => $basePrice + $tax
         ];
     }
 }

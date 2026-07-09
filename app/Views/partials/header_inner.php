@@ -2,12 +2,27 @@
     $db = \Config\Database::connect();
     $uid = session('user_id');
     $hasBonusOnly = false;
-    if ($uid && $db->tableExists('user_wallets')) {
-        $wb = $db->table('user_wallets')->where('user_id', $uid)->get()->getRow();
-        if ($wb && $wb->balance > 0) {
-            $hasBonusOnly = true;
+    $userPlanId = 1;
+
+    if ($uid) {
+        if ($db->tableExists('user_wallets')) {
+            $wb = $db->table('user_wallets')->where('user_id', $uid)->get()->getRow();
+            if ($wb && $wb->balance > 0) {
+                $hasBonusOnly = true;
+            }
+        }
+        
+        $subModel = new \App\Models\UsersuscriptionsModel();
+        $userPlan = $subModel->getActivePlanByUserId($uid);
+        if (!$userPlan) {
+            $userPlan = $subModel->getUserSubscriptionWithPlan($uid);
+        }
+        if ($userPlan && isset($userPlan->plan_id)) {
+            $userPlanId = (int)$userPlan->plan_id;
         }
     }
+    
+    $isStandardPlan = in_array($userPlanId, [1, 2, 3, 6]);
 ?>
 
     <header>
@@ -62,7 +77,7 @@
 
             <nav class="desktop-only" aria-label="Principal" style="display:flex; align-items:center;">
                 <a class="minor-nav-link" href="<?=site_url() ?>dashboard">Dashboard</a>
-                <?php if(!$hasBonusOnly): ?>
+                <?php if(!$hasBonusOnly && $isStandardPlan): ?>
                 <span class="nav-sep">•</span>
                 <a class="minor-nav-link" href="<?=site_url() ?>billing">Suscripción</a>
                 <?php endif; ?>
@@ -70,8 +85,9 @@
                 <a class="minor-nav-link" href="<?=site_url() ?>consumption">Consumo</a>
                 <span class="nav-sep">•</span>
                 <a class="minor-nav-link" href="<?=site_url() ?>documentation">Docs</a>
-                <span class="nav-sep">•</span>
                 
+                <?php if($isStandardPlan): ?>
+                <span class="nav-sep">•</span>
                 <div class="main-nav-dropdown-container">
                     <button class="minor-nav-link" id="mainNavDropdownTrigger" style="display: flex; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; padding: 6px 4px;">
                         Integraciones 
@@ -97,6 +113,7 @@
                         </a>
                     </div>
                 </div>
+                <?php endif; ?>
             </nav>
 
             <div class="desktop-only auth-buttons">
@@ -134,7 +151,7 @@
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                                 Mi Perfil
                             </a>
-                            <?php if(!$hasBonusOnly): ?>
+                            <?php if(!$hasBonusOnly && $isStandardPlan): ?>
                             <a href="<?= site_url('billing') ?>" class="dropdown-item">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10"/></svg>
                                 Suscripción
@@ -170,12 +187,14 @@
                 <nav class="mobile-nav">
                     <a href="<?=site_url() ?>dashboard" class="mobile-nav-link">Dashboard</a>
                     <a href="<?=site_url() ?>profile" class="mobile-nav-link">Mi Perfil</a>
-                    <?php if(!$hasBonusOnly): ?>
+                    <?php if(!$hasBonusOnly && $isStandardPlan): ?>
                     <a href="<?=site_url() ?>billing" class="mobile-nav-link">Suscripción</a>
                     <?php endif; ?>
                     <a href="<?=site_url() ?>consumption" class="mobile-nav-link">Consumo</a>
                     <a href="<?=site_url() ?>documentation" class="mobile-nav-link">Documentación</a>
+                    <?php if($isStandardPlan): ?>
                     <a href="#" class="mobile-nav-link js-track-wp-cta" style="color: #0369a1;">Plugin WordPress <span style="background: #e0f2fe; color: #0284c7; font-size: 10px; padding: 2px 6px; border-radius: 4px;">NUEVO</span></a>
+                    <?php endif; ?>
                     <div class="mobile-auth">
                         <?php if(!session('logged_in')): ?>
                             <a href="<?=site_url() ?>enter" class="btn btn-full ghost">Iniciar sesión</a>

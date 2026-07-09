@@ -4,12 +4,20 @@ namespace App\Services;
 
 class BillingService
 {
+    public function getDirectoryPricingDetails(int $totalCount): array
+    {
+        if (!function_exists('calculate_directory_price')) {
+            require_once APPPATH . 'Helpers/pricing_helper.php';
+        }
+        return calculate_directory_price($totalCount, false);
+    }
+
     /**
-     * Calcula el precio para descargas de bases de datos de directorio históricas
+     * Calcula el precio base (float) por compatibilidad
      */
     public function calculateDirectoryPrice(int $totalCount): float
     {
-        return round(19 + (($totalCount / 1000) * 1.00), 2);
+        return (float) $this->getDirectoryPricingDetails($totalCount)['base_price'];
     }
 
     /**
@@ -300,20 +308,48 @@ class BillingService
         ];
     }
 
+    public function getPublicFundsPricingDetails(int $totalCount): array
+    {
+        if (!function_exists('calculate_directory_price')) {
+            require_once APPPATH . 'Helpers/pricing_helper.php';
+        }
+        // Usamos el helper para obtener el "precio matemático" para mostrar como tachado
+        $linearPricing = calculate_directory_price($totalCount, false);
+        $originalPrice = $linearPricing['original_price'];
+
+        $basePrice = 29.0;
+        if ($totalCount <= 10000) {
+            $basePrice = 29.0;
+        } elseif ($totalCount <= 100000) {
+            $basePrice = 49.0;
+        } elseif ($totalCount <= 500000) {
+            $basePrice = 99.0;
+        } else {
+            $basePrice = 149.0;
+        }
+
+        $isDiscounted = false;
+        if ($originalPrice > $basePrice) {
+            $isDiscounted = true;
+        } else {
+            $originalPrice = $basePrice;
+        }
+
+        return [
+            'base_price'     => $basePrice,
+            'original_price' => $originalPrice,
+            'is_discounted'  => $isDiscounted,
+            'tax'            => round($basePrice * 0.21, 2),
+            'total'          => $basePrice + round($basePrice * 0.21, 2)
+        ];
+    }
+
     /**
      * Calcula el precio para descargas de bases de datos de Subvenciones y Licitaciones
      */
     public function calculatePublicFundsPrice(int $totalCount): float
     {
-        if ($totalCount <= 10000) {
-            return 29.0;
-        } elseif ($totalCount <= 100000) {
-            return 49.0;
-        } elseif ($totalCount <= 500000) {
-            return 99.0;
-        } else {
-            return 149.0;
-        }
+        return (float) $this->getPublicFundsPricingDetails($totalCount)['base_price'];
     }
 
     /**

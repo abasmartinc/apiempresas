@@ -296,7 +296,8 @@ class RadarController extends BaseController
         $sidebarData = $this->radarService->getTopSidebarLinks($province);
 
         $totalCount = $seoMeta['total_context_count'];
-        $dynamicPrice = calculate_radar_price($totalCount);
+        $dynamicPriceData = calculate_radar_price($totalCount);
+        $dynamicPrice = $dynamicPriceData['base_price'];
         $isLowResults = $totalCount === 0;
 
         $prices = [
@@ -335,7 +336,8 @@ class RadarController extends BaseController
             'potential_revenue_max' => number_format(($totalCount > 0 ? $totalCount : ($stats['30days'] ?? 100)) * 1500, 0, ',', '.'),
             'conversion_count' => $totalCount > 0 ? $totalCount : ($stats['30days'] ?? 100),
             'conversion_label' => $totalCount > 0 ? ($period === 'hoy' ? 'hoy' : 'en este periodo') : 'en el último mes',
-            'dynamic_price' => $dynamicPrice,
+            'dynamic_price' => $dynamicPriceData,
+            'pricing'       => $dynamicPriceData,
             'period' => $period,
             'is_low_results' => $isLowResults,
             'robots' => $isLowResults ? 'noindex, follow' : 'index, follow',

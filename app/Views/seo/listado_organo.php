@@ -254,12 +254,13 @@
                 <?php 
                     $billingService = new \App\Services\BillingService();
                     $checkoutUrl = site_url('billing/contracts_checkout?organo=' . urlencode($slug));
-                    $dynamic_price = $billingService->calculatePublicFundsPrice($total);
+                    $pricing = $billingService->getPublicFundsPricingDetails($total);
+                    $dynamic_price = $pricing['base_price'];
                 ?>
                 <div style="margin-top: 2rem;">
                     <a href="<?= $checkoutUrl ?>" style="display: inline-flex; align-items: center; gap: 8px; background: #2152FF; color: #fff; padding: 0.85rem 1.5rem; border-radius: 12px; font-weight: 800; font-size: 0.95rem; text-decoration: none; box-shadow: 0 6px 20px rgba(33, 82, 255, 0.25); transition: all 0.2s; border: 1px solid #60A5FA;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(33, 82, 255, 0.35)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(33, 82, 255, 0.25)';">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Descargar CSV Completo — <?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
+                        Descargar CSV Completo — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
                     </a>
                     <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7); max-width: 480px; margin-top: 10px; line-height: 1.4;">
                         Incluye todos los registros (<?= number_format($total, 0, ',', '.') ?>) cruzados con los datos del Registro Mercantil: Sector CNAE, Dirección, Provincia y Teléfono (cuando esté disponible).
@@ -311,16 +312,17 @@
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($contracts as $contract): 
-                                    $cUrl = company_url(['cif' => $contract['company_cif'], 'name' => $contract['company_name'] ?: $contract['company_cif']]);
+                                    $hasCompany = !empty($contract['company_name']);
+                                    $cUrl = $hasCompany ? company_url(['cif' => $contract['company_cif'], 'name' => $contract['company_name']]) : '#';
                                 ?>
-                                    <tr onclick="window.location='<?= esc($cUrl) ?>'" style="cursor: pointer;">
+                                    <tr<?= $hasCompany ? ' onclick="window.location=\'' . esc($cUrl) . '\'" style="cursor: pointer;"' : '' ?>>
                                         <td>
-                                            <?php if ($contract['company_name']): ?>
+                                            <?php if ($hasCompany): ?>
                                                 <a href="<?= esc($cUrl) ?>" style="color: #0f172a; font-weight: 800; text-decoration: none; display: block; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='#2152FF'" onmouseout="this.style.color='#0f172a'">
                                                     <?= esc($contract['company_name']) ?>
                                                 </a>
                                             <?php else: ?>
-                                                <span style="color: #0f172a; font-weight: 800; display: block; font-size: 0.95rem;">Empresa sin nombre registrado</span>
+                                                <span style="color: #0f172a; font-weight: 800; display: block; font-size: 0.95rem;">Empresa <?= esc($contract['company_cif']) ?></span>
                                             <?php endif; ?>
                                             <span class="cif-badge">CIF: <?= esc($contract['company_cif']) ?></span>
                                         </td>
@@ -354,12 +356,13 @@
                 <?php 
                     $billingService = new \App\Services\BillingService();
                     $checkoutUrl = site_url('billing/contracts_checkout?organo=' . urlencode($organName));
-                    $dynamic_price = $billingService->calculatePublicFundsPrice($total);
+                    $pricing = $billingService->getPublicFundsPricingDetails($total);
+                    $dynamic_price = $pricing['base_price'];
                 ?>
                 <div style="padding: 24px; text-align: right; border-top: 1px solid #e2e8f0; background: #f8fafc; border-radius: 0 0 16px 16px;">
                     <a href="<?= $checkoutUrl ?>" style="display: inline-flex; align-items: center; gap: 8px; background: #2152FF; color: #fff; padding: 12px 24px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; text-decoration: none; box-shadow: 0 8px 20px rgba(33, 82, 255, 0.25); transition: all 0.2s; margin-bottom: 8px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 25px rgba(33, 82, 255, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(33, 82, 255, 0.25)';">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Descargar CSV Completo — <?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
+                        Descargar CSV Completo — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
                     </a>
                     <div style="font-size: 0.75rem; color: #94a3b8; max-width: 320px; margin-left: auto; line-height: 1.4;">
                         Incluye todos los registros (<?= number_format($total, 0, ',', '.') ?>) cruzados con los datos del Registro Mercantil: Sector CNAE, Dirección, Provincia y Teléfono (cuando esté disponible).

@@ -633,7 +633,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     <div class="ae-radar-page__excel-actions">
                             <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 700px;">
                                 <a href="<?= site_url('excel/preview?period=' . urlencode($period) . ($sector_label ? '&sector=' . urlencode($sector_label) : '')) ?>" class="ae-radar-page__excel-btn js-loading-btn" style="white-space: nowrap !important;">
-                                    Descargar listado <?= esc($heading_time) ?> (<?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€
+                                    Descargar listado <?= esc($heading_time) ?> (<?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas) · <?php if(isset($dynamic_price['is_discounted']) && $dynamic_price['is_discounted']): ?><s style="opacity:0.65; font-size:0.85em; margin-right:4px;"><?= number_format($dynamic_price['original_price'], 0) ?>€</s><?php endif; ?><?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€ <span style="font-size:0.85em; opacity:0.85; font-weight:600;">+ IVA</span>
                                 </a>
                             </div>
 

@@ -84,6 +84,9 @@
     }
 
     $barWidth = $percent !== null ? max(0, min(100, $percent)) : 0;
+    if ($barWidth < 2 && $usedThisMonth > 0) {
+        $barWidth = 2; // Para consumos muy pequeños (ej. 15 / 15000), forzar que se vea un poco la barra
+    }
 
     // Logic for adaptive messaging
     $isVeryLowUsage = $usedThisMonth <= 5;
@@ -374,6 +377,11 @@
                                                 <td style="padding: 8px 0; text-align: right; font-weight: 800;"><?= $fmt($ep['total']) ?></td>
                                             </tr>
                                         <?php endforeach; ?>
+                                    <?php elseif ($usedThisMonth > 0): ?>
+                                        <tr>
+                                            <td style="padding: 8px 0;"><span class="usage-pill" style="font-size: 10px; padding: 2px 6px;">Llamadas anteriores</span></td>
+                                            <td style="padding: 8px 0; text-align: right; font-weight: 800;"><?= $fmt($usedThisMonth) ?></td>
+                                        </tr>
                                     <?php else: ?>
                                         <tr>
                                             <td colspan="2" style="text-align: center; opacity: 0.6; padding: 12px;">Sin datos</td>

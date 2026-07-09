@@ -123,6 +123,30 @@ class Webhook extends Controller
                 }
             }
 
+            // EXPORT JOBS
+            if (in_array($planSlug, ['directory_single', 'subsidies_single', 'contracts_single', 'radar'])) {
+                $exportContext = json_decode($session->metadata->export_context ?? '{}', true);
+                $totalCount = (int) ($session->metadata->total_count ?? 0);
+                
+                if ($totalCount >= 100000) {
+                    $jobModel = new \App\Models\ExportJobModel();
+                    $type = 'directory';
+                    if ($planSlug === 'subsidies_single') $type = 'subsidies';
+                    if ($planSlug === 'contracts_single') $type = 'contracts';
+                    if ($planSlug === 'radar') $type = 'radar';
+                    
+                    $jobModel->insert([
+                        'user_id' => $userId,
+                        'type' => $type,
+                        'context' => json_encode($exportContext),
+                        'status' => 'pending'
+                    ]);
+                    log_message('info', "[Webhook::stripe] Created export_job for user {$userId}, type {$type}, count {$totalCount}");
+                } else {
+                    log_message('info', "[Webhook::stripe] Payment for {$planSlug} user {$userId}, count {$totalCount} < 100k, handled live on frontend.");
+                }
+            }
+
             return;
         }
 

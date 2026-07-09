@@ -530,7 +530,8 @@ class Billing extends BaseController
         }
 
         // Dynamic pricing calculada via BillingService
-        $price = $this->billingService->calculateDirectoryPrice($totalCount);
+        $pricing = $this->billingService->getDirectoryPricingDetails($totalCount);
+        $price = $pricing['base_price'];
         $tax = round($price * 0.21, 2);
 
         return $this->renderView('billing/directory_order_summary', [
@@ -543,7 +544,8 @@ class Billing extends BaseController
             'cnae_text' => $cnae_text,
             'sector' => $sector,
             'estado' => $estado,
-            'has_phone' => $has_phone
+            'has_phone' => $has_phone,
+            'pricing'   => $pricing
         ]);
     }
 
@@ -560,7 +562,8 @@ class Billing extends BaseController
         $year = $params['year'] ?? '';
 
         $totalCount = $this->billingService->countSubsidies($params);
-        $price = $this->billingService->calculatePublicFundsPrice($totalCount);
+        $pricing = $this->billingService->getPublicFundsPricingDetails($totalCount);
+        $price = $pricing['base_price'];
         $tax = round($price * 0.21, 2);
 
         $displayName = 'Subvenciones';
@@ -573,6 +576,7 @@ class Billing extends BaseController
             'price' => $price,
             'tax' => $tax,
             'type' => 'subsidies',
+            'pricing' => $pricing,
             'convocatoria' => $convocatoria,
             'year' => $year
         ]);
@@ -591,7 +595,8 @@ class Billing extends BaseController
         $organo = $params['organo'] ?? '';
 
         $totalCount = $this->billingService->countContracts($params);
-        $price = $this->billingService->calculatePublicFundsPrice($totalCount);
+        $pricing = $this->billingService->getPublicFundsPricingDetails($totalCount);
+        $price = $pricing['base_price'];
         $tax = round($price * 0.21, 2);
 
         $displayName = 'Licitaciones Públicas';
@@ -604,6 +609,7 @@ class Billing extends BaseController
             'price' => $price,
             'tax' => $tax,
             'type' => 'contracts',
+            'pricing' => $pricing,
             'year' => $year,
             'organo' => $organo
         ]);
@@ -661,7 +667,8 @@ class Billing extends BaseController
             'period' => $period,
             'price' => $price,
             'tax' => $tax,
-            'total_count' => $count
+            'total_count' => $count,
+            'pricing' => $pricing
         ];
 
         return $this->renderView('billing/order_summary', $data);

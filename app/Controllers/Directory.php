@@ -101,24 +101,6 @@ class Directory extends BaseController
             $helperPath = APPPATH . 'Helpers/pricing_helper.php';
             if (file_exists($helperPath)) require_once $helperPath;
         }
-        
-        // Inline fallback
-        if (!function_exists('calculate_directory_price')) {
-            function calculate_directory_price(int $count, bool $isPremium = false): array {
-                $basePrice = 9.00;
-                if ($count > 1000) {
-                    $extraCount = $count - 1000;
-                    $tier2Count = min($extraCount, 9000);
-                    $basePrice += ceil($tier2Count / 1000) * 5.00;
-                    if ($extraCount > 9000) {
-                        $basePrice += ceil(($extraCount - 9000) / 1000) * 1.00;
-                    }
-                }
-                if ($isPremium) $basePrice = round($basePrice * 1.5, 2);
-                return [ 'base_price' => $basePrice, 'tax' => round($basePrice * 0.21, 2), 'total' => $basePrice + round($basePrice * 0.21, 2) ];
-            }
-        }
-
         $priceData = calculate_directory_price($totalAll);
         $dynamicPrice = $priceData['base_price'];
 
@@ -129,6 +111,7 @@ class Directory extends BaseController
             'max_province'     => $maxProvince,
             'max_cnae'         => $maxCnae,
             'dynamic_price'    => $dynamicPrice,
+            'pricing'          => $priceData,
             'title'            => "Listado de Empresas en España | {$totalFormatted} Sociedades Registradas",
             'meta_description' => "Listado completo de {$totalFormatted} empresas españolas organizadas por {$numProvinces} provincias y sectores CNAE. Datos oficiales actualizados del Registro Mercantil.",
             'excerptText'      => "Listado completo de {$totalFormatted} empresas españolas organizadas por {$numProvinces} provincias y sectores CNAE. Datos oficiales actualizados del Registro Mercantil.",
@@ -238,6 +221,7 @@ class Directory extends BaseController
             'total_companies' => $totalCompanies,
             'total_formatted' => $totalFormatted,
             'dynamic_price'   => $dynamicPrice,
+            'pricing'         => $priceData,
             'province_name'   => $provinceName,
             'robots'          => ($page > 1) ? 'noindex, follow' : 'index, follow',
             'canonical'       => site_url("listado-de-empresas/" . urlencode($provinceName)), // siempre pág 1
@@ -387,6 +371,7 @@ class Directory extends BaseController
             'total_companies' => $totalCompanies,
             'total_formatted' => $totalFormatted,
             'dynamic_price'   => $dynamicPrice,
+            'pricing'         => $priceData,
             'province_name'   => $cnaeLabel, // reusing this variable for the excel download label
             'cnae_code'       => $cnaeCode,
             'robots'    => ($page > 1) ? 'noindex, follow' : 'index, follow',
@@ -457,6 +442,7 @@ class Directory extends BaseController
             'total_companies' => $totalCompanies,
             'total_formatted' => $totalFormatted,
             'dynamic_price'   => $dynamicPrice,
+            'pricing'         => $priceData,
             'robots'    => ($page > 1) ? 'noindex, follow' : 'index, follow',
             'paywall_level' => 'soft',
             'title'     => "Últimas empresas registradas en España (Últimos 30 días)",
@@ -559,6 +545,7 @@ class Directory extends BaseController
             'total_companies' => $totalCompanies,
             'total_formatted' => $totalFormatted,
             'dynamic_price'   => $dynamicPrice,
+            'pricing'         => $priceData,
             'province_name'   => $titleTag,
             'robots'    => ($page > 1) ? 'noindex, follow' : 'index, follow',
             'title'     => "{$totalFormatted} Empresas etiquetadas como {$titleTag} | Listado",

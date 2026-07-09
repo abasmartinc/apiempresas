@@ -229,22 +229,32 @@
                 <div class="order-card">
                     <h2 style="font-size: 1.1rem; font-weight: 900; margin-bottom: 16px; color: #0f172a;">Resumen del pedido</h2>
 
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: #64748b; font-size: 0.88rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: #64748b; font-size: 0.88rem; gap: 12px;">
                         <span>BBDD <?= esc($display_name ?? '') ?> (<?= number_format($total_count, 0, ',', '.') ?> empresas)</span>
-                        <span style="font-weight: 700; color: #0f172a;"><?= number_format($price, 2, ',', '.') ?> €</span>
+                        <span style="font-weight: 700; color: #0f172a; white-space: nowrap;">
+                            <?php if(isset($pricing) && $pricing['is_discounted']): ?>
+                            <s style="opacity:0.55; font-size:0.85em; font-weight:500; margin-right:4px;"><?= number_format($pricing['original_price'], 2, ',', '.') ?> €</s>
+                            <?php endif; ?>
+                            <?= number_format($price, 2, ',', '.') ?> €
+                        </span>
                     </div>
 
                     <?php if ($total_count > 0 && $price > 0): ?>
-                    <div style="text-align: right; font-size: 0.72rem; color: #10b981; font-weight: 800; margin-bottom: 12px;">
-                        <span style="background: #ecfdf5; padding: 2px 6px; border-radius: 4px;">
+                    <div style="text-align: right; font-size: 0.72rem; font-weight: 800; margin-bottom: 12px; display:flex; justify-content:flex-end; gap:8px;">
+                        <?php if(isset($pricing) && $pricing['is_discounted']): ?>
+                        <span style="background:#fef2f2; color:#dc2626; padding:2px 8px; border-radius:4px;">Precio original: <?= number_format($pricing['original_price'], 2, ',', '.') ?>€</span>
+                        <span style="background:#ecfdf5; color:#10b981; padding:2px 8px; border-radius:4px;">✓ Con descuento</span>
+                        <?php else: ?>
+                        <span style="background: #ecfdf5; color:#10b981; padding: 2px 6px; border-radius: 4px;">
                             Apenas <?= number_format($price / $total_count, 4, ',', '.') ?>€ por empresa
                         </span>
+                        <?php endif; ?>
                     </div>
                     <?php endif; ?>
 
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px; color: #64748b; font-size: 0.88rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px; color: #64748b; font-size: 0.88rem; gap: 12px;">
                         <span>IVA (21%)</span>
-                        <span style="font-weight: 700; color: #0f172a;"><?= number_format($tax, 2, ',', '.') ?> €</span>
+                        <span style="font-weight: 700; color: #0f172a; white-space: nowrap;"><?= number_format($tax, 2, ',', '.') ?> €</span>
                     </div>
 
                     <div class="total-row">
@@ -281,7 +291,7 @@
                             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 14px 30px rgba(16, 185, 129, 0.45)';"
                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(16, 185, 129, 0.35)';">
                             <span style="font-size: 1.1rem; letter-spacing: -0.01em; pointer-events: none;">
-                                Pagar <?= number_format($price + $tax, 2, ',', '.') ?>€ y Descargar CSV
+                                Pagar <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.65; font-size:0.85em; font-weight:500; margin-right:6px;"><?= number_format($pricing['original_price'] * 1.21, 2, ',', '.') ?>€</s><?php endif; ?><?= number_format($price + $tax, 2, ',', '.') ?>€ y Descargar CSV
                             </span>
                         </button>
                     </form>
