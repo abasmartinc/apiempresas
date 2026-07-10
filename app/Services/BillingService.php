@@ -317,9 +317,11 @@ class BillingService
         $linearPricing = calculate_directory_price($totalCount, false);
         $originalPrice = $linearPricing['original_price'];
 
-        $basePrice = 29.0;
-        if ($totalCount <= 10000) {
-            $basePrice = 29.0;
+        $basePrice = 9.90;
+        if ($totalCount <= 999) {
+            $basePrice = 9.90;
+        } elseif ($totalCount <= 9999) {
+            $basePrice = 19.0;
         } elseif ($totalCount <= 100000) {
             $basePrice = 49.0;
         } elseif ($totalCount <= 500000) {
@@ -327,6 +329,15 @@ class BillingService
         } else {
             $basePrice = 149.0;
         }
+
+        $maxDisplayOriginalPrice = [
+            9   => 19.0,
+            19  => 29.0,
+            49  => 79.0,
+            99  => 129.0,
+            149 => 259.0,
+        ];
+        $originalPrice = min($originalPrice, $maxDisplayOriginalPrice[(int) $basePrice] ?? 259.0);
 
         $isDiscounted = false;
         if ($originalPrice > $basePrice) {

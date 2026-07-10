@@ -37,7 +37,9 @@ if (!function_exists('calculate_core_price')) {
         $isDiscounted = false;
         
         $maxCap = 149.00;
+        $maxDisplayOriginalPrice = 259.00;
         if ($basePrice > $maxCap) {
+            $originalPrice = min($originalPrice, $maxDisplayOriginalPrice);
             $basePrice = $maxCap;
             $isDiscounted = true;
         }

@@ -49,7 +49,7 @@ class CompanyEnrichmentController extends BaseApiController
     )]
     public function score()
     {
-        $cif = $this->request->getGet('cif');
+        $cif = strtoupper(trim((string) $this->request->getGet('cif')));
         if (!$cif) {
             return $this->fail('CIF es requerido', 400);
         }

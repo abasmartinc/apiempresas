@@ -23,6 +23,7 @@ class CompanyModel extends Model
         'cnae_2009_2025.label_2025 AS cnae_2025_label',
         'companies.objeto_social      AS corporate_purpose',
         'companies.fecha_constitucion AS founded',
+        'companies.capital_social_raw AS capital_social_raw',
         'companies.registro_mercantil AS province',
         'companies.address',
         'companies.municipality',
@@ -45,7 +46,7 @@ class CompanyModel extends Model
 
     public function getByCif(string $cif): ?array
     {
-        $cif = trim($cif);
+        $cif = strtoupper(trim($cif));
         if ($cif === '')
             return null;
 

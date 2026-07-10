@@ -30,6 +30,11 @@ class CompanyRadarScoreModel extends Model
      */
     public function getByCif(string $cif)
     {
+        $cif = strtoupper(trim($cif));
+        if ($cif === '') {
+            return null;
+        }
+
         return $this->select('company_radar_scores.*')
                     ->join('companies', 'companies.id = company_radar_scores.company_id')
                     ->where('companies.cif', $cif)

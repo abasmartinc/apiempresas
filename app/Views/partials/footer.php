@@ -28,7 +28,6 @@
             </div>
 
             <!-- Column 3: Fondos Públicos -->
-            <?php /* 
             <div>
                 <h4 class="foot-title">Fondos Públicos</h4>
                 <ul class="foot-links">
@@ -38,7 +37,6 @@
                     <li><a href="<?=site_url('mayores-empresas-contratistas-del-estado') ?>">Contratistas del Estado</a></li>
                 </ul>
             </div>
-            */ ?>
 
             <!-- Column 4: Desarrolladores y Ayuda -->
             <div>
