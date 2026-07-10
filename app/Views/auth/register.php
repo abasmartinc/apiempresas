@@ -3,7 +3,6 @@
 <head>
     <?=view('partials/head') ?>
     <link rel="stylesheet" href="<?= base_url('public/css/login.css?v=' . time()) ?>" />
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 
 <body>
@@ -123,10 +122,6 @@
                     <label for="no_marketing" style="font-weight: 400; margin: 0; line-height: 1.3;">
                         No deseo recibir consejos, ofertas ni comunicaciones comerciales por email.
                     </label>
-                </div>
-
-                <div style="margin-top: 10px; margin-bottom: 16px; display: flex; justify-content: center;">
-                    <div class="cf-turnstile" data-sitekey="<?= env('TURNSTILE_SITE_KEY') ?>" data-theme="light"></div>
                 </div>
 
                 <button id="registerSubmit" type="submit" class="auth-btn-primary" style="padding: 10px; font-size: 0.95rem;">

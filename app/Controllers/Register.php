@@ -107,12 +107,6 @@ class Register extends BaseController
                 ->with('validation', $this->validator);
         }
 
-        helper('turnstile');
-        $turnstileResponse = $this->request->getPost('cf-turnstile-response');
-        if (!verify_turnstile($turnstileResponse, $this->request->getIPAddress())) {
-            return redirect()->back()->withInput()->with('error', 'Fallo en la verificación de seguridad (Turnstile). Por favor, inténtalo de nuevo.');
-        }
-
         $email = strtolower(trim((string) $this->request->getPost('email')));
 
         // Scoped Uniqueness Check: Check if email already exists for 'apiempresas'
