@@ -937,8 +937,10 @@ class RadarController extends BaseController
 
         $params = $this->request->getGet();
         $year = $params['year'] ?? '';
+        $organo = $params['organo'] ?? '';
 
         $filename = "Contratos_Publicos";
+        if ($organo) $filename .= "_" . substr(preg_replace('/[^A-Za-z0-9_]/', '_', $organo), 0, 30);
         if ($year) $filename .= "_" . $year;
         $filename .= ".csv";
 
@@ -983,6 +985,10 @@ class RadarController extends BaseController
         ');
         $builder->join('companies c', 'c.cif = c_contr.company_cif', 'left');
 
+        if ($organo !== '') {
+            $billingService = new \App\Services\BillingService();
+            $builder->where('c_contr.organo_contratacion', $billingService->resolveContractsOrgano($organo));
+        }
         if ($year !== '') {
             $builder->where('YEAR(c_contr.fecha_adjudicacion)', $year);
         }

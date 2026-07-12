@@ -140,6 +140,7 @@ class ProcessExports extends BaseCommand
     private function processContracts($db, $filters, $fp)
     {
         $year = $filters['year'] ?? '';
+        $organo = $filters['organo'] ?? '';
 
         fputcsv($fp, ['Empresa Adjudicataria', 'CIF', 'Órgano de Contratación', 'Título del Contrato', 'Fecha Adjudicación', 'Importe Adjudicación', 'Teléfono', 'Sector CNAE', 'Provincia', 'Dirección']);
 
@@ -147,6 +148,10 @@ class ProcessExports extends BaseCommand
         $builder->select('c_contr.company_name, c_contr.raw_adjudicatario, c_contr.company_cif, c_contr.organo_contratacion, c_contr.titulo_contrato, c_contr.fecha_adjudicacion, c_contr.importe_adjudicacion, c.phone, c.cnae_label, c.registro_mercantil, c.address');
         $builder->join('companies c', 'c.cif = c_contr.company_cif', 'left');
 
+        if ($organo !== '') {
+            $billingService = new \App\Services\BillingService();
+            $builder->where('c_contr.organo_contratacion', $billingService->resolveContractsOrgano($organo));
+        }
         if ($year !== '') {
             $builder->where('YEAR(c_contr.fecha_adjudicacion)', $year);
         }

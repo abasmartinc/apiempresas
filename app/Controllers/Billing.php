@@ -594,6 +594,7 @@ class Billing extends BaseController
         $params = $this->request->getGet();
         $year = $params['year'] ?? '';
         $organo = $params['organo'] ?? '';
+        $organoName = $organo !== '' ? $this->billingService->resolveContractsOrgano($organo) : '';
 
         $totalCount = $this->billingService->countContracts($params);
         $pricing = $this->billingService->getPublicFundsPricingDetails($totalCount);
@@ -601,7 +602,7 @@ class Billing extends BaseController
         $tax = round($price * 0.21, 2);
 
         $displayName = 'Licitaciones Públicas';
-        if ($organo) $displayName .= ' - ' . ucfirst(str_replace('-', ' ', $organo));
+        if ($organoName) $displayName .= ' - ' . $this->billingService->formatContractsOrganoName($organoName);
         if ($year) $displayName .= ' (' . $year . ')';
 
         return $this->renderView('billing/public_funds_order_summary', [

@@ -246,6 +246,7 @@ class BillingService
         } elseif ($plan === 'contracts_single') {
             $year = $postData['year'] ?? '';
             $organo = $postData['organo'] ?? '';
+            $organoName = $organo !== '' ? $this->resolveContractsOrgano($organo) : '';
             $count = $this->countContracts(['year' => $year, 'organo' => $organo]);
             $amount = $this->calculatePublicFundsPrice($count);
 
@@ -257,7 +258,7 @@ class BillingService
             ];
 
             $productName = 'BBDD Licitaciones Públicas';
-            if ($organo) $productName .= ' - ' . ucfirst(str_replace('-', ' ', $organo));
+            if ($organoName) $productName .= ' - ' . $this->formatContractsOrganoName($organoName);
             if ($year) $productName .= ' (' . $year . ')';
             $productName .= ' (' . number_format($count, 0, ',', '.') . ' registros)';
             
@@ -481,9 +482,124 @@ class BillingService
             $builder->where('YEAR(fecha_adjudicacion)', $year);
         }
         if ($organo !== '') {
-            $builder->where('organo_contratacion', $organo);
+            $builder->where('organo_contratacion', $this->resolveContractsOrgano($organo));
         }
         
         return $builder->countAllResults();
+    }
+
+    public function resolveContractsOrgano(string $organo): string
+    {
+        $organo = trim($organo);
+        if ($organo === '') {
+            return '';
+        }
+
+        $db = \Config\Database::connect();
+
+        try {
+            $row = $db->table('company_contracts')
+                ->select('organo_contratacion')
+                ->where('organo_contratacion', $organo)
+                ->limit(1)
+                ->get()
+                ->getRowArray();
+
+            if (!empty($row['organo_contratacion'])) {
+                return $row['organo_contratacion'];
+            }
+        } catch (\Throwable $e) {
+            log_message('warning', '[BillingService::resolveContractsOrgano exact] ' . $e->getMessage());
+        }
+
+        foreach ($this->buildContractsOrganoPrefixes($organo) as $prefix) {
+            try {
+                $row = $db->table('company_contracts')
+                    ->select('organo_contratacion')
+                    ->where('organo_contratacion IS NOT NULL', null, false)
+                    ->where('organo_contratacion !=', '')
+                    ->like('organo_contratacion', $prefix, 'after')
+                    ->limit(1)
+                    ->get()
+                    ->getRowArray();
+
+                if (!empty($row['organo_contratacion'])) {
+                    return $row['organo_contratacion'];
+                }
+            } catch (\Throwable $e) {
+                log_message('warning', '[BillingService::resolveContractsOrgano prefix] ' . $e->getMessage());
+            }
+        }
+
+        $words = $this->extractContractsOrganoWords($organo);
+        if (count($words) >= 2) {
+            try {
+                $builder = $db->table('company_contracts')
+                    ->select('organo_contratacion, COUNT(id) as total')
+                    ->where('organo_contratacion IS NOT NULL', null, false)
+                    ->where('organo_contratacion !=', '');
+
+                foreach ([$words[0], $words[count($words) - 1]] as $word) {
+                    $builder->like('organo_contratacion', $word, 'both');
+                }
+
+                $row = $builder
+                    ->groupBy('organo_contratacion')
+                    ->orderBy('total', 'DESC')
+                    ->limit(1)
+                    ->get()
+                    ->getRowArray();
+
+                if (!empty($row['organo_contratacion'])) {
+                    return $row['organo_contratacion'];
+                }
+            } catch (\Throwable $e) {
+                log_message('warning', '[BillingService::resolveContractsOrgano words] ' . $e->getMessage());
+            }
+        }
+
+        return $organo;
+    }
+
+    public function formatContractsOrganoName(string $organo): string
+    {
+        $name = trim(str_replace(['-', '_'], ' ', $organo));
+        $name = preg_replace('/\s+/u', ' ', $name) ?? $name;
+
+        return mb_convert_case($name, MB_CASE_TITLE, 'UTF-8');
+    }
+
+    private function buildContractsOrganoPrefixes(string $value): array
+    {
+        $phrase = trim(preg_replace('/\s+/u', ' ', str_replace(['-', '_'], ' ', $value)) ?? '');
+        if ($phrase === '') {
+            return [];
+        }
+
+        $prefixes = [$phrase];
+        $parts = preg_split('/\s+/u', $phrase, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        if (count($parts) > 3) {
+            $prefixes[] = implode(' ', array_slice($parts, 0, 3));
+        }
+
+        return array_values(array_unique($prefixes));
+    }
+
+    private function extractContractsOrganoWords(string $value): array
+    {
+        $phrase = mb_strtolower(str_replace(['-', '_'], ' ', $value), 'UTF-8');
+        $parts = preg_split('/\s+/u', $phrase, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $stopWords = ['de' => true, 'del' => true, 'la' => true, 'el' => true, 'y' => true, 'a' => true, 'en' => true];
+        $words = [];
+
+        foreach ($parts as $part) {
+            $part = trim($part);
+            if ($part === '' || isset($stopWords[$part]) || mb_strlen($part, 'UTF-8') < 4) {
+                continue;
+            }
+            $words[] = $part;
+        }
+
+        return array_values(array_unique($words));
     }
 }
