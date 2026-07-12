@@ -14,10 +14,15 @@ class Sitemap extends Controller
      */
     public function index()
     {
-        $model = new CompanyModel();
-        
-        $total = $model->builder()->countAllResults();
-        $pages = ceil($total / $this->perPage);
+        $pages = 0;
+        if (file_exists(FCPATH . 'sitemap-companies-count.txt')) {
+            $pages = (int) file_get_contents(FCPATH . 'sitemap-companies-count.txt');
+        } else {
+            // Fallback just in case
+            $model = new CompanyModel();
+            $total = $model->builder()->countAllResults();
+            $pages = ceil($total / $this->perPage);
+        }
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';
         $xml .= '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
