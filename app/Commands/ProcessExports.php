@@ -112,7 +112,8 @@ class ProcessExports extends BaseCommand
         $builder->join('companies c', 'c.cif = s.company_cif', 'left');
 
         if ($convocatoria !== '') {
-            $builder->where('s.slug_convocatoria', $convocatoria);
+            $billingService = new \App\Services\BillingService();
+            $builder->where('s.convocatoria', $billingService->resolveSubsidiesConvocatoria($convocatoria));
         }
         if ($year !== '') {
             $builder->where('YEAR(s.fecha_concesion)', $year);

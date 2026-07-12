@@ -223,6 +223,7 @@ class BillingService
 
         } elseif ($plan === 'subsidies_single') {
             $convocatoria = $postData['convocatoria'] ?? '';
+            $convocatoriaName = $convocatoria !== '' ? $this->resolveSubsidiesConvocatoria($convocatoria) : '';
             $year = $postData['year'] ?? '';
             $count = $this->countSubsidies(['convocatoria' => $convocatoria, 'year' => $year]);
             $amount = $this->calculatePublicFundsPrice($count);
@@ -235,7 +236,7 @@ class BillingService
             ];
             
             $productName = 'BBDD Subvenciones';
-            if ($convocatoria) $productName .= ' - ' . ucfirst(str_replace('-', ' ', $convocatoria));
+            if ($convocatoriaName) $productName .= ' - ' . mb_convert_case($convocatoriaName, MB_CASE_TITLE, 'UTF-8');
             if ($year) $productName .= ' (' . $year . ')';
             $productName .= ' (' . number_format($count, 0, ',', '.') . ' registros)';
             
@@ -375,13 +376,46 @@ class BillingService
         $year = $filters['year'] ?? '';
 
         if ($convocatoria !== '') {
-            $builder->where('slug_convocatoria', $convocatoria);
+            $builder->where('convocatoria', $this->resolveSubsidiesConvocatoria($convocatoria));
         }
         if ($year !== '') {
             $builder->where('YEAR(fecha_concesion)', $year);
         }
         
         return $builder->countAllResults();
+    }
+
+    /**
+     * Resuelve un slug SEO de convocatoria al valor real guardado en company_subsidies.
+     */
+    public function resolveSubsidiesConvocatoria(string $convocatoria): string
+    {
+        $convocatoria = trim($convocatoria);
+        if ($convocatoria === '') {
+            return '';
+        }
+
+        $db = \Config\Database::connect();
+
+        try {
+            $row = $db->table('seo_hub_subvenciones')
+                ->select('convocatoria')
+                ->groupStart()
+                    ->where('slug', $convocatoria)
+                    ->orWhere('convocatoria', $convocatoria)
+                ->groupEnd()
+                ->limit(1)
+                ->get()
+                ->getRowArray();
+
+            if (!empty($row['convocatoria'])) {
+                return $row['convocatoria'];
+            }
+        } catch (\Throwable $e) {
+            log_message('warning', '[BillingService::resolveSubsidiesConvocatoria] ' . $e->getMessage());
+        }
+
+        return $convocatoria;
     }
 
     /**

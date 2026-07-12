@@ -560,6 +560,7 @@ class Billing extends BaseController
         $params = $this->request->getGet();
         $convocatoria = $params['convocatoria'] ?? '';
         $year = $params['year'] ?? '';
+        $convocatoriaName = $convocatoria !== '' ? $this->billingService->resolveSubsidiesConvocatoria($convocatoria) : '';
 
         $totalCount = $this->billingService->countSubsidies($params);
         $pricing = $this->billingService->getPublicFundsPricingDetails($totalCount);
@@ -567,7 +568,7 @@ class Billing extends BaseController
         $tax = round($price * 0.21, 2);
 
         $displayName = 'Subvenciones';
-        if ($convocatoria) $displayName .= ' - ' . ucfirst(str_replace('-', ' ', $convocatoria));
+        if ($convocatoriaName) $displayName .= ' - ' . mb_convert_case($convocatoriaName, MB_CASE_TITLE, 'UTF-8');
         if ($year) $displayName .= ' (' . $year . ')';
 
         return $this->renderView('billing/public_funds_order_summary', [
