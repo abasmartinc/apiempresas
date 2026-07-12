@@ -193,6 +193,24 @@ class Billing extends BaseController
                     $cancelParams['provincia'] = $postData['provincia'] ?? 'España';
                 }
                 $cancelUrl = site_url('checkout/directory-export?' . http_build_query($cancelParams));
+            } elseif ($plan === 'subsidies_single') {
+                $cancelParams = [];
+                if (!empty($postData['convocatoria'])) {
+                    $cancelParams['convocatoria'] = $postData['convocatoria'];
+                }
+                if (!empty($postData['year'])) {
+                    $cancelParams['year'] = $postData['year'];
+                }
+                $cancelUrl = site_url('checkout/subsidies-export' . ($cancelParams ? '?' . http_build_query($cancelParams) : ''));
+            } elseif ($plan === 'contracts_single') {
+                $cancelParams = [];
+                if (!empty($postData['organo'])) {
+                    $cancelParams['organo'] = $postData['organo'];
+                }
+                if (!empty($postData['year'])) {
+                    $cancelParams['year'] = $postData['year'];
+                }
+                $cancelUrl = site_url('checkout/contracts-export' . ($cancelParams ? '?' . http_build_query($cancelParams) : ''));
             }
 
 
