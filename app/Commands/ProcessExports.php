@@ -108,7 +108,7 @@ class ProcessExports extends BaseCommand
         fputcsv($fp, ['Empresa', 'CIF', 'Convocatoria', 'Instrumento / Detalle', 'Fecha Concesión', 'Importe', 'Teléfono', 'Sector CNAE', 'Provincia', 'Dirección']);
 
         $builder = $db->table('company_subsidies s');
-        $builder->select('s.company_name, s.raw_beneficiario, s.company_cif, s.convocatoria, s.instrumento, s.fecha_concesion, s.importe, c.phone, c.cnae_label, c.registro_mercantil, c.address');
+        $builder->select('c.company_name, s.raw_beneficiario, s.company_cif, s.convocatoria, s.instrumento, s.fecha_concesion, s.importe, c.phone, c.cnae_label, c.registro_mercantil, c.address');
         $builder->join('companies c', 'c.cif = s.company_cif', 'left');
 
         if ($convocatoria !== '') {

@@ -549,7 +549,8 @@ class RadarController extends BaseController
 
     public function sendExportEmail()
     {
-        if (!session('logged_in')) {
+        $hasExcelToken = session('simulator_excel_token') !== null || session('just_bought_excel') !== null;
+        if (!session('logged_in') && !$hasExcelToken) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Debes iniciar sesión.']);
         }
 
@@ -843,7 +844,8 @@ class RadarController extends BaseController
 
     public function exportSubsidiesExcel()
     {
-        if (!session('logged_in')) {
+        $hasExcelToken = session('simulator_excel_token') !== null || session('just_bought_excel') !== null;
+        if (!session('logged_in') && !$hasExcelToken) {
             return redirect()->to(site_url('enter'))->with('error', 'Debes iniciar sesión para descargar el listado.');
         }
 
@@ -883,7 +885,6 @@ class RadarController extends BaseController
         $db = \Config\Database::connect();
         $builder = $db->table('company_subsidies s');
         $builder->select('
-            s.company_name, 
             s.raw_beneficiario, 
             s.company_cif, 
             s.convocatoria, 
@@ -893,7 +894,8 @@ class RadarController extends BaseController
             c.phone,
             c.cnae_label,
             c.registro_mercantil,
-            c.address
+            c.address,
+            c.company_name
         ');
         $builder->join('companies c', 'c.cif = s.company_cif', 'left');
 
@@ -928,7 +930,8 @@ class RadarController extends BaseController
 
     public function exportContractsExcel()
     {
-        if (!session('logged_in')) {
+        $hasExcelToken = session('simulator_excel_token') !== null || session('just_bought_excel') !== null;
+        if (!session('logged_in') && !$hasExcelToken) {
             return redirect()->to(site_url('enter'))->with('error', 'Debes iniciar sesión para descargar el listado.');
         }
 
