@@ -651,6 +651,7 @@ class Billing extends BaseController
         $count = 0;
         $price = 0;
         $tax = 0;
+        $pricing = null;
 
         if ($type === 'subscription') {
             $db = \Config\Database::connect();
