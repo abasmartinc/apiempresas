@@ -20,6 +20,8 @@ class UsersuscriptionsModel extends Model
         'current_period_start',
         'current_period_end',
         'canceled_at',
+        'cancellation_reason',
+        'cancellation_feedback',
         'created_at',
         'updated_at',
         'product_type',

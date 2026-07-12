@@ -145,6 +145,7 @@
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Usuario</th>
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Plan</th>
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Estado</th>
+                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Motivo cancelaciÃ³n</th>
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Periodo Actual</th>
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Acciones</th>
                 </tr>
@@ -186,6 +187,30 @@
                         <span class="pill <?= $statusClass ?>" style="font-size: 0.7rem;">
                             <?= strtoupper($s->status) ?>
                         </span>
+                    </td>
+                    <td style="padding: 12px; font-size: 0.78rem; color: #475569; max-width: 260px;">
+                        <?php
+                            $reasonLabels = [
+                                'too_expensive' => 'Precio',
+                                'missing_features' => 'Faltan funcionalidades',
+                                'low_usage' => 'Poco uso',
+                                'technical_issues' => 'Problemas tecnicos',
+                                'switched_solution' => 'Otra solucion',
+                                'temporary_pause' => 'Pausa temporal',
+                                'other' => 'Otro motivo',
+                                'prefer_not_to_say' => 'Prefiere no responder',
+                            ];
+                            $reason = $s->cancellation_reason ?? '';
+                            $feedback = trim((string) ($s->cancellation_feedback ?? ''));
+                        ?>
+                        <?php if ($s->status === 'canceled' && ($reason || $feedback)): ?>
+                            <div style="font-weight: 800; color: #0f172a;"><?= esc($reasonLabels[$reason] ?? $reason) ?></div>
+                            <?php if ($feedback !== ''): ?>
+                                <div title="<?= esc($feedback) ?>" style="margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= esc($feedback) ?></div>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <span style="color: #cbd5e1;">-</span>
+                        <?php endif; ?>
                     </td>
                     <td style="padding: 12px; font-size: 0.8rem;">
                         <div style="color: #16a34a;">Inicio: <?= date('d/m/Y', strtotime($s->current_period_start)) ?></div>

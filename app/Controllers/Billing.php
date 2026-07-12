@@ -968,6 +968,26 @@ class Billing extends BaseController
 
         $userId = (int) session('user_id');
         $specificSubId = $this->request->getPost('sub_id');
+        $reasonOptions = [
+            'too_expensive' => 'Precio',
+            'missing_features' => 'Faltan funcionalidades',
+            'low_usage' => 'Poco uso',
+            'technical_issues' => 'Problemas tecnicos',
+            'switched_solution' => 'Uso otra solucion',
+            'temporary_pause' => 'Pausa temporal',
+            'other' => 'Otro motivo',
+            'prefer_not_to_say' => 'Prefiere no responder',
+        ];
+        $cancellationReason = trim((string) $this->request->getPost('cancellation_reason'));
+        if (!array_key_exists($cancellationReason, $reasonOptions)) {
+            $cancellationReason = 'prefer_not_to_say';
+        }
+        $cancellationFeedback = trim((string) $this->request->getPost('cancellation_feedback'));
+        if (function_exists('mb_substr')) {
+            $cancellationFeedback = mb_substr($cancellationFeedback, 0, 1000);
+        } else {
+            $cancellationFeedback = substr($cancellationFeedback, 0, 1000);
+        }
 
         if ($specificSubId) {
             $plan = $this->UsersuscriptionsModel->where('user_id', $userId)->find($specificSubId);
@@ -1010,13 +1030,29 @@ class Billing extends BaseController
         }
 
         // 2. Marcar como cancelado en nuestra DB
-        $this->UsersuscriptionsModel->update($plan->id, [
+        $subscriptionUpdate = [
             'status' => 'canceled',
-            'canceled_at' => date('Y-m-d H:i:s')
-        ]);
+            'canceled_at' => date('Y-m-d H:i:s'),
+        ];
+        $subscriptionColumns = \Config\Database::connect()->getFieldNames('user_subscriptions');
+        if (in_array('cancellation_reason', $subscriptionColumns, true)) {
+            $subscriptionUpdate['cancellation_reason'] = $cancellationReason;
+        }
+        if (in_array('cancellation_feedback', $subscriptionColumns, true)) {
+            $subscriptionUpdate['cancellation_feedback'] = $cancellationFeedback !== '' ? $cancellationFeedback : null;
+        }
+
+        $this->UsersuscriptionsModel->update($plan->id, $subscriptionUpdate);
 
         // Log subscription cancellation
-        log_activity('subscription_cancelled', ['plan' => $plan->plan_name ?? 'Unknown']);
+        log_activity('subscription_cancelled', [
+            'plan' => $plan->plan_name ?? 'Unknown',
+            'reason' => $cancellationReason,
+            'reason_label' => $reasonOptions[$cancellationReason],
+            'feedback' => $cancellationFeedback,
+        ]);
+
+        $this->sendSubscriptionCancellationEmail($userId, $plan, $reasonOptions[$cancellationReason], $cancellationFeedback);
 
         if ($this->request->isAJAX() || $this->request->getPost('ajax')) {
             return $this->response->setJSON([
@@ -1026,6 +1062,53 @@ class Billing extends BaseController
         }
 
         return redirect()->to(site_url('billing'))->with('message', 'Tu suscripción ha sido cancelada. Seguirás teniendo acceso hasta el final del periodo facturado y no se te cobrará de nuevo.');
+    }
+
+    private function sendSubscriptionCancellationEmail(int $userId, object $plan, string $reasonLabel, string $feedback): void
+    {
+        try {
+            $user = $this->userModel->find($userId);
+            $userName = trim((string) ($user->name ?? 'Usuario sin nombre'));
+            $userEmail = trim((string) ($user->email ?? 'Sin email'));
+            $planName = (string) ($plan->plan_name ?? 'Plan desconocido');
+            $periodEnd = !empty($plan->current_period_end)
+                ? date('d/m/Y H:i', strtotime((string) $plan->current_period_end))
+                : 'No disponible';
+            $stripeSubscriptionId = (string) ($plan->stripe_subscription_id ?? 'No disponible');
+            $feedbackText = $feedback !== '' ? nl2br(htmlspecialchars($feedback, ENT_QUOTES, 'UTF-8')) : 'Sin comentario adicional';
+
+            $body = '
+                <div style="font-family: Arial, sans-serif; color: #0f172a; line-height: 1.5; max-width: 680px;">
+                    <h2 style="margin: 0 0 16px; color: #b91c1c;">Cancelacion de suscripcion</h2>
+                    <p style="margin: 0 0 18px;">Un usuario acaba de cancelar su suscripcion desde billing.</p>
+                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0;">
+                        <tr><td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold; width: 180px;">Usuario</td><td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">' . htmlspecialchars($userName, ENT_QUOTES, 'UTF-8') . ' (#' . $userId . ')</td></tr>
+                        <tr><td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">Email</td><td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">' . htmlspecialchars($userEmail, ENT_QUOTES, 'UTF-8') . '</td></tr>
+                        <tr><td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">Plan</td><td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">' . htmlspecialchars($planName, ENT_QUOTES, 'UTF-8') . '</td></tr>
+                        <tr><td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">Motivo</td><td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">' . htmlspecialchars($reasonLabel, ENT_QUOTES, 'UTF-8') . '</td></tr>
+                        <tr><td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">Comentario</td><td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">' . $feedbackText . '</td></tr>
+                        <tr><td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">Acceso hasta</td><td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">' . htmlspecialchars($periodEnd, ENT_QUOTES, 'UTF-8') . '</td></tr>
+                        <tr><td style="padding: 10px; font-weight: bold;">Stripe subscription</td><td style="padding: 10px;">' . htmlspecialchars($stripeSubscriptionId, ENT_QUOTES, 'UTF-8') . '</td></tr>
+                    </table>
+                    <p style="margin-top: 18px;">
+                        <a href="' . site_url('admin/subscriptions?status=canceled') . '" style="color: #2563eb; font-weight: bold;">Ver suscripciones canceladas</a>
+                    </p>
+                </div>';
+
+            $emailService = \Config\Services::email();
+            $emailService->clear(true);
+            $emailService->setFrom('soporte@apiempresas.es', 'APIEmpresas');
+            $emailService->setTo('papelo.amh@gmail.com');
+            $emailService->setSubject('Cancelacion de suscripcion - ' . $planName . ' - ' . $userEmail);
+            $emailService->setMailType('html');
+            $emailService->setMessage($body);
+
+            if (!$emailService->send()) {
+                log_message('error', '[Billing::sendSubscriptionCancellationEmail] Error enviando email: ' . $emailService->printDebugger(['headers']));
+            }
+        } catch (\Throwable $e) {
+            log_message('error', '[Billing::sendSubscriptionCancellationEmail] ' . $e->getMessage());
+        }
     }
 
     /**

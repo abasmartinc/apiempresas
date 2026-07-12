@@ -2091,6 +2091,8 @@
                                     </div>
                                 <?php endif; ?>
 
+                                <?php $hideApiBulkCta = true; ?>
+                                <?php if (!$hideApiBulkCta): ?>
                                 <!-- API CTA Developer-First -->
                                 <div style="margin-top: 32px; background: #0f172a; border-radius: 16px; padding: 24px; color: #f8fafc; display: flex; flex-direction: column; gap: 16px; overflow: hidden; position: relative;">
                                     <div style="position: absolute; top: 0; right: 0; padding: 24px; opacity: 0.05; pointer-events: none;">
@@ -2135,6 +2137,7 @@
                                         </a>
                                     </div>
                                 </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     <?php endif; ?>

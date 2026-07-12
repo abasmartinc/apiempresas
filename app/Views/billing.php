@@ -367,6 +367,10 @@ $fmt = function ($n) {
                             </div>
                             
                             <div id="review-slider" style="transition: opacity 0.4s ease-in-out; opacity: 1;">
+                                <div style="display: flex; justify-content: center; margin-bottom: 12px;">
+                                    <div id="review-avatar-fallback" style="display: none; width: 48px; height: 48px; border-radius: 50%; align-items: center; justify-content: center; background: linear-gradient(135deg, #1d4ed8 0%, #14b8a6 100%); color: #ffffff; font-weight: 900; font-size: 0.85rem; border: 3px solid #ffffff; box-shadow: 0 10px 24px rgba(37, 99, 235, 0.18);">AS</div>
+                                    <img id="review-avatar" src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=96&h=96&q=80" alt="Foto de Alex S." loading="lazy" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 3px solid #ffffff; box-shadow: 0 10px 24px rgba(37, 99, 235, 0.18);">
+                                </div>
                                 <p id="review-text" style="font-size: 0.95rem; color: #0f172a; text-align: center; line-height: 1.6; margin: 0 0 16px; font-weight: 500;">La integración con APIEmpresas es brutal. Puedes ver parámetros clave y mucho más. Todo muy rápido y fiable.</p>
                                 <div style="font-size: 0.85rem; text-align: center; color: #475569;">
                                     <span id="review-author" style="font-weight: 900; color: #0f172a;">Alex S.</span> · <span id="review-role">CTO en SaaS B2B</span>
@@ -380,6 +384,28 @@ $fmt = function ($n) {
                                         { text: "Pasamos de revisar NIFs manualmente a automatizar el 100% del onboarding de clientes. Nos ahorra decenas de horas al mes.", author: "Laura M.", role: "Dir. Operaciones" },
                                         { text: "La API es ultra rápida y la documentación impecable. Lo conectamos con nuestro ERP interno en menos de una mañana.", author: "David R.", role: "Lead Developer" }
                                     ];
+                                    const reviewAvatars = {
+                                        "Alex S.": { initials: "AS", avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=96&h=96&q=80" },
+                                        "Laura M.": { initials: "LM", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=96&h=96&q=80" },
+                                        "David R.": { initials: "DR", avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=96&h=96&q=80" }
+                                    };
+                                    const avatar = document.getElementById('review-avatar');
+                                    const avatarFallback = document.getElementById('review-avatar-fallback');
+                                    const updateAvatar = (review) => {
+                                        if (!avatar || !avatarFallback) return;
+                                        const avatarData = reviewAvatars[review.author] || { initials: review.author.slice(0, 2).toUpperCase(), avatar: '' };
+                                        avatarFallback.textContent = avatarData.initials;
+                                        avatarFallback.style.display = 'none';
+                                        avatar.style.display = 'block';
+                                        avatar.alt = 'Foto de ' + review.author;
+                                        avatar.src = avatarData.avatar;
+                                    };
+                                    if (avatar) {
+                                        avatar.addEventListener('error', () => {
+                                            avatar.style.display = 'none';
+                                            if (avatarFallback) avatarFallback.style.display = 'flex';
+                                        });
+                                    }
                                     let currentReview = 0;
                                     setInterval(() => {
                                         const slider = document.getElementById('review-slider');
@@ -390,6 +416,7 @@ $fmt = function ($n) {
                                             document.getElementById('review-text').textContent = reviews[currentReview].text;
                                             document.getElementById('review-author').textContent = reviews[currentReview].author;
                                             document.getElementById('review-role').textContent = reviews[currentReview].role;
+                                            updateAvatar(reviews[currentReview]);
                                             slider.style.opacity = 1;
                                         }, 400); 
                                     }, 6000); 
