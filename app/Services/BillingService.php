@@ -236,7 +236,7 @@ class BillingService
             ];
             
             $productName = 'BBDD Subvenciones';
-            if ($convocatoriaName) $productName .= ' - ' . mb_convert_case($convocatoriaName, MB_CASE_TITLE, 'UTF-8');
+            if ($convocatoriaName) $productName .= ' - ' . $this->formatSubsidiesConvocatoriaName($convocatoriaName);
             if ($year) $productName .= ' (' . $year . ')';
             $productName .= ' (' . number_format($count, 0, ',', '.') . ' registros)';
             
@@ -415,7 +415,56 @@ class BillingService
             log_message('warning', '[BillingService::resolveSubsidiesConvocatoria] ' . $e->getMessage());
         }
 
+        foreach ($this->buildSubsidiesConvocatoriaPrefixes($convocatoria) as $prefix) {
+            try {
+                $row = $db->table('company_subsidies')
+                    ->select('convocatoria')
+                    ->where('convocatoria IS NOT NULL', null, false)
+                    ->where('convocatoria !=', '')
+                    ->like('convocatoria', $prefix, 'after')
+                    ->limit(1)
+                    ->get()
+                    ->getRowArray();
+
+                if (!empty($row['convocatoria'])) {
+                    return $row['convocatoria'];
+                }
+            } catch (\Throwable $e) {
+                log_message('warning', '[BillingService::resolveSubsidiesConvocatoria prefix] ' . $e->getMessage());
+            }
+        }
+
         return $convocatoria;
+    }
+
+    public function formatSubsidiesConvocatoriaName(string $convocatoria): string
+    {
+        $name = trim(str_replace(['-', '_'], ' ', $convocatoria));
+        $name = preg_replace('/\s+/u', ' ', $name) ?? $name;
+        $name = str_replace(['A¤o', 'A寸'], 'Año', $name);
+
+        return mb_convert_case($name, MB_CASE_TITLE, 'UTF-8');
+    }
+
+    private function buildSubsidiesConvocatoriaPrefixes(string $value): array
+    {
+        $phrase = trim(preg_replace('/\s+/u', ' ', str_replace(['-', '_'], ' ', $value)) ?? '');
+        if ($phrase === '') {
+            return [];
+        }
+
+        $prefixes = [$phrase];
+        $withoutYear = trim(preg_replace('/\s+a[nñ]o\s+\d{4}\s*$/iu', '', $phrase) ?? '');
+        if ($withoutYear !== '' && $withoutYear !== $phrase) {
+            $prefixes[] = $withoutYear;
+        }
+
+        $parts = preg_split('/\s+/u', $withoutYear ?: $phrase, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        if (count($parts) > 8) {
+            $prefixes[] = implode(' ', array_slice($parts, 0, 8));
+        }
+
+        return array_values(array_unique($prefixes));
     }
 
     /**

@@ -568,7 +568,7 @@ class Billing extends BaseController
         $tax = round($price * 0.21, 2);
 
         $displayName = 'Subvenciones';
-        if ($convocatoriaName) $displayName .= ' - ' . mb_convert_case($convocatoriaName, MB_CASE_TITLE, 'UTF-8');
+        if ($convocatoriaName) $displayName .= ' - ' . $this->billingService->formatSubsidiesConvocatoriaName($convocatoriaName);
         if ($year) $displayName .= ' (' . $year . ')';
 
         return $this->renderView('billing/public_funds_order_summary', [
