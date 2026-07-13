@@ -1375,8 +1375,8 @@
                                 </td>
                                 <td style="padding: 18px 20px;">
                                     <strong
-                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Radar
-                                        de Nuevas Sociedades</strong>
+                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Endpoint
+                                        de Nuevas Constituciones</strong>
                                     <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
                                         Extracción masiva de empresas recién constituidas. Filtra por geolocalización o
                                         actividad económica (CNAE) para alimentar tu flujo de ventas frío.
@@ -1594,7 +1594,7 @@
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> Acceso a Radar API</li>
+                                </svg> Listado de Constituciones</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />

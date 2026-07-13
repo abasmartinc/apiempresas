@@ -29,10 +29,12 @@ class RadarScoringSystem
         
         if ($dbScore > 0) {
             $baseScore = $dbScore;
-            // Para el desglose en el debug, estimamos los bloques si no los tenemos
-            $bormeScore = (int)($company['borme_score_static'] ?? $dbScore); // Campo hipotético si el script lo guarda
-            $qualityScore = 100; // Placeholder
-            $contactScore = 100; // Placeholder
+            // Para el desglose, usamos la nota de la DB para BORME si la hay,
+            // pero calculamos el perfil de calidad y el nivel de contacto REAL
+            // en base a los datos reales que tenemos, para no mentir al usuario.
+            $bormeScore = (int)($company['borme_score_static'] ?? $dbScore);
+            $qualityScore = self::calculateQualityScore($company);
+            $contactScore = self::calculateContactScore($company);
         } else {
             $bormeScore = self::calculateBormeScore($company);
             $qualityScore = self::calculateQualityScore($company);

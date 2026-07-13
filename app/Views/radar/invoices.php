@@ -102,13 +102,7 @@
                         <?php endif; ?>
                     </div>
 
-                    <div style="margin-top: 32px; padding: 24px; background: #eff6ff; border: 1px solid #dbeafe; border-radius: 20px; display: flex; align-items: flex-start; gap: 16px;">
-                        <div style="font-size: 24px;">ℹ️</div>
-                        <div>
-                            <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 800; color: #1e40af;">¿Necesitas cambiar tus datos de facturación?</h4>
-                            <p style="margin: 0; font-size: 13px; color: #1e40af; opacity: 0.8; line-height: 1.5;">Puedes actualizar tu dirección fiscal, NIF o razón social desde el <a href="<?= site_url('billing/portal') ?>" style="font-weight: 700; color: #1e40af; text-decoration: underline;">Portal de Cliente</a> de Stripe.</p>
-                        </div>
-                    </div>
+
 
                 </div>
             </div>

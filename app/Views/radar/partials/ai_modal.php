@@ -175,35 +175,27 @@
                                 <p id="ae-ai-message" style="font-size: 15px; line-height: 1.6; color: #1e293b; margin: 0 0 16px 0; font-style: italic; font-weight: 500;">"${data.first_message}"</p>
                                 
                                 <!-- Botones de acción inmediata sobre el mensaje -->
-                                    <button type="button" class="ai-action-btn ai-action-btn--copy" style="background: #2563eb; color: white; border: none; height: 42px; display: flex; align-items: center; justify-content: center; font-weight: 700; width: 100%; font-size: 15px;" onclick="copyToClipboard('ae-ai-message', this)">
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <button type="button" class="ai-action-btn ai-action-btn--copy" style="background: #2563eb; color: white; border: none; height: 42px; display: flex; align-items: center; justify-content: center; font-weight: 700; width: 100%; font-size: 15px; border-radius: 8px;" onclick="copyToClipboard('ae-ai-message', this)">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px; margin-right: 8px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                                         📋 Copiar mensaje sugerido
+                                    </button>
+                                    
+                                    <button type="button" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border: 1px solid #334155; height: 42px; display: flex; align-items: center; justify-content: center; font-weight: 700; width: 100%; font-size: 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" 
+                                            onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'; this.style.transform='translateY(-1px)';" 
+                                            onmouseout="this.style.boxShadow='none'; this.style.transform='none';"
+                                            onclick="${data.is_free ? `showInlineAIPaywall(this)` : `alert('Generando mensaje avanzado... (En desarrollo)')`}">
+                                        ✨ Reescribir con IA Avanzada
                                     </button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 8. CTA Principal Dinámico -->
-                        <div class="ai-primary-action-wrap">
-                            <button type="button" id="ai-main-cta" 
-                                    class="ai-primary-action ${isContactMissing ? 'ai-primary-action--prepare' : ''} ${(data.followup && data.followup.exists) ? 'ai-primary-action--active' : ''}" 
-                                    onclick="${(data.followup && data.followup.exists) ? '' : (isContactMissing ? 'prepareLeadForContact(' + id + ', this)' : 'handleDirectContact(' + id + ')')}"
-                                    ${(data.followup && data.followup.exists) ? 'disabled' : ''}>
-                                ${ (data.followup && data.followup.exists) 
-                                    ? '⏳ En seguimiento' 
-                                    : (isContactMissing ? '⚡ Preparar contacto' : '📞 ' + data.primary_action.label) 
-                                }
-                            </button>
-                        </div>
+
 
                         <!-- 9. Acciones Finales Dinámicas -->
                         <div class="ai-action-buttons">
-                            ${isContactMissing ? `
-                                <button type="button" class="ai-action-btn ai-action-btn--alert" onclick="alertWhenContactAvailable(${id}, this)">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                                    Avisarme contacto
-                                </button>
-                            ` : `
+                            ${isContactMissing ? '' : `
                                 <button type="button" class="ai-action-btn ai-action-btn--contact" onclick="markAsContactedFromAI(${id}, this)">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                     Marcar contactado
@@ -231,6 +223,13 @@
                             $msgSection.style.boxShadow = '0 0 20px rgba(37, 99, 235, 0.2)';
                         }
                     }, 200);
+                }
+            } else if (data.status === 'limit_reached') {
+                closeAIModal();
+                if (typeof openUpgradeModal === 'function') {
+                    openUpgradeModal('Límite diario alcanzado', 'Has consumido tus 3 análisis con IA gratuitos por hoy. Actualiza a PRO para desbloquear análisis ilimitados.');
+                } else {
+                    Swal.fire({ icon: 'warning', title: 'Límite alcanzado', text: 'Has consumido tus 3 análisis IA gratuitos de hoy. Pásate a PRO.', confirmButtonColor: '#2563eb' });
                 }
             } else {
                 $content.innerHTML = `
@@ -442,5 +441,56 @@
                 </div>
             </div>
         `;
+    }
+
+    function showInlineAIPaywall(btn) {
+        const section = document.getElementById('ae-ai-message-section');
+        const msg = document.getElementById('ae-ai-message');
+        const buttonsContainer = btn.parentElement;
+        
+        // Efecto de transición
+        section.style.background = 'linear-gradient(135deg, #0f172a, #1e293b)';
+        section.style.border = '2px solid #3b82f6';
+        section.style.boxShadow = '0 10px 25px -5px rgba(59, 130, 246, 0.2)';
+        
+        // Ocultar botones
+        if (buttonsContainer) {
+            buttonsContainer.style.opacity = '0';
+            setTimeout(() => buttonsContainer.style.display = 'none', 300);
+        }
+        
+        // Cambiar el label
+        const label = section.querySelector('.ae-ai-result__label');
+        if (label) {
+            label.style.color = '#94a3b8';
+            label.innerText = 'IA AVANZADA EN CURSO...';
+        }
+        
+        // Mostrar el estado bloqueado
+        msg.style.transition = 'opacity 0.3s';
+        msg.style.opacity = '0';
+        
+        setTimeout(() => {
+            msg.style.opacity = '1';
+            msg.innerHTML = `
+                <div style="position: relative; text-align: center; padding: 20px 0; min-height: 140px;">
+                    <div style="filter: blur(5px); opacity: 0.3; font-size: 14px; user-select: none; color: white;">
+                        "Hola, hemos detectado que vuestra empresa acaba de constituirse y tiene un enfoque claro en el sector. Nuestra herramienta os permite multiplicar ventas..."
+                    </div>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%;">
+                        <div style="background: rgba(15, 23, 42, 0.85); padding: 16px; border-radius: 12px; backdrop-filter: blur(8px); border: 1px solid #334155; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 28px; height: 28px; margin-bottom: 8px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            <h4 style="color: white; margin: 0 0 6px 0; font-weight: 800; font-size: 15px;">Personalización PRO</h4>
+                            <p style="color: #94a3b8; font-size: 12px; margin: 0 0 16px 0; line-height: 1.4;">La redacción a medida de mensajes conectada a IA conversacional es exclusiva de Radar PRO.</p>
+                            <button onclick="showConversionNudge('Redacción Inteligente B2B', 'La Inteligencia Artificial avanzada redactará un correo 100% único basado en el objeto social de cada empresa. Activa Radar PRO para multiplicar tu tasa de respuesta.', {action: 'ai_generate_inline'})" 
+                                    style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; transition: all 0.2s;"
+                                    onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+                                Desbloquear Función PRO
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }, 300);
     }
 </script>

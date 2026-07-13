@@ -145,15 +145,22 @@ class Radar extends BaseController
             ->orLike('companies.cnae_label', 'Ingenier')
         ->groupEnd();
 
+        $builder->orderBy('companies.fecha_constitucion', 'DESC');
         $builder->orderBy('crs.score_total', 'DESC');
         $builder->limit(5); // 5 empresas como pide el spec
         
         $companies = $builder->get()->getResultArray();
 
-        // Procesar estrategias para el JS de la demo
-        foreach ($companies as &$co) {
+        // Procesar estrategias para el JS de la demo y simular fechas recientes para la vista
+        $today = date('Y-m-d');
+        $yesterday = date('Y-m-d', strtotime('-1 day'));
+        foreach ($companies as $index => &$co) {
             $co['strategy'] = $this->generateDemoStrategy($co);
             $co['lead_score_data'] = ['numeric' => $co['score_total'], 'base' => $co['score_total']];
+            
+            // Forzar fechas de hoy/ayer para que el preview siempre demuestre "frescura"
+            $co['fecha_constitucion'] = ($index % 2 == 0) ? $today : $yesterday;
+            $co['last_borme_date'] = $co['fecha_constitucion'];
         }
 
         // 2. Métricas de Escala
@@ -163,16 +170,16 @@ class Radar extends BaseController
         // Deterministic Rotation for Preview
         $hash = crc32(uri_string());
         $tVariants = [
-            "Consigue clientes B2B antes que tu competencia | Radar",
-            "Empresas activas contratando ahora mismo | Radar B2B",
-            "Oportunidades de venta en tiempo real | Radar",
-            "Accede antes que tu competencia a nuevos clientes | Radar"
+            "Señales de compra detectadas en nuevas constituciones hoy",
+            "Llena tu pipeline B2B con empresas de nueva creación hoy",
+            "Oportunidades de negocio y leads B2B cualificados",
+            "Prospectos B2B en fase de alta intención de compra"
         ];
         $mVariants = [
-            "Accede a empresas recién creadas con necesidades activas ahora mismo. Contacta antes que otros proveedores y cierra ventas B2B.",
+            "El 70% de las nuevas empresas eligen al primer proveedor que las contacta. Accede a las constituciones del BORME y llena tu pipeline antes que tu competencia.",
             "Descubre empresas con potencial de compra inmediato. Leads B2B frescos detectados hoy en el BORME para tu equipo comercial.",
-            "Contacta con empresas nuevas que buscan proveedores en este momento. Adelántate a tu competencia y consigue clientes hoy.",
-            "Listado de empresas con necesidades de contratación activas. Ideal para prospección comercial de alto impacto."
+            "Automatiza tu prospección y contacta con empresas recién creadas con necesidades activas. Accede a oportunidades antes de encender el CRM.",
+            "Listado de empresas con necesidades de contratación activas. Ideal para prospección comercial B2B de alto impacto."
         ];
 
         return view('radar/preview', [
@@ -464,8 +471,17 @@ class Radar extends BaseController
             $days = (int)$timeRange;
             $dateLimit = date('Y-m-d', strtotime("-$days days"));
         }
-        $this->companyModel->where('companies.fecha_constitucion >=', $dateLimit);
-        // Eliminamos la restricción <= $today para incluir "pre-constituciones" detectadas para los próximos días
+        
+        // Límite superior de +15 días para evitar typos de scraper
+        $maxDateLimit = date('Y-m-d', strtotime('+15 days'));
+
+        $unionQuery = "SELECT cif FROM companies WHERE fecha_constitucion >= '{$dateLimit}' AND fecha_constitucion <= '{$maxDateLimit}' 
+                       UNION 
+                       SELECT company_cif AS cif FROM company_subsidies WHERE created_at >= '{$dateLimit} 00:00:00' 
+                       UNION 
+                       SELECT company_cif AS cif FROM company_contracts WHERE created_at >= '{$dateLimit} 00:00:00'";
+                       
+        $this->companyModel->join("({$unionQuery}) matched_events", "matched_events.cif = companies.cif", "inner");
 
         // Orden por defecto: Score Total y luego fecha
         $this->companyModel->orderBy('crs.score_total', 'DESC');
@@ -479,6 +495,47 @@ class Radar extends BaseController
 
         $companies = $this->companyModel->paginate($perPage);
         $pager = $this->companyModel->pager;
+
+        // [TRIGGER EVENTS] Inject trigger type and desc
+        $cifs = array_filter(array_column($companies, 'cif'));
+        $subsidies = [];
+        $contracts = [];
+        
+        if (!empty($cifs)) {
+            $db = \Config\Database::connect();
+            $subs = $db->table('company_subsidies')
+                ->whereIn('company_cif', $cifs)
+                ->where('created_at >=', $dateLimit . ' 00:00:00')
+                ->get()->getResultArray();
+            foreach ($subs as $sub) {
+                $subsidies[$sub['company_cif']] = $sub;
+            }
+            
+            $conts = $db->table('company_contracts')
+                ->whereIn('company_cif', $cifs)
+                ->where('created_at >=', $dateLimit . ' 00:00:00')
+                ->get()->getResultArray();
+            foreach ($conts as $cont) {
+                $contracts[$cont['company_cif']] = $cont;
+            }
+        }
+
+        foreach ($companies as &$company) {
+            $cif = $company['cif'];
+            if (isset($subsidies[$cif])) {
+                $company['trigger_type'] = 'subvencion';
+                $company['trigger_desc'] = number_format($subsidies[$cif]['importe'], 2, ',', '.') . '€';
+                $company['trigger_date'] = $subsidies[$cif]['fecha_concesion'] ?? $subsidies[$cif]['created_at'];
+            } elseif (isset($contracts[$cif])) {
+                $company['trigger_type'] = 'contrato';
+                $company['trigger_desc'] = number_format($contracts[$cif]['importe_adjudicacion'], 2, ',', '.') . '€';
+                $company['trigger_date'] = $contracts[$cif]['fecha_adjudicacion'] ?? $contracts[$cif]['created_at'];
+            } else {
+                $company['trigger_type'] = 'nueva_empresa';
+                $company['trigger_desc'] = '';
+                $company['trigger_date'] = $company['fecha_constitucion'] ?? $company['last_borme_date'] ?? null;
+            }
+        }
 
         // Metadatos de paginación para los contadores
         $totalCount = $pager->getTotal();
@@ -610,15 +667,28 @@ class Radar extends BaseController
     private function countNewCompanies($period)
     {
         $builder = $this->companyModel->builder();
-        if ($period === 'hoy') {
-            $builder->where('fecha_constitucion >=', date('Y-m-d'));
-        } elseif ($period === 'semana') {
-            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')));
+        
+        $maxDateLimit = date('Y-m-d', strtotime('+15 days'));
+        
+        $dateLimit = date('Y-m-d');
+        if ($period === 'semana') {
+            $dateLimit = date('Y-m-d', strtotime('-7 days'));
         } elseif ($period === 'mes') {
-            $builder->where('fecha_constitucion >=', date('Y-m-01'));
+            $dateLimit = date('Y-m-01');
         }
+
+        $unionQuery = "SELECT cif FROM companies WHERE fecha_constitucion >= '{$dateLimit}' AND fecha_constitucion <= '{$maxDateLimit}' 
+                       UNION 
+                       SELECT company_cif AS cif FROM company_subsidies WHERE created_at >= '{$dateLimit} 00:00:00' 
+                       UNION 
+                       SELECT company_cif AS cif FROM company_contracts WHERE created_at >= '{$dateLimit} 00:00:00'";
+
+        $builder->join("({$unionQuery}) matched_events", "matched_events.cif = companies.cif", "inner");
+        
         return $builder->countAllResults();
     }
+
+
 
     /**
      * Alternar una empresa como favorita (AJAX)
@@ -984,12 +1054,21 @@ class Radar extends BaseController
 
         $today = date('Y-m-d');
         if ($timeRange === 'hoy') {
-            $builder->where('companies.fecha_constitucion >=', $today);
+            $dateLimit = $today;
         } else {
             $days = (int)$timeRange;
-            $builder->where('companies.fecha_constitucion >=', date('Y-m-d', strtotime("-$days days")));
+            $dateLimit = date('Y-m-d', strtotime("-$days days"));
         }
-        // Eliminamos restricción <= $today para coherencia con la vista
+        
+        $maxDateLimit = date('Y-m-d', strtotime('+15 days'));
+        
+        $unionQuery = "SELECT cif FROM companies WHERE fecha_constitucion >= '{$dateLimit}' AND fecha_constitucion <= '{$maxDateLimit}' 
+                       UNION 
+                       SELECT company_cif AS cif FROM company_subsidies WHERE created_at >= '{$dateLimit} 00:00:00' 
+                       UNION 
+                       SELECT company_cif AS cif FROM company_contracts WHERE created_at >= '{$dateLimit} 00:00:00'";
+
+        $builder->join("({$unionQuery}) matched_events", "matched_events.cif = companies.cif", "inner");
         
         $companies = $builder->orderBy('crs.score_total', 'DESC')
                             ->orderBy('crs.last_borme_date', 'DESC')
@@ -1486,6 +1565,47 @@ class Radar extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'No autorizado']);
         }
 
+        $userId = session('user_id');
+        $activePlan = $this->subscriptionModel->getActivePlanByUserId($userId);
+        $isFree = (!$activePlan || !in_array($activePlan->product_type, ['radar', 'bundle']));
+
+        if ($isFree) {
+            $db = \Config\Database::connect();
+            $date = date('Y-m-d');
+            
+            // Aseguramos que la tabla exista (ligero)
+            $db->query("CREATE TABLE IF NOT EXISTS radar_daily_unlocks (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                unlock_date DATE NOT NULL,
+                unlock_count INT DEFAULT 0,
+                UNIQUE KEY (user_id, unlock_date)
+            )");
+
+            $row = $db->table('radar_daily_unlocks')
+                      ->where('user_id', $userId)
+                      ->where('unlock_date', $date)
+                      ->get()
+                      ->getRow();
+                      
+            if ($row && $row->unlock_count >= 3) {
+                return $this->response->setJSON(['status' => 'limit_reached', 'message' => 'Límite de 3 desbloqueos diarios gratuitos alcanzado']);
+            }
+
+            if (!$row) {
+                $db->table('radar_daily_unlocks')->insert([
+                    'user_id' => $userId,
+                    'unlock_date' => $date,
+                    'unlock_count' => 1
+                ]);
+            } else {
+                $db->table('radar_daily_unlocks')
+                   ->where('id', $row->id)
+                   ->set('unlock_count', 'unlock_count+1', false)
+                   ->update();
+            }
+        }
+
         $company = $this->companyModel
             ->select('companies.*, company_radar_scores.score_total, company_radar_scores.priority_level, company_radar_scores.score_reasons, company_radar_scores.main_act_type, company_radar_scores.last_borme_date')
             ->join('company_radar_scores', 'companies.id = company_radar_scores.company_id', 'left')
@@ -1501,7 +1621,7 @@ class Radar extends BaseController
             // [TRACKING] Registro de clic en Estrategia
             $this->logLeadEvent(session('user_id'), $id, 'view_strategy');
 
-            return $this->response->setJSON(['status' => 'success'] + $analysis);
+            return $this->response->setJSON(['status' => 'success', 'is_free' => $isFree] + $analysis);
         } catch (\Exception $e) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Error al analizar: ' . $e->getMessage()]);
         }

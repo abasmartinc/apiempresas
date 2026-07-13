@@ -33,8 +33,8 @@ $pagination = [
 
     <style>
         /* Override radar.css for preview specific needs if any, but try to keep it minimal */
-        .ae-radar-page { background: #e2e8f0 !important; }
-        .ae-radar-page__main { background: #f8fafc; }
+        .ae-radar-page { background: #f1f5f9 !important; }
+        .ae-radar-page__main { background: #f1f5f9 !important; }
         .ae-radar-page__topbar { 
             background: #ffffff !important; 
             border-bottom: 1px solid #e2e8f0 !important;
@@ -44,20 +44,22 @@ $pagination = [
         .ae-radar-page__breadcrumb strong { color: #1e293b !important; }
         .ae-radar-page__freshness { color: #64748b !important; }
         
-        .ae-radar-page__content { padding: 40px !important; }
+        .ae-radar-page__content { 
+            padding: 32px 40px !important; 
+            background: #ffffff !important;
+            border-radius: 24px !important;
+            margin: 24px 40px !important;
+            box-shadow: 0 10px 40px rgba(15, 23, 42, 0.03) !important;
+            border: 1px solid #e2e8f0 !important;
+        }
 
         /* Preview Hero Header - Matching Dashboard Aesthetic (LIGHT VERSION) */
         .preview-header-banner {
-            background: #ffffff;
-            border-radius: 24px;
-            padding: 64px 40px;
-            margin-bottom: 32px;
             text-align: center;
             color: #1e293b;
+            padding: 0 20px 24px;
+            margin-bottom: 0px;
             position: relative;
-            overflow: hidden;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 10px 40px rgba(15, 23, 42, 0.03);
         }
 
         .preview-header-banner__glow {
@@ -280,58 +282,22 @@ $pagination = [
                         
                         <!-- 1. PREVIEW BANNER -->
                         <section class="preview-header-banner">
-                            <div class="preview-header-banner__glow"></div>
-                            <div class="preview-header-banner__badge">
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: #60a5fa; animation: pulse 2s infinite;"></span>
-                                +<?= $opps_count ?> empresas detectadas hoy — acceso inmediato
-                            </div>
+                            <!-- Clean minimal header -->
 
                             <h1 class="preview-header-banner__title">
-                                <span style="background: linear-gradient(90deg, #60a5fa, #34d399); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">+<?= $opps_count ?> empresas están</span><br>
-                                contratando proveedor ahora mismo
+                                <span style="background: linear-gradient(90deg, #60a5fa, #34d399); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">+<?= $opps_count ?> señales de compra en</span><br>
+                                empresas de nueva creación hoy
                             </h1>
 
                             <p class="preview-header-banner__subtitle">
-                                Si no contactas tú, otro proveedor lo hará en las próximas horas. <br>
-                                <strong>Consigue clientes reales sin hacer prospección manual.</strong>
+                                El 70% de las nuevas empresas eligen al primer proveedor que las contacta. <br>
+                                <strong>Llena tu pipeline diario sin perder horas investigando en el BORME.</strong>
                             </p>
 
-                            <div class="preview-capture-box">
-                                <p style="font-size: 0.95rem; font-weight: 800; color: #64748b; margin-bottom: 16px;">Introduce tu email para desbloquear las <?= $opps_count ?> oportunidades</p>
-                                <form class="email-capture-form preview-form-handler" id="email-section" style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
-                                    <input type="email" name="email" class="email-capture-input email-capture__input" placeholder="Introduce tu email profesional" style="flex: 1; min-width: 280px; height: 64px !important; min-height: 64px !important; line-height: 64px !important; padding: 0 !important; border-radius: 16px !important; text-align: center; border: 1px solid #cbd5e1 !important; font-size: 1.1rem; background: white !important; color: #1e293b !important; display: block !important; box-sizing: border-box !important;" required>
-                                    <button type="submit" class="email-capture-btn submit-btn-handler" style="height: 64px; padding: 0 32px; border-radius: 16px; background: #2563eb; color: white; font-weight: 900; font-size: 1.1rem; border: none; cursor: pointer; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);">
-                                        Conseguir clientes ahora ⚡
-                                    </button>
-                                </form>
-                                <div class="form-error-handler" style="color: #ef4444; font-size: 0.85rem; font-weight: 700; margin-top: 12px; display: none; text-align: center;"></div>
-                                <div style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 20px; font-size: 0.8rem; color: #94a3b8; font-weight: 700;">
-                                    <span style="display: flex; align-items: center; gap: 6px;"><span style="color: #10b981; font-size: 1.1rem;">✓</span> Sin tarjeta</span>
-                                    <span style="display: flex; align-items: center; gap: 6px;"><span style="color: #10b981; font-size: 1.1rem;">✓</span> Acceso en <10 segundos</span>
-                                </div>
-                            </div>
                         </section>
 
-                        <!-- 2. SEARCH IA TEASER -->
-                        <div class="ae-pro-search-hero" onclick="openModal('ai_search_teaser')" style="cursor: pointer;">
-                            <div class="ae-pro-search-hero__label" style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" style="width:14px;height:14px;"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                                Búsqueda con IA
-                                <span style="background:#fff1f2; color:#e11d48; font-size:9px; font-weight:900; padding:2px 7px; border-radius:999px; letter-spacing:0.05em; display:flex; align-items:center; gap:4px;">
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                                    PRO ONLY
-                                </span>
-                            </div>
-                            <div style="display:flex;gap:12px;align-items:center; opacity: 0.6; pointer-events: none;">
-                                <div style="position:relative;flex-grow:1;">
-                                    <input type="text" class="ae-pro-search-hero__input" placeholder="Ej: Empresas nuevas de construcción en Madrid..." style="width: 100%; height: 58px; padding: 0 24px; border-radius: 14px; border: 2px solid #e2e8f0; background: #f8fafc; font-size: 15px; outline: none; cursor: not-allowed;" readonly>
-                                </div>
-                                <button class="ae-pro-search-hero__btn" style="height: 58px; padding: 0 28px; background: #0f172a; color: #fff; border-radius: 14px; border: none; font-weight: 800; cursor: not-allowed;" disabled>Buscar con IA</button>
-                            </div>
-                        </div>
-
                         <!-- 3. RESULTS TABLE -->
-                        <div style="background: #ffffff; border-radius: 24px; border: 1px solid #e2e8f0; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.02);">
+                        <div style="padding: 0;">
                             <div style="margin-bottom: 24px; text-align: center;">
                                 <div style="font-size: 1rem; color: #16a34a; font-weight: 800; background: #f0fdf4; padding: 12px; border-radius: 12px; border: 1px solid #dcfce7; display: inline-block;">
                                     💰 Oportunidades con tickets estimados entre 5.000€ y 12.000€
@@ -352,14 +318,14 @@ $pagination = [
                             <!-- Light mesh gradient decoration -->
                             <div style="position: absolute; width: 400px; height: 400px; background: radial-gradient(circle, rgba(37, 99, 235, 0.03) 0%, transparent 70%); top: -150px; left: -150px; pointer-events: none;"></div>
                             
-                            <h2 style="font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight:950; margin-bottom:20px; letter-spacing: -0.03em; position: relative;">¿Listo para conseguir clientes <span style="background: linear-gradient(90deg, #2563eb, #10b981); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">reales hoy mismo</span>?</h2>
-                            <p style="font-size:1.15rem; color:#64748b; margin-bottom:40px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.5; font-weight: 500; position: relative;">No dejes que tu competencia se adelante. Accede ahora al Radar B2B y empieza a recibir oportunidades de negocio filtradas cada mañana.</p>
+                            <h2 style="font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight:950; margin-bottom:20px; letter-spacing: -0.03em; position: relative;">¿Listo para automatizar tu <span style="background: linear-gradient(90deg, #2563eb, #10b981); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">prospección B2B</span>?</h2>
+                            <p style="font-size:1.15rem; color:#64748b; margin-bottom:40px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.5; font-weight: 500; position: relative;">Accede al Radar y recibe tu listado de prospectos cualificados cada mañana antes de encender el CRM.</p>
                             
                             <div style="max-width: 480px; margin: 0 auto; position: relative;">
                                 <form class="preview-form-handler" style="display: flex; flex-direction: column; gap: 16px;">
                                     <input type="email" name="email" class="email-capture-input email-capture__input" placeholder="Introduce tu email profesional" style="width: 100%; height: 64px !important; min-height: 64px !important; line-height: 64px !important; padding: 0 !important; text-align: center; border: 1px solid #cbd5e1 !important; background: #ffffff !important; color: #1e293b !important; border-radius: 16px !important; font-size: 1.1rem !important; display: block !important; box-sizing: border-box !important;" required>
                                     <button type="submit" class="submit-btn-handler" style="width: 100%; height: 64px; background: #2563eb; color: white; border: none; border-radius: 16px; font-weight: 900; font-size: 1.1rem; cursor: pointer; box-shadow: 0 10px 25px rgba(37,99,235,0.3);">
-                                        Activar mi acceso a las <?= $opps_count ?> empresas
+                                        Crear mi cuenta gratuita
                                     </button>
                                 </form>
                                 <div class="form-error-handler" style="color: #ef4444; font-size: 0.85rem; font-weight: 700; margin-top: 12px; display: none; text-align: center;"></div>
@@ -409,7 +375,7 @@ $pagination = [
                     <input type="email" name="email" class="email-capture__input" placeholder="ejemplo@empresa.com" style="width: 100%; height: 64px; font-size: 1.1rem; text-align: center; border-radius: 16px; background: #f8fafc; border: 1px solid #e2e8f0; outline: none; transition: border-color 0.2s;" required>
                 </div>
                 <button type="submit" class="email-capture__btn submit-btn-handler" style="width: 100%; height: 64px; font-size: 1.1rem; font-weight: 800; border-radius: 16px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; border: none; box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25); cursor: pointer; transition: transform 0.2s;">
-                    Acceder a las <?= $opps_count ?> empresas
+                    Activar mi Radar Freemium
                 </button>
                 <div class="form-error-handler" style="color: #ef4444; font-size: 0.85rem; font-weight: 700; margin-top: 4px; display: none; text-align: center;"></div>
             </form>
@@ -446,11 +412,6 @@ $pagination = [
             // Mostrar sutil mensaje de retorno
             $('<div id="returning-msg" style="position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#0f172a; color:white; padding:12px 24px; border-radius:50px; font-weight:700; z-index:10000; box-shadow:0 10px 25px rgba(0,0,0,0.2); font-size:0.9rem; display:none;">Vuelve a donde lo dejaste — desbloquea las oportunidades ahora</div>')
                 .appendTo('body').fadeIn().delay(3000).fadeOut();
-            
-            // Scroll automático suave tras s
-            setTimeout(() => {
-                document.getElementById('email-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 1000);
         }
         localStorage.setItem('preview_seen', 'true');
 
@@ -460,26 +421,7 @@ $pagination = [
             $('#real-radar-data').fadeIn();
         }, 500);
 
-        // Sticky CTA Toggle
-        let highlightTriggered = false;
-        function triggerInputHighlight() {
-            if (highlightTriggered) return;
-            highlightTriggered = true;
-            $('.email-capture__input').first().addClass('input-highlight-pulse').focus();
-            setTimeout(() => {
-                $('.email-capture__input').removeClass('input-highlight-pulse');
-            }, 4000);
-        }
-
-        // Time trigger
-        setTimeout(triggerInputHighlight, 5000);
-        $(window).scroll(function() {
-            // Scroll trigger (>50%)
-            const scrollPercent = ($(window).scrollTop() / ($(document).height() - $(window).height())) * 100;
-            if (scrollPercent > 50) {
-                triggerInputHighlight();
-            }
-        });
+        // Removed triggerInputHighlight which caused page jumps
 
         // Trigger modal after 15s (if not converted)
         setTimeout(() => {
@@ -489,7 +431,7 @@ $pagination = [
         }, 15000);
 
         // Interaction Triggers
-        $(document).on('click', '.locked-rows, .btn-ae', function(e) {
+        $(document).on('click', '.locked-rows, .btn-ae, .ae-radar-page__nav-link, .ae-radar-page__brand-header', function(e) {
             e.preventDefault();
             openModal('interaction');
         });
@@ -575,7 +517,7 @@ $pagination = [
     });
 
     function openModal(trigger = 'manual') {
-        if (sessionStorage.getItem('radar_converted')) return;
+        // if (sessionStorage.getItem('radar_converted')) return; // Comentado para que puedas hacer pruebas
         $('#interaction-modal').addClass('is-active');
         trackPreviewEvent('open_modal_preview', { trigger: trigger });
     }
@@ -583,6 +525,21 @@ $pagination = [
     // Global helper for components that use showConversionNudge
     window.showConversionNudge = function(title, desc, metadata = {}) {
         openModal('conversion_nudge');
+    }
+
+    // Mock functions for preview interactions (forces email capture)
+    window.analyzeAI = function(id, btn, name, intent) {
+        openModal('ai_action');
+    }
+    window.handleContactClick = function(btn, id, name) {
+        openModal('contact_action');
+    }
+    window.toggleFavorite = function(btn, id) {
+        openModal('favorite');
+    }
+    window.updateLeadStatusAndNotify = function(select, id) {
+        select.value = 'nuevo'; // revert
+        openModal('status');
     }
 
     function closeModal() {

@@ -85,9 +85,6 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                         <div class="ae-radar-page__pill ae-radar-page__pill--free">
                             Plan Free · Vista limitada
                         </div>
-                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=' . esc($source)) ?>" class="ae-radar-page__cta-top" style="background: #2563eb; color: #ffffff; border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
-                            Desbloquear todas las oportunidades ahora
-                        </a>
                     <?php } else { ?>
                         <?php if (isset($userPlan['status']) && $userPlan['status'] === 'canceled') { ?>
                             <a href="<?= site_url('billing') ?>" class="ae-radar-page__pill ae-radar-page__pill--live" style="text-decoration:none; background:#fef2f2; border:1px solid #fee2e2; color:#ef4444;" title="Gestionar facturación">
@@ -408,22 +405,22 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                     <div class="ae-usage-counter" style="margin-bottom:24px;background:linear-gradient(to right, #fff, #f8fafc);border-radius:16px;padding:24px 32px;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
                         <div>
                             <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-                                <span style="background:#fef2f2; color:#ef4444; font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px; text-transform:uppercase;">Acceso Limitado</span>
-                                <h3 style="margin:0;font-size:16px;font-weight:800;color:#1e293b;">Oportunidades detectadas hoy</h3>
+                                <span style="background:#fef2f2; color:#ef4444; font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px; text-transform:uppercase;">Plan Gratuito</span>
+                                <h3 style="margin:0;font-size:16px;font-weight:800;color:#1e293b;">Has desbloqueado 3 de <?= number_format($pagination['total']) ?> leads hoy</h3>
                             </div>
-                            <p style="margin:0;font-size:13px;color:#64748b;">Estás viendo las primeras <?= count($visibleCompanies) ?> de las <strong><?= number_format($pagination['total']) ?></strong> oportunidades encontradas hoy.</p>
+                            <p style="margin:0;font-size:13px;color:#64748b;">Los datos están difuminados a partir del 3er resultado. Actualiza a PRO para acceso total.</p>
                         </div>
                         <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=' . esc($source)) ?>" class="ae-radar-page__cta-top ae-shine-btn" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color:#fff; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4); border:none; padding: 12px 24px; border-radius: 12px; font-weight: 900; display: flex; align-items: center; gap: 8px;">
-                            <span>👑</span> Desbloquear acceso completo
+                            <span>👑</span> Desbloquear todo ahora
                         </a>
                     </div>
 
-                    <!-- Contenedor de resultados (Sin blur global para mostrar el teaser) -->
+                    <!-- Contenedor de resultados -->
                     <div style="position:relative;background:#fff;padding:20px;border-radius:24px;border:1px solid #e1e7f0;margin-bottom:40px;box-shadow: 0 10px 30px rgba(0,0,0,0.02);">
                         <section class="ae-radar-page__lead-wrap">
                             <div id="radar-results-container">
                                 <?= view('radar/partials/results_table', array_merge($filters, [
-                                    'companies'  => $visibleCompanies,
+                                    'companies'  => $allCompanies,
                                     'isFree'     => true,
                                     'pagination' => $pagination ?? null,
                                     'pager'      => $pager ?? null,
@@ -433,13 +430,6 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                         </section>
                     </div>
 
-                    <div class="radar-paywall-main" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:white;padding:60px 40px;border-radius:32px;margin:40px 0;text-align:center;">
-                        <h2 style="font-size:32px;font-weight:900;margin-bottom:16px;">¿Quieres llegar antes que nadie?</h2>
-                        <p style="font-size:16px;color:#94a3b8;margin-bottom:32px;">Los usuarios PRO reciben alertas en tiempo real y acceden a todos los contactos.</p>
-                        <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" class="ae-shine-btn" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color:white; padding:20px 40px; border-radius:18px; font-weight:900; text-decoration:none; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3); display:inline-flex; align-items:center; gap:12px; font-size:18px; border: 1px solid rgba(255,255,255,0.2);">
-                            <span>🚀</span> Activar Radar PRO ahora
-                        </a>
-                    </div>
                     <?php endif; ?>
 
                 </div>
@@ -633,17 +623,57 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
 
     function updateLeadStatus(select, companyId) {
         const status = select.value;
-        $(select).attr('class', 'ae-status-select-chip status-bg-' + status);
+        const statusText = select.options[select.selectedIndex].text;
+        
+        // Update UI immediately (V3 pill)
+        const $pill = $(select).closest('.ae-status-pill-v3');
+        if ($pill.length) {
+            const colors = {
+                'nuevo': '#4b5563',
+                'contactado': '#2563eb',
+                'seguimiento': '#ea580c',
+                'negociacion': '#7c3aed',
+                'ganado': '#16a34a'
+            };
+            const color = colors[status] || '#4b5563';
+            $pill.find('.ae-status-dot').css('background', color);
+            $pill.find('.ae-status-text').css('color', color).text(statusText);
+        } else {
+            $(select).attr('class', 'ae-status-select-chip status-bg-' + status);
+        }
+
         $.post('<?= site_url('radar/update-favorite-status') ?>', {
             company_id: companyId,
             status: status,
             '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+        }).done(function() {
+            if (typeof Swal !== 'undefined') {
+                Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 }).fire({ icon: 'success', title: 'Estado actualizado a ' + statusText });
+            }
+        }).fail(function() {
+            if (typeof Swal !== 'undefined') {
+                Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 }).fire({ icon: 'error', title: 'Error al actualizar el estado' });
+            }
         });
     }
 
     function toggleFavorite(btn, id) {
-        $(btn).toggleClass('is-active');
-        $.post('<?= site_url('radar/toggle-favorite') ?>', { company_id: id, '<?= csrf_token() ?>': '<?= csrf_hash() ?>' });
+        const isActive = $(btn).toggleClass('is-active').hasClass('is-active');
+        
+        // Update SVG fill manually just in case
+        const $svg = $(btn).find('svg');
+        if (isActive) {
+            $svg.attr('fill', '#ffb800');
+        } else {
+            $svg.attr('fill', 'none');
+        }
+
+        $.post('<?= site_url('radar/toggle-favorite') ?>', { company_id: id, '<?= csrf_token() ?>': '<?= csrf_hash() ?>' })
+        .done(function() {
+            if (typeof Swal !== 'undefined') {
+                Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 }).fire({ icon: 'success', title: isActive ? 'Añadido a favoritos' : 'Eliminado de favoritos' });
+            }
+        });
     }
 
     let radarMap = null;

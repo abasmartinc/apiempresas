@@ -490,6 +490,7 @@ function updateStatus(companyId, status, select) {
     const formData = new FormData();
     formData.append('company_id', companyId);
     formData.append('status', status);
+    formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
     fetch('<?= site_url('radar/update-favorite-status') ?>', {
         method: 'POST',
@@ -523,6 +524,7 @@ function saveNote(companyId, notes) {
     const formData = new FormData();
     formData.append('company_id', companyId);
     formData.append('notes', notes);
+    formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
     fetch('<?= site_url('radar/save-note') ?>', {
         method: 'POST',
@@ -567,6 +569,7 @@ function removeFavorite(companyId) {
         if (result.isConfirmed) {
             const formData = new FormData();
             formData.append('company_id', companyId);
+            formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
             fetch('<?= site_url('radar/toggle-favorite') ?>', {
                 method: 'POST',

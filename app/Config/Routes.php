@@ -115,9 +115,9 @@ $routes->get('radar/kanban', 'Radar::kanban', ['filter' => 'subscription:radar']
 $routes->post('radar/update-favorite-status', 'Radar::updateFavoriteStatus', ['filter' => 'subscription:radar']);
 $routes->get('radar/trends', 'Radar::trends', ['filter' => 'subscription:radar']);
 $routes->get('radar/trend-data', 'Radar::getTrendData', ['filter' => 'subscription:radar']);
-$routes->get('radar/ai-analyze/(:num)', 'Radar::aiAnalyze/$1', ['filter' => 'subscription:radar']);
-$routes->post('radar/prepare-contact/(:num)', 'Radar::prepareContact/$1', ['filter' => 'subscription:radar']);
-$routes->post('radar/log-event', 'Radar::logEvent', ['filter' => 'subscription:radar']);
+$routes->get('radar/ai-analyze/(:num)', 'Radar::aiAnalyze/$1');
+$routes->post('radar/prepare-contact/(:num)', 'Radar::prepareContact/$1');
+$routes->post('radar/log-event', 'Radar::logEvent');
 $routes->get('contact', 'Contact::index');
 $routes->post('contact/send', 'Contact::send');
 $routes->get('blog', 'Blog::index');
