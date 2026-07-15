@@ -373,7 +373,7 @@ class Sitemap extends Controller
         }
 
         helper('text');
-        $convocatorias = $db->query("SELECT DISTINCT convocatoria FROM subsidies_grants WHERE convocatoria IS NOT NULL AND convocatoria != ''")->getResultArray();
+        $convocatorias = $db->query("SELECT DISTINCT convocatoria FROM company_subsidies WHERE convocatoria IS NOT NULL AND convocatoria != ''")->getResultArray();
         
         foreach ($convocatorias as $c) {
             $slug = url_title($c['convocatoria'], '-', true);
