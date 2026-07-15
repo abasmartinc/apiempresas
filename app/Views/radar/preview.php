@@ -431,7 +431,7 @@ $pagination = [
         }, 15000);
 
         // Interaction Triggers
-        $(document).on('click', '.locked-rows, .btn-ae, .ae-radar-page__nav-link, .ae-radar-page__brand-header', function(e) {
+        $(document).on('click', '.locked-rows, .btn-ae, .ae-radar-page__nav-link', function(e) {
             e.preventDefault();
             openModal('interaction');
         });

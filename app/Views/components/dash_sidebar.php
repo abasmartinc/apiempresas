@@ -128,6 +128,23 @@
 <?php endif; ?>
 <?php endif; ?>
 <?php endif; ?>
+<section class="dash-card" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid #334155; border-radius: 16px; padding: 24px; margin-top: 24px; position: relative; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);">
+    <div style="position: absolute; top: 0; right: 0; width: 150px; height: 150px; background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, rgba(37,99,235,0) 70%); border-radius: 50%; transform: translate(30%, -30%);"></div>
+    
+    <div style="display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; position: relative; z-index: 2;">
+        <div style="background: rgba(37,99,235,0.2); color: #60a5fa; padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(59,130,246,0.3);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+        </div>
+        <div>
+            <div class="kicker" style="background: #3b82f6; color: #ffffff; padding: 3px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 900; letter-spacing: 0.05em; display: inline-block; margin-bottom: 6px;">NUEVO PRODUCTO</div>
+            <h3 style="font-size: 1.15rem; font-weight: 900; color: #ffffff; margin: 0 0 4px !important;">Radar B2B</h3>
+            <p style="font-size: 0.85rem; color: #94a3b8; font-weight: 500; margin: 0 !important; line-height: 1.4;">Encuentra leads y empresas recién creadas en tiempo real.</p>
+        </div>
+    </div>
+    <a href="<?= site_url('radar') ?>" style="display: block; width: 100%; text-align: center; background: #3b82f6; color: #ffffff; padding: 12px; border-radius: 10px; border: none; font-weight: 800; font-size: 0.95rem; text-decoration: none; transition: all 0.2s; position: relative; z-index: 2; box-shadow: 0 4px 12px rgba(37,99,235,0.2);" onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#3b82f6'; this.style.transform='translateY(0)';">
+        Abrir Radar B2B &rarr;
+    </a>
+</section>
 
 <section class="dash-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-top: 24px;">
     <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">

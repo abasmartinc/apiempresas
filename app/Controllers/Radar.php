@@ -369,7 +369,9 @@ class Radar extends BaseController
         // Obtener filtros desde la URL
         $province = $this->request->getGet('provincia');
         $cnae = $this->request->getGet('cnae');
-        $timeRange = $this->request->getGet('rango') ?? 'hoy'; // Default hoy
+        
+        $requestedRange = $this->request->getGet('rango');
+        $timeRange = $requestedRange ?? 'hoy'; // Default hoy
 
         // 1. Estadísticas Rápidas (National)
         $stats = [
@@ -377,6 +379,16 @@ class Radar extends BaseController
             'semana' => $this->countNewCompanies('semana'),
             'mes' => $this->countNewCompanies('mes')
         ];
+
+        // Auto-fallback inteligente: Si el pipeline de hoy no se ha ejecutado aún (0 empresas),
+        // y el usuario no ha forzado el filtro "hoy", ampliamos la búsqueda para que no se vea vacío.
+        if (empty($requestedRange)) {
+            if ($stats['hoy'] == 0 && $stats['semana'] > 0) {
+                $timeRange = 'semana';
+            } elseif ($stats['hoy'] == 0 && $stats['semana'] == 0 && $stats['mes'] > 0) {
+                $timeRange = 'mes';
+            }
+        }
 
         // 2. Query Principal del Listado con Paginación
         $this->companyModel->select('
@@ -526,10 +538,12 @@ class Radar extends BaseController
                 $company['trigger_type'] = 'subvencion';
                 $company['trigger_desc'] = number_format($subsidies[$cif]['importe'], 2, ',', '.') . '€';
                 $company['trigger_date'] = $subsidies[$cif]['fecha_concesion'] ?? $subsidies[$cif]['created_at'];
+                $company['trigger_raw_data'] = json_encode($subsidies[$cif]);
             } elseif (isset($contracts[$cif])) {
                 $company['trigger_type'] = 'contrato';
                 $company['trigger_desc'] = number_format($contracts[$cif]['importe_adjudicacion'], 2, ',', '.') . '€';
                 $company['trigger_date'] = $contracts[$cif]['fecha_adjudicacion'] ?? $contracts[$cif]['created_at'];
+                $company['trigger_raw_data'] = json_encode($contracts[$cif]);
             } else {
                 $company['trigger_type'] = 'nueva_empresa';
                 $company['trigger_desc'] = '';
@@ -555,7 +569,7 @@ class Radar extends BaseController
             ->select('uf.status, COUNT(*) as total')
             ->join('companies c', 'c.id = uf.company_id')
             ->where('uf.user_id', $userId)
-            ->where('c.fecha_constitucion >=', $dateLimit);
+            ->join("({$unionQuery}) matched_events", "matched_events.cif = c.cif", "inner");
         
         if ($province) {
             $statusCounts->where('c.registro_mercantil', strtoupper(str_replace('-', ' ', $province)));
@@ -684,6 +698,7 @@ class Radar extends BaseController
                        SELECT company_cif AS cif FROM company_contracts WHERE created_at >= '{$dateLimit} 00:00:00'";
 
         $builder->join("({$unionQuery}) matched_events", "matched_events.cif = companies.cif", "inner");
+        $builder->where('companies.fecha_constitucion IS NOT NULL');
         
         return $builder->countAllResults();
     }
@@ -975,7 +990,16 @@ class Radar extends BaseController
                 $this->logLeadEvent($userId, $companyId ?: ($favorite['company_id'] ?? null), 'status_followup');
             }
 
-            return $this->response->setJSON(['status' => 'success', 'action' => 'updated']);
+            // Calculate new stats
+            $statsRows = $this->favoriteModel->select('status, count(id) as total')->where('user_id', $userId)->groupBy('status')->get()->getResultArray();
+            $crmStats = ['contactado' => 0, 'seguimiento' => 0, 'negociacion' => 0, 'ganado' => 0];
+            foreach ($statsRows as $r) {
+                if (array_key_exists($r['status'], $crmStats)) {
+                    $crmStats[$r['status']] = (int)$r['total'];
+                }
+            }
+
+            return $this->response->setJSON(['status' => 'success', 'action' => 'updated', 'crmStats' => $crmStats]);
 
         } catch (\Throwable $e) {
             log_message('error', '[Radar::updateFavoriteStatus] Exception: ' . $e->getMessage());

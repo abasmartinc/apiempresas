@@ -25,23 +25,25 @@ class RadarScoringSystem
         // 1. Intentamos usar el score_total de la DB si es > 0 (asumimos que el script externo ya aplicó el 90% de la lógica)
         // 2. Si es 0, usamos el fallback de cálculo en tiempo real (mismo algoritmo que el script externo)
         
+        $triggerType = $company['trigger_type'] ?? '';
+        $isHighValueTrigger = in_array($triggerType, ['contrato', 'subvencion']);
+
         $dbScore = (int)($company['score_total'] ?? 0);
         
         if ($dbScore > 0) {
-            $baseScore = $dbScore;
-            // Para el desglose, usamos la nota de la DB para BORME si la hay,
-            // pero calculamos el perfil de calidad y el nivel de contacto REAL
-            // en base a los datos reales que tenemos, para no mentir al usuario.
-            $bormeScore = (int)($company['borme_score_static'] ?? $dbScore);
+            $baseScore = $isHighValueTrigger ? max($dbScore, 95) : $dbScore;
+            $bormeScore = $isHighValueTrigger ? 100 : (int)($company['borme_score_static'] ?? $dbScore);
             $qualityScore = self::calculateQualityScore($company);
             $contactScore = self::calculateContactScore($company);
         } else {
-            $bormeScore = self::calculateBormeScore($company);
+            $bormeScore = $isHighValueTrigger ? 100 : self::calculateBormeScore($company);
             $qualityScore = self::calculateQualityScore($company);
             $contactScore = self::calculateContactScore($company);
             
-            // Cálculo manual del 90% estático
             $baseScore = (($bormeScore * 0.60) + ($qualityScore * 0.15) + ($contactScore * 0.15)) / 0.90;
+            if ($isHighValueTrigger) {
+                $baseScore = max($baseScore, 95);
+            }
         }
 
         $personalizationScore = self::calculatePersonalizationScore($engagementScore, $groupScore, $userPrefScore);
@@ -69,7 +71,7 @@ class RadarScoringSystem
             'contact_score' => $contactScore,
             'personalization_score' => $personalizationScore,
             'visuals' => $visuals,
-            'explanation' => self::buildExplanation($bormeScore, $qualityScore, $contactScore, $personalizationScore, $mainAct)
+            'explanation' => self::buildExplanation($bormeScore, $qualityScore, $contactScore, $personalizationScore, $mainAct, $triggerType)
         ];
     }
 
@@ -242,10 +244,16 @@ class RadarScoringSystem
         ];
     }
 
-    private static function buildExplanation(int $borme, int $quality, int $contact, int $personalization, string $act): string
+    private static function buildExplanation(int $borme, int $quality, int $contact, int $personalization, string $act, string $triggerType = ''): string
     {
         $reasons = [];
-        $reasons[] = "Señal BORME ($act): $borme/100";
+        if ($triggerType === 'contrato') {
+            $reasons[] = "Adjudicatario de contrato público (Alta solvencia)";
+        } elseif ($triggerType === 'subvencion') {
+            $reasons[] = "Subvención concedida (Inyección de liquidez)";
+        } else {
+            $reasons[] = trim($act) !== '' ? "Señal BORME ($act): $borme/100" : "Señal BORME: $borme/100";
+        }
         if ($quality > 50) $reasons[] = "Perfil de empresa de alta calidad";
         if ($contact > 50) $reasons[] = "Múltiples vías de contacto detectadas";
         if ($personalization > 50) $reasons[] = "Alta afinidad con tus intereses detectada por IA";

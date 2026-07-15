@@ -72,7 +72,9 @@ $filters = $filters ?? [];
 $allCompanies = $companies ?? [];
 $limitFree = 3; // Limitado a 3 empresas visibles
 $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCompanies;
-$lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
+$lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree, 4) : []; // Mostrar solo 4 filas borrosas
+$totalItems = $pagination['total'] ?? 0;
+$hiddenCount = max(0, $totalItems - $limitFree);
 ?>
 
 <?php if (!$isFree): ?>
@@ -342,18 +344,6 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
 
         <!-- Right Side: Grouped Controls -->
         <div class="ae-radar-page__lead-controls" style="display:flex; align-items:center; gap:16px;">
-            <!-- View Toggle -->
-            <div class="ae-radar-page__view-toggle" style="display:flex; gap:4px; background:#f1f5f9; padding:4px; border-radius:12px;">
-                <button type="button" class="ae-view-btn is-active" data-view="list" onclick="switchView('list')" style="display:flex; align-items:center; gap:6px; border:none; background:white; padding:6px 14px; border-radius:10px; font-weight:700; color:#2563eb; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,0.05); font-size:12px;">
-                    Listado
-                </button>
-                <button type="button" class="ae-view-btn" data-view="map" onclick="switchView('map')" style="display:flex; align-items:center; gap:6px; border:none; background:transparent; padding:6px 14px; border-radius:10px; font-weight:700; color:#64748b; cursor:pointer; font-size:12px;">
-                    Mapa
-                </button>
-            </div>
-
-                <!-- Vertical Separator -->
-                <div style="width:1px; height:24px; background:#e2e8f0;"></div>
 
                 <!-- Controls Group -->
                 <div style="display:flex; align-items:center; gap:10px;">
@@ -371,7 +361,7 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
                     <div style="display:flex; gap:6px;">
                         <a href="<?= site_url('radar/exportar?' . http_build_query(array_merge($filters, ['format' => 'excel']))) ?>" class="ae-radar-page__export-btn" style="background:#2563eb; padding: 10px 14px; border-radius:10px; color:#fff; text-decoration:none; font-size:12px; font-weight:800; display:flex; align-items:center; gap:6px;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                            Desbloquear oportunidades
+                            Descargar listado
                         </a>
                         <a href="<?= site_url('radar/exportar?' . http_build_query(array_merge($filters, ['format' => 'csv']))) ?>" class="ae-radar-page__export-btn" style="background:#475569; padding: 10px 14px; border-radius:10px; color:#fff; text-decoration:none; font-size:12px; font-weight:800; display:flex; align-items:center;" title="Exportar CSV (Datos brutos)">
                             .CSV
@@ -545,12 +535,12 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
 
                                     <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px;">
                                         <?php if (($co['trigger_type'] ?? 'nueva_empresa') === 'subvencion') { ?>
-                                            <div style="font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 8px; background: #fffbeb; color: #d97706; text-transform: uppercase; border: 1px solid currentColor;">
+                                            <div onclick="openTriggerModal(this)" data-type="subvencion" data-raw='<?= htmlspecialchars($co['trigger_raw_data'] ?? '{}', ENT_QUOTES, 'UTF-8') ?>' style="cursor: pointer; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 8px; background: #fffbeb; color: #d97706; text-transform: uppercase; border: 1px solid currentColor;">
                                                 🔥 SUBVENCIÓN CONCEDIDA
                                             </div>
                                             <span style="font-size: 11px; font-weight: 900; color: #b45309;"><?= $co['trigger_desc'] ?></span>
                                         <?php } elseif (($co['trigger_type'] ?? 'nueva_empresa') === 'contrato') { ?>
-                                            <div style="font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 8px; background: #eff6ff; color: #1d4ed8; text-transform: uppercase; border: 1px solid currentColor;">
+                                            <div onclick="openTriggerModal(this)" data-type="contrato" data-raw='<?= htmlspecialchars($co['trigger_raw_data'] ?? '{}', ENT_QUOTES, 'UTF-8') ?>' style="cursor: pointer; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 8px; background: #eff6ff; color: #1d4ed8; text-transform: uppercase; border: 1px solid currentColor;">
                                                 💼 CONTRATO PÚBLICO
                                             </div>
                                             <span style="font-size: 11px; font-weight: 900; color: #1e40af;"><?= $co['trigger_desc'] ?></span>
@@ -631,7 +621,7 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
                                                 <span class="ae-status-dot" style="background: <?= $st['color'] ?>;"></span>
                                                 <span class="ae-status-text" style="color: <?= $st['color'] ?>;"><?= $curStatus ?></span>
                                             </div>
-                                            <select onchange="updateLeadStatusAndNotify(this, '<?= $co['id'] ?>')" 
+                                            <select data-old="<?= $curStatus ?>" onchange="updateLeadStatusAndNotify(this, '<?= $co['id'] ?>')" 
                                                     style="position: absolute; opacity: 0; width: 100%; height: 100%; top:0; left:0; cursor: pointer;">
                                                 <option value="nuevo" <?= ($curStatus === 'nuevo') ? 'selected' : '' ?>>NUEVO</option>
                                                 <option value="contactado" <?= ($curStatus === 'contactado') ? 'selected' : '' ?>>CONTACTADO</option>
@@ -651,34 +641,46 @@ $lockedCompanies = $isFree ? array_slice($allCompanies, $limitFree) : [];
                         <?php foreach ($lockedCompanies as $co): ?>
                             <tr class="ae-radar-row ae-locked-overlay" onclick="showConversionNudge('Oportunidad real bloqueada', 'Activa Radar PRO para ver los detalles de esta empresa y del resto de oportunidades detectadas hoy.', {id: '<?= $co['id'] ?>', action: 'view'})">
                                 <td class="ae-radar-page__td-identity" style="padding: 24px 20px;">
-                                    <div class="ae-radar-row-blurred" style="filter: blur(12px); pointer-events: none; opacity: 0.4;">
+                                    <div class="ae-radar-row-blurred" style="filter: blur(6px); pointer-events: none; opacity: 0.7;">
                                         <span style="font-size: 17px; font-weight: 800; color: #0f172a;"><?= esc($co['company_name']) ?></span>
                                         <div class="ae-meta-sub">
                                             <span>B********</span> · <span>Sector Reservado</span>
                                         </div>
                                     </div>
-                                    <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #1e293b; color: white; padding: 8px 16px; border-radius: 10px; font-size: 12px; font-weight: 900; box-shadow: 0 4px 12px rgba(0,0,0,0.2); white-space: nowrap; border: 1px solid rgba(255,255,255,0.1);">
-                                        🔒 Bloqueado: Radar PRO
-                                    </div>
                                 </td>
                                 <td class="ae-radar-page__td-opportunity" style="padding: 24px 10px;">
-                                    <div class="ae-radar-row-blurred" style="filter: blur(12px); pointer-events: none; opacity: 0.4;">
+                                    <div class="ae-radar-row-blurred" style="filter: blur(6px); pointer-events: none; opacity: 0.7;">
                                         <div class="ae-value-box">
                                             <div style="font-size: 15px; font-weight: 800;">Potencial Reservado</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="ae-radar-page__td-actions" style="padding: 24px 20px; text-align: right;">
-                                    <div style="opacity: 0.3;">
-                                        <button disabled style="background: #94a3b8; color: white; width: 100%; height: 42px; border-radius: 10px; font-weight: 800; border: none; cursor: not-allowed; text-transform: uppercase; font-size: 11px;">Disponible en PRO</button>
-                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php } ?>
                 <?php } ?>
-            </tbody>
+        </tbody>
         </table>
+        
+        <?php if ($isFree && $hiddenCount > 0) { ?>
+        <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; display: flex; align-items: center; justify-content: center; background: linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.9) 40%, rgba(255,255,255,0) 100%); z-index: 30; pointer-events: none;">
+            <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; padding: 24px 40px; border-radius: 20px; text-align: center; font-size: 17px; box-shadow: 0 20px 40px -10px rgba(37, 99, 235, 0.4), 0 0 0 1px rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); cursor: pointer; pointer-events: auto; transform: translateY(10px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); min-width: 380px;" onclick="showConversionNudge('Oportunidades bloqueadas', 'Activa Radar PRO para ver el resto de empresas detectadas.', {action: 'view'})" onmouseover="this.style.transform='translateY(5px) scale(1.02)'; this.style.boxShadow='0 25px 50px -12px rgba(37, 99, 235, 0.5), 0 0 0 1px rgba(255,255,255,0.2)';" onmouseout="this.style.transform='translateY(10px) scale(1)'; this.style.boxShadow='0 20px 40px -10px rgba(37, 99, 235, 0.4), 0 0 0 1px rgba(255,255,255,0.1)';">
+                <div style="display: flex; justify-content: center; margin-bottom: 12px;">
+                    <span style="background: rgba(255,255,255,0.15); padding: 12px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </span>
+                </div>
+                <h4 style="font-weight: 950; font-size: 1.25rem; margin-bottom: 8px; color: #ffffff; letter-spacing: -0.02em;">Has descubierto 3 de <?= number_format($totalItems) ?> empresas</h4>
+                <p style="color: rgba(255,255,255,0.85); font-size: 0.95rem; font-weight: 500; margin-bottom: 20px; line-height: 1.5;">Quedan <strong style="color: #ffffff; font-weight: 800;"><?= number_format($hiddenCount) ?> empresas</strong> ocultas con datos de contacto, actividad y subvenciones recientes.</p>
+                
+                <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=radar_locked_cta') ?>" onclick="event.stopPropagation()" style="display: block; text-decoration: none; background: linear-gradient(90deg, #fde047 0%, #f59e0b 50%, #ea580c 100%); color: #0f172a; border-radius: 12px; padding: 14px; font-weight: 800; font-size: 1rem; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                    Desbloquear todo el Radar
+                </a>
+            </div>
+        </div>
+        <?php } ?>
     </div>
 
     <?php if (!$isFree && isset($pagination) && isset($pager)) { ?>

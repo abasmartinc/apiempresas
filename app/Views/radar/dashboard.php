@@ -235,21 +235,21 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                     <div class="ae-pro-crm-bar">
                         <div class="ae-pro-crm-bar__stat">
                             <div>
-                                <div class="ae-pro-crm-bar__num"><?= number_format($crmStats['contactado'] ?? 0) ?></div>
+                                <div id="kpi-contactadas" class="ae-pro-crm-bar__num"><?= number_format($crmStats['contactado'] ?? 0) ?></div>
                                 <div class="ae-pro-crm-bar__label">Contactadas</div>
                             </div>
                         </div>
                         <div class="ae-pro-crm-bar__sep"></div>
                         <div class="ae-pro-crm-bar__stat">
                             <div>
-                                <div class="ae-pro-crm-bar__num"><?= number_format($crmStats['seguimiento'] ?? 0) ?></div>
+                                <div id="kpi-seguimiento" class="ae-pro-crm-bar__num"><?= number_format($crmStats['seguimiento'] ?? 0) ?></div>
                                 <div class="ae-pro-crm-bar__label">En seguimiento</div>
                             </div>
                         </div>
                         <div class="ae-pro-crm-bar__sep"></div>
                         <div class="ae-pro-crm-bar__stat">
                             <div>
-                                <div class="ae-pro-crm-bar__num" style="color:#2563eb;"><?= number_format($crmStats['nuevo'] ?? 0) ?></div>
+                                <div id="kpi-sin-contactar" class="ae-pro-crm-bar__num" style="color:#2563eb;"><?= number_format($crmStats['nuevo'] ?? 0) ?></div>
                                 <div class="ae-pro-crm-bar__label">Sin contactar</div>
                             </div>
                         </div>
@@ -282,7 +282,7 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                                 <?php if ($isFree): ?>
                                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                                 <?php endif; ?>
-                                <?= $isFree ? 'PRO ONLY' : 'BETA' ?>
+                                <?= $isFree ? 'DISPONIBLE EN PRO' : 'BETA' ?>
                             </span>
                         </div>
                         <div style="display:flex;gap:12px;align-items:center;">
@@ -624,7 +624,20 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
     function updateLeadStatus(select, companyId) {
         const status = select.value;
         const statusText = select.options[select.selectedIndex].text;
+        const oldStatus = select.dataset.old || 'nuevo';
+        select.dataset.old = status;
         
+        // Optimistic KPI update
+        if (oldStatus !== status) {
+            if (oldStatus === 'contactado') { $('#kpi-contactadas').text( Math.max(0, parseInt($('#kpi-contactadas').text()||0) - 1) ); }
+            if (oldStatus === 'seguimiento') { $('#kpi-seguimiento').text( Math.max(0, parseInt($('#kpi-seguimiento').text()||0) - 1) ); }
+            if (oldStatus === 'nuevo') { $('#kpi-sin-contactar').text( Math.max(0, parseInt($('#kpi-sin-contactar').text()||0) - 1) ); }
+            
+            if (status === 'contactado') { $('#kpi-contactadas').text( parseInt($('#kpi-contactadas').text()||0) + 1 ); }
+            if (status === 'seguimiento') { $('#kpi-seguimiento').text( parseInt($('#kpi-seguimiento').text()||0) + 1 ); }
+            if (status === 'nuevo') { $('#kpi-sin-contactar').text( parseInt($('#kpi-sin-contactar').text()||0) + 1 ); }
+        }
+
         // Update UI immediately (V3 pill)
         const $pill = $(select).closest('.ae-status-pill-v3');
         if ($pill.length) {
@@ -646,7 +659,7 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
             company_id: companyId,
             status: status,
             '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
-        }).done(function() {
+        }).done(function(res) {
             if (typeof Swal !== 'undefined') {
                 Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 }).fire({ icon: 'success', title: 'Estado actualizado a ' + statusText });
             }
@@ -736,6 +749,7 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
             .then(r => r.text())
             .then(html => {
                 $('#radar-results-container').html(html).css('opacity', '1');
+                document.getElementById('radar-results-container').scrollIntoView({ behavior: 'smooth' });
             });
     }
 
@@ -762,6 +776,102 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
         }, function() {
             window.location.reload();
         });
+    }
+
+    function openTriggerModal(btn) {
+        const rawDataStr = btn.dataset.raw;
+        const type = btn.dataset.type;
+        
+        if (!rawDataStr || rawDataStr === '{}') return;
+        
+        try {
+            const rawData = JSON.parse(rawDataStr);
+            let title = type === 'subvencion' ? '🔥 Detalles de la Subvención' : '💼 Detalles del Contrato Público';
+            
+            const fieldMapping = {
+                'importe': 'Importe',
+                'importe_adjudicacion': 'Importe Adjudicado',
+                'titulo': 'Título',
+                'titulo_contrato': 'Título del Contrato',
+                'objeto': 'Objeto',
+                'organo': 'Órgano',
+                'organo_contratacion': 'Órgano de Contratación',
+                'fecha_concesion': 'Fecha de Concesión',
+                'fecha_adjudicacion': 'Fecha de Adjudicación',
+                'estado': 'Estado',
+                'cpv': 'Código CPV',
+                'expediente': 'Expediente',
+                'url': 'Enlace Oficial',
+                'link': 'Enlace Oficial',
+                'enlace_licitacion': 'Enlace a Licitación',
+                'id_licitacion': 'ID Licitación'
+            };
+
+            let html = `
+                <div style="font-size: 13px; color: #64748b; margin-bottom: 16px; text-align: left; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
+                    Información oficial extraída del boletín correspondiente.
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; text-align: left; font-family: 'Inter', system-ui, sans-serif; max-height: 400px; overflow-y: auto; padding-right: 8px;">
+            `;
+            
+            const excludeFields = ['id', 'company_cif', 'created_at', 'updated_at', 'company_id'];
+            
+            for (const [key, value] of Object.entries(rawData)) {
+                if (excludeFields.includes(key)) continue;
+                if (value === null || value === '') continue;
+                
+                const label = fieldMapping[key] || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+                
+                let displayValue = value;
+                
+                // Format currency
+                if (key.includes('importe') && !isNaN(value)) {
+                    displayValue = `<span style="font-size: 16px; font-weight: 800; color: #16a34a;">${new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value)}</span>`;
+                }
+                // Make URLs clickable
+                else if (typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://'))) {
+                    displayValue = `
+                        <a href="${value}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; color: #2563eb; text-decoration: none; font-weight: 600; font-size: 13px; padding: 2px 0; transition: color 0.2s;">
+                            <span>Abrir enlace externo</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        </a>
+                    `;
+                } 
+                // Default text display
+                else {
+                    displayValue = `<span style="color: #0f172a; font-size: 13px; font-weight: 500; line-height: 1.4; word-break: break-word;">${value}</span>`;
+                }
+                
+                // Determine column span based on field type/length
+                let colSpan = '';
+                if (key === 'titulo' || key === 'titulo_contrato' || key === 'objeto' || key === 'url' || key === 'link' || key === 'enlace_licitacion' || key === 'id_licitacion' || key.length > 20 || (typeof value === 'string' && value.length > 60)) {
+                    colSpan = 'grid-column: span 2;';
+                } else {
+                    colSpan = 'grid-column: span 1;';
+                }
+
+                html += `
+                    <div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 6px; padding: 10px; ${colSpan}">
+                        <div style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">${label}</div>
+                        <div>${displayValue}</div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: `<div style="text-align: left; font-size: 18px; font-weight: 800; color: #0f172a; font-family: 'Inter', system-ui, sans-serif;">${title}</div>`,
+                    html: html,
+                    width: 750,
+                    showCloseButton: true,
+                    showConfirmButton: false,
+                    padding: '16px 20px 20px 20px'
+                });
+            }
+        } catch(e) {
+            console.error("Error parsing trigger data", e);
+        }
     }
     </script>
 

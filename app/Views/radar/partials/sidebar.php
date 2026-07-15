@@ -124,9 +124,11 @@ $current_url = current_url();
             API para desarrolladores
         </a>
 
+        <?php if (session('logged_in')): ?>
         <a href="<?= site_url('logout') ?>" class="ae-radar-page__nav-link">
             <span class="ae-radar-page__nav-icon">🚪</span>
             Cerrar sesión
         </a>
+        <?php endif; ?>
     </div>
 </aside>
