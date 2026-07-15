@@ -55,12 +55,6 @@ class GenerateSitemaps extends BaseCommand
         
         $publicPath = FCPATH;
         
-        // Ensure old sitemaps are removed (optional but good for cleanup if count decreases)
-        $existing = glob($publicPath . 'sitemap-companies-*.xml');
-        foreach ($existing as $file) {
-            @unlink($file);
-        }
-
         $currentFile = $publicPath . "sitemap-companies-{$fileIndex}.xml";
         $xmlContent = '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL;
         
@@ -130,5 +124,17 @@ class GenerateSitemaps extends BaseCommand
         // Create an index file specifically for these just to keep track of the count
         // So that the main Sitemap Controller knows how many there are.
         file_put_contents($publicPath . 'sitemap-companies-count.txt', $fileIndex);
+
+        // Cleanup any old files that might remain if the total count decreased
+        $existing = glob($publicPath . 'sitemap-companies-*.xml');
+        foreach ($existing as $file) {
+            // Extract the number from the filename
+            if (preg_match('/sitemap-companies-(\d+)\.xml$/', $file, $matches)) {
+                $num = (int)$matches[1];
+                if ($num > $fileIndex) {
+                    @unlink($file);
+                }
+            }
+        }
     }
 }
