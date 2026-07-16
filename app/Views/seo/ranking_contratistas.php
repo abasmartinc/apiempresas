@@ -88,6 +88,65 @@
         .cif-badge { display: inline-block; background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; margin-top: 4px; border: 1px solid #e2e8f0; }
         .amount-badge { display: inline-block; background: #eff6ff; color: #1d4ed8; padding: 5px 14px; border-radius: 99px; font-weight: 800; font-size: 0.9rem; border: 1px solid #bfdbfe; white-space: nowrap; }
 
+        /* ── PAYWALL BLUR ── */
+        .blurred-amount {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .blurred-amount .amount-text {
+            filter: blur(5px);
+            user-select: none;
+            color: #1d4ed8;
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+        .blurred-amount .lock-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(135deg, #2152FF, #3b82f6);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(33,82,255,0.3);
+            transition: all 0.2s;
+        }
+        .blurred-amount .lock-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(33,82,255,0.4); }
+        .paywall-row { opacity: 0.85; }
+        .paywall-row td { background: #fafbff !important; }
+        .paywall-cta-banner {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border: 1px solid #bfdbfe;
+            border-radius: 16px;
+            padding: 20px 28px;
+            margin: 20px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .paywall-cta-banner p { margin: 0; font-size: 0.9rem; color: #1e3a8a; font-weight: 600; }
+        .paywall-cta-banner a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #2152FF;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            text-decoration: none;
+            white-space: nowrap;
+            box-shadow: 0 4px 14px rgba(33,82,255,0.3);
+            flex-shrink: 0;
+        }
+
         .pagination-container { padding: 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: center; background: #f8fafc; border-radius: 0 0 20px 20px; }
         .pagination { display: flex; list-style: none; padding: 0; margin: 0; gap: 6px; }
         .pagination li a, .pagination li span { display: flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 12px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; text-decoration: none; transition: all 0.2s; }
@@ -226,34 +285,54 @@
                                 <?php
                                 $maxAmount = !empty($companies) ? (float)$companies[0]['total_amount'] : 1;
                                 $count = (($currentPage ?? 1) - 1) * 50;
+                                $radarUrl = site_url('radar');
                                 foreach($companies as $co):
                                     $count++;
+                                    $isLocked = $count > 10;
                                     $pct = $maxAmount > 0 ? min(100, max(2, ($co['total_amount'] / $maxAmount) * 100)) : 2;
                                     $delay = (($count - 1) % 50) * 0.04;
                                     $rankClass = $count === 1 ? 'rank-1' : ($count === 2 ? 'rank-2' : ($count === 3 ? 'rank-3' : 'rank-n'));
                                     $hasCompany = !empty($co['company_name']);
-                                    $cUrl = $hasCompany ? site_url($co['company_cif'] . '-' . url_title(str_replace(['º','ª'],['o','a'],$co['company_name']), '-', true)) : '#';
+                                    $cUrl = ($hasCompany && !$isLocked) ? site_url($co['company_cif'] . '-' . url_title(str_replace(['º','ª'],['o','a'],$co['company_name']), '-', true)) : '#';
                                 ?>
-                                <tr<?= $hasCompany ? ' onclick="window.location=\'' . esc($cUrl) . '\'"' : ' style="cursor: default;"' ?>>
+                                <tr<?= (!$isLocked && $hasCompany) ? ' onclick="window.location=\'' . esc($cUrl) . '\'"' : ' style="cursor: default;"' ?><?= $isLocked ? ' class="paywall-row"' : '' ?>>
                                     <td style="text-align: center; padding-left: 16px;">
                                         <span class="rank-badge <?= $rankClass ?>"><?= $count <= 3 ? ['🥇','🥈','🥉'][$count-1] : $count ?></span>
                                     </td>
                                     <td>
                                         <?php if ($hasCompany): ?>
+                                        <?php if (!$isLocked): ?>
                                         <a href="<?= esc($cUrl) ?>" style="font-weight: 700; color: #0f172a; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#2152FF'" onmouseout="this.style.color='#0f172a'">
                                             <?= esc($co['company_name']) ?>
                                         </a>
+                                        <?php else: ?>
+                                        <span style="font-weight: 700; color: #0f172a;"><?= esc($co['company_name']) ?></span>
+                                        <?php endif; ?>
                                         <?php else: ?>
                                         <span style="font-weight: 700; color: #0f172a;">Empresa <?= esc($co['company_cif']) ?></span>
                                         <?php endif; ?>
                                         <span class="cif-badge"><?= esc($co['company_cif']) ?></span>
                                     </td>
                                     <td>
+                                        <?php if (!$isLocked): ?>
                                         <span style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 6px;"><?= number_format($co['total_contracts'], 0, ',', '.') ?></span>
                                         <div class="pbar-track"><div class="pbar-fill pbar-fill--blue" style="width: <?= $pct ?>%; animation-delay: <?= $delay ?>s;"></div></div>
+                                        <?php else: ?>
+                                        <span style="filter: blur(4px); font-weight: 700; color: #0f172a; user-select: none;"><?= number_format($co['total_contracts'], 0, ',', '.') ?></span>
+                                        <?php endif; ?>
                                     </td>
                                     <td style="text-align: right;">
+                                        <?php if (!$isLocked): ?>
                                         <span class="amount-badge"><?= number_format($co['total_amount'], 2, ',', '.') ?> €</span>
+                                        <?php else: ?>
+                                        <span class="blurred-amount">
+                                            <span class="amount-text"><?= number_format($co['total_amount'], 2, ',', '.') ?> €</span>
+                                            <a href="<?= $radarUrl ?>" class="lock-btn" onclick="event.stopPropagation();">
+                                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                                Radar
+                                            </a>
+                                        </span>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -262,6 +341,16 @@
                         </table>
                     </div>
                 </section>
+
+                <?php if ($total > 10): ?>
+                <div class="paywall-cta-banner">
+                    <p>🔒 <strong>Solo se muestran los 10 primeros importes.</strong> Accede al Radar para ver el ranking completo de <?= number_format($total, 0, ',', '.') ?> empresas contratistas, con filtros por sector y provincia.</p>
+                    <a href="<?= site_url('radar') ?>">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                        Acceder al Radar
+                    </a>
+                </div>
+                <?php endif; ?>
 
                 <?php if (empty($searchQuery)): ?>
                 <?php 

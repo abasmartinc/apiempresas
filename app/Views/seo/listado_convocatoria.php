@@ -98,6 +98,68 @@
             width: 100%;
             overflow-x: auto;
         }
+
+        /* ── PAYWALL BLUR ── */
+        .blurred-amount {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .blurred-amount .amount-text {
+            filter: blur(5px);
+            user-select: none;
+            color: #059669;
+            font-weight: 800;
+            font-size: 0.95rem;
+        }
+        .blurred-amount .lock-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.3);
+            transition: all 0.2s;
+        }
+        .blurred-amount .lock-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16,185,129,0.4);
+        }
+        .paywall-row td { background: #fafffe !important; }
+        .paywall-cta-banner {
+            background: linear-gradient(135deg, #f0fdf9, #ecfdf5);
+            border: 1px solid #a7f3d0;
+            border-radius: 16px;
+            padding: 20px 28px;
+            margin: 16px 24px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .paywall-cta-banner p { margin: 0; font-size: 0.9rem; color: #065f46; font-weight: 600; }
+        .paywall-cta-banner a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #10b981;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            text-decoration: none;
+            white-space: nowrap;
+            box-shadow: 0 4px 14px rgba(16,185,129,0.3);
+            flex-shrink: 0;
+        }
         .prem-table {
             width: 100%;
             min-width: 800px;
@@ -292,16 +354,25 @@
                                     <td colspan="3" style="text-align: center; color: #64748b; padding: 48px; font-weight: 500;">No hay subvenciones registradas para esta convocatoria en esta página.</td>
                                 </tr>
                             <?php else: ?>
-                                <?php foreach ($subsidies as $sub): 
+                                <?php 
+                                $rowNum = 0;
+                                $radarUrl = site_url('radar');
+                                foreach ($subsidies as $sub):
+                                    $rowNum++;
+                                    $isLocked = $rowNum > 10;
                                     $hasCompany = !empty($sub['company_name']);
-                                    $cUrl = $hasCompany ? company_url(['cif' => $sub['company_cif'], 'name' => $sub['company_name']]) : '#';
+                                    $cUrl = ($hasCompany && !$isLocked) ? company_url(['cif' => $sub['company_cif'], 'name' => $sub['company_name']]) : '#';
                                 ?>
-                                    <tr<?= $hasCompany ? ' onclick="window.location=\'' . esc($cUrl) . '\'" style="cursor: pointer;"' : '' ?>>
+                                    <tr<?= (!$isLocked && $hasCompany) ? ' onclick="window.location=\'' . esc($cUrl) . '\'" style="cursor: pointer;"' : '' ?><?= $isLocked ? ' class="paywall-row"' : '' ?>>
                                         <td>
                                             <?php if ($hasCompany): ?>
+                                                <?php if (!$isLocked): ?>
                                                 <a href="<?= esc($cUrl) ?>" style="color: #0f172a; font-weight: 800; text-decoration: none; display: block; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='#0f172a'">
                                                     <?= esc($sub['company_name']) ?>
                                                 </a>
+                                                <?php else: ?>
+                                                <span style="color: #0f172a; font-weight: 800; display: block; font-size: 0.95rem;"><?= esc($sub['company_name']) ?></span>
+                                                <?php endif; ?>
                                             <?php else: ?>
                                                 <?php if (!empty($sub['raw_beneficiario'])): ?>
                                                     <span style="color: #0f172a; font-weight: 800; display: block; font-size: 0.95rem;"><?= esc($sub['raw_beneficiario']) ?></span>
@@ -313,12 +384,22 @@
                                         </td>
 
                                         <td style="color: #64748b; font-size: 0.95rem; white-space: nowrap; font-weight: 500;">
-                                            <?= date('d/m/Y', strtotime($sub['fecha_concesion'])) ?>
+                                            <?= !$isLocked ? date('d/m/Y', strtotime($sub['fecha_concesion'])) : date('d/m/Y', strtotime($sub['fecha_concesion'])) ?>
                                         </td>
                                         <td style="text-align: right;">
+                                            <?php if (!$isLocked): ?>
                                             <span class="amount-badge">
                                                 <?= number_format($sub['importe'], 2, ',', '.') ?> €
                                             </span>
+                                            <?php else: ?>
+                                            <span class="blurred-amount">
+                                                <span class="amount-text"><?= number_format($sub['importe'], 2, ',', '.') ?> €</span>
+                                                <a href="<?= $radarUrl ?>" class="lock-btn" onclick="event.stopPropagation();" title="Ver importe completo en el Radar">
+                                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                                    Radar
+                                                </a>
+                                            </span>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -326,7 +407,17 @@
                         </tbody>
                     </table>
                 </div>
-                
+
+                <?php if ($total > 10): ?>
+                <div class="paywall-cta-banner">
+                    <p>🔒 <strong><?= number_format($total - 10, 0, ',', '.') ?> importes ocultos.</strong> Accede al Radar para ver todos los datos completos, filtrar por provincia, sector y exportar.</p>
+                    <a href="<?= site_url('radar') ?>">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                        Acceder al Radar
+                    </a>
+                </div>
+                <?php endif; ?>
+
                 <?php if (empty($searchQuery) && $total > 0): ?>
                 <?php 
                     $billingService = new \App\Services\BillingService();
