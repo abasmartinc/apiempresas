@@ -351,7 +351,29 @@
             .prem-table-wrap { overflow-x: auto; }
             .pbar-track { width: 80px; }
         }
-    </style>
+    .paywall-row {
+    filter: blur(6px);
+    position: relative;
+}
+
+.paywall-cta-banner {
+    margin: 16px 0;
+    padding: 12px;
+    background: #f0f9ff;
+    border: 1px solid #c0e0ff;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.paywall-cta-banner a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #2152ff;
+    font-weight: 600;
+    text-decoration: none;
+}
+</style>
 </head>
 <body>
     <div class="bg-halo" aria-hidden="true"></div>
@@ -501,12 +523,16 @@
                                 <?php
                                 $count = (($currentPage ?? 1) - 1) * 50;
                                 foreach($organs as $organ):
-                                    $count++;
+                                    $count++; $rowNum = ($rowNum ?? 0) + 1; $isLocked = $rowNum > 10;
                                     $pct = min(100, max(2, ($organ['total_contracts'] / $max_contracts) * 100));
                                     $delay = (($count - 1) % 50) * 0.04;
                                     $rankClass = $count === 1 ? 'rank-1' : ($count === 2 ? 'rank-2' : ($count === 3 ? 'rank-3' : 'rank-n'));
                                 ?>
-                                <tr onclick="window.location='<?= site_url('licitaciones-del-estado/organo-' . esc($organ['slug'])) ?>'">
+                                <?php if ($isLocked): ?>
+    <tr class="paywall-row">
+<?php else: ?>
+    <tr onclick="window.location='<?= site_url('licitaciones-del-estado/organo-' . esc($organ['slug'])) ?>'">
+<?php endif; ?>
                                     <td style="text-align:center; padding-left:16px;">
                                         <span class="rank-badge <?= $rankClass ?>">
                                             <?= $count <= 3 ? ['🥇','🥈','🥉'][$count-1] : $count ?>
@@ -543,6 +569,15 @@
                         </tbody>
                     </table>
                 </div>
+<?php if ($total_organs > 10): ?>
+<div class="paywall-cta-banner">
+    <p>🔒 <strong><?= number_format($total_organs - 10, 0, ',', '.') ?> importes ocultos.</strong> Accede al Radar para ver el historial completo de adjudicaciones, filtrar y exportar los datos.</p>
+    <a href="<?= site_url('radar') ?>">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        Acceder al Radar
+    </a>
+</div>
+<?php endif; ?>
             <!-- Toolbar: Filters & Pagination BOTTOM -->
             <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 0; background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e9eef5;">
                 

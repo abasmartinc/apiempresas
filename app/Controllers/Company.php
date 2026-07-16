@@ -234,12 +234,12 @@ class Company extends BaseController
             log_message('error', 'Cache read error for ' . $cacheKey . ': ' . $e->getMessage());
         }
 
-        if ($cachedData !== null) {
-            $listCount = $cachedData['count'];
-            $targetProv = $cachedData['targetProv'];
-            $provUrlParam = $cachedData['provUrlParam'];
-            $cnaeUrlParam = $cachedData['cnaeUrlParam'];
-            $sectorName = $cachedData['sectorName'];
+        if (is_array($cachedData)) {
+            $listCount = $cachedData['count'] ?? 0;
+            $targetProv = $cachedData['targetProv'] ?? $companyProv;
+            $provUrlParam = $cachedData['provUrlParam'] ?? $provUrlParam;
+            $cnaeUrlParam = $cachedData['cnaeUrlParam'] ?? $cnaeUrlParam;
+            $sectorName = $cachedData['sectorName'] ?? $sectorName;
         } else {
             // 1. Intentar Sector + Provincia
             $builder = $db->table('companies');
