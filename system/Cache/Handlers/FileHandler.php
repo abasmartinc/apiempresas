@@ -232,7 +232,7 @@ class FileHandler extends BaseHandler
             return false;
         }
 
-        $contents = file_get_contents($this->path . $filename);
+        $contents = @file_get_contents($this->path . $filename);
         if ($contents === false) {
             return false;
         }
