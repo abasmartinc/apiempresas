@@ -95,9 +95,30 @@ class ApiKeyFilter implements FilterInterface
             return service('response')->setStatusCode(403)->setJSON(['error' => 'API key inactiva o usuario inactivo']);
         }
 
+        // 3.1) IP Whitelist Check (Geo-Bypass)
+        $isIpWhitelisted = false;
+        if ($db->tableExists('api_whitelist_ips')) {
+            $whitelistedIps = $db->table('api_whitelist_ips')
+                ->where('user_id', $row->user_id)
+                ->get()
+                ->getResult();
+            
+            if (!empty($whitelistedIps)) {
+                $clientIp = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $request->getIPAddress();
+                foreach ($whitelistedIps as $wIp) {
+                    if ($wIp->ip_address === $clientIp) {
+                        $isIpWhitelisted = true;
+                        break;
+                    }
+                }
+            }
+        }
+
         // 3.5) Detección de Anomalías Geográficas (CF-IPCountry)
         $cfCountry = isset($_SERVER['HTTP_CF_IPCOUNTRY']) ? strtoupper((string)$_SERVER['HTTP_CF_IPCOUNTRY']) : null;
-        if ($cfCountry && (int)$row->user_id !== 166) {
+        
+        // Si la IP está en la lista blanca, saltamos el chequeo geográfico
+        if (!$isIpWhitelisted && $cfCountry && (int)$row->user_id !== 166) {
             $allowedCountries = $row->allowed_countries ? explode(',', strtoupper(str_replace(' ', '', $row->allowed_countries))) : [];
             if (!empty($allowedCountries) && !in_array($cfCountry, $allowedCountries)) {
                 // Bloquear API Key por seguridad
