@@ -121,22 +121,10 @@ class ApiKeyFilter implements FilterInterface
         if (!$isIpWhitelisted && $cfCountry && (int)$row->user_id !== 166) {
             $allowedCountries = $row->allowed_countries ? explode(',', strtoupper(str_replace(' ', '', $row->allowed_countries))) : [];
             if (!empty($allowedCountries) && !in_array($cfCountry, $allowedCountries)) {
-                // Bloquear API Key por seguridad
-                $db->table('api_keys')->where('id', (int)$row->api_key_id)->update(['is_active' => 0]);
-                
-                // Enviar alerta por email (asíncrono idealmente, pero síncrono por seguridad inminente)
-                try {
-                    $emailService = new \App\Services\EmailService();
-                    if (method_exists($emailService, 'sendApiKeyBlockedAlert')) {
-                        $emailService->sendApiKeyBlockedAlert($row->email, $cfCountry);
-                    }
-                } catch (\Throwable $e) {
-                    log_message('error', '[ApiKeyFilter::GeoAnomalyEmail] ' . $e->getMessage());
-                }
-
-                log_message('critical', "GEO-ANOMALY: API Key {$row->api_key_id} blocked. Request from {$cfCountry}. User: {$row->email}");
+                // Denegar acceso sin inactivar la clave (evita caídas de servicio legítimo)
+                log_message('warning', "GEO-ANOMALY DENIED: API Key {$row->api_key_id} blocked request from {$cfCountry}. User: {$row->email}");
                 return service('response')->setStatusCode(403)->setJSON([
-                    'error' => 'API Key bloqueada temporalmente por acceso desde país no autorizado (' . $cfCountry . '). Revise su correo.'
+                    'error' => 'Acceso denegado. Petición originada desde país no autorizado (' . $cfCountry . ').'
                 ]);
             }
         }
