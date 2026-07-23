@@ -38,11 +38,15 @@ class GenerateSitemaps extends BaseCommand
 
     public function run(array $params)
     {
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);
+        
         helper(['text', 'seo_dynamic', 'company']);
         
         CLI::write("Starting sitemap generation...", 'green');
         
         $db = \Config\Database::connect();
+        $db->saveQueries = false; // Prevent memory leak from query history
         $builder = $db->table('companies');
         $builder->select('id, cif, company_name as name, cnae_code as cnae, registro_mercantil as province, objeto_social as corporate_purpose');
         
@@ -110,6 +114,9 @@ class GenerateSitemaps extends BaseCommand
             }
             
             CLI::write("Processed {$totalProcessed} companies so far (Last ID: {$lastId})...", 'cyan');
+            
+            unset($companies);
+            gc_collect_cycles();
         }
 
         // Write the remaining URLs if any

@@ -4,39 +4,39 @@ namespace App\Commands;
 
 use CodeIgniter\CLI\BaseCommand;
 use CodeIgniter\CLI\CLI;
+use CodeIgniter\HTTP\IncomingRequest;
+use CodeIgniter\HTTP\URI;
+use CodeIgniter\HTTP\UserAgent;
+use Config\App;
+use App\Filters\ApiKeyFilter;
 
 class TestFilter extends BaseCommand
 {
-    protected $group       = 'Testing';
+    protected $group       = 'Custom';
     protected $name        = 'test:filter';
-    protected $description = 'Tests the ApiKeyFilter for a specific API Key.';
+    protected $description = 'Test the ApiKeyFilter';
 
     public function run(array $params)
     {
-        $apiKey = $params[0] ?? 'ak_32e3a5f48f3aa510d25d26fa66a3b6ac';
+        $_SERVER['HTTP_CF_IPCOUNTRY'] = 'BR';
+        $_SERVER['HTTP_CF_CONNECTING_IP'] = '2.2.2.2'; // NOT IN WHITELIST
+        $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer ak_8721c3d873a0c6d7cfc5fdfe4b309a3a'; // User 187 active key
 
-        $db = \Config\Database::connect('default');
+        $config = new App();
+        $uri = new URI('http://localhost/test');
+        $request = new IncomingRequest($config, $uri, 'php://input', new UserAgent());
+        
+        $request->setHeader('Authorization', 'Bearer ak_8721c3d873a0c6d7cfc5fdfe4b309a3a');
+        $request->setHeader('X-API-KEY', 'ak_8721c3d873a0c6d7cfc5fdfe4b309a3a');
 
-        CLI::write("Testing API Key: $apiKey");
-
-        $filter = new \App\Filters\ApiKeyFilter();
-        $request = \Config\Services::request();
-        // Clear headers and set X-API-KEY
-        $request->setHeader('X-API-KEY', $apiKey);
-
+        $filter = new ApiKeyFilter();
         $response = $filter->before($request);
 
         if ($response instanceof \CodeIgniter\HTTP\ResponseInterface) {
-            CLI::error("Filter BLOCKED the request!");
-            CLI::write("Status Code: " . $response->getStatusCode());
-            CLI::write("Body: " . $response->getBody());
+            CLI::write("STATUS: " . $response->getStatusCode());
+            CLI::write("BODY: " . $response->getBody());
         } else {
-            CLI::write("Filter PASSED the request!");
-        }
-
-        CLI::write("\n=== ApiKeyFilter::\$apiMeta ===");
-        foreach (\App\Filters\ApiKeyFilter::$apiMeta as $key => $val) {
-            CLI::write("  $key: " . var_export($val, true));
+            CLI::write("PASSED (No block)");
         }
     }
 }

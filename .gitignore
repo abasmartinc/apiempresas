@@ -59,4 +59,7 @@ testdir/
 # BORME Pipeline (Python)
 borme_flow/.env
 borme_flow/pipeline_execution.log
-borme_flow/__pycache__/
+borme_flow/__pycache__/
+
+public/sitemap-companies-*.xml
+public/sitemap-companies-count.txt
