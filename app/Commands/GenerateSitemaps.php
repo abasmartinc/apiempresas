@@ -57,7 +57,7 @@ class GenerateSitemaps extends BaseCommand
         $urlCount = 0;
         $urlsPerFile = 10000;
         
-        $publicPath = FCPATH;
+        $publicPath = ROOTPATH;
         
         $currentFile = $publicPath . "sitemap-companies-{$fileIndex}.xml";
         $xmlContent = '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL;
