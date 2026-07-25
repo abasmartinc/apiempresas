@@ -592,10 +592,6 @@
                             <div style="display:flex; align-items:center;">
                                 <div>
                                     <div class="company-name" title="<?= esc($company['name']) ?>"><?= esc($company['name']) ?></div>
-                                    <div class="company-cif">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
-                                        CIF: <?= esc($company['cif'] ?? '—') ?>
-                                    </div>
                                     <?php if (!empty($company['cnae_label']) || !empty($company['founded'])): ?>
                                     <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
                                         <?php if (!empty($company['cnae_label'])): ?>
@@ -631,10 +627,6 @@
                                 <div style="display:flex; align-items:center;">
                                     <div>
                                         <div class="company-name">Empresa Restringida S.L.</div>
-                                        <div class="company-cif">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
-                                            CIF: A00******
-                                        </div>
                                     </div>
                                 </div>
                             </td>

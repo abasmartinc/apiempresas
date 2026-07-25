@@ -38,11 +38,15 @@ class GenerateSitemaps extends BaseCommand
 
     public function run(array $params)
     {
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);
+        
         helper(['text', 'seo_dynamic', 'company']);
         
         CLI::write("Starting sitemap generation...", 'green');
         
         $db = \Config\Database::connect();
+        $db->saveQueries = false; // Prevent memory leak from query history
         $builder = $db->table('companies');
         $builder->select('id, cif, company_name as name, cnae_code as cnae, registro_mercantil as province, objeto_social as corporate_purpose');
         
@@ -53,14 +57,8 @@ class GenerateSitemaps extends BaseCommand
         $urlCount = 0;
         $urlsPerFile = 10000;
         
-        $publicPath = FCPATH;
+        $publicPath = ROOTPATH;
         
-        // Ensure old sitemaps are removed (optional but good for cleanup if count decreases)
-        $existing = glob($publicPath . 'sitemap-companies-*.xml');
-        foreach ($existing as $file) {
-            @unlink($file);
-        }
-
         $currentFile = $publicPath . "sitemap-companies-{$fileIndex}.xml";
         $xmlContent = '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL;
         
@@ -116,6 +114,9 @@ class GenerateSitemaps extends BaseCommand
             }
             
             CLI::write("Processed {$totalProcessed} companies so far (Last ID: {$lastId})...", 'cyan');
+            
+            unset($companies);
+            gc_collect_cycles();
         }
 
         // Write the remaining URLs if any
@@ -130,5 +131,17 @@ class GenerateSitemaps extends BaseCommand
         // Create an index file specifically for these just to keep track of the count
         // So that the main Sitemap Controller knows how many there are.
         file_put_contents($publicPath . 'sitemap-companies-count.txt', $fileIndex);
+
+        // Cleanup any old files that might remain if the total count decreased
+        $existing = glob($publicPath . 'sitemap-companies-*.xml');
+        foreach ($existing as $file) {
+            // Extract the number from the filename
+            if (preg_match('/sitemap-companies-(\d+)\.xml$/', $file, $matches)) {
+                $num = (int)$matches[1];
+                if ($num > $fileIndex) {
+                    @unlink($file);
+                }
+            }
+        }
     }
 }

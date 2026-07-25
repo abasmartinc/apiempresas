@@ -151,6 +151,10 @@
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                                 Mi Perfil
                             </a>
+                            <a href="<?= site_url('whitelist-ips') ?>" class="dropdown-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                Lista Blanca de IPs
+                            </a>
                             <?php if(!$hasBonusOnly && $isStandardPlan): ?>
                             <a href="<?= site_url('billing') ?>" class="dropdown-item">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10"/></svg>
@@ -187,6 +191,7 @@
                 <nav class="mobile-nav">
                     <a href="<?=site_url() ?>dashboard" class="mobile-nav-link">Dashboard</a>
                     <a href="<?=site_url() ?>profile" class="mobile-nav-link">Mi Perfil</a>
+                    <a href="<?=site_url() ?>whitelist-ips" class="mobile-nav-link">Lista Blanca de IPs</a>
                     <?php if(!$hasBonusOnly && $isStandardPlan): ?>
                     <a href="<?=site_url() ?>billing" class="mobile-nav-link">Suscripción</a>
                     <?php endif; ?>
