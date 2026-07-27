@@ -102,6 +102,7 @@ $routes->get('consumption', 'Usage::index');
 $routes->get('consumption/request/(:any)', 'Usage::getRequestDetails/$1');
 $routes->get('consumption/logs_ajax', 'Usage::getLogsAjax');
 $routes->get('api-empresas', 'ApiPrices::index');
+$routes->get('spanish-company-api', 'ApiPrices::english'); // English version
 $routes->get('crear-bono-api', 'ApiPrices::customBonusWizard');
 $routes->match(['get', 'post'], 'billing/checkout_bonus', 'Billing::checkout_bonus');
 $routes->get('plugin-wordpress-buscador-empresas', 'Plugin::index');
@@ -199,6 +200,8 @@ $routes->cli('swagger:generate', 'App\Commands\GenerateSwaggerCommand::run');
 $routes->get('api/docs', 'Api\Docs::index');
 $routes->get('api/docs/openapi.json', 'Api\Docs::json');
 $routes->get('documentation', 'Documentation::index');
+$routes->get('documentation/en', 'Documentation::english'); // English version
+$routes->get('api-docs', 'Documentation::english');          // SEO alias
 $routes->get('docs/errors/(:any)', 'Documentation::error/$1');
 
 

@@ -15,6 +15,16 @@ class ApiPrices extends BaseController
     }
 
     /**
+     * English version – /spanish-company-api
+     */
+    public function english()
+    {
+        $freeLimit = get_free_plan_limit();
+
+        return view('seo/api_prices_en', ['freeLimit' => $freeLimit]);
+    }
+
+    /**
      * Muestra el Wizard interactivo para crear un bono de créditos a medida
      */
     public function customBonusWizard()

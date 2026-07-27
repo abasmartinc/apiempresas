@@ -858,6 +858,34 @@
             mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
         }
+        /* Language switcher in hero */
+        .lang-switcher {
+            display: inline-flex;
+            gap: 8px;
+            margin-bottom: 1.5rem;
+        }
+        .lang-switcher a {
+            padding: 5px 14px;
+            border-radius: 99px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .lang-switcher a.active {
+            background: rgba(255,255,255,0.18);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.35);
+        }
+        .lang-switcher a.inactive {
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.55);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .lang-switcher a.inactive:hover {
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+        }
     </style>
 </head>
 
@@ -869,6 +897,12 @@
         <!-- HERO SECTION UNIFICADO -->
         <header class="api-unified-hero">
             <div class="container" style="max-width:1100px; margin:0 auto; padding:0 2rem;">
+
+                <!-- Language switcher -->
+                <div class="lang-switcher">
+                    <a href="<?= site_url('api-empresas') ?>" class="active" title="Versión en español">🇪🇸 ES</a>
+                    <a href="<?= site_url('spanish-company-api') ?>" class="inactive" title="English version">🇬🇧 EN</a>
+                </div>
 
                 <!-- Badge -->
                 <div class="api-hero-badge">
