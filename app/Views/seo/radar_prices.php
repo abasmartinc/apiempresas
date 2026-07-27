@@ -670,6 +670,51 @@
             });
         });
     </script>
+    <!-- ── EXPLORA TAMBIÉN ── -->
+    <section style="padding: 60px 0; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 32px;">
+                <p style="font-size: 0.78rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 10px;">¿Buscas algo diferente?</p>
+                <h2 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.02em;">¿Necesitas empresas con historial de contratos o subvenciones?</h2>
+                <p style="color: #64748b; font-size: 0.95rem; margin: 10px 0 0; max-width: 540px; margin-left: auto; margin-right: auto; line-height: 1.5;">El Radar detecta empresas <strong>recién constituidas</strong>. Si buscas listados de empresas que ya trabajan con la Administración o han recibido ayudas públicas, estos directorios son para ti.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 800px; margin: 0 auto;">
+
+                <!-- Licitaciones -->
+                <a href="<?= site_url('licitaciones-del-estado') ?>" style="background: #fff; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 28px 28px; display: flex; gap: 18px; align-items: flex-start; text-decoration: none; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.04);" onmouseover="this.style.borderColor='#2152FF'; this.style.boxShadow='0 8px 24px rgba(33,82,255,0.1)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)'; this.style.transform='translateY(0)'">
+                    <div style="width: 46px; height: 46px; background: #eff6ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2152FF" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <div>
+                        <div style="font-weight: 800; color: #0f172a; font-size: 1rem; margin-bottom: 6px;">Licitaciones del Estado</div>
+                        <div style="font-size: 0.83rem; color: #64748b; line-height: 1.5; margin-bottom: 12px;">Empresas adjudicatarias de contratos públicos por Ministerio, Ayuntamiento o Consejería. CSV con datos de contacto del Registro Mercantil.</div>
+                        <span style="font-size: 0.8rem; font-weight: 800; color: #2152FF; display: flex; align-items: center; gap: 5px;">
+                            Explorar directorio
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2152FF" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Subvenciones -->
+                <a href="<?= site_url('subvenciones-empresas') ?>" style="background: #fff; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 28px 28px; display: flex; gap: 18px; align-items: flex-start; text-decoration: none; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.04);" onmouseover="this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 24px rgba(16,185,129,0.1)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)'; this.style.transform='translateY(0)'">
+                    <div style="width: 46px; height: 46px; background: #ecfdf5; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                    <div>
+                        <div style="font-weight: 800; color: #0f172a; font-size: 1rem; margin-bottom: 6px;">Subvenciones a Empresas</div>
+                        <div style="font-size: 0.83rem; color: #64748b; line-height: 1.5; margin-bottom: 12px;">Empresas beneficiarias de fondos públicos (FEDER, CDTI, PERTE, autonómicos). Ideal para consultoras de subvenciones y venta B2B especializada.</div>
+                        <span style="font-size: 0.8rem; font-weight: 800; color: #10b981; display: flex; align-items: center; gap: 5px;">
+                            Explorar directorio
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                        </span>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+    </section>
+
     <!-- SEO Schema: Product & FAQPage -->
     <script type="application/ld+json">
     {

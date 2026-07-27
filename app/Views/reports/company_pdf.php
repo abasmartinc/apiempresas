@@ -278,7 +278,7 @@
         </div>
 
         <?php if (!empty($administrators)): ?>
-        <div class="no-break">
+        <div>
             <div class="section-title">Administradores y Cargos Actuales</div>
             <table class="list-table">
                 <thead>
@@ -288,7 +288,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($administrators as $admin): ?>
+                    <?php foreach (array_slice($administrators, 0, 50) as $admin): ?>
                     <tr>
                         <td><strong><?= esc($admin['name']) ?></strong></td>
                         <td><?= esc($admin['position']) ?></td>
@@ -296,6 +296,12 @@
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            
+            <?php if (count($administrators) > 50): ?>
+            <p style="font-size: 8pt; color: #64748b; margin-top: 10px; font-style: italic;">
+                * Se muestran los primeros 50 cargos. Consulte la ficha completa en apiempresas.es para ver el listado total.
+            </p>
+            <?php endif; ?>
         </div>
         <?php endif; ?>
 

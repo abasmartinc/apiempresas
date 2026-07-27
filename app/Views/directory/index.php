@@ -456,10 +456,10 @@
     <div class="container">
         <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(33, 82, 255, 0.15); color: #60A5FA; padding: 6px 14px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; margin-bottom: 1.5rem; border: 1px solid rgba(33, 82, 255, 0.25);">
             <span style="display: inline-block; width: 6px; height: 6px; background: #34D399; border-radius: 99px; box-shadow: 0 0 8px #34D399;"></span>
-            Base de Datos Oficial en Tiempo Real
+            Directorio y Buscador Gratuito
         </div>
         <h1>Listado de <span class="grad">Empresas Españolas</span></h1>
-        <p>Valide información mercantil en tiempo real con acceso a la base de datos más completa de sociedades en España.</p>
+        <p>Buscador mercantil SEO gratuito con información de sociedades, licitaciones y subvenciones obtenida directamente de fuentes oficiales.</p>
 
         <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 1.5rem; margin-bottom: 1.25rem;">
             <div style="display: flex; color: #fbbf24;">
@@ -495,7 +495,9 @@
             </button>
         </form>
 
-
+        <div style="margin-top: 1.5rem; font-size: 0.85rem; color: #94a3b8;">
+            ¿Prefieres recibir alertas automáticas de nuevas empresas? <a href="<?= site_url('leads-empresas-nuevas') ?>" style="color: #34D399; font-weight: 700; text-decoration: none;">Prueba Radar B2B &rarr;</a>
+        </div>
     </div>
 </header>
 
@@ -611,6 +613,18 @@
                 </button>
             </div>
         </section>
+
+        <!-- ── CROSS SELL BANNER 1 (CSV) ── -->
+        <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #a7f3d0; border-radius: 20px; padding: 24px 32px; margin-bottom: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;">
+            <div>
+                <h3 style="font-size: 1.25rem; font-weight: 800; color: #065f46; margin: 0 0 8px 0;">¿Necesitas el listado completo en Excel?</h3>
+                <p style="margin: 0; color: #047857; font-size: 0.95rem;">Descarga nuestra base de datos completa filtrada a medida para tu CRM. Pago único.</p>
+            </div>
+            <a href="<?= site_url('base-de-datos-de-empresas') ?>" style="display: inline-flex; align-items: center; gap: 8px; background: #10b981; color: white; font-weight: 800; padding: 12px 24px; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 14px rgba(16,185,129,0.3); flex-shrink: 0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Generador de Listados &rarr;
+            </a>
+        </div>
 
         <!-- ── CNAES ── -->
         <section class="dir-section" id="cnaes-section">
@@ -745,6 +759,18 @@
             </div>
         </section>
         <?php endif; ?>
+
+        <!-- ── CROSS SELL BANNER 2 (RADAR) ── -->
+        <div style="background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #334155; border-radius: 20px; padding: 24px 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;">
+            <div>
+                <h3 style="font-size: 1.25rem; font-weight: 800; color: #f8fafc; margin: 0 0 8px 0;">¿Quieres leads como estos todos los días?</h3>
+                <p style="margin: 0; color: #94a3b8; font-size: 0.95rem;">Recibe alertas automáticas de nuevas empresas creadas en España. Ideal para prospección B2B.</p>
+            </div>
+            <a href="<?= site_url('leads-empresas-nuevas') ?>" style="display: inline-flex; align-items: center; gap: 8px; background: #3b82f6; color: white; font-weight: 800; padding: 12px 24px; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 14px rgba(59,130,246,0.3); flex-shrink: 0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                Prueba Radar B2B &rarr;
+            </a>
+        </div>
 
         <!-- ── SEO TEXT & FAQ ── -->
         <section class="dir-section" style="margin-top: 4rem; padding-top: 3rem; border-top: 1px solid #e2e8f0; margin-bottom: 2rem;">

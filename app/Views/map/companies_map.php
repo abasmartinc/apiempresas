@@ -46,12 +46,12 @@
         <nav aria-label="Breadcrumb" class="breadcrumb" style="margin-bottom: 24px; font-size: 0.85rem; color: rgba(255,255,255,0.6); display: flex; justify-content: center; align-items: center;">
             <a href="<?= site_url() ?>" style="color: inherit; text-decoration: none;">Inicio</a>
             <span style="margin: 0 0.5rem;">/</span>
-            <span aria-current="page" style="color: #fff;">Base de Datos de Empresas</span>
+            <span aria-current="page" style="color: #fff;">Generador de Listados de Empresas</span>
         </nav>
 
         <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(33, 82, 255, 0.15); color: #60A5FA; padding: 6px 14px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; margin-bottom: 1.5rem; border: 1px solid rgba(33, 82, 255, 0.25);">
             <span style="display: inline-block; width: 6px; height: 6px; background: #34D399; border-radius: 99px; box-shadow: 0 0 8px #34D399;"></span>
-            Base de Datos Oficial en Tiempo Real
+            Generador de Listados B2B a medida (CSV)
         </div>
         
         <h1 style="font-size: clamp(2.2rem, 4vw, 3.5rem); font-weight: 800; letter-spacing: -0.03em; color: #ffffff; margin-bottom: 1.25rem; line-height: 1.1;">
@@ -59,7 +59,7 @@
         </h1>
         
         <p style="font-size: 1.2rem; color: #cbd5e1; max-width: 750px; margin: 0 auto 1.5rem auto; line-height: 1.6;">
-            Filtra por provincia, municipio y sector. Configura y descarga tu <strong>base de datos de empresas</strong> al instante. Listados B2B oficiales extraídos del BORME y listos para tu CRM.
+            Filtra por provincia, municipio y sector. Configura y descarga tu <strong>base de datos a medida</strong> al instante. Pago único. Sin suscripciones. Extraído del BORME y listo para tu CRM.
         </p>
 
         <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 2rem;">

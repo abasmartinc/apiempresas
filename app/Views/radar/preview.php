@@ -325,7 +325,7 @@ $pagination = [
                                 <form class="preview-form-handler" style="display: flex; flex-direction: column; gap: 16px;">
                                     <input type="email" name="email" class="email-capture-input email-capture__input" placeholder="Introduce tu email profesional" style="width: 100%; height: 64px !important; min-height: 64px !important; line-height: 64px !important; padding: 0 !important; text-align: center; border: 1px solid #cbd5e1 !important; background: #ffffff !important; color: #1e293b !important; border-radius: 16px !important; font-size: 1.1rem !important; display: block !important; box-sizing: border-box !important;" required>
                                     <button type="submit" class="submit-btn-handler" style="width: 100%; height: 64px; background: #2563eb; color: white; border: none; border-radius: 16px; font-weight: 900; font-size: 1.1rem; cursor: pointer; box-shadow: 0 10px 25px rgba(37,99,235,0.3);">
-                                        Crear mi cuenta gratuita
+                                        Ver empresas de hoy &rarr;
                                     </button>
                                 </form>
                                 <div class="form-error-handler" style="color: #ef4444; font-size: 0.85rem; font-weight: 700; margin-top: 12px; display: none; text-align: center;"></div>
@@ -375,7 +375,7 @@ $pagination = [
                     <input type="email" name="email" class="email-capture__input" placeholder="ejemplo@empresa.com" style="width: 100%; height: 64px; font-size: 1.1rem; text-align: center; border-radius: 16px; background: #f8fafc; border: 1px solid #e2e8f0; outline: none; transition: border-color 0.2s;" required>
                 </div>
                 <button type="submit" class="email-capture__btn submit-btn-handler" style="width: 100%; height: 64px; font-size: 1.1rem; font-weight: 800; border-radius: 16px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; border: none; box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25); cursor: pointer; transition: transform 0.2s;">
-                    Activar mi Radar Freemium
+                    Ver empresas de hoy &rarr;
                 </button>
                 <div class="form-error-handler" style="color: #ef4444; font-size: 0.85rem; font-weight: 700; margin-top: 4px; display: none; text-align: center;"></div>
             </form>

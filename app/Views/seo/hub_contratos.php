@@ -20,7 +20,7 @@
 
         /* ── HERO ── */
         .dir-hero {
-            padding: 60px 0 140px;
+            padding: 48px 0 120px;
             background: linear-gradient(160deg, #060a14 0%, #0c1428 50%, #0f172a 100%);
             color: #fff;
             text-align: center;
@@ -33,7 +33,7 @@
             position: absolute;
             top: -20%; right: -10%;
             width: 40%; height: 80%;
-            background: radial-gradient(circle, rgba(33,82,255,0.14) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(33,82,255,0.18) 0%, transparent 70%);
             pointer-events: none;
         }
         .dir-hero::after {
@@ -41,16 +41,16 @@
             position: absolute;
             bottom: -10%; left: -5%;
             width: 35%; height: 60%;
-            background: radial-gradient(circle, rgba(52,211,153,0.07) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(52,211,153,0.09) 0%, transparent 70%);
             pointer-events: none;
         }
         .dir-hero h1 {
-            font-size: clamp(2.4rem, 4.5vw, 3.5rem);
-            font-weight: 800;
-            letter-spacing: -0.03em;
+            font-size: clamp(2.6rem, 5vw, 4rem);
+            font-weight: 900;
+            letter-spacing: -0.04em;
             color: #ffffff;
-            margin-bottom: 1.25rem;
-            line-height: 1.1;
+            margin-bottom: 1rem;
+            line-height: 1.05;
         }
         .dir-hero .grad {
             background: linear-gradient(135deg, #60A5FA 0%, #34D399 100%);
@@ -59,11 +59,11 @@
             -webkit-text-fill-color: transparent;
         }
         .dir-hero p {
-            font-size: 1.15rem;
-            color: #cbd5e1;
-            max-width: 650px;
+            font-size: 1.1rem;
+            color: #94a3b8;
+            max-width: 580px;
             margin: 0 auto;
-            line-height: 1.65;
+            line-height: 1.6;
         }
         
         /* ── LAYOUT ── */
@@ -90,7 +90,7 @@
             background: #e2e8f0;
             border-radius: 20px;
             overflow: hidden;
-            margin-bottom: 56px;
+            margin-bottom: 0;
             box-shadow: 0 4px 16px rgba(0,0,0,0.04);
         }
         .dir-stat {
@@ -112,19 +112,19 @@
         .dir-stat__icon--green { background: linear-gradient(135deg, #f0fdf4, #dcfce7); }
         .dir-stat__icon--purple{ background: linear-gradient(135deg, #faf5ff, #ede9fe); }
         .dir-stat__num {
-            font-size: 1.75rem;
+            font-size: 2rem;
             font-weight: 900;
             color: #0f172a;
-            letter-spacing: -0.04em;
+            letter-spacing: -0.05em;
             line-height: 1;
         }
         .dir-stat__label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #64748b;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
-            margin-top: 3px;
+            letter-spacing: 0.06em;
+            margin-top: 4px;
         }
 
         /* ── SECTION HEADER ── */
@@ -352,27 +352,84 @@
             .pbar-track { width: 80px; }
         }
     .paywall-row {
-    filter: blur(6px);
-    position: relative;
-}
+        filter: blur(6px);
+        position: relative;
+    }
 
-.paywall-cta-banner {
-    margin: 16px 0;
-    padding: 12px;
-    background: #f0f9ff;
-    border: 1px solid #c0e0ff;
-    border-radius: 8px;
-    text-align: center;
-}
+    .paywall-cta-banner {
+        margin: 0;
+        padding: 20px 28px;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border-top: 1px solid #bfdbfe;
+        border-bottom: 1px solid #bfdbfe;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    .paywall-cta-banner p {
+        margin: 0;
+        font-size: 0.92rem;
+        color: #1e3a8a;
+        font-weight: 700;
+    }
+    .paywall-cta-banner a {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #2152FF;
+        color: #fff;
+        padding: 10px 22px;
+        border-radius: 10px;
+        font-weight: 800;
+        font-size: 0.9rem;
+        text-decoration: none;
+        white-space: nowrap;
+        box-shadow: 0 4px 14px rgba(33,82,255,0.3);
+        flex-shrink: 0;
+        transition: all 0.2s;
+    }
+    .paywall-cta-banner a:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(33,82,255,0.4);
+    }
 
-.paywall-cta-banner a {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: #2152ff;
-    font-weight: 600;
-    text-decoration: none;
-}
+    /* hero checklist pills */
+    .hero-pills {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 14px;
+    }
+    .hero-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8rem;
+        color: rgba(255,255,255,0.75);
+        font-weight: 600;
+    }
+    .hero-pill svg { flex-shrink: 0; opacity: 0.8; }
+
+    /* use-case cards hover */
+    .use-case-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 18px 20px;
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        transition: all 0.2s;
+    }
+    .use-case-card:hover {
+        background: #fff;
+        border-color: #bfdbfe;
+        box-shadow: 0 4px 16px rgba(33,82,255,0.07);
+        transform: translateY(-2px);
+    }
 </style>
 </head>
 <body>
@@ -381,12 +438,12 @@
     
     <header class="dir-hero">
         <div class="container">
-            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(33, 82, 255, 0.15); color: #60A5FA; padding: 6px 14px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; margin-bottom: 1.5rem; border: 1px solid rgba(33, 82, 255, 0.25);">
-                <span style="display: inline-block; width: 6px; height: 6px; background: #60A5FA; border-radius: 99px; box-shadow: 0 0 8px #60A5FA;"></span>
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(96,165,250,0.12); color: #60A5FA; padding: 6px 16px; border-radius: 99px; font-size: 0.8rem; font-weight: 700; margin-bottom: 1.25rem; border: 1px solid rgba(96,165,250,0.2); letter-spacing: 0.02em;">
+                <span style="display: inline-block; width: 7px; height: 7px; background: #60A5FA; border-radius: 99px; box-shadow: 0 0 8px #60A5FA; animation: pulse 2s ease-in-out infinite;"></span>
                 Plataforma de Contratación del Sector Público
             </div>
             <h1>Licitaciones del <span class="grad">Estado</span></h1>
-            <p>Descubre qué empresas ganan las licitaciones públicas. Selecciona un Ministerio, Ayuntamiento u Órgano de Contratación para ver el historial oficial de empresas adjudicatarias.</p>
+            <p>Qué empresas ganan los contratos públicos en España. Por Ministerio, Ayuntamiento u Órgano — con datos de contacto del Registro Mercantil.</p>
 
                 <?php 
                     $billingService = new \App\Services\BillingService();
@@ -395,13 +452,32 @@
                     $dynamic_price = $pricing['base_price'];
                     $checkoutUrl = site_url('billing/contracts_checkout');
                 ?>
-                <div style="margin-top: 2rem;">
-                    <a href="<?= $checkoutUrl ?>" style="display: inline-flex; align-items: center; gap: 8px; background: #2152FF; color: #fff; padding: 1.1rem 1.8rem; border-radius: 12px; font-weight: 800; font-size: 1rem; text-decoration: none; box-shadow: 0 10px 30px rgba(33, 82, 255, 0.3); transition: all 0.2s; border: 1px solid #60A5FA;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 35px rgba(33, 82, 255, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(33, 82, 255, 0.3)';">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Descargar Base Completa de Contratos — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
-                    </a>
-                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7); max-width: 480px; margin-top: 10px; margin-left: auto; margin-right: auto; line-height: 1.4;">
-                        Incluye todos los contratos (<?= number_format($total_contracts, 0, ',', '.') ?> registros) cruzados con los datos del Registro Mercantil: Sector CNAE, Dirección, Provincia y Teléfono (cuando esté disponible).
+                <div style="margin-top: 2rem; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center;">
+                        <a href="<?= $checkoutUrl ?>" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #2152FF, #3b82f6); color: #fff; padding: 1rem 2rem; border-radius: 12px; font-weight: 800; font-size: 1rem; text-decoration: none; box-shadow: 0 10px 30px rgba(33,82,255,0.35); transition: all 0.2s; border: 1px solid rgba(96,165,250,0.4);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 14px 40px rgba(33,82,255,0.45)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(33,82,255,0.35)';">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Descargar base completa
+                        </a>
+                        <div style="text-align: left;">
+                            <div style="font-size: 1.3rem; font-weight: 900; color: #fff; letter-spacing: -0.04em; line-height: 1;"><?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="font-size: 0.75em; opacity: 0.5; margin-right: 4px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€</div>
+                            <div style="font-size: 0.72rem; color: rgba(255,255,255,0.55); font-weight: 600; margin-top: 2px;">+ IVA · pago único</div>
+                        </div>
+                    </div>
+                    <div class="hero-pills">
+                        <span class="hero-pill">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            <?= number_format($total_contracts, 0, ',', '.') ?> registros incluidos
+                        </span>
+                        <span style="color: rgba(255,255,255,0.2); font-size: 0.8rem;">|</span>
+                        <span class="hero-pill">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            Teléfono, CNAE, dirección, provincia
+                        </span>
+                        <span style="color: rgba(255,255,255,0.2); font-size: 0.8rem;">|</span>
+                        <span class="hero-pill">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            Descarga inmediata en CSV
+                        </span>
                     </div>
                 </div>
         </div>
@@ -420,7 +496,50 @@
             </div>
             <?php endif; ?>
 
-            <div style="padding: 48px 12px;">
+            <!-- ── PARA QUIÉN ES ESTO ── -->
+            <?php if (empty($searchQuery)): ?>
+            <div style="padding: 28px 28px 24px; border-bottom: 1px solid #f1f5f9;">
+                <p style="font-size: 0.72rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 14px; display: flex; align-items: center; gap: 8px;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="#94a3b8"><circle cx="12" cy="12" r="10"/></svg>
+                    ¿Quién compra esto?
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+
+                    <div class="use-case-card">
+                        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #eff6ff, #dbeafe); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2152FF" stroke-width="2.5"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                        </div>
+                        <div>
+                            <div style="font-weight: 800; color: #0f172a; font-size: 0.88rem; margin-bottom: 5px;">Proveedores de la Administración</div>
+                            <div style="font-size: 0.78rem; color: #64748b; line-height: 1.45;">Identifican qué empresas trabajan con Ministerios y Ayuntamientos para venderles como subcontrata o proveedor.</div>
+                        </div>
+                    </div>
+
+                    <div class="use-case-card">
+                        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #faf5ff, #ede9fe); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                        </div>
+                        <div>
+                            <div style="font-weight: 800; color: #0f172a; font-size: 0.88rem; margin-bottom: 5px;">Análisis de Mercado</div>
+                            <div style="font-size: 0.78rem; color: #64748b; line-height: 1.45;">Analizan qué empresas acumulan más adjudicaciones y en qué sectores concentra su actividad la Administración.</div>
+                        </div>
+                    </div>
+
+                    <div class="use-case-card">
+                        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <div>
+                            <div style="font-weight: 800; color: #0f172a; font-size: 0.88rem; margin-bottom: 5px;">Prospección B2B</div>
+                            <div style="font-size: 0.78rem; color: #64748b; line-height: 1.45;">Construyen listas de empresas con experiencia en contratación pública para campañas comerciales.</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <div style="padding: 0 12px 48px;">
             <!-- ── STATS BAR ── -->
             <div class="dir-stats">
                 <div class="dir-stat">
@@ -515,24 +634,44 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if (empty($organs)): ?>
+                                 <?php if (empty($organs)): ?>
                                 <tr>
                                     <td colspan="4" style="text-align: center; color: #64748b; padding: 48px;">No hay licitaciones registradas.</td>
                                 </tr>
                             <?php else: ?>
                                 <?php
                                 $count = (($currentPage ?? 1) - 1) * 50;
+                                $ctaBannerShown = false;
                                 foreach($organs as $organ):
-                                    $count++; $rowNum = ($rowNum ?? 0) + 1; $isLocked = $rowNum > 10;
+                                    $count++;
+                                    $rowNum = ($rowNum ?? 0) + 1;
                                     $pct = min(100, max(2, ($organ['total_contracts'] / $max_contracts) * 100));
                                     $delay = (($count - 1) % 50) * 0.04;
                                     $rankClass = $count === 1 ? 'rank-1' : ($count === 2 ? 'rank-2' : ($count === 3 ? 'rank-3' : 'rank-n'));
                                 ?>
-                                <?php if ($isLocked): ?>
-    <tr class="paywall-row">
-<?php else: ?>
-    <tr onclick="window.location='<?= site_url('licitaciones-del-estado/organo-' . esc($organ['slug'])) ?>'">
-<?php endif; ?>
+                                <?php if ($rowNum === 11 && !$ctaBannerShown && empty($searchQuery)): $ctaBannerShown = true; ?>
+                                <tr>
+                                    <td colspan="4" style="padding: 0;">
+                                        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #2152FF 100%); padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+                                            <div>
+                                                <p style="margin: 0 0 3px; font-size: 0.9rem; color: rgba(255,255,255,0.9); font-weight: 800;">📥 Descarga las empresas de todos estos órganos</p>
+                                                <p style="margin: 0; font-size: 0.78rem; color: rgba(255,255,255,0.65); font-weight: 600;">CSV con nombre, CIF, teléfono, CNAE, dirección y provincia · Del Registro Mercantil</p>
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 14px; flex-shrink: 0;">
+                                                <div style="text-align: right;">
+                                                    <div style="font-size: 1.1rem; font-weight: 900; color: #fff; letter-spacing: -0.03em;"><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.75rem; font-weight: 600; opacity: 0.8;">+ IVA</span></div>
+                                                    <div style="font-size: 0.7rem; color: rgba(255,255,255,0.6); font-weight: 600;">pago único</div>
+                                                </div>
+                                                <a href="<?= $checkoutUrl ?>" style="display: inline-flex; align-items: center; gap: 8px; background: #fff; color: #2152FF; padding: 11px 22px; border-radius: 10px; font-weight: 800; font-size: 0.9rem; text-decoration: none; white-space: nowrap; box-shadow: 0 4px 14px rgba(0,0,0,0.2); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.25)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 14px rgba(0,0,0,0.2)'">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                                    Descargar CSV
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php endif; ?>
+                                <tr onclick="window.location='<?= site_url('licitaciones-del-estado/organo-' . esc($organ['slug'])) ?>'" style="cursor: pointer;">
                                     <td style="text-align:center; padding-left:16px;">
                                         <span class="rank-badge <?= $rankClass ?>">
                                             <?= $count <= 3 ? ['🥇','🥈','🥉'][$count-1] : $count ?>
@@ -571,10 +710,12 @@
                 </div>
 <?php if ($total_organs > 10): ?>
 <div class="paywall-cta-banner">
-    <p>🔒 <strong><?= number_format($total_organs - 10, 0, ',', '.') ?> importes ocultos.</strong> Accede al Radar para ver el historial completo de adjudicaciones, filtrar y exportar los datos.</p>
-    <a href="<?= site_url('radar') ?>">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-        Acceder al Radar
+    <div>
+        <p>📥 <strong><?= number_format($total_organs - 10, 0, ',', '.') ?> órganos más</strong> disponibles en el directorio. Descarga la base completa de empresas adjudicatarias con datos de contacto del Registro Mercantil.</p>
+    </div>
+    <a href="<?= $checkoutUrl ?>">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Descargar CSV — <?= number_format($dynamic_price, 2, ',', '') ?>€ + IVA
     </a>
 </div>
 <?php endif; ?>
@@ -582,13 +723,13 @@
             <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 0; background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e9eef5;">
                 
                 <?php if (empty($searchQuery)): ?>
-                <div style="text-align: right; margin-bottom: 0px;">
-                    <a href="<?= $checkoutUrl ?>" style="display: inline-flex; align-items: center; gap: 8px; background: #2152FF; color: #fff; padding: 12px 24px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; text-decoration: none; box-shadow: 0 8px 20px rgba(33, 82, 255, 0.25); transition: all 0.2s; margin-bottom: 8px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 25px rgba(33, 82, 255, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(33, 82, 255, 0.25)';">
+                <div style="text-align: center; margin-bottom: 16px;">
+                    <a href="<?= $checkoutUrl ?>" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #2152FF, #3b82f6); color: #fff; padding: 14px 32px; border-radius: 12px; font-weight: 800; font-size: 1rem; text-decoration: none; box-shadow: 0 8px 24px rgba(33, 82, 255, 0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 32px rgba(33, 82, 255, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 24px rgba(33, 82, 255, 0.3)';">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Descargar Base Completa de Contratos — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
+                        Descargar Base Completa de Contratos — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:4px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
                     </a>
-                    <div style="font-size: 0.75rem; color: #94a3b8; max-width: 320px; margin-left: auto; line-height: 1.4;">
-                        Incluye todos los contratos (<?= number_format($total_contracts, 0, ',', '.') ?> registros) cruzados con los datos del Registro Mercantil: Sector CNAE, Dirección, Provincia y Teléfono (cuando esté disponible).
+                    <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 10px; line-height: 1.4;">
+                        <?= number_format($total_contracts, 0, ',', '.') ?> registros · Teléfono, CNAE, dirección y provincia incluidos
                     </div>
                 </div>
                 
@@ -628,6 +769,59 @@
             </section>
 
             </div> <!-- padding 48px -->
+
+            <!-- ── SIGUIENTE PASO: CSV vs RADAR (hub) ── -->
+            <?php if (empty($searchQuery)): ?>
+            <div style="padding: 32px 32px 40px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-top: 1px solid #e2e8f0;">
+                <p style="text-align: center; font-size: 0.8rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px;">¿Qué quieres hacer ahora?</p>
+                <p style="text-align: center; font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0 0 32px; letter-spacing: -0.02em;">Elige cómo usar estos datos</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 800px; margin: 0 auto;">
+
+                    <!-- OPCIÓN A: Descarga única -->
+                    <div style="background: #fff; border: 2px solid #2152FF; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 16px rgba(33,82,255,0.08);">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 38px; height: 38px; background: #eff6ff; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2152FF" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                </div>
+                                <div style="font-weight: 800; color: #0f172a; font-size: 0.9rem; white-space: nowrap;">Descargar listado</div>
+                            </div>
+                            <span style="background: #2152FF; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Pago único</span>
+                        </div>
+                        <p style="margin: 0; font-size: 0.85rem; color: #475569; line-height: 1.5;">Exporta el CSV completo de empresas adjudicatarias con datos de contacto: teléfono, CNAE, dirección y provincia. Listo para tu CRM.</p>
+                        <div style="margin-top: 4px;">
+                            <a href="<?= $checkoutUrl ?>" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #2152FF; color: #fff; padding: 12px 16px; border-radius: 10px; font-weight: 800; font-size: 0.9rem; text-decoration: none; box-shadow: 0 4px 12px rgba(33,82,255,0.3); transition: all 0.2s; width: 100%;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                Descargar CSV completo
+                            </a>
+                            <div style="text-align: center; margin-top: 8px; font-size: 0.82rem; font-weight: 800; color: #2152FF; letter-spacing: -0.01em;"><?= number_format($dynamic_price, 2, ',', '') ?>€ + IVA &nbsp;·&nbsp; <span style="font-weight: 600; color: #64748b;">pago único</span></div>
+                        </div>
+                    </div>
+
+                    <!-- OPCIÓN B: Radar -->
+                    <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 12px; position: relative;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 38px; height: 38px; background: #fff; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(16,185,129,0.2);">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                                </div>
+                                <div style="font-weight: 800; color: #065f46; font-size: 0.9rem; white-space: nowrap;">Prospección continua</div>
+                            </div>
+                            <span style="background: #10b981; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.05em;">Diario</span>
+                        </div>
+                        <p style="margin: 0; font-size: 0.85rem; color: #065f46; line-height: 1.5; opacity: 0.85;">Detecta cada día empresas recién constituidas antes que tu competencia, con scoring de IA y CRM integrado.</p>
+                        <div style="margin-top: 4px;">
+                            <a href="<?= site_url('leads-empresas-nuevas') ?>" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #10b981; color: #fff; padding: 12px 16px; border-radius: 10px; font-weight: 800; font-size: 0.9rem; text-decoration: none; box-shadow: 0 4px 12px rgba(16,185,129,0.3); transition: all 0.2s; width: 100%;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                                Conocer el Radar
+                            </a>
+                            <div style="text-align: center; margin-top: 8px; font-size: 0.82rem; font-weight: 800; color: #10b981; letter-spacing: -0.01em;">79,00€ / mes &nbsp;·&nbsp; <span style="font-weight: 600; color: #065f46; opacity: 0.7;">sin permanencia</span></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <?php endif; ?>
 
             <!-- SEO Content & FAQs -->
             <div style="padding: 48px; background: #fff;">

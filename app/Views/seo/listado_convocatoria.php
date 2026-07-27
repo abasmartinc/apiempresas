@@ -99,67 +99,7 @@
             overflow-x: auto;
         }
 
-        /* ── PAYWALL BLUR ── */
-        .blurred-amount {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .blurred-amount .amount-text {
-            filter: blur(5px);
-            user-select: none;
-            color: #059669;
-            font-weight: 800;
-            font-size: 0.95rem;
-        }
-        .blurred-amount .lock-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: #fff;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            text-decoration: none;
-            white-space: nowrap;
-            box-shadow: 0 2px 8px rgba(16,185,129,0.3);
-            transition: all 0.2s;
-        }
-        .blurred-amount .lock-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(16,185,129,0.4);
-        }
-        .paywall-row td { background: #fafffe !important; }
-        .paywall-cta-banner {
-            background: linear-gradient(135deg, #f0fdf9, #ecfdf5);
-            border: 1px solid #a7f3d0;
-            border-radius: 16px;
-            padding: 20px 28px;
-            margin: 16px 24px 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-        }
-        .paywall-cta-banner p { margin: 0; font-size: 0.9rem; color: #065f46; font-weight: 600; }
-        .paywall-cta-banner a {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #10b981;
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 0.9rem;
-            text-decoration: none;
-            white-space: nowrap;
-            box-shadow: 0 4px 14px rgba(16,185,129,0.3);
-            flex-shrink: 0;
-        }
+
         .prem-table {
             width: 100%;
             min-width: 800px;
@@ -301,13 +241,16 @@
                     $pricing = $billingService->getPublicFundsPricingDetails($total);
                     $dynamic_price = $pricing['base_price'];
                 ?>
-                <div style="margin-top: 2rem;">
-                    <a href="<?= $checkoutUrl ?>" style="display: inline-flex; align-items: center; gap: 8px; background: #10b981; color: #fff; padding: 0.85rem 1.5rem; border-radius: 12px; font-weight: 800; font-size: 0.95rem; text-decoration: none; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.25); transition: all 0.2s; border: 1px solid #34d399;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(16, 185, 129, 0.35)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(16, 185, 129, 0.25)';">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Descargar CSV Completo — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
+                <div style="margin-top: 2rem; display: flex; align-items: center; justify-content: flex-start; gap: 16px; flex-wrap: wrap;">
+                    <a href="<?= $checkoutUrl ?>" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, #10b981, #059669); color: #fff; padding: 16px 32px; border-radius: 14px; font-weight: 800; font-size: 1.1rem; text-decoration: none; box-shadow: 0 12px 32px rgba(16,185,129,0.3); transition: all 0.2s; border: 1px solid rgba(255,255,255,0.1);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 16px 40px rgba(16,185,129,0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 12px 32px rgba(16,185,129,0.3)';">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Descargar CSV completo
                     </a>
-                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7); max-width: 480px; margin-top: 10px; line-height: 1.4;">
-                        Incluye todos los registros (<?= number_format($total, 0, ',', '.') ?>) cruzados con los datos del Registro Mercantil: Sector CNAE, Dirección, Provincia y Teléfono (cuando esté disponible).
+                    <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 20px; border-radius: 14px; text-align: left; display: flex; flex-direction: column; justify-content: center;">
+                        <div style="font-size: 1.3rem; font-weight: 900; color: #fff; letter-spacing: -0.04em; line-height: 1;">
+                            <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="color:rgba(255,255,255,0.5); font-size:0.9rem; font-weight:600; margin-right:6px; text-decoration-thickness: 2px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85rem; font-weight: 700; color: #34d399;">+ IVA</span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px;">Pago único · <?= number_format($total, 0, ',', '.') ?> registros</div>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -356,23 +299,17 @@
                             <?php else: ?>
                                 <?php 
                                 $rowNum = 0;
-                                $radarUrl = site_url('radar');
                                 foreach ($subsidies as $sub):
                                     $rowNum++;
-                                    $isLocked = $rowNum > 10;
                                     $hasCompany = !empty($sub['company_name']);
-                                    $cUrl = ($hasCompany && !$isLocked) ? company_url(['cif' => $sub['company_cif'], 'name' => $sub['company_name']]) : '#';
+                                    $cUrl = ($hasCompany) ? company_url(['cif' => $sub['company_cif'], 'name' => $sub['company_name']]) : '#';
                                 ?>
-                                    <tr<?= (!$isLocked && $hasCompany) ? ' onclick="window.location=\'' . esc($cUrl) . '\'" style="cursor: pointer;"' : '' ?><?= $isLocked ? ' class="paywall-row"' : '' ?>>
+                                    <tr<?= ($hasCompany) ? ' onclick="window.location=\'' . esc($cUrl) . '\'" style="cursor: pointer;"' : '' ?>>
                                         <td>
                                             <?php if ($hasCompany): ?>
-                                                <?php if (!$isLocked): ?>
                                                 <a href="<?= esc($cUrl) ?>" style="color: #0f172a; font-weight: 800; text-decoration: none; display: block; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='#0f172a'">
                                                     <?= esc($sub['company_name']) ?>
                                                 </a>
-                                                <?php else: ?>
-                                                <span style="color: #0f172a; font-weight: 800; display: block; font-size: 0.95rem;"><?= esc($sub['company_name']) ?></span>
-                                                <?php endif; ?>
                                             <?php else: ?>
                                                 <?php if (!empty($sub['raw_beneficiario'])): ?>
                                                     <span style="color: #0f172a; font-weight: 800; display: block; font-size: 0.95rem;"><?= esc($sub['raw_beneficiario']) ?></span>
@@ -384,22 +321,12 @@
                                         </td>
 
                                         <td style="color: #64748b; font-size: 0.95rem; white-space: nowrap; font-weight: 500;">
-                                            <?= !$isLocked ? date('d/m/Y', strtotime($sub['fecha_concesion'])) : date('d/m/Y', strtotime($sub['fecha_concesion'])) ?>
+                                            <?= date('d/m/Y', strtotime($sub['fecha_concesion'])) ?>
                                         </td>
                                         <td style="text-align: right;">
-                                            <?php if (!$isLocked): ?>
                                             <span class="amount-badge">
                                                 <?= number_format($sub['importe'], 2, ',', '.') ?> €
                                             </span>
-                                            <?php else: ?>
-                                            <span class="blurred-amount">
-                                                <span class="amount-text"><?= number_format($sub['importe'], 2, ',', '.') ?> €</span>
-                                                <a href="<?= $radarUrl ?>" class="lock-btn" onclick="event.stopPropagation();" title="Ver importe completo en el Radar">
-                                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                                                    Radar
-                                                </a>
-                                            </span>
-                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -408,43 +335,70 @@
                     </table>
                 </div>
 
-                <?php if ($total > 10): ?>
-                <div class="paywall-cta-banner">
-                    <p>🔒 <strong><?= number_format($total - 10, 0, ',', '.') ?> importes ocultos.</strong> Accede al Radar para ver todos los datos completos, filtrar por provincia, sector y exportar.</p>
-                    <a href="<?= site_url('radar') ?>">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-                        Acceder al Radar
-                    </a>
-                </div>
-                <?php endif; ?>
-
-                <?php if (empty($searchQuery) && $total > 0): ?>
-                <?php 
-                    $billingService = new \App\Services\BillingService();
-                    $checkoutUrl = site_url('billing/subsidies_checkout?convocatoria=' . urlencode($slug));
-                    $pricing = $billingService->getPublicFundsPricingDetails($total);
-                    $dynamic_price = $pricing['base_price'];
-                ?>
-                <div style="padding: 24px; text-align: right; border-top: 1px solid #e2e8f0; background: #f8fafc; border-radius: 0 0 16px 16px;">
-                    <a href="<?= $checkoutUrl ?>" style="display: inline-flex; align-items: center; gap: 8px; background: #10b981; color: #fff; padding: 12px 24px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; text-decoration: none; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25); transition: all 0.2s; margin-bottom: 8px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 25px rgba(16, 185, 129, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(16, 185, 129, 0.25)';">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Descargar CSV Completo — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
-                    </a>
-                    <div style="font-size: 0.75rem; color: #94a3b8; max-width: 320px; margin-left: auto; line-height: 1.4;">
-                        Incluye todos los registros (<?= number_format($total, 0, ',', '.') ?>) cruzados con los datos del Registro Mercantil: Sector CNAE, Dirección, Provincia y Teléfono (cuando esté disponible).
-                    </div>
-                </div>
-                <?php endif; ?>
-
                 <!-- Pagination -->
                 <?php if ($pager): ?>
-                <div class="pagination-container">
+                <div class="pagination-container" style="padding: 16px 28px; background: #fff; border-top: 1px solid #f1f5f9; display: flex; justify-content: center; border-radius: 0 0 16px 16px;">
                     <?php 
-                        // CodeIgniter 4 pager structure fixing to use our classes
                         $pagerLinks = $pager; 
-                        // Just echo out the pager, but if CI outputs unstyled ul/li we will style them globally in CSS
                     ?>
                     <?= $pagerLinks ?>
+                </div>
+                <?php endif; ?>
+
+
+
+                <!-- ── BLOQUE SIGUIENTE PASO: CSV vs RADAR ── -->
+                <?php if (empty($searchQuery)): ?>
+                <div style="margin: 0; padding: 40px 24px 32px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-top: 1px solid #e2e8f0; border-radius: 0 0 16px 16px;">
+                    <p style="text-align: center; font-size: 0.8rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px;">¿Qué quieres hacer ahora?</p>
+                    <p style="text-align: center; font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0 0 32px; letter-spacing: -0.02em;">Elige cómo usar estos datos</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 800px; margin: 0 auto;">
+
+                        <!-- OPCIÓN A: Descarga única -->
+                        <div style="background: #fff; border: 2px solid #10b981; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 16px rgba(16,185,129,0.08);">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 38px; height: 38px; background: #ecfdf5; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    </div>
+                                    <div style="font-weight: 800; color: #0f172a; font-size: 0.9rem; white-space: nowrap;">Descargar listado</div>
+                                </div>
+                                <span style="background: #10b981; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Pago único</span>
+                            </div>
+                            <p style="margin: 0; font-size: 0.85rem; color: #475569; line-height: 1.5;">Exporta el CSV completo de empresas subvencionadas con datos de contacto: teléfono, CNAE, dirección y provincia. Listo para tu CRM.</p>
+                            <?php if (!empty($checkoutUrl) && !empty($pricing)): ?>
+                            <div style="margin-top: 4px;">
+                                <a href="<?= $checkoutUrl ?>" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #10b981; color: #fff; padding: 12px 16px; border-radius: 10px; font-weight: 800; font-size: 0.9rem; text-decoration: none; box-shadow: 0 4px 12px rgba(16,185,129,0.3); transition: all 0.2s; width: 100%;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    Descargar CSV completo
+                                </a>
+                                <div style="text-align: center; margin-top: 8px; font-size: 0.82rem; font-weight: 800; color: #10b981; letter-spacing: -0.01em;"><?= number_format($dynamic_price, 2, ',', '') ?>€ + IVA &nbsp;·&nbsp; <span style="font-weight: 600; color: #64748b;">pago único</span></div>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- OPCIÓN B: Radar -->
+                        <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 12px; position: relative;">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 38px; height: 38px; background: #fff; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(16,185,129,0.2);">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                                    </div>
+                                    <div style="font-weight: 800; color: #065f46; font-size: 0.9rem; white-space: nowrap;">Prospección continua</div>
+                                </div>
+                                <span style="background: #10b981; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.05em;">Diario</span>
+                            </div>
+                            <p style="margin: 0; font-size: 0.85rem; color: #065f46; line-height: 1.5; opacity: 0.85;">Detecta cada día empresas recién constituidas antes que tu competencia, con scoring de IA y CRM integrado.</p>
+                            <div style="margin-top: 4px;">
+                                <a href="<?= site_url('leads-empresas-nuevas') ?>" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #10b981; color: #fff; padding: 12px 16px; border-radius: 10px; font-weight: 800; font-size: 0.9rem; text-decoration: none; box-shadow: 0 4px 12px rgba(16,185,129,0.3); transition: all 0.2s; width: 100%;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                                    Conocer el Radar
+                                </a>
+                                <div style="text-align: center; margin-top: 8px; font-size: 0.82rem; font-weight: 800; color: #10b981; letter-spacing: -0.01em;">79,00€ / mes &nbsp;·&nbsp; <span style="font-weight: 600; color: #065f46; opacity: 0.7;">sin permanencia</span></div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
                 <?php endif; ?>
             </div>
