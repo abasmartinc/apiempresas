@@ -8,8 +8,7 @@ use CodeIgniter\Router\RouteCollection;
 // --- MÁXIMA PRIORIDAD PARA DEPURACIÓN ---
 $routes->get('informes/(:any)', 'SeoReportController::handleReport/$1');
 
-// === STANDALONE ENGLISH DOMAIN (Phase 1) ===
-$routes->group('', ['hostname' => 'spaincompanyapi.test'], static function ($routes) {
+$englishRoutes = static function ($routes) {
     // English Landing Page
     $routes->get('/', 'Home::englishStandalone');
     // English Documentation
@@ -21,7 +20,10 @@ $routes->group('', ['hostname' => 'spaincompanyapi.test'], static function ($rou
     // Auth English
     $routes->get('enter', 'Login::english');
     $routes->get('register', 'Register::english');
-});
+};
+
+$routes->group('', ['hostname' => 'spaincompanyapi.test'], $englishRoutes);
+$routes->group('', ['hostname' => 'spaincompanyapi.com'], $englishRoutes);
 
 $routes->get('/', 'Home::index');
 
