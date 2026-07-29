@@ -60,7 +60,10 @@ class GenerateSitemaps extends BaseCommand
         $publicPath = ROOTPATH;
         
         $currentFile = $publicPath . "sitemap-companies-{$fileIndex}.xml";
-        $xmlContent = '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL;
+        $currentFileEn = $publicPath . "sitemap-en-companies-{$fileIndex}.xml";
+        $xmlHeader = '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL;
+        $xmlContent = $xmlHeader;
+        $xmlContentEn = $xmlHeader;
         
         $totalProcessed = 0;
         $totalIncluded = 0;
@@ -85,15 +88,20 @@ class GenerateSitemaps extends BaseCommand
                 }
 
                 $url = company_url($company);
+                $urlEn = str_replace(
+                    ['apiempresas.es', 'apiempresas.test'],
+                    ['spaincompanyapi.com', 'spaincompanyapi.test'],
+                    $url
+                );
+
                 $score = calculateCompanySeoScore($company);
                 $priority = ($score >= 7) ? '0.8' : '0.6';
                 
-                $xmlContent .= '<url>' . PHP_EOL;
-                $xmlContent .= '  <loc>' . esc($url) . '</loc>' . PHP_EOL;
-                $xmlContent .= '  <lastmod>' . date('Y-m-d') . '</lastmod>' . PHP_EOL;
-                $xmlContent .= '  <changefreq>monthly</changefreq>' . PHP_EOL;
-                $xmlContent .= '  <priority>' . $priority . '</priority>' . PHP_EOL;
-                $xmlContent .= '</url>' . PHP_EOL;
+                $urlEntry = '<url>' . PHP_EOL . '  <loc>' . esc($url) . '</loc>' . PHP_EOL . '  <lastmod>' . date('Y-m-d') . '</lastmod>' . PHP_EOL . '  <changefreq>monthly</changefreq>' . PHP_EOL . '  <priority>' . $priority . '</priority>' . PHP_EOL . '</url>' . PHP_EOL;
+                $urlEntryEn = '<url>' . PHP_EOL . '  <loc>' . esc($urlEn) . '</loc>' . PHP_EOL . '  <lastmod>' . date('Y-m-d') . '</lastmod>' . PHP_EOL . '  <changefreq>monthly</changefreq>' . PHP_EOL . '  <priority>' . $priority . '</priority>' . PHP_EOL . '</url>' . PHP_EOL;
+                
+                $xmlContent .= $urlEntry;
+                $xmlContentEn .= $urlEntryEn;
                 
                 $urlCount++;
                 $totalIncluded++;
@@ -101,15 +109,19 @@ class GenerateSitemaps extends BaseCommand
                 // If we reached the limit for one file, write and close
                 if ($urlCount >= $urlsPerFile) {
                     $xmlContent .= '</urlset>';
+                    $xmlContentEn .= '</urlset>';
                     file_put_contents($currentFile, $xmlContent);
+                    file_put_contents($currentFileEn, $xmlContentEn);
                     
-                    CLI::write("Generated sitemap {$fileIndex} with {$urlCount} URLs.", 'yellow');
+                    CLI::write("Generated sitemaps {$fileIndex} (ES & EN) with {$urlCount} URLs.", 'yellow');
                     
                     // Reset for next file
                     $fileIndex++;
                     $urlCount = 0;
                     $currentFile = $publicPath . "sitemap-companies-{$fileIndex}.xml";
-                    $xmlContent = '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL;
+                    $currentFileEn = $publicPath . "sitemap-en-companies-{$fileIndex}.xml";
+                    $xmlContent = $xmlHeader;
+                    $xmlContentEn = $xmlHeader;
                 }
             }
             
@@ -122,8 +134,10 @@ class GenerateSitemaps extends BaseCommand
         // Write the remaining URLs if any
         if ($urlCount > 0) {
             $xmlContent .= '</urlset>';
+            $xmlContentEn .= '</urlset>';
             file_put_contents($currentFile, $xmlContent);
-            CLI::write("Generated sitemap {$fileIndex} with {$urlCount} URLs.", 'yellow');
+            file_put_contents($currentFileEn, $xmlContentEn);
+            CLI::write("Generated sitemap {$fileIndex} (ES & EN) with {$urlCount} URLs.", 'yellow');
         }
 
         CLI::write("Done! Processed {$totalProcessed} total companies, included {$totalIncluded} in {$fileIndex} sitemap files.", 'green');
@@ -134,9 +148,12 @@ class GenerateSitemaps extends BaseCommand
 
         // Cleanup any old files that might remain if the total count decreased
         $existing = glob($publicPath . 'sitemap-companies-*.xml');
-        foreach ($existing as $file) {
+        $existingEn = glob($publicPath . 'sitemap-en-companies-*.xml');
+        $allExisting = array_merge($existing, $existingEn);
+        
+        foreach ($allExisting as $file) {
             // Extract the number from the filename
-            if (preg_match('/sitemap-companies-(\d+)\.xml$/', $file, $matches)) {
+            if (preg_match('/sitemap-(?:en-)?companies-(\d+)\.xml$/', $file, $matches)) {
                 $num = (int)$matches[1];
                 if ($num > $fileIndex) {
                     @unlink($file);

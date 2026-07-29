@@ -45,10 +45,13 @@ class Sitemap extends Controller
         $xml .= '<sitemap><loc>' . site_url("sitemap-subvenciones.xml") . '</loc></sitemap>';
         $xml .= '<sitemap><loc>' . site_url("sitemap-contratos.xml") . '</loc></sitemap>';
 
+        $isEn = (strpos((string)$this->request->getServer('HTTP_HOST'), 'spaincompanyapi') !== false);
+        $prefix = $isEn ? 'sitemap-en-companies-' : 'sitemap-companies-';
+
         // 5. Páginas de empresas
         for ($i = 1; $i <= $pages; $i++) {
             $xml .= '<sitemap>';
-            $xml .= '<loc>' . site_url("sitemap-companies-{$i}.xml") . '</loc>';
+            $xml .= '<loc>' . site_url("{$prefix}{$i}.xml") . '</loc>';
             $xml .= '</sitemap>';
         }
         
