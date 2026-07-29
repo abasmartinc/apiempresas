@@ -22,12 +22,20 @@ class App extends BaseConfig
     {
         parent::__construct();
         
-        $host = $_SERVER['HTTP_HOST'] ?? 'apiempresas.test';
+        if (is_cli()) {
+            $isProd = (env('CI_ENVIRONMENT') === 'production');
+            $host = $isProd ? 'apiempresas.es' : 'apiempresas.test';
+        } else {
+            $host = $_SERVER['HTTP_HOST'] ?? 'apiempresas.test';
+        }
+        
+        $isLocal = (strpos($host, 'localhost') !== false || strpos($host, '.test') !== false);
         
         if (strpos($host, 'localhost') !== false) {
             $this->baseURL = 'http://localhost/apiempresas/';
         } else {
-            $this->baseURL = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://') . $host . '/';
+            $protocol = $isLocal ? 'http://' : 'https://';
+            $this->baseURL = $protocol . $host . '/';
         }
     }
 
