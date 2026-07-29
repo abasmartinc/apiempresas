@@ -85,7 +85,7 @@ class Billing extends BaseController
         $currentTime = time();
 
         if ($lastCheckout && ($currentTime - $lastCheckout) < 10) { // 10 seconds limit
-            return redirect()->back()->with('error', 'Demasiadas solicitudes. Por favor, espera unos segundos.');
+            return redirect()->back()->with('error', lang('Messages.flash_4'));
         }
         $session->set('last_checkout_time', $currentTime);
 
@@ -145,9 +145,9 @@ class Billing extends BaseController
             }
 
             if ($simulator->simulatePayment($userId, $plan, $period)) {
-                return redirect()->to(site_url('billing/success'))->with('message', 'Simulación de pago completada con éxito.');
+                return redirect()->to(site_url('billing/success'))->with('message', lang('Messages.flash_5'));
             } else {
-                return redirect()->back()->with('error', 'Error en la simulación del pago.');
+                return redirect()->back()->with('error', lang('Messages.flash_6'));
             }
         }
 
@@ -162,7 +162,7 @@ class Billing extends BaseController
         if ($period !== 'single' && $plan !== 'radar') {
             $dbPlan = $planModel->where('slug', $plan)->first();
             if (!$dbPlan) {
-                return redirect()->back()->with('error', 'El plan seleccionado no existe.');
+                return redirect()->back()->with('error', lang('Messages.flash_7'));
             }
         }
 
@@ -280,7 +280,7 @@ class Billing extends BaseController
                         if (isset($dbPlan->price_annual)) {
                             $amount = (float) $dbPlan->price_annual;
                         } else {
-                            return redirect()->back()->with('error', 'El precio anual no está configurado para este plan.');
+                            return redirect()->back()->with('error', lang('Messages.flash_8'));
                         }
                     } else {
                         $amount = (float) $dbPlan->price_monthly;
@@ -288,7 +288,7 @@ class Billing extends BaseController
                 }
 
                 if ($amount <= 0) {
-                    return redirect()->back()->with('error', 'El precio del plan no es válido.');
+                    return redirect()->back()->with('error', lang('Messages.flash_9'));
                 }
 
                 $lineItem = $this->billingService->buildSubscriptionLineItem(
@@ -370,7 +370,7 @@ class Billing extends BaseController
         $credits = (int) ($postData['credits'] ?? 0);
 
         if ($credits < 10000) {
-            return redirect()->back()->with('error', 'La cantidad mínima de créditos es 10.000.');
+            return redirect()->back()->with('error', lang('Messages.flash_10'));
         }
 
         // Lógica de Precios (Igual a la de Javascript por seguridad) delegada a BillingService
@@ -384,9 +384,9 @@ class Billing extends BaseController
                 'price' => $price
             ]);
             if ($simulator->simulateBonusRecharge($userId, $credits)) {
-                return redirect()->to(site_url('billing/success'))->with('message', 'Simulación de recarga completada.');
+                return redirect()->to(site_url('billing/success'))->with('message', lang('Messages.flash_11'));
             } else {
-                return redirect()->back()->with('error', 'Error en la simulación de recarga.');
+                return redirect()->back()->with('error', lang('Messages.flash_12'));
             }
         }
 
@@ -704,7 +704,7 @@ class Billing extends BaseController
         // Permitir acceso sin login si viene del simulador con contexto de excel en sesión
         $hasSimulatorContext = session('checkout_context') !== null || session('simulator_excel_token') !== null;
         if (!session('logged_in') && !$hasSimulatorContext) {
-            return redirect()->to(site_url('enter'))->with('error', 'Debes iniciar sesión para continuar.');
+            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_13'));
         }
 
         $userId = (int) session('user_id');
@@ -837,7 +837,7 @@ class Billing extends BaseController
             return redirect()->to(site_url('dashboard'));
         }
         // puedes crear una vista billing_cancel si quieres
-        return redirect()->to(site_url('billing'))->with('info', 'Has cancelado el proceso de pago.');
+        return redirect()->to(site_url('billing'))->with('info', lang('Messages.flash_14'));
     }
 
 
@@ -898,16 +898,16 @@ class Billing extends BaseController
         $invoice = $invoiceModel->find($id);
 
         if (!$invoice) {
-            return redirect()->back()->with('error', 'Factura no encontrada.');
+            return redirect()->back()->with('error', lang('Messages.flash_15'));
         }
 
         // Fix: Castear a int para evitar error de "43" !== 43
         if ((int) $invoice->user_id !== $userId) {
-            return redirect()->back()->with('error', 'No tienes permiso para ver esta factura.');
+            return redirect()->back()->with('error', lang('Messages.flash_16'));
         }
 
         if (empty($invoice->pdf_path)) {
-            return redirect()->back()->with('error', 'El archivo PDF no está disponible.');
+            return redirect()->back()->with('error', lang('Messages.flash_17'));
         }
 
         // Limpiamos 'writable/' del inicio por si acaso, para usar WRITEPATH que es más seguro
@@ -972,7 +972,7 @@ class Billing extends BaseController
             ]);
         }
 
-        return redirect()->to(site_url('dashboard'))->with('message', 'Tu API Key ha sido rotada con éxito. Recuerda actualizar tus aplicaciones.');
+        return redirect()->to(site_url('dashboard'))->with('message', lang('Messages.flash_18'));
     }
 
     /**
@@ -1020,7 +1020,7 @@ class Billing extends BaseController
             if ($this->request->isAJAX() || $this->request->getPost('ajax')) {
                 return $this->response->setJSON(['status' => 'error', 'message' => 'No tienes ninguna suscripción activa para cancelar.']);
             }
-            return redirect()->back()->with('error', 'No tienes ninguna suscripción activa para cancelar.');
+            return redirect()->back()->with('error', lang('Messages.flash_19'));
         }
 
         // 1. Si es Stripe, cancelar en Stripe (al final del periodo)
@@ -1082,7 +1082,7 @@ class Billing extends BaseController
             ]);
         }
 
-        return redirect()->to(site_url('billing'))->with('message', 'Tu suscripción ha sido cancelada. Seguirás teniendo acceso hasta el final del periodo facturado y no se te cobrará de nuevo.');
+        return redirect()->to(site_url('billing'))->with('message', lang('Messages.flash_20'));
     }
 
     private function sendSubscriptionCancellationEmail(int $userId, object $plan, string $reasonLabel, string $feedback): void
@@ -1145,7 +1145,7 @@ class Billing extends BaseController
         $user = $this->userModel->find($userId);
 
         if (!$user || empty($user->stripe_customer_id)) {
-            return redirect()->to(site_url('billing'))->with('error', 'No tienes un historial de facturación en Stripe todavía o no tienes suscripciones activas.');
+            return redirect()->to(site_url('billing'))->with('error', lang('Messages.flash_21'));
         }
 
         try {

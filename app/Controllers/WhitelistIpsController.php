@@ -42,19 +42,19 @@ class WhitelistIpsController extends BaseController
         $description = $this->request->getPost('description');
 
         if (empty($ipAddress)) {
-            session()->setFlashdata('error', 'La dirección IP es obligatoria.');
+            session()->setFlashdata('error', lang('Messages.flash_81'));
             return redirect()->to(site_url('whitelist-ips'));
         }
 
         // Basic IP validation
         if (!filter_var($ipAddress, FILTER_VALIDATE_IP)) {
-            session()->setFlashdata('error', 'La dirección IP introducida no es válida.');
+            session()->setFlashdata('error', lang('Messages.flash_82'));
             return redirect()->to(site_url('whitelist-ips'));
         }
 
         // Check if it already exists
         if ($this->whitelistModel->isIpWhitelisted($userId, $ipAddress)) {
-            session()->setFlashdata('error', 'Esta dirección IP ya está en tu lista blanca.');
+            session()->setFlashdata('error', lang('Messages.flash_83'));
             return redirect()->to(site_url('whitelist-ips'));
         }
 
@@ -64,7 +64,7 @@ class WhitelistIpsController extends BaseController
             'description' => $description
         ]);
 
-        session()->setFlashdata('success', 'Dirección IP añadida correctamente a la lista blanca.');
+        session()->setFlashdata('success', lang('Messages.flash_84'));
         return redirect()->to(site_url('whitelist-ips'));
     }
 
@@ -79,9 +79,9 @@ class WhitelistIpsController extends BaseController
         $ip = $this->whitelistModel->find($id);
         if ($ip && (int)$ip->user_id === (int)$userId) {
             $this->whitelistModel->delete($id);
-            session()->setFlashdata('success', 'Dirección IP eliminada correctamente de la lista blanca.');
+            session()->setFlashdata('success', lang('Messages.flash_85'));
         } else {
-            session()->setFlashdata('error', 'No se pudo eliminar la dirección IP.');
+            session()->setFlashdata('error', lang('Messages.flash_86'));
         }
 
         return redirect()->to(site_url('whitelist-ips'));

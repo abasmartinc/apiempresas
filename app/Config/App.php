@@ -17,6 +17,19 @@ class App extends BaseConfig
      * E.g., http://example.com/
      */
     public string $baseURL = 'http://apiempresas.test/';
+    
+    public function __construct()
+    {
+        parent::__construct();
+        
+        $host = $_SERVER['HTTP_HOST'] ?? 'apiempresas.test';
+        
+        if (strpos($host, 'localhost') !== false) {
+            $this->baseURL = 'http://localhost/apiempresas/';
+        } else {
+            $this->baseURL = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://') . $host . '/';
+        }
+    }
 
     /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.
@@ -29,7 +42,7 @@ class App extends BaseConfig
      *
      * @var list<string>
      */
-    public array $allowedHostnames = [];
+    public array $allowedHostnames = ['spaincompanyapi.test', 'spaincompanyapi.com'];
 
     /**
      * --------------------------------------------------------------------------
@@ -117,10 +130,8 @@ class App extends BaseConfig
      * found, the first locale will be used.
      *
      * IncomingRequest::setLocale() also uses this list.
-     *
-     * @var list<string>
      */
-    public array $supportedLocales = ['en'];
+    public array $supportedLocales = ['en', 'es'];
 
     /**
      * --------------------------------------------------------------------------

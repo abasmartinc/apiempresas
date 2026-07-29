@@ -107,8 +107,17 @@ class EmailService
      */
     public function sendSetPasswordEmail(string $userEmail, string $token)
     {
-        $templateData = ['token' => $token];
+        $templateData = ['token' => $token, 'reset_url' => site_url("reset-password/{$token}")];
         return $this->sendTemplateEmail('set_password', $templateData, $userEmail, ['papelo.amh@gmail.com']);
+    }
+
+    /**
+     * Send a password reset email (forgot password).
+     */
+    public function sendPasswordResetEmail(string $userEmail, string $token)
+    {
+        $templateData = ['token' => $token, 'reset_url' => site_url("reset-password/{$token}")];
+        return $this->sendTemplateEmail('reset_password', $templateData, $userEmail);
     }
 
     /**
@@ -299,8 +308,29 @@ class EmailService
         $fromName  = env('email.fromName', 'APIEmpresas.es');
         $email->setFrom($fromEmail, $fromName);
 
-        $subject = $this->parsePlaceholders($template->subject, $data);
-        $body    = $this->parsePlaceholders($template->body, $data);
+        // Fetch User Language Preference
+        $userLang = 'es'; // default
+        if ($userId > 0) {
+            $db = \Config\Database::connect();
+            $user = $db->table('users')->select('lang')->where('id', $userId)->get()->getRow();
+            if ($user && !empty($user->lang)) {
+                $userLang = $user->lang;
+            }
+        } else {
+            // Try to find by email
+            $db = \Config\Database::connect();
+            $user = $db->table('users')->select('lang')->where('email', $to)->get()->getRow();
+            if ($user && !empty($user->lang)) {
+                $userLang = $user->lang;
+            }
+        }
+
+        // Determine correct subject and body based on language
+        $subjectTemplate = ($userLang === 'en' && !empty($template->subject_en)) ? $template->subject_en : $template->subject;
+        $bodyTemplate = ($userLang === 'en' && !empty($template->body_en)) ? $template->body_en : $template->body;
+
+        $subject = $this->parsePlaceholders($subjectTemplate, $data);
+        $body    = $this->parsePlaceholders($bodyTemplate, $data);
 
         // Add unsubscribe link if not already present and only for commercial/marketing emails
         if (!in_array($slug, $transactionalSlugs) && strpos($body, 'unsubscribe') === false) {
@@ -377,26 +407,7 @@ class EmailService
      */
     public function sendApiKeyBlockedAlert(string $userEmail, string $countryCode)
     {
-        $emailService = \Config\Services::email();
-        $emailService->clear();
-
-        $fromEmail = env('email.fromEmail', 'no-reply@apiempresas.es');
-        $fromName  = env('email.fromName', 'APIEmpresas Seguridad');
-        
-        $emailService->setFrom($fromEmail, $fromName);
-        $emailService->setTo($userEmail);
-        $emailService->setSubject('⚠️ ALERTA DE SEGURIDAD: Tu API Key ha sido bloqueada');
-
-        $body = view('emails/api_key_blocked', ['countryCode' => $countryCode]);
-        $emailService->setMessage($body);
-
-        if ($emailService->send()) {
-            log_message('info', "[EmailService] Alerta Geo-Anomaly enviada a {$userEmail}");
-            return true;
-        } else {
-            log_message('error', "[EmailService] Error al enviar alerta Geo-Anomaly a {$userEmail}: " . $emailService->printDebugger(['headers']));
-            return false;
-        }
+        return $this->sendTemplateEmail('api_key_blocked', ['countryCode' => $countryCode], $userEmail);
     }
 
     /**
@@ -404,35 +415,15 @@ class EmailService
      */
     public function sendMassiveExportReady(string $userEmail, string $downloadToken, string $exportType, int $totalRecords)
     {
-        $emailService = \Config\Services::email();
-        $emailService->clear();
-
-        $fromEmail = env('email.fromEmail', 'no-reply@apiempresas.es');
-        $fromName  = env('email.fromName', 'APIEmpresas.es');
-        
-        $emailService->setFrom($fromEmail, $fromName);
-        $emailService->setTo($userEmail);
-        $emailService->setSubject('✅ Tu Base de Datos masiva está lista para descargar');
-
         $downloadUrl = site_url("download/secure/{$downloadToken}");
-        
         $typeLabel = strpos($exportType, 'subsidies') !== false ? 'Subvenciones' : 'Licitaciones Públicas';
 
-        $body = "Hola,<br><br>";
-        $body .= "Tu exportación masiva de <b>{$typeLabel}</b> (" . number_format($totalRecords, 0, ',', '.') . " registros) ha finalizado correctamente y está lista para descargar.<br><br>";
-        $body .= "Hemos procesado y optimizado los datos para ti. Puedes descargar tu archivo de forma segura haciendo clic en el siguiente enlace (el archivo viene comprimido en ZIP):<br><br>";
-        $body .= "<a href='{$downloadUrl}' style='display:inline-block; padding:12px 24px; background:#10b981; color:#fff; text-decoration:none; border-radius:8px; font-weight:bold;'>Descargar BBDD Completa</a><br><br>";
-        $body .= "<i>Nota: Este enlace es seguro y privado. Por favor, no lo compartas.</i><br><br>";
-        $body .= "Gracias por confiar en APIEmpresas.<br>";
+        $templateData = [
+            'typeLabel' => $typeLabel,
+            'totalRecords' => number_format($totalRecords, 0, ',', '.'),
+            'downloadUrl' => $downloadUrl
+        ];
 
-        $emailService->setMessage($body);
-
-        if ($emailService->send()) {
-            log_message('info', "[EmailService] Export ready email sent to {$userEmail}");
-            return true;
-        } else {
-            log_message('error', "[EmailService] Failed to send export ready email to {$userEmail}: " . $emailService->printDebugger(['headers']));
-            return false;
-        }
+        return $this->sendTemplateEmail('massive_export_ready', $templateData, $userEmail);
     }
 }

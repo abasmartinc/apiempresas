@@ -25,7 +25,7 @@ class Plugin extends BaseController
         }
 
         return redirect()->to(site_url('dashboard#plugin-wp'))
-            ->with('info', 'Ya puedes descargar y configurar tu plugin de WordPress desde aquí.');
+            ->with('info', lang('Messages.flash_47'));
     }
 
     /**
@@ -40,6 +40,6 @@ class Plugin extends BaseController
         // TODO: En producción, aquí se serviría el archivo .zip real
         // Para esta fase, redirigimos al dashboard con aviso o devolvemos un mensaje
         return redirect()->to(site_url('dashboard#plugin-wp'))
-            ->with('info', 'El archivo del plugin se está preparando. Estará disponible en tu dashboard en breve.');
+            ->with('info', lang('Messages.flash_48'));
     }
 }

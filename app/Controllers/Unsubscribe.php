@@ -17,7 +17,7 @@ class Unsubscribe extends Controller
         $email = $this->request->getGet('email');
         
         if (!$email || !$hash) {
-            return redirect()->to(site_url())->with('error', 'Enlace de baja inválido.');
+            return redirect()->to(site_url())->with('error', lang('Messages.flash_77'));
         }
 
         // Validate hash
@@ -25,7 +25,7 @@ class Unsubscribe extends Controller
         
         if ($hash !== $expectedHash) {
             log_message('warning', "[Unsubscribe] Intento de baja con hash inválido para: {$email}");
-            return redirect()->to(site_url())->with('error', 'Enlace de baja inválido o expirado.');
+            return redirect()->to(site_url())->with('error', lang('Messages.flash_78'));
         }
 
         return view('unsubscribe/confirm', [
@@ -51,7 +51,7 @@ class Unsubscribe extends Controller
         $expectedHash = hash_hmac('sha256', $email, env('encryption.key', 'apiempresas-secret-key'));
         
         if ($hash !== $expectedHash) {
-            return redirect()->to(site_url())->with('error', 'Error de seguridad al procesar la baja.');
+            return redirect()->to(site_url())->with('error', lang('Messages.flash_79'));
         }
 
         $userModel = new UserModel();
@@ -66,6 +66,6 @@ class Unsubscribe extends Controller
             ]);
         }
 
-        return redirect()->to(site_url())->with('error', 'Usuario no encontrado.');
+        return redirect()->to(site_url())->with('error', lang('Messages.flash_80'));
     }
 }

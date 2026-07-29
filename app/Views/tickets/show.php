@@ -101,6 +101,23 @@
                                 timerProgressBar: true
                             });
                         });
+<div class="tkt-container">
+            <!-- Columna Izquierda: Mensajes -->
+            <div>
+                
+                <?php if(session()->getFlashdata('success')): ?>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: '<?= esc(session()->getFlashdata('success')) ?>',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
+                        });
                     </script>
                 <?php endif; ?>
 
@@ -109,7 +126,7 @@
                         <h1>#<?= $ticket['id'] ?> - <?= esc($ticket['subject']) ?></h1>
                         <a href="<?= site_url('tickets') ?>" class="tkt-back-link" style="margin-bottom: 0;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                            Volver a Tickets
+                            <?= lang('Tickets.btn_back') ?>
                         </a>
                     </div>
 
@@ -118,14 +135,14 @@
                             <?php if(isset($reply['is_private']) && $reply['is_private']) continue; ?>
                             <div class="message-bubble <?= $reply['is_admin'] ? 'message-admin' : 'message-user' ?>">
                                 <div class="message-meta">
-                                    <span><?= $reply['is_admin'] ? 'Soporte Técnico' : 'Tú' ?></span>
+                                    <span><?= $reply['is_admin'] ? lang('Tickets.support_team') : lang('Tickets.you') ?></span>
                                     <span><?= date('d/m/Y H:i', strtotime($reply['created_at'])) ?></span>
                                 </div>
                                 <div class="message-content"><?= nl2br(esc($reply['message'])) ?><?php if(!empty($reply['attachment'])): ?>
                                         <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); white-space: normal;">
                                             <a href="<?= base_url($reply['attachment']) ?>" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 700; color: #2152ff; text-decoration: none;">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
-                                                Ver archivo adjunto
+                                                <?= lang('Tickets.view_attachment') ?>
                                             </a>
                                         </div>
                                     <?php endif; ?>
@@ -138,22 +155,22 @@
                         <div class="reply-box">
                             <form action="<?= site_url('tickets/'.$ticket['id'].'/reply') ?>" method="POST" enctype="multipart/form-data">
                                 <?= csrf_field() ?>
-                                <textarea name="message" class="form-control" placeholder="Describe tu consulta o añade más detalles aquí..." required></textarea>
+                                <textarea name="message" class="form-control" placeholder="<?= lang('Tickets.ph_reply') ?>" required></textarea>
                                 
                                 <div style="margin-bottom: 16px;">
-                                    <label style="font-size: 0.85rem; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">Adjuntar archivo (opcional)</label>
+                                    <label style="font-size: 0.85rem; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;"><?= lang('Tickets.label_attachment') ?></label>
                                     <input type="file" name="attachment" accept=".jpg,.jpeg,.png,.pdf,.txt,.json" style="width: 100%; padding: 8px; border: 1px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; font-size: 0.85rem;">
                                 </div>
 
                                 <div style="display: flex; justify-content: flex-end; align-items: center;">
-                                    <button type="submit" class="btn-submit">Enviar Mensaje</button>
+                                    <button type="submit" class="btn-submit"><?= lang('Tickets.btn_send_reply') ?></button>
                                 </div>
                             </form>
                         </div>
                     <?php else: ?>
                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; text-align: center; margin-top: 24px;">
-                            <h3 style="margin: 0 0 8px 0; color: #0f172a; font-family: 'Outfit', sans-serif;">Este ticket está cerrado</h3>
-                            <p style="margin: 0; color: #64748b; font-size: 0.95rem;">Si necesitas más ayuda, por favor crea un nuevo ticket desde el panel principal.</p>
+                            <h3 style="margin: 0 0 8px 0; color: #0f172a; font-family: 'Outfit', sans-serif;"><?= lang('Tickets.ticket_closed_title') ?></h3>
+                            <p style="margin: 0; color: #64748b; font-size: 0.95rem;"><?= lang('Tickets.ticket_closed_desc') ?></p>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -162,9 +179,9 @@
                     <script>
                         document.addEventListener('DOMContentLoaded', function() {
                             Swal.fire({
-                                title: '¿Qué te ha parecido la atención recibida?',
+                                title: '<?= lang('Tickets.rating_title') ?>',
                                 html: `
-                                    <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 32px; margin-top: 0;">Tu valoración nos ayuda a mejorar continuamente el soporte de APIEmpresas.</p>
+                                    <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 32px; margin-top: 0;"><?= lang('Tickets.rating_desc') ?></p>
                                     <form id="ratingForm" action="<?= site_url('tickets/'.$ticket['id'].'/rate') ?>" method="POST">
                                         <?= csrf_field() ?>
                                         <div class="tkt-stars" style="margin-bottom: 0;">
@@ -199,9 +216,9 @@
                          <div class="tkt-rating-card" style="background: #ffffff; border-color: #e2e8f0;">
                             <h3 class="tkt-rating-title" style="color: #0f172a; margin:0; display: flex; align-items: center; justify-content: center; gap: 12px;">
                                 <svg width="28" height="28" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                                ¡Gracias por tu valoración (<?= $ticket['rating'] ?>/5)!
+                                <?= str_replace('{rating}', $ticket['rating'], lang('Tickets.rating_thanks')) ?>
                             </h3>
-                            <p style="margin: 12px 0 0 0; color: #64748b; font-size: 0.95rem; font-weight: 500;">Esta solicitud se encuentra cerrada.</p>
+                            <p style="margin: 12px 0 0 0; color: #64748b; font-size: 0.95rem; font-weight: 500;"><?= lang('Tickets.rating_closed') ?></p>
                          </div>
                     <?php endif; ?>
             </div>
@@ -211,14 +228,14 @@
                 <div class="tkt-side-card">
                     <h3 class="tkt-side-title">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                        Detalles del Ticket
+                        <?= lang('Tickets.details_title') ?>
                     </h3>
                     
                     <div class="tkt-info-group">
-                        <span class="tkt-info-label">Estado Actual</span>
+                        <span class="tkt-info-label"><?= lang('Tickets.label_current_status') ?></span>
                         <?php 
                             $status_classes = ['open' => 'open', 'in_progress' => 'in_progress', 'answered' => 'answered', 'closed' => 'closed'];
-                            $statuses = ['open' => 'Abierto', 'in_progress' => 'En Proceso', 'answered' => 'Respondido', 'closed' => 'Cerrado'];
+                            $statuses = ['open' => lang('Tickets.st_open'), 'in_progress' => lang('Tickets.st_in_progress'), 'answered' => lang('Tickets.st_answered'), 'closed' => lang('Tickets.st_closed')];
                             $st_class = $status_classes[$ticket['status']] ?? 'open';
                             $st_label = $statuses[$ticket['status']] ?? $ticket['status'];
                         ?>
@@ -229,7 +246,7 @@
                     </div>
 
                     <div class="tkt-info-group">
-                        <span class="tkt-info-label">Tema Relacionado</span>
+                        <span class="tkt-info-label"><?= lang('Tickets.label_category') ?></span>
                         <div class="tkt-badge tkt-badge-category">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
                             <?= esc(str_replace('_', ' ', $ticket['category'] ?? 'general')) ?>
@@ -237,16 +254,16 @@
                     </div>
 
                     <div class="tkt-info-group">
-                        <span class="tkt-info-label">Prioridad</span>
+                        <span class="tkt-info-label"><?= lang('Tickets.label_priority') ?></span>
                         <?php if($ticket['status'] !== 'closed'): ?>
                             <form action="<?= site_url('tickets/'.$ticket['id'].'/priority') ?>" method="POST" style="display: block;">
                                 <?= csrf_field() ?>
                                 <div style="position: relative;">
                                     <select name="priority" onchange="this.form.submit()" style="width: 100%; appearance: none; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 32px 8px 12px; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600; color: #334155; cursor: pointer;">
-                                        <option value="low" <?= $ticket['priority'] === 'low' ? 'selected' : '' ?>>Baja</option>
-                                        <option value="medium" <?= $ticket['priority'] === 'medium' ? 'selected' : '' ?>>Media</option>
-                                        <option value="high" <?= $ticket['priority'] === 'high' ? 'selected' : '' ?>>Alta</option>
-                                        <option value="urgent" <?= $ticket['priority'] === 'urgent' ? 'selected' : '' ?>>Urgente</option>
+                                        <option value="low" <?= $ticket['priority'] === 'low' ? 'selected' : '' ?>><?= lang('Tickets.pr_low') ?></option>
+                                        <option value="medium" <?= $ticket['priority'] === 'medium' ? 'selected' : '' ?>><?= lang('Tickets.pr_medium') ?></option>
+                                        <option value="high" <?= $ticket['priority'] === 'high' ? 'selected' : '' ?>><?= lang('Tickets.pr_high') ?></option>
+                                        <option value="urgent" <?= $ticket['priority'] === 'urgent' ? 'selected' : '' ?>><?= lang('Tickets.pr_urgent') ?></option>
                                     </select>
                                     <div style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #64748b;">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
@@ -257,8 +274,8 @@
                             <div class="tkt-badge" style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
                                 <?php 
-                                    $priorities = ['low' => 'Baja', 'medium' => 'Media', 'high' => 'Alta', 'urgent' => 'Urgente'];
-                                    echo $priorities[$ticket['priority']] ?? 'Normal';
+                                    $priorities = ['low' => lang('Tickets.pr_low'), 'medium' => lang('Tickets.pr_medium'), 'high' => lang('Tickets.pr_high'), 'urgent' => lang('Tickets.pr_urgent')];
+                                    echo $priorities[$ticket['priority']] ?? lang('Tickets.pr_normal');
                                 ?>
                             </div>
                         <?php endif; ?>
@@ -266,11 +283,11 @@
 
                     <?php if($ticket['status'] !== 'closed'): ?>
                         <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #f1f5f9;">
-                            <form action="<?= site_url('tickets/'.$ticket['id'].'/close') ?>" method="POST" data-confirm="¿Confirmas que deseas dar por solucionado este ticket?">
+                            <form action="<?= site_url('tickets/'.$ticket['id'].'/close') ?>" method="POST" data-confirm="<?= lang('Tickets.confirm_resolve') ?>">
                                 <?= csrf_field() ?>
                                 <button type="submit" class="tkt-btn-resolve">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                    Marcar como Resuelto
+                                    <?= lang('Tickets.btn_resolve') ?>
                                 </button>
                             </form>
                         </div>

@@ -127,6 +127,47 @@ class Home extends BaseController
         ]);
     }
 
+    public function englishStandalone()
+    {
+        if (session('logged_in')) {
+            return redirect()->to(site_url('dashboard'));
+        }
+
+        // Dynamic Social Proof Counter (English)
+        $cache = \Config\Services::cache();
+        $cacheKey = 'home_social_proof_text_en_v1';
+        $socialProofText = $cache->get($cacheKey);
+
+        if ($socialProofText === null) {
+            $apiRequestsModel = new \App\Models\ApiRequestsModel();
+            $searchLogModel = new \App\Models\SearchLogModel();
+            $today = date('Y-m-d');
+
+            $apiValidationsToday = $apiRequestsModel->countRequestsForDay($today);
+            $webValidationsToday = $searchLogModel->countLogsForDay($today);
+            $totalReal = $apiValidationsToday + $webValidationsToday;
+
+            if ($totalReal <= 0) {
+                $socialProofText = '';
+            } elseif ($totalReal < 50) {
+                $socialProofText = "Over 100 companies validated today automatically";
+            } elseif ($totalReal < 200) {
+                $roundedTotal = ceil($totalReal / 50) * 50;
+                $socialProofText = "Over " . number_format($roundedTotal, 0, '.', ',') . " companies validated today automatically";
+            } else {
+                $socialProofText = "Today " . number_format($totalReal, 0, '.', ',') . " companies were validated automatically";
+            }
+
+            $cache->save($cacheKey, $socialProofText, 300);
+        }
+
+        $freeLimit = get_free_plan_limit();
+
+        return view('home_en_standalone', [
+            'socialProofText' => $socialProofText,
+            'freeLimit' => $freeLimit
+        ]);
+    }
 
     public function submitReview()
     {

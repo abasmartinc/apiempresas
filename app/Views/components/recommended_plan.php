@@ -35,21 +35,21 @@ if (!isset($isPaid)) {
 // Logic for what to recommend
 $recoPlan = 'Pro';
 $recoPrice = '19€';
-$recoQueries = '3.000 consultas / mes';
-$recoFeatures = ['Scoring Comercial IA', 'Radar Inteligente B2B', '10 Webhooks Activos'];
-$recoDesc = 'Ideal para automatizar validaciones en tu CRM o sistema.';
-$recoCta = 'Activar Pro ahora';
-$recoValue = 'Ahorra +10h de validación manual';
+$recoQueries = lang('RecommendedPlan.pro_queries');
+$recoFeatures = [lang('RecommendedPlan.pro_feat_1'), lang('RecommendedPlan.pro_feat_2'), lang('RecommendedPlan.pro_feat_3')];
+$recoDesc = lang('RecommendedPlan.pro_desc');
+$recoCta = lang('RecommendedPlan.pro_cta');
+$recoValue = lang('RecommendedPlan.pro_value');
 
 if ($isPaid && strpos($currentPlanSlug, 'pro') !== false) {
     // Already on Pro, recommend Business
     $recoPlan = 'Business';
     $recoPrice = '49€';
-    $recoQueries = '10.000+ consultas / mes';
-    $recoFeatures = ['SLA Avanzado (99.9%)', 'Gestor de cuenta personal', 'Webhooks Ilimitados'];
-    $recoDesc = 'Para volumen alto, roles avanzados y soporte dedicado.';
-    $recoCta = 'Mejorar a Business';
-    $recoValue = 'Escalabilidad sin límites';
+    $recoQueries = lang('RecommendedPlan.biz_queries');
+    $recoFeatures = [lang('RecommendedPlan.biz_feat_1'), lang('RecommendedPlan.biz_feat_2'), lang('RecommendedPlan.biz_feat_3')];
+    $recoDesc = lang('RecommendedPlan.biz_desc');
+    $recoCta = lang('RecommendedPlan.biz_cta');
+    $recoValue = lang('RecommendedPlan.biz_value');
 }
 ?>
 
@@ -63,17 +63,17 @@ if ($isPaid && strpos($currentPlanSlug, 'pro') !== false) {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <div
                 style="color: #2152ff; font-weight: 900; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
-                <span style="font-size: 1.1rem;">🔥</span> Escala hoy
+                <span style="font-size: 1.1rem;">🔥</span> <?= lang('RecommendedPlan.scale_today') ?>
             </div>
             <div
                 style="background: #2152ff; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.65rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;">
-                Recomendado
+                <?= lang('RecommendedPlan.recommended') ?>
             </div>
         </div>
 
         <h2
             style="font-size: 1.75rem; font-weight: 950; margin: 0 0 4px !important; letter-spacing: -0.03em; color: #0f172a;">
-            Plan <?= $recoPlan ?></h2>
+            <?= lang('RecommendedPlan.plan') ?> <?= $recoPlan ?></h2>
         <p style="margin-bottom: 20px; color: #64748b; font-weight: 600; font-size: 0.95rem; line-height: 1.4;">
             <?= $recoDesc ?></p>
 
@@ -103,7 +103,7 @@ if ($isPaid && strpos($currentPlanSlug, 'pro') !== false) {
             <div
                 style="font-size: 2.8rem; font-weight: 950; color: #0f172a; margin-bottom: 0; line-height: 1; letter-spacing: -0.04em;">
                 <?= $recoPrice ?> <span
-                    style="font-size: 1.1rem; color: #94a3b8; font-weight: 700; letter-spacing: 0;">/mes</span>
+                    style="font-size: 1.1rem; color: #94a3b8; font-weight: 700; letter-spacing: 0;"><?= lang('RecommendedPlan.per_month') ?></span>
             </div>
             <div
                 style="font-size: 0.85rem; color: #6366f1; font-weight: 800; margin-top: 8px; display: flex; align-items: center; gap: 6px;">
@@ -127,13 +127,13 @@ if ($isPaid && strpos($currentPlanSlug, 'pro') !== false) {
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                     <polyline points="20 6 9 17 4 12" />
                 </svg>
-                Sin permanencia · Cancela cuando quieras
+                <?= lang('RecommendedPlan.no_permanence') ?>
             </span>
             <span style="display: flex; align-items: center; justify-content: center; gap: 4px;">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                     <polyline points="20 6 9 17 4 12" />
                 </svg>
-                Activación instantánea
+                <?= lang('RecommendedPlan.instant_activation') ?>
             </span>
         </div>
     </div>

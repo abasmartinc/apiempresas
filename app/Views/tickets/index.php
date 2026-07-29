@@ -1,6 +1,5 @@
 <?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/app' ) ?>
 <?= $this->section('styles') ?>
-" />
     <style>
         .tkt-wrapper { background-color: #f3f6f9; min-height: calc(100vh - 80px); padding: 40px 0 80px; }
         .tkt-container { max-width: 1200px; width: 95%; margin: 0 auto; }
@@ -44,6 +43,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<div class="tkt-wrapper">
 <div class="tkt-container">
             <?php if(session()->getFlashdata('success')): ?>
                 <script>
@@ -61,32 +61,32 @@
                 </script>
             <?php endif; ?>
 
-            <div class="tkt-list-card">
+            <div class="tkt-list-card" style="margin-top: 40px;">
                 <div class="tkt-header" style="padding: 32px; margin: 0; border-bottom: 1px solid #e2e8f0;">
-                    <h1>Mis Tickets</h1>
+                    <h1><?= lang('Tickets.title') ?></h1>
                     <a href="<?= site_url('tickets/create') ?>" class="tkt-btn-create">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-                        Abrir Ticket
+                        <?= lang('Tickets.btn_create') ?>
                     </a>
                 </div>
 
                 <?php if(empty($tickets)): ?>
                     <div class="tkt-empty-state">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                        <h3>No tienes tickets abiertos</h3>
-                        <p>Si necesitas ayuda técnica o administrativa, abre un nuevo ticket.</p>
+                        <h3><?= lang('Tickets.empty_title') ?></h3>
+                        <p><?= lang('Tickets.empty_desc') ?></p>
                     </div>
                 <?php else: ?>
                     <div style="overflow-x: auto;">
                         <table style="width: 100%; border-collapse: collapse; text-align: left;">
                             <thead>
                                 <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">
-                                    <th style="padding: 16px 24px;">ID / Asunto</th>
-                                    <th style="padding: 16px 24px;">Estado</th>
-                                    <th style="padding: 16px 24px;">Prioridad</th>
-                                    <th style="padding: 16px 24px;">Categoría</th>
-                                    <th style="padding: 16px 24px;">Actualizado</th>
-                                    <th style="padding: 16px 24px; text-align: right;">Acción</th>
+                                    <th style="padding: 16px 24px;"><?= lang('Tickets.col_id') ?></th>
+                                    <th style="padding: 16px 24px;"><?= lang('Tickets.col_status') ?></th>
+                                    <th style="padding: 16px 24px;"><?= lang('Tickets.col_priority') ?></th>
+                                    <th style="padding: 16px 24px;"><?= lang('Tickets.col_category') ?></th>
+                                    <th style="padding: 16px 24px;"><?= lang('Tickets.col_updated') ?></th>
+                                    <th style="padding: 16px 24px; text-align: right;"><?= lang('Tickets.col_action') ?></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -100,21 +100,16 @@
                                         <td style="padding: 16px 24px;">
                                             <?php 
                                                 $status_classes = ['open' => 'open', 'in_progress' => 'in_progress', 'answered' => 'answered', 'closed' => 'closed'];
-                                                $statuses = ['open' => 'Abierto', 'in_progress' => 'En Proceso', 'answered' => 'Respondido', 'closed' => 'Cerrado'];
                                                 $st_class = $status_classes[$ticket['status']] ?? 'open';
-                                                $st_label = $statuses[$ticket['status']] ?? $ticket['status'];
                                             ?>
                                             <span class="tkt-badge tkt-badge-<?= $st_class ?>">
                                                 <div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>
-                                                <?= $st_label ?>
+                                                <?= lang('Tickets.st_' . $ticket['status']) ?>
                                             </span>
                                         </td>
                                         <td style="padding: 16px 24px;">
                                             <span class="tkt-badge tkt-badge-priority-<?= $ticket['priority'] ?>">
-                                                <?php 
-                                                    $priorities = ['low' => 'Baja', 'medium' => 'Media', 'high' => 'Alta', 'urgent' => 'Urgente'];
-                                                    echo $priorities[$ticket['priority']] ?? $ticket['priority'];
-                                                ?>
+                                                <?= lang('Tickets.pr_' . $ticket['priority']) ?>
                                             </span>
                                         </td>
                                         <td style="padding: 16px 24px;">
@@ -127,7 +122,7 @@
                                         </td>
                                         <td style="padding: 16px 24px; text-align: right;">
                                             <a href="<?= site_url('tickets/'.$ticket['id']) ?>" style="color: #2152ff; font-weight: 600; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 4px;">
-                                                Ver Ticket <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                                <?= lang('Tickets.btn_view') ?> <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                                             </a>
                                         </td>
                                     </tr>
@@ -137,5 +132,6 @@
                     </div>
                 <?php endif; ?>
             </div>
-        </div>
+</div>
+</div>
 <?= $this->endSection() ?>

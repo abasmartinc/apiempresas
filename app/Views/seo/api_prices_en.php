@@ -725,7 +725,7 @@
                             <span class="api-terminal__title">bash — curl</span>
                         </div>
                         <div class="api-terminal__body">
-                            <span style="color: #98c379;">$</span> curl -X GET <span class="api-code-string">"https://apiempresas.es/api/v1/companies?cif=B12345678"</span>
+                            <span style="color: #98c379;">$</span> curl -X GET <span class="api-code-string">"https://spaincompanyapi.com/api/v1/companies?cif=B12345678"</span>
                             \<br>
                             &nbsp;&nbsp;-H <span class="api-code-string">"X-API-KEY: your_key"</span>
                         </div>
@@ -1045,7 +1045,7 @@
                     <div style="display: inline-block; background: #ffffff; color: #2563eb; font-size: 0.8rem; font-weight: 800; padding: 6px 16px; border-radius: 99px; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 16px; box-shadow: 0 4px 6px -1px rgba(37,99,235,0.1); border: 1px solid rgba(59,130,246,0.1);">Pay-as-you-go</div>
                     <h3 style="color: #0f172a; font-size: 2.1rem; font-weight: 900; margin: 0 0 12px; letter-spacing: -0.03em;">Prefer to pay only for what you use?</h3>
                     <p style="color: #475569; font-size: 1.15rem; max-width: 600px; margin: 0 auto 32px; line-height: 1.6;">Design your own <strong style="color: #0f172a;">Prepaid Credit Bundle</strong>. Pay once, consume at your pace and get automatic volume discounts.</p>
-                    <a href="<?= site_url('crear-bono-api') ?>" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; padding: 18px 40px; border-radius: 16px; font-weight: 800; font-size: 1.1rem; text-decoration: none; box-shadow: 0 10px 25px rgba(37,99,235,0.4); transition: all 0.3s ease;">
+                    <a href="<?= site_url('buy-api-credits') ?>" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; padding: 18px 40px; border-radius: 16px; font-weight: 800; font-size: 1.1rem; text-decoration: none; box-shadow: 0 10px 25px rgba(37,99,235,0.4); transition: all 0.3s ease;">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="4" x2="14" y2="4"></line><line x1="10" y1="4" x2="3" y2="4"></line><line x1="21" y1="12" x2="12" y2="12"></line><line x1="8" y1="12" x2="3" y2="12"></line><line x1="21" y1="20" x2="16" y2="20"></line><line x1="12" y1="20" x2="3" y2="20"></line><line x1="14" y1="1" x2="14" y2="7"></line><line x1="8" y1="9" x2="8" y2="15"></line><line x1="16" y1="17" x2="16" y2="23"></line></svg>
                         Build my Custom Bundle
                     </a>
@@ -1085,7 +1085,7 @@
 <span style="color:#d19a66;">CIF</span>     <span style="color:#e2e8f0;">=</span> <span style="color:#98c379;">"B12345678"</span>
 
 <span style="color:#d19a66;">response</span> <span style="color:#e2e8f0;">= requests.get(</span>
-    <span style="color:#98c379;">"https://apiempresas.es/api/v1/companies"</span><span style="color:#e2e8f0;">,</span>
+    <span style="color:#98c379;">"https://spaincompanyapi.com/api/v1/companies"</span><span style="color:#e2e8f0;">,</span>
     <span style="color:#d19a66;">params</span><span style="color:#e2e8f0;">={"cif": CIF},</span>
     <span style="color:#d19a66;">headers</span><span style="color:#e2e8f0;">={"X-API-KEY": API_KEY}</span>
 <span style="color:#e2e8f0;">)</span>
@@ -1096,7 +1096,7 @@
 
 <span style="color:#d19a66;">$response</span> = Http::withHeaders([
     <span style="color:#98c379;">'X-API-KEY'</span> => <span style="color:#98c379;">'your_api_key'</span>
-])->get(<span style="color:#98c379;">'https://apiempresas.es/api/v1/companies'</span>, [
+])->get(<span style="color:#98c379;">'https://spaincompanyapi.com/api/v1/companies'</span>, [
     <span style="color:#98c379;">'cif'</span> => <span style="color:#98c379;">'B12345678'</span>
 ]);
 
@@ -1104,7 +1104,7 @@
 <span style="color:#c678dd;">echo</span> <span style="color:#d19a66;">$company</span>[<span style="color:#98c379;">'name'</span>];</code></pre>
                     <pre id="code-node" style="display:none; margin: 0; padding: 28px; font-family: 'Fira Code', monospace; font-size: 13px; line-height: 1.7; color: #e2e8f0; overflow-x: auto;"><code><span style="color:#c678dd;">const</span> <span style="color:#d19a66;">getCompany</span> = <span style="color:#c678dd;">async</span> (<span style="color:#e2e8f0;">cif</span>) => {
   <span style="color:#c678dd;">const</span> <span style="color:#d19a66;">res</span> = <span style="color:#c678dd;">await</span> fetch(
-    <span style="color:#98c379;">`https://apiempresas.es/api/v1/companies?cif=${cif}`</span>,
+    <span style="color:#98c379;">`https://spaincompanyapi.com/api/v1/companies?cif=${cif}`</span>,
     { headers: { <span style="color:#98c379;">'X-API-KEY'</span>: <span style="color:#98c379;">'your_api_key'</span> } }
   );
   <span style="color:#c678dd;">const</span> { data } = <span style="color:#c678dd;">await</span> res.json();

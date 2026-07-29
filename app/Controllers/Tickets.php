@@ -51,7 +51,7 @@ class Tickets extends BaseController
         $message = $this->request->getPost('message');
 
         if (empty($subject) || empty($message)) {
-            return redirect()->back()->with('error', 'El asunto y el mensaje son obligatorios.');
+            return redirect()->back()->with('error', lang('Messages.flash_61'));
         }
 
         $ticketId = $this->ticketModel->insert([
@@ -103,10 +103,10 @@ class Tickets extends BaseController
             $emailService->setMailType('html');
             $emailService->send();
 
-            return redirect()->to('/tickets/' . $ticketId)->with('success', 'Ticket creado correctamente.');
+            return redirect()->to('/tickets/' . $ticketId)->with('success', lang('Messages.flash_62'));
         }
 
-        return redirect()->back()->with('error', 'Hubo un problema al crear el ticket.');
+        return redirect()->back()->with('error', lang('Messages.flash_63'));
     }
 
     public function show($id)
@@ -119,7 +119,7 @@ class Tickets extends BaseController
         $ticket = $this->ticketModel->where('id', $id)->where('user_id', $userId)->first();
         
         if (!$ticket) {
-            return redirect()->to('/tickets')->with('error', 'Ticket no encontrado.');
+            return redirect()->to('/tickets')->with('error', lang('Messages.flash_64'));
         }
 
         $replies = $this->ticketReplyModel->getRepliesWithSender($id);
@@ -137,17 +137,17 @@ class Tickets extends BaseController
         $ticket = $this->ticketModel->where('id', $id)->where('user_id', $userId)->first();
         
         if (!$ticket) {
-            return redirect()->to('/tickets')->with('error', 'Ticket no encontrado.');
+            return redirect()->to('/tickets')->with('error', lang('Messages.flash_65'));
         }
 
         if ($ticket['status'] === 'closed') {
-            return redirect()->back()->with('error', 'No puedes responder a un ticket cerrado.');
+            return redirect()->back()->with('error', lang('Messages.flash_66'));
         }
 
         $message = $this->request->getPost('message');
 
         if (empty($message)) {
-            return redirect()->back()->with('error', 'El mensaje no puede estar vacío.');
+            return redirect()->back()->with('error', lang('Messages.flash_67'));
         }
 
         $attachmentPath = null;
@@ -184,7 +184,7 @@ class Tickets extends BaseController
         $emailService->setMailType('html');
         $emailService->send();
 
-        return redirect()->back()->with('success', 'Respuesta enviada.');
+        return redirect()->back()->with('success', lang('Messages.flash_68'));
     }
 
     public function close($id)
@@ -197,12 +197,12 @@ class Tickets extends BaseController
         $ticket = $this->ticketModel->where('id', $id)->where('user_id', $userId)->first();
         
         if (!$ticket) {
-            return redirect()->to('/tickets')->with('error', 'Ticket no encontrado.');
+            return redirect()->to('/tickets')->with('error', lang('Messages.flash_69'));
         }
 
         $this->ticketModel->update($id, ['status' => 'closed']);
 
-        return redirect()->back()->with('success', 'Ticket cerrado correctamente.');
+        return redirect()->back()->with('success', lang('Messages.flash_70'));
     }
 
     public function rate($id)
@@ -215,17 +215,17 @@ class Tickets extends BaseController
         $ticket = $this->ticketModel->where('id', $id)->where('user_id', $userId)->first();
         
         if (!$ticket) {
-            return redirect()->to('/tickets')->with('error', 'Ticket no encontrado.');
+            return redirect()->to('/tickets')->with('error', lang('Messages.flash_71'));
         }
 
         $rating = $this->request->getPost('rating');
 
         if ($rating >= 1 && $rating <= 5) {
             $this->ticketModel->update($id, ['rating' => $rating]);
-            return redirect()->back()->with('success', '¡Gracias por tu valoración!');
+            return redirect()->back()->with('success', lang('Messages.flash_1'));
         }
 
-        return redirect()->back()->with('error', 'Valoración no válida.');
+        return redirect()->back()->with('error', lang('Messages.flash_72'));
     }
 
     public function updatePriority($id)
@@ -238,19 +238,19 @@ class Tickets extends BaseController
         $ticket = $this->ticketModel->where('id', $id)->where('user_id', $userId)->first();
         
         if (!$ticket) {
-            return redirect()->to('/tickets')->with('error', 'Ticket no encontrado.');
+            return redirect()->to('/tickets')->with('error', lang('Messages.flash_73'));
         }
 
         if ($ticket['status'] === 'closed') {
-            return redirect()->back()->with('error', 'No puedes cambiar la prioridad de un ticket cerrado.');
+            return redirect()->back()->with('error', lang('Messages.flash_74'));
         }
 
         $priority = $this->request->getPost('priority');
         if (in_array($priority, ['low', 'medium', 'high', 'urgent'])) {
             $this->ticketModel->update($id, ['priority' => $priority]);
-            return redirect()->back()->with('success', 'Prioridad actualizada correctamente.');
+            return redirect()->back()->with('success', lang('Messages.flash_75'));
         }
 
-        return redirect()->back()->with('error', 'Prioridad no válida.');
+        return redirect()->back()->with('error', lang('Messages.flash_76'));
     }
 }

@@ -12,17 +12,17 @@
             ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>'
             : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M2 12h20M12 2l4.5 4.5M12 22l-4.5-4.5M2 12l4.5 4.5M22 12l-4.5-4.5"/></svg>';
         
-        $label1 = (!$isPaid && $requestsUsed >= $freeLimit) ? 'Límite alcanzado' : ((isset($isBonusUser) && $isBonusUser) ? 'Consultas Bono' : (!$isPaid ? 'Consultas Totales' : 'Consultas Mes'));
+        $label1 = (!$isPaid && $requestsUsed >= $freeLimit) ? lang('Dashboard.limit_reached') : ((isset($isBonusUser) && $isBonusUser) ? lang('Dashboard.bonus_queries') : (!$isPaid ? lang('Dashboard.total_queries') : lang('Dashboard.queries_month')));
         
         $val1 = '<div id="kpi-requests-container">';
         if ($requestsUsed > 0) {
             $val1 .= '<span id="kpi-requests">'.$requestsUsed.'</span>';
         } else {
-            $val1 .= '<span id="kpi-requests" style="display:none;">0</span><span id="kpi-waiting-msg" class="waiting-pulse" style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.02em; white-space: nowrap; display: block; margin: 4px 0;">Esperando actividad...</span>';
+            $val1 .= '<span id="kpi-requests" style="display:none;">0</span><span id="kpi-waiting-msg" class="waiting-pulse" style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.02em; white-space: nowrap; display: block; margin: 4px 0;">' . lang('Dashboard.waiting_activity') . '</span>';
         }
         $val1 .= '</div>';
         
-        $meta1 = (!$isPaid && $requestsUsed >= $freeLimit) ? '<strong>Activar Pro ahora &rarr;</strong>' : ((isset($isBonusUser) && $isBonusUser) ? 'Pago por Uso' : 'Límite: ' . ($isPaid ? number_format($maxLimit ?? 0, 0, ',', '.') : $freeLimit));
+        $meta1 = (!$isPaid && $requestsUsed >= $freeLimit) ? lang('Dashboard.activate_pro') : ((isset($isBonusUser) && $isBonusUser) ? lang('Dashboard.pay_as_you_go') : lang('Dashboard.limit', [($isPaid ? number_format($maxLimit ?? 0, 0, ',', '.') : $freeLimit)]));
         
         $attr1 = (!$isPaid && $requestsUsed >= $freeLimit) ? 'onclick="window.location.href=\''.site_url('billing').'\'"' : '';
     ?>
@@ -38,34 +38,34 @@
     <?= view('components/ui/kpi', [
         'theme' => 'default',
         'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
-        'label' => 'Latencia',
+        'label' => lang('Dashboard.latency'),
         'value' => '<span id="kpi-latency">'.($requestsUsed > 0 ? '...' : '--').'</span> <span class="value-unit" id="kpi-latency-unit" style="'.($requestsUsed > 0 ? '' : 'display:none').'">ms</span>',
-        'meta' => 'Velocidad real'
+        'meta' => lang('Dashboard.real_speed')
     ]) ?>
 
     <?= view('components/ui/kpi', [
         'theme' => 'error',
         'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
-        'label' => 'Ratio Error',
+        'label' => lang('Dashboard.error_rate'),
         'value' => '<div id="kpi-error">'.($requestsUsed > 0 ? '...' : '--').'</div>',
-        'meta' => 'Tasa de fallo'
+        'meta' => lang('Dashboard.failure_rate')
     ]) ?>
 
     <?php if (($walletBalance ?? 0) > 0 && !(isset($isBonusUser) && $isBonusUser)): ?>
         <?= view('components/ui/kpi', [
             'theme' => 'default',
             'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" /><path d="M4 6v12c0 1.1.9 2 2 2h14v-4" /><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" /></svg>',
-            'label' => 'Monedero Extra',
+            'label' => lang('Dashboard.extra_wallet'),
             'value' => '<span style="color: #334155;">'.number_format($walletBalance ?? 0, 0, ',', '.').'</span>',
-            'meta' => 'Créditos sin caducidad'
+            'meta' => lang('Dashboard.credits_no_exp')
         ]) ?>
     <?php else: ?>
         <?= view('components/ui/kpi', [
             'theme' => 'success',
             'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
-            'label' => 'Estado',
-            'value' => '<span style="color: #10b981;">Operativo</span>',
-            'meta' => 'Disponibilidad 99.9%'
+            'label' => lang('Dashboard.status'),
+            'value' => '<span style="color: #10b981;">' . lang('Dashboard.operational') . '</span>',
+            'meta' => lang('Dashboard.uptime')
         ]) ?>
     <?php endif; ?>
 </div>

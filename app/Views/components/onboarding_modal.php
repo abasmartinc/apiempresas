@@ -14,16 +14,16 @@ if (isset($show_wizard) && $show_wizard && session()->has('user_id')) {
     <!-- STEP 1: INTERACTION -->
     <div id="wizard-step-1" class="wizard-card" style="width: 100%; max-width: 550px; background: white; border-radius: 24px; padding: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
         <div style="background: #eff6ff; color: #2152ff; width: 64px; height: 64px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 2rem;">⚡</div>
-        <h2 style="font-size: 1.75rem; font-weight: 950; color: #0f172a; margin-bottom: 12px; text-align: center;">Tu primera llamada a la API</h2>
-        <p style="color: #64748b; font-weight: 600; text-align: center; margin-bottom: 16px; font-size: 0.95rem;">Prueba lo rápido que es obtener los datos oficiales del Registro Mercantil de cualquier empresa.</p>
+        <h2 style="font-size: 1.75rem; font-weight: 950; color: #0f172a; margin-bottom: 12px; text-align: center;"><?= lang('Wizard.title') ?></h2>
+        <p style="color: #64748b; font-weight: 600; text-align: center; margin-bottom: 16px; font-size: 0.95rem;"><?= lang('Wizard.subtitle') ?></p>
         
         <div style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; font-size: 0.8rem; font-weight: 800; text-align: center; padding: 6px 16px; border-radius: 100px; width: fit-content; margin: 0 auto 32px; display: flex; align-items: center; gap: 6px;">
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-            Tranquilo, esta prueba no consume tus créditos
+            <?= lang('Wizard.no_credits') ?>
         </div>
         
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 12px;">Haz clic en una para probar:</label>
+            <label style="display: block; font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 12px;"><?= lang('Wizard.click_to_test') ?></label>
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;">
                 <button class="wiz-badge" onclick="simulateApi('A15075062', 'Inditex S.A.', 'Arteixo', 'A Coruña')">👕 Inditex</button>
                 <button class="wiz-badge" onclick="simulateApi('A46103834', 'Mercadona S.A.', 'Tavernes Blanques', 'Valencia')">🛒 Mercadona</button>
@@ -32,26 +32,26 @@ if (isset($show_wizard) && $show_wizard && session()->has('user_id')) {
             
             <div style="display: flex; align-items: center; gap: 16px;">
                 <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
-                <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">O usa un CIF</span>
+                <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;"><?= lang('Wizard.or_use_cif') ?></span>
                 <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
             </div>
             
             <div style="margin-top: 24px; display: flex; gap: 12px;">
-                <input type="text" id="wiz-cif-input" placeholder="Ej: B12345678" style="flex: 1; padding: 16px; border-radius: 12px; border: 1px solid #cbd5e1; font-weight: 700; font-size: 1rem; outline: none;">
-                <button onclick="simulateApiManual()" style="background: #2152ff; color: white; border: none; padding: 0 24px; border-radius: 12px; font-weight: 800; cursor: pointer;">Validar</button>
+                <input type="text" id="wiz-cif-input" placeholder="<?= lang('Wizard.cif_placeholder') ?>" style="flex: 1; padding: 16px; border-radius: 12px; border: 1px solid #cbd5e1; font-weight: 700; font-size: 1rem; outline: none;">
+                <button onclick="simulateApiManual()" style="background: #2152ff; color: white; border: none; padding: 0 24px; border-radius: 12px; font-weight: 800; cursor: pointer;"><?= lang('Wizard.validate') ?></button>
             </div>
         </div>
         
         <div style="text-align: center; margin-top: 24px;">
-            <button onclick="skipWizard()" style="background: none; border: none; color: #94a3b8; font-size: 0.85rem; font-weight: 700; cursor: pointer; text-decoration: underline;">Saltar tutorial</button>
+            <button onclick="skipWizard()" style="background: none; border: none; color: #94a3b8; font-size: 0.85rem; font-weight: 700; cursor: pointer; text-decoration: underline;"><?= lang('Wizard.skip') ?></button>
         </div>
     </div>
 
     <!-- LOADING STATE -->
     <div id="wizard-loading" class="wizard-card" style="display: none; width: 100%; max-width: 400px; background: white; border-radius: 24px; padding: 40px; text-align: center;">
         <div style="width: 48px; height: 48px; border: 4px solid #f1f5f9; border-top-color: #2152ff; border-radius: 50%; margin: 0 auto 24px; animation: api-spin 0.8s linear infinite;"></div>
-        <h3 style="font-size: 1.25rem; font-weight: 900; color: #0f172a; margin-bottom: 8px;">Conectando...</h3>
-        <p style="color: #64748b; font-weight: 600; font-size: 0.9rem;">Consultando fuentes oficiales en tiempo real.</p>
+        <h3 style="font-size: 1.25rem; font-weight: 900; color: #0f172a; margin-bottom: 8px;"><?= lang('Wizard.connecting') ?></h3>
+        <p style="color: #64748b; font-weight: 600; font-size: 0.9rem;"><?= lang('Wizard.consulting') ?></p>
     </div>
 
     <!-- STEP 2: RESULTS & UPSELL -->
@@ -63,9 +63,9 @@ if (isset($show_wizard) && $show_wizard && session()->has('user_id')) {
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <div style="width: 10px; height: 10px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px rgba(16,185,129,0.5);"></div>
-                        <span style="font-weight: 800; color: #0f172a; font-size: 0.9rem;">200 OK - <span id="wiz-res-name">Empresa</span></span>
+                        <span style="font-weight: 800; color: #0f172a; font-size: 0.9rem;">200 OK - <span id="wiz-res-name"><?= lang('Wizard.company') ?></span></span>
                     </div>
-                    <div style="background: #e2e8f0; color: #475569; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; font-family: monospace;" id="wiz-json-label">RESPONSE</div>
+                    <div style="background: #e2e8f0; color: #475569; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; font-family: monospace;" id="wiz-json-label"><?= lang('Wizard.response') ?></div>
                 </div>
                 
                 <div style="background: #1e293b; border-radius: 16px; padding: 20px; overflow-y: auto; flex: 1;">
@@ -75,34 +75,34 @@ if (isset($show_wizard) && $show_wizard && session()->has('user_id')) {
 
             <!-- Upsell Info -->
             <div style="display: flex; flex-direction: column; justify-content: center;">
-                <h2 style="font-size: 1.4rem; font-weight: 950; color: #0f172a; margin-bottom: 8px;">Compara los resultados</h2>
-                <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 24px; font-weight: 600;">Estás viendo la respuesta por defecto. <span style="color: #2152ff; font-weight: 800;">Haz clic en el Plan PRO abajo</span> para descubrir los datos ocultos que se desbloquean.</p>
+                <h2 style="font-size: 1.4rem; font-weight: 950; color: #0f172a; margin-bottom: 8px;"><?= lang('Wizard.compare_title') ?></h2>
+                <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 24px; font-weight: 600;"><?= lang('Wizard.compare_desc') ?></p>
                 
                 <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px;">
                     <!-- Plan Free Toggle -->
                     <div id="wiz-plan-free" onclick="togglePlan('free')" style="display: flex; gap: 16px; padding: 16px; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 12px; cursor: pointer; transition: all 0.2s;">
                         <div style="font-size: 1.5rem;">🆓</div>
                         <div>
-                            <div style="font-weight: 900; color: #0f172a; font-size: 0.95rem;">Plan Free (Actual)</div>
-                            <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; margin-top: 4px;">Datos básicos. Oculta dirección, objeto social y coordenadas.</div>
+                            <div style="font-weight: 900; color: #0f172a; font-size: 0.95rem;"><?= lang('Wizard.plan_free') ?></div>
+                            <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; margin-top: 4px;"><?= lang('Wizard.plan_free_desc') ?></div>
                         </div>
                     </div>
                     
                     <!-- Plan Pro Toggle -->
                     <div id="wiz-plan-pro" onclick="togglePlan('pro')" style="display: flex; gap: 16px; padding: 16px; background: #eff6ff; border: 2px solid #2152ff; border-radius: 12px; cursor: pointer; position: relative; transition: all 0.2s; box-shadow: 0 10px 15px -3px rgba(33, 82, 255, 0.1);">
-                        <div style="position: absolute; top: -10px; right: 16px; background: #2152ff; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 900; text-transform: uppercase;">Recomendado</div>
+                        <div style="position: absolute; top: -10px; right: 16px; background: #2152ff; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 900; text-transform: uppercase;"><?= lang('Wizard.recommended') ?></div>
                         <div style="font-size: 1.5rem;">🚀</div>
                         <div>
-                            <div style="font-weight: 900; color: #1e3a8a; font-size: 0.95rem;">Plan PRO</div>
-                            <div style="font-size: 0.8rem; color: #3b82f6; font-weight: 600; margin-top: 4px;">Datos 100% completos, ilimitados y actualizados.</div>
+                            <div style="font-weight: 900; color: #1e3a8a; font-size: 0.95rem;"><?= lang('Wizard.plan_pro') ?></div>
+                            <div style="font-size: 0.8rem; color: #3b82f6; font-weight: 600; margin-top: 4px;"><?= lang('Wizard.plan_pro_desc') ?></div>
                         </div>
                     </div>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <button onclick="showCodeSnippets()" style="background: #0f172a; color: white; border: none; text-align: center; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer;">💻 Ver ejemplos de código (Copiar y pegar)</button>
-                    <button onclick="goBackToStep1()" style="background: white; color: #0f172a; border: 2px solid #e2e8f0; text-align: center; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: background 0.2s;">🔄 Probar con otra empresa</button>
-                    <button onclick="finishWizard()" style="background: #2152ff; border: none; color: white; font-weight: 900; font-size: 1rem; padding: 16px; border-radius: 12px; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(33, 82, 255, 0.3);">¡Impresionante! Entrar al Dashboard</button>
+                    <button onclick="showCodeSnippets()" style="background: #0f172a; color: white; border: none; text-align: center; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer;"><?= lang('Wizard.show_code') ?></button>
+                    <button onclick="goBackToStep1()" style="background: white; color: #0f172a; border: 2px solid #e2e8f0; text-align: center; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: background 0.2s;"><?= lang('Wizard.try_another') ?></button>
+                    <button onclick="finishWizard()" style="background: #2152ff; border: none; color: white; font-weight: 900; font-size: 1rem; padding: 16px; border-radius: 12px; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(33, 82, 255, 0.3);"><?= lang('Wizard.enter_dashboard') ?></button>
                 </div>
             </div>
         </div>
@@ -112,10 +112,10 @@ if (isset($show_wizard) && $show_wizard && session()->has('user_id')) {
     <div id="wizard-step-3" class="wizard-card" style="display: none; width: 100%; max-width: 800px; background: white; border-radius: 24px; padding: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
             <div>
-                <h2 style="font-size: 1.75rem; font-weight: 950; color: #0f172a; margin-bottom: 8px;">Copia y pega en tu código</h2>
-                <p style="color: #64748b; font-weight: 600;">Ya hemos inyectado tu <strong>API Key real</strong> y el <strong>CIF de prueba</strong> en estos fragmentos.</p>
+                <h2 style="font-size: 1.75rem; font-weight: 950; color: #0f172a; margin-bottom: 8px;"><?= lang('Wizard.copy_paste') ?></h2>
+                <p style="color: #64748b; font-weight: 600;"><?= lang('Wizard.injected_keys') ?></p>
             </div>
-            <button onclick="document.getElementById('wizard-step-3').style.display='none'; document.getElementById('wizard-step-2').style.display='block';" style="background: #f1f5f9; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 800; cursor: pointer; color: #475569;">&larr; Volver atrás</button>
+            <button onclick="document.getElementById('wizard-step-3').style.display='none'; document.getElementById('wizard-step-2').style.display='block';" style="background: #f1f5f9; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 800; cursor: pointer; color: #475569;"><?= lang('Wizard.go_back') ?></button>
         </div>
 
         <!-- TABS -->
@@ -130,7 +130,7 @@ if (isset($show_wizard) && $show_wizard && session()->has('user_id')) {
         <div style="position: relative; background: #1e293b; border-radius: 16px; padding: 24px; overflow-x: auto;">
             <button id="copy-btn" onclick="copySnippet()" style="position: absolute; top: 12px; right: 12px; background: #334155; border: none; color: white; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                Copiar
+                <?= lang('Wizard.copy') ?>
             </button>
             
             <pre id="code-curl" class="code-snippet" style="margin: 0; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.5; display: block;">curl --request GET \
@@ -178,19 +178,19 @@ response = requests.get(url, headers=headers)
 print(response.json())</pre>
 
             <div id="code-postman" class="code-snippet" style="display: none; padding: 32px 20px; text-align: center;">
-                <h3 style="font-size: 1.25rem; font-weight: 900; color: white; margin-bottom: 12px;">Colección Oficial de Postman</h3>
+                <h3 style="font-size: 1.25rem; font-weight: 900; color: white; margin-bottom: 12px;"><?= lang('Wizard.postman_title') ?></h3>
                 <p style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 24px; max-width: 450px; margin-left: auto; margin-right: auto; line-height: 1.5;">
-                    Descarga nuestra colección pre-configurada para probar todos los endpoints cómodamente desde la aplicación de Postman.
+                    <?= lang('Wizard.postman_desc') ?>
                 </p>
                 <a href="<?= base_url('public/docs/apiempresas_postman.json') ?>" download style="display: inline-flex; align-items: center; gap: 8px; background: #ff6c37; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 800; font-size: 1rem; text-decoration: none; box-shadow: 0 4px 6px -1px rgba(255, 108, 55, 0.3);">
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Descargar Colección
+                    <?= lang('Wizard.download_collection') ?>
                 </a>
             </div>
         </div>
 
         <div style="margin-top: 32px; text-align: center;">
-            <button onclick="finishWizard()" style="background: #2152ff; border: none; color: white; font-weight: 900; font-size: 1.1rem; padding: 18px 32px; border-radius: 12px; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(33, 82, 255, 0.3);">🚀 ¡Todo listo! Ir al Dashboard</button>
+            <button onclick="finishWizard()" style="background: #2152ff; border: none; color: white; font-weight: 900; font-size: 1.1rem; padding: 18px 32px; border-radius: 12px; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(33, 82, 255, 0.3);"><?= lang('Wizard.all_done') ?></button>
         </div>
     </div>
 </div>

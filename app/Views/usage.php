@@ -161,8 +161,8 @@
         <div class="container">
 
             <div class="dash-header" style="margin: 10px 0 24px;">
-                <h1>Uso de la API</h1>
-                <p class="dash-sub">Distribución del consumo y registro de llamadas de tu cuenta.</p>
+                <h1><?= lang('Usage.title') ?></h1>
+                <p class="dash-sub"><?= lang('Usage.subtitle') ?></p>
             </div>
 
             <!-- KPIs (Dashboard Exact Match) -->
@@ -172,11 +172,11 @@
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                     </div>
                     <div class="kpi-content">
-                        <span class="label">Consultas este mes</span>
+                        <span class="label"><?= lang('Usage.queries_this_month') ?></span>
                         <div class="value">
                             <span><?= $fmt($usedThisMonth) ?></span>
                         </div>
-                        <div class="meta">Acumulado actual</div>
+                        <div class="meta"><?= lang('Usage.current_acc') ?></div>
                     </div>
                 </div>
 
@@ -185,11 +185,11 @@
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                     <div class="kpi-content">
-                        <span class="label">Consultas hoy</span>
+                        <span class="label"><?= lang('Usage.queries_today') ?></span>
                         <div class="value">
                             <span><?= $usedToday !== null ? $fmt($usedToday) : '—' ?></span>
                         </div>
-                        <div class="meta">Actividad diaria</div>
+                        <div class="meta"><?= lang('Usage.daily_activity') ?></div>
                     </div>
                 </div>
 
@@ -198,11 +198,11 @@
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                     </div>
                     <div class="kpi-content">
-                        <span class="label">Estado de la API</span>
+                        <span class="label"><?= lang('Usage.api_status') ?></span>
                         <div class="value" style="color: #10b981;">
-                            <span>Operativo</span>
+                            <span><?= lang('Usage.operational') ?></span>
                         </div>
-                        <div class="meta">Disponibilidad 99.9%</div>
+                        <div class="meta"><?= lang('Usage.availability') ?></div>
                     </div>
                 </div>
             </div>
@@ -210,27 +210,27 @@
             <!-- Filtros a todo lo ancho -->
             <form class="dash-card" method="get" action="<?= current_url() ?>" style="display: flex; gap: 24px; align-items: flex-end; margin-bottom: 24px; padding: 20px 24px; flex-wrap: wrap;">
                 <div style="flex: 1; min-width: 180px;">
-                    <label for="range" style="font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.08em;">Rango</label>
+                    <label for="range" style="font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.08em;"><?= lang('Usage.range') ?></label>
                     <select id="range" name="range" style="width: 100%; border-radius: 10px; border: 1px solid #cbd5e1; padding: 10px 14px; font-size: 13px; background: #f8fafc; color: #0f172a; font-weight: 700; outline: none; transition: border-color 0.2s;">
-                        <option value="30" <?= (($_GET['range'] ?? '') === '30') ? 'selected' : '' ?>>Últimos 30 días</option>
-                        <option value="7" <?= (($_GET['range'] ?? '') === '7') ? 'selected' : '' ?>>Últimos 7 días</option>
-                        <option value="today" <?= (($_GET['range'] ?? '') === 'today') ? 'selected' : '' ?>>Hoy</option>
-                        <option value="custom" <?= (($_GET['range'] ?? '') === 'custom') ? 'selected' : '' ?>>Personalizado…</option>
+                        <option value="30" <?= (($_GET['range'] ?? '') === '30') ? 'selected' : '' ?>><?= lang('Usage.last_30_days') ?></option>
+                        <option value="7" <?= (($_GET['range'] ?? '') === '7') ? 'selected' : '' ?>><?= lang('Usage.last_7_days') ?></option>
+                        <option value="today" <?= (($_GET['range'] ?? '') === 'today') ? 'selected' : '' ?>><?= lang('Usage.today') ?></option>
+                        <option value="custom" <?= (($_GET['range'] ?? '') === 'custom') ? 'selected' : '' ?>><?= lang('Usage.custom_range') ?></option>
                     </select>
                 </div>
 
                 <div style="flex: 1; min-width: 180px;">
-                    <label for="from" style="font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.08em;">Desde</label>
+                    <label for="from" style="font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.08em;"><?= lang('Usage.from') ?></label>
                     <input type="date" id="from" name="from" value="<?= esc($_GET['from'] ?? '') ?>" style="width: 100%; border-radius: 10px; border: 1px solid #cbd5e1; padding: 10px 14px; font-size: 13px; background: #f8fafc; color: #0f172a; font-weight: 700; outline: none; transition: border-color 0.2s;">
                 </div>
 
                 <div style="flex: 1; min-width: 180px;">
-                    <label for="to" style="font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.08em;">Hasta</label>
+                    <label for="to" style="font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.08em;"><?= lang('Usage.to') ?></label>
                     <input type="date" id="to" name="to" value="<?= esc($_GET['to'] ?? '') ?>" style="width: 100%; border-radius: 10px; border: 1px solid #cbd5e1; padding: 10px 14px; font-size: 13px; background: #f8fafc; color: #0f172a; font-weight: 700; outline: none; transition: border-color 0.2s;">
                 </div>
 
                 <div>
-                    <button type="submit" style="padding: 11px 24px; border-radius: 10px; font-size: 13px; font-weight: 800; background: linear-gradient(135deg, #2152ff 0%, #0284c7 100%); color: white; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(33, 82, 255, 0.35); transition: transform 0.1s;">Actualizar</button>
+                    <button type="submit" style="padding: 11px 24px; border-radius: 10px; font-size: 13px; font-weight: 800; background: linear-gradient(135deg, #2152ff 0%, #0284c7 100%); color: white; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(33, 82, 255, 0.35); transition: transform 0.1s;"><?= lang('Usage.update_btn') ?></button>
                 </div>
             </form>
 
@@ -239,8 +239,8 @@
                 <!-- Columna Izquierda (Gráfico y Tablas) -->
                 <div class="dash-content">
                     <section class="dash-card">
-                        <h2>Consultas por día</h2>
-                        <p>Distribución del número de consultas realizadas en el periodo seleccionado.</p>
+                        <h2><?= lang('Usage.queries_per_day') ?></h2>
+                        <p><?= lang('Usage.queries_distribution') ?></p>
                         <div class="chart-wrapper">
                             <canvas id="usageChart" height="110"></canvas>
                         </div>
@@ -249,13 +249,13 @@
                     <section class="dash-card" style="margin-top: 24px;">
                         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; gap: 16px;">
                             <div>
-                                <h2>Registro de Actividad Reciente</h2>
-                                <p style="margin:0;">Haz clic en cualquier petición para inspeccionar sus metadatos.</p>
+                                <h2><?= lang('Usage.recent_activity') ?></h2>
+                                <p style="margin:0;"><?= lang('Usage.click_to_inspect') ?></p>
                             </div>
                             <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                                <input type="text" id="logFilterSearch" placeholder="Buscar CIF o ID..." style="padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; width: 180px;">
+                                <input type="text" id="logFilterSearch" placeholder="<?= lang('Usage.search_placeholder') ?>" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; width: 180px;">
                                 <select id="logFilterEndpoint" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; background: #fff;">
-                                    <option value="">Todos los endpoints</option>
+                                    <option value=""><?= lang('Usage.all_endpoints') ?></option>
                                     <option value="/companies/search">/companies/search</option>
                                     <option value="/companies/score">/companies/score</option>
                                     <option value="/companies/signals">/companies/signals</option>
@@ -264,9 +264,9 @@
                                     <option value="/companies">/companies (CIF)</option>
                                 </select>
                                 <select id="logFilterStatus" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; background: #fff;">
-                                    <option value="">Todos los estados</option>
-                                    <option value="success">Solo Éxito (200)</option>
-                                    <option value="error">Solo Errores (!200)</option>
+                                    <option value=""><?= lang('Usage.all_statuses') ?></option>
+                                    <option value="success"><?= lang('Usage.success_only') ?></option>
+                                    <option value="error"><?= lang('Usage.errors_only') ?></option>
                                 </select>
                             </div>
                         </div>
@@ -274,11 +274,11 @@
                         <!-- Top Pagination Controls -->
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px;">
                             <div style="font-size: 13px; color: #64748b; font-weight: 600;" id="logPaginationInfoTop">
-                                Mostrando página 1 de 1
+                                <?= lang('Usage.showing_page') ?> 1 <?= lang('Usage.of') ?> 1
                             </div>
                             <div style="display: flex; gap: 8px;">
-                                <button id="logBtnPrevTop" onclick="changeLogPage(-1)" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-size: 13px; font-weight: 600; color: #475569; transition: all 0.2s;">Anterior</button>
-                                <button id="logBtnNextTop" onclick="changeLogPage(1)" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-size: 13px; font-weight: 600; color: #475569; transition: all 0.2s;">Siguiente</button>
+                                <button id="logBtnPrevTop" onclick="changeLogPage(-1)" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-size: 13px; font-weight: 600; color: #475569; transition: all 0.2s;"><?= lang('Usage.prev') ?></button>
+                                <button id="logBtnNextTop" onclick="changeLogPage(1)" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-size: 13px; font-weight: 600; color: #475569; transition: all 0.2s;"><?= lang('Usage.next') ?></button>
                             </div>
                         </div>
 
@@ -286,16 +286,16 @@
                             <table class="usage-table">
                                 <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
                                     <tr>
-                                        <th>Fecha</th>
-                                        <th>Endpoint</th>
-                                        <th>Búsqueda</th>
-                                        <th>Resp</th>
-                                        <th>Origen</th>
+                                        <th><?= lang('Usage.date') ?></th>
+                                        <th><?= lang('Usage.endpoint') ?></th>
+                                        <th><?= lang('Usage.search') ?></th>
+                                        <th><?= lang('Usage.resp') ?></th>
+                                        <th><?= lang('Usage.origin') ?></th>
                                     </tr>
                                 </thead>
                                 <tbody id="logsTableBody">
                                     <tr>
-                                        <td colspan="5" style="text-align: center; padding: 40px; color: #64748b; font-weight: 600;">Cargando registros...</td>
+                                        <td colspan="5" style="text-align: center; padding: 40px; color: #64748b; font-weight: 600;"><?= lang('Usage.loading_records') ?></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -304,11 +304,11 @@
                         <!-- Pagination Controls -->
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
                             <div style="font-size: 13px; color: #64748b; font-weight: 600;" id="logPaginationInfo">
-                                Mostrando página 1 de 1
+                                <?= lang('Usage.showing_page') ?> 1 <?= lang('Usage.of') ?> 1
                             </div>
                             <div style="display: flex; gap: 8px;">
-                                <button id="logBtnPrev" onclick="changeLogPage(-1)" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-size: 13px; font-weight: 600; color: #475569;">Anterior</button>
-                                <button id="logBtnNext" onclick="changeLogPage(1)" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-size: 13px; font-weight: 600; color: #475569;">Siguiente</button>
+                                <button id="logBtnPrev" onclick="changeLogPage(-1)" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-size: 13px; font-weight: 600; color: #475569;"><?= lang('Usage.prev') ?></button>
+                                <button id="logBtnNext" onclick="changeLogPage(1)" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-size: 13px; font-weight: 600; color: #475569;"><?= lang('Usage.next') ?></button>
                             </div>
                         </div>
                     </section>
@@ -319,14 +319,14 @@
                     <?php if ($isBonus): ?>
                     <!-- Tarjeta Monedero Prepago -->
                     <div class="dash-card" style="margin-bottom: 24px; background: #f0fdf4; border: 1px solid #10b981; border-top: 4px solid #10b981; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1); padding: 24px;">
-                        <div class="plan-pill" style="background: #d1fae5; color: #065f46; font-weight: 800; border-radius: 6px; display: inline-block; padding: 4px 10px; font-size: 0.7rem; letter-spacing: 0.05em; margin-bottom: 8px;">💎 MONEDERO PREPAGO</div>
+                        <div class="plan-pill" style="background: #d1fae5; color: #065f46; font-weight: 800; border-radius: 6px; display: inline-block; padding: 4px 10px; font-size: 0.7rem; letter-spacing: 0.05em; margin-bottom: 8px;">💎 <?= lang('Usage.prepaid_wallet') ?></div>
                         <h2 style="color: #064e3b; margin-top: 4px !important; margin-bottom: 4px !important; font-size: 2rem; font-weight: 900; display: flex; align-items: baseline; gap: 6px;">
-                            <?= $fmt($walletBalance) ?> <span style="font-size: 0.9rem; font-weight: 800; color: #059669;">créditos</span>
+                            <?= $fmt($walletBalance) ?> <span style="font-size: 0.9rem; font-weight: 800; color: #059669;"><?= lang('Usage.credits') ?></span>
                         </h2>
                         
                         <div style="margin-top: 20px;">
                             <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:800; margin-bottom:8px; color:#064e3b;">
-                                <span>Saldo consumido</span>
+                                <span><?= lang('Usage.spent_balance') ?></span>
                                 <span><?= $fmt($walletSpent) ?> / <?= $fmt($walletTotal) ?></span>
                             </div>
                             <?php $walletPct = ($walletTotal > 0) ? ($walletSpent / $walletTotal * 100) : 0; ?>
@@ -339,11 +339,11 @@
                     <!-- Tarjeta de Plan (Estilo Dashboard) -->
                     <div class="plan-card <?= stripos($planName, 'pro') !== false ? 'plan-card--pro' : (stripos($planName, 'business') !== false ? 'plan-card--business' : '') ?>" style="margin-bottom: 24px;">
                         <div class="plan-pill"><?= esc($planName) ?></div>
-                        <h2>Límites de tu plan</h2>
+                        <h2><?= lang('Usage.plan_limits') ?></h2>
                         
                         <div style="margin-top: 16px;">
                             <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700; margin-bottom:6px; color:#fff;">
-                                <span>Consumo Actual</span>
+                                <span><?= lang('Usage.current_consumption') ?></span>
                                 <span><?= $fmt($usedThisMonth) ?> / <?= $monthlyQuotaInt !== null ? $fmt($monthlyQuotaInt) : '∞' ?></span>
                             </div>
                             <div style="width:100%; height:8px; background:rgba(255,255,255,0.2); border-radius:999px; overflow:hidden;">
@@ -351,7 +351,7 @@
                             </div>
                             <?php if ($monthlyQuotaInt !== null): ?>
                                 <div style="text-align: right; font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 6px; font-weight: 600;">
-                                    Te quedan <?= $fmt($remaining) ?> consultas
+                                    <?= sprintf(lang('Usage.queries_left'), $fmt($remaining)) ?>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -360,13 +360,13 @@
 
                     <!-- Desglose por Endpoint Mini -->
                     <div class="dash-card">
-                        <h2>Uso por Endpoint</h2>
+                        <h2><?= lang('Usage.usage_by_endpoint') ?></h2>
                         <div class="usage-table-wrapper" style="margin-top: 12px; box-shadow: none; border: none; overflow: visible;">
                             <table class="usage-table" style="font-size: 12px;">
                                 <thead>
                                     <tr>
-                                        <th style="padding: 8px 0;">Ruta</th>
-                                        <th style="padding: 8px 0; text-align: right;">Total</th>
+                                        <th style="padding: 8px 0;"><?= lang('Usage.path') ?></th>
+                                        <th style="padding: 8px 0; text-align: right;"><?= lang('Usage.total') ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -379,12 +379,12 @@
                                         <?php endforeach; ?>
                                     <?php elseif ($usedThisMonth > 0): ?>
                                         <tr>
-                                            <td style="padding: 8px 0;"><span class="usage-pill" style="font-size: 10px; padding: 2px 6px;">Llamadas anteriores</span></td>
+                                            <td style="padding: 8px 0;"><span class="usage-pill" style="font-size: 10px; padding: 2px 6px;"><?= lang('Usage.previous_calls') ?></span></td>
                                             <td style="padding: 8px 0; text-align: right; font-weight: 800;"><?= $fmt($usedThisMonth) ?></td>
                                         </tr>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="2" style="text-align: center; opacity: 0.6; padding: 12px;">Sin datos</td>
+                                            <td colspan="2" style="text-align: center; opacity: 0.6; padding: 12px;"><?= lang('Usage.no_data') ?></td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
@@ -407,12 +407,12 @@
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line></svg>
                             </div>
                             <div>
-                                <h3 style="font-size: 1.1rem; font-weight: 900; color: #0f172a; margin: 0 0 4px !important;">Soporte Técnico</h3>
-                                <p style="font-size: 0.85rem; color: #64748b; font-weight: 600; margin: 0 !important; line-height: 1.4;">¿Necesitas ayuda con la API o tu cuenta?</p>
+                                <h3 style="font-size: 1.1rem; font-weight: 900; color: #0f172a; margin: 0 0 4px !important;"><?= lang('Usage.tech_support') ?></h3>
+                                <p style="font-size: 0.85rem; color: #64748b; font-weight: 600; margin: 0 !important; line-height: 1.4;"><?= lang('Usage.need_help') ?></p>
                             </div>
                         </div>
                         <a href="<?= site_url('tickets') ?>" style="display: block; width: 100%; text-align: center; background: #f8fafc; color: #0f172a; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; font-weight: 800; font-size: 0.95rem; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.borderColor='#cbd5e1';" onmouseout="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0';">
-                            Abrir un Ticket
+                            <?= lang('Usage.open_ticket') ?>
                         </a>
                     </section>
                 </aside>
@@ -426,7 +426,7 @@
         <div class="log-slideover-overlay" onclick="closeLogDetails()"></div>
         <div class="log-slideover-panel">
             <div class="log-slideover-header">
-                <h3>Detalles de la Petición</h3>
+                <h3><?= lang('Usage.request_details') ?></h3>
                 <button onclick="closeLogDetails()">&times;</button>
             </div>
             <div class="log-slideover-body">
@@ -440,19 +440,19 @@
                 
                 <div class="log-grid">
                     <div class="log-meta">
-                        <label>Método</label>
+                        <label><?= lang('Usage.method') ?></label>
                         <span class="badge badge-method log-modal-method-text">---</span>
                     </div>
                     <div class="log-meta">
-                        <label>Estado HTTP</label>
+                        <label><?= lang('Usage.http_status') ?></label>
                         <span class="badge log-modal-status-text">---</span>
                     </div>
                     <div class="log-meta">
-                        <label>Latencia</label>
+                        <label><?= lang('Usage.latency') ?></label>
                         <span id="logModalLatency"></span>
                     </div>
                     <div class="log-meta">
-                        <label>Fecha y Hora</label>
+                        <label><?= lang('Usage.date_time') ?></label>
                         <span id="logModalDate"></span>
                     </div>
                 </div>
@@ -463,23 +463,23 @@
                 </div>
 
                 <div class="log-meta-group">
-                    <label>Término de Búsqueda</label>
+                    <label><?= lang('Usage.search_term') ?></label>
                     <code id="logModalSearch" class="block-code"></code>
                 </div>
 
                 <div class="log-meta-group">
-                    <label>Dirección IP</label>
+                    <label><?= lang('Usage.ip_address') ?></label>
                     <code id="logModalIp" class="block-code"></code>
                 </div>
 
                 <div class="log-meta-group">
-                    <label>User Agent</label>
+                    <label><?= lang('Usage.user_agent') ?></label>
                     <code id="logModalUa" class="block-code"></code>
                 </div>
                 
                 <div class="log-notice">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                    <span>El payload JSON no se almacena en base de datos para garantizar la privacidad y optimizar el rendimiento.</span>
+                    <span><?= lang('Usage.privacy_notice') ?></span>
                 </div>
             </div>
         </div>
@@ -611,7 +611,7 @@
                 tbody.style.opacity = '0.5';
                 tbody.style.pointerEvents = 'none';
             } else {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #64748b; font-weight: 600;">Cargando registros...</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #64748b; font-weight: 600;"><?= lang('Usage.loading_records') ?></td></tr>';
             }
             
             document.getElementById('logBtnPrev').disabled = true;
@@ -636,7 +636,7 @@
 
                 if (result.success) {
                     totalLogPages = result.pagination.total_pages;
-                    const infoText = `Mostrando página ${currentLogPage} de ${totalLogPages} (${result.pagination.total_records} registros)`;
+                    const infoText = `<?= lang('Usage.showing_page') ?> ${currentLogPage} <?= lang('Usage.of') ?> ${totalLogPages} (${result.pagination.total_records} <?= lang('Usage.records') ?>)`;
                     document.getElementById('logPaginationInfo').innerText = infoText;
                     if (document.getElementById('logPaginationInfoTop')) document.getElementById('logPaginationInfoTop').innerText = infoText;
                     
@@ -650,7 +650,7 @@
 
                     tbody.innerHTML = '';
                     if (result.data.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; opacity: 0.6; padding: 24px; font-weight: 700;">No hay resultados con estos filtros.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; opacity: 0.6; padding: 24px; font-weight: 700;"><?= lang('Usage.no_results') ?></td></tr>';
                         return;
                     }
 
@@ -695,8 +695,8 @@
                     console.error("Backend returned:", result);
                     tbody.style.opacity = '1';
                     tbody.style.pointerEvents = 'auto';
-                    const errMsg = result.message || result.error || 'Error desconocido en el servidor';
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 24px; color: #ef4444; font-weight: 700;">Error del servidor: ' + errMsg + '</td></tr>';
+                    const errMsg = result.message || result.error || '<?= lang('Usage.unknown_error') ?>';
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 24px; color: #ef4444; font-weight: 700;"><?= lang('Usage.server_error') ?>' + errMsg + '</td></tr>';
                 }
             } catch (err) {
                 console.error("Fetch error:", err);

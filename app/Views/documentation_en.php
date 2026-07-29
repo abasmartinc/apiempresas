@@ -17,11 +17,7 @@
                         </button>
                     </div>
 
-                    <!-- Language switcher -->
-                    <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-                        <a href="<?= site_url('documentation') ?>" style="flex:1; text-align:center; padding: 6px 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.8rem; font-weight: 600; color: #64748b; text-decoration: none; transition: all 0.2s;" title="Versión en español">🇪🇸 ES</a>
-                        <a href="<?= site_url('documentation/en') ?>" style="flex:1; text-align:center; padding: 6px 10px; border-radius: 8px; border: 2px solid #2563eb; background: #eff6ff; font-size: 0.8rem; font-weight: 800; color: #2563eb; text-decoration: none;" title="English version">🇬🇧 EN</a>
-                    </div>
+
 
                     <ul class="docs-nav">
                         <li>
@@ -140,7 +136,7 @@
             <div class="docs-content">
                 <h1>API Documentation</h1>
                 <p class="docs-intro-lead" style="font-size: 1.1rem; color: #334155; line-height: 1.7; margin-bottom: 24px;">
-                    Welcome to the official documentation for <strong>APIEmpresas.es</strong>. Our RESTful API is designed for development teams that need to integrate Spanish commercial intelligence (data, BORME records, contacts, scoring and corporate links) into their own systems quickly and without friction.
+                    Welcome to the official documentation for <strong>SpainCompanyAPI.com</strong>. Our RESTful API is designed for development teams that need to integrate Spanish commercial intelligence (data, BORME records, contacts, scoring and corporate links) into their own systems quickly and without friction.
                 </p>
                 <div class="docs-intro-highlights" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 0 0 40px 0;">
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.01);">
@@ -324,13 +320,13 @@
                             <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
                                 <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div> Production Environment
                             </div>
-                            <code style="color: #e2e8f0; font-family: 'Fira Code', monospace; font-size: 0.95rem; background: transparent; padding: 0;">https://apiempresas.es/api/v1</code>
+                            <code style="color: #e2e8f0; font-family: 'Fira Code', monospace; font-size: 0.95rem; background: transparent; padding: 0;">https://spaincompanyapi.com/api/v1</code>
                         </div>
                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; position: relative;">
                             <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
                                 <div style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;"></div> Sandbox Environment (Free)
                             </div>
-                            <code style="color: #0f172a; font-family: 'Fira Code', monospace; font-size: 0.95rem; background: transparent; padding: 0;">https://apiempresas.es/api/sandbox/v1</code>
+                            <code style="color: #0f172a; font-family: 'Fira Code', monospace; font-size: 0.95rem; background: transparent; padding: 0;">https://spaincompanyapi.com/api/sandbox/v1</code>
                         </div>
                     </div>
 
@@ -377,7 +373,7 @@
                         To access the endpoints you must include your <strong>X-API-KEY</strong> in the request header. You can generate and copy your key from your <a href="<?= site_url('dashboard') ?>">control panel</a>.
                     </p>
                     <pre><code class="language-http">GET /api/v1/companies?cif=B12345678 HTTP/1.1
-Host: apiempresas.es
+Host: spaincompanyapi.com
 X-API-KEY: your_api_key_here
 Accept: application/json</code></pre>
                 </section>
@@ -1141,7 +1137,7 @@ print(company.name)</code></pre>
                         <pre><code class="language-php">&lt;?php
 $apiKey = 'YOUR_API_KEY';
 $cif = 'B12345678';
-$url = 'https://apiempresas.es/api/v1/companies?cif=' . $cif;
+$url = 'https://spaincompanyapi.com/api/v1/companies?cif=' . $cif;
 
 $ch = curl_init($url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -1163,7 +1159,7 @@ print_r($data);
 
 $response = Http::withHeaders([
     'X-API-KEY' => 'YOUR_API_KEY'
-])->get('https://apiempresas.es/api/v1/companies', [
+])->get('https://spaincompanyapi.com/api/v1/companies', [
     'cif' => 'B12345678'
 ]);
 
@@ -1177,7 +1173,7 @@ if ($response->successful()) {
                         </h3>
                         <pre><code class="language-php">$client = \Config\Services::curlrequest();
 
-$response = $client->request('GET', 'https://apiempresas.es/api/v1/companies', [
+$response = $client->request('GET', 'https://spaincompanyapi.com/api/v1/companies', [
     'headers' => [
         'X-API-KEY' => 'YOUR_API_KEY',
         'Accept'    => 'application/json'
@@ -1194,7 +1190,7 @@ $data = json_decode($response->getBody(), true);</code></pre>
                         <pre><code class="language-js">const fetch = require('node-fetch');
 
 const getCompany = async (cif) => {
-  const response = await fetch('https://apiempresas.es/api/v1/companies?cif=' + cif, {
+  const response = await fetch('https://spaincompanyapi.com/api/v1/companies?cif=' + cif, {
     headers: { 'X-API-KEY': 'YOUR_API_KEY' }
   });
   const data = await response.json();
@@ -1207,7 +1203,7 @@ const getCompany = async (cif) => {
                         </h3>
                         <pre><code class="language-python">import requests
 
-url = "https://apiempresas.es/api/v1/companies"
+url = "https://spaincompanyapi.com/api/v1/companies"
 params = {"cif": "B12345678"}
 headers = {"X-API-KEY": "YOUR_API_KEY"}
 
@@ -1218,7 +1214,7 @@ print(response.json())</code></pre>
                             <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" width="24" height="24" alt="JavaScript" />
                             JavaScript (Browser Fetch)
                         </h3>
-                        <pre><code class="language-js">fetch('https://apiempresas.es/api/v1/companies?cif=B12345678', {
+                        <pre><code class="language-js">fetch('https://spaincompanyapi.com/api/v1/companies?cif=B12345678', {
   headers: {
     'X-API-KEY': 'YOUR_API_KEY',
     'Accept': 'application/json'

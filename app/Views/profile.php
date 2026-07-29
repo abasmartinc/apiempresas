@@ -208,8 +208,8 @@
                 <?= strtoupper(substr($user->name ?? 'U', 0, 1)) ?>
             </div>
             <div class="profile-header">
-                <h1 class="profile-title">Ajustes de Perfil</h1>
-                <p class="profile-subtitle">Gestiona tu identidad, datos de contacto y seguridad de la cuenta.</p>
+                <h1 class="profile-title"><?= lang('Profile.title') ?></h1>
+                <p class="profile-subtitle"><?= lang('Profile.subtitle') ?></p>
             </div>
         </div>
 
@@ -234,29 +234,29 @@
                 <div class="card-icon-wrapper">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 </div>
-                <h2 class="profile-card-title">Datos Personales</h2>
-                <p class="profile-card-desc">Actualiza tu información básica de contacto y tu perfil profesional para el ecosistema.</p>
+                <h2 class="profile-card-title"><?= lang('Profile.personal_data') ?></h2>
+                <p class="profile-card-desc"><?= lang('Profile.personal_desc') ?></p>
                 
                 <form action="<?= site_url('profile/update') ?>" method="post">
                     <?= csrf_field() ?>
                     
                     <div class="p-form-group">
-                        <label for="name" class="p-form-label">Nombre completo</label>
+                        <label for="name" class="p-form-label"><?= lang('Profile.full_name') ?></label>
                         <input type="text" id="name" name="name" value="<?= esc($user->name) ?>" class="p-form-input" required>
                     </div>
 
                     <div class="p-form-group">
-                        <label for="company" class="p-form-label">Empresa o Proyecto</label>
+                        <label for="company" class="p-form-label"><?= lang('Profile.company') ?></label>
                         <input type="text" id="company" name="company" value="<?= esc($user->company) ?>" class="p-form-input">
                     </div>
 
                     <div class="p-form-group" style="margin-bottom: 32px;">
-                        <label for="email" class="p-form-label">Correo electrónico</label>
+                        <label for="email" class="p-form-label"><?= lang('Profile.email') ?></label>
                         <input type="email" id="email" name="email" value="<?= esc($user->email) ?>" class="p-form-input" required>
                     </div>
 
                     <button type="submit" class="btn-wow btn-wow-primary">
-                        Guardar Cambios
+                        <?= lang('Profile.save_changes') ?>
                     </button>
                 </form>
             </div>
@@ -266,8 +266,8 @@
                 <div class="card-icon-wrapper" style="color: #8b5cf6; background: #f5f3ff;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 </div>
-                <h2 class="profile-card-title">Seguridad y Acceso</h2>
-                <p class="profile-card-desc">Modifica tu contraseña regularmente para mantener tu cuenta completamente protegida contra amenazas.</p>
+                <h2 class="profile-card-title"><?= lang('Profile.security_access') ?></h2>
+                <p class="profile-card-desc"><?= lang('Profile.security_desc') ?></p>
 
                 <?php if (session()->has('message_password')): ?>
                     <div class="p-alert p-alert-success" style="padding: 12px 16px; margin-bottom: 24px; font-size: 13px;">
@@ -287,22 +287,22 @@
                     <?= csrf_field() ?>
                     
                     <div class="p-form-group">
-                        <label for="current_password" class="p-form-label">Contraseña actual</label>
-                        <input type="password" id="current_password" name="current_password" class="p-form-input" required placeholder="••••••••••••">
+                        <label for="current_password" class="p-form-label"><?= lang('Profile.current_password') ?></label>
+                        <input type="password" id="current_password" name="current_password" class="p-form-input" required placeholder="<?= lang('Profile.placeholder_current') ?>">
                     </div>
 
                     <div class="p-form-group">
-                        <label for="new_password" class="p-form-label">Nueva contraseña</label>
-                        <input type="password" id="new_password" name="new_password" class="p-form-input" required placeholder="Mínimo 6 caracteres">
+                        <label for="new_password" class="p-form-label"><?= lang('Profile.new_password') ?></label>
+                        <input type="password" id="new_password" name="new_password" class="p-form-input" required placeholder="<?= lang('Profile.placeholder_new') ?>">
                     </div>
 
                     <div class="p-form-group" style="margin-bottom: 32px;">
-                        <label for="confirm_password" class="p-form-label">Confirmar nueva contraseña</label>
-                        <input type="password" id="confirm_password" name="confirm_password" class="p-form-input" required placeholder="Repite tu nueva contraseña">
+                        <label for="confirm_password" class="p-form-label"><?= lang('Profile.confirm_password') ?></label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="p-form-input" required placeholder="<?= lang('Profile.placeholder_confirm') ?>">
                     </div>
 
                     <button type="submit" class="btn-wow btn-wow-secondary">
-                        Actualizar Contraseña
+                        <?= lang('Profile.update_password') ?>
                     </button>
                 </form>
             </div>

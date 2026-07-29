@@ -18,8 +18,8 @@
                 <div class="auth-form-icon-badge">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                 </div>
-                <h1>Nueva contraseña</h1>
-                <p>Establece una nueva contraseña segura para recuperar el acceso a tu cuenta.</p>
+                <h1><?= lang('Auth.reset_title') ?></h1>
+                <p><?= lang('Auth.reset_desc') ?></p>
             </div>
 
             <!-- ALERTS -->
@@ -39,7 +39,7 @@
                 <input type="hidden" name="token" value="<?= esc($token) ?>">
 
                 <div class="auth-field-group">
-                    <label for="password">Nueva contraseña</label>
+                    <label for="password"><?= lang('Auth.new_password') ?></label>
                     <input
                         id="password"
                         name="password"
@@ -47,12 +47,12 @@
                         autocomplete="new-password"
                         required
                         class="auth-input"
-                        placeholder="Mínimo 8 caracteres"
+                        placeholder="<?= lang('Auth.new_password_ph') ?>"
                     />
                 </div>
 
                 <div class="auth-field-group">
-                    <label for="password_confirm">Confirmar contraseña</label>
+                    <label for="password_confirm"><?= lang('Auth.confirm_password') ?></label>
                     <input
                         id="password_confirm"
                         name="password_confirm"
@@ -60,20 +60,20 @@
                         autocomplete="new-password"
                         required
                         class="auth-input"
-                        placeholder="Repite tu nueva contraseña"
+                        placeholder="<?= lang('Auth.confirm_password_ph') ?>"
                     />
                 </div>
 
-                <button type="submit" class="auth-btn-primary" id="reset-submit">Actualizar contraseña</button>
+                <button type="submit" class="auth-btn-primary" id="reset-submit"><?= lang('Auth.btn_update') ?></button>
             </form>
 
             <div class="auth-form-footer">
-                ¿Prefieres no cambiarla? <a href="<?=site_url('enter') ?>">Volver al login</a>
+                <?= lang('Auth.cancel_reset') ?> <a href="<?=site_url('enter') ?>"><?= lang('Auth.back_to_login') ?></a>
             </div>
         </div>
 
         <div class="auth-legal-footer">
-            © <?= date('Y') ?> ApiEmpresas. <a href="#" data-modal-target="modalTerms">Aviso Legal</a> · <a href="#" data-modal-target="modalPrivacy">Privacidad</a>
+            © <?= date('Y') ?> ApiEmpresas. <a href="#" data-modal-target="modalTerms"><?= lang('Auth.legal_notice') ?></a> · <a href="#" data-modal-target="modalPrivacy"><?= lang('Auth.privacy') ?></a>
         </div>
     </div>
 </div>
@@ -86,7 +86,7 @@
         if (form && btn) {
             form.addEventListener('submit', function () {
                 btn.disabled = true;
-                btn.textContent = 'Actualizando clave…';
+                btn.textContent = '<?= lang('Auth.btn_updating') ?>';
             });
         }
     });

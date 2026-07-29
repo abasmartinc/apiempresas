@@ -28,7 +28,7 @@ class GithubAuth extends BaseController
     public function login()
     {
         if (empty($this->clientId) || empty($this->redirectUri)) {
-            return redirect()->to(site_url('enter'))->with('error', 'Error de configuración: Las credenciales de GitHub no se han cargado correctamente del .env');
+            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_27'));
         }
 
         $url = "https://github.com/login/oauth/authorize?client_id={$this->clientId}&redirect_uri={$this->redirectUri}&scope=user:email";
@@ -49,7 +49,7 @@ class GithubAuth extends BaseController
         }
 
         if (!$code) {
-            return redirect()->to(site_url('enter'))->with('error', 'No se recibió el código de GitHub (Revisa los logs para ver qué llegó).');
+            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_28'));
         }
 
         try {
@@ -114,7 +114,7 @@ class GithubAuth extends BaseController
 
         } catch (\Exception $e) {
             log_message('error', '[GithubAuth] Error en callback: ' . $e->getMessage());
-            return redirect()->to(site_url('enter'))->with('error', 'Error durante la autenticación con GitHub.');
+            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_29'));
         }
     }
 
@@ -139,10 +139,14 @@ class GithubAuth extends BaseController
 
         // 3. Si sigue sin existir, crear usuario nuevo
         if (!$user) {
-            $apiKey = 'sk_' . bin2hex(random_bytes(16));
+            $apiKey = bin2hex(random_bytes(16)); // not 'sk_' actually wait, it was $apiKey
+            $host = $this->request->getServer('HTTP_HOST') ?? '';
+            $lang = (strpos((string)$host, 'spaincompanyapi') !== false) ? 'en' : 'es';
+
             $userData = [
                 'name'          => $name,
                 'email'         => $email,
+                'lang'          => $lang,
                 'github_id'     => $githubId,
                 'avatar'        => $avatar,
                 'api_key'       => $apiKey,

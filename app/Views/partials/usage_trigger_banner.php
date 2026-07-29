@@ -12,7 +12,7 @@
         
         <div style="display: flex; align-items: center; gap: 16px;">
             <a id="usage-trigger-cta" href="<?= site_url('billing') ?>" class="btn" style="white-space: nowrap; font-weight: 800; padding: 10px 24px; border-radius: 12px; font-size: 0.9rem; transition: all 0.2s ease; border: none;">
-                🔥 Activar Radar + API
+                <?= lang('UsageTrigger.activate_radar') ?>
             </a>
             <button id="usage-trigger-close" style="background: transparent; border: none; cursor: pointer; padding: 4px; opacity: 0.6; transition: opacity 0.2s ease;" title="Cerrar">
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -35,47 +35,47 @@ document.addEventListener('DOMContentLoaded', function() {
     const triggers = {
         'first_use': {
             icon: '🚀',
-            title: '¡Tu primera llamada a la API ha sido un éxito!',
-            desc: 'Pásate a Pro para desbloquear datos sin enmascarar y mayor velocidad.',
+            title: '<?= lang('UsageTrigger.first_use_title') ?>',
+            desc: '<?= lang('UsageTrigger.first_use_desc') ?>',
             bg: '#eff6ff',
             border: '#bfdbfe',
             text: '#1e40af',
             ctaBg: '#2563eb',
             ctaText: '#ffffff',
-            ctaLabel: 'Ver Plan Pro'
+            ctaLabel: '<?= lang('UsageTrigger.first_use_cta') ?>'
         },
         '20_percent': {
             icon: '📈',
-            title: 'Le estás sacando partido a la API',
-            desc: 'Asegura la escalabilidad de tu proyecto con una cuota mayor de consultas.',
+            title: '<?= lang('UsageTrigger.20_percent_title') ?>',
+            desc: '<?= lang('UsageTrigger.20_percent_desc') ?>',
             bg: '#f0f9ff',
             border: '#bae6fd',
             text: '#0369a1',
             ctaBg: '#0284c7',
             ctaText: '#ffffff',
-            ctaLabel: 'Mejorar a Pro'
+            ctaLabel: '<?= lang('UsageTrigger.20_percent_cta') ?>'
         },
         '50_percent': {
             icon: '⚠️',
-            title: 'Has consumido el 50% de tu cuota',
-            desc: 'Actualiza tu plan antes de llegar al límite para evitar cortes en tu servicio.',
+            title: '<?= lang('UsageTrigger.50_percent_title') ?>',
+            desc: '<?= lang('UsageTrigger.50_percent_desc') ?>',
             bg: '#fff7ed',
             border: '#fed7aa',
             text: '#9a3412',
             ctaBg: '#ea580c',
             ctaText: '#ffffff',
-            ctaLabel: 'Actualizar a Pro'
+            ctaLabel: '<?= lang('UsageTrigger.50_percent_cta') ?>'
         },
         '80_percent': {
             icon: '🚨',
-            title: 'Límite gratuito casi agotado',
-            desc: 'Tu integración dejará de funcionar pronto. Activa Pro para mantener el servicio.',
+            title: '<?= lang('UsageTrigger.80_percent_title') ?>',
+            desc: '<?= lang('UsageTrigger.80_percent_desc') ?>',
             bg: '#fef2f2',
             border: '#fecaca',
             text: '#991b1b',
             ctaBg: '#dc2626',
             ctaText: '#ffffff',
-            ctaLabel: 'Evitar corte de servicio'
+            ctaLabel: '<?= lang('UsageTrigger.80_percent_cta') ?>'
         }
     };
 
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 banner.style.color = config.text;
                 cta.style.backgroundColor = config.ctaBg;
                 cta.style.color = config.ctaText;
-                cta.textContent = config.ctaLabel || 'Activar Plan Pro';
+                cta.textContent = config.ctaLabel || '<?= lang('UsageTrigger.default_cta') ?>';
                 
                 // Mostrar banner
                 container.style.display = 'block';

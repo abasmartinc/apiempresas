@@ -53,7 +53,7 @@ if ($isBonusUser && !($isPaid ?? false)) {
             ?>
 
             <div class="dash-header">
-                <h1>Bienvenido, <?= htmlspecialchars($userName) ?></h1>
+                <h1><?= lang('Dashboard.welcome', [htmlspecialchars($userName)]) ?></h1>
                 
                 <?php if (!empty($usageMessage)): ?>
                     <?= view('components/ui/alert', [
@@ -67,10 +67,10 @@ if ($isBonusUser && !($isPaid ?? false)) {
                     <?php foreach($answeredTickets as $t): ?>
                         <?= view('components/ui/alert', [
                             'type' => 'success',
-                            'title' => 'Ticket Respondido: ' . $t['subject'],
-                            'text' => 'Nuestro equipo de soporte ha respondido a tu ticket.',
+                            'title' => lang('Dashboard.ticket_answered', [$t['subject']]),
+                            'text' => lang('Dashboard.support_replied'),
                             'actionUrl' => site_url('tickets/view/'.$t['id']),
-                            'actionText' => 'Ver respuesta &rarr;'
+                            'actionText' => lang('Dashboard.view_reply')
                         ]) ?>
                     <?php endforeach; ?>
                 <?php endif; ?>

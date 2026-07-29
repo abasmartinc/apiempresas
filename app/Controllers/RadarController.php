@@ -522,7 +522,7 @@ class RadarController extends BaseController
     {
         $hasSimulatorToken = session('simulator_excel_token') !== null || session('just_bought_excel') !== null;
         if (!session('logged_in') && !$hasSimulatorToken) {
-            return redirect()->to(site_url('enter'))->with('error', 'Debes iniciar sesión para descargar el listado.');
+            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_52'));
         }
 
         $params = $this->request->getGet();
@@ -846,7 +846,7 @@ class RadarController extends BaseController
     {
         $hasExcelToken = session('simulator_excel_token') !== null || session('just_bought_excel') !== null;
         if (!session('logged_in') && !$hasExcelToken) {
-            return redirect()->to(site_url('enter'))->with('error', 'Debes iniciar sesión para descargar el listado.');
+            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_53'));
         }
 
         $params = $this->request->getGet();
@@ -932,7 +932,7 @@ class RadarController extends BaseController
     {
         $hasExcelToken = session('simulator_excel_token') !== null || session('just_bought_excel') !== null;
         if (!session('logged_in') && !$hasExcelToken) {
-            return redirect()->to(site_url('enter'))->with('error', 'Debes iniciar sesión para descargar el listado.');
+            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_54'));
         }
 
         $params = $this->request->getGet();

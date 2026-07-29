@@ -8,6 +8,21 @@ use CodeIgniter\Router\RouteCollection;
 // --- MÁXIMA PRIORIDAD PARA DEPURACIÓN ---
 $routes->get('informes/(:any)', 'SeoReportController::handleReport/$1');
 
+// === STANDALONE ENGLISH DOMAIN (Phase 1) ===
+$routes->group('', ['hostname' => 'spaincompanyapi.test'], static function ($routes) {
+    // English Landing Page
+    $routes->get('/', 'Home::englishStandalone');
+    // English Documentation
+    $routes->get('docs', 'Documentation::englishStandalone');
+    
+    // English API Prices/Marketing Page
+    $routes->get('spanish-company-data-api', 'ApiPrices::englishStandalone');
+    
+    // Auth English
+    $routes->get('enter', 'Login::english');
+    $routes->get('register', 'Register::english');
+});
+
 $routes->get('/', 'Home::index');
 
 $routes->post('submit-review', 'Home::submitReview');
@@ -104,6 +119,7 @@ $routes->get('consumption/logs_ajax', 'Usage::getLogsAjax');
 $routes->get('api-empresas', 'ApiPrices::index');
 $routes->get('spanish-company-api', 'ApiPrices::english'); // English version
 $routes->get('crear-bono-api', 'ApiPrices::customBonusWizard');
+$routes->get('buy-api-credits', 'ApiPrices::customBonusWizardEn');
 $routes->match(['get', 'post'], 'billing/checkout_bonus', 'Billing::checkout_bonus');
 $routes->get('plugin-wordpress-buscador-empresas', 'Plugin::index');
 $routes->get('obtener-plugin-wordpress', 'Plugin::get_plugin');

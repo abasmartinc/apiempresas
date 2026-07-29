@@ -50,12 +50,12 @@
 
                 <div class="brand-text">
                     <span class="brand-name">API<span class="grad">Empresas</span>.es</span>
-                    <span class="brand-tag">Verificación mercantil y Radar de empresas</span>
+                    <span class="brand-tag"><?= lang('Auth.brand_tag') ?></span>
                 </div>
             </div>
 
             <div class="desktop-only">
-                <a class="btn btn_header" href="<?= site_url() ?>login">Ir a Login</a>
+                <a class="btn btn_header" href="<?= site_url() ?>login"><?= lang('Auth.go_to_login') ?></a>
             </div>
         </div>
     </header>
@@ -74,24 +74,24 @@
                     </div>
 
                     <div class="success-copy">
-                        <h1>Registro completado</h1>
-                        <p>Tu cuenta ya está lista. Accede al panel para ver tu API key, documentación y consumo.</p>
+                        <h1><?= lang('Auth.success_title') ?></h1>
+                        <p><?= lang('Auth.success_desc') ?></p>
                     </div>
                 </div>
 
                 <div class="auth-alert-success">
-                    <strong>Cuenta creada correctamente.</strong><br/> Ya puedes iniciar sesión.
+                    <strong><?= lang('Auth.success_alert_strong') ?></strong><br/> <?= lang('Auth.success_alert_text') ?>
                 </div>
 
                 <div class="success-actions">
-                    <a class="btn" href="<?= site_url() ?>enter">Iniciar sesión</a>
-                    <a class="btn btn-ghost" href="<?= site_url() ?>">Volver al inicio</a>
+                    <a class="btn" href="<?= site_url() ?>enter"><?= lang('Auth.btn_login') ?></a>
+                    <a class="btn btn-ghost" href="<?= site_url() ?>"><?= lang('Auth.btn_home') ?></a>
                 </div>
 
                 <div class="success-foot">
                     <div class="success-tip">
                         <span class="success-tip-dot" aria-hidden="true"></span>
-                        <span>Tip: guarda tu API key en un lugar seguro y rota las claves si lo necesitas.</span>
+                        <span><?= lang('Auth.tip_text') ?></span>
                     </div>
                 </div>
             </div>

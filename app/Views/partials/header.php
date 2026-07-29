@@ -138,7 +138,7 @@
                 </svg>
                 <div class="brand-text">
                     <span class="brand-name">API<span class="grad">Empresas</span>.es</span>
-                    <span class="brand-tag">Verificación mercantil y Radar de empresas</span>
+                    <span class="brand-tag">Verificación mercantil y datos de empresas</span>
                 </div>
             </a>
         </div>

@@ -28,7 +28,7 @@ class LinkedinAuth extends BaseController
     public function login()
     {
         if (empty($this->clientId) || empty($this->redirectUri)) {
-            return redirect()->to(site_url('enter'))->with('error', 'Error de configuración: Las credenciales de LinkedIn no se han cargado correctamente del .env');
+            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_32'));
         }
 
         $state = bin2hex(random_bytes(16));
@@ -57,11 +57,11 @@ class LinkedinAuth extends BaseController
         }
 
         if (!$code) {
-            return redirect()->to(site_url('enter'))->with('error', 'No se recibió el código de LinkedIn.');
+            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_33'));
         }
 
         if ($state !== session('linkedin_state')) {
-            return redirect()->to(site_url('enter'))->with('error', 'Error de seguridad: El estado de la sesión no coincide.');
+            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_34'));
         }
 
         try {

@@ -35,6 +35,19 @@
                             showConfirmButton: false,
                             timer: 3000,
                             timerProgressBar: true
+<div class="container">
+
+            <?php if(session()->getFlashdata('error')): ?>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: '<?= esc(session()->getFlashdata('error')) ?>',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true
                         });
                     });
                 </script>
@@ -42,10 +55,10 @@
 
             <div class="create-form-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 32px; border-bottom: 1px solid #e2e8f0;">
-                    <h1 style="font-size: 2rem; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.02em;">Crear Nuevo Ticket</h1>
+                    <h1 style="font-size: 2rem; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.02em;"><?= lang('Tickets.create_title') ?></h1>
                     <a href="<?= site_url('tickets') ?>" class="btn-back">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                        Volver a tickets
+                        <?= lang('Tickets.btn_back') ?>
                     </a>
                 </div>
                 <div style="padding: 32px;">
@@ -53,44 +66,44 @@
                     <?= csrf_field() ?>
                     
                     <div class="form-group">
-                        <label class="form-label" for="subject">Asunto</label>
-                        <input type="text" id="subject" name="subject" class="form-control" placeholder="Ej. Problema con la facturación, Duda sobre la API..." required>
+                        <label class="form-label" for="subject"><?= lang('Tickets.label_subject') ?></label>
+                        <input type="text" id="subject" name="subject" class="form-control" placeholder="<?= lang('Tickets.ph_subject') ?>" required>
                     </div>
                     
                     <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div>
-                            <label class="form-label" for="category">Tema relacionado</label>
+                            <label class="form-label" for="category"><?= lang('Tickets.label_category') ?></label>
                             <select id="category" name="category" class="form-control">
-                                <option value="api_key">API Key</option>
-                                <option value="dashboard">Dashboard</option>
-                                <option value="facturacion">Facturación / Pagos</option>
-                                <option value="busquedas">Búsquedas / Resultados</option>
-                                <option value="otro" selected>Otro</option>
+                                <option value="api_key"><?= lang('Tickets.cat_api_key') ?></option>
+                                <option value="dashboard"><?= lang('Tickets.cat_dashboard') ?></option>
+                                <option value="facturacion"><?= lang('Tickets.cat_billing') ?></option>
+                                <option value="busquedas"><?= lang('Tickets.cat_search') ?></option>
+                                <option value="otro" selected><?= lang('Tickets.cat_other') ?></option>
                             </select>
                         </div>
                         <div>
-                            <label class="form-label" for="priority">Prioridad</label>
+                            <label class="form-label" for="priority"><?= lang('Tickets.label_priority') ?></label>
                             <select id="priority" name="priority" class="form-control">
-                                <option value="low">Baja</option>
-                                <option value="medium" selected>Media</option>
-                                <option value="high">Alta</option>
-                                <option value="urgent">Urgente</option>
+                                <option value="low"><?= lang('Tickets.pr_low') ?></option>
+                                <option value="medium" selected><?= lang('Tickets.pr_medium') ?></option>
+                                <option value="high"><?= lang('Tickets.pr_high') ?></option>
+                                <option value="urgent"><?= lang('Tickets.pr_urgent') ?></option>
                             </select>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="message">Mensaje / Descripción</label>
-                        <textarea id="message" name="message" class="form-control" placeholder="Describe tu problema con el mayor detalle posible..." required></textarea>
+                        <label class="form-label" for="message"><?= lang('Tickets.label_message') ?></label>
+                        <textarea id="message" name="message" class="form-control" placeholder="<?= lang('Tickets.ph_message') ?>" required></textarea>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="attachment">Archivo adjunto (opcional)</label>
+                        <label class="form-label" for="attachment"><?= lang('Tickets.label_attachment') ?></label>
                         <input type="file" id="attachment" name="attachment" class="form-control" style="padding: 10px;" accept=".jpg,.jpeg,.png,.pdf,.txt,.json">
-                        <p style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">Formatos permitidos: JPG, PNG, PDF, TXT, JSON.</p>
+                        <p style="font-size: 0.8rem; color: #64748b; margin-top: 4px;"><?= lang('Tickets.attachment_formats') ?></p>
                     </div>
 
-                    <button type="submit" class="btn-submit">Enviar Ticket</button>
+                    <button type="submit" class="btn-submit"><?= lang('Tickets.btn_submit') ?></button>
                     </form>
                 </div>
             </div>

@@ -1027,7 +1027,7 @@ class Radar extends BaseController
         $activePlan = $this->subscriptionModel->getActivePlanByUserId($userId);
         
         if (!$activePlan || !in_array($activePlan->product_type, ['radar', 'bundle'])) {
-            return redirect()->to(site_url('leads-empresas-nuevas'))->with('message', 'La exportación requiere un plan activo.');
+            return redirect()->to(site_url('leads-empresas-nuevas'))->with('message', lang('Messages.flash_51'));
         }
 
         $format = $this->request->getGet('format') ?? 'csv';

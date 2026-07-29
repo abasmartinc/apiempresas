@@ -22,6 +22,18 @@ class Documentation extends BaseController
         return $this->renderView('documentation_en', $data);
     }
 
+    public function englishStandalone()
+    {
+        $data = [
+            'lang'        => 'en-US',
+            'locale'      => 'en_US',
+            'title'       => 'Spain Company API Documentation',
+            'excerptText' => 'Official REST API documentation for Spanish company data.',
+            'canonical'   => site_url('docs'),
+        ];
+        return $this->renderView('documentation_en_standalone', $data);
+    }
+
     public function error($errorCode)
     {
         $data = [

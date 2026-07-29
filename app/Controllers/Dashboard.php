@@ -26,7 +26,7 @@ class Dashboard extends BaseController
     {
         if (! session('logged_in')) {
             return redirect()->to(site_url('enter'))
-                ->with('error', 'Debes iniciar sesión para acceder al panel.');
+                ->with('error', lang('Messages.flash_24'));
         }
 
         $userModel = new UserModel();
@@ -170,42 +170,42 @@ class Dashboard extends BaseController
             if ($requestsUsedThisMonth >= $maxLimit) {
                 if ($walletBalance > 0) {
                     $data['usageMessage'] = [
-                        'title' => 'Límite gratuito superado',
-                        'text'  => 'Se están consumiendo créditos automáticamente de tu monedero a medida.'
+                        'title' => lang('Dashboard.usage_msg_limit_exceeded_title'),
+                        'text'  => lang('Dashboard.usage_msg_limit_exceeded_text')
                     ];
                 } else {
                     $data['usageMessage'] = [
-                        'title' => 'Has alcanzado el límite gratuito',
-                        'text'  => 'Activa Pro para seguir validando empresas automáticamente.'
+                        'title' => lang('Dashboard.usage_msg_limit_reached_title'),
+                        'text'  => lang('Dashboard.usage_msg_limit_reached_text')
                     ];
                 }
             } elseif ($requestsUsedThisMonth >= ($maxLimit * 0.6)) {
                 $data['usageMessage'] = [
-                    'title' => 'Límite casi alcanzado',
-                    'text'  => 'Te quedan pocas consultas gratuitas. Activa Pro para evitar interrupciones.'
+                    'title' => lang('Dashboard.usage_msg_almost_reached_title'),
+                    'text'  => lang('Dashboard.usage_msg_almost_reached_text')
                 ];
             } elseif ($requestsUsedThisMonth >= 5) {
                 $data['usageMessage'] = [
-                    'title' => 'Estás viendo el valor',
-                    'text'  => 'El siguiente paso es integrarlo en tu sistema para automatizar procesos.'
+                    'title' => lang('Dashboard.usage_msg_seeing_value_title'),
+                    'text'  => lang('Dashboard.usage_msg_seeing_value_text')
                 ];
             } elseif ($requestsUsedThisMonth >= 1 && $requestsUsedThisMonth <= 4) {
                 $data['usageMessage'] = [
-                    'title' => '⚡ Ya has probado la API',
-                    'text'  => 'Haz 2–3 validaciones más para comprobar la calidad real de los datos.'
+                    'title' => lang('Dashboard.usage_msg_tested_title'),
+                    'text'  => lang('Dashboard.usage_msg_tested_text')
                 ];
             } else {
                 $data['usageMessage'] = [
-                    'title' => '¡Bienvenido!',
-                    'text'  => 'Empieza validando una empresa para ver cómo funciona la API en tiempo real.'
+                    'title' => lang('Dashboard.usage_msg_welcome_title'),
+                    'text'  => lang('Dashboard.usage_msg_welcome_text')
                 ];
             }
         } else {
             // Plan de Pago superado con wallet
             if ($requestsUsedThisMonth >= $maxLimit && $walletBalance > 0) {
                 $data['usageMessage'] = [
-                    'title' => 'Límite mensual superado',
-                    'text'  => 'Se están consumiendo créditos automáticamente de tu monedero a medida.'
+                    'title' => lang('Dashboard.usage_msg_monthly_exceeded_title'),
+                    'text'  => lang('Dashboard.usage_msg_limit_exceeded_text')
                 ];
             }
         }
@@ -330,7 +330,7 @@ class Dashboard extends BaseController
         if (!$adminUser || !$adminUser->is_admin) {
              // Fallback raro: el impersonador ya no existe o no es admin
              session()->destroy();
-             return redirect()->to(site_url('enter'))->with('error', 'Sesión de administrador no válida.');
+             return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_25'));
         }
 
         // Restaurar sesión de admin
@@ -343,7 +343,7 @@ class Dashboard extends BaseController
             'logged_in'  => true,
         ]);
 
-        return redirect()->to(site_url('admin/users'))->with('message', 'Has vuelto a tu cuenta de administrador.');
+        return redirect()->to(site_url('admin/users'))->with('message', lang('Messages.flash_26'));
     }
 
     /**

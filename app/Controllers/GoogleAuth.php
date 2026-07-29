@@ -48,7 +48,7 @@ class GoogleAuth extends BaseController
         $code = $this->request->getGet('code');
 
         if (!$code) {
-            return redirect()->to(site_url('enter'))->with('error', 'No se ha podido autenticar con Google.');
+            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_30'));
         }
 
         try {
@@ -113,7 +113,7 @@ class GoogleAuth extends BaseController
 
         } catch (\Throwable $e) {
             log_message('error', '[GoogleAuth] Error en callback: ' . $e->getMessage());
-            return redirect()->to(site_url('enter'))->with('error', 'Ha ocurrido un error durante la autenticación.');
+            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_31'));
         }
     }
 
@@ -125,11 +125,15 @@ class GoogleAuth extends BaseController
         $db = \Config\Database::connect();
         $db->transStart();
 
+        $host = $this->request->getServer('HTTP_HOST') ?? '';
+        $lang = (strpos((string)$host, 'spaincompanyapi') !== false) ? 'en' : 'es';
+
         try {
             // Datos del usuario
             $userData = [
                 'name'          => $name,
                 'email'         => $email,
+                'lang'          => $lang,
                 'google_id'     => $googleId,
                 'avatar'        => $picture,
                 'password_hash' => password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT), // Pass aleatoria

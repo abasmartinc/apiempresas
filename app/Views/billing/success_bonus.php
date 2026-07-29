@@ -4,7 +4,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<div class="container">
+<div class="container" style="padding-top: 80px;">
 
             <!-- HERO -->
             <div class="success-hero">
@@ -14,42 +14,42 @@
                             background: linear-gradient(90deg, #10b981, #059669);
                         }
                     </style>
-                    <div class="kicker" style="color: #059669;">RECARGA COMPLETADA</div>
+                    <div class="kicker" style="color: #059669;"><?= lang('Billing.success_bonus_kicker') ?></div>
 
                     <div class="title-row">
-                        <h1>Créditos añadidos.<br>Tu monedero está recargado.</h1>
+                        <h1><?= lang('Billing.success_bonus_title') ?></h1>
                         <span class="status-badge" style="background: #ecfdf5; border-color: #a7f3d0; color: #065f46;">
                             <span class="status-ic" style="background: #10b981;" aria-hidden="true"></span>
-                            Aprobado
+                            <?= lang('Billing.success_bonus_approved') ?>
                         </span>
                     </div>
 
                     <p class="sub">
-                        Hemos confirmado tu pago y tus créditos ya están disponibles en tu monedero prepago. Recuerda que no tienen caducidad.
+                        <?= lang('Billing.success_bonus_desc') ?>
                     </p>
 
                     <div class="hero-actions">
-                        <a class="btn btn_primary" href="<?=site_url()?>dashboard" style="background: #10b981; box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4);">Ir a mi Monedero</a>
-                        <a class="btn btn_light" href="<?=site_url()?>documentation">Ver documentación</a>
+                        <a class="btn btn_primary" href="<?=site_url()?>dashboard" style="background: #10b981; box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4);"><?= lang('Billing.success_bonus_btn_wallet') ?></a>
+                        <a class="btn btn_light" href="<?=site_url()?>documentation"><?= lang('Billing.success_bonus_btn_docs') ?></a>
                     </div>
 
                     <div class="hero-note" style="background: #f0fdf4; border-color: #d1fae5; color: #064e3b;">
                         <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        Los créditos de este bono se consumirán únicamente cuando agotes tu cuota mensual gratuita o tu plan principal. Nunca caducan.
+                        <?= lang('Billing.success_bonus_note') ?>
                     </div>
                 </div>
 
                 <!-- TICKET DE COMPRA -->
                 <aside class="purchase-card" aria-label="Resumen de la recarga">
                     <div class="purchase-head">
-                        <div class="purchase-title">Resumen de recarga</div>
+                        <div class="purchase-title"><?= lang('Billing.success_bonus_summary_title') ?></div>
                         <div class="purchase-sub">Ref: <strong>#<?= htmlspecialchars($order_ref ?? 'BONUS-0001') ?></strong></div>
                     </div>
 
                     <div class="purchase-lines">
-                        <div class="line"><span>Concepto</span><strong>Bono API a Medida</strong></div>
-                        <div class="line"><span>Créditos añadidos</span><strong style="color: #10b981;">+<?= number_format($credits ?? 0, 0, ',', '.') ?></strong></div>
-                        <div class="line"><span>Caducidad</span><strong>Nunca</strong></div>
+                        <div class="line"><span><?= lang('Billing.success_bonus_concept') ?></span><strong><?= lang('Billing.success_bonus_concept_val') ?></strong></div>
+                        <div class="line"><span><?= lang('Billing.success_bonus_credits_added') ?></span><strong style="color: #10b981;">+<?= number_format($credits ?? 0, 0, ',', '.') ?></strong></div>
+                        <div class="line"><span><?= lang('Billing.success_bonus_expiration') ?></span><strong><?= lang('Billing.success_bonus_never') ?></strong></div>
                         
                         <div class="ticket-divider"></div>
 
@@ -58,9 +58,9 @@
                             $iva = $base * 0.21;
                             $total = $base + $iva;
                         ?>
-                        <div class="line"><span>Base imponible</span><strong><?= number_format($base, 2, ',', '.') ?> €</strong></div>
-                        <div class="line"><span>IVA (21%)</span><strong><?= number_format($iva, 2, ',', '.') ?> €</strong></div>
-                        <div class="line total"><span>Total abonado</span><strong style="color: #10b981;"><?= number_format($total, 2, ',', '.') ?> €</strong></div>
+                        <div class="line"><span><?= lang('Billing.success_bonus_base') ?></span><strong><?= number_format($base, 2, ',', '.') ?> €</strong></div>
+                        <div class="line"><span><?= lang('Billing.success_bonus_vat') ?></span><strong><?= number_format($iva, 2, ',', '.') ?> €</strong></div>
+                        <div class="line total"><span><?= lang('Billing.success_bonus_total') ?></span><strong style="color: #10b981;"><?= number_format($total, 2, ',', '.') ?> €</strong></div>
                     </div>
                 </aside>
             </div>
@@ -68,8 +68,8 @@
             <!-- Siguientes pasos (Premium Grid) -->
             <section class="next-steps">
                 <div class="section-head">
-                    <h2>Siguientes pasos</h2>
-                    <p>Ya puedes empezar a gastar tus créditos realizando peticiones a nuestra API.</p>
+                    <h2><?= lang('Billing.success_bonus_next_title') ?></h2>
+                    <p><?= lang('Billing.success_bonus_next_desc') ?></p>
                 </div>
 
                 <div class="step-list">
@@ -79,13 +79,13 @@
                             1
                         </div>
                         <div class="step-body">
-                            <h3>Copia tu API Key</h3>
+                            <h3><?= lang('Billing.success_bonus_step1_title') ?></h3>
                             <p>
-                                Accede a tu dashboard principal para copiar la llave maestra que te permitirá autenticarte en todos nuestros endpoints.
+                                <?= lang('Billing.success_bonus_step1_desc') ?>
                             </p>
                         </div>
                         <div class="step-actions">
-                            <a class="btn btn_light btn_full" href="<?=site_url()?>dashboard">Obtener API Key</a>
+                            <a class="btn btn_light btn_full" href="<?=site_url()?>dashboard"><?= lang('Billing.success_bonus_step1_btn') ?></a>
                         </div>
                     </article>
 
@@ -95,13 +95,13 @@
                             2
                         </div>
                         <div class="step-body">
-                            <h3>Prueba el Enriquecimiento</h3>
+                            <h3><?= lang('Billing.success_bonus_step2_title') ?></h3>
                             <p>
-                                Haz una llamada al endpoint básico (cuesta solo 1 crédito) y verifica cómo el saldo de tu monedero disminuye instantáneamente.
+                                <?= lang('Billing.success_bonus_step2_desc') ?>
                             </p>
                         </div>
                         <div class="step-actions">
-                            <a class="btn btn_light btn_full" href="<?=site_url()?>documentation#enriquecimiento">Ver endpoint</a>
+                            <a class="btn btn_light btn_full" href="<?=site_url()?>documentation#enriquecimiento"><?= lang('Billing.success_bonus_step2_btn') ?></a>
                         </div>
                     </article>
 
@@ -111,13 +111,13 @@
                             3
                         </div>
                         <div class="step-body">
-                            <h3>Aprovecha el Radar</h3>
+                            <h3><?= lang('Billing.success_bonus_step3_title') ?></h3>
                             <p>
-                                Al tener créditos de pago, se te desbloquean los endpoints premium como Radar o Scoring (3 créditos por llamada).
+                                <?= lang('Billing.success_bonus_step3_desc') ?>
                             </p>
                         </div>
                         <div class="step-actions">
-                            <a class="btn btn_light btn_full" href="<?=site_url()?>documentation#radar">Explorar premium</a>
+                            <a class="btn btn_light btn_full" href="<?=site_url()?>documentation#radar"><?= lang('Billing.success_bonus_step3_btn') ?></a>
                         </div>
                     </article>
                 </div>

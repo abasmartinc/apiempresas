@@ -39,16 +39,16 @@ $fmt = function ($n) {
             <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 24px; margin-bottom: 32px;">
                 
                 <div class="billing-hero-clean" style="text-align: left; margin: 0; max-width: 600px;">
-                    <h1 style="font-size: 2.75rem; margin-bottom: 12px;">Planes y Precios</h1>
-                    <p style="font-size: 1.1rem; line-height: 1.5;">Escala tu integración con límites adaptados a tu volumen de operaciones.<br>Sin sorpresas. Cancela cuando quieras.</p>
+                    <h1 style="font-size: 2.75rem; margin-bottom: 12px;"><?= lang('Billing.title') ?></h1>
+                    <p style="font-size: 1.1rem; line-height: 1.5;"><?= lang('Billing.subtitle') ?></p>
                 </div>
 
                 <div class="period-toggle-container" style="margin: 0;">
                     <div class="period-toggle" role="group" aria-label="Periodicidad" style="background: #e2e8f0; padding: 6px; border-radius: 12px; box-shadow: none;">
-                        <button type="button" class="period-btn active" data-period="monthly" style="border-radius: 8px;">Mensual</button>
+                        <button type="button" class="period-btn active" data-period="monthly" style="border-radius: 8px;"><?= lang('Billing.monthly') ?></button>
                         <button type="button" class="period-btn" data-period="annual" style="position: relative; border-radius: 8px;">
-                            Anual
-                            <span class="badge-save" style="top: -14px; right: -12px; background: #10b981; border: 2px solid #f8fafc; color: #fff; padding: 2px 8px; font-size: 0.7rem; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);">-20%</span>
+                            <?= lang('Billing.annual') ?>
+                            <span class="badge-save" style="top: -14px; right: -12px; background: #10b981; border: 2px solid #f8fafc; color: #fff; padding: 2px 8px; font-size: 0.7rem; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);"><?= lang('Billing.save_20') ?></span>
                         </button>
                     </div>
                 </div>
@@ -72,25 +72,25 @@ $fmt = function ($n) {
                             <div class="plan-title">
                                 <span class="name">Pro</span>
                                 <?php if ($planName === 'Pro'): ?>
-                                    <span class="badge-pro">Tu plan actual</span>
+                                    <span class="badge-pro"><?= lang('Billing.current_plan') ?></span>
                                 <?php else: ?>
-                                    <span class="badge-pro">Más elegido</span>
+                                    <span class="badge-pro"><?= lang('Billing.most_chosen') ?></span>
                                 <?php endif; ?>
                             </div>
                             
                             <div class="plan-price">
                                 <div class="amount" data-monthly="19" data-annual="182">19</div>
-                                <div class="currency">€ / <span class="per">mes</span> + IVA</div>
+                                <div class="currency">€ / <span class="per"><?= lang('Billing.per_month') ?></span> <?= lang('Billing.plus_vat') ?></div>
                             </div>
                             
-                            <div class="plan-desc">La opción ideal para SaaS, ERPs y productos que ya necesitan validación en producción.</div>
+                            <div class="plan-desc"><?= lang('Billing.pro_desc') ?></div>
                             
                             <ul class="plan-features">
-                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> 3.000 consultas al mes</li>
-                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> Datos completos BORME y Actividad</li>
-                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> Scoring Comercial IA (0-100)</li>
-                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> Listado de Constituciones</li>
-                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> Grafos de Poder Societario</li>
+                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> <?= lang('Billing.pro_f1') ?></li>
+                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> <?= lang('Billing.pro_f2') ?></li>
+                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> <?= lang('Billing.pro_f3') ?></li>
+                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> <?= lang('Billing.pro_f4') ?></li>
+                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> <?= lang('Billing.pro_f5') ?></li>
                             </ul>
                         </label>
 
@@ -104,25 +104,25 @@ $fmt = function ($n) {
                             <div class="plan-title">
                                 <span class="name">Business</span>
                                 <?php if ($planName === 'Business'): ?>
-                                    <span class="badge-pro">Tu plan actual</span>
+                                    <span class="badge-pro"><?= lang('Billing.current_plan') ?></span>
                                 <?php else: ?>
-                                    <span class="badge-green">Equipos</span>
+                                    <span class="badge-green"><?= lang('Billing.teams') ?></span>
                                 <?php endif; ?>
                             </div>
                             
                             <div class="plan-price">
                                 <div class="amount" data-monthly="49" data-annual="470">49</div>
-                                <div class="currency">€ / <span class="per">mes</span> + IVA</div>
+                                <div class="currency">€ / <span class="per"><?= lang('Billing.per_month') ?></span> <?= lang('Billing.plus_vat') ?></div>
                             </div>
                             
-                            <div class="plan-desc">Pensado para plataformas con más carga, procesos críticos y necesidades de mayor disponibilidad.</div>
+                            <div class="plan-desc"><?= lang('Billing.business_desc') ?></div>
                             
                             <ul class="plan-features">
-                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> 10.000 consultas al mes</li>
-                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> Webhooks Push</li>
-                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> IA Predictiva de Oportunidades</li>
-                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> Calculadora de Match B2B</li>
-                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> Soporte Prioritario Slack / Email</li>
+                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> <?= lang('Billing.bus_f1') ?></li>
+                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> <?= lang('Billing.bus_f2') ?></li>
+                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> <?= lang('Billing.bus_f3') ?></li>
+                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> <?= lang('Billing.bus_f4') ?></li>
+                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> <?= lang('Billing.bus_f5') ?></li>
                             </ul>
                         </label>
                     </div>
@@ -134,16 +134,16 @@ $fmt = function ($n) {
                                 <div style="width: 56px; height: 56px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
                                     <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                                 </div>
-                                <h3 style="margin: 0 0 12px; font-size: 1.25rem; font-weight: 900; color: #0f172a;">Acción no procesada</h3>
+                                <h3 style="margin: 0 0 12px; font-size: 1.25rem; font-weight: 900; color: #0f172a;"><?= lang('Billing.error_title') ?></h3>
                                 <p style="margin: 0 0 20px; font-size: 0.95rem; color: #dc2626; line-height: 1.5; font-weight: 600; background: #fef2f2; padding: 12px; border-radius: 8px;">
                                     <?= esc(session('error')) ?>
                                 </p>
                                 <p style="margin: 0 0 24px; font-size: 0.85rem; color: #64748b; font-weight: 500; line-height: 1.4;">
-                                    Tu cuenta no ha sufrido ningún cargo. Por favor, inténtalo de nuevo en unos minutos o contacta con soporte si el problema persiste.
+                                    <?= lang('Billing.error_desc') ?>
                                 </p>
                                 <div style="display: flex; gap: 12px; justify-content: center;">
-                                    <button type="button" onclick="document.getElementById('error-modal').remove()" style="padding: 12px 20px; background: #ffffff; border: 1px solid #cbd5e1; color: #475569; font-weight: 800; border-radius: 12px; cursor: pointer; transition: all 0.2s;">Cerrar</button>
-                                    <a href="<?= site_url('contacto') ?>" style="padding: 12px 20px; background: #2152ff; border: 1px solid #2152ff; color: #ffffff; font-weight: 800; border-radius: 12px; text-decoration: none; display: inline-block; transition: background 0.2s; box-shadow: 0 4px 6px -1px rgba(33, 82, 255, 0.2);">Contactar Soporte</a>
+                                    <button type="button" onclick="document.getElementById('error-modal').remove()" style="padding: 12px 20px; background: #ffffff; border: 1px solid #cbd5e1; color: #475569; font-weight: 800; border-radius: 12px; cursor: pointer; transition: all 0.2s;"><?= lang('Billing.close') ?></button>
+                                    <a href="<?= site_url('contacto') ?>" style="padding: 12px 20px; background: #2152ff; border: 1px solid #2152ff; color: #ffffff; font-weight: 800; border-radius: 12px; text-decoration: none; display: inline-block; transition: background 0.2s; box-shadow: 0 4px 6px -1px rgba(33, 82, 255, 0.2);"><?= lang('Billing.contact_support') ?></a>
                                 </div>
                             </div>
                         </div>
@@ -175,11 +175,11 @@ $fmt = function ($n) {
                                     <!-- PASO 1 -->
                                     <div style="position: relative; margin-bottom: 40px; z-index: 1;">
                                         <div style="position: absolute; left: -36px; top: -2px; width: 28px; height: 28px; border-radius: 50%; background: #2152ff; color: white; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 14px; transform: translateX(-50%); box-shadow: 0 0 0 6px #ffffff;">1</div>
-                                        <h3 style="margin: 0 0 4px; font-size: 1.25rem; font-weight: 900; color: #0f172a;">Datos de facturación</h3>
-                                        <p style="margin: 0 0 16px; font-size: 0.95rem; color: #64748b;">Usaremos estos datos para emitir tu factura.</p>
+                                        <h3 style="margin: 0 0 4px; font-size: 1.25rem; font-weight: 900; color: #0f172a;"><?= lang('Billing.step1_title') ?></h3>
+                                        <p style="margin: 0 0 16px; font-size: 0.95rem; color: #64748b;"><?= lang('Billing.step1_desc') ?></p>
                                         
                                         <div class="form-group" style="position: relative;">
-                                            <label for="bill_email" style="font-weight: 800; color: #0f172a; display: block; margin-bottom: 8px;">Email de facturación</label>
+                                            <label for="bill_email" style="font-weight: 800; color: #0f172a; display: block; margin-bottom: 8px;"><?= lang('Billing.bill_email') ?></label>
                                             <div style="position: relative;">
                                                 <div style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #64748b; display: flex;">
                                                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
@@ -190,11 +190,11 @@ $fmt = function ($n) {
 
                                         <div id="billing_extra_fields" style="display:block; margin-top: 16px;">
                                             <div class="form-group">
-                                                <label for="bill_name">Nombre o Razón Social</label>
+                                                <label for="bill_name"><?= lang('Billing.bill_name') ?></label>
                                                 <input class="form-control" id="bill_name" name="name" type="text" placeholder="Empresa S.L." value="<?= esc($get($user, 'company') ?: $get($user, 'name') ?: '') ?>" style="border-radius: 12px; background: #f8fafc;" />
                                             </div>
                                             <div class="form-group">
-                                                <label for="bill_vat">NIF/CIF</label>
+                                                <label for="bill_vat"><?= lang('Billing.bill_vat') ?></label>
                                                 <input class="form-control" id="bill_vat" name="vat" type="text" style="border-radius: 12px; background: #f8fafc;" />
                                             </div>
                                         </div>
@@ -203,7 +203,7 @@ $fmt = function ($n) {
                                     <!-- PASO 2 -->
                                     <div style="position: relative; z-index: 1;">
                                         <div style="position: absolute; left: -36px; top: -2px; width: 28px; height: 28px; border-radius: 50%; background: #2152ff; color: white; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 14px; transform: translateX(-50%); box-shadow: 0 0 0 6px #ffffff;">2</div>
-                                        <h3 style="margin: 0 0 16px; font-size: 1.25rem; font-weight: 900; color: #0f172a;">Activar plan y usar en producción</h3>
+                                        <h3 style="margin: 0 0 16px; font-size: 1.25rem; font-weight: 900; color: #0f172a;"><?= lang('Billing.step2_title') ?></h3>
                                         
                                         <div style="border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; display: flex; gap: 32px; align-items: center; background: #ffffff; margin-bottom: 24px;">
                                             <div style="width: 140px; height: 140px; border-radius: 16px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: inset 0 2px 4px rgba(255,255,255,0.8), 0 4px 6px -1px rgba(37, 99, 235, 0.1); border: 1px solid #bfdbfe;">
@@ -215,26 +215,26 @@ $fmt = function ($n) {
                                             <div style="display: flex; flex-direction: column; gap: 16px;">
                                                 <div style="display: flex; align-items: center; gap: 12px;">
                                                     <div style="width: 24px; height: 24px; border-radius: 50%; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                                                    <span style="font-weight: 600; color: #0f172a;">Activación inmediata del plan</span>
+                                                    <span style="font-weight: 600; color: #0f172a;"><?= lang('Billing.immediate_activation') ?></span>
                                                 </div>
                                                 <div style="display: flex; align-items: center; gap: 12px;">
                                                     <div style="width: 24px; height: 24px; border-radius: 50%; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                                                    <span style="font-weight: 600; color: #0f172a;">Acceso completo a todas las funciones</span>
+                                                    <span style="font-weight: 600; color: #0f172a;"><?= lang('Billing.full_access') ?></span>
                                                 </div>
                                                 <div style="display: flex; align-items: center; gap: 12px;">
                                                     <div style="width: 24px; height: 24px; border-radius: 50%; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                                                    <span style="font-weight: 600; color: #0f172a;">Sin permanencia. Cancela cuando quieras</span>
+                                                    <span style="font-weight: 600; color: #0f172a;"><?= lang('Billing.no_commitment') ?></span>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <button class="btn-primary js-loading-btn" type="submit" id="btnCheckout" style="width: 100%; height: 56px; font-size: 1.1rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                            <span style="color: #fbbf24; font-size: 1.2rem;">⚡</span> Activar Business y usar en producción
+                                            <span style="color: #fbbf24; font-size: 1.2rem;">⚡</span> <?= lang('Billing.activate_btn', ['Business']) ?>
                                         </button>
                                         
                                         <div class="secure-badge" style="justify-content: center; margin-top: 16px; color: #64748b; font-size: 0.9rem;">
                                             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                                            Pago 100% seguro y cifrado con Stripe
+                                            <?= lang('Billing.secure_payment') ?>
                                         </div>
                                     </div>
                                 </div>
@@ -254,31 +254,31 @@ $fmt = function ($n) {
                     
                     <!-- TARJETA 1: RESUMEN -->
                     <div class="summary-card" style="margin-bottom: 24px;">
-                        <h3>Resumen del plan</h3>
+                        <h3><?= lang('Billing.summary_title') ?></h3>
                         <div style="padding: 32px;">
                         
                         <div class="summary-row" style="margin-bottom: 12px; font-weight: 600; color: #475569;">
-                            <span>Plan elegido</span>
+                            <span><?= lang('Billing.chosen_plan') ?></span>
                             <span class="value" id="sumPlan" style="color: #0f172a; font-weight: 800;">Business</span>
                         </div>
                         
                         <div class="summary-row" style="margin-bottom: 12px; font-weight: 600; color: #475569;">
-                            <span>Periodicidad</span>
+                            <span><?= lang('Billing.periodicity') ?></span>
                             <span class="value" id="sumPeriod" style="color: #0f172a; font-weight: 800;">Mensual</span>
                         </div>
                         
                         <div class="summary-row" style="margin-bottom: 12px; font-weight: 600; color: #475569;">
-                            <span>Subtotal</span>
+                            <span><?= lang('Billing.subtotal') ?></span>
                             <span class="value" style="color: #0f172a; font-weight: 800;"><span id="sumSubtotal">49,00</span> €</span>
                         </div>
                         
                         <div class="summary-row" style="margin-bottom: 24px; font-weight: 600; color: #475569;">
-                            <span>IVA (21%)</span>
+                            <span><?= lang('Billing.vat') ?></span>
                             <span class="value" style="color: #0f172a; font-weight: 800;"><span id="sumIva">10,29</span> €</span>
                         </div>
                         
                         <div class="summary-row total" style="margin-top: 0; padding-top: 24px; border-top: 2px dashed #cbd5e1; align-items: center;">
-                            <span style="font-size: 1.1rem; color: #0f172a; font-weight: 900;">Total</span>
+                            <span style="font-size: 1.1rem; color: #0f172a; font-weight: 900;"><?= lang('Billing.total') ?></span>
                             <span class="value" style="color: #2152ff; font-size: 1.4rem; font-weight: 900;"><span id="sumPrice">59,29</span> €</span>
                         </div>
 
@@ -287,8 +287,8 @@ $fmt = function ($n) {
                                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                             </div>
                             <div>
-                                <strong style="display: block; font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Uso en producción inmediato</strong>
-                                <span style="font-size: 0.8rem; color: #64748b; line-height: 1.4; display: block;">Accede a todas las funcionalidades desde el momento de activación.</span>
+                                <strong style="display: block; font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;"><?= lang('Billing.immediate_use') ?></strong>
+                                <span style="font-size: 0.8rem; color: #64748b; line-height: 1.4; display: block;"><?= lang('Billing.immediate_use_desc') ?></span>
                             </div>
                         </div>
                         </div>
@@ -297,7 +297,7 @@ $fmt = function ($n) {
                     <!-- TARJETA 2: CONFIANZA Y TESTIMONIO -->
                     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 32px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.02), 0 4px 6px -4px rgba(0,0,0,0.02);">
                         
-                        <h3 style="font-size: 1.25rem; font-weight: 900; margin: 0 0 24px; text-align: center; color: #0f172a;">Confianza y seguridad</h3>
+                        <h3 style="font-size: 1.25rem; font-weight: 900; margin: 0 0 24px; text-align: center; color: #0f172a;"><?= lang('Billing.trust_title') ?></h3>
                         
                         <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 32px;">
                             <div style="display: flex; align-items: flex-start; gap: 16px;">
@@ -305,8 +305,8 @@ $fmt = function ($n) {
                                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                                 </div>
                                 <div>
-                                    <strong style="display: block; font-size: 0.95rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Pago 100% seguro</strong>
-                                    <span style="font-size: 0.85rem; color: #475569; display: block;">Procesado con Stripe.</span>
+                                    <strong style="display: block; font-size: 0.95rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;"><?= lang('Billing.secure_pay_title') ?></strong>
+                                    <span style="font-size: 0.85rem; color: #475569; display: block;"><?= lang('Billing.secure_pay_desc') ?></span>
                                 </div>
                             </div>
                             
@@ -315,8 +315,8 @@ $fmt = function ($n) {
                                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                                 </div>
                                 <div>
-                                    <strong style="display: block; font-size: 0.95rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Tus datos protegidos</strong>
-                                    <span style="font-size: 0.85rem; color: #475569; display: block; line-height: 1.4;">Ciframos tu información con SSL de 256 bits.</span>
+                                    <strong style="display: block; font-size: 0.95rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;"><?= lang('Billing.data_protected_title') ?></strong>
+                                    <span style="font-size: 0.85rem; color: #475569; display: block; line-height: 1.4;"><?= lang('Billing.data_protected_desc') ?></span>
                                 </div>
                             </div>
 
@@ -325,8 +325,8 @@ $fmt = function ($n) {
                                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                                 </div>
                                 <div>
-                                    <strong style="display: block; font-size: 0.95rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Sin permanencia</strong>
-                                    <span style="font-size: 0.85rem; color: #475569; display: block;">Cancela tu plan cuando quieras.</span>
+                                    <strong style="display: block; font-size: 0.95rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;"><?= lang('Billing.no_commit_title') ?></strong>
+                                    <span style="font-size: 0.85rem; color: #475569; display: block;"><?= lang('Billing.no_commit_desc') ?></span>
                                 </div>
                             </div>
                         </div>
@@ -350,7 +350,7 @@ $fmt = function ($n) {
                             </div>
                         </div>
                         <div style="text-align: center; font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 32px;">
-                            y más métodos seguros
+                            <?= lang('Billing.more_methods') ?>
                         </div>
 
                         <!-- Testimonio Integrado (Carrusel) -->
@@ -379,46 +379,12 @@ $fmt = function ($n) {
 
                             <script>
                                 document.addEventListener('DOMContentLoaded', () => {
-                                    const reviews = [
-                                        { text: "La integración con APIEmpresas es brutal. Puedes ver parámetros clave y mucho más. Todo muy rápido y fiable.", author: "Alex S.", role: "CTO en SaaS B2B" },
-                                        { text: "Pasamos de revisar NIFs manualmente a automatizar el 100% del onboarding de clientes. Nos ahorra decenas de horas al mes.", author: "Laura M.", role: "Dir. Operaciones" },
-                                        { text: "La API es ultra rápida y la documentación impecable. Lo conectamos con nuestro ERP interno en menos de una mañana.", author: "David R.", role: "Lead Developer" }
-                                    ];
-                                    const reviewAvatars = {
-                                        "Alex S.": { initials: "AS", avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=96&h=96&q=80" },
-                                        "Laura M.": { initials: "LM", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=96&h=96&q=80" },
-                                        "David R.": { initials: "DR", avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=96&h=96&q=80" }
-                                    };
-                                    const avatar = document.getElementById('review-avatar');
-                                    const avatarFallback = document.getElementById('review-avatar-fallback');
-                                    const updateAvatar = (review) => {
-                                        if (!avatar || !avatarFallback) return;
-                                        const avatarData = reviewAvatars[review.author] || { initials: review.author.slice(0, 2).toUpperCase(), avatar: '' };
-                                        avatarFallback.textContent = avatarData.initials;
-                                        avatarFallback.style.display = 'none';
-                                        avatar.style.display = 'block';
-                                        avatar.alt = 'Foto de ' + review.author;
-                                        avatar.src = avatarData.avatar;
-                                    };
-                                    if (avatar) {
-                                        avatar.addEventListener('error', () => {
-                                            avatar.style.display = 'none';
-                                            if (avatarFallback) avatarFallback.style.display = 'flex';
-                                        });
-                                    }
-                                    let currentReview = 0;
+                                    let currentReview = 1;
                                     setInterval(() => {
-                                        const slider = document.getElementById('review-slider');
-                                        if(!slider) return;
-                                        slider.style.opacity = 0;
-                                        setTimeout(() => {
-                                            currentReview = (currentReview + 1) % reviews.length;
-                                            document.getElementById('review-text').textContent = reviews[currentReview].text;
-                                            document.getElementById('review-author').textContent = reviews[currentReview].author;
-                                            document.getElementById('review-role').textContent = reviews[currentReview].role;
-                                            updateAvatar(reviews[currentReview]);
-                                            slider.style.opacity = 1;
-                                        }, 400); 
+                                        const slides = document.querySelectorAll('.testimonial-slide');
+                                        slides.forEach(s => s.style.display = 'none');
+                                        currentReview = (currentReview % slides.length) + 1;
+                                        document.getElementById('testim-' + currentReview).style.display = 'block';
                                     }, 6000); 
                                 });
                             </script>
@@ -435,40 +401,27 @@ $fmt = function ($n) {
                 <!-- GESTIÓN DE SUSCRIPCIÓN -->
                 <?php include APPPATH . 'Views/components/manage_subscription.php'; ?>
 
-                <div style="text-align: center; margin-bottom: 40px; margin-top: 40px;">
-                    <h2 style="font-size: 1.75rem; font-weight: 900; color: var(--text-main); margin: 0;">Dudas frecuentes</h2>
-                </div>
-
-                <div class="faq-grid">
-                    <div class="faq-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-                        <div style="width: 40px; height: 40px; background: #e0e7ff; color: #4338ca; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                        </div>
-                        <h4 style="margin-top: 0;">¿Recibiré factura oficial?</h4>
-                        <p>Sí, tras cada pago recibirás automáticamente una factura legal con el desglose del IVA correspondiente a tu NIF/CIF.</p>
+                <div style="max-width: 800px; margin: 64px auto 0;">
+                <h3 style="font-size: 1.5rem; font-weight: 900; margin-bottom: 24px; text-align: center; color: #0f172a;"><?= lang('Billing.faq_title') ?></h3>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
+                        <strong style="display: block; font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;"><?= lang('Billing.faq_1_q') ?></strong>
+                        <p style="margin: 0; font-size: 0.95rem; color: #475569; line-height: 1.5;"><?= lang('Billing.faq_1_a') ?></p>
                     </div>
-                    <div class="faq-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-                        <div style="width: 40px; height: 40px; background: #dcfce7; color: #15803d; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                        </div>
-                        <h4 style="margin-top: 0;">¿Puedo cancelar cuando quiera?</h4>
-                        <p>Sin compromiso. Puedes cancelar tu suscripción con un solo clic desde tu panel y seguirás teniendo acceso hasta el final del periodo pagado.</p>
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
+                        <strong style="display: block; font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;"><?= lang('Billing.faq_2_q') ?></strong>
+                        <p style="margin: 0; font-size: 0.95rem; color: #475569; line-height: 1.5;"><?= lang('Billing.faq_2_a') ?></p>
                     </div>
-                    <div class="faq-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-                        <div style="width: 40px; height: 40px; background: #fef3c7; color: #b45309; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                        </div>
-                        <h4 style="margin-top: 0;">¿Cómo funciona el cambio de plan?</h4>
-                        <p>Si pasas de Pro a Business, Stripe prorrateará el importe y solo pagarás la diferencia por el tiempo restante de tu mensualidad.</p>
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
+                        <strong style="display: block; font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;"><?= lang('Billing.faq_3_q') ?></strong>
+                        <p style="margin: 0; font-size: 0.95rem; color: #475569; line-height: 1.5;"><?= lang('Billing.faq_3_a') ?></p>
                     </div>
-                    <div class="faq-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-                        <div style="width: 40px; height: 40px; background: #f1f5f9; color: #334155; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                        </div>
-                        <h4 style="margin-top: 0;">¿El pago es seguro?</h4>
-                        <p>Utilizamos Stripe como pasarela de pago. Tus datos bancarios nunca tocan nuestros servidores y están protegidos por cifrado bancario de nivel militar.</p>
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
+                        <strong style="display: block; font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;"><?= lang('Billing.faq_4_q') ?></strong>
+                        <p style="margin: 0; font-size: 0.95rem; color: #475569; line-height: 1.5;"><?= lang('Billing.faq_4_a') ?></p>
                     </div>
                 </div>
+            </div>
 
             </div>
 
@@ -551,7 +504,7 @@ $fmt = function ($n) {
             }
 
             if (btnCheckout) {
-                btnCheckout.innerHTML = `<span style="color: #fbbf24; font-size: 1.2rem;">⚡</span> Activar ${plan === 'business' ? 'Business' : 'Pro'} y usar en producción`;
+                btnCheckout.innerHTML = `<span style="color: #fbbf24; font-size: 1.2rem;">⚡</span> <?= lang('Billing.activate_btn', ['${plan === "business" ? "Business" : "Pro"}']) ?>`;
             }
 
             const stepPlanName = document.getElementById('stepPlanName');
@@ -569,11 +522,11 @@ $fmt = function ($n) {
                 } else {
                     checkoutSection.style.display = 'block';
                     if (currentPlan !== 'free' && currentPlan !== 'none') {
-                        if (checkoutTitle) checkoutTitle.textContent = 'Confirma tu cambio de plan';
-                        if (checkoutSub) checkoutSub.innerHTML = 'Estás a punto de mejorar tu cuenta. Se aplicará el nuevo cargo y se prorrateará tu periodo actual.';
+                        if (checkoutTitle) checkoutTitle.textContent = '<?= lang('Billing.confirm_change') ?>';
+                        if (checkoutSub) checkoutSub.innerHTML = '<?= lang('Billing.confirm_change_desc') ?>';
                     } else {
-                        if (checkoutTitle) checkoutTitle.textContent = 'Completa la activación';
-                        if (checkoutSub) checkoutSub.textContent = 'Pago cifrado y seguro vía Stripe o PayPal.';
+                        if (checkoutTitle) checkoutTitle.textContent = '<?= lang('Billing.complete_activation') ?>';
+                        if (checkoutSub) checkoutSub.textContent = '<?= lang('Billing.complete_activation_desc') ?>';
                     }
                 }
             }

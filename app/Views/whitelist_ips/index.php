@@ -224,52 +224,52 @@
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
         </div>
         <div class="profile-header">
-            <h1 class="profile-title">Lista Blanca de IPs</h1>
-            <p class="profile-subtitle">Gestiona tu Lista Blanca de IPs para proteger tu clave API.</p>
+            <h1 class="profile-title"><?= lang('Whitelist.title') ?></h1>
+            <p class="profile-subtitle"><?= lang('Whitelist.subtitle') ?></p>
         </div>
     </div>
 
     <div class="wow-card">
-        <h2 class="profile-card-title">Añadir Dirección IP</h2>
-        <p class="profile-card-desc">Añade direcciones IP a esta lista si necesitas permitir el acceso a tu API desde servidores ubicados en países que no estén autorizados habitualmente. Las IPs que registres aquí tendrán acceso garantizado y no serán bloqueadas por el sistema de detección geográfica anti-fraude.</p>
+        <h2 class="profile-card-title"><?= lang('Whitelist.add_ip_title') ?></h2>
+        <p class="profile-card-desc"><?= lang('Whitelist.add_ip_desc') ?></p>
         
         <div class="add-ip-box">
             <form action="<?= site_url('whitelist-ips/add') ?>" method="POST" style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
                 <?= csrf_field() ?>
                 
                 <div style="flex: 1; min-width: 200px;">
-                    <label for="ip_address" class="p-form-label">Dirección IP (IPv4 o IPv6)</label>
-                    <input type="text" id="ip_address" name="ip_address" class="p-form-input" placeholder="Ej: 192.168.1.100" required>
+                    <label for="ip_address" class="p-form-label"><?= lang('Whitelist.ip_address') ?></label>
+                    <input type="text" id="ip_address" name="ip_address" class="p-form-input" placeholder="<?= lang('Whitelist.ip_placeholder') ?>" required>
                 </div>
                 
                 <div style="flex: 1; min-width: 200px;">
-                    <label for="description" class="p-form-label">Descripción (Opcional)</label>
-                    <input type="text" id="description" name="description" class="p-form-input" placeholder="Ej: Servidor de Producción">
+                    <label for="description" class="p-form-label"><?= lang('Whitelist.description') ?></label>
+                    <input type="text" id="description" name="description" class="p-form-input" placeholder="<?= lang('Whitelist.desc_placeholder') ?>">
                 </div>
                 
                 <button type="submit" class="btn-wow btn-wow-primary">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Añadir IP
+                    <?= lang('Whitelist.add_ip_btn') ?>
                 </button>
             </form>
         </div>
 
-        <h2 class="profile-card-title">IPs Permitidas</h2>
+        <h2 class="profile-card-title"><?= lang('Whitelist.allowed_ips') ?></h2>
         <?php if(empty($ips)): ?>
             <div style="padding: 40px; text-align: center; border: 2px dashed #e2e8f0; border-radius: 16px;">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8; margin-bottom: 16px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <h3 style="margin: 0 0 8px; font-weight: 700; color: #475569;">No hay restricciones configuradas</h3>
-                <p style="margin: 0; color: #64748b; font-size: 14px;">Actualmente cualquier IP válida puede hacer uso de tu API Key.</p>
+                <h3 style="margin: 0 0 8px; font-weight: 700; color: #475569;"><?= lang('Whitelist.no_restrictions') ?></h3>
+                <p style="margin: 0; color: #64748b; font-size: 14px;"><?= lang('Whitelist.no_restrictions_desc') ?></p>
             </div>
         <?php else: ?>
             <div style="overflow-x: auto;">
                 <table class="ips-table">
                     <thead>
                         <tr>
-                            <th>Dirección IP</th>
-                            <th>Descripción</th>
-                            <th>Fecha de Adición</th>
-                            <th style="text-align: right;">Acciones</th>
+                            <th><?= lang('Whitelist.table_ip') ?></th>
+                            <th><?= lang('Whitelist.table_desc') ?></th>
+                            <th><?= lang('Whitelist.table_date') ?></th>
+                            <th style="text-align: right;"><?= lang('Whitelist.table_actions') ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -284,7 +284,7 @@
                                 <form action="<?= site_url('whitelist-ips/delete/'.$ip->id) ?>" method="POST" class="delete-ip-form" style="display:inline;">
                                     <?= csrf_field() ?>
                                     <button type="button" class="btn-wow btn-wow-danger btn-delete-ip" title="Eliminar IP">
-                                        Eliminar
+                                        <?= lang('Whitelist.delete_btn') ?>
                                     </button>
                                 </form>
                             </td>
@@ -340,21 +340,21 @@
                 const form = this.closest('form');
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
-                        title: '¿Estás seguro?',
-                        text: "Se eliminará esta IP de tu lista blanca y podría perder acceso a la API.",
+                        title: '<?= lang('Whitelist.confirm_title') ?>',
+                        text: "<?= lang('Whitelist.confirm_text') ?>",
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#ef4444',
                         cancelButtonColor: '#94a3b8',
-                        confirmButtonText: 'Sí, eliminar',
-                        cancelButtonText: 'Cancelar'
+                        confirmButtonText: '<?= lang('Whitelist.confirm_yes') ?>',
+                        cancelButtonText: '<?= lang('Whitelist.confirm_no') ?>'
                     }).then((result) => {
                         if (result.isConfirmed) {
                             form.submit();
                         }
                     });
                 } else {
-                    if (confirm('¿Seguro que quieres eliminar esta IP de tu lista blanca?')) {
+                    if (confirm('<?= lang('Whitelist.confirm_text') ?>')) {
                         form.submit();
                     }
                 }

@@ -15,7 +15,11 @@
     </main>
 </div>
 
-<?= view('partials/footer') ?>
+<?php if (service('request')->getLocale() === 'en'): ?>
+    <?= view('partials/footer_en') ?>
+<?php else: ?>
+    <?= view('partials/footer') ?>
+<?php endif; ?>
 <?= $this->renderSection('scripts') ?>
 
 </body>

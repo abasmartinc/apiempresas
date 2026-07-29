@@ -73,8 +73,10 @@ class Company extends BaseController
         $statusRaw = (string)($company['status'] ?? '');
         $isActive  = strtoupper($statusRaw) === 'ACTIVA';
         
+        $isEn = (service('request')->getLocale() === 'en');
+
         // Generar título y descripción
-        $name = $company['name'] ?? 'Empresa';
+        $name = $company['name'] ?? ($isEn ? 'Company' : 'Empresa');
         $cif  = $company['cif'] ?? $company['nif'] ?? '';
         
         // Robust check for province
@@ -85,18 +87,33 @@ class Company extends BaseController
             $prov = $company['provincia'];
         }
         
-        $title = "{$name} - CIF {$cif}, Teléfono, Dirección y Cargos";
-        if ($prov) $title .= " | {$prov}";
-        $title .= " - APIEmpresas.es";
+        if ($isEn) {
+            $title = "{$name} - VAT {$cif}, Phone, Address and Directors";
+            if ($prov) $title .= " | {$prov}";
+            $title .= " - SpainCompanyAPI.com";
 
-        $desc = "Toda la información mercantil de {$name}";
-        if ($cif) {
-            $desc .= " (CIF {$cif})";
+            $desc = "All commercial information for {$name}";
+            if ($cif) {
+                $desc .= " (VAT {$cif})";
+            }
+            if ($prov) {
+                $desc .= " in {$prov}";
+            }
+            $desc .= ". Get the phone number, address, board members, financials, and BORME registry acts.";
+        } else {
+            $title = "{$name} - CIF {$cif}, Teléfono, Dirección y Cargos";
+            if ($prov) $title .= " | {$prov}";
+            $title .= " - APIEmpresas.es";
+
+            $desc = "Toda la información mercantil de {$name}";
+            if ($cif) {
+                $desc .= " (CIF {$cif})";
+            }
+            if ($prov) {
+                $desc .= " en {$prov}";
+            }
+            $desc .= ". Conoce su teléfono, dirección, cargos directivos, balances y actos en el BORME.";
         }
-        if ($prov) {
-            $desc .= " en {$prov}";
-        }
-        $desc .= ". Conoce su teléfono, dirección, cargos directivos, balances y actos en el BORME.";
         
         $desc = character_limiter($desc, 155, '');
 
@@ -418,7 +435,8 @@ class Company extends BaseController
         // Etiqueta secreta para que Cloudflare sepa que ESTA PÁGINA SÍ se puede cachear (1 día)
         $this->response->setHeader('Cache-Control', 'public, s-maxage=86400, max-age=86400');
 
-        return $this->response->setBody(view('company', $data));
+        $viewName = (service('request')->getLocale() === 'en') ? 'company_en' : 'company';
+        return $this->response->setBody(view($viewName, $data));
     }
     
     /**
@@ -440,7 +458,7 @@ class Company extends BaseController
             // Si no encontramos, intentar buscar por nombre
             $searchName = str_replace('-', ' ', $cleanSlug);
             return redirect()->to(site_url('search_company?q=' . urlencode($searchName)))
-                             ->with('message', 'No encontramos la empresa exacta. Te mostramos resultados relacionados.');
+                             ->with('message', lang('Messages.flash_22'));
         }
         
         // Verificar si la empresa ahora tiene un CIF válido
@@ -473,7 +491,8 @@ class Company extends BaseController
         // Etiqueta secreta para que Cloudflare sepa que ESTA PÁGINA SÍ se puede cachear (1 día)
         $this->response->setHeader('Cache-Control', 'public, s-maxage=86400, max-age=86400');
 
-        return $this->response->setBody(view('company', $data));
+        $viewName = (service('request')->getLocale() === 'en') ? 'company_en' : 'company';
+        return $this->response->setBody(view($viewName, $data));
     }
     
     /**
@@ -549,7 +568,7 @@ class Company extends BaseController
         // Fallback: Si todo falla, ir al buscador con el término limpio original
         $searchTerm = str_replace('-', ' ', $cleanSlug);
         return redirect()->to(site_url('search_company?q=' . urlencode($searchTerm)))
-                         ->with('message', 'La dirección que buscas ha cambiado. Te mostramos resultados relacionados.');
+                         ->with('message', lang('Messages.flash_23'));
     }
 
     /**

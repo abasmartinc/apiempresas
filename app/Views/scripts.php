@@ -1,4 +1,7 @@
-<?php helper('api'); ?>
+<?php 
+helper('api'); 
+$isEn = (service('request')->getLocale() === 'en');
+?>
 <script>
     function runWithJquery(fn) {
         if (window.jQuery) {
@@ -32,8 +35,8 @@
             
             if (!query) return;
 
-            $btn.prop('disabled', true).text('Buscando...');
-            $('#resultado').html('<div class="card"><p class="muted">Buscando datos oficiales...</p></div>');
+            $btn.prop('disabled', true).text('<?= $isEn ? 'Searching...' : 'Buscando...' ?>');
+            $('#resultado').html('<div class="card"><p class="muted"><?= $isEn ? 'Searching official data...' : 'Buscando datos oficiales...' ?></p></div>');
             $('#resultado_container').show();
 
             $.ajax({
@@ -56,17 +59,17 @@
                         url: SEARCH_ENDPOINT
                     });
                     
-                    let msg = 'Error al consultar la API. Inténtalo de nuevo.';
+                    let msg = '<?= $isEn ? 'Error querying the API. Try again.' : 'Error al consultar la API. Inténtalo de nuevo.' ?>';
                     if (xhr.status === 404) {
-                        msg = 'No se ha encontrado ninguna empresa con ese nombre o CIF.';
+                        msg = '<?= $isEn ? 'No company found with that name or CIF.' : 'No se ha encontrado ninguna empresa con ese nombre o CIF.' ?>';
                     } else if (xhr.status === 429) {
-                        msg = 'Demasiadas solicitudes. Por favor espera un minuto.';
+                        msg = '<?= $isEn ? 'Too many requests. Please wait a minute.' : 'Demasiadas solicitudes. Por favor espera un minuto.' ?>';
                     }
 
                     $('#resultado').html(`<div class="card" style="padding: 30px; border-radius: 16px; border: 1px solid #fee2e2; background: #fff5f5;"><p style="color:#dc2626; font-weight:700; margin:0;">${msg}</p></div>`);
                 },
                 complete: function() {
-                    $btn.prop('disabled', false).text('Validar ahora');
+                    $btn.prop('disabled', false).text('<?= $isEn ? 'Validate Company Now' : 'Validar ahora' ?>');
                 }
             });
         });
@@ -80,7 +83,7 @@
             if (!data.success) {
                 $resultado.html(`
                     <div class="search-result-card" style="text-align: center; padding: 48px;">
-                        <p style="color: #64748b; font-size: 1.1rem;">${data.message || 'No se han encontrado resultados.'}</p>
+                        <p style="color: #64748b; font-size: 1.1rem;">${data.message || '<?= $isEn ? 'No results found.' : 'No se han encontrado resultados.' ?>'}</p>
                     </div>`);
                 $container.show();
                 return;
@@ -96,17 +99,18 @@
                     name: company.name,
                     cif: company.cif || company.nif,
                     status: company.status,
-                    address: company.address ? company.address : "ACTUALIZA A PRO PARA VER LA DIRECCCION",
+                    address: company.address ? company.address : "<?= $isEn ? 'UPGRADE TO PRO TO SEE ADDRESS' : 'ACTUALIZA A PRO PARA VER LA DIRECCCION' ?>",
                     founded: company.founded,
-                    capital: company.capital || "Consultar",
+                    capital: company.capital || "<?= $isEn ? 'Consult' : 'Consultar' ?>",
                     activity: company.cnae_label
                 }
             };
 
             const jsonHtml = formatJsonForIde(maskedJson);
 
-            const province = company.province || company.provincia || 'España';
-            const status = (company.status || '').toLowerCase() === 'activa' ? 'activa' : 'inactiva';
+            const province = company.province || company.provincia || '<?= $isEn ? 'Spain' : 'España' ?>';
+            const statusClass = (company.status || '').toLowerCase() === 'activa' ? 'activa' : 'inactiva';
+            const statusText = (company.status || '').toLowerCase() === 'activa' ? '<?= $isEn ? 'ACTIVE' : 'ACTIVA' ?>' : '<?= $isEn ? 'INACTIVE' : 'INACTIVA' ?>';
 
             // 1. DETECTAR ANTIGÜEDAD
             let año_constitucion = null;
@@ -140,29 +144,29 @@
       <div>
         <h2 style="margin: 0; font-size: 1.75rem; font-weight: 900; color: #0f172a; letter-spacing: -0.02em;">${company.name || 'N/A'}</h2>
         <div style="display: flex; gap: 12px; margin-top: 6px; align-items: center;">
-          <span style="background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 8px; font-weight: 800; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;">${company.cif || company.nif || 'Sin CIF'}</span>
+          <span style="background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 8px; font-weight: 800; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;">${company.cif || company.nif || '<?= $isEn ? 'No CIF' : 'Sin CIF' ?>'}</span>
           <span style="font-size: 0.9rem; color: #94a3b8;">•</span>
           <span style="font-size: 0.9rem; color: #64748b; font-weight: 600;">${province}</span>
         </div>
       </div>
     </div>
-    <span class="status-badge ${status}" style="padding: 8px 16px; border-radius: 100px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; ${status === 'activa' ? 'background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7;' : 'background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2;'}">
-      ${company.status || 'N/A'}
+    <span class="status-badge ${statusClass}" style="padding: 8px 16px; border-radius: 100px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; ${statusClass === 'activa' ? 'background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7;' : 'background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2;'}">
+      ${statusText}
     </span>
   </div>
 
   <div class="result-info-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-bottom: 24px; padding: 24px; background: #f8fafc; border-radius: 20px; border: 1px solid #f1f5f9; text-align: left;">
     <div class="info-item">
-      <span style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Actividad</span>
-      <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700; line-height: 1.4;">${company.cnae_label || 'Sin sector'}</span>
+      <span style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;"><?= $isEn ? 'ACTIVITY' : 'Actividad' ?></span>
+      <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700; line-height: 1.4;">${company.cnae_label || '<?= $isEn ? 'No sector' : 'Sin sector' ?>'}</span>
     </div>
     <div class="info-item">
-      <span style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Constitución</span>
+      <span style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;"><?= $isEn ? 'INCORPORATION' : 'Constitución' ?></span>
       <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700;">${company.founded || 'N/A'}</span>
     </div>
     <div class="info-item">
-      <span style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Capital Social</span>
-      <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700;">${company.capital || 'Consultar'}</span>
+      <span style="display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;"><?= $isEn ? 'SHARE CAPITAL' : 'Capital Social' ?></span>
+      <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700;">${company.capital || '<?= $isEn ? 'Consult' : 'Consultar' ?>'}</span>
     </div>
   </div>
 
@@ -171,16 +175,16 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
     </div>
     <div>
-        <span style="display: block; font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px;">Dirección Fiscal Oficial</span>
-        <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700;">${company.address || 'Consultar en ficha completa'}</span>
+        <span style="display: block; font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px;"><?= $isEn ? 'Official Registered Address' : 'Dirección Fiscal Oficial' ?></span>
+        <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700;">${company.address || '<?= $isEn ? 'View in full profile' : 'Consultar en ficha completa' ?>'}</span>
     </div>
   </div>
 
   <div class="result-actions" style="display: flex; gap: 16px; margin-bottom: 32px;">
-    <a href="${baseUrl}${company.cif || company.nif}" class="btn" style="text-decoration:none; padding: 20px 32px; font-weight: 800; flex-grow: 1; text-align: center; background: #ffffff; color: #475569; border: 2px solid #e2e8f0; border-radius: 16px; transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--ae-blue)'; this.style.color='var(--ae-blue)'" onmouseout="this.style.borderColor='#e2e8f0'; this.style.color='#475569'">Ver ficha detallada completa</a>
+    <a href="${baseUrl}${company.cif || company.nif}" class="btn" style="text-decoration:none; padding: 20px 32px; font-weight: 800; flex-grow: 1; text-align: center; background: #ffffff; color: #475569; border: 2px solid #e2e8f0; border-radius: 16px; transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--ae-blue)'; this.style.color='var(--ae-blue)'" onmouseout="this.style.borderColor='#e2e8f0'; this.style.color='#475569'"><?= $isEn ? 'View full detailed profile' : 'Ver ficha detallada completa' ?></a>
     <a href="javascript:void(0)" onclick="$('#json-ide-section').slideToggle();" class="btn secondary" style="text-decoration:none; padding: 20px 32px; font-weight: 900; text-align: center; border-radius: 16px; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.15); background: linear-gradient(135deg, #2563eb, #10b981); color: white; display: flex; align-items: center; justify-content: center; gap: 10px;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-        Ver respuesta JSON
+        <?= $isEn ? 'View JSON response' : 'Ver respuesta JSON' ?>
     </a>
   </div>
 
@@ -195,7 +199,7 @@
             <div class="json-ide-title">response.json</div>
             <button class="json-ide-btn-copy" onclick="triggerAhaMoment()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                Copiar JSON
+                <?= $isEn ? 'Copy JSON' : 'Copiar JSON' ?>
             </button>
         </div>
         <div class="json-ide-content">
@@ -203,12 +207,13 @@
         </div>
         <div class="json-blur-overlay">
             <div class="json-upgrade-hint" onclick="triggerAhaMoment()">
-                🚀 Obtener acceso completo a la API
+                <?= $isEn ? '🚀 Get full API access' : '🚀 Obtener acceso completo a la API' ?>
             </div>
         </div>
     </div>
   </div>
 
+  <?php if (!$isEn): ?>
   <!-- Bridge to Radar Dinámico -->
   <div class="radar-bridge" style="background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); border: 1px solid #dcfce7; border-radius: 24px; padding: 32px; display: flex; gap: 28px; align-items: center; margin-bottom: 24px; position: relative; overflow: hidden; text-align: left;">
     <div style="position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);"></div>
@@ -238,6 +243,7 @@
   <div style="text-align: center; margin-bottom: 20px;">
     <span class="radar-context-text" style="font-size: 0.95rem; font-weight: 500;">“La detección temprana de empresas puede marcar la diferencia en procesos comerciales.”</span>
   </div>
+  <?php endif; ?>
 </div>`);
 
             $container.show();

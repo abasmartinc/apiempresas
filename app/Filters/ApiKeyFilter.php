@@ -114,31 +114,6 @@ class ApiKeyFilter implements FilterInterface
             }
         }
 
-        // 3.5) Detección de Anomalías Geográficas (CF-IPCountry)
-        $cfCountry = isset($_SERVER['HTTP_CF_IPCOUNTRY']) ? strtoupper((string)$_SERVER['HTTP_CF_IPCOUNTRY']) : null;
-        
-        // Si la IP está en la lista blanca, saltamos el chequeo geográfico
-        if (!$isIpWhitelisted && $cfCountry && (int)$row->user_id !== 166) {
-            $allowedCountries = $row->allowed_countries ? explode(',', strtoupper(str_replace(' ', '', $row->allowed_countries))) : [];
-            if (!empty($allowedCountries) && !in_array($cfCountry, $allowedCountries)) {
-                // Denegar acceso sin inactivar la clave (evita caídas de servicio legítimo)
-                log_message('warning', "GEO-ANOMALY DENIED: API Key {$row->api_key_id} blocked request from {$cfCountry}. User: {$row->email}");
-                return service('response')->setStatusCode(403)->setJSON([
-                    'error' => 'Acceso denegado. Petición originada desde país no autorizado (' . $cfCountry . ').'
-                ]);
-            }
-        }
-
-        // 4) Registrar uso (con throttling para evitar bloqueos en ráfagas)
-        try {
-            $lastUsed = $row->last_used_at ? strtotime($row->last_used_at) : 0;
-            if (time() - $lastUsed > 300) { // Solo actualizar cada 5 minutos
-                $db->table('api_keys')->where('id', (int)$row->api_key_id)->update(['last_used_at' => date('Y-m-d H:i:s')]);
-            }
-        } catch (\Throwable $e) {
-            log_message('error', '[ApiKeyFilter::before:last_used_at] ' . $e->getMessage());
-        }
-
         // 4.1) Resolver suscripción y plan
         $subscriptionId = null;
         $planId         = 1;
@@ -190,6 +165,33 @@ class ApiKeyFilter implements FilterInterface
         } catch (\Throwable $e) {
             log_message('error', '[ApiKeyFilter::before:subscription] ' . $e->getMessage());
         }
+
+        // 3.5) Detección de Anomalías Geográficas (CF-IPCountry)
+        $cfCountry = isset($_SERVER['HTTP_CF_IPCOUNTRY']) ? strtoupper((string)$_SERVER['HTTP_CF_IPCOUNTRY']) : null;
+        
+        // Si la IP está en la lista blanca o es plan free, saltamos el chequeo geográfico
+        if (!$isIpWhitelisted && $cfCountry && (int)$row->user_id !== 166 && (int)$planId !== 1) {
+            $allowedCountries = $row->allowed_countries ? explode(',', strtoupper(str_replace(' ', '', $row->allowed_countries))) : [];
+            if (!empty($allowedCountries) && !in_array($cfCountry, $allowedCountries)) {
+                // Denegar acceso sin inactivar la clave (evita caídas de servicio legítimo)
+                log_message('warning', "GEO-ANOMALY DENIED: API Key {$row->api_key_id} blocked request from {$cfCountry}. User: {$row->email}");
+                return service('response')->setStatusCode(403)->setJSON([
+                    'error' => 'Acceso denegado. Petición originada desde país no autorizado (' . $cfCountry . ').'
+                ]);
+            }
+        }
+
+        // 4) Registrar uso (con throttling para evitar bloqueos en ráfagas)
+        try {
+            $lastUsed = $row->last_used_at ? strtotime($row->last_used_at) : 0;
+            if (time() - $lastUsed > 300) { // Solo actualizar cada 5 minutos
+                $db->table('api_keys')->where('id', (int)$row->api_key_id)->update(['last_used_at' => date('Y-m-d H:i:s')]);
+            }
+        } catch (\Throwable $e) {
+            log_message('error', '[ApiKeyFilter::before:last_used_at] ' . $e->getMessage());
+        }
+
+
 
         // 4.1.2) Rate Limiting (Throttling per second)
         try {

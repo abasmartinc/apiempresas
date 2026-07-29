@@ -42,7 +42,7 @@ class Profile extends BaseController
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            return redirect()->back()->withInput()->with('error', 'Por favor, revisa los campos. Es posible que el correo ya esté en uso.');
+            return redirect()->back()->withInput()->with('error', lang('Messages.flash_49'));
         }
 
         $name = $this->request->getPost('name');
@@ -61,7 +61,7 @@ class Profile extends BaseController
             'user_email' => $email
         ]);
 
-        return redirect()->to('profile')->with('message', 'Perfil actualizado correctamente.');
+        return redirect()->to('profile')->with('message', lang('Messages.flash_50'));
     }
 
     public function password()

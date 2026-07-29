@@ -2,18 +2,18 @@
 <section class="dash-card" style="border-top: 4px solid #10b981; background: #f0fdf4; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1);">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
         <div class="kicker" style="background: #d1fae5; color: #065f46; font-weight: 800; padding: 4px 10px; display: inline-block; border-radius: 6px; font-size: 0.7rem; letter-spacing: 0.05em; margin-bottom: 0;">
-            💎 MONEDERO PREPAGO
+            💎 <?= lang('Dashboard.prepaid_wallet') ?>
         </div>
         <?php if ($walletLowBalance ?? false): ?>
-            <a href="<?= site_url('billing/checkout_bonus') ?>" style="background: #10b981; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.7rem; text-decoration: none; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);">Recargar &rarr;</a>
+            <a href="<?= site_url('billing/checkout_bonus') ?>" style="background: #10b981; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.7rem; text-decoration: none; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);"><?= lang('Dashboard.recharge') ?></a>
         <?php endif; ?>
     </div>
     
     <div style="margin-bottom: 16px;">
-        <span style="font-size: 0.8rem; color: #064e3b; font-weight: 700; text-transform: uppercase;">Saldo Disponible</span>
+        <span style="font-size: 0.8rem; color: #064e3b; font-weight: 700; text-transform: uppercase;"><?= lang('Dashboard.available_balance') ?></span>
         <h2 style="margin-top: 2px !important; color: #064e3b; font-size: 2.2rem; font-weight: 900; display: flex; align-items: baseline; gap: 6px; margin-bottom: 0 !important;">
             <?= number_format($walletBalance ?? 0, 0, ',', '.') ?>
-            <span style="font-size: 0.9rem; color: #059669; font-weight: 800;">créditos</span>
+            <span style="font-size: 0.9rem; color: #059669; font-weight: 800;"><?= lang('Dashboard.credits') ?></span>
         </h2>
     </div>
 
@@ -25,8 +25,8 @@
     </div>
     
     <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 800; color: #047857;">
-        <span>Comprado: <?= number_format($walletTotal ?? 0, 0, ',', '.') ?></span>
-        <span>Gastado: <?= number_format($walletSpent ?? 0, 0, ',', '.') ?></span>
+        <span><?= lang('Dashboard.purchased', [number_format($walletTotal ?? 0, 0, ',', '.')]) ?></span>
+        <span><?= lang('Dashboard.spent', [number_format($walletSpent ?? 0, 0, ',', '.')]) ?></span>
     </div>
 </section>
 <?php endif; ?>
@@ -35,24 +35,24 @@
 <?php if (!$isPaid): ?>
 <section class="dash-card" style="border-top: 4px solid #94a3b8; background: #ffffff; margin-bottom: 24px;">
     <div class="kicker" style="background: #f1f5f9; color: #475569; display: inline-block; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.7rem; letter-spacing: 0.05em; margin-bottom: 8px;">
-        ⚠️ ESTÁS EN PLAN FREE
+        <?= lang('Dashboard.free_plan_alert') ?>
     </div>
-    <h2 style="margin-top: 12px !important;">Ideal para probar la API</h2>
+    <h2 style="margin-top: 12px !important;"><?= lang('Dashboard.ideal_to_test') ?></h2>
     <p style="color: #0f172a; font-size: 0.95rem; margin-bottom: 12px; font-weight: 800; border-left: 3px solid #2152ff; padding-left: 12px;">
-        Te quedan <?= $remainingRequests ?> consultas gratuitas
+        <?= lang('Dashboard.free_queries_left', [$remainingRequests]) ?>
     </p>
     <p style="color: #64748b; font-size: 0.8rem; font-weight: 600; margin-bottom: 20px;">
-        <?= $remainingRequests <= 0 ? 'Has alcanzado el límite gratuito. Activa Pro para seguir validando empresas automáticamente.' : 'Cuando se acaben, necesitarás activar Pro para seguir validando empresas.' ?>
+        <?= $remainingRequests <= 0 ? lang('Dashboard.free_limit_reached_alert') : lang('Dashboard.free_limit_warning') ?>
     </p>
     <a href="<?= site_url('billing') ?>" class="btn primary" style="width: 100%; display: block; text-align: center; text-decoration: none; padding: 14px; font-weight: 800; background: #10b981; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
-        Activar Pro
+        <?= lang('Dashboard.activate_pro_btn') ?>
     </a>
 </section>
 
 <?php if ($requestsUsedThisMonth >= 3): ?>
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; margin-bottom: 32px; border-left: 4px solid #2152ff; margin-top: 32px;">
-        <p style="margin: 0; font-size: 0.85rem; color: #0f172a; font-weight: 900;">Ya estás viendo el valor real</p>
-        <p style="margin: 0; font-size: 0.75rem; color: #64748b; font-weight: 700;">Activa Pro y automatiza validaciones sin límite</p>
+        <p style="margin: 0; font-size: 0.85rem; color: #0f172a; font-weight: 900;"><?= lang('Dashboard.real_value_seen') ?></p>
+        <p style="margin: 0; font-size: 0.75rem; color: #64748b; font-weight: 700;"><?= lang('Dashboard.automate_validations_pro') ?></p>
     </div>
 <?php endif; ?>
 
@@ -65,11 +65,11 @@
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
         </div>
         <div>
-            <div class="kicker" style="background: #fef3c7; color: #b45309; padding: 3px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 900; letter-spacing: 0.05em; display: inline-block; margin-bottom: 6px;">PAGO POR USO</div>
-            <h3 style="font-size: 1rem; font-weight: 900; color: #0f172a; margin: 0 0 4px !important;">Bonos Prepago</h3>
-            <p style="font-size: 0.8rem; color: #64748b; font-weight: 600; margin: 0 0 12px !important; line-height: 1.4;">¿Prefieres ir a tu ritmo? Compra saldo de consultas sin suscripción.</p>
+            <div class="kicker" style="background: #fef3c7; color: #b45309; padding: 3px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 900; letter-spacing: 0.05em; display: inline-block; margin-bottom: 6px;"><?= lang('Dashboard.pay_as_you_go_kicker') ?></div>
+            <h3 style="font-size: 1rem; font-weight: 900; color: #0f172a; margin: 0 0 4px !important;"><?= lang('Dashboard.prepaid_bonuses') ?></h3>
+            <p style="font-size: 0.8rem; color: #64748b; font-weight: 600; margin: 0 0 12px !important; line-height: 1.4;"><?= lang('Dashboard.prepaid_desc') ?></p>
             <a href="<?= base_url('crear-bono-api') ?>" style="display: inline-block; color: #d97706; font-weight: 800; font-size: 0.85rem; text-decoration: none; border-bottom: 2px solid rgba(217, 119, 6, 0.2); transition: all 0.2s;" onmouseover="this.style.borderColor='#d97706'" onmouseout="this.style.borderColor='rgba(217, 119, 6, 0.2)'">
-                Ver Bonos &rarr;
+                <?= lang('Dashboard.view_bonuses') ?>
             </a>
         </div>
     </div>
@@ -83,7 +83,7 @@
 ?>
 <section style="background: <?= $bgColor ?>; border-radius: 16px; padding: 24px; color: #ffffff; margin-bottom: 24px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);">
     <div style="background: rgba(255,255,255,0.2); color: #ffffff; display: inline-block; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.7rem; letter-spacing: 0.05em; margin-bottom: 12px; text-transform: uppercase;">
-        PLAN ACTUAL <?= $planName ?>
+        <?= lang('Dashboard.current_plan', [$planName]) ?>
     </div>
     
     <h2 style="color: #ffffff; font-size: 2.2rem; font-weight: 900; margin-bottom: 16px; margin-top: 0 !important;">
@@ -91,11 +91,11 @@
     </h2>
     
     <div style="border-left: 2px solid rgba(255,255,255,0.4); padding-left: 12px; margin-bottom: 16px;">
-        <p style="color: #ffffff; font-weight: 800; margin: 0; font-size: 0.95rem;">Límite: <?= number_format($maxLimit ?? 3000, 0, ',', '.') ?> consultas/mes</p>
+        <p style="color: #ffffff; font-weight: 800; margin: 0; font-size: 0.95rem;"><?= lang('Dashboard.limit_queries', [number_format($maxLimit ?? 3000, 0, ',', '.')]) ?></p>
     </div>
     
     <p style="color: rgba(255,255,255,0.9); font-size: 0.85rem; line-height: 1.5; font-weight: 500; margin-bottom: 24px;">
-        Disfrutas de todas las ventajas del Plan <?= $planName ?>, incluyendo métricas avanzadas, soporte prioritario y SLA garantizado.
+        <?= lang('Dashboard.enjoy_advantages', [$planName]) ?>
     </p>
     
     <?php
@@ -118,7 +118,7 @@
     ?>
     <?php if ($isStandardPlan): ?>
     <a href="<?= site_url('billing') ?>" style="display: block; text-align: center; background: #ffffff; color: #0f172a; padding: 14px; border-radius: 12px; font-weight: 900; font-size: 0.95rem; text-decoration: none; transition: transform 0.2s;">
-        Gestionar suscripción
+        <?= lang('Dashboard.manage_subscription') ?>
     </a>
     <?php endif; ?>
 </section>
@@ -128,6 +128,7 @@
 <?php endif; ?>
 <?php endif; ?>
 <?php endif; ?>
+<?php if (service('request')->getLocale() === 'es'): ?>
 <section class="dash-card" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid #334155; border-radius: 16px; padding: 24px; margin-top: 24px; position: relative; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);">
     <div style="position: absolute; top: 0; right: 0; width: 150px; height: 150px; background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, rgba(37,99,235,0) 70%); border-radius: 50%; transform: translate(30%, -30%);"></div>
     
@@ -136,15 +137,16 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
         </div>
         <div>
-            <div class="kicker" style="background: #3b82f6; color: #ffffff; padding: 3px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 900; letter-spacing: 0.05em; display: inline-block; margin-bottom: 6px;">NUEVO PRODUCTO</div>
-            <h3 style="font-size: 1.15rem; font-weight: 900; color: #ffffff; margin: 0 0 4px !important;">Radar B2B</h3>
-            <p style="font-size: 0.85rem; color: #94a3b8; font-weight: 500; margin: 0 !important; line-height: 1.4;">Encuentra leads y empresas recién creadas en tiempo real.</p>
+            <div class="kicker" style="background: #3b82f6; color: #ffffff; padding: 3px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 900; letter-spacing: 0.05em; display: inline-block; margin-bottom: 6px;"><?= lang('Dashboard.new_product') ?></div>
+            <h3 style="font-size: 1.15rem; font-weight: 900; color: #ffffff; margin: 0 0 4px !important;"><?= lang('Dashboard.radar_b2b') ?></h3>
+            <p style="font-size: 0.85rem; color: #94a3b8; font-weight: 500; margin: 0 !important; line-height: 1.4;"><?= lang('Dashboard.find_leads') ?></p>
         </div>
     </div>
     <a href="<?= site_url('radar') ?>" style="display: block; width: 100%; text-align: center; background: #3b82f6; color: #ffffff; padding: 12px; border-radius: 10px; border: none; font-weight: 800; font-size: 0.95rem; text-decoration: none; transition: all 0.2s; position: relative; z-index: 2; box-shadow: 0 4px 12px rgba(37,99,235,0.2);" onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#3b82f6'; this.style.transform='translateY(0)';">
-        Abrir Radar B2B &rarr;
+        <?= lang('Dashboard.open_radar') ?>
     </a>
 </section>
+<?php endif; ?>
 
 <section class="dash-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-top: 24px;">
     <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
@@ -152,12 +154,12 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line></svg>
         </div>
         <div>
-            <h3 style="font-size: 1.1rem; font-weight: 900; color: #0f172a; margin: 0 0 4px !important;">Soporte Técnico</h3>
-            <p style="font-size: 0.85rem; color: #64748b; font-weight: 600; margin: 0 !important; line-height: 1.4;">¿Necesitas ayuda con la API o tu cuenta?</p>
+            <h3 style="font-size: 1.1rem; font-weight: 900; color: #0f172a; margin: 0 0 4px !important;"><?= lang('Dashboard.tech_support') ?></h3>
+            <p style="font-size: 0.85rem; color: #64748b; font-weight: 600; margin: 0 !important; line-height: 1.4;"><?= lang('Dashboard.need_help') ?></p>
         </div>
     </div>
     <a href="<?= site_url('tickets') ?>" style="display: block; width: 100%; text-align: center; background: #f8fafc; color: #0f172a; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; font-weight: 800; font-size: 0.95rem; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.borderColor='#cbd5e1';" onmouseout="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0';">
-        Abrir un Ticket
+        <?= lang('Dashboard.open_ticket') ?>
     </a>
 </section>
 

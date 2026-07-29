@@ -6,8 +6,8 @@
 <section class="help-center-section" style="margin-top: 80px; border-top: 1px solid #e2e8f0; padding: 80px 40px; margin-bottom: 80px; background: #ffffff; border-radius: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
     <div style="max-width: 1200px; margin: 0 auto;">
         <div style="text-align: center; margin-bottom: 64px;">
-            <h2 style="font-size: 2.5rem; font-weight: 950; margin-bottom: 16px; letter-spacing: -0.04em; background: linear-gradient(135deg, #2152ff 0%, #12b48a 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;">Centro de Ayuda</h2>
-            <p style="font-size: 1.15rem; color: #64748b; font-weight: 600; max-width: 700px; margin: 0 auto; line-height: 1.6;">Estamos aquí para ayudarte a escalar tu negocio. Encuentra respuestas rápidas o contacta con nuestro equipo técnico.</p>
+            <h2 style="font-size: 2.5rem; font-weight: 950; margin-bottom: 16px; letter-spacing: -0.04em; background: linear-gradient(135deg, #2152ff 0%, #12b48a 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;"><?= lang('Dashboard.help_center') ?></h2>
+            <p style="font-size: 1.15rem; color: #64748b; font-weight: 600; max-width: 700px; margin: 0 auto; line-height: 1.6;"><?= lang('Dashboard.help_subtitle') ?></p>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start;">
@@ -17,47 +17,47 @@
                 <div style="background: #eff6ff; color: #2152ff; width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                 </div>
-                Preguntas Frecuentes
+                <?= lang('Dashboard.faqs') ?>
             </h3>
             
             <div class="help-accordion">
                 <div class="help-faq-item active">
                     <div class="help-faq-header" style="padding: 16px; background: #f8fafc; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e2e8f0; transition: all 0.2s;">
-                        <span style="font-weight: 800; color: #0f172a; font-size: 0.95rem;">¿Cómo empiezo la integración técnica?</span>
+                        <span style="font-weight: 800; color: #0f172a; font-size: 0.95rem;"><?= lang('Dashboard.faq_1_q') ?></span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="acc-icon" style="transition: transform 0.3s;"><polyline points="6 9 12 15 18 9"/></svg>
                     </div>
                     <div class="help-faq-content" style="padding: 16px; font-size: 0.9rem; color: #64748b; font-weight: 600; line-height: 1.5; display: block;">
-                        Es muy sencillo. Solo necesitas copiar tu API Key desde el panel superior y consultar nuestra <a href="<?= site_url('documentation') ?>" style="color: #2152ff; text-decoration: none; font-weight: 800;">documentación técnica</a>. Tenemos ejemplos en PHP, Python, Node.js y más.
+                        <?= lang('Dashboard.faq_1_a', [site_url('documentation')]) ?>
                     </div>
                 </div>
 
                 <div class="help-faq-item" style="margin-top: 12px;">
                     <div class="help-faq-header" style="padding: 16px; background: #ffffff; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e2e8f0; transition: all 0.2s;">
-                        <span style="font-weight: 800; color: #0f172a; font-size: 0.95rem;">¿Qué sucede si agoto las consultas de mi plan?</span>
+                        <span style="font-weight: 800; color: #0f172a; font-size: 0.95rem;"><?= lang('Dashboard.faq_2_q') ?></span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="acc-icon" style="transition: transform 0.3s;"><polyline points="6 9 12 15 18 9"/></svg>
                     </div>
                     <div class="help-faq-content" style="padding: 16px; font-size: 0.9rem; color: #64748b; font-weight: 600; line-height: 1.5; display: none;">
-                        Si alcanzas el límite, la API devolverá un código de error específico. Puedes monitorizar tu consumo en tiempo real desde la sección de <a href="<?= site_url('consumption') ?>" style="color: #2152ff; text-decoration: none; font-weight: 800;">consumo</a> y escalar a un plan superior en cualquier momento para seguir operando.
+                        <?= lang('Dashboard.faq_2_a', [site_url('consumption')]) ?>
                     </div>
                 </div>
 
                 <div class="help-faq-item" style="margin-top: 12px;">
                     <div class="help-faq-header" style="padding: 16px; background: #ffffff; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e2e8f0; transition: all 0.2s;">
-                        <span style="font-weight: 800; color: #0f172a; font-size: 0.95rem;">¿Puedo cancelar o cambiar de plan cuando quiera?</span>
+                        <span style="font-weight: 800; color: #0f172a; font-size: 0.95rem;"><?= lang('Dashboard.faq_3_q') ?></span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="acc-icon" style="transition: transform 0.3s;"><polyline points="6 9 12 15 18 9"/></svg>
                     </div>
                     <div class="help-faq-content" style="padding: 16px; font-size: 0.9rem; color: #64748b; font-weight: 600; line-height: 1.5; display: none;">
-                        Sí, no tenemos permanencia. Puedes cancelar tu suscripción o cambiar entre planes Pro y Business desde la gestión de facturación. Los cambios se aplican al instante.
+                        <?= lang('Dashboard.faq_3_a') ?>
                     </div>
                 </div>
 
                 <div class="help-faq-item" style="margin-top: 12px;">
                     <div class="help-faq-header" style="padding: 16px; background: #ffffff; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e2e8f0; transition: all 0.2s;">
-                        <span style="font-weight: 800; color: #0f172a; font-size: 0.95rem;">¿Los datos del buscador son en tiempo real?</span>
+                        <span style="font-weight: 800; color: #0f172a; font-size: 0.95rem;"><?= lang('Dashboard.faq_4_q') ?></span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="acc-icon" style="transition: transform 0.3s;"><polyline points="6 9 12 15 18 9"/></svg>
                     </div>
                     <div class="help-faq-content" style="padding: 16px; font-size: 0.9rem; color: #64748b; font-weight: 600; line-height: 1.5; display: none;">
-                        Absolutamente. Nuestra conexión con el Registro Mercantil y BORME nos permite ofrecer información veraz y actualizada en el momento de la consulta.
+                        <?= lang('Dashboard.faq_4_a') ?>
                     </div>
                 </div>
             </div>
@@ -80,40 +80,40 @@
                 </div>
             <?php endif; ?>
 
-            <h3 style="font-size: 1.4rem; font-weight: 950; color: #0f172a; margin-bottom: 12px; letter-spacing: -0.02em;">Contacto Directo</h3>
-            <p style="font-size: 0.95rem; color: #64748b; font-weight: 600; margin-bottom: 32px; line-height: 1.5;">Envíanos un mensaje o déjanos tu teléfono y te llamamos nosotros.</p>
+            <h3 style="font-size: 1.4rem; font-weight: 950; color: #0f172a; margin-bottom: 12px; letter-spacing: -0.02em;"><?= lang('Dashboard.direct_contact') ?></h3>
+            <p style="font-size: 0.95rem; color: #64748b; font-weight: 600; margin-bottom: 32px; line-height: 1.5;"><?= lang('Dashboard.direct_contact_desc') ?></p>
 
             <form action="<?= site_url('contact/send') ?>" method="POST" id="helpContactForm">
                 <div style="display: grid; gap: 24px;">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div>
-                            <label style="display: block; font-size: 0.75rem; font-weight: 900; color: #0f172a; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em;">Nombre</label>
-                            <input type="text" name="name" placeholder="Tu nombre" required style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.95rem; font-weight: 600; background: #f8fafc; transition: all 0.2s;">
+                            <label style="display: block; font-size: 0.75rem; font-weight: 900; color: #0f172a; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em;"><?= lang('Dashboard.name_label') ?></label>
+                            <input type="text" name="name" placeholder="<?= lang('Dashboard.name_placeholder') ?>" required style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.95rem; font-weight: 600; background: #f8fafc; transition: all 0.2s;">
                         </div>
                         <div>
-                            <label style="display: block; font-size: 0.75rem; font-weight: 900; color: #0f172a; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em;">Teléfono <span style="color: #64748b; font-weight: 600; font-size: 0.65rem;">(OPCIONAL)</span></label>
+                            <label style="display: block; font-size: 0.75rem; font-weight: 900; color: #0f172a; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em;"><?= lang('Dashboard.phone_label') ?> <span style="color: #64748b; font-weight: 600; font-size: 0.65rem;"><?= lang('Dashboard.optional') ?></span></label>
                             <input type="tel" name="phone" placeholder="+34 ..." style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.95rem; font-weight: 600; background: #f8fafc; transition: all 0.2s;">
                         </div>
                     </div>
                     
                     <div>
-                        <label style="display: block; font-size: 0.75rem; font-weight: 900; color: #0f172a; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em;">Email de contacto</label>
-                        <input type="email" name="email" placeholder="hola@tuempresa.com" required style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.95rem; font-weight: 600; background: #f8fafc; transition: all 0.2s;">
+                        <label style="display: block; font-size: 0.75rem; font-weight: 900; color: #0f172a; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em;"><?= lang('Dashboard.email_contact_label') ?></label>
+                        <input type="email" name="email" placeholder="<?= lang('Dashboard.email_placeholder') ?>" required style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.95rem; font-weight: 600; background: #f8fafc; transition: all 0.2s;">
                     </div>
 
                     <div>
-                        <label style="display: block; font-size: 0.75rem; font-weight: 900; color: #0f172a; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em;">¿En qué podemos ayudarte?</label>
-                        <textarea name="message" rows="4" placeholder="Escribe tu mensaje aquí..." required style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.95rem; font-weight: 600; background: #f8fafc; resize: none; transition: all 0.2s;"></textarea>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 900; color: #0f172a; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em;"><?= lang('Dashboard.how_can_we_help') ?></label>
+                        <textarea name="message" rows="4" placeholder="<?= lang('Dashboard.message_placeholder') ?>" required style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.95rem; font-weight: 600; background: #f8fafc; resize: none; transition: all 0.2s;"></textarea>
                     </div>
 
                     <button type="submit" style="width: 100%; background: #2152ff; color: white; border: none; padding: 20px; border-radius: 14px; font-weight: 900; font-size: 1.1rem; cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 10px 20px -5px rgba(33, 82, 255, 0.3);">
-                        <span>Enviar Mensaje</span>
+                        <span><?= lang('Dashboard.send_message') ?></span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                     </button>
                 </div>
                 
                 <div style="margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 12px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
-                    <span style="font-size: 0.8rem; color: #64748b; font-weight: 700;">O escribe directamente a:</span>
+                    <span style="font-size: 0.8rem; color: #64748b; font-weight: 700;"><?= lang('Dashboard.or_write_directly') ?></span>
                     <a href="mailto:soporte@apiempresas.es" style="font-size: 0.85rem; color: #2152ff; font-weight: 900; text-decoration: none;">soporte@apiempresas.es</a>
                 </div>
             </form>

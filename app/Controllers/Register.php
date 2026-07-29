@@ -47,6 +47,24 @@ class Register extends BaseController
     }
 
     /**
+     * Muestra el formulario de registro en ingles
+     */
+    public function english()
+    {
+        if (session('logged_in')) {
+            $redirectUrl = $this->request->getGet('redirect') ?? 'dashboard';
+            return redirect()->to(site_url(ltrim($redirectUrl, '/')));
+        }
+        $validation = session('validation') ?? \Config\Services::validation();
+        $redirectUrl = $this->request->getGet('redirect') ?? '';
+
+        return view('auth/register_en', [
+            'validation' => $validation,
+            'redirectUrl' => $redirectUrl
+        ]);
+    }
+
+    /**
      * Procesa el registro
      */
     public function store()
@@ -74,7 +92,34 @@ class Register extends BaseController
             ],
         ];
 
-        $messages = [
+        $host = $this->request->getServer('HTTP_HOST') ?? '';
+        $isEnglish = (strpos((string)$host, 'spaincompanyapi') !== false);
+
+        $messages = $isEnglish ? [
+            'name' => [
+                'required' => 'Full name is required.',
+                'min_length' => 'Name must be at least 3 characters.',
+                'max_length' => 'Name cannot exceed 100 characters.',
+            ],
+            'company' => [
+                'max_length' => 'Company name cannot exceed 150 characters.',
+            ],
+            'email' => [
+                'required' => 'Email address is required.',
+                'valid_email' => 'Please provide a valid email address.',
+                'max_length' => 'Email cannot exceed 190 characters.',
+                'is_unique' => 'An account already exists with this email.',
+                'not_disposable_email' => 'Temporary or disposable email addresses are not allowed.',
+            ],
+            'password' => [
+                'required' => 'Password is required.',
+                'min_length' => 'Password must be at least 8 characters.',
+                'max_length' => 'Password cannot exceed 255 characters.',
+            ],
+            'terms' => [
+                'required' => 'You must accept the terms to continue.',
+            ],
+        ] : [
             'name' => [
                 'required' => 'El nombre es obligatorio.',
                 'min_length' => 'El nombre debe tener al menos 3 caracteres.',
@@ -110,7 +155,8 @@ class Register extends BaseController
         helper('turnstile');
         $turnstileResponse = $this->request->getPost('cf-turnstile-response');
         if (!verify_turnstile($turnstileResponse, $this->request->getIPAddress())) {
-            return redirect()->back()->withInput()->with('error', 'Fallo en la verificación de seguridad (Turnstile). Por favor, inténtalo de nuevo.');
+            $msg = $isEnglish ? 'Security verification failed (Turnstile). Please try again.' : 'Fallo en la verificación de seguridad (Turnstile). Por favor, inténtalo de nuevo.';
+            return redirect()->back()->withInput()->with('error', $msg);
         }
 
         $email = strtolower(trim((string) $this->request->getPost('email')));
@@ -122,10 +168,11 @@ class Register extends BaseController
             ->first();
 
         if ($existingUser) {
+            $msg = $isEnglish ? 'An account already exists with this email address.' : 'Ya existe una cuenta registrada con este correo en APIEmpresas.';
             return redirect()
                 ->back()
                 ->withInput()
-                ->with('error', 'Ya existe una cuenta registrada con este correo en APIEmpresas.');
+                ->with('error', $msg);
         }
 
         // Generar API key robusta (64 chars hex)
@@ -133,10 +180,14 @@ class Register extends BaseController
 
         $redirectUrl = $this->request->getGet('redirect') ?? $this->request->getPost('redirect');
         $prefProduct = (strpos((string)$redirectUrl, 'radar') !== false) ? 'radar' : 'api';
+        
+        $host = $this->request->getServer('HTTP_HOST') ?? '';
+        $lang = (strpos((string)$host, 'spaincompanyapi') !== false) ? 'en' : 'es';
 
         $data = [
             'name' => trim((string) $this->request->getPost('name')),
             'company' => trim((string) $this->request->getPost('company')),
+            'lang' => $lang,
             'email' => $email,
             'password_hash' => password_hash((string) $this->request->getPost('password'), PASSWORD_DEFAULT),
             'is_active' => 1,
@@ -157,7 +208,7 @@ class Register extends BaseController
                     ->back()
                     ->withInput()
                     ->with('validation', $this->validator)
-                    ->with('error', 'Ha ocurrido un error al crear tu cuenta. Inténtalo de nuevo.');
+                    ->with('error', lang('Messages.flash_55'));
             }
 
             // 2) Crear API key
@@ -227,7 +278,7 @@ class Register extends BaseController
 
             return redirect()
                 ->to($targetUrl)
-                ->with('success', '¡Bienvenido! Tu cuenta ha sido creada y ya estás dentro.');
+                ->with('success', lang('Messages.flash_56'));
         } catch (\Throwable $e) {
 
             // Log del error real para depuración
@@ -237,7 +288,7 @@ class Register extends BaseController
                 ->back()
                 ->withInput()
                 ->with('validation', $this->validator)
-                ->with('error', 'Ha ocurrido un error al crear tu cuenta. Inténtalo de nuevo.');
+                ->with('error', lang('Messages.flash_57'));
         }
     }
 
@@ -263,7 +314,7 @@ class Register extends BaseController
         $email = strtolower(trim((string) $this->request->getPost('email')));
         
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return redirect()->back()->with('error', 'Por favor, introduce un email válido.');
+            return redirect()->back()->with('error', lang('Messages.flash_58'));
         }
 
         // Check for disposable email
@@ -287,7 +338,7 @@ class Register extends BaseController
             // Autologin para usuarios existentes (Zero Friction) excepto admins
             if (($user->is_admin ?? 0) == 1) {
                 return redirect()->to(site_url('enter?redirect=billing/checkout'))
-                    ->with('info', 'Por seguridad, identifícate con tu cuenta de administrador.')
+                    ->with('info', lang('Messages.flash_59'))
                     ->with('prefill_email', $email);
             }
 
@@ -311,9 +362,13 @@ class Register extends BaseController
         $token = bin2hex(random_bytes(32)); // Reset token for setting password
         $expires = date('Y-m-d H:i:s', strtotime('+48 hours'));
 
+        $host = $this->request->getServer('HTTP_HOST') ?? '';
+        $lang = (strpos((string)$host, 'spaincompanyapi') !== false) ? 'en' : 'es';
+
         $data = [
             'name' => explode('@', $email)[0], // Use email part as name
             'email' => $email,
+            'lang' => $lang,
             'password_hash' => password_hash($password, PASSWORD_DEFAULT),
             'reset_token' => $token,
             'reset_expires' => $expires,
@@ -373,7 +428,7 @@ class Register extends BaseController
 
         } catch (\Throwable $e) {
             log_message('error', 'Quick Register failed: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Error al crear la cuenta. Inténtalo de nuevo.');
+            return redirect()->back()->with('error', lang('Messages.flash_60'));
         }
     }
 }

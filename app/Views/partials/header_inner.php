@@ -28,8 +28,8 @@
     <header>
         <?php if (session('impersonator_id')): ?>
         <div style="background: #e0f2fe; border-bottom: 1px solid #bae6fd; padding: 10px; text-align: center; color: #0369a1; font-size: 0.9rem; font-weight: 500;">
-            👀 Estás viendo el sitio como <strong><?= esc(session('user_name')) ?></strong>.
-            <a href="<?= site_url('stop-impersonation') ?>" style="margin-left: 10px; text-decoration: underline; color: #0284c7; font-weight: 700;">Volver a Admin &rarr;</a>
+            👀 <?= lang('Nav.view_as') ?> <strong><?= esc(session('user_name')) ?></strong>.
+            <a href="<?= site_url('stop-impersonation') ?>" style="margin-left: 10px; text-decoration: underline; color: #0284c7; font-weight: 700;"><?= lang('Nav.back_to_admin') ?> &rarr;</a>
         </div>
         <?php endif; ?>
         
@@ -69,56 +69,32 @@
                                fill="none" filter="url(#ve-checkShadow)"/>
                     </svg>
                     <div class="brand-text">
-                        <span class="brand-name">API<span class="grad">Empresas</span>.es</span>
-                        <span class="brand-tag">Verificación mercantil y Radar de empresas</span>
+                        <?php if (service('request')->getLocale() === 'en'): ?>
+                            <span class="brand-name">SpainCompany<span class="grad">API</span></span>
+                            <span class="brand-tag">Spanish Company Data API</span>
+                        <?php else: ?>
+                            <span class="brand-name">API<span class="grad">Empresas</span>.es</span>
+                            <span class="brand-tag">Verificación mercantil y datos de empresas</span>
+                        <?php endif; ?>
                     </div>
                 </a>
             </div>
 
             <nav class="desktop-only" aria-label="Principal" style="display:flex; align-items:center;">
-                <a class="minor-nav-link" href="<?=site_url() ?>dashboard">Dashboard</a>
+                <a class="minor-nav-link" href="<?=site_url() ?>dashboard"><?= lang('Nav.dashboard') ?></a>
                 <?php if(!$hasBonusOnly && $isStandardPlan): ?>
                 <span class="nav-sep">•</span>
-                <a class="minor-nav-link" href="<?=site_url() ?>billing">Suscripción</a>
+                <a class="minor-nav-link" href="<?=site_url() ?>billing"><?= lang('Nav.subscription') ?></a>
                 <?php endif; ?>
                 <span class="nav-sep">•</span>
-                <a class="minor-nav-link" href="<?=site_url() ?>consumption">Consumo</a>
+                <a class="minor-nav-link" href="<?=site_url() ?>consumption"><?= lang('Nav.consumption') ?></a>
                 <span class="nav-sep">•</span>
-                <a class="minor-nav-link" href="<?=site_url() ?>documentation">Docs</a>
-                
-                <?php if($isStandardPlan): ?>
-                <span class="nav-sep">•</span>
-                <div class="main-nav-dropdown-container">
-                    <button class="minor-nav-link" id="mainNavDropdownTrigger" style="display: flex; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; padding: 6px 4px;">
-                        Integraciones 
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.8; margin-top: 1px;"><path d="m6 9 6 6 6-6"/></svg>
-                    </button>
-                    
-                    <div class="main-nav-dropdown-menu" id="mainNavDropdownMenu">
-                        <a href="#" class="dropdown-item js-track-wp-cta">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
-                            Plugin WordPress
-                        </a>
-                        <a href="#" class="dropdown-item js-track-wp-cta">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-                            Extensión Google Sheets
-                        </a>
-                        <a href="#" class="dropdown-item js-track-wp-cta">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                            App para Zapier / Make
-                        </a>
-                        <a href="#" class="dropdown-item js-track-wp-cta">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                            Plugin Shopify B2B
-                        </a>
-                    </div>
-                </div>
-                <?php endif; ?>
+                <a class="minor-nav-link" href="<?=site_url(service('request')->getLocale() === 'en' ? 'documentation/en' : 'documentation') ?>"><?= lang('Nav.docs') ?></a>
             </nav>
 
             <div class="desktop-only auth-buttons">
                 <?php if(!session('logged_in')): ?>
-                    <a class="btn btn_header btn_header--ghost" href="<?=site_url() ?>enter">Iniciar sesión</a>
+                    <a class="btn btn_header btn_header--ghost" href="<?=site_url() ?>enter"><?= lang('Nav.login') ?></a>
                 <?php else: ?>
                     <div class="user-dropdown-container">
                         <button class="user-avatar-trigger" id="userMenuTrigger">
@@ -145,30 +121,30 @@
                             <div class="dropdown-divider"></div>
                             <a href="<?= site_url('dashboard') ?>" class="dropdown-item">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-                                Mi Dashboard
+                                <?= lang('Nav.dashboard') ?>
                             </a>
                             <a href="<?= site_url('profile') ?>" class="dropdown-item">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                Mi Perfil
+                                <?= lang('Nav.profile') ?>
                             </a>
                             <a href="<?= site_url('whitelist-ips') ?>" class="dropdown-item">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                                Lista Blanca de IPs
+                                <?= lang('Nav.whitelist') ?>
                             </a>
                             <?php if(!$hasBonusOnly && $isStandardPlan): ?>
                             <a href="<?= site_url('billing') ?>" class="dropdown-item">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10"/></svg>
-                                Suscripción
+                                <?= lang('Nav.subscription') ?>
                             </a>
                             <?php endif; ?>
                             <a href="<?= site_url('tickets') ?>" class="dropdown-item">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>
-                                Mis tickets
+                                <?= lang('Nav.tickets') ?>
                             </a>
                             <div class="dropdown-divider"></div>
                             <a href="<?= site_url('logout') ?>" class="dropdown-item logout-item" hx-boost="false">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-                                Cerrar sesión
+                                <?= lang('Nav.logout') ?>
                             </a>
                         </div>
                     </div>
@@ -185,24 +161,25 @@
         <div class="mobile-menu-overlay" id="mobileMenuInner">
             <div class="mobile-menu-content">
                 <div class="mobile-menu-header">
-                    <span class="brand-name">API<span class="grad">Empresas</span></span>
+                    <?php if (service('request')->getLocale() === 'en'): ?>
+                        <span class="brand-name">SpainCompany<span class="grad">API</span></span>
+                    <?php else: ?>
+                        <span class="brand-name">API<span class="grad">Empresas</span></span>
+                    <?php endif; ?>
                     <button class="mobile-menu-close" aria-label="Cerrar menú">&times;</button>
                 </div>
                 <nav class="mobile-nav">
-                    <a href="<?=site_url() ?>dashboard" class="mobile-nav-link">Dashboard</a>
-                    <a href="<?=site_url() ?>profile" class="mobile-nav-link">Mi Perfil</a>
-                    <a href="<?=site_url() ?>whitelist-ips" class="mobile-nav-link">Lista Blanca de IPs</a>
+                    <a href="<?=site_url() ?>dashboard" class="mobile-nav-link"><?= lang('Nav.dashboard') ?></a>
+                    <a href="<?=site_url() ?>profile" class="mobile-nav-link"><?= lang('Nav.profile') ?></a>
+                    <a href="<?=site_url() ?>whitelist-ips" class="mobile-nav-link"><?= lang('Nav.whitelist') ?></a>
                     <?php if(!$hasBonusOnly && $isStandardPlan): ?>
-                    <a href="<?=site_url() ?>billing" class="mobile-nav-link">Suscripción</a>
+                    <a href="<?=site_url() ?>billing" class="mobile-nav-link"><?= lang('Nav.subscription') ?></a>
                     <?php endif; ?>
-                    <a href="<?=site_url() ?>consumption" class="mobile-nav-link">Consumo</a>
-                    <a href="<?=site_url() ?>documentation" class="mobile-nav-link">Documentación</a>
-                    <?php if($isStandardPlan): ?>
-                    <a href="#" class="mobile-nav-link js-track-wp-cta" style="color: #0369a1;">Plugin WordPress <span style="background: #e0f2fe; color: #0284c7; font-size: 10px; padding: 2px 6px; border-radius: 4px;">NUEVO</span></a>
-                    <?php endif; ?>
+                    <a href="<?=site_url() ?>consumption" class="mobile-nav-link"><?= lang('Nav.consumption') ?></a>
+                    <a href="<?=site_url(service('request')->getLocale() === 'en' ? 'documentation/en' : 'documentation') ?>" class="mobile-nav-link"><?= lang('Nav.docs') ?></a>
                     <div class="mobile-auth">
                         <?php if(!session('logged_in')): ?>
-                            <a href="<?=site_url() ?>enter" class="btn btn-full ghost">Iniciar sesión</a>
+                            <a href="<?=site_url() ?>enter" class="btn btn-full ghost"><?= lang('Nav.login') ?></a>
                         <?php else: ?>
                             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 0 10px;">
                                 <div style="width: 44px; height: 44px; border-radius: 50%; overflow: hidden; border: 2px solid #f1f5f9; background: #f8fafc; display: flex; align-items: center; justify-content: center;">
@@ -217,7 +194,7 @@
                                     <span style="font-size: 12px; color: #64748b; font-weight: 600;">Sesión activa</span>
                                 </div>
                             </div>
-                            <a href="<?=site_url() ?>logout" class="btn btn-full ghost" hx-boost="false">Cerrar sesión</a>
+                            <a href="<?=site_url() ?>logout" class="btn btn-full ghost" hx-boost="false"><?= lang('Nav.logout') ?></a>
                         <?php endif; ?>
                     </div>
                 </nav>

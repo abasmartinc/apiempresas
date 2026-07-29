@@ -37,6 +37,25 @@ class Login extends BaseController
     }
 
     /**
+     * Muestra el formulario de login en ingles
+     */
+    public function english()
+    {
+        if (session('logged_in')) {
+            $redirectUrl = $this->request->getGet('redirect') ?: 'dashboard';
+            return redirect()->to(site_url(ltrim($redirectUrl, '/')));
+        }
+        $data = [
+            'message' => session('message'),
+            'error' => session('error'),
+            'info' => session('info'),
+            'prefill_email' => session('prefill_email'),
+        ];
+
+        return view('auth/login_en', $data);
+    }
+
+    /**
      * Procesa el intento de login (POST /login)
      */
     public function authenticate()
@@ -56,13 +75,13 @@ class Login extends BaseController
             return redirect()
                 ->back()
                 ->withInput()
-                ->with('error', 'Por favor revisa los datos introducidos.');
+                ->with('error', lang('Messages.flash_35'));
         }
 
         helper('turnstile');
         $turnstileResponse = $this->request->getPost('cf-turnstile-response');
         if (!verify_turnstile($turnstileResponse, $this->request->getIPAddress())) {
-            return redirect()->back()->withInput()->with('error', 'Fallo en la verificación de seguridad (Turnstile). Por favor, inténtalo de nuevo.');
+            return redirect()->back()->withInput()->with('error', lang('Messages.flash_36'));
         }
 
         $email = strtolower(trim($this->request->getPost('email')));
@@ -79,7 +98,7 @@ class Login extends BaseController
             return redirect()
                 ->back()
                 ->withInput()
-                ->with('error', 'Credenciales incorrectas.');
+                ->with('error', lang('Messages.flash_37'));
         }
 
         // Comprobar si está activo
@@ -88,7 +107,7 @@ class Login extends BaseController
             return redirect()
                 ->back()
                 ->withInput()
-                ->with('error', 'Tu cuenta está inactiva. Contacta con soporte.');
+                ->with('error', lang('Messages.flash_38'));
         }
 
         $hash = (string) ($user->password_hash ?? '');
@@ -101,7 +120,7 @@ class Login extends BaseController
             return redirect()
                 ->back()
                 ->withInput()
-                ->with('error', 'Credenciales incorrectas.');
+                ->with('error', lang('Messages.flash_39'));
         }
 
         // Actualizar último login
@@ -118,7 +137,8 @@ class Login extends BaseController
             'user_name' => $user->name ?? '',
             'is_admin' => $user->is_admin ?? 0,
             'preferred_product' => $user->preferred_product ?? 'api',
-            'logged_in' => true,
+            'lang'              => $user->lang ?? 'es',
+            'logged_in'         => true,
         ]);
 
         // Track login from email if tracking code exists
@@ -170,7 +190,7 @@ class Login extends BaseController
 
         return redirect()
             ->to(site_url('enter'))
-            ->with('message', 'Has cerrado sesión correctamente.');
+            ->with('message', lang('Messages.flash_40'));
     }
 
     /**
@@ -203,18 +223,16 @@ class Login extends BaseController
             ]);
 
             // Enviar email
-            $emailService = \Config\Services::email();
-            $emailService->setTo($email);
-            $emailService->setSubject('Restablecer contraseña - APIEmpresas.es');
-            $emailService->setMessage(view('emails/reset_email', ['token' => $token]));
-
-            if (!$emailService->send()) {
-                log_message('error', 'Error enviando email de reseteo: ' . $emailService->printDebugger(['headers']));
+            $emailService = new \App\Services\EmailService();
+            $result = $emailService->sendPasswordResetEmail($email, $token);
+            
+            if (!$result || (is_array($result) && !$result['success'])) {
+                log_message('error', 'Error enviando email de reseteo para: ' . $email);
             }
         }
 
         // Siempre mostrar el mismo mensaje para evitar enumeración de usuarios
-        return redirect()->back()->with('message', 'Si el correo existe en nuestro sistema, recibirás un enlace para restablecer tu contraseña en unos minutos.');
+        return redirect()->back()->with('message', lang('Messages.flash_41'));
     }
 
     /**
@@ -228,7 +246,7 @@ class Login extends BaseController
             ->first();
 
         if (!$user) {
-            return redirect()->to(site_url('enter'))->with('error', 'El enlace de restablecimiento es inválido o ha caducado.');
+            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_42'));
         }
 
         return view('auth/reset_password', ['token' => $token]);
@@ -244,11 +262,11 @@ class Login extends BaseController
         $passwordConfirm = $this->request->getPost('password_confirm');
 
         if ($password !== $passwordConfirm) {
-            return redirect()->back()->with('error', 'Las contraseñas no coinciden.');
+            return redirect()->back()->with('error', lang('Messages.flash_43'));
         }
 
         if (strlen($password) < 8) {
-            return redirect()->back()->with('error', 'La contraseña debe tener al menos 8 caracteres.');
+            return redirect()->back()->with('error', lang('Messages.flash_44'));
         }
 
         $user = $this->userModel
@@ -257,7 +275,7 @@ class Login extends BaseController
             ->first();
 
         if (!$user) {
-            return redirect()->to(site_url('enter'))->with('error', 'El enlace de restablecimiento es inválido o ha caducado.');
+            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_45'));
         }
 
         $this->userModel->update($user->id, [
@@ -266,6 +284,6 @@ class Login extends BaseController
             'reset_expires' => null
         ]);
 
-        return redirect()->to(site_url('enter'))->with('message', 'Contraseña actualizada correctamente. Ya puedes iniciar sesión.');
+        return redirect()->to(site_url('enter'))->with('message', lang('Messages.flash_46'));
     }
 }

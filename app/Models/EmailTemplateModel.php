@@ -12,7 +12,7 @@ class EmailTemplateModel extends Model
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['slug', 'name', 'subject', 'body', 'description'];
+    protected $allowedFields    = ['slug', 'name', 'subject', 'subject_en', 'body', 'body_en', 'description'];
 
     // Dates
     protected $useTimestamps = true;

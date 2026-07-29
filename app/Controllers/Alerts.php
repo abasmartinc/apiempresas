@@ -11,7 +11,7 @@ class Alerts extends BaseController
     {
         // 1. Check Login
         if (!session('logged_in')) {
-            return redirect()->to(site_url('enter'))->with('error', 'Debes iniciar sesión para crear una alerta.');
+            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_1'));
         }
 
         // 2. Validate Company
@@ -19,7 +19,7 @@ class Alerts extends BaseController
         $company = $companyModel->getByCif($cif);
 
         if (!$company) {
-            return redirect()->back()->with('error', 'Empresa no encontrada.');
+            return redirect()->back()->with('error', lang('Messages.flash_2'));
         }
 
         $data = [
@@ -50,7 +50,7 @@ class Alerts extends BaseController
             ->countAllResults();
 
         if ($exists > 0) {
-            return redirect()->to(site_url('dashboard'))->with('message', 'Ya estás siguiendo a esta empresa.');
+            return redirect()->to(site_url('dashboard'))->with('message', lang('Messages.flash_3'));
         }
 
         // Check Limit

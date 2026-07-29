@@ -14,16 +14,17 @@
  * - $twitterSite (string)  // "@usuario" opcional
  */
 
-$siteName = 'APIEmpresas.es';
+$siteName = lang('Seo.siteName') !== 'Seo.siteName' ? lang('Seo.siteName') : 'APIEmpresas.es';
 
-$defaultTitle = 'Validar CIF y verificar empresas en España | APIEmpresas.es';
-$defaultDesc  = 'Valida CIF y razón social con datos oficiales (BOE/BORME, AEAT, INE y VIES). Buscador web y API REST para KYB/KYC, facturación y scoring.';
+$defaultTitle = lang('Seo.defaultTitle') !== 'Seo.defaultTitle' ? lang('Seo.defaultTitle') : 'Validar CIF y verificar empresas en España | APIEmpresas.es';
+$defaultDesc  = lang('Seo.defaultDesc') !== 'Seo.defaultDesc' ? lang('Seo.defaultDesc') : 'Valida CIF y razón social con datos oficiales (BOE/BORME, AEAT, INE y VIES). Buscador web y API REST para KYB/KYC, facturación y scoring.';
 
 $seoTitle = $title ?? $defaultTitle;
 $seoDesc  = $excerptText ?? $defaultDesc;
 
-$lang   = $lang ?? 'es-ES';
-$locale = $locale ?? 'es_ES';
+$currentLocale = service('request')->getLocale();
+$lang   = $lang ?? ($currentLocale === 'en' ? 'en-US' : 'es-ES');
+$locale = $locale ?? ($currentLocale === 'en' ? 'en_US' : 'es_ES');
 
 $robots = $robots ?? 'index,follow';
 
@@ -77,9 +78,16 @@ $googlebot = $googlebot ?? ($robots . ',max-snippet:-1,max-image-preview:large,m
 <link rel="next" href="<?= esc($nextUrl) ?>" />
 <?php endif; ?>
 
-<!-- Hreflang (si solo tienes ES, esto es suficiente) -->
-<link rel="alternate" href="<?= esc($canonicalUrl) ?>" hreflang="es-ES" />
-<link rel="alternate" href="<?= esc($canonicalUrl) ?>" hreflang="x-default" />
+<!-- Hreflang cruzado internacional (ES / EN) -->
+<?php
+// Construimos las URLs para ambos dominios basándonos en la canónica actual
+$esUrl = str_replace(['spaincompanyapi.com', 'spaincompanyapi.local'], ['apiempresas.es', 'apiempresas.local'], $canonicalUrl);
+$enUrl = str_replace(['apiempresas.es', 'apiempresas.local'], ['spaincompanyapi.com', 'spaincompanyapi.local'], $canonicalUrl);
+?>
+<link rel="alternate" href="<?= esc($esUrl) ?>" hreflang="es" />
+<link rel="alternate" href="<?= esc($esUrl) ?>" hreflang="es-ES" />
+<link rel="alternate" href="<?= esc($enUrl) ?>" hreflang="en" />
+<link rel="alternate" href="<?= esc($esUrl) ?>" hreflang="x-default" />
 
 <!-- Open Graph -->
 <meta property="og:site_name" content="<?= esc($siteName) ?>" />
@@ -200,7 +208,7 @@ $googlebot = $googlebot ?? ($robots . ',max-snippet:-1,max-image-preview:large,m
       "url": "<?= esc($homeUrl) ?>",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "description": "Valida CIF y verifica empresas en España con datos oficiales (BOE/BORME, AEAT, INE y VIES). Incluye buscador web y API REST para KYB/KYC, onboarding, facturación y scoring.",
+      "description": "<?= esc($seoDesc) ?>",
       "publisher": { "@id": "<?= esc($homeUrl) ?>#org" },
       "image": "<?= esc($ogImage) ?>",
       "offers": [
@@ -223,7 +231,7 @@ $googlebot = $googlebot ?? ($robots . ',max-snippet:-1,max-image-preview:large,m
         "@type": "Country",
         "name": "España"
       },
-      "description": "Servicio de verificación mercantil y validación de CIF en tiempo real."
+      "description": "<?= esc($seoDesc) ?>"
     }
   ]
 }

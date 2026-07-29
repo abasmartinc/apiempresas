@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="es">
+<html lang="<?= service('request')->getLocale() ?>">
 <head>
     <?= view('partials/head', [
-        'title'       => 'Paso Final: Tu Email - APIEmpresas',
-        'excerptText' => 'Introduce tu email para completar la compra de tu listado.',
+        'title'       => lang('Auth.quick_reg_title'),
+        'excerptText' => lang('Auth.quick_reg_excerpt'),
     ]) ?>
     <style>
         .register-container {
@@ -120,7 +120,7 @@
     </style>
 </head>
 <body>
-    <?= view('partials/header') ?>
+    <?= view(service('request')->getLocale() == 'en' ? 'partials/header_en' : 'partials/header') ?>
 
     <main class="container">
         <div class="register-container">
@@ -132,10 +132,10 @@
                     </div>
                     <div>
                         <h1 style="font-size: 1.8rem; font-weight: 950; color: #0f172a; margin-bottom: 4px; letter-spacing: -0.04em; line-height: 1.1;">
-                            Accede a empresas listas para ser contactadas antes que tu competencia
+                            <?= lang('Auth.quick_reg_radar_title') ?>
                         </h1>
                         <p style="color: #475569; line-height: 1.4; font-weight: 500; font-size: 0.95rem; margin: 0;">
-                            Empresas recién creadas que necesitan proveedores en sus primeros días
+                            <?= lang('Auth.quick_reg_radar_sub') ?>
                         </p>
                     </div>
                 </div>
@@ -143,7 +143,7 @@
                 <div style="background: #FFF7ED; border: 1px solid #FFEDD5; padding: 10px; border-radius: 12px; margin-bottom: 16px;">
                     <div style="display: flex; align-items: center; justify-content: center; gap: 10px; color: #9A3412; font-weight: 800; font-size: 0.85rem;">
                         <span style="display: block; width: 6px; height: 6px; background: #EA580C; border-radius: 50%; box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.1);"></span>
-                        +<?= esc($oppsCount) ?> empresas detectadas HOY — otras empresas ya están contactando estas oportunidades
+                        <?= sprintf(lang('Auth.quick_reg_radar_alert'), esc($oppsCount)) ?>
                     </div>
                 </div>
                 <!-- Preview Visual Section (Compact) -->
@@ -173,8 +173,8 @@
                     
                     <div class="preview-overlay">
                         <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                            <div class="preview-overlay-text" style="font-size: 0.8rem; padding: 10px 24px;">Otras empresas ya están trabajando estas oportunidades</div>
-                            <div style="font-size: 0.65rem; color: #64748B; font-weight: 700; background: rgba(255,255,255,0.8); padding: 2px 8px; border-radius: 4px;">Accede ahora o llegarás tarde</div>
+                            <div class="preview-overlay-text" style="font-size: 0.8rem; padding: 10px 24px;"><?= lang('Auth.quick_reg_radar_overlay_text') ?></div>
+                            <div style="font-size: 0.65rem; color: #64748B; font-weight: 700; background: rgba(255,255,255,0.8); padding: 2px 8px; border-radius: 4px;"><?= lang('Auth.quick_reg_radar_overlay_sub') ?></div>
                         </div>
                     </div>
                 </div>
@@ -185,15 +185,15 @@
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"/></svg>
                     </div>
                 </div>
-                <h1 style="font-size: 1.75rem; font-weight: 900; color: #0f172a; margin-bottom: 12px; letter-spacing: -0.01em;">Crea tu cuenta gratuita</h1>
+                <h1 style="font-size: 1.75rem; font-weight: 900; color: #0f172a; margin-bottom: 12px; letter-spacing: -0.01em;"><?= lang('Auth.quick_reg_create_account') ?></h1>
                 <p style="color: #64748b; margin-bottom: 32px; line-height: 1.6; font-size: 0.95rem;">
-                    Introduce tu correo electrónico para procesar el pago y acceder al instante a tu nueva API Key con el saldo cargado en tu monedero.
+                    <?= lang('Auth.quick_reg_desc_create') ?>
                 </p>
             <?php else: ?>
                 <!-- VERSION PASO FINAL / DESCARGA -->
-                <h1 style="font-size: 1.75rem; font-weight: 900; color: #0f172a; margin-bottom: 12px; letter-spacing: -0.01em;">Paso Final</h1>
+                <h1 style="font-size: 1.75rem; font-weight: 900; color: #0f172a; margin-bottom: 12px; letter-spacing: -0.01em;"><?= lang('Auth.quick_reg_final_step') ?></h1>
                 <p style="color: #64748b; margin-bottom: 32px; line-height: 1.6;">
-                    Introduce tu correo electrónico para procesar el pago y recibir el enlace de descarga de tu listado.
+                    <?= lang('Auth.quick_reg_desc_final') ?>
                 </p>
             <?php endif; ?>
 
@@ -208,22 +208,22 @@
                 <input type="hidden" name="redirect" value="<?= esc($redirect ?? '') ?>">
                 <div class="form-group">
                     <label class="form-label">
-                        <?= (isset($redirect) && strpos($redirect, 'radar') !== false) ? '' : 'Tu correo electrónico' ?>
+                        <?= (isset($redirect) && strpos($redirect, 'radar') !== false) ? '' : lang('Auth.quick_reg_email_label') ?>
                     </label>
-                    <input type="email" name="email" id="email_input" class="form-control" placeholder="ejemplo@empresa.com" required autofocus>
+                    <input type="email" name="email" id="email_input" class="form-control" placeholder="<?= lang('Auth.quick_reg_email_ph') ?>" required autofocus>
                 </div>
 
                 <div style="text-align: left; margin-bottom: 12px; font-size: 0.80rem; color: #475569;">
                     <div style="display: flex; align-items: flex-start; gap: 6px; margin-bottom: 6px;">
                         <input type="checkbox" id="terms" name="terms" value="1" required style="margin-top: 3px;" />
                         <label for="terms" style="line-height: 1.3; margin: 0;">
-                            Acepto <a href="#" data-modal-target="modalPrivacy" style="color: var(--primary); text-decoration: none; font-weight: 600;">Privacidad</a> y <a href="#" data-modal-target="modalTerms" style="color: var(--primary); text-decoration: none; font-weight: 600;">Aviso Legal</a>.
+                            <?= lang('Auth.quick_reg_terms') ?>
                         </label>
                     </div>
                     <div style="display: flex; align-items: flex-start; gap: 6px;">
                         <input type="checkbox" id="no_marketing" name="no_marketing" value="1" style="margin-top: 3px;" />
                         <label for="no_marketing" style="line-height: 1.3; margin: 0;">
-                            No deseo recibir consejos ni ofertas comerciales.
+                            <?= lang('Auth.quick_reg_no_marketing') ?>
                         </label>
                     </div>
                 </div>
@@ -231,11 +231,11 @@
                 <button type="submit" class="btn-primary" style="<?= (isset($redirect) && strpos($redirect, 'radar') !== false) ? 'background: #2563EB;' : '' ?>">
                     <?php 
                         if (isset($redirect) && strpos($redirect, 'radar') !== false) {
-                            echo 'Acceder a estas empresas ahora';
+                            echo lang('Auth.quick_reg_btn_radar');
                         } elseif (isset($redirect) && strpos($redirect, 'checkout_bonus') !== false) {
-                            echo 'Crear cuenta y pagar bono';
+                            echo lang('Auth.quick_reg_btn_bonus');
                         } else {
-                            echo 'Continuar al Pago';
+                            echo lang('Auth.quick_reg_btn_default');
                         }
                     ?>
                 </button>
@@ -243,46 +243,18 @@
 
             <?php if (isset($redirect) && strpos($redirect, 'radar') !== false): ?>
                 <p style="margin-top: 12px; font-size: 0.85rem; color: #EA580C; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                    🚀 Hoy hay +<?= esc($oppsCount) ?> empresas esperando ser contactadas
+                    <?= sprintf(lang('Auth.quick_reg_radar_wait'), esc($oppsCount)) ?>
                 </p>
                 <div style="display: flex; justify-content: center; gap: 16px; margin-top: 16px; font-size: 0.75rem; font-weight: 700; color: #64748B;">
-                    <div style="display: flex; align-items: center; gap: 4px;"><span>✔</span> Acceso inmediato</div>
-                    <div style="display: flex; align-items: center; gap: 4px;"><span>✔</span> Sin tarjeta</div>
-                    <div style="display: flex; align-items: center; gap: 4px;"><span>✔</span> Sin permanencia</div>
+                    <div style="display: flex; align-items: center; gap: 4px;"><span>✔</span> <?= lang('Auth.quick_reg_radar_access') ?></div>
+                    <div style="display: flex; align-items: center; gap: 4px;"><span>✔</span> <?= lang('Auth.quick_reg_radar_no_card') ?></div>
                 </div>
-                <p style="margin-top: 24px; font-size: 0.9rem; color: #1E293B; font-weight: 800;">
-                    "Las primeras empresas en contactar son las que se llevan el cliente"
-                </p>
-            <?php elseif (isset($redirect) && strpos($redirect, 'checkout_bonus') !== false): ?>
-                <p style="margin-top: 24px; font-size: 0.85rem; color: #94a3b8; line-height: 1.5;">
-                    Al instante tendrás acceso a tu panel de control para gestionar tu API, consultar métricas y contactar con soporte técnico.
-                </p>
-            <?php else: ?>
-                <p style="margin-top: 24px; font-size: 0.85rem; color: #94a3b8; line-height: 1.5;">
-                    Recibirás una clave de acceso temporal para descargar el archivo siempre que lo necesites.
-                </p>
             <?php endif; ?>
+
         </div>
     </main>
 
-    <?= view('partials/footer') ?>
+    <?= view(service('request')->getLocale() == 'en' ? 'partials/footer_en' : 'partials/footer') ?>
 
-    <script>
-        // TRACKING: Quick register view
-        trackEvent('quick_register_view', { 
-            context: '<?= (isset($redirect) && strpos($redirect, 'radar') !== false) ? 'radar' : 'checkout' ?>' 
-        });
-
-        document.querySelector('form').addEventListener('submit', (e) => {
-            const email = document.getElementById('email_input').value;
-            const domain = email.split('@')[1] || 'unknown';
-            
-            // TRACKING: Quick register submit
-            trackEvent('quick_register_submit', { 
-                email_domain: domain,
-                context: '<?= (isset($redirect) && strpos($redirect, 'radar') !== false) ? 'radar' : 'checkout' ?>'
-            });
-        });
-    </script>
 </body>
 </html>
