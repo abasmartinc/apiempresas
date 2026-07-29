@@ -27,25 +27,28 @@ class Sitemap extends Controller
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';
         $xml .= '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
+        $isEn = (strpos((string)$this->request->getServer('HTTP_HOST'), 'spaincompanyapi') !== false);
+
         // 1. Sitemap Estático
         $xml .= '<sitemap><loc>' . site_url("sitemap-static.xml") . '</loc></sitemap>';
 
-        // 2. Sitemap del Blog
-        $xml .= '<sitemap><loc>' . site_url("sitemap-blog.xml") . '</loc></sitemap>';
+        if (!$isEn) {
+            // 2. Sitemap del Blog
+            $xml .= '<sitemap><loc>' . site_url("sitemap-blog.xml") . '</loc></sitemap>';
 
-        // 3. Sitemap de Directorios (Provincias y CNAE)
-        $xml .= '<sitemap><loc>' . site_url("sitemap-directories.xml") . '</loc></sitemap>';
+            // 3. Sitemap de Directorios (Provincias y CNAE)
+            $xml .= '<sitemap><loc>' . site_url("sitemap-directories.xml") . '</loc></sitemap>';
 
-        // 4. Sitemap de Informes SEO (Legacy + WordPress Dinámico)
-        $xml .= '<sitemap><loc>' . site_url("sitemap-informes-provincias.xml") . '</loc></sitemap>';
-        $xml .= '<sitemap><loc>' . site_url("sitemap-informes-sectores.xml") . '</loc></sitemap>';
-        $xml .= '<sitemap><loc>' . site_url("sitemap-informes-wp.xml") . '</loc></sitemap>';
+            // 4. Sitemap de Informes SEO (Legacy + WordPress Dinámico)
+            $xml .= '<sitemap><loc>' . site_url("sitemap-informes-provincias.xml") . '</loc></sitemap>';
+            $xml .= '<sitemap><loc>' . site_url("sitemap-informes-sectores.xml") . '</loc></sitemap>';
+            $xml .= '<sitemap><loc>' . site_url("sitemap-informes-wp.xml") . '</loc></sitemap>';
 
-        // 5. Sitemap de Subvenciones y Contratos Públicos
-        $xml .= '<sitemap><loc>' . site_url("sitemap-subvenciones.xml") . '</loc></sitemap>';
-        $xml .= '<sitemap><loc>' . site_url("sitemap-contratos.xml") . '</loc></sitemap>';
+            // 5. Sitemap de Subvenciones y Contratos Públicos
+            $xml .= '<sitemap><loc>' . site_url("sitemap-subvenciones.xml") . '</loc></sitemap>';
+            $xml .= '<sitemap><loc>' . site_url("sitemap-contratos.xml") . '</loc></sitemap>';
+        }
 
-        $isEn = (strpos((string)$this->request->getServer('HTTP_HOST'), 'spaincompanyapi') !== false);
         $prefix = $isEn ? 'sitemap-en-companies-' : 'sitemap-companies-';
 
         // 5. Páginas de empresas
