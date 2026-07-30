@@ -68,16 +68,28 @@ class Sitemap extends Controller
      */
     public function static()
     {
-        $urls = [
-            ['loc' => site_url('/'), 'priority' => '1.0', 'freq' => 'daily'],
-            ['loc' => site_url('base-de-datos-de-empresas'), 'priority' => '1.0', 'freq' => 'daily'],
-            ['loc' => site_url('leads-empresas-nuevas'), 'priority' => '0.8', 'freq' => 'monthly'],
-            ['loc' => site_url('contact'), 'priority' => '0.5', 'freq' => 'monthly'],
-            ['loc' => site_url('documentation'), 'priority' => '0.9', 'freq' => 'weekly'],
-            ['loc' => site_url('search_company'), 'priority' => '0.9', 'freq' => 'daily'],
-            ['loc' => site_url('blog'), 'priority' => '0.8', 'freq' => 'daily'],
-            ['loc' => site_url('empresas-nuevas'), 'priority' => '1.0', 'freq' => 'daily'],
-        ];
+        $isEn = (strpos((string)$this->request->getServer('HTTP_HOST'), 'spaincompanyapi') !== false);
+
+        if ($isEn) {
+            $urls = [
+                ['loc' => site_url('/'), 'priority' => '1.0', 'freq' => 'daily'],
+                ['loc' => site_url('docs'), 'priority' => '0.9', 'freq' => 'weekly'],
+                ['loc' => site_url('spanish-company-data-api'), 'priority' => '0.8', 'freq' => 'monthly'],
+                ['loc' => site_url('enter'), 'priority' => '0.5', 'freq' => 'monthly'],
+                ['loc' => site_url('register'), 'priority' => '0.5', 'freq' => 'monthly'],
+            ];
+        } else {
+            $urls = [
+                ['loc' => site_url('/'), 'priority' => '1.0', 'freq' => 'daily'],
+                ['loc' => site_url('base-de-datos-de-empresas'), 'priority' => '1.0', 'freq' => 'daily'],
+                ['loc' => site_url('leads-empresas-nuevas'), 'priority' => '0.8', 'freq' => 'monthly'],
+                ['loc' => site_url('contact'), 'priority' => '0.5', 'freq' => 'monthly'],
+                ['loc' => site_url('documentation'), 'priority' => '0.9', 'freq' => 'weekly'],
+                ['loc' => site_url('search_company'), 'priority' => '0.9', 'freq' => 'daily'],
+                ['loc' => site_url('blog'), 'priority' => '0.8', 'freq' => 'daily'],
+                ['loc' => site_url('empresas-nuevas'), 'priority' => '1.0', 'freq' => 'daily'],
+            ];
+        }
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
@@ -100,6 +112,9 @@ class Sitemap extends Controller
      */
     public function blog()
     {
+        $isEn = (strpos((string)$this->request->getServer('HTTP_HOST'), 'spaincompanyapi') !== false);
+        if ($isEn) return $this->response->setStatusCode(404);
+
         $siteUrl    = 'https://blog.apiempresas.es';
         $endpoint   = '/index.php?rest_route=/wp/v2/posts&per_page=100&fields=slug,date';
         $requestUrl = $siteUrl . $endpoint;
@@ -361,6 +376,9 @@ class Sitemap extends Controller
     }
     public function subvenciones()
     {
+        $isEn = (strpos((string)$this->request->getServer('HTTP_HOST'), 'spaincompanyapi') !== false);
+        if ($isEn) return $this->response->setStatusCode(404);
+
         $db = \Config\Database::connect();
         
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';
@@ -392,6 +410,9 @@ class Sitemap extends Controller
 
     public function contratos()
     {
+        $isEn = (strpos((string)$this->request->getServer('HTTP_HOST'), 'spaincompanyapi') !== false);
+        if ($isEn) return $this->response->setStatusCode(404);
+
         $db = \Config\Database::connect();
         
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';
