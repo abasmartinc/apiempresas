@@ -11,4 +11,5 @@ return [
     'login' => 'Iniciar sesión',
     'view_as' => 'Estás viendo el sitio como',
     'back_to_admin' => 'Volver a Admin',
+    'register' => 'Crear cuenta gratis',
 ];

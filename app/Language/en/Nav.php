@@ -11,4 +11,5 @@ return [
     'login' => 'Login',
     'view_as' => 'You are viewing the site as',
     'back_to_admin' => 'Back to Admin',
+    'register' => 'Create free account',
 ];

@@ -95,6 +95,7 @@
             <div class="desktop-only auth-buttons">
                 <?php if(!session('logged_in')): ?>
                     <a class="btn btn_header btn_header--ghost" href="<?=site_url() ?>enter"><?= lang('Nav.login') ?></a>
+                    <a class="btn btn_header btn_header--primary" href="<?= site_url() ?>register"><?= lang('Nav.register') ?></a>
                 <?php else: ?>
                     <div class="user-dropdown-container">
                         <button class="user-avatar-trigger" id="userMenuTrigger">
@@ -180,6 +181,7 @@
                     <div class="mobile-auth">
                         <?php if(!session('logged_in')): ?>
                             <a href="<?=site_url() ?>enter" class="btn btn-full ghost"><?= lang('Nav.login') ?></a>
+                            <a href="<?= site_url() ?>register" class="btn btn-full primary"><?= lang('Nav.register') ?></a>
                         <?php else: ?>
                             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 0 10px;">
                                 <div style="width: 44px; height: 44px; border-radius: 50%; overflow: hidden; border: 2px solid #f1f5f9; background: #f8fafc; display: flex; align-items: center; justify-content: center;">
