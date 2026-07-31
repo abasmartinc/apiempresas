@@ -465,10 +465,10 @@ $hiddenCount = max(0, $totalItems - $limitFree);
 
                             // 4. Motivo Inteligente (Fallback mejorado)
                             $sectorSimple = esc(mb_strimwidth($co['cnae_label'] ?? 'su sector', 0, 30, '...'));
-                            if (empty($needText) || $needText == 'Necesidad detectada por Radar') {
+                            if (empty($co['need_text']) || $co['need_text'] == 'Necesidad detectada por Radar') {
                                 $reason = $scoreData['details']['explanation'] ?? "Empresa de $sectorSimple con señales de interés detectadas.";
                             } else {
-                                $reason = $needText;
+                                $reason = $co['need_text'];
                             }
 
 

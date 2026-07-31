@@ -87,6 +87,8 @@
                 <a class="minor-nav-link" href="<?=site_url() ?>billing"><?= lang('Nav.subscription') ?></a>
                 <?php endif; ?>
                 <span class="nav-sep">•</span>
+                <a class="minor-nav-link" href="<?=site_url() ?>integraciones/google-sheets">Integraciones</a>
+                <span class="nav-sep">•</span>
                 <a class="minor-nav-link" href="<?=site_url() ?>consumption"><?= lang('Nav.consumption') ?></a>
                 <span class="nav-sep">•</span>
                 <a class="minor-nav-link" href="<?=site_url(service('request')->getLocale() === 'en' ? 'documentation/en' : 'documentation') ?>"><?= lang('Nav.docs') ?></a>
@@ -176,6 +178,7 @@
                     <?php if(!$hasBonusOnly && $isStandardPlan): ?>
                     <a href="<?=site_url() ?>billing" class="mobile-nav-link"><?= lang('Nav.subscription') ?></a>
                     <?php endif; ?>
+                    <a href="<?=site_url() ?>integraciones/google-sheets" class="mobile-nav-link">Integraciones</a>
                     <a href="<?=site_url() ?>consumption" class="mobile-nav-link"><?= lang('Nav.consumption') ?></a>
                     <a href="<?=site_url(service('request')->getLocale() === 'en' ? 'documentation/en' : 'documentation') ?>" class="mobile-nav-link"><?= lang('Nav.docs') ?></a>
                     <div class="mobile-auth">

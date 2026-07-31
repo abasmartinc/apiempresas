@@ -691,13 +691,13 @@ class Radar extends BaseController
             $dateLimit = date('Y-m-01');
         }
 
-        $unionQuery = "SELECT cif FROM companies WHERE fecha_constitucion >= '{$dateLimit}' AND fecha_constitucion <= '{$maxDateLimit}' 
+        $unionQuery = "SELECT id FROM companies WHERE fecha_constitucion >= '{$dateLimit}' AND fecha_constitucion <= '{$maxDateLimit}' 
                        UNION 
-                       SELECT company_cif AS cif FROM company_subsidies WHERE created_at >= '{$dateLimit} 00:00:00' 
+                       SELECT c.id FROM company_subsidies s INNER JOIN companies c ON c.cif = s.company_cif WHERE s.created_at >= '{$dateLimit} 00:00:00' 
                        UNION 
-                       SELECT company_cif AS cif FROM company_contracts WHERE created_at >= '{$dateLimit} 00:00:00'";
+                       SELECT c.id FROM company_contracts ctr INNER JOIN companies c ON c.cif = ctr.company_cif WHERE ctr.created_at >= '{$dateLimit} 00:00:00'";
 
-        $builder->join("({$unionQuery}) matched_events", "matched_events.cif = companies.cif", "inner");
+        $builder->join("({$unionQuery}) matched_events", "matched_events.id = companies.id", "inner");
         $builder->where('companies.fecha_constitucion IS NOT NULL');
         
         return $builder->countAllResults();

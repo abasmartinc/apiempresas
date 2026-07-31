@@ -105,11 +105,11 @@
                                 </svg>
                             </div>
                             <div>
-                                <strong>Plugin WordPress</strong>
+                                <strong style="display: flex; align-items: center; gap: 8px;">Plugin WordPress <b style="background: #f1f5f9; color: #64748b; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; display: inline-block; line-height: 1;">PRÓXIMAMENTE</b></strong>
                                 <span>Buscador oficial para tu web</span>
                             </div>
                         </a>
-                        <a href="#" class="js-track-wp-cta">
+                        <a href="<?= site_url('integraciones/google-sheets') ?>">
                             <div class="nav-item-icon">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
@@ -118,7 +118,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <strong>Extensión Google Sheets</strong>
+                                <strong style="display: flex; align-items: center; gap: 8px;">Extensión Google Sheets <b style="background: #10b981; color: white; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; display: inline-block; line-height: 1;">DISPONIBLE</b></strong>
                                 <span>Sincronización de datos B2B</span>
                             </div>
                         </a>
@@ -131,7 +131,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <strong>App para Zapier / Make</strong>
+                                <strong style="display: flex; align-items: center; gap: 8px;">App para Zapier / Make <b style="background: #f1f5f9; color: #64748b; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; display: inline-block; line-height: 1;">PRÓXIMAMENTE</b></strong>
                                 <span>Automatiza tus flujos de trabajo</span>
                             </div>
                         </a>
@@ -144,7 +144,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <strong>Plugin Shopify B2B</strong>
+                                <strong style="display: flex; align-items: center; gap: 8px;">Plugin Shopify B2B <b style="background: #f1f5f9; color: #64748b; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; display: inline-block; line-height: 1;">PRÓXIMAMENTE</b></strong>
                                 <span>Validación en checkout</span>
                             </div>
                         </a>
@@ -298,7 +298,7 @@
 
                     <div style="padding: 16px 18px 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em;">Integraciones</div>
                     <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Plugin WordPress</span></a>
-                    <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Google Sheets</span></a>
+                    <a href="<?= site_url('integraciones/google-sheets') ?>" class="mobile-nav-link"><span>Google Sheets</span></a>
                     <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Zapier / Make</span></a>
                     <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Shopify B2B</span></a>
                 </div>

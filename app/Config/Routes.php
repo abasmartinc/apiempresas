@@ -67,6 +67,9 @@ $routes->get('whitelist-ips', 'WhitelistIpsController::index');
 $routes->post('whitelist-ips/add', 'WhitelistIpsController::add');
 $routes->post('whitelist-ips/delete/(:num)', 'WhitelistIpsController::delete/$1');
 
+// Integraciones
+$routes->get('integraciones/google-sheets', 'IntegrationsController::googleSheets');
+
 // $routes->get('empresas-nuevas', 'NewCompanies::index'); // Deprecated route interfering with SeoController::newRadarHub (line 194)
 $routes->get('dashboard/kpis', 'Dashboard::kpis_ajax');
 $routes->post('dashboard/complete-wizard', 'Dashboard::completeWizard');
