@@ -292,7 +292,7 @@ class LookalikeController extends BaseController
             'generated_csv' => $generatedFilename
         ]);
         
-        session()->setFlashdata('lookalike_view_data', [
+        session()->set('lookalike_view_data', [
             'results' => $results,
             'total_found' => $total_found,
             'filename' => $nombreArchivo,
@@ -304,13 +304,10 @@ class LookalikeController extends BaseController
 
     public function results()
     {
-        $data = session()->getFlashdata('lookalike_view_data');
+        $data = session()->get('lookalike_view_data');
         if (!$data) {
             return redirect()->to('encontrar-empresas-similares')->with('error', 'La sesión ha expirado, por favor sube el archivo de nuevo.');
         }
-
-        // Mantener la flashdata por si el usuario recarga la página
-        session()->keepFlashdata('lookalike_view_data');
 
         return view('lookalike/results', $data);
     }
