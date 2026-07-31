@@ -329,7 +329,7 @@
                         <h3 class="gs-template-title">Plantilla Prospección B2B 2026</h3>
                         <p class="gs-template-desc">Tablero preconfigurado con fórmulas avanzadas de enriquecimiento masivo.</p>
                     </div>
-                    <a href="https://docs.google.com/spreadsheets/d/1ke9ErUQktrusqx1rVWx1WTJ5p6qNItGd4H7mUtXUipY/copy" target="_blank" class="gs-btn-primary">Descargar Plantilla Gratis</a>
+                    <a href="https://docs.google.com/spreadsheets/d/1ke9ErUQktrusqx1rVWx1WTJ5p6qNItGd4H7mUtXUipY/copy" target="_blank" class="gs-btn-primary" onclick="if(window.trackEvent) trackEvent('gsheets_template_download');">Descargar Plantilla Gratis</a>
                 </div>
             </div>
         </div>
@@ -370,7 +370,7 @@
 
                                 <div class="gs-code-block">
                                     <div class="gs-code-header">
-                                        <button onclick="copyScript()" class="gs-btn-copy" <?= !$is_logged_in ? 'disabled' : '' ?>>
+                                        <button class="gs-btn-copy" onclick="if(window.trackEvent) trackEvent('gsheets_code_copied'); copyScript();" <?= !$is_logged_in ? 'disabled' : '' ?>>
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                                             <span id="copyText">Copiar código</span>
                                         </button>
