@@ -265,6 +265,19 @@ class BillingService
             $productDesc = 'Descarga en Excel de empresas adjudicatarias con teléfono y CNAE.';
             $metadataPlan = 'contracts_single';
 
+        } elseif ($plan === 'lookalike_single') {
+            $count = (int) ($postData['total_count'] ?? 0);
+            $amount = (float) ($postData['price'] ?? 0);
+            
+            $context = [
+                'type'        => 'lookalike_excel',
+                'total_count' => $count
+            ];
+            
+            $productName = 'Audiencia Lookalike (' . number_format($count, 0, ',', '.') . ' prospectos)';
+            $productDesc = 'Descarga de clientes clonados para marketing B2B.';
+            $metadataPlan = 'lookalike_single';
+
         } else {
             $sect = $postData['sector'] ?? '';
             $cnae = $postData['cnae'] ?? '';

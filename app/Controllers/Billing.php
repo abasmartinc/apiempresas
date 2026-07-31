@@ -116,7 +116,7 @@ class Billing extends BaseController
         $period = strtolower(trim((string) ($postData['period'] ?? 'single')));
         $pm = strtolower(trim((string) ($postData['payment_method'] ?? 'stripe')));
 
-        if (!in_array($plan, ['pro', 'business', 'radar', 'directory_single', 'subsidies_single', 'contracts_single'], true)) {
+        if (!in_array($plan, ['pro', 'business', 'radar', 'directory_single', 'subsidies_single', 'contracts_single', 'lookalike_single'], true)) {
             $plan = 'radar'; // default fallback for single downloads
         }
         if (!in_array($period, ['monthly', 'annual', 'single'], true)) {
@@ -211,11 +211,11 @@ class Billing extends BaseController
                     $cancelParams['year'] = $postData['year'];
                 }
                 $cancelUrl = site_url('checkout/contracts-export' . ($cancelParams ? '?' . http_build_query($cancelParams) : ''));
+            } elseif ($plan === 'lookalike_single') {
+                $cancelUrl = site_url('encontrar-empresas-similares');
             }
 
-
-
-            if ($period === 'single' || ($plan === 'radar' && $period === 'single') || $plan === 'directory_single' || $plan === 'subsidies_single' || $plan === 'contracts_single') {
+            if ($period === 'single' || ($plan === 'radar' && $period === 'single') || $plan === 'directory_single' || $plan === 'subsidies_single' || $plan === 'contracts_single' || $plan === 'lookalike_single') {
                 $downloadData = $this->billingService->getExcelDownloadContext($plan, $postData, $this->request->getGet() ?? []);
                 session()->set('checkout_context', $downloadData['context']);
 
@@ -727,7 +727,7 @@ class Billing extends BaseController
         }
 
         // 1. Excel Single Purchase Flow (Check context or last info)
-        $validExcelTypes = ['excel', 'directory_excel', 'subsidies_excel', 'contracts_excel'];
+        $validExcelTypes = ['excel', 'directory_excel', 'subsidies_excel', 'contracts_excel', 'lookalike_excel'];
         if (in_array($checkoutData['type'] ?? '', $validExcelTypes) || (!empty($lastInfo) && empty($subscription))) {
 
             $isDir = false;
@@ -789,6 +789,16 @@ class Billing extends BaseController
                 $downloadUrl = site_url('billing/export-subsidies?' . http_build_query($exportParams));
             } elseif (($lastInfo['type'] ?? '') === 'contracts_excel') {
                 $downloadUrl = site_url('billing/export-contracts?' . http_build_query($exportParams));
+            } elseif (($lastInfo['type'] ?? '') === 'lookalike_excel') {
+                // Pre-generar el archivo ahora para que la descarga sea instantánea
+                $lookalike = new \App\Controllers\LookalikeController();
+                $filename = $lookalike->preGenerateExcel();
+                if ($filename) {
+                    $downloadUrl = site_url('billing/export-lookalike?file=' . urlencode($filename));
+                } else {
+                    // Fallback si no hay contexto (improbable en success)
+                    $downloadUrl = site_url('billing/export-lookalike');
+                }
             }
 
             $user = $userId > 0 ? $this->userModel->find($userId) : null;

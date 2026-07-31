@@ -104,6 +104,7 @@ $routes->get('billing/export-subsidies', 'RadarController::exportSubsidiesExcel'
 $routes->get('billing/contracts_checkout', 'Billing::contracts_checkout');
 $routes->get('checkout/contracts-export', 'Billing::contracts_order_summary');
 $routes->get('billing/export-contracts', 'RadarController::exportContractsExcel');
+$routes->get('billing/export-lookalike', 'LookalikeController::exportExcel');
 $routes->get('billing/success', 'Billing::success'); // callback Stripe
 $routes->get('billing/cancel', 'Billing::cancel');   // cancel Stripe/PayPal
 $routes->get('billing/purchase-success', 'Billing::purchase_success');
@@ -430,6 +431,11 @@ $routes->get('empresas-nuevas/(:any)-en-(:any)', 'RadarController::newRadarLongT
 $routes->get('empresas-nuevas-hoy/(:any)', 'RadarController::todayProvince/$1');
 $routes->get('empresas-nuevas-semana/(:any)', 'RadarController::weekProvince/$1');
 $routes->get('empresas-nuevas-mes/(:any)', 'RadarController::monthProvince/$1');
+
+// --- Lookalike Feature ---
+$routes->get('encontrar-empresas-similares', 'LookalikeController::index');
+$routes->post('encontrar-empresas-similares/process', 'LookalikeController::process');
+$routes->get('encontrar-empresas-similares/resultados', 'LookalikeController::results');
 
 // Legacy Sitemap Redirects
 $routes->addRedirect('informes/nuevas-empresas-en-(:any)', 'empresas-nuevas/$1', 301);

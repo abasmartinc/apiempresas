@@ -1,95 +1,3 @@
-<!-- VÉRTICE TOP BANNER -->
-<style>
-    .vertice-top-banner {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%);
-        color: white;
-        padding: 10px 20px;
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        font-size: 14px;
-        position: relative;
-        z-index: 9999;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        text-align: center;
-        gap: 16px;
-        flex-wrap: wrap;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .vertice-top-banner-text {
-        font-weight: 500;
-    }
-
-    .vertice-top-banner-highlight {
-        color: #34d399;
-        /* Verde esmeralda que contrasta con el azul */
-        font-weight: 800;
-        margin-right: 4px;
-    }
-
-    .vertice-top-banner-btn {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        /* Naranja Vértice */
-        color: white;
-        text-decoration: none;
-        padding: 4px 16px;
-        border-radius: 100px;
-        font-weight: 700;
-        font-size: 13px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
-        white-space: nowrap;
-    }
-
-    .vertice-top-banner-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(245, 158, 11, 0.5);
-        color: white;
-    }
-
-    /* Ajustes para móviles */
-    @media (max-width: 600px) {
-        .vertice-top-banner {
-            padding: 12px 16px;
-            flex-direction: column;
-            gap: 10px;
-        }
-    }
-</style>
-
-<div class="vertice-top-banner">
-    <span class="vertice-top-banner-text">
-        <span class="vertice-top-banner-highlight">¡NUEVO!</span>
-        No te la juegues al abrir un local. Analiza la viabilidad de cualquier municipio con IA.
-    </span>
-    <a href="https://vertice.apiempresas.es" target="_blank" class="vertice-top-banner-btn" id="vertice-top-banner-link">
-        Probar Vértice gratis 🚀
-    </a>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Utilizamos jQuery.post exactamente igual que en el resto de la web
-            if (typeof jQuery !== 'undefined') {
-                jQuery(document).on('click', '#vertice-top-banner-link', function() {
-                    console.log('Sending tracking event para Vértice...');
-                    jQuery.post('<?= site_url("api/tracking/event") ?>', {
-                        event_type: 'cta_click',
-                        source: 'vertice_top_banner',
-                        page: window.location.pathname
-                    }).done(function(res) {
-                        console.log('Tracking guardado:', res);
-                    }).fail(function(err) {
-                        console.error('Error guardando tracking:', err);
-                    });
-                });
-            } else {
-                console.error('jQuery no está cargado, no se puede trackear el click.');
-            }
-        });
-    </script>
-</div>
-<!-- FIN VÉRTICE TOP BANNER -->
 <header class="main-site-header">
     <?php if (session('impersonator_id')): ?>
         <div
@@ -145,297 +53,146 @@
 
         <!-- Programmatic Navigation (Desktop) -->
         <nav class="desktop-only" aria-label="Principal" style="display:flex; align-items:center; gap: 20px;">
+            
             <div class="nav-dropdown">
                 <button class="nav-dropdown-trigger">
                     Soluciones
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                        stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                         <path d="m6 9 6 6 6-6" />
                     </svg>
                 </button>
-                <div class="nav-dropdown-menu nav-dropdown-mega">
-                    <a href="<?= site_url('api-empresas') ?>">
-                        <div class="nav-item-icon">🔌</div>
-                        <div>
-                            <strong>API Empresas</strong>
-                            <span>Integra datos oficiales del Registro Mercantil en tu software. Verifica CIFs al
-                                instante y automatiza el alta de clientes B2B.</span>
-                        </div>
-                    </a>
-                    <a href="<?= getRadarRedirect('header') ?>">
-                        <div class="nav-item-icon">📡</div>
-                        <div>
-                            <strong>Radar Inteligente</strong>
-                            <span>Detecta en tiempo real empresas de reciente creación publicadas en el BORME y contacta
-                                antes que tu competencia.</span>
-                        </div>
-                    </a>
+                <div class="nav-dropdown-menu nav-dropdown-mega" style="width: 760px !important; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px !important;">
+                    
+                    <div>
+                        <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 12px; margin-left: 16px;">Productos</h4>
+                        <a href="<?= site_url('api-empresas') ?>">
+                            <div class="nav-item-icon">🔌</div>
+                            <div>
+                                <strong>API Empresas</strong>
+                                <span>Integra datos oficiales del Registro Mercantil en tu software y automatiza B2B.</span>
+                            </div>
+                        </a>
+                        <a href="<?= getRadarRedirect('header') ?>">
+                            <div class="nav-item-icon">📡</div>
+                            <div>
+                                <strong>Radar Inteligente</strong>
+                                <span>Detecta en tiempo real empresas de reciente creación publicadas en el BORME.</span>
+                            </div>
+                        </a>
+                        <a href="https://vertice.apiempresas.es" target="_blank">
+                            <div class="nav-item-icon">📍</div>
+                            <div>
+                                <strong>Inteligencia Comercial</strong>
+                                <span>Analiza la viabilidad y competencia de cualquier municipio con IA.</span>
+                            </div>
+                        </a>
+                        <a href="<?= site_url('encontrar-empresas-similares') ?>">
+                            <div class="nav-item-icon">👥</div>
+                            <div>
+                                <strong>Empresas Gemelas</strong>
+                                <span>Encuentra empresas idénticas a tus mejores clientes con nuestra IA.</span>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div>
+                        <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 12px; margin-left: 16px;">Integraciones</h4>
+                        <a href="#" class="js-track-wp-cta">
+                            <div class="nav-item-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+                                    <line x1="4" x2="4" y1="22" y2="15" />
+                                </svg>
+                            </div>
+                            <div>
+                                <strong>Plugin WordPress</strong>
+                                <span>Buscador oficial para tu web</span>
+                            </div>
+                        </a>
+                        <a href="#" class="js-track-wp-cta">
+                            <div class="nav-item-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                    <line x1="3" y1="9" x2="21" y2="9" />
+                                    <line x1="9" y1="21" x2="9" y2="9" />
+                                </svg>
+                            </div>
+                            <div>
+                                <strong>Extensión Google Sheets</strong>
+                                <span>Sincronización de datos B2B</span>
+                            </div>
+                        </a>
+                        <a href="#" class="js-track-wp-cta">
+                            <div class="nav-item-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                                    <path d="M2 12h20" />
+                                </svg>
+                            </div>
+                            <div>
+                                <strong>App para Zapier / Make</strong>
+                                <span>Automatiza tus flujos de trabajo</span>
+                            </div>
+                        </a>
+                        <a href="#" class="js-track-wp-cta">
+                            <div class="nav-item-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                                    <line x1="3" y1="6" x2="21" y2="6" />
+                                    <path d="M16 10a4 4 0 0 1-8 0" />
+                                </svg>
+                            </div>
+                            <div>
+                                <strong>Plugin Shopify B2B</strong>
+                                <span>Validación en checkout</span>
+                            </div>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="nav-dropdown">
+                <button class="nav-dropdown-trigger">
+                    Listados
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6" />
+                    </svg>
+                </button>
+                <div class="nav-dropdown-menu">
                     <a href="<?= site_url('listado-de-empresas') ?>">
                         <div class="nav-item-icon">🗂️</div>
                         <div>
                             <strong>Directorio Histórico</strong>
-                            <span>Explora nuestro directorio B2B clasificado por todas las provincias y sectores (CNAE)
-                                con fichas completas de empresas.</span>
+                            <span>Explora el directorio B2B completo.</span>
                         </div>
                     </a>
                     <a href="<?= site_url('base-de-datos-de-empresas') ?>">
                         <div class="nav-item-icon">📊</div>
                         <div>
                             <strong>Descargas de BBDD</strong>
-                            <span>Filtra y exporta al instante bases de datos en formato CSV listas para tus campañas de
-                                telemarketing o cold mailing.</span>
+                            <span>Filtra y exporta listados B2B al instante.</span>
                         </div>
                     </a>
                     <a href="<?= site_url('subvenciones-empresas') ?>">
                         <div class="nav-item-icon">💰</div>
                         <div>
                             <strong>Subvenciones Públicas</strong>
-                            <span>Explora las subvenciones adjudicadas a empresas españolas de fondos estatales y europeos.</span>
+                            <span>Explora subvenciones adjudicadas.</span>
                         </div>
                     </a>
                     <a href="<?= site_url('licitaciones-del-estado') ?>">
                         <div class="nav-item-icon">🏛️</div>
                         <div>
                             <strong>Licitaciones y Contratos</strong>
-                            <span>Descubre los contratos públicos adjudicados a empresas por todos los órganos del Estado.</span>
-                        </div>
-                    </a>
-                    <!-- BANNER VÉRTICE MEGA-MENÚ (HERO VIVO + LOGO REAL) -->
-                    <a href="https://vertice.apiempresas.es" target="_blank" class="vertice-vivid-banner">
-                        <div class="vertice-vivid-icon">
-                            <!-- SVG del logo X de Vértice reconstruido fielmente -->
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="46" height="46">
-                                <defs>
-                                    <linearGradient id="vx-grad" x1="0%" y1="100%" x2="100%" y2="0%">
-                                        <stop offset="0%" stop-color="#3b82f6" />
-                                        <stop offset="100%" stop-color="#14b8a6" />
-                                    </linearGradient>
-                                </defs>
-                                <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#vx-grad)" />
-                                <g stroke="#ffffff" stroke-width="7.5" stroke-linecap="round">
-                                    <line x1="20" y1="20" x2="28" y2="28" />
-                                    <line x1="36" y1="36" x2="44" y2="44" />
-                                    <line x1="44" y1="20" x2="36" y2="28" />
-                                    <line x1="20" y1="44" x2="28" y2="36" />
-                                </g>
-                                <circle cx="32" cy="32" r="3.5" fill="#1e3a8a" />
-                            </svg>
-                        </div>
-
-                        <div class="vertice-vivid-content">
-                            <div class="vertice-vivid-title">
-                                Vértice: Inteligencia Comercial
-                                <span class="vertice-vivid-badge">NUEVO</span>
-                            </div>
-                            <div class="vertice-vivid-desc">
-                                Descubre dónde abrir tu próximo negocio. Informes automáticos de viabilidad y
-                                competencia por municipio.
-                            </div>
-                        </div>
-
-                        <div class="vertice-vivid-arrow">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M5 12h14M12 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                    </a>
-
-                    <style>
-                        .vertice-vivid-banner {
-                            display: flex;
-                            align-items: center;
-                            grid-column: 1 / -1;
-                            width: 100%;
-                            margin-top: 16px;
-                            padding: 18px 24px;
-                            /* Fondo vivo: degradado azul oscuro corporativo */
-                            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
-                            border-radius: 14px;
-                            text-decoration: none;
-                            transition: all 0.3s ease;
-                            box-sizing: border-box;
-                            box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.4);
-                            position: relative;
-                            overflow: hidden;
-                        }
-
-                        /* Brillo sutil de luz en la esquina superior derecha para darle volumen */
-                        .vertice-vivid-banner::before {
-                            content: '';
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            bottom: 0;
-                            background: radial-gradient(circle at 100% 0%, rgba(56, 189, 248, 0.2) 0%, transparent 50%);
-                            pointer-events: none;
-                        }
-
-                        .vertice-vivid-banner:hover {
-                            transform: translateY(-3px);
-                            box-shadow: 0 15px 30px -5px rgba(30, 58, 138, 0.6);
-                        }
-
-                        .vertice-vivid-icon {
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            margin-right: 20px;
-                            flex-shrink: 0;
-                            position: relative;
-                            z-index: 1;
-                        }
-
-                        .vertice-vivid-icon svg {
-                            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
-                            transition: transform 0.3s ease;
-                        }
-
-                        /* Efecto divertido: el logo rota ligeramente al pasar el ratón */
-                        .vertice-vivid-banner:hover .vertice-vivid-icon svg {
-                            transform: scale(1.05) rotate(5deg);
-                        }
-
-                        .vertice-vivid-content {
-                            flex-grow: 1;
-                            position: relative;
-                            z-index: 1;
-                        }
-
-                        .vertice-vivid-title {
-                            display: flex;
-                            align-items: center;
-                            font-family: inherit;
-                            font-size: 16px;
-                            font-weight: 700;
-                            color: #ffffff;
-                            /* Texto blanco puro */
-                            margin-bottom: 6px;
-                            letter-spacing: -0.2px;
-                        }
-
-                        .vertice-vivid-badge {
-                            background-color: #ffffff;
-                            color: #1e3a8a;
-                            /* Letras en azul oscuro corporativo */
-                            font-size: 10px;
-                            font-weight: 900;
-                            /* Un poco más gordita la letra para que se lea perfecto */
-                            padding: 3px 8px;
-                            border-radius: 100px;
-                            margin-left: 12px;
-                            letter-spacing: 0.5px;
-                            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-                        }
-
-                        .vertice-vivid-desc {
-                            font-family: inherit;
-                            font-size: 13px;
-                            color: #cbd5e1;
-                            /* Gris claro que se lee perfecto sobre oscuro */
-                            line-height: 1.5;
-                            margin: 0;
-                            padding-right: 20px;
-                        }
-
-                        .vertice-vivid-arrow {
-                            color: #38bdf8;
-                            /* Flecha en azul cyan muy llamativo */
-                            margin-left: 10px;
-                            flex-shrink: 0;
-                            transition: all 0.3s ease;
-                            position: relative;
-                            z-index: 1;
-                        }
-
-                        .vertice-vivid-banner:hover {
-                            /* El !important obliga a la web a respetar nuestro fondo oscuro */
-                            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%) !important;
-                            transform: translateY(-3px);
-                            box-shadow: 0 15px 30px -5px rgba(30, 58, 138, 0.6);
-                        }
-
-                        /* Protegemos también los colores del texto por si acaso */
-                        .vertice-vivid-banner:hover .vertice-vivid-title {
-                            color: #ffffff !important;
-                        }
-
-                        .vertice-vivid-banner:hover .vertice-vivid-desc {
-                            color: #cbd5e1 !important;
-                        }
-                    </style>
-                </div>
-            </div>
-
-            <div class="nav-dropdown">
-                <button class="nav-dropdown-trigger">
-                    Integraciones
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m6 9 6 6 6-6" />
-                    </svg>
-                </button>
-                <div class="nav-dropdown-menu">
-                    <a href="#" class="js-track-wp-cta">
-                        <div class="nav-item-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
-                                <line x1="4" x2="4" y1="22" y2="15" />
-                            </svg>
-                        </div>
-                        <div>
-                            <strong>Plugin WordPress</strong>
-                            <span>Buscador oficial para tu web</span>
-                        </div>
-                    </a>
-                    <a href="#" class="js-track-wp-cta">
-                        <div class="nav-item-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                                <line x1="3" y1="9" x2="21" y2="9" />
-                                <line x1="9" y1="21" x2="9" y2="9" />
-                            </svg>
-                        </div>
-                        <div>
-                            <strong>Extensión Google Sheets</strong>
-                            <span>Sincronización de datos B2B</span>
-                        </div>
-                    </a>
-                    <a href="#" class="js-track-wp-cta">
-                        <div class="nav-item-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10" />
-                                <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-                                <path d="M2 12h20" />
-                            </svg>
-                        </div>
-                        <div>
-                            <strong>App para Zapier / Make</strong>
-                            <span>Automatiza tus flujos de trabajo</span>
-                        </div>
-                    </a>
-                    <a href="#" class="js-track-wp-cta">
-                        <div class="nav-item-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-                                <line x1="3" y1="6" x2="21" y2="6" />
-                                <path d="M16 10a4 4 0 0 1-8 0" />
-                            </svg>
-                        </div>
-                        <div>
-                            <strong>Plugin Shopify B2B</strong>
-                            <span>Validación en checkout</span>
+                            <span>Contratos públicos del Estado.</span>
                         </div>
                     </a>
                 </div>
             </div>
 
-            <a class="minor-nav-link" href="<?= site_url('documentation') ?>">Docs</a>
+            <a class="minor-nav-link" href="<?= site_url('documentation') ?>" style="color: rgba(255,255,255,0.9); font-weight: 600; text-decoration: none; font-size: 15px; margin-left: 8px;">Docs</a>
         </nav>
 
         <div class="desktop-only auth-buttons">
@@ -524,12 +281,30 @@
             <nav class="mobile-nav">
                 <div class="mobile-nav-group">
                     <div class="mobile-nav-label">Soluciones</div>
+                    
+                    <div style="padding: 12px 18px 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em;">Productos</div>
                     <a href="<?= site_url('api-empresas') ?>" class="mobile-nav-link">
                         <span>API Empresas</span>
                     </a>
                     <a href="<?= getRadarRedirect('mobile_header') ?>" class="mobile-nav-link">
                         <span>Radar Inteligente</span>
                     </a>
+                    <a href="https://vertice.apiempresas.es" target="_blank" class="mobile-nav-link">
+                        <span>Inteligencia Comercial</span>
+                    </a>
+                    <a href="<?= site_url('encontrar-empresas-similares') ?>" class="mobile-nav-link">
+                        <span>Empresas Gemelas</span>
+                    </a>
+
+                    <div style="padding: 16px 18px 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em;">Integraciones</div>
+                    <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Plugin WordPress</span></a>
+                    <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Google Sheets</span></a>
+                    <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Zapier / Make</span></a>
+                    <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Shopify B2B</span></a>
+                </div>
+
+                <div class="mobile-nav-group" style="margin-top: 16px;">
+                    <div class="mobile-nav-label">Listados</div>
                     <a href="<?= site_url('listado-de-empresas') ?>" class="mobile-nav-link">
                         <span>Directorio Histórico</span>
                     </a>
@@ -542,14 +317,6 @@
                     <a href="<?= site_url('licitaciones-del-estado') ?>" class="mobile-nav-link">
                         <span>Licitaciones y Contratos</span>
                     </a>
-                </div>
-
-                <div class="mobile-nav-group" style="margin-top: 16px;">
-                    <div class="mobile-nav-label">Integraciones</div>
-                    <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Plugin WordPress</span></a>
-                    <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Google Sheets</span></a>
-                    <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Zapier / Make</span></a>
-                    <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Shopify B2B</span></a>
                 </div>
 
                 <div class="mobile-nav-group" style="margin-top: 16px;">

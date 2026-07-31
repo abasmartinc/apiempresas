@@ -1709,14 +1709,14 @@
                                 });
                             </script>
 
-                            <!-- CTA VERTICE (Sidebar) -->
-                            <a href="https://vertice.apiempresas.es" target="_blank" rel="noopener noreferrer" style="display: block; background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); border-radius: 12px; padding: 1.5rem 1.25rem; text-decoration: none; position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.5); transition: transform 0.2s, box-shadow 0.2s;"
+                            <!-- CTA LOOKALIKE (Sidebar) -->
+                            <a href="<?= site_url('encontrar-empresas-similares') ?>" rel="noopener noreferrer" style="display: block; background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); border-radius: 12px; padding: 1.5rem 1.25rem; text-decoration: none; position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.5); transition: transform 0.2s, box-shadow 0.2s;"
                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 30px -5px rgba(15, 23, 42, 0.6)';"
                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px -5px rgba(15, 23, 42, 0.5)';"
-                               onclick="if(window.trackEvent) trackEvent('click_vertice_banner', { source: 'company_sidebar' });">
+                               onclick="if(window.trackEvent) trackEvent('click_lookalike_banner', { source: 'company_sidebar' });">
                                 
                                 <!-- Decorative element -->
-                                <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(249, 115, 22, 0.2); filter: blur(30px); border-radius: 50%;"></div>
+                                <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(37, 99, 235, 0.2); filter: blur(30px); border-radius: 50%;"></div>
                                 
                                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.85rem; position: relative; z-index: 1;">
                                     <span style="background: #22c55e; color: #ffffff; font-size: 0.7rem; font-weight: 800; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px; text-transform: uppercase; box-shadow: 0 2px 5px rgba(34, 197, 94, 0.3);">
@@ -1724,12 +1724,12 @@
                                     </span>
                                 </div>
                                 
-                                <p style="color: #f8fafc; font-size: 1rem; line-height: 1.5; margin: 0 0 1.25rem 0; font-weight: 600; position: relative; z-index: 1;">
-                                    No te la juegues al abrir un local. Analiza la viabilidad de cualquier municipio con IA.
+                                <p style="color: #f8fafc; font-size: 0.95rem; line-height: 1.5; margin: 0 0 1.25rem 0; font-weight: 600; position: relative; z-index: 1;">
+                                    ¿Tienes una lista con tus mejores clientes? Súbela y nuestra IA encontrará miles de <strong>empresas gemelas</strong> por toda España.
                                 </p>
 
-                                <div style="display: flex; align-items: center; justify-content: center; width: 100%; background: linear-gradient(to right, #f97316, #ea580c); color: #ffffff; font-weight: 700; font-size: 1rem; padding: 12px 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); transition: all 0.2s; position: relative; z-index: 1;">
-                                    Probar Vértice gratis 🚀
+                                <div style="display: flex; align-items: center; justify-content: center; width: 100%; background: linear-gradient(to right, #fde047, #f97316); color: #1e293b; font-weight: 800; font-size: 1rem; padding: 12px 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); transition: all 0.2s; position: relative; z-index: 1;">
+                                    Subir mis clientes 🧬
                                 </div>
                             </a>
 
@@ -2938,6 +2938,79 @@
         to { opacity: 1; transform: translateY(0) scale(1); }
     }
     </style>
+    <!-- Lookalike Modal WOW Effect -->
+    <div id="lookalike-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; padding: 20px; transition: opacity 0.3s ease;">
+        <div style="background: #ffffff; border-radius: 24px; width: 100%; max-width: 520px; padding: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3); position: relative; animation: modalIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden;">
+            
+            <button onclick="document.getElementById('lookalike-modal').style.opacity='0'; setTimeout(()=>document.getElementById('lookalike-modal').style.display='none', 300);" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: #94a3b8; cursor: pointer; padding: 6px; border-radius: 50%; transition: all 0.2s; z-index: 2;" onmouseover="this.style.background='#f1f5f9'; this.style.color='#0f172a';" onmouseout="this.style.background='none'; this.style.color='#94a3b8';">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            
+            <div style="position: relative; z-index: 1; text-align: center;">
+                <div style="width: 64px; height: 64px; background: #f3e8ff; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #9333ea; margin: 0 auto 24px auto;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </div>
+                
+                <span style="display: inline-block; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 100px; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 16px;">IA B2B</span>
+                
+                <h3 style="margin: 0 0 16px 0; font-size: 1.6rem; color: #0f172a; font-weight: 900; line-height: 1.2; letter-spacing: -0.02em;">Multiplica tus ventas clonando a tus clientes</h3>
+                <p style="margin: 0 0 32px 0; font-size: 1.05rem; color: #475569; line-height: 1.6;">
+                    Sube una lista con tus mejores clientes y nuestro algoritmo cruzará miles de variables para <strong>entregarte cientos de empresas gemelas</strong> por toda España.
+                </p>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <a href="<?= site_url('encontrar-empresas-similares') ?>" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; text-align: center; background: linear-gradient(to right, #fde047, #f97316); color: #1e293b; text-decoration: none; padding: 16px 20px; border-radius: 12px; font-weight: 800; font-size: 1.1rem; box-shadow: 0 8px 20px rgba(249, 115, 22, 0.3); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 25px rgba(249, 115, 22, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(249, 115, 22, 0.3)';">
+                        Subir mis clientes 🧬
+                    </a>
+                    <button onclick="document.getElementById('lookalike-modal').style.opacity='0'; setTimeout(()=>document.getElementById('lookalike-modal').style.display='none', 300);" style="width: 100%; text-align: center; background: transparent; color: #64748b; text-decoration: none; padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 0.95rem; border: none; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#0f172a';" onmouseout="this.style.color='#64748b';">
+                        Quizás en otro momento
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mostrar modal de Lookalike después de 12 segundos (con cooldown de 7 días)
+            const modalId = 'lookalike-modal';
+            const storageKey = 'lookalike_modal_shown_v2'; // Cambiamos la key para limpiar el anterior
+            
+            const lastShownStr = localStorage.getItem(storageKey);
+            let shouldShow = false;
+            
+            if (!lastShownStr) {
+                shouldShow = true;
+            } else {
+                const lastShown = parseInt(lastShownStr, 10);
+                const daysPassed = (new Date().getTime() - lastShown) / (1000 * 60 * 60 * 24);
+                if (daysPassed >= 7) { // 7 días de enfriamiento
+                    shouldShow = true;
+                }
+            }
+            
+            if (shouldShow) {
+                setTimeout(() => {
+                    const modal = document.getElementById(modalId);
+                    if (modal) {
+                        modal.style.opacity = '0';
+                        modal.style.display = 'flex';
+                        // trigger reflow
+                        void modal.offsetWidth;
+                        modal.style.opacity = '1';
+                        
+                        // Guardamos el timestamp actual
+                        localStorage.setItem(storageKey, new Date().getTime().toString());
+                    }
+                }, 12000); // 12 segundos (momento óptimo)
+            }
+        });
+    </script>
 </body>
 
 </html>
