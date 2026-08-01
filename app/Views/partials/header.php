@@ -74,12 +74,12 @@
                                 <span>Integra datos oficiales del Registro Mercantil en tu software y automatiza B2B.</span>
                             </div>
                         </a>
-                        <a href="#" class="js-track-wp-cta" style="height: 100%;">
+                        <a href="<?= site_url('plugin-wordpress-buscador-empresas') ?>" style="height: 100%;">
                             <div class="nav-item-icon">
                                 <img src="<?= base_url('public/img/logos/wordpress.svg') ?>" width="20" height="20" alt="WordPress" style="display: block;">
                             </div>
                             <div>
-                                <strong style="display: flex; align-items: center; gap: 8px;">Plugin WordPress <b style="background: #f1f5f9; color: #64748b; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; display: inline-block; line-height: 1;">PRÓXIMAMENTE</b></strong>
+                                <strong style="display: flex; align-items: center; gap: 8px;">Plugin WordPress <b style="background: #10b981; color: white; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; display: inline-block; line-height: 1;">DISPONIBLE</b></strong>
                                 <span>Instala nuestro buscador B2B y convierte tu web en un imán de leads corporativos.</span>
                             </div>
                         </a>
@@ -285,7 +285,7 @@
                     </a>
 
                     <div style="padding: 16px 18px 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em;">Integraciones</div>
-                    <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Plugin WordPress</span></a>
+                    <a href="<?= site_url('plugin-wordpress-buscador-empresas') ?>" class="mobile-nav-link"><span>Plugin WordPress</span></a>
                     <a href="<?= site_url('integraciones/google-sheets') ?>" class="mobile-nav-link"><span>Google Sheets</span></a>
                     <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Zapier / Make</span></a>
                     <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Shopify B2B</span></a>

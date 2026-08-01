@@ -66,6 +66,51 @@ class UsageController extends BaseApiController
         }
 
         try {
+            $currentMonth = date('Y-m');
+
+            // 1. Stats
+            $monthlyCount = $this->apiRequestsModel->countRequestsForMonth($currentMonth, ['user_id' => $userId]);
+            $totalCount = $this->apiRequestsModel->where('user_id', $userId)->countAllResults();
+
+            // 2. History (Recent Queried Companies)
+            $recentRequests = $this->apiRequestsModel
+                ->select('search_term, MAX(created_at) as last_query')
+                ->where('user_id', $userId)
+                ->where('search_term IS NOT NULL')
+                ->where('search_term !=', '')
+                ->groupStart()
+                    ->like('endpoint', 'companies', 'both')
+                    ->orLike('endpoint', 'professional', 'both')
+                ->groupEnd()
+                ->groupBy('search_term')
+                ->orderBy('last_query', 'DESC')
+                ->limit(20)
+                ->findAll();
+
+            $cifs = array_column($recentRequests, 'search_term');
+
+            $history = [];
+            foreach ($cifs as $cif) {
+                $details = $this->companyModel->getByCif($cif);
+                if ($details) {
+                    $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
+                    if ((int)$planId === 1) {
+                        $details = mask_company_data($details);
+                    }
+                    $details = filter_company_data($details);
+                    $details['found'] = true;
+                    $history[] = $details;
+                } else {
+                    $history[] = [
+                        'cif'        => $cif,
+                        'name'       => 'Empresa no encontrada',
+                        'province'   => '-',
+                        'cnae_label' => '-',
+                        'found'      => false
+                    ];
+                }
+            }
+
             // Get Plan Info and Limits
             $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
             $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
@@ -76,83 +121,13 @@ class UsageController extends BaseApiController
             
             $monthlyQuota = $planRow ? (int)$planRow->monthly_quota : get_free_plan_limit();
             $planName = $planRow ? $planRow->name : 'Free';
-
-            $currentMonth = date('Y-m');
-
-            // Define what a "billable" request is
-            $billableWhere = "user_id = {$db->escape($userId)} AND search_term IS NOT NULL AND search_term != '' AND (endpoint LIKE '%companies%' OR endpoint LIKE '%professional%')";
-
-            // 1. Stats
-            if ($planSlug === 'free') {
-                // For Free plan, quota is lifetime
-                $consumedCount = $this->apiRequestsModel->where($billableWhere, null, false)->countAllResults();
-            } else {
-                // For Paid plans, quota is monthly
-                $consumedCount = $this->apiRequestsModel
-                    ->where($billableWhere, null, false)
-                    ->where('created_at >=', $currentMonth . '-01 00:00:00')
-                    ->where('created_at <', date('Y-m-d H:i:s', strtotime($currentMonth . '-01 00:00:00 +1 month')))
-                    ->countAllResults();
-            }
-            
-            $totalCount = $this->apiRequestsModel->where($billableWhere, null, false)->countAllResults();
-
-            // 2. History
-            $historyQuery = $this->apiRequestsModel
-                ->select('search_term, created_at as last_query')
-                ->where($billableWhere, null, false);
-
-            if ($planSlug !== 'free') {
-                $historyQuery = $historyQuery
-                    ->where('created_at >=', $currentMonth . '-01 00:00:00')
-                    ->where('created_at <', date('Y-m-d H:i:s', strtotime($currentMonth . '-01 00:00:00 +1 month')));
-            }
-
-            // We don't groupBy search_term so that every individual request is shown, ensuring the count matches exactly
-            $recentRequests = $historyQuery
-                ->orderBy('created_at', 'DESC')
-                ->limit(100) // Same as max free limit, so it matches perfectly
-                ->findAll();
-
-            $history = [];
-            $memo = [];
-            foreach ($recentRequests as $req) {
-                $cif = $req['search_term'];
-                if (isset($memo[$cif])) {
-                    $history[] = $memo[$cif];
-                    continue;
-                }
-                
-                $details = $this->companyModel->getByCif($cif);
-                if ($details) {
-                    if ((int)$planId === 1) {
-                        $details = mask_company_data($details);
-                    }
-                    $details = filter_company_data($details);
-                    $details['found'] = true;
-                    $memo[$cif] = $details;
-                    $history[] = $details;
-                } else {
-                    $notFound = [
-                        'cif'        => $cif,
-                        'name'       => 'Empresa no encontrada',
-                        'province'   => '-',
-                        'cnae_label' => '-',
-                        'found'      => false
-                    ];
-                    $memo[$cif] = $notFound;
-                    $history[] = $notFound;
-                }
-            }
-
-            $remainingCalls = max(0, $monthlyQuota - $consumedCount);
+            $remainingCalls = max(0, $monthlyQuota - $monthlyCount);
 
             return $this->respond([
                 'success' => true,
                 'data'    => [
                     'stats' => [
-                        // Retenemos el nombre 'monthly_queries' para no romper la compatibilidad con apps móviles/plugins antiguos
-                        'monthly_queries' => $consumedCount,
+                        'monthly_queries' => $monthlyCount,
                         'total_queries'   => $totalCount,
                         'monthly_quota'   => $monthlyQuota,
                         'remaining_calls' => $remainingCalls,
