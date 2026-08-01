@@ -63,92 +63,80 @@
                 </button>
                 <div class="nav-dropdown-menu nav-dropdown-mega" style="width: 760px !important; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px !important;">
                     
-                    <div>
                         <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 12px; margin-left: 16px;">Productos</h4>
-                        <a href="<?= site_url('api-empresas') ?>">
+                        <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 12px; margin-left: 16px;">Integraciones</h4>
+
+                        <!-- Fila 1 -->
+                        <a href="<?= site_url('api-empresas') ?>" style="height: 100%;">
                             <div class="nav-item-icon">🔌</div>
                             <div>
                                 <strong>API Empresas</strong>
                                 <span>Integra datos oficiales del Registro Mercantil en tu software y automatiza B2B.</span>
                             </div>
                         </a>
-                        <a href="<?= getRadarRedirect('header') ?>">
+                        <a href="#" class="js-track-wp-cta" style="height: 100%;">
+                            <div class="nav-item-icon">
+                                <img src="<?= base_url('public/img/logos/wordpress.svg') ?>" width="20" height="20" alt="WordPress" style="display: block;">
+                            </div>
+                            <div>
+                                <strong style="display: flex; align-items: center; gap: 8px;">Plugin WordPress <b style="background: #f1f5f9; color: #64748b; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; display: inline-block; line-height: 1;">PRÓXIMAMENTE</b></strong>
+                                <span>Instala nuestro buscador B2B y convierte tu web en un imán de leads corporativos.</span>
+                            </div>
+                        </a>
+
+                        <!-- Fila 2 -->
+                        <a href="<?= getRadarRedirect('header') ?>" style="height: 100%;">
                             <div class="nav-item-icon">📡</div>
                             <div>
                                 <strong>Radar Inteligente</strong>
                                 <span>Detecta en tiempo real empresas de reciente creación publicadas en el BORME.</span>
                             </div>
                         </a>
-                        <a href="https://vertice.apiempresas.es" target="_blank">
+                        <a href="<?= site_url('integraciones/google-sheets') ?>" style="height: 100%;">
+                            <div class="nav-item-icon">
+                                <img src="<?= base_url('public/img/logos/googlesheets.svg') ?>" width="20" height="20" alt="Google Sheets" style="display: block;">
+                            </div>
+                            <div>
+                                <strong style="display: flex; align-items: center; gap: 8px;">Extensión Google Sheets <b style="background: #10b981; color: white; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; display: inline-block; line-height: 1;">DISPONIBLE</b></strong>
+                                <span>Sincroniza y enriquece bases de datos B2B masivamente sin salir de tus hojas de cálculo.</span>
+                            </div>
+                        </a>
+
+                        <!-- Fila 3 -->
+                        <a href="https://vertice.apiempresas.es" target="_blank" style="height: 100%;">
                             <div class="nav-item-icon">📍</div>
                             <div>
                                 <strong>Inteligencia Comercial</strong>
                                 <span>Analiza la viabilidad y competencia de cualquier municipio con IA.</span>
                             </div>
                         </a>
-                        <a href="<?= site_url('encontrar-empresas-similares') ?>">
+                        <a href="#" class="js-track-wp-cta" style="height: 100%;">
+                            <div class="nav-item-icon">
+                                <img src="<?= base_url('public/img/logos/zapier.svg') ?>" width="20" height="20" alt="Zapier" style="display: block;">
+                            </div>
+                            <div>
+                                <strong style="display: flex; align-items: center; gap: 8px;">App para Zapier / Make <b style="background: #f1f5f9; color: #64748b; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; display: inline-block; line-height: 1;">PRÓXIMAMENTE</b></strong>
+                                <span>Automatiza tus procesos comerciales conectando nuestra API con miles de apps.</span>
+                            </div>
+                        </a>
+
+                        <!-- Fila 4 -->
+                        <a href="<?= site_url('encontrar-empresas-similares') ?>" style="height: 100%;">
                             <div class="nav-item-icon">👥</div>
                             <div>
                                 <strong>Empresas Gemelas</strong>
                                 <span>Encuentra empresas idénticas a tus mejores clientes con nuestra IA.</span>
                             </div>
                         </a>
-                    </div>
-
-                    <div>
-                        <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 12px; margin-left: 16px;">Integraciones</h4>
-                        <a href="#" class="js-track-wp-cta">
+                        <a href="#" class="js-track-wp-cta" style="height: 100%;">
                             <div class="nav-item-icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
-                                    <line x1="4" x2="4" y1="22" y2="15" />
-                                </svg>
-                            </div>
-                            <div>
-                                <strong style="display: flex; align-items: center; gap: 8px;">Plugin WordPress <b style="background: #f1f5f9; color: #64748b; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; display: inline-block; line-height: 1;">PRÓXIMAMENTE</b></strong>
-                                <span>Buscador oficial para tu web</span>
-                            </div>
-                        </a>
-                        <a href="<?= site_url('integraciones/google-sheets') ?>">
-                            <div class="nav-item-icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                                    <line x1="3" y1="9" x2="21" y2="9" />
-                                    <line x1="9" y1="21" x2="9" y2="9" />
-                                </svg>
-                            </div>
-                            <div>
-                                <strong style="display: flex; align-items: center; gap: 8px;">Extensión Google Sheets <b style="background: #10b981; color: white; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; display: inline-block; line-height: 1;">DISPONIBLE</b></strong>
-                                <span>Sincronización de datos B2B</span>
-                            </div>
-                        </a>
-                        <a href="#" class="js-track-wp-cta">
-                            <div class="nav-item-icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-                                    <path d="M2 12h20" />
-                                </svg>
-                            </div>
-                            <div>
-                                <strong style="display: flex; align-items: center; gap: 8px;">App para Zapier / Make <b style="background: #f1f5f9; color: #64748b; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; display: inline-block; line-height: 1;">PRÓXIMAMENTE</b></strong>
-                                <span>Automatiza tus flujos de trabajo</span>
-                            </div>
-                        </a>
-                        <a href="#" class="js-track-wp-cta">
-                            <div class="nav-item-icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-                                    <line x1="3" y1="6" x2="21" y2="6" />
-                                    <path d="M16 10a4 4 0 0 1-8 0" />
-                                </svg>
+                                <img src="<?= base_url('public/img/logos/shopify.svg') ?>" width="20" height="20" alt="Shopify" style="display: block;">
                             </div>
                             <div>
                                 <strong style="display: flex; align-items: center; gap: 8px;">Plugin Shopify B2B <b style="background: #f1f5f9; color: #64748b; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; display: inline-block; line-height: 1;">PRÓXIMAMENTE</b></strong>
-                                <span>Validación en checkout</span>
+                                <span>Valida automáticamente el CIF y la salud financiera de tus clientes en el checkout.</span>
                             </div>
                         </a>
-                    </div>
 
                 </div>
             </div>
