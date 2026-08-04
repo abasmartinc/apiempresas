@@ -187,7 +187,12 @@ class MetricsController extends BaseController
                 (SELECT MAX(created_at) FROM tracking_events WHERE user_id = u.id AND event_name = 'api_key_copied') as last_key_copied,
                 (SELECT COUNT(*) FROM tracking_events WHERE user_id = u.id AND event_name = 'cta_upgrade_click') as cta_clicks
             FROM users u
-            LEFT JOIN user_subscriptions s ON (s.user_id = u.id AND s.status = 'active')
+            LEFT JOIN (
+                SELECT user_id, MAX(plan_id) as plan_id 
+                FROM user_subscriptions 
+                WHERE status = 'active' 
+                GROUP BY user_id
+            ) s ON s.user_id = u.id
             LEFT JOIN api_plans p ON s.plan_id = p.id
             WHERE (s.plan_id IS NULL OR s.plan_id = 1)
             AND (u.unsuscribe IS NULL OR u.unsuscribe != 1)
