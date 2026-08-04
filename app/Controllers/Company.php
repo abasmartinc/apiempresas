@@ -718,4 +718,435 @@ class Company extends BaseController
             'message' => '¡Gracias por ayudarnos a mejorar!'
         ]);
     }
+
+    /**
+     * Endpoint temporal para probar el diseño del Informe Premium Marca Blanca
+     */
+    public function previewPremiumPdf($id)
+    {
+        $id = (int)$id;
+        $company = $this->companyModel->getById($id);
+
+        if (!$company) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        // Administrators
+        $adminsRaw = $this->adminModel->getByCompanyId($id);
+        $filteredAdmins = [];
+        $excludeKeywords = ['CAPITAL', 'DOMICILIO', 'OBJETO SOCIAL', 'OTROS CONCEPTOS', 'COMIENZO DE OPERACIONES', 'INSCRIPCION', 'RESULTANTE', 'SUSCRITO', 'EURO', 'REMITIDO'];
+        $seenAdmins = [];
+
+        foreach ($adminsRaw as $admin) {
+            $nameStr = strtoupper($admin['name'] ?? '');
+            $posStr = strtoupper($admin['position'] ?? '');
+            $combinedText = $nameStr . ' ' . $posStr;
+
+            $exclude = false;
+            foreach ($excludeKeywords as $kw) {
+                if (strpos($combinedText, $kw) !== false) {
+                    $exclude = true;
+                    break;
+                }
+            }
+            if ($exclude || preg_match('/[0-9]+/', $nameStr)) continue;
+
+            $uniqueKey = md5(trim($nameStr) . '|' . trim($posStr));
+            if (isset($seenAdmins[$uniqueKey])) continue;
+
+            $seenAdmins[$uniqueKey] = true;
+            $filteredAdmins[] = $admin;
+        }
+
+        // Radar Score
+        $radarModel = new \App\Models\CompanyRadarScoreModel();
+        $radarScore = $radarModel->where('company_id', $id)->first();
+
+        // Variables de Marca Blanca simuladas (hardcoded para la prueba)
+        $brandColor = '#c026d3'; // Un color fucsia corporativo de prueba
+        $brandName = 'Agencia Global SEO';
+        $brandFooterText = 'Documento confidencial generado por Agencia Global SEO para uso interno.';
+        
+        // Simular logo (usamos el de APIEmpresas como si fuera el de la agencia, o lo dejamos vacío para que use texto)
+        $brandLogoBase64 = '';
+        $logoPath = ROOTPATH . 'public/images/logo.png';
+        if (file_exists($logoPath)) {
+            $type = pathinfo($logoPath, PATHINFO_EXTENSION);
+            $data = file_get_contents($logoPath);
+            // Lo quitamos en la prueba para ver cómo queda con el texto, o lo dejamos. Lo dejaremos vacío para que se vea el brandName.
+            // $brandLogoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        }
+
+        $options = new \Dompdf\Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
+        
+        $dompdf = new \Dompdf\Dompdf($options);
+        
+        $html = view('reports/company_pdf_premium', [
+            'company'         => $company,
+            'administrators'  => $filteredAdmins,
+            'bormePosts'      => $this->bormePostsModel->getByCompanyId($id),
+            'radarScore'      => $radarScore,
+            'brandColor'      => $brandColor,
+            'brandName'       => $brandName,
+            'brandFooterText' => $brandFooterText,
+            'brandLogoBase64' => $brandLogoBase64
+        ]);
+
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'informe_premium_prueba.pdf';
+        
+        return $this->response->setHeader('Content-Type', 'application/pdf')
+                              ->setHeader('Content-Disposition', 'inline; filename="' . $filename . '"')
+                              ->setHeader('X-Robots-Tag', 'noindex, nofollow')
+                              ->setBody($dompdf->output());
+    }
+
+    /**
+     * AJAX POST endpoint to generate the Premium PDF and send it via email if requested.
+     */
+    /**
+     * AJAX POST endpoint to checkout the Premium PDF via Stripe
+     */
+    public function checkoutPremiumPdf()
+    {
+        $request = service('request');
+        if (!$request->isAJAX()) {
+            return $this->response->setStatusCode(403)->setJSON(['status' => 'error', 'message' => 'Acceso denegado']);
+        }
+
+        $companyId = (int)$request->getPost('company_id');
+        $agencyName = trim((string)$request->getPost('agency_name'));
+        $brandColor = trim((string)$request->getPost('brand_color'));
+        $footerText = trim((string)$request->getPost('footer_text'));
+        $email = trim((string)$request->getPost('email'));
+
+        if ($companyId <= 0 || empty($agencyName)) {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Datos inválidos. El nombre de la agencia es obligatorio.']);
+        }
+
+        $company = $this->companyModel->getById($companyId);
+        if (!$company) {
+            return $this->response->setStatusCode(404)->setJSON(['status' => 'error', 'message' => 'Empresa no encontrada']);
+        }
+
+        // Handle Image Upload
+        $logoPath = null;
+        $file = $this->request->getFile('brand_logo');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $mime = $file->getMimeType();
+            if (in_array($mime, ['image/png', 'image/jpeg', 'image/jpg'])) {
+                if ($file->getSize() < 2097152) { // Max 2MB
+                    $newName = $file->getRandomName();
+                    $uploadDir = WRITEPATH . 'uploads/whitelabel/logos/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    $file->move($uploadDir, $newName);
+                    $logoPath = $newName;
+                }
+            }
+        }
+
+        // Save order in database
+        $uuid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+        );
+
+        $pdfOrderModel = new \App\Models\PdfOrderModel();
+        $orderId = $pdfOrderModel->insert([
+            'uuid' => $uuid,
+            'company_id' => $companyId,
+            'agency_name' => $agencyName,
+            'brand_color' => $brandColor,
+            'footer_text' => $footerText,
+            'email' => $email,
+            'logo_path' => $logoPath,
+            'status' => 'pending'
+        ]);
+
+        // Start Stripe Checkout or Simulator
+        if (env('BILLING_MODE') === 'simulator') {
+            // Simulator Bypass
+            $fakeSessionId = 'sim_' . time() . '_' . random_string('alnum', 10);
+            $pdfOrderModel->update($orderId, ['stripe_session_id' => $fakeSessionId, 'status' => 'paid']);
+            
+            return $this->response->setJSON([
+                'status' => 'success',
+                'checkout_url' => site_url('empresa/success-premium-pdf?session_id=' . $fakeSessionId . '&uuid=' . $uuid)
+            ]);
+        }
+
+        try {
+            $stripeService = new \App\Services\StripeService();
+            $sessionParams = [
+                'payment_method_types' => ['card', 'paypal'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'eur',
+                        'unit_amount' => 390, // 3,90 €
+                        'product_data' => [
+                            'name' => 'Informe Marca Blanca - ' . $company['name'],
+                            'description' => 'Dossier Ejecutivo Premium (PDF)',
+                        ],
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'client_reference_id' => $orderId,
+                'success_url' => site_url('empresa/success-premium-pdf?session_id={CHECKOUT_SESSION_ID}&uuid=' . $uuid),
+                'cancel_url' => site_url('empresa/' . $company['cif']),
+            ];
+            
+            // Check if we have tax rate
+            $taxRate = $stripeService->getTaxRateId();
+            if ($taxRate) {
+                $sessionParams['line_items'][0]['tax_rates'] = [$taxRate];
+            }
+
+            $session = $stripeService->createCheckoutSession($sessionParams);
+            
+            // Update order with session_id
+            $pdfOrderModel->update($orderId, ['stripe_session_id' => $session->id]);
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'checkout_url' => $session->url
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', '[checkoutPremiumPdf] Stripe Error: ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON(['status' => 'error', 'message' => 'Error al conectar con la pasarela de pago.']);
+        }
+    }
+
+    /**
+     * Endpoint for successful payment return, generates PDF
+     */
+    public function successPremiumPdf()
+    {
+        $sessionId = $this->request->getGet('session_id');
+        $uuid = $this->request->getGet('uuid');
+
+        if (!$sessionId || !$uuid) {
+            return redirect()->to('/')->with('error', 'Enlace de descarga inválido.');
+        }
+
+        $pdfOrderModel = new \App\Models\PdfOrderModel();
+        $order = $pdfOrderModel->where('uuid', $uuid)->first();
+
+        if (!$order) {
+            return redirect()->to('/')->with('error', 'Pedido no encontrado.');
+        }
+
+        // Validate payment with Stripe API (to prevent URL sharing without payment)
+        if (strpos($sessionId, 'sim_') === 0 && env('BILLING_MODE') === 'simulator') {
+            // Simulator bypass: trust the local status
+            if ($order['status'] !== 'paid') {
+                return redirect()->to('/')->with('error', 'El pago simulado no se completó.');
+            }
+        } else {
+            try {
+                $stripeService = new \App\Services\StripeService();
+                $stripeSession = \Stripe\Checkout\Session::retrieve($sessionId);
+                
+                if ($stripeSession->payment_status !== 'paid') {
+                    return redirect()->to('/')->with('error', 'El pago no ha sido completado.');
+                }
+            } catch (\Exception $e) {
+                return redirect()->to('/')->with('error', 'Error validando el pago.');
+            }
+        }
+
+        // Mark as paid if it wasn't
+        if ($order['status'] !== 'paid') {
+            $pdfOrderModel->update($order['id'], ['status' => 'paid']);
+        }
+
+        // Mostrar pantalla de éxito
+        return view('reports/premium_success', [
+            'order' => $order,
+            'companyId' => $order['company_id']
+        ]);
+    }
+
+    public function generateAndDownloadPremiumPdf()
+    {
+        $uuid = $this->request->getGet('uuid');
+        if (!$uuid) return redirect()->to('/')->with('error', 'Enlace inválido');
+
+        $pdfOrderModel = new \App\Models\PdfOrderModel();
+        $order = $pdfOrderModel->where('uuid', $uuid)->first();
+        if (!$order || $order['status'] !== 'paid') {
+            return redirect()->to('/')->with('error', 'Pedido no válido o no pagado');
+        }
+
+        return $this->generatePdfFromOrder($order);
+    }
+
+    private function generatePdfFromOrder(array $order)
+    {
+        $companyId = $order['company_id'];
+        $company = $this->companyModel->getById($companyId);
+        if (!$company) {
+            return redirect()->to('/')->with('error', 'Empresa no encontrada');
+        }
+
+        // Load Logo Base64
+        $brandLogoBase64 = '';
+        if (!empty($order['logo_path'])) {
+            $logoFullPath = WRITEPATH . 'uploads/whitelabel/logos/' . $order['logo_path'];
+            if (file_exists($logoFullPath)) {
+                $data = file_get_contents($logoFullPath);
+                $type = pathinfo($logoFullPath, PATHINFO_EXTENSION);
+                $brandLogoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+            }
+        }
+
+        // Administrators
+        $adminsRaw = $this->adminModel->getByCompanyId($companyId);
+        $filteredAdmins = [];
+        $excludeKeywords = ['CAPITAL', 'DOMICILIO', 'OBJETO SOCIAL', 'OTROS CONCEPTOS', 'COMIENZO DE OPERACIONES', 'INSCRIPCION', 'RESULTANTE', 'SUSCRITO', 'EURO', 'REMITIDO'];
+        $seenAdmins = [];
+
+        foreach ($adminsRaw as $admin) {
+            $nameStr = strtoupper($admin['name'] ?? '');
+            $posStr = strtoupper($admin['position'] ?? '');
+            $combinedText = $nameStr . ' ' . $posStr;
+
+            $exclude = false;
+            foreach ($excludeKeywords as $kw) {
+                if (strpos($combinedText, $kw) !== false) {
+                    $exclude = true;
+                    break;
+                }
+            }
+            if ($exclude || preg_match('/[0-9]+/', $nameStr)) continue;
+
+            $uniqueKey = md5(trim($nameStr) . '|' . trim($posStr));
+            if (isset($seenAdmins[$uniqueKey])) continue;
+
+            $seenAdmins[$uniqueKey] = true;
+            $filteredAdmins[] = $admin;
+        }
+
+        // Radar Score
+        $radarModel = new \App\Models\CompanyRadarScoreModel();
+        $radarData = $radarModel->where('company_id', $companyId)->first();
+        if ($radarData) {
+            $company = array_merge($company, $radarData);
+        }
+        $dynamicScoreData = \App\Libraries\RadarScoringSystem::calculate($company);
+        
+        // Remove emojis because DOMPDF Helvetica font does not support them
+        $dynamicScoreData['visuals']['icon'] = '';
+        
+        // Generate QR code as base64 to avoid remote load issues in Dompdf
+        $profileUrl = base_url('empresa/' . $company['id']);
+        $qrApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&format=png&margin=0&data=' . urlencode($profileUrl);
+        $qrBase64 = '';
+        try {
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $qrApiUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
+            $qrData = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            
+            if ($httpCode == 200 && $qrData) {
+                $qrBase64 = 'data:image/png;base64,' . base64_encode($qrData);
+            }
+        } catch (\Exception $e) {}
+
+        // Contracts & Subsidies
+        $contracts = [];
+        $subsidies = [];
+        if (!empty($company['cif'])) {
+            $db = \Config\Database::connect();
+            $contracts = $db->table('company_contracts')
+                ->where('company_cif', $company['cif'])
+                ->orderBy('fecha_adjudicacion', 'DESC')
+                ->get()->getResultArray();
+                
+            $subsidies = $db->table('company_subsidies')
+                ->where('company_cif', $company['cif'])
+                ->orderBy('fecha_concesion', 'DESC')
+                ->get()->getResultArray();
+        }
+
+        // Dompdf configuration
+        $options = new \Dompdf\Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
+        
+        $dompdf = new \Dompdf\Dompdf($options);
+        
+        $html = view('reports/company_pdf_premium', [
+            'company'         => $company,
+            'administrators'  => $filteredAdmins,
+            'bormePosts'      => $this->bormePostsModel->getByCompanyId($companyId),
+            'radarScore'      => $dynamicScoreData,
+            'contracts'       => $contracts,
+            'subsidies'       => $subsidies,
+            'brandColor'      => $order['brand_color'] ?: '#0f172a',
+            'brandName'       => $order['agency_name'],
+            'brandFooterText' => $order['footer_text'],
+            'brandLogoBase64' => $brandLogoBase64,
+            'qrBase64'        => $qrBase64
+        ]);
+
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $pdfContent = $dompdf->output();
+
+        // Send Email if provided
+        if (!empty($order['email']) && filter_var($order['email'], FILTER_VALIDATE_EMAIL)) {
+            $uploadDir = WRITEPATH . 'uploads/whitelabel/';
+            if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+            $filename = 'informe_' . $companyId . '_' . time() . '.pdf';
+            $filePath = $uploadDir . $filename;
+            file_put_contents($filePath, $pdfContent);
+
+            $emailService = \Config\Services::email();
+            $emailService->setFrom('noreply@apiempresas.es', 'APIEmpresas');
+            $emailService->setTo($order['email']);
+            $emailService->setSubject('Tu Informe Premium Marca Blanca - ' . $company['name']);
+            $emailService->setMessage('Hola,<br><br>Adjuntamos el informe mercantil premium que acabas de generar para <b>' . esc($company['name']) . '</b>.<br><br>Un saludo.');
+            $emailService->attach($filePath);
+            $emailService->send();
+            
+            // Delete temp file after sending
+            @unlink($filePath);
+        }
+
+        return $this->response->setHeader('Content-Type', 'application/pdf')
+                              ->setHeader('Content-Disposition', 'attachment; filename="informe_marca_blanca_' . $company['cif'] . '.pdf"')
+                              ->setHeader('X-Robots-Tag', 'noindex, nofollow')
+                              ->setBody($pdfContent);
+    }
+
+    /**
+     * Endpoint to download the generated Premium PDF
+     */
+    public function downloadPremiumPdf($filename)
+    {
+        $filename = basename($filename); // Prevent path traversal
+        $filePath = WRITEPATH . 'uploads/whitelabel/' . $filename;
+
+        if (!file_exists($filePath)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('El archivo ha expirado o no existe.');
+        }
+
+        return $this->response->download($filePath, null)->setFileName('Informe_Premium.pdf');
+    }
 }

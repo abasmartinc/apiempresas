@@ -506,6 +506,11 @@ $routes->post('company/rate', 'Company::submitRating');
 $routes->post('company/rate_feedback', 'Company::submitRatingFeedback');
 
 $routes->get('empresa/export/(:num)', 'Company::exportPdf/$1');
+$routes->get('empresa/preview-premium/(:num)', 'Company::previewPremiumPdf/$1');
+$routes->post('empresa/checkout-premium-pdf', 'Company::checkoutPremiumPdf');
+$routes->get('empresa/success-premium-pdf', 'Company::successPremiumPdf');
+$routes->get('empresa/download-premium-pdf', 'Company::generateAndDownloadPremiumPdf');
+$routes->get('empresa/download-premium-pdf/(:any)', 'Company::downloadPremiumPdf/$1');
 $routes->get('empresa/(:num)-(:any)', 'Company::showById/$1/$2');
 $routes->get('empresa/(:num)', 'Company::showById/$1');
 $routes->get('test-pdf', 'TestPdf::index');

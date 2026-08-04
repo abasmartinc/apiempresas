@@ -1139,6 +1139,15 @@
                                             </svg>
                                             Descargar informe
                                         </a>
+                                        <button type="button" onclick="document.getElementById('whitelabel-modal').style.display='flex';"
+                                            style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-size: 0.9rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);"
+                                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(16, 185, 129, 0.4)';"
+                                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(16, 185, 129, 0.3)';">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                                            </svg>
+                                            PDF Premium
+                                        </button>
                                     </div>
                                 </div>
 
@@ -2956,6 +2965,152 @@
         to { opacity: 1; transform: translateY(0) scale(1); }
     }
     </style>
+    <!-- Whitelabel Modal -->
+    <div id="whitelabel-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: #ffffff; border-radius: 24px; width: 100%; max-width: 850px; padding: 0; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3); position: relative; overflow-y: auto; max-height: 90vh; display: flex; flex-wrap: wrap;">
+            
+            <button onclick="document.getElementById('whitelabel-modal').style.display='none';" style="position: absolute; top: 15px; right: 15px; background: #f1f5f9; border: none; color: #64748b; cursor: pointer; padding: 8px; border-radius: 50%; transition: all 0.2s; z-index: 10;" onmouseover="this.style.background='#e2e8f0'; this.style.color='#0f172a'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            
+            <!-- Left Side: Features & Preview Info -->
+            <div style="flex: 1 1 350px; background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); padding: 40px; border-radius: 24px 0 0 24px; border-right: 1px solid #e2e8f0;">
+                <h3 style="margin: 0 0 20px 0; font-size: 1.4rem; color: #ffffff; font-weight: 800;">¿Qué incluye el informe?</h3>
+                <p style="color: #cbd5e1; margin-bottom: 25px; line-height: 1.5; font-size: 0.95rem;">
+                    Obtén un dossier ejecutivo en PDF de 4 páginas de <strong style="color: #ffffff;"><?= esc($companyName) ?></strong>, con un diseño premium y la siguiente inteligencia comercial:
+                </p>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 18px;">
+                    <li style="display: flex; gap: 12px; align-items: flex-start;">
+                        <span style="color: #f472b6; background: rgba(236, 72, 153, 0.2); padding: 8px; border-radius: 10px; display: inline-flex;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></span>
+                        <div>
+                            <strong style="color: #ffffff; display: block; margin-bottom: 4px; font-size: 1rem;">Datos Generales y Contacto</strong>
+                            <span style="color: #94a3b8; font-size: 0.9rem; line-height: 1.4; display: block;">Dirección completa, teléfonos, CNAE, provincia, municipio y datos de registro.</span>
+                        </div>
+                    </li>
+                    <li style="display: flex; gap: 12px; align-items: flex-start;">
+                        <span style="color: #34d399; background: rgba(16, 185, 129, 0.2); padding: 8px; border-radius: 10px; display: inline-flex;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+                        <div>
+                            <strong style="color: #ffffff; display: block; margin-bottom: 4px; font-size: 1rem;">Diseño Espectacular</strong>
+                            <span style="color: #94a3b8; font-size: 0.9rem; line-height: 1.4; display: block;">Portada premium, tipografías modernas y gráficas visuales. Todo adaptado a tus colores.</span>
+                        </div>
+                    </li>
+                    <li style="display: flex; gap: 12px; align-items: flex-start;">
+                        <span style="color: #60a5fa; background: rgba(59, 130, 246, 0.2); padding: 8px; border-radius: 10px; display: inline-flex;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"></path></svg></span>
+                        <div>
+                            <strong style="color: #ffffff; display: block; margin-bottom: 4px; font-size: 1rem;">Estructura y BORME</strong>
+                            <span style="color: #94a3b8; font-size: 0.9rem; line-height: 1.4; display: block;">Línea temporal de actos registrales, balances y estado mercantil de la entidad.</span>
+                        </div>
+                    </li>
+                    <li style="display: flex; gap: 12px; align-items: flex-start;">
+                        <span style="color: #a78bfa; background: rgba(139, 92, 246, 0.2); padding: 8px; border-radius: 10px; display: inline-flex;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
+                        <div>
+                            <strong style="color: #ffffff; display: block; margin-bottom: 4px; font-size: 1rem;">Administradores y Cargos</strong>
+                            <span style="color: #94a3b8; font-size: 0.9rem; line-height: 1.4; display: block;">Listado completo de órganos de gobierno actuales y directivos clave de la empresa.</span>
+                        </div>
+                    </li>
+                    <li style="display: flex; gap: 12px; align-items: flex-start;">
+                        <span style="color: #fbbf24; background: rgba(245, 158, 11, 0.2); padding: 8px; border-radius: 10px; display: inline-flex;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></span>
+                        <div>
+                            <strong style="color: #ffffff; display: block; margin-bottom: 4px; font-size: 1rem;">Contratos y Subvenciones</strong>
+                            <span style="color: #94a3b8; font-size: 0.9rem; line-height: 1.4; display: block;">Historial de adjudicaciones públicas y ayudas económicas (si las hubiera).</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Right Side: Personalization Form -->
+            <div style="flex: 1 1 400px; padding: 40px;">
+                <h3 style="margin: 0 0 20px 0; font-size: 1.5rem; color: #0f172a; font-weight: 800;">Personalizar PDF</h3>
+                <p style="color: #475569; margin-bottom: 25px; line-height: 1.5;">Configura la Marca Blanca. Precio: <strong>3,90€ + IVA</strong></p>
+
+                <div id="whitelabel-status"></div>
+
+                <form id="whitelabel-form" enctype="multipart/form-data">
+                <input type="hidden" name="company_id" value="<?= esc($company['id']) ?>">
+                <?= csrf_field() ?>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1e293b;">Nombre de tu Agencia/Empresa <span style="color:red">*</span></label>
+                    <input type="text" name="agency_name" required placeholder="Ej: Global Consultores" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem;">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1e293b;">Color Corporativo Principal</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="color" name="brand_color" value="#0f172a" style="width: 50px; height: 40px; border: none; cursor: pointer; border-radius: 8px; padding: 0;">
+                        <span style="color: #64748b; font-size: 0.9rem;">Se usará en títulos y gráficos.</span>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1e293b;">Logotipo (PNG/JPG)</label>
+                    <input type="file" name="brand_logo" accept="image/png, image/jpeg" style="width: 100%; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; font-size: 0.9rem;">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1e293b;">Texto de pie de página</label>
+                    <input type="text" name="footer_text" placeholder="Documento confidencial generado por Global Consultores" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem;">
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1e293b;">Enviar copia al correo electrónico</label>
+                    <input type="email" name="email" placeholder="tu@email.com" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem;">
+                </div>
+
+                <button type="submit" id="btn-whitelabel-submit" style="width: 100%; padding: 14px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
+                    Pagar 3,90€ + IVA y Descargar
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('whitelabel-form');
+        if(form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const btnSubmit = document.getElementById('btn-whitelabel-submit');
+                const statusArea = document.getElementById('whitelabel-status');
+                
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = 'Conectando con Stripe... ⏳';
+                
+                const formData = new FormData(this);
+                
+                fetch('<?= site_url("empresa/checkout-premium-pdf") ?>', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        statusArea.innerHTML = `
+                            <div style="background: #eff6ff; color: #1e3a8a; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; text-align: center;">
+                                Redirigiendo a pasarela segura... 💳
+                            </div>
+                        `;
+                        window.location.href = data.checkout_url;
+                    } else {
+                        alert('Error: ' + data.message);
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = 'Pagar 3,90€ + IVA y Descargar';
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Ocurrió un error en la conexión.');
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = 'Pagar 3,90€ + IVA y Descargar';
+                });
+            });
+        }
+    });
+    </script>
+    
     <!-- Lookalike Modal WOW Effect -->
     <div id="lookalike-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; padding: 20px; transition: opacity 0.3s ease;">
         <div style="background: #ffffff; border-radius: 24px; width: 100%; max-width: 520px; padding: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3); position: relative; animation: modalIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden;">
