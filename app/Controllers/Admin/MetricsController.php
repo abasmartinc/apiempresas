@@ -197,6 +197,9 @@ class MetricsController extends BaseController
             WHERE (s.plan_id IS NULL OR s.plan_id = 1)
             AND (u.unsuscribe IS NULL OR u.unsuscribe != 1)
             AND u.id NOT IN (
+                SELECT user_id FROM user_subscriptions WHERE plan_id > 1
+            )
+            AND u.id NOT IN (
                 SELECT user_id FROM email_logs 
                 WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
                 AND subject NOT LIKE '¡Bienvenido%' 
