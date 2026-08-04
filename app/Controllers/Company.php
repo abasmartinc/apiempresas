@@ -886,7 +886,7 @@ class Company extends BaseController
         try {
             $stripeService = new \App\Services\StripeService();
             $sessionParams = [
-                'payment_method_types' => ['card', 'paypal'],
+                'payment_method_types' => ['card'],
                 'line_items' => [[
                     'price_data' => [
                         'currency' => 'eur',
