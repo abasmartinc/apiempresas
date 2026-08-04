@@ -158,9 +158,13 @@ class Login extends BaseController
         $redirectUrl = $this->request->getPost('redirect');
         
         if (empty($redirectUrl)) {
-            // Si no hay redirección específica, comprobamos si tiene radar para mandarlo allí
+            // Si no hay redirección específica, comprobamos el plan del usuario
             $subscriptionModel = new \App\Models\UsersuscriptionsModel();
-            if ($subscriptionModel->hasActiveSubscriptionFor($user->id, 'radar')) {
+            $activePlan = $subscriptionModel->getActivePlanByUserId($user->id);
+            
+            if ($activePlan && $activePlan->plan_slug === 'copiloto_ventas') {
+                $redirectUrl = '/'; // Redirigir a la home si solo tiene copiloto_ventas
+            } elseif ($subscriptionModel->hasActiveSubscriptionFor($user->id, 'radar')) {
                 $redirectUrl = 'radar';
             } else {
                 $redirectUrl = 'dashboard';

@@ -685,6 +685,15 @@
 
         .bg-halo {
             display: none;
+                 margin-top: 20px;
+        }
+        .ai-loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px 0;
+            color: #64748b;
+            font-size: 0.9rem;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -1098,6 +1107,12 @@
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
                                             </button>
                                         </div>
+                                        <button type="button" onclick="openCopilotModal('<?= esc($companyCif) ?>');"
+                                            style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: #ffffff; font-size: 0.9rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.3);"
+                                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(99, 102, 241, 0.4)';"
+                                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(99, 102, 241, 0.3)';">
+                                            ✨ Preparar llamada con IA
+                                        </button>
                                         <button type="button" onclick="document.getElementById('crm-modal').style.display='flex';"
                                             style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #0f172a; color: #ffffff; font-size: 0.9rem; font-weight: 700; text-decoration: none; border-radius: 10px; border: 1px solid #0f172a; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer;"
                                             onmouseover="this.style.background='#1e293b'; this.style.transform='translateY(-2px)';"
@@ -2702,6 +2717,9 @@
                 </div>
         </section>
     </main>
+
+
+
 
     <?= view('partials/footer') ?>
 

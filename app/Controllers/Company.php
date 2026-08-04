@@ -76,7 +76,14 @@ class Company extends BaseController
         $isEn = (service('request')->getLocale() === 'en');
 
         // Generar título y descripción
-        $name = $company['name'] ?? ($isEn ? 'Company' : 'Empresa');
+        $rawName = $company['name'] ?? ($isEn ? 'Company' : 'Empresa');
+        $name = mb_convert_case(mb_strtolower($rawName, 'UTF-8'), MB_CASE_TITLE, 'UTF-8');
+        // Arreglar abreviaturas comunes (SL, SA, etc)
+        $name = str_replace([' S.l.', ' S.l', ' Sl', ' Sl.', ' S.L.'], ' S.L.', $name);
+        $name = str_replace([' S.a.', ' S.a', ' Sa', ' Sa.', ' S.A.'], ' S.A.', $name);
+        // Actualizamos en el array para que las vistas también lo usen
+        $company['name'] = $name;
+
         $cif  = $company['cif'] ?? $company['nif'] ?? '';
         
         // Robust check for province

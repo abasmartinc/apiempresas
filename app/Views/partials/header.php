@@ -46,7 +46,7 @@
                 </svg>
                 <div class="brand-text">
                     <span class="brand-name">API<span class="grad">Empresas</span>.es</span>
-                    <span class="brand-tag">Verificación mercantil y datos de empresas</span>
+                    <span class="brand-tag">La suite de inteligencia empresarial</span>
                 </div>
             </a>
         </div>
@@ -183,7 +183,12 @@
             <a class="minor-nav-link" href="<?= site_url('documentation') ?>" style="color: rgba(255,255,255,0.9); font-weight: 600; text-decoration: none; font-size: 15px; margin-left: 8px;">Docs</a>
         </nav>
 
-        <div class="desktop-only auth-buttons">
+        <div class="desktop-only auth-buttons" style="position: relative;">
+            <button onclick="if(typeof toggleGlobalCopilotSticky === 'function') toggleGlobalCopilotSticky();" class="btn btn_header btn_header--ghost" style="position: relative; padding-left: 12px; padding-right: 12px; gap: 8px; display: flex; align-items: center; border: 1px solid rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.15); transition: all 0.2s ease; overflow: visible;">
+                <span style="font-size: 1.1rem;">✨</span>
+                <span style="color: #f3e8ff; font-weight: 600;">Copiloto</span>
+                <span style="position: absolute; top: -8px; right: -8px; background: linear-gradient(135deg, #a855f7, #d946ef); color: white; font-size: 0.6rem; font-weight: 900; padding: 2px 6px; border-radius: 6px; letter-spacing: 0.05em; box-shadow: 0 2px 5px rgba(168, 85, 247, 0.3);">NUEVO</span>
+            </button>
             <?php if (!session('logged_in')): ?>
                 <a class="btn btn_header btn_header--ghost" href="<?= site_url() ?>enter">Iniciar sesión</a>
                 <a class="btn btn_header btn_header--primary" href="<?= site_url() ?>register">Crear cuenta gratis</a>
@@ -218,6 +223,22 @@
                             <span class="user-email-display"><?= esc(session('user_email')) ?></span>
                         </div>
                         <div class="dropdown-divider"></div>
+                        <?php
+                        $showFullMenu = true;
+                        if (session('logged_in')) {
+                            $db = \Config\Database::connect();
+                            $activePlanHeader = $db->table('user_subscriptions')
+                                ->select('plan_id')
+                                ->where('user_id', session('user_id'))
+                                ->where('status', 'active')
+                                ->orderBy('created_at', 'DESC')
+                                ->get()->getRow();
+                            if ($activePlanHeader && $activePlanHeader->plan_id == 13) {
+                                $showFullMenu = false; // Only copilot plan
+                            }
+                        }
+                        if ($showFullMenu):
+                        ?>
                         <a href="<?= site_url('dashboard') ?>" class="dropdown-item">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -237,6 +258,7 @@
                             Mis tickets
                         </a>
                         <div class="dropdown-divider"></div>
+                        <?php endif; ?>
                         <a href="<?= site_url('logout') ?>" class="dropdown-item logout logout-item">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

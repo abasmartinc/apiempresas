@@ -495,6 +495,9 @@
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Sin tarjeta de crédito</li>
                         </ul>
                         <a href="<?= site_url('register?plan=free') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar gratis", "plan": "free", "source_block": "pricing_cta", "page_type": "home"}'>Empezar gratis</a>
+                        <div style="text-align: center; margin-top: 16px;">
+                            <a href="<?= site_url('planes/free') ?>" style="color: #e2e8f0; font-size: 0.9rem; text-decoration: none; font-weight: 500; border-bottom: 1px dashed #cbd5e1; padding-bottom: 2px; transition: color 0.2s;">Ver casos de uso y ejemplos &rarr;</a>
+                        </div>
                     </div>
                     
                     <!-- PRO -->
@@ -512,6 +515,9 @@
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Grafos de Poder Societario</li>
                         </ul>
                         <a href="<?= site_url('register?plan=pro') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Pro", "plan": "pro", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Pro</a>
+                        <div style="text-align: center; margin-top: 16px;">
+                            <a href="<?= site_url('planes/pro') ?>" style="color: #c7d2fe; font-size: 0.9rem; text-decoration: none; font-weight: 500; border-bottom: 1px dashed #818cf8; padding-bottom: 2px; transition: color 0.2s;">Ver casos de uso y ejemplos &rarr;</a>
+                        </div>
                     </div>
                     
                     <!-- BUSINESS -->
@@ -529,6 +535,9 @@
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Soporte Prioritario Slack / Email</li>
                         </ul>
                         <a href="<?= site_url('register?plan=business') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Business", "plan": "business", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Business</a>
+                        <div style="text-align: center; margin-top: 16px;">
+                            <a href="<?= site_url('planes/business') ?>" style="color: #a7f3d0; font-size: 0.9rem; text-decoration: none; font-weight: 500; border-bottom: 1px dashed #34d399; padding-bottom: 2px; transition: color 0.2s;">Ver casos de uso y ejemplos &rarr;</a>
+                        </div>
                     </div>
                 </div>
 

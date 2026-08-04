@@ -116,7 +116,7 @@ class Billing extends BaseController
         $period = strtolower(trim((string) ($postData['period'] ?? 'single')));
         $pm = strtolower(trim((string) ($postData['payment_method'] ?? 'stripe')));
 
-        if (!in_array($plan, ['pro', 'business', 'radar', 'directory_single', 'subsidies_single', 'contracts_single', 'lookalike_single'], true)) {
+        if (!in_array($plan, ['pro', 'business', 'radar', 'copiloto_ventas', 'directory_single', 'subsidies_single', 'contracts_single', 'lookalike_single'], true)) {
             $plan = 'radar'; // default fallback for single downloads
         }
         if (!in_array($period, ['monthly', 'annual', 'single'], true)) {
@@ -168,6 +168,11 @@ class Billing extends BaseController
 
         try {
             $successUrl = site_url('billing/success') . '?session_id={CHECKOUT_SESSION_ID}';
+            
+            if (($postData['source'] ?? '') === 'copilot') {
+                $successUrl .= '&source=copilot';
+            }
+            
             $cancelUrl = site_url('billing/cancel');
 
             // Si es una compra de radar/excel, enviamos a Stripe una URL de cancelación dinámica
@@ -835,6 +840,11 @@ class Billing extends BaseController
                 'payment_method' => 'Tarjeta (Stripe)',
                 'order_ref' => 'SUB-' . str_pad($subscription->id ?? '0', 6, '0', STR_PAD_LEFT),
             ];
+            
+            if ($this->request->getGet('source') === 'copilot' || ($subscription->plan_slug ?? '') === 'copiloto_ventas') {
+                return $this->renderView('billing/success_copilot', $data);
+            }
+
             return $this->renderView('purchase_success', $data);
         }
 

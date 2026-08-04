@@ -35,6 +35,12 @@ class Dashboard extends BaseController
         $user   = $userModel->find($userId);
         $data['user'] = $user;
 
+        // Si el usuario tiene el plan copiloto_ventas, no tiene acceso al dashboard
+        $plan = $this->UsersuscriptionsModel->getActivePlanByUserId($userId);
+        if ($plan && $plan->plan_slug === 'copiloto_ventas') {
+            return redirect()->to(site_url('/'));
+        }
+
 
 
         // Determinar si hay que mostrar el wizard de onboarding

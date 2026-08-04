@@ -464,10 +464,13 @@ class RadarAnalyzer
         }
 
         $synergies = [
-            'marketing' => ['commerce', 'tech', 'consulting'],
+            'marketing' => ['commerce', 'tech', 'consulting', 'general'],
+            'web' => ['commerce', 'tech', 'consulting', 'general', 'hospitality', 'health'],
+            'seo' => ['commerce', 'tech', 'consulting', 'general', 'hospitality', 'health'],
             'software' => ['tech', 'consulting', 'commerce', 'logistics', 'health'],
             'rrhh' => ['consulting', 'hospitality', 'construction', 'logistics'],
             'asesoria' => ['commerce', 'construction', 'hospitality', 'general'],
+            'gestoria' => ['commerce', 'construction', 'hospitality', 'general'],
             'logistica' => ['commerce', 'industrial']
         ];
 
@@ -478,6 +481,28 @@ class RadarAnalyzer
             if (mb_stripos($sellerSectorLower, $sellerKw) !== false) {
                 if (in_array($buyerSlug, $buyerSlugs)) {
                     $synergyBonus = 20;
+                }
+            }
+        }
+
+        // --- NEW COMPANY LOGIC ---
+        // Si la empresa es de muy reciente creación (Constitución o fundada este/año pasado)
+        $isNewCompany = false;
+        if (($company['main_act_type'] ?? '') === 'Constitución') {
+            $isNewCompany = true;
+        } elseif (!empty($company['founded'])) {
+            $foundedYear = (int)substr($company['founded'], 0, 4);
+            if ($foundedYear >= date('Y') - 1) {
+                $isNewCompany = true;
+            }
+        }
+
+        $startupServices = ['web', 'seo', 'marketing', 'asesoria', 'gestoria', 'logo', 'diseño'];
+        if ($isNewCompany) {
+            foreach ($startupServices as $srv) {
+                if (mb_stripos($sellerSectorLower, $srv) !== false) {
+                    $synergyBonus += 30; // Massive bonus for selling startup services to new companies
+                    break;
                 }
             }
         }

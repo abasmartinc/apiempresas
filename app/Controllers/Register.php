@@ -193,6 +193,7 @@ class Register extends BaseController
             'is_active' => 1,
             'api_access' => 1,
             'source_app' => 'apiempresas', // Default source
+            'signup_intent' => $this->request->getPost('intent') ? trim((string) $this->request->getPost('intent')) : null,
             'preferred_product' => $prefProduct,
             'unsuscribe' => $this->request->getPost('no_marketing') ? 1 : 0,
             'created_at' => date('Y-m-d H:i:s'),
@@ -375,6 +376,7 @@ class Register extends BaseController
             'is_active' => 1,
             'api_access' => 1,
             'source_app' => 'apiempresas',
+            'signup_intent' => $this->request->getPost('intent') ? trim((string) $this->request->getPost('intent')) : null,
             'unsuscribe' => $this->request->getPost('no_marketing') ? 1 : 0,
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),

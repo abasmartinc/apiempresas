@@ -39,6 +39,16 @@ $routes->post('forgot-password', 'Login::sendResetLink');
 $routes->get('reset-password/(:any)', 'Login::resetPassword/$1');
 $routes->post('reset-password', 'Login::updatePassword');
 
+// Copilot Pro Landing
+$routes->get('copilot-pro', 'CopilotLandingController::index');
+
+// Plan Details Pages
+$routes->group('planes', function($routes) {
+    $routes->get('free', 'PlansController::free');
+    $routes->get('pro', 'PlansController::pro');
+    $routes->get('business', 'PlansController::business');
+});
+
 $routes->get('register', 'Register::index');
 $routes->get('register/quick', 'Register::quick');
 $routes->get('register_sucess', 'Register::register_sucess');
@@ -216,6 +226,9 @@ $routes->post('api/user/log-event', 'Api\EventTracker::log');
 
 // AI Internal Routes
 $routes->post('api/internal/generate-seo-text', 'AiSeoController::generate');
+$routes->post('api/ai/copilot/generate', 'AiCopilotController::generate');
+$routes->post('api/ai/copilot/email', 'AiCopilotController::emailDossier');
+$routes->post('api/ai/copilot/feedback', 'AiCopilotController::submitFeedback');
 
 // Swagger
 $routes->cli('swagger:generate', 'App\Commands\GenerateSwaggerCommand::run');

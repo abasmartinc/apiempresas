@@ -6,9 +6,7 @@ class Home extends BaseController
 {
     public function index()
     {
-        if (session('logged_in')) {
-            return redirect()->to(site_url('dashboard'));
-        }
+
 
         // SSR: Fetch latest blog posts for SEO (Cached 1h)
         $cache = \Config\Services::cache();
@@ -129,9 +127,7 @@ class Home extends BaseController
 
     public function englishStandalone()
     {
-        if (session('logged_in')) {
-            return redirect()->to(site_url('dashboard'));
-        }
+
 
         // Dynamic Social Proof Counter (English)
         $cache = \Config\Services::cache();

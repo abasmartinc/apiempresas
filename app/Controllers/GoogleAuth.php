@@ -37,6 +37,9 @@ class GoogleAuth extends BaseController
      */
     public function login()
     {
+        if ($this->request->getGet('intent')) {
+            session()->set('signup_intent', trim((string)$this->request->getGet('intent')));
+        }
         return redirect()->to($this->googleClient->createAuthUrl());
     }
 
@@ -94,7 +97,9 @@ class GoogleAuth extends BaseController
                     ]);
                 } else {
                     // 3. Crear nuevo usuario (Registro rápido)
-                    $user_id = $this->createNewGoogleUser($email, $name, $googleId, $picture);
+                    $intent = session()->get('signup_intent') ?: null;
+                    $user_id = $this->createNewGoogleUser($email, $name, $googleId, $picture, $intent);
+                    session()->remove('signup_intent');
                     $user = $this->userModel->find($user_id);
                 }
             } else {
@@ -120,7 +125,7 @@ class GoogleAuth extends BaseController
     /**
      * Crea un nuevo usuario desde el flujo de Google
      */
-    private function createNewGoogleUser($email, $name, $googleId, $picture)
+    private function createNewGoogleUser($email, $name, $googleId, $picture, $intent = null)
     {
         $db = \Config\Database::connect();
         $db->transStart();
@@ -140,6 +145,7 @@ class GoogleAuth extends BaseController
                 'is_active'     => 1,
                 'api_access'    => 1,
                 'source_app'    => 'apiempresas',
+                'signup_intent' => $intent,
                 'created_at'    => date('Y-m-d H:i:s'),
                 'updated_at'    => date('Y-m-d H:i:s'),
                 'last_login_at' => date('Y-m-d H:i:s'),

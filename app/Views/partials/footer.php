@@ -198,6 +198,9 @@
 <!-- AI CHAT BUBBLE -->
 <?= view('partials/ai_chat_bubble') ?>
 
+<!-- AI COPILOT MODAL & STICKY BAR -->
+<?= view('partials/copilot_modal') ?>
+
 <?= view('partials/legal_modals') ?>
 
 <?=view('scripts') ?>

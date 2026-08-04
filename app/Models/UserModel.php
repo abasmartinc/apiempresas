@@ -26,6 +26,7 @@ class UserModel extends Model
         'is_admin',
         'api_access',
         'source_app',
+        'signup_intent',
         'stripe_customer_id',
         'reset_token',
         'reset_expires',
@@ -37,6 +38,7 @@ class UserModel extends Model
         'migration_reset_done',
         'unsuscribe',
         'wizard_completed',
+        'ai_copilot_trials',
     ];
 
     protected $useTimestamps = false;

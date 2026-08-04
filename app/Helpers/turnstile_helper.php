@@ -10,7 +10,13 @@ if (!function_exists('verify_turnstile')) {
      */
     function verify_turnstile(string $token, string $ip = null): bool
     {
+        // Bypass para entorno local/desarrollo
+        if (env('CI_ENVIRONMENT') === 'development') {
+            return true;
+        }
+
         if (empty($token)) {
+            @file_put_contents(WRITEPATH . 'debug_turnstile.txt', date('Y-m-d H:i:s') . " | Token is EMPTY\n", FILE_APPEND);
             return false;
         }
 
@@ -57,6 +63,7 @@ if (!function_exists('verify_turnstile')) {
         }
 
         log_message('warning', 'Turnstile validation failed: ' . json_encode($result));
+        @file_put_contents(WRITEPATH . 'debug_turnstile.txt', date('Y-m-d H:i:s') . ' | Token: ' . substr($token, 0, 10) . '... | IP: ' . $ip . ' | Result: ' . $response . "\n", FILE_APPEND);
         return false;
     }
 }
