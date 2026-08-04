@@ -901,7 +901,7 @@ class Company extends BaseController
                 'mode' => 'payment',
                 'client_reference_id' => $orderId,
                 'success_url' => site_url('empresa/success-premium-pdf?session_id={CHECKOUT_SESSION_ID}&uuid=' . $uuid),
-                'cancel_url' => site_url('empresa/' . $company['cif']),
+                'cancel_url' => site_url('empresa/' . $company['id']),
             ];
             
             // Check if we have tax rate
