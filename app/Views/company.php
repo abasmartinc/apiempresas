@@ -1139,7 +1139,7 @@
                                             </svg>
                                             Descargar informe
                                         </a>
-                                        <button type="button" onclick="document.getElementById('whitelabel-modal').style.display='flex';"
+                                        <button type="button" onclick="document.getElementById('whitelabel-modal').style.display='flex'; if(window.trackEvent) trackEvent('premium_pdf_modal_opened');"
                                             style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-size: 0.9rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);"
                                             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(16, 185, 129, 0.4)';"
                                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(16, 185, 129, 0.3)';">
@@ -3070,6 +3070,7 @@
         if(form) {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
+                if(window.trackEvent) trackEvent('premium_pdf_checkout_started');
                 const btnSubmit = document.getElementById('btn-whitelabel-submit');
                 const statusArea = document.getElementById('whitelabel-status');
                 

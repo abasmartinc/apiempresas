@@ -84,6 +84,54 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        .edit-info {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 25px;
+            font-size: 0.95rem;
+            color: #64748b;
+        }
+        .btn-edit {
+            display: inline-block;
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-edit:hover { background: #f8fafc; border-color: #94a3b8; color: #0f172a; }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15,23,42,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            text-align: left;
+            position: relative;
+        }
+        .close-btn { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 24px; color: #94a3b8; border: none; background: transparent; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 0.95rem; font-weight: 600; color: #1e293b; margin-bottom: 8px; }
+        .form-group input[type="text"], .form-group input[type="color"] { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
+        .form-group input[type="color"] { height: 50px; padding: 5px; }
+        .form-group input[type="file"] { width: 100%; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -122,6 +170,48 @@
         </div>
         <div>
             <a href="<?= site_url('empresa/' . $companyId) ?>" class="btn-secondary">Volver a la ficha de la empresa</a>
+        </div>
+        
+        <div class="edit-info">
+            ¿Te has equivocado de color o logo? Puedes guardar el enlace de esta página (te lo hemos enviado por email) para volver en cualquier momento y editar el diseño de tu PDF gratis.
+            <br>
+            <button class="btn-edit" onclick="document.getElementById('edit-modal').style.display='flex'">Editar Diseño del PDF</button>
+        </div>
+    </div>
+
+    <!-- Modal de Edición -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="document.getElementById('edit-modal').style.display='none'">&times;</button>
+            <h2 style="margin-top: 0; font-size: 1.5rem;">Editar Diseño</h2>
+            <p style="font-size: 0.95rem; color: #64748b; margin-bottom: 25px;">Modifica los datos y regenera tu informe gratis.</p>
+            <form action="<?= site_url('empresa/update-premium-pdf') ?>" method="POST" enctype="multipart/form-data">
+                <?= csrf_field() ?>
+                <input type="hidden" name="uuid" value="<?= esc($order['uuid']) ?>">
+                
+                <div class="form-group">
+                    <label>Nombre de la Agencia / Consultoría</label>
+                    <input type="text" name="agency_name" value="<?= esc($order['agency_name']) ?>" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Color Corporativo Principal</label>
+                    <input type="color" name="brand_color" value="<?= esc($order['brand_color']) ?>">
+                </div>
+
+                <div class="form-group">
+                    <label>Texto del Pie de Página (Opcional)</label>
+                    <input type="text" name="footer_text" value="<?= esc($order['footer_text']) ?>" placeholder="Ej: Documento generado por MiAgencia SL">
+                </div>
+
+                <div class="form-group">
+                    <label>Logo de tu Agencia (Opcional)</label>
+                    <input type="file" name="logo" accept="image/png, image/jpeg">
+                    <small style="display:block; color:#94a3b8; margin-top:5px;">Si subes uno nuevo, reemplazará al anterior.</small>
+                </div>
+
+                <button type="submit" class="btn-primary" style="width: 100%; text-align: center; border: none; cursor: pointer;">Guardar y Regenerar PDF</button>
+            </form>
         </div>
     </div>
 </body>

@@ -286,9 +286,9 @@
         .timeline-item {
             border-left: 2px solid #cbd5e1;
             padding-left: 20px;
+            padding-bottom: 20px;
             position: relative;
-            margin-bottom: 20px;
-            page-break-inside: avoid;
+            margin-bottom: 0;
         }
         .timeline-item::before {
             content: "";
@@ -596,6 +596,111 @@
         <?php if (!empty($bormePosts)): ?>
         <div style="margin-top: 30px;">
             <div class="section-title">Actividad Registral (BORME)</div>
+            
+            <?php 
+            $actCounts = [];
+            $bormeTimeline = [];
+            $totalActs = 0;
+            foreach ($bormePosts as $post) {
+                $monthYear = date('Y-m', strtotime($post['borme_date']));
+                if (!isset($bormeTimeline[$monthYear])) $bormeTimeline[$monthYear] = ['count' => 0, 'types' => []];
+                $bormeTimeline[$monthYear]['count']++;
+                $types = array_map('trim', explode(',', strtolower($post['act_types'] ?? '')));
+                foreach ($types as $t) {
+                    if (empty($t)) continue;
+                    if (strpos($t, 'nombramiento') !== false) $t = 'Nombramientos';
+                    elseif (strpos($t, 'cese') !== false || strpos($t, 'dimision') !== false || strpos($t, 'revocacion') !== false) $t = 'Ceses/Dimisiones';
+                    elseif (strpos($t, 'capital') !== false) $t = 'Modific. de Capital';
+                    elseif (strpos($t, 'domicilio') !== false) $t = 'Cambio de Domicilio';
+                    elseif (strpos($t, 'estatutos') !== false || strpos($t, 'objeto social') !== false) $t = 'Modific. Estatutos';
+                    elseif (strpos($t, 'constitucion') !== false) $t = 'Constitución';
+                    elseif (strpos($t, 'unipersonalidad') !== false) $t = 'Unipersonalidad';
+                    elseif (strpos($t, 'cuentas') !== false) $t = 'Cuentas Anuales';
+                    elseif (strpos($t, 'socio unico') !== false) $t = 'Socio Único';
+                    else $t = 'Otros Actos';
+                    
+                    if (!isset($actCounts[$t])) $actCounts[$t] = 0;
+                    $actCounts[$t]++;
+                    $totalActs++;
+                }
+            }
+            arsort($actCounts);
+            ksort($bormeTimeline);
+            $topActs = array_slice($actCounts, 0, 4, true);
+            $maxActsTimeline = 1;
+            foreach ($bormeTimeline as $data) {
+                if ($data['count'] > $maxActsTimeline) $maxActsTimeline = $data['count'];
+            }
+            $monthsEs = ['01'=>'Ene','02'=>'Feb','03'=>'Mar','04'=>'Abr','05'=>'May','06'=>'Jun','07'=>'Jul','08'=>'Ago','09'=>'Sep','10'=>'Oct','11'=>'Nov','12'=>'Dic'];
+            ?>
+            <table style="width: 100%; border-collapse: separate; border-spacing: 10px; margin-left: -10px; margin-right: -10px; margin-bottom: 20px; page-break-inside: avoid;">
+                <tr>
+                    <!-- COL 1: Resumen IA -->
+                    <td style="width: 33.3%; vertical-align: top; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; background: #f8fafc;">
+                        <div style="font-size: 10pt; font-weight: bold; color: <?= $brandColor ?>; margin-bottom: 10px;">
+                            Resumen del BORME con IA
+                        </div>
+                        <div style="font-size: 8pt; color: #475569; line-height: 1.5;">
+                            <?= !empty($company['ai_borme_summary']) ? nl2br(esc($company['ai_borme_summary'])) : 'No hay resumen disponible.' ?>
+                        </div>
+                    </td>
+
+                    <!-- COL 2: Evolucion (Bar Chart) -->
+                    <td style="width: 33.3%; vertical-align: top; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px;">
+                        <div style="font-size: 9pt; font-weight: bold; color: #64748b; margin-bottom: 15px; text-transform: uppercase;">
+                            Evolución de Actividad
+                        </div>
+                        <table style="width: 100%; border-collapse: collapse; height: 100px;">
+                            <tr style="height: 70px;">
+                                <?php foreach ($bormeTimeline as $my => $data): 
+                                    $count = $data['count'];
+                                    // Calculate height in pixels (max 60px) instead of % for DOMPDF compatibility
+                                    $pixelHeight = max(($count / $maxActsTimeline) * 60, 5); 
+                                ?>
+                                <td style="vertical-align: bottom; text-align: center; padding: 0 2px; height: 70px;">
+                                    <div style="font-size: 7pt; color: #64748b; margin-bottom: 2px;"><?= $count ?></div>
+                                    <div style="background-color: <?= $brandColor ?>; width: 12px; margin: 0 auto; border-radius: 2px 2px 0 0; height: <?= $pixelHeight ?>px;"></div>
+                                </td>
+                                <?php endforeach; ?>
+                            </tr>
+                            <tr>
+                                <?php foreach ($bormeTimeline as $my => $data): 
+                                    list($y, $m) = explode('-', $my);
+                                ?>
+                                <td style="text-align: center; font-size: 6pt; color: #94a3b8; padding-top: 5px; line-height: 1.1;">
+                                    <?= $monthsEs[$m] ?><br><?= substr($y, 2) ?>'
+                                </td>
+                                <?php endforeach; ?>
+                            </tr>
+                        </table>
+                    </td>
+
+                    <!-- COL 3: Distribucion -->
+                    <td style="width: 33.3%; vertical-align: top; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px;">
+                        <div style="font-size: 9pt; font-weight: bold; color: #64748b; margin-bottom: 15px; text-transform: uppercase;">
+                            Distribución de Actos
+                        </div>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <?php foreach ($topActs as $type => $count): 
+                                $pct = $totalActs > 0 ? round(($count / $totalActs) * 100) : 0;
+                            ?>
+                            <tr>
+                                <td style="font-size: 7pt; color: #475569; padding-bottom: 2px;"><?= esc($type) ?></td>
+                                <td style="font-size: 7pt; color: #94a3b8; text-align: right; padding-bottom: 2px;"><?= $count ?> (<?= $pct ?>%)</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="padding-bottom: 8px;">
+                                    <div style="width: 100%; background: #f1f5f9; height: 5px; border-radius: 2px;">
+                                        <div style="width: <?= $pct ?>%; background-color: <?= $brandColor ?>; height: 5px; border-radius: 2px;"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+            
             <div class="timeline">
                 <?php foreach (array_slice($bormePosts, 0, 15) as $post): ?>
                 <div class="timeline-item">

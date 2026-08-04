@@ -926,6 +926,60 @@ class Company extends BaseController
     }
 
     /**
+     * Endpoint to update premium PDF settings via UUID without repurchasing
+     */
+    public function updatePremiumPdf()
+    {
+        $uuid = $this->request->getPost('uuid');
+        if (!$uuid) {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Falta identificador del pedido (UUID).']);
+        }
+
+        $pdfOrderModel = new \App\Models\PdfOrderModel();
+        $order = $pdfOrderModel->where('uuid', $uuid)->first();
+        if (!$order) {
+            return $this->response->setStatusCode(404)->setJSON(['status' => 'error', 'message' => 'Pedido no encontrado.']);
+        }
+        if ($order['status'] !== 'paid') {
+            return $this->response->setStatusCode(403)->setJSON(['status' => 'error', 'message' => 'Este pedido aún no ha sido pagado.']);
+        }
+
+        $agencyName = $this->request->getPost('agency_name');
+        $brandColor = $this->request->getPost('brand_color');
+        $footerText = $this->request->getPost('footer_text');
+        
+        $updateData = [
+            'agency_name' => $agencyName,
+            'brand_color' => $brandColor,
+            'footer_text' => $footerText,
+        ];
+
+        $file = $this->request->getFile('logo');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $mime = $file->getMimeType();
+            if (in_array($mime, ['image/png', 'image/jpeg', 'image/jpg'])) {
+                if ($file->getSize() < 2097152) { // Max 2MB
+                    $newName = $file->getRandomName();
+                    $uploadDir = WRITEPATH . 'uploads/whitelabel/logos/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    $file->move($uploadDir, $newName);
+                    $updateData['logo_path'] = $newName;
+                } else {
+                    return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'El logo no puede pesar más de 2MB.']);
+                }
+            } else {
+                return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Formato de imagen no permitido. Usa PNG o JPG.']);
+            }
+        }
+
+        $pdfOrderModel->update($order['id'], $updateData);
+
+        return redirect()->to('empresa/success-premium-pdf?session_id=' . urlencode($order['stripe_session_id']) . '&uuid=' . $uuid);
+    }
+
+    /**
      * Endpoint for successful payment return, generates PDF
      */
     public function successPremiumPdf()
@@ -966,6 +1020,22 @@ class Company extends BaseController
         // Mark as paid if it wasn't
         if ($order['status'] !== 'paid') {
             $pdfOrderModel->update($order['id'], ['status' => 'paid']);
+            
+            // Send notification to admin
+            try {
+                $emailService = new \App\Services\EmailService();
+                $emailService->sendPaymentNotification([
+                    'invoice_number' => 'PDF-' . strtoupper(substr($order['uuid'], 0, 8)),
+                    'customer_name'  => !empty($order['agency_name']) ? $order['agency_name'] : 'Cliente',
+                    'customer_email' => !empty($order['email']) ? $order['email'] : 'No especificado',
+                    'plan_name'      => 'Informe Premium PDF (Marca Blanca)',
+                    'amount'         => '3.90',
+                    'currency'       => 'EUR',
+                    'invoice'        => 'N/A'
+                ]);
+            } catch (\Exception $e) {
+                log_message('error', '[successPremiumPdf] Error sending email: ' . $e->getMessage());
+            }
         }
 
         // Mostrar pantalla de éxito
