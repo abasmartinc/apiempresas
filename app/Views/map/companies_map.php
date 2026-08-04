@@ -1102,8 +1102,9 @@
                     }
                 });
             }
-            loadProvinces();
-            loadSectors();
+            // Retrasar las llamadas a la API para evitar bloqueos del WAF (Anti-DDoS) por peticiones concurrentes
+            setTimeout(loadProvinces, 200);
+            setTimeout(loadSectors, 600);
         });
     
         // ---------- AI Chat Assistant Logic ----------
