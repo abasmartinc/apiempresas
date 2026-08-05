@@ -103,7 +103,7 @@ body {
 /* PLAN CARDS */
 .plan-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 24px;
 }
 
@@ -151,11 +151,14 @@ body {
     background: var(--card-bg);
     border: 1px solid var(--border-soft);
     border-radius: var(--radius-lg);
-    padding: 40px 32px;
+    padding: 28px 20px;
     box-shadow: var(--shadow-soft);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .plan-card:hover {
@@ -374,8 +377,19 @@ body {
     font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
+    white-space: nowrap;
 }
 
+.badge-gray {
+    background: #e2e8f0;
+    color: #475569;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
 .badge-green {
     background: #d1fae5;
     color: #059669;

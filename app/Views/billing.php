@@ -61,6 +61,29 @@ $fmt = function ($n) {
                 <div class="billing-left">
                     
                     <div class="plan-grid" role="radiogroup" aria-label="Planes">
+                        <!-- TARJETA FREE -->
+                        <label class="plan-card <?= ($planName === 'Free') ? 'is-current' : '' ?>" for="plan_free" data-plan="free" style="opacity: 0.95; cursor: default; border: 1px solid #e2e8f0; background: #ffffff;">
+                            <input id="plan_free" name="plan_ui" type="radio" value="free" <?= ($planName === 'Free') ? 'checked' : '' ?> disabled style="display:none;" />
+                            
+                            <div class="plan-title">
+                                <span class="name">Free</span>
+                                <?php if ($planName === 'Free'): ?>
+                                    <span class="badge-gray"><?= lang('Billing.current_plan') ?></span>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <div class="plan-price">
+                                <div class="amount" data-monthly="0" data-annual="0">0</div>
+                                <div class="currency">€ / <span class="per"><?= lang('Billing.per_month') ?></span> <span style="opacity:0"><?= lang('Billing.plus_vat') ?></span></div>
+                            </div>
+                            
+                            <div class="plan-desc">El plan básico gratuito.</div>
+                            
+                            <ul class="plan-features">
+                                <li style="color: #64748b;"><div class="feature-icon" style="background: #f1f5f9; color: #64748b;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> 100 consultas al mes</li>
+                                <li style="color: #64748b;"><div class="feature-icon" style="background: #f1f5f9; color: #64748b;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> Datos limitados</li>
+                            </ul>
+                        </label>
                         
                         <!-- TARJETA PRO -->
                         <label class="plan-card <?= ($planName === 'Pro') ? 'is-current' : '' ?> <?= (!$plan || $planName === 'Free') ? 'is-selected' : '' ?>" for="plan_pro" data-plan="pro">
@@ -172,37 +195,15 @@ $fmt = function ($n) {
                                     <!-- Línea vertical conectora -->
                                     <div style="position: absolute; top: 16px; bottom: 32px; left: 14px; width: 2px; background: #e2e8f0; z-index: 0;"></div>
 
-                                    <!-- PASO 1 -->
-                                    <div style="position: relative; margin-bottom: 40px; z-index: 1;">
-                                        <div style="position: absolute; left: -36px; top: -2px; width: 28px; height: 28px; border-radius: 50%; background: #2152ff; color: white; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 14px; transform: translateX(-50%); box-shadow: 0 0 0 6px #ffffff;">1</div>
-                                        <h3 style="margin: 0 0 4px; font-size: 1.25rem; font-weight: 900; color: #0f172a;"><?= lang('Billing.step1_title') ?></h3>
-                                        <p style="margin: 0 0 16px; font-size: 0.95rem; color: #64748b;"><?= lang('Billing.step1_desc') ?></p>
-                                        
-                                        <div class="form-group" style="position: relative;">
-                                            <label for="bill_email" style="font-weight: 800; color: #0f172a; display: block; margin-bottom: 8px;"><?= lang('Billing.bill_email') ?></label>
-                                            <div style="position: relative;">
-                                                <div style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #64748b; display: flex;">
-                                                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                                                </div>
-                                                <input class="form-control" id="bill_email" name="email" type="email" placeholder="tu@email.com" value="<?= esc($get($user, 'email') ?? '') ?>" autocomplete="email" required style="padding-left: 48px; border-radius: 12px; height: 50px; background: #f8fafc; border: 1px solid #cbd5e1;" />
-                                            </div>
-                                        </div>
-
-                                        <div id="billing_extra_fields" style="display:block; margin-top: 16px;">
-                                            <div class="form-group">
-                                                <label for="bill_name"><?= lang('Billing.bill_name') ?></label>
-                                                <input class="form-control" id="bill_name" name="name" type="text" placeholder="Empresa S.L." value="<?= esc($get($user, 'company') ?: $get($user, 'name') ?: '') ?>" style="border-radius: 12px; background: #f8fafc;" />
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="bill_vat"><?= lang('Billing.bill_vat') ?></label>
-                                                <input class="form-control" id="bill_vat" name="vat" type="text" style="border-radius: 12px; background: #f8fafc;" />
-                                            </div>
-                                        </div>
+                                    <!-- PASO OCULTO (Datos enviados al controlador si existen) -->
+                                    <div style="display: none;">
+                                        <input id="bill_email" name="email" type="hidden" value="<?= esc($get($user, 'email') ?? '') ?>" autocomplete="email" />
+                                        <input id="bill_name" name="name" type="hidden" value="<?= esc($get($user, 'company') ?: $get($user, 'name') ?: '') ?>" />
+                                        <input id="bill_vat" name="vat" type="hidden" value="" />
                                     </div>
 
-                                    <!-- PASO 2 -->
+                                    <!-- BOTON Y CONFIRMACION -->
                                     <div style="position: relative; z-index: 1;">
-                                        <div style="position: absolute; left: -36px; top: -2px; width: 28px; height: 28px; border-radius: 50%; background: #2152ff; color: white; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 14px; transform: translateX(-50%); box-shadow: 0 0 0 6px #ffffff;">2</div>
                                         <h3 style="margin: 0 0 16px; font-size: 1.25rem; font-weight: 900; color: #0f172a;"><?= lang('Billing.step2_title') ?></h3>
                                         
                                         <div style="border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; display: flex; gap: 32px; align-items: center; background: #ffffff; margin-bottom: 24px;">
@@ -481,6 +482,15 @@ $fmt = function ($n) {
 
         function update() {
             const period = getPeriod();
+            
+            // Actualizar el texto del precio en todas las tarjetas
+            document.querySelectorAll('.plan-card').forEach(c => {
+                const amountEl = c.querySelector('.amount');
+                if (amountEl && amountEl.hasAttribute('data-monthly')) {
+                    amountEl.textContent = (period === 'annual') ? amountEl.getAttribute('data-annual') : amountEl.getAttribute('data-monthly');
+                }
+            });
+
             const checked = document.querySelector('.plan-card input[name="plan_ui"]:checked');
             const plan = checked ? checked.value : 'pro';
             const card = checked ? checked.closest('.plan-card') : document.querySelector('.plan-card');

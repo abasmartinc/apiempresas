@@ -242,6 +242,8 @@ class Billing extends BaseController
                     'success_url' => $successUrl,
                     'cancel_url' => $cancelUrl,
                     'customer_creation' => 'if_required',
+                    'billing_address_collection' => 'required',
+                    'tax_id_collection' => ['enabled' => true],
                     'invoice_creation' => [
                         'enabled' => true,
                         'invoice_data' => [
@@ -310,6 +312,8 @@ class Billing extends BaseController
                     'success_url' => $successUrl,
                     'cancel_url' => $cancelUrl,
                     'client_reference_id' => (string) $userId,
+                    'billing_address_collection' => 'required',
+                    'tax_id_collection' => ['enabled' => true],
                     'metadata' => [
                         'user_id' => (string) $userId,
                         'plan' => $plan,
