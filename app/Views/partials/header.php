@@ -227,14 +227,23 @@
                         $showFullMenu = true;
                         if (session('logged_in')) {
                             $db = \Config\Database::connect();
-                            $activePlanHeader = $db->table('user_subscriptions')
+                            $activePlans = $db->table('user_subscriptions')
                                 ->select('plan_id')
                                 ->where('user_id', session('user_id'))
                                 ->where('status', 'active')
-                                ->orderBy('created_at', 'DESC')
-                                ->get()->getRow();
-                            if ($activePlanHeader && $activePlanHeader->plan_id == 13) {
-                                $showFullMenu = false; // Only copilot plan
+                                ->get()->getResultArray();
+                                
+                            if (!empty($activePlans)) {
+                                $hasOnlyCopilot = true;
+                                foreach ($activePlans as $plan) {
+                                    if ($plan['plan_id'] != 13) {
+                                        $hasOnlyCopilot = false;
+                                        break;
+                                    }
+                                }
+                                if ($hasOnlyCopilot) {
+                                    $showFullMenu = false; // Only copilot plan
+                                }
                             }
                         }
                         if ($showFullMenu):
