@@ -193,6 +193,7 @@
                 <a class="btn btn_header btn_header--ghost" href="<?= site_url() ?>enter">Iniciar sesión</a>
                 <a class="btn btn_header btn_header--primary" href="<?= site_url() ?>register">Crear cuenta gratis</a>
             <?php else: ?>
+                <a class="btn btn_header btn_header--primary" href="<?= site_url('dashboard') ?>">Dashboard</a>
                 <div class="user-dropdown-container">
                     <button class="user-avatar-trigger" id="userMenuTrigger">
                         <?php
