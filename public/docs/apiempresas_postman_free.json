@@ -1,0 +1,129 @@
+{
+    "info": {
+        "_postman_id": "8c5e2a1b-7d3a-4f5a-9e2c-1b2a3d4f5g6h",
+        "name": "APIEmpresas.es - Plan Free",
+        "description": "Colecci\u00f3n completa de la API de APIEmpresas.es organizada por planes de acceso (Free, Professional y Business).",
+        "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Plan Free",
+            "description": "Endpoints accesibles para todos los planes, incluido el plan Free.",
+            "item": [
+                {
+                    "name": "Consulta por CIF",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https:\/\/apiempresas.es\/api\/v1\/companies?cif=B12345678",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "B12345678"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "B\u00fasqueda por Nombre",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https:\/\/apiempresas.es\/api\/v1\/companies\/search?q=Telef\u00f3nica",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "q",
+                                    "value": "Telef\u00f3nica"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Estad\u00edsticas de Consumo",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https:\/\/apiempresas.es\/api\/v1\/usage",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "usage"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "API_KEY",
+            "value": "tu_api_key_aqui",
+            "type": "string"
+        }
+    ]
+}

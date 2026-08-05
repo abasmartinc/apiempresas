@@ -126,6 +126,96 @@
             </div>
         </div>
 
+        <style>
+            .endpoints-section {
+                margin-bottom: 60px;
+                background: white;
+                padding: 40px;
+                border-radius: 24px;
+                border: 1px solid #e2e8f0;
+                box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            }
+            .endpoints-title {
+                font-size: 1.8rem;
+                font-weight: 800;
+                color: #0f172a;
+                margin-bottom: 24px;
+                text-align: center;
+            }
+            .endpoints-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 16px;
+                margin-bottom: 24px;
+            }
+            @media (min-width: 768px) {
+                .endpoints-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+            .endpoint-card {
+                padding: 20px;
+                border-radius: 12px;
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                text-align: left;
+            }
+            .endpoint-route {
+                font-family: 'Fira Code', monospace;
+                font-weight: bold;
+                color: #2563eb;
+                margin-bottom: 8px;
+                font-size: 1.05rem;
+            }
+            .endpoint-desc {
+                margin: 0;
+                color: #475569;
+                font-size: 0.95rem;
+                line-height: 1.5;
+            }
+            .doc-link {
+                color: #3b82f6;
+                font-weight: 600;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 1.05rem;
+                padding: 12px 24px;
+                background: #eff6ff;
+                border-radius: 100px;
+                transition: all 0.2s;
+            }
+            .doc-link:hover {
+                background: #dbeafe;
+                color: #2563eb;
+            }
+        </style>
+
+        <div class="endpoints-section">
+            <h3 class="endpoints-title">Endpoints incluidos en el Plan Free</h3>
+            <div class="endpoints-grid">
+                <div class="endpoint-card">
+                    <div class="endpoint-route">GET /companies/{cif}</div>
+                    <p class="endpoint-desc">Obtén los datos oficiales básicos (Razón Social, Estado, CNAE) de una empresa indicando únicamente su CIF.</p>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-route">GET /companies/search</div>
+                    <p class="endpoint-desc">Busca una empresa por su nombre comercial y localiza su CIF y estado actual de forma rápida y sencilla.</p>
+                </div>
+            </div>
+            <div style="text-align: center; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <a href="<?= site_url('documentation') ?>" class="doc-link">
+                    Ver documentación de la API
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
+                <a href="<?= base_url('public/docs/apiempresas_postman_free.json') ?>" class="doc-link" style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;" download>
+                    Descargar Postman Collection
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                </a>
+            </div>
+        </div>
+
         <div class="plan-card">
             <div class="plan-card-bg"></div>
             <h2>¿Listo para integrar?</h2>
