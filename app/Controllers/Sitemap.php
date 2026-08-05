@@ -15,7 +15,9 @@ class Sitemap extends Controller
     public function index()
     {
         $pages = 0;
-        if (file_exists(FCPATH . 'sitemap-companies-count.txt')) {
+        if (file_exists(WRITEPATH . 'sitemaps/sitemap-companies-count.txt')) {
+            $pages = (int) file_get_contents(WRITEPATH . 'sitemaps/sitemap-companies-count.txt');
+        } elseif (file_exists(FCPATH . 'sitemap-companies-count.txt')) {
             $pages = (int) file_get_contents(FCPATH . 'sitemap-companies-count.txt');
         } else {
             // Fallback just in case
@@ -153,6 +155,14 @@ class Sitemap extends Controller
     {
         $page = (int) $page;
         if ($page < 1) $page = 1;
+
+        $isEn = (strpos((string)$this->request->getServer('HTTP_HOST'), 'spaincompanyapi') !== false);
+        $prefix = $isEn ? 'sitemap-en-companies-' : 'sitemap-companies-';
+        
+        $staticFile = WRITEPATH . 'sitemaps/' . $prefix . $page . '.xml';
+        if (file_exists($staticFile)) {
+            return $this->response->setContentType('application/xml')->setBody(file_get_contents($staticFile));
+        }
 
         $model = new CompanyModel();
         helper(['text', 'seo_dynamic_helper', 'company']); // para url_title, scoring y urls de empresa

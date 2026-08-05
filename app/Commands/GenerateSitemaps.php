@@ -57,7 +57,7 @@ class GenerateSitemaps extends BaseCommand
         $urlCount = 0;
         $urlsPerFile = 10000;
         
-        $publicPath = ROOTPATH;
+        $publicPath = WRITEPATH . 'sitemaps/';
         
         $currentFile = $publicPath . "sitemap-companies-{$fileIndex}.xml";
         $currentFileEn = $publicPath . "sitemap-en-companies-{$fileIndex}.xml";

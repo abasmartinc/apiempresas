@@ -395,6 +395,7 @@ $routes->get('sitemap-informes-wp.xml', 'Sitemap::informesWp');
 $routes->get('sitemap-subvenciones.xml', 'Sitemap::subvenciones');
 $routes->get('sitemap-contratos.xml', 'Sitemap::contratos');
 $routes->get('sitemap-companies-(:num).xml', 'Sitemap::companies/$1');
+$routes->get('sitemap-en-companies-(:num).xml', 'Sitemap::companies/$1');
 
 // --- Webhook CRON SEO ---
 $routes->get('cron/seo-sync/(:any)', 'RadarController::syncStatsWebhook/$1');
