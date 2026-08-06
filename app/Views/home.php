@@ -17,8 +17,8 @@
         <!-- 1. HERO PROFESIONAL -->
         <section class="hero container" data-track-section="hero">
             <h1 class="reveal">
-                API de empresas para validar CIF y 
-                <span class="gradient-text">verificar datos oficiales en España</span>
+                API para validar empresas y verificar CIF 
+                <span class="gradient-text">con datos oficiales en España</span>
             </h1>
             <p class="reveal delay-1">Consulta datos oficiales de empresas españolas y accede a nuevas oportunidades de negocio con información basada en Registro Mercantil y BORME. También puedes detectar empresas recién creadas en España antes que tu competencia con el Radar B2B.</p>
             
@@ -377,12 +377,12 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
                         Para Desarrolladores
                     </div>
-                    <h2 class="reveal delay-1">API de empresas para validar, <span class="gradient-text">consultar e integrar datos</span></h2>
+                    <h2 class="reveal delay-1">API para validar empresas, <span class="gradient-text">consultar e integrar datos</span></h2>
                     <p class="reveal delay-1">Incorpore información empresarial oficial directamente en sus procesos de registro, formularios o aplicaciones internas.</p>
                     <ul class="path-list reveal delay-2" style="margin-bottom: 48px;">
                         <li style="color: var(--ae-dark); border-bottom: none; padding: 6px 0;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            Validación automática de CIF en tiempo real
+                            La mejor API para validar empresas y CIFs en tiempo real
                         </li>
                         <li style="color: var(--ae-dark); border-bottom: none; padding: 6px 0;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>

@@ -295,7 +295,7 @@ class AiCopilotController extends Controller
                 ->make();
 
             $response = $client->chat()->create([
-                'model' => 'gpt-4o-mini',
+                'model' => 'gpt-4o',
                 'temperature' => 0.4,
                 'response_format' => ['type' => 'json_object'],
                 'messages' => [

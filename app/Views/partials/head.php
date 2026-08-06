@@ -16,8 +16,8 @@
 
 $siteName = lang('Seo.siteName') !== 'Seo.siteName' ? lang('Seo.siteName') : 'APIEmpresas.es';
 
-$defaultTitle = lang('Seo.defaultTitle') !== 'Seo.defaultTitle' ? lang('Seo.defaultTitle') : 'Validar CIF y verificar empresas en España | APIEmpresas.es';
-$defaultDesc  = lang('Seo.defaultDesc') !== 'Seo.defaultDesc' ? lang('Seo.defaultDesc') : 'Valida CIF y razón social con datos oficiales (BOE/BORME, AEAT, INE y VIES). Buscador web y API REST para KYB/KYC, facturación y scoring.';
+$defaultTitle = lang('Seo.defaultTitle') !== 'Seo.defaultTitle' ? lang('Seo.defaultTitle') : 'API para validar empresas y verificar CIF en España | APIEmpresas';
+$defaultDesc  = lang('Seo.defaultDesc') !== 'Seo.defaultDesc' ? lang('Seo.defaultDesc') : 'Valida CIF y razón social con datos oficiales. API para validar empresas y Buscador web para KYB/KYC, facturación y prospección B2B.';
 
 $seoTitle = $title ?? $defaultTitle;
 $seoDesc  = $excerptText ?? $defaultDesc;
@@ -224,7 +224,7 @@ $enUrl = str_replace(['apiempresas.es', 'apiempresas.local'], ['spaincompanyapi.
     },
     {
       "@type": "Service",
-      "name": "Verificación de Empresas en España",
+      "name": "API de Verificación y Validación de Empresas en España",
       "serviceType": "B2B Data Verification",
       "provider": { "@id": "<?= esc($homeUrl) ?>#org" },
       "areaServed": {

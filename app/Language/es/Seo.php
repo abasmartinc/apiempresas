@@ -2,6 +2,6 @@
 
 return [
     'siteName' => 'APIEmpresas.es',
-    'defaultTitle' => 'Validar CIF y verificar empresas en España | APIEmpresas.es',
-    'defaultDesc'  => 'Valida CIF y razón social con datos oficiales (BOE/BORME, AEAT, INE y VIES). Buscador web y API REST para KYB/KYC, facturación y scoring.',
+    'defaultTitle' => 'API para validar empresas y verificar CIF en España | APIEmpresas',
+    'defaultDesc'  => 'Valida CIF y razón social con datos oficiales. API para validar empresas y Buscador web para KYB/KYC, facturación y prospección B2B.',
 ];
