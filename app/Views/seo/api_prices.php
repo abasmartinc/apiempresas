@@ -3,7 +3,7 @@
 
 <head>
     <?= view('partials/head', [
-        'title' => 'Infraestructura API para Datos Mercantiles y KYB en España | APIEmpresas.es',
+        'title' => 'API REST de Datos Mercantiles y Onboarding KYB en España | APIEmpresas',
         'excerptText' => 'Integra datos oficiales del Registro Mercantil y BORME en tu CRM o ERP. API REST diseñada para enriquecimiento de datos B2B, onboarding KYB automatizado y scoring IA.',
         'canonical' => site_url('api-empresas'),
         'robots' => 'index,follow',
@@ -887,6 +887,19 @@
             color: #fff;
         }
     </style>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebAPI",
+      "name": "API REST de Datos Mercantiles",
+      "description": "API REST JSON para validación de empresas españolas, enriquecimiento B2B y automatización KYB. Acceso a datos oficiales del Registro Mercantil.",
+      "documentation": "<?= site_url('documentation') ?>",
+      "provider": {
+        "@type": "Organization",
+        "name": "APIEmpresas"
+      }
+    }
+    </script>
 </head>
 
 <body>
@@ -1130,7 +1143,7 @@
             <div class="container">
                 <div class="radar-heading radar-heading--center">
                     <div class="radar-kicker">Soluciones B2B</div>
-                    <h2 class="radar-title">Casos de uso de la API de empresas</h2>
+                    <h2 class="radar-title">Casos de uso de nuestra API REST B2B</h2>
                 </div>
                 <div class="radar-grid"
                     style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-top: 40px;">
