@@ -8,6 +8,46 @@
         'canonical' => $canonical,
         'robots' => $robots,
     ]) ?>
+
+    <?php
+    // Generación dinámica y segura del Schema JSON-LD para la entidad principal
+    $schemaOrg = [
+        '@context' => 'https://schema.org',
+        '@type'    => 'Organization',
+        'name'     => $companyName ?? ($company['company_name'] ?? ''),
+        'taxID'    => $companyCif ?? '',
+        'url'      => $canonical ?? current_url(),
+    ];
+
+    $addressData = [];
+    if (!empty($company['address'])) $addressData['streetAddress'] = $company['address'];
+    if (!empty($company['postal_code'])) $addressData['postalCode'] = $company['postal_code'];
+    if (!empty($company['municipality'])) {
+        $addressData['addressLocality'] = $company['municipality'];
+    } elseif (!empty($companyProv)) {
+        $addressData['addressLocality'] = $companyProv;
+    }
+    if (!empty($companyProv)) $addressData['addressRegion'] = $companyProv;
+
+    if (!empty($addressData)) {
+        $addressData['@type'] = 'PostalAddress';
+        $addressData['addressCountry'] = 'ES';
+        $schemaOrg['address'] = $addressData;
+    }
+
+    if (!empty($company['phone'])) {
+        $schemaOrg['telephone'] = $company['phone'];
+    }
+    if (!empty($company['cnae_label'])) {
+        $schemaOrg['knowsAbout'] = $company['cnae_label'];
+    }
+    if (!empty($company['fecha_constitucion']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $company['fecha_constitucion'])) {
+        $schemaOrg['foundingDate'] = $company['fecha_constitucion'];
+    }
+    ?>
+    <script type="application/ld+json">
+    <?= json_encode($schemaOrg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
+    </script>
     <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style"
         onload="this.onload=null;this.rel='stylesheet'">
     <noscript>
