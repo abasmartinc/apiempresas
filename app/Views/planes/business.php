@@ -1,9 +1,32 @@
 <!doctype html>
 <html lang="es">
 <head>
-    <?= view('partials/head', ['title' => $title ?? 'Plan Business - API Empresas']) ?>
+    <?= view('partials/head', [
+        'title' => 'Infraestructura API de Datos Mercantiles para ERP | Plan Business',
+        'excerptText' => 'Tarifas y planes de nuestra API Enterprise para extraer datos masivos del Registro Mercantil, conexión ERP y Webhooks en tiempo real.'
+    ]) ?>
     <link rel="stylesheet" href="<?= base_url('public/css/home.css') ?>?v=<?= time() ?>">
     <link rel="stylesheet" href="<?= base_url('public/css/home-mobile.css') ?>?v=<?= time() ?>" media="screen and (max-width: 768px)">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      "name": "Infraestructura API Enterprise - Plan Business",
+      "description": "Tarifas y planes para alto volumen. Conecta tu ERP al Registro Mercantil, extrae datos B2B masivos y recibe Webhooks de notificaciones en tiempo real sin límites.",
+      "brand": {
+        "@type": "Brand",
+        "name": "APIEmpresas"
+      },
+      "offers": {
+        "@type": "Offer",
+        "url": "<?= current_url() ?>",
+        "priceCurrency": "EUR",
+        "price": "49",
+        "priceValidUntil": "2028-12-31",
+        "availability": "https://schema.org/InStock"
+      }
+    }
+    </script>
 </head>
 <body>
     <?= view('partials/header') ?>
@@ -76,8 +99,8 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                 Plan Business (Escala)
             </div>
-            <h1 class="plan-title">Inteligencia de Cuentas<br><span>En Tiempo Real</span></h1>
-            <p class="plan-subtitle">Escala tus operaciones. Monitoriza miles de clientes simultáneamente, recibe notificaciones push cuando publiquen subvenciones o cambien de directivos, y genera prospectos con IA.</p>
+            <h1 class="plan-title">Infraestructura API <span>Enterprise</span></h1>
+            <p class="plan-subtitle">Tarifas y planes para alto volumen. Conecta tu ERP al Registro Mercantil, extrae datos B2B masivos y recibe Webhooks de notificaciones en tiempo real sin límites.</p>
         </div>
 
         <div class="plan-demo-wrapper" style="background: #f8fafc;">

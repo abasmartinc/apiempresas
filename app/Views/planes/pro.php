@@ -1,9 +1,32 @@
 <!doctype html>
 <html lang="es">
 <head>
-    <?= view('partials/head', ['title' => $title ?? 'Plan Pro - API Empresas']) ?>
+    <?= view('partials/head', [
+        'title' => 'Precio API de Enriquecimiento B2B y KYB para SaaS | Plan Pro',
+        'excerptText' => 'Descubre las tarifas y precios de nuestra API para automatizar onboarding B2B, extraer datos de empresas y hacer scoring comercial con IA.'
+    ]) ?>
     <link rel="stylesheet" href="<?= base_url('public/css/home.css') ?>?v=<?= time() ?>">
     <link rel="stylesheet" href="<?= base_url('public/css/home-mobile.css') ?>?v=<?= time() ?>" media="screen and (max-width: 768px)">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      "name": "API Enriquecimiento B2B - Plan Pro",
+      "description": "Tarifas diseñadas para escalar SaaS y automatizar onboarding B2B. Extrae datos del Registro Mercantil y haz scoring comercial sin costes ocultos.",
+      "brand": {
+        "@type": "Brand",
+        "name": "APIEmpresas"
+      },
+      "offers": {
+        "@type": "Offer",
+        "url": "<?= current_url() ?>",
+        "priceCurrency": "EUR",
+        "price": "19",
+        "priceValidUntil": "2028-12-31",
+        "availability": "https://schema.org/InStock"
+      }
+    }
+    </script>
 </head>
 <body>
     <?= view('partials/header') ?>
@@ -75,8 +98,8 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                 Plan Pro (El más elegido)
             </div>
-            <h1 class="plan-title">Automatización B2B <span>Sin Fricción</span></h1>
-            <p class="plan-subtitle">Elimina el trabajo manual. Autocompleta datos de clientes en tu CRM o ERP, averigua el riesgo financiero antes de vender y extrae listas de nuevas constituciones empresariales.</p>
+            <h1 class="plan-title">Precio API Enriquecimiento<br><span>B2B y KYB</span></h1>
+            <p class="plan-subtitle">Tarifas diseñadas para escalar SaaS y automatizar onboarding B2B. Extrae datos del Registro Mercantil y haz scoring comercial sin costes ocultos.</p>
         </div>
 
         <div class="plan-demo-wrapper">

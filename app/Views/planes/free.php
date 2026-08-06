@@ -1,9 +1,31 @@
 <!doctype html>
 <html lang="es">
 <head>
-    <?= view('partials/head', ['title' => $title ?? 'Plan Free - API Empresas']) ?>
+    <?= view('partials/head', [
+        'title' => 'API Registro Mercantil GRATIS: Entorno Sandbox para Pruebas | APIEmpresas',
+        'excerptText' => 'Prueba nuestra API de empresas gratis sin tarjeta de crédito. Entorno Sandbox con datos reales del Registro Mercantil para validación de CIF y desarrollo.'
+    ]) ?>
     <link rel="stylesheet" href="<?= base_url('public/css/home.css') ?>?v=<?= time() ?>">
     <link rel="stylesheet" href="<?= base_url('public/css/home-mobile.css') ?>?v=<?= time() ?>" media="screen and (max-width: 768px)">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      "name": "API Registro Mercantil - Plan Free (Sandbox)",
+      "description": "Entorno Sandbox diseñado para que los desarrolladores prueben la integración y validen CIFs con datos oficiales reales sin tarjeta de crédito.",
+      "brand": {
+        "@type": "Brand",
+        "name": "APIEmpresas"
+      },
+      "offers": {
+        "@type": "Offer",
+        "url": "<?= current_url() ?>",
+        "priceCurrency": "EUR",
+        "price": "0",
+        "availability": "https://schema.org/InStock"
+      }
+    }
+    </script>
 </head>
 <body>
     <?= view('partials/header') ?>
@@ -75,8 +97,8 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                 Plan Free (Testing)
             </div>
-            <h1 class="plan-title">Prueba la API <span>sin riesgos</span></h1>
-            <p class="plan-subtitle">El plan Free está diseñado para que los desarrolladores validen la integración y comprueben la calidad de nuestros datos oficiales (CIF, Razón Social, CNAE) de forma instantánea.</p>
+            <h1 class="plan-title">API Registro Mercantil <span>GRATIS</span></h1>
+            <p class="plan-subtitle">Entorno Sandbox diseñado para que los desarrolladores prueben la integración y validen CIFs con datos oficiales reales sin tarjeta de crédito.</p>
         </div>
 
         <div class="plan-demo-wrapper">
