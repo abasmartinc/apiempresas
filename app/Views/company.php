@@ -22,12 +22,14 @@
     $addressData = [];
     if (!empty($company['address'])) $addressData['streetAddress'] = $company['address'];
     if (!empty($company['postal_code'])) $addressData['postalCode'] = $company['postal_code'];
+    
+    $provinceVal = $company['province'] ?? $company['provincia'] ?? '';
     if (!empty($company['municipality'])) {
         $addressData['addressLocality'] = $company['municipality'];
-    } elseif (!empty($companyProv)) {
-        $addressData['addressLocality'] = $companyProv;
+    } elseif (!empty($provinceVal)) {
+        $addressData['addressLocality'] = $provinceVal;
     }
-    if (!empty($companyProv)) $addressData['addressRegion'] = $companyProv;
+    if (!empty($provinceVal)) $addressData['addressRegion'] = $provinceVal;
 
     if (!empty($addressData)) {
         $addressData['@type'] = 'PostalAddress';
@@ -54,24 +56,6 @@
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     </noscript>
 
-    <!-- Schema.org para la Empresa -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "<?= esc($companyName ?? $company['name'] ?? 'Empresa') ?>",
-      <?php if (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-'): ?>
-      "vatID": "<?= esc($companyCif) ?>",
-      "taxID": "<?= esc($companyCif) ?>",
-      <?php endif; ?>
-      "url": "<?= esc($canonical ?? current_url()) ?>",
-      "address": {
-        "@type": "PostalAddress",
-        "addressRegion": "<?= esc($company['province'] ?? $company['provincia'] ?? '') ?>",
-        "addressCountry": "ES"
-      }
-    }
-    </script>
     <link rel="stylesheet" href="<?= base_url('public/css/company_ficha.css') ?>?v=1.3">
 </head>
 

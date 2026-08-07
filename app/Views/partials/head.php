@@ -97,7 +97,7 @@ $enUrl = str_replace(['apiempresas.es', 'apiempresas.local'], ['spaincompanyapi.
 <meta property="og:url" content="<?= esc($canonicalUrl) ?>" />
 <meta property="og:locale" content="<?= esc($locale) ?>" />
 <meta property="og:image" content="<?= esc($ogImage) ?>" />
-<meta property="og:image:alt" content="APIEmpresas.es — Validar CIF y verificar empresas en España" />
+<meta property="og:image:alt" content="<?= esc($siteName) ?> — <?= esc($seoDesc) ?>" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 
@@ -164,7 +164,7 @@ $enUrl = str_replace(['apiempresas.es', 'apiempresas.local'], ['spaincompanyapi.
         {
           "@type": "Organization",
           "@id": "<?= esc($homeUrl) ?>#org",
-      "name": "APIEmpresas.es",
+      "name": "<?= esc($siteName) ?>",
       "url": "<?= esc($homeUrl) ?>",
       "logo": {
         "@type": "ImageObject",
@@ -176,7 +176,7 @@ $enUrl = str_replace(['apiempresas.es', 'apiempresas.local'], ['spaincompanyapi.
       "@type": "WebSite",
       "@id": "<?= esc($homeUrl) ?>#website",
       "url": "<?= esc($homeUrl) ?>",
-      "name": "APIEmpresas.es",
+      "name": "<?= esc($siteName) ?>",
       "publisher": { "@id": "<?= esc($homeUrl) ?>#org" },
       "inLanguage": "<?= esc($lang) ?>",
       "potentialAction": {
@@ -204,7 +204,7 @@ $enUrl = str_replace(['apiempresas.es', 'apiempresas.local'], ['spaincompanyapi.
     {
       "@type": ["SoftwareApplication", "WebApplication"],
       "@id": "<?= esc($homeUrl) ?>#app",
-      "name": "APIEmpresas.es",
+      "name": "<?= esc($siteName) ?>",
       "url": "<?= esc($homeUrl) ?>",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
@@ -217,9 +217,9 @@ $enUrl = str_replace(['apiempresas.es', 'apiempresas.local'], ['spaincompanyapi.
         { "@type": "Offer", "name": "Business",      "price": "49", "priceCurrency": "EUR", "category": "Subscription", "url": "<?= esc($urlPricingAnchor) ?>" }
       ],
       "hasPart": [
-        { "@type": "WebPage", "@id": "<?= esc($urlSearch) ?>#webpage", "url": "<?= esc($urlSearch) ?>", "name": "Buscador | APIEmpresas.es" },
-        { "@type": "WebPage", "@id": "<?= esc($urlDocs) ?>#webpage",   "url": "<?= esc($urlDocs) ?>",   "name": "Documentación API | APIEmpresas.es" },
-        { "@type": "Blog",    "@id": "<?= esc($urlBlog) ?>#blog",      "url": "<?= esc($urlBlog) ?>",   "name": "Blog | APIEmpresas.es" }
+        { "@type": "WebPage", "@id": "<?= esc($urlSearch) ?>#webpage", "url": "<?= esc($urlSearch) ?>", "name": "Buscador | <?= esc($siteName) ?>" },
+        { "@type": "WebPage", "@id": "<?= esc($urlDocs) ?>#webpage",   "url": "<?= esc($urlDocs) ?>",   "name": "Documentación API | <?= esc($siteName) ?>" },
+        { "@type": "Blog",    "@id": "<?= esc($urlBlog) ?>#blog",      "url": "<?= esc($urlBlog) ?>",   "name": "Blog | <?= esc($siteName) ?>" }
       ]
     },
     {
