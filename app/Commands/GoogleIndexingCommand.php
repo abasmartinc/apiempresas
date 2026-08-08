@@ -113,5 +113,15 @@ class GoogleIndexingCommand extends BaseCommand
         }
 
         CLI::write("Done! Submitted {$submitted} URLs to Google Indexing API.", 'green');
+
+        if (!$isDryRun) {
+            $email = \Config\Services::email();
+            $email->setTo('papelo.amh@gmail.com');
+            $email->setSubject('Reporte Diario: Google Indexing API');
+            $email->setMessage("El comando automático seo:indexing-api ha finalizado.\n\nSe han enviado {$submitted} URLs enriquecidas con IA a Google para forzar su indexación rápida.\nLímite máximo permitido diario: 200.\n\nAPIEmpresas.es Cron");
+            if (!$email->send()) {
+                CLI::error("No se pudo enviar el email de reporte.");
+            }
+        }
     }
 }

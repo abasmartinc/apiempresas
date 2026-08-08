@@ -66,5 +66,13 @@ class QueueTopCompanies extends BaseCommand
         }
         
         CLI::write("Proceso terminado. Se han encolado {$queued} nuevas empresas.", 'yellow');
+
+        $email = \Config\Services::email();
+        $email->setTo('papelo.amh@gmail.com');
+        $email->setSubject("Reporte Diario: Encolado SEO IA ({$queued} empresas)");
+        $email->setMessage("El comando seo:queue-top ha finalizado.\n\nSe han encolado exitosamente {$queued} nuevas empresas (las más visitadas del mes) para ser enriquecidas proactivamente por la IA.\n\nAPIEmpresas.es Cron");
+        if (!$email->send()) {
+            CLI::error("No se pudo enviar el email de reporte.");
+        }
     }
 }
