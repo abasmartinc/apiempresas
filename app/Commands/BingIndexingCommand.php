@@ -71,50 +71,66 @@ class BingIndexingCommand extends BaseCommand
         $siteUrl = 'https://apiempresas.es';
         $endpoint = "https://ssl.bing.com/webmaster/api.svc/json/SubmitUrlbatch?apikey={$apiKey}";
 
-        $payload = json_encode([
-            'siteUrl' => $siteUrl,
-            'urlList' => $urlList
-        ]);
-
-        $ch = curl_init($endpoint);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json; charset=utf-8',
-            'Content-Length: ' . strlen($payload)
-        ]);
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);
-        curl_close($ch);
-
         $submitted = 0;
         $submittedCifs = [];
+        $hasError = false;
 
-        if ($httpCode == 200) {
-            $result = json_decode($response, true);
-            // Bing returns 200 OK even if successful
-            CLI::write("Successfully submitted batch to Bing!", 'green');
+        // Bing limits each batch request to 500 URLs
+        $urlChunks = array_chunk($urlList, 500);
 
-            // Update database for all successful URLs
-            foreach ($companyMap as $url => $c) {
-                $db->table('company_enrichment')
-                   ->where('company_id', $c['id'])
-                   ->update(['bing_indexing_submitted_at' => date('Y-m-d H:i:s')]);
+        foreach ($urlChunks as $chunk) {
+            $payload = json_encode([
+                'siteUrl' => $siteUrl,
+                'urlList' => $chunk
+            ]);
+
+            $ch = curl_init($endpoint);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json; charset=utf-8',
+                'Content-Length: ' . strlen($payload)
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_error($ch);
+            curl_close($ch);
+
+            if ($httpCode == 200) {
+                // Bing returns 200 OK even if successful
+                $result = json_decode($response, true);
                 
-                $submitted++;
-                if (!empty($c['cif'])) {
-                    $submittedCifs[] = $c['cif'];
+                // Update database for all successful URLs in this chunk
+                foreach ($chunk as $url) {
+                    if (isset($companyMap[$url])) {
+                        $c = $companyMap[$url];
+                        $db->table('company_enrichment')
+                           ->where('company_id', $c['id'])
+                           ->update(['bing_indexing_submitted_at' => date('Y-m-d H:i:s')]);
+                        
+                        $submitted++;
+                        if (!empty($c['cif'])) {
+                            $submittedCifs[] = $c['cif'];
+                        }
+                    }
                 }
+            } else {
+                CLI::error("Failed to submit chunk to Bing. HTTP Status: {$httpCode}");
+                CLI::write("Response: {$response}", 'red');
+                if ($error) {
+                    CLI::write("cURL Error: {$error}", 'red');
+                }
+                $hasError = true;
+                break; // Stop processing further chunks if we hit an API error
             }
-        } else {
-            CLI::error("Failed to submit to Bing. HTTP Status: {$httpCode}");
-            CLI::write("Response: {$response}", 'red');
-            if ($error) {
-                CLI::write("cURL Error: {$error}", 'red');
-            }
+            
+            usleep(200000); // 200ms pause between chunk requests to be nice to the API
+        }
+
+        if (!$hasError && $submitted > 0) {
+            CLI::write("Successfully submitted batches to Bing!", 'green');
         }
 
         CLI::write("Done! Processed {$submitted} URLs to Bing.", 'green');
