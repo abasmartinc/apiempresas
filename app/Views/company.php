@@ -1135,7 +1135,7 @@
                                                     ?>
                                                     <tr class="<?= $isHidden ? 'holding-hidden-row' : '' ?>" style="<?= $isHidden ? 'display: none;' : '' ?> border-bottom: 1px solid #f1f5f9; transition: background 0.2s; <?= $isCurrent ? 'background: #eff6ff;' : '' ?>" onmouseover="this.style.background='<?= $isCurrent ? '#eff6ff' : '#f8fafc' ?>'" onmouseout="this.style.background='<?= $isCurrent ? '#eff6ff' : 'transparent' ?>'">
                                                         <td style="padding: 14px 20px; color: #0f172a; font-weight: <?= $isCurrent ? '700' : '500' ?>; font-size: 0.95rem;">
-                                                            <?php if(!$isCurrent): ?><a href="<?= site_url($hc['cif']) ?>" style="color: inherit; text-decoration: none;"><?php endif; ?>
+                                                            <?php if(!$isCurrent): ?><a href="<?= company_url($hc) ?>" style="color: inherit; text-decoration: none;"><?php endif; ?>
                                                             <?= esc($hc['name']) ?> <?= $isCurrent ? '<span style="font-size: 0.7rem; background:#3b82f6; color:#ffffff; padding:2px 8px; border-radius:12px; margin-left:8px; font-weight:600; letter-spacing: 0.02em;">ACTUAL</span>' : '' ?>
                                                             <?php if(!$isCurrent): ?></a><?php endif; ?>
                                                         </td>

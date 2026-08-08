@@ -24,7 +24,7 @@ class Company extends BaseController
         $this->companyModel = new CompanyModel();
         $this->bormePostsModel = new BormePostsModel();
         $this->adminModel = new CompanyAdministratorModel();
-        helper(['text', 'seo_dynamic']); // Cargar text para url_title y nuestro nuevo helper SEO
+        helper(['text', 'seo_dynamic', 'company']); // Cargar text para url_title, helper SEO, y helper company
     }
 
     /**
