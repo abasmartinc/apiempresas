@@ -3,6 +3,7 @@
 <head>
     <?= view('partials/head') ?>
     <link rel="stylesheet" href="<?= base_url('public/css/contact.css') ?>" />
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 
 <body>
@@ -126,6 +127,11 @@
                                         placeholder="Describe con detalle tu duda o incidencia. Si aplica, indica entorno (dev/prod), endpoint, parámetros y cualquier log relevante."
                                         required
                                 ><?= esc(old('message')) ?></textarea>
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <!-- Cloudflare Turnstile Widget -->
+                                <div class="cf-turnstile" data-sitekey="<?= esc(env('TURNSTILE_SITE_KEY')) ?>"></div>
                             </div>
 
                             <div class="grid-2" style="align-items:center; margin-top:10px;">

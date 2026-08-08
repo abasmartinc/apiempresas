@@ -35,6 +35,43 @@ class Contact extends BaseController
                 ->with('contact_error', 'Por favor revisa los campos del formulario.');
         }
 
+        // Validación Cloudflare Turnstile
+        $turnstileResponse = $this->request->getPost('cf-turnstile-response');
+        $turnstileSecret = env('TURNSTILE_SECRET_KEY');
+
+        if (!empty($turnstileSecret) && !empty(env('TURNSTILE_SITE_KEY'))) {
+            if (empty($turnstileResponse)) {
+                if ($this->request->isAJAX()) {
+                    return $this->response->setJSON(['success' => false, 'message' => 'Por favor, completa la verificación de seguridad (Captcha).']);
+                }
+                return redirect()->back()->withInput()->with('contact_error', 'Por favor, completa la verificación de seguridad (Captcha).');
+            }
+
+            // Llamar a la API de validación
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, 'https://challenges.cloudflare.com/turnstile/v0/siteverify');
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+                'secret'   => $turnstileSecret,
+                'response' => $turnstileResponse,
+                'remoteip' => $this->request->getIPAddress()
+            ]));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            
+            $verifyResponse = curl_exec($ch);
+            curl_close($ch);
+
+            $verifyData = json_decode($verifyResponse, true);
+
+            if (!$verifyData || !isset($verifyData['success']) || !$verifyData['success']) {
+                log_message('error', 'Turnstile validation failed: ' . print_r($verifyData, true));
+                if ($this->request->isAJAX()) {
+                    return $this->response->setJSON(['success' => false, 'message' => 'Verificación de seguridad fallida. Eres un bot?']);
+                }
+                return redirect()->back()->withInput()->with('contact_error', 'Verificación de seguridad fallida. Inténtalo de nuevo.');
+            }
+        }
+
         // Datos del formulario
         $name    = $this->request->getPost('name');
         $email   = $this->request->getPost('email');
