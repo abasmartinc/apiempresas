@@ -73,8 +73,11 @@ class GoogleIndexingCommand extends BaseCommand
         $endpoint = 'https://indexing.googleapis.com/v3/urlNotifications:publish';
         
         $submitted = 0;
+        $submittedCifs = [];
         foreach ($companies as $c) {
-            $url = company_url($c);
+            // Force production domain for Google API, regardless of local CLI config
+            $urlPath = !empty($c['cif']) ? $c['cif'] . '-' . url_title($c['name'], '-', true) : url_title($c['name'], '-', true);
+            $url = 'https://apiempresas.es/' . ltrim($urlPath, '/');
 
             $content = json_encode([
                 'url' => $url,
@@ -98,6 +101,9 @@ class GoogleIndexingCommand extends BaseCommand
                        ->where('company_id', $c['id'])
                        ->update(['indexing_api_submitted_at' => date('Y-m-d H:i:s')]);
                     $submitted++;
+                    if (!empty($c['cif'])) {
+                        $submittedCifs[] = $c['cif'];
+                    }
                 } else {
                     CLI::write("Failed to submit: {$url} (Status: {$statusCode})", 'red');
                 }
@@ -115,10 +121,12 @@ class GoogleIndexingCommand extends BaseCommand
         CLI::write("Done! Submitted {$submitted} URLs to Google Indexing API.", 'green');
 
         if (!$isDryRun) {
+            $cifListText = !empty($submittedCifs) ? "\n\nCIFs procesados:\n" . implode(', ', $submittedCifs) : "";
+            
             $email = \Config\Services::email();
             $email->setTo('papelo.amh@gmail.com');
             $email->setSubject('Reporte Diario: Google Indexing API');
-            $email->setMessage("El comando automático seo:indexing-api ha finalizado.\n\nSe han enviado {$submitted} URLs enriquecidas con IA a Google para forzar su indexación rápida.\nLímite máximo permitido diario: 200.\n\nAPIEmpresas.es Cron");
+            $email->setMessage("El comando automático seo:indexing-api ha finalizado.\n\nSe han enviado {$submitted} URLs enriquecidas con IA a Google para forzar su indexación rápida.\nLímite máximo permitido diario: 200.{$cifListText}\n\nAPIEmpresas.es Cron");
             if (!$email->send()) {
                 CLI::error("No se pudo enviar el email de reporte.");
             }
