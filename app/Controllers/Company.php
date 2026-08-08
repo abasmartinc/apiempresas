@@ -371,6 +371,7 @@ class Company extends BaseController
             ->get()->getRowArray();
             
         if ($holdingRow) {
+            $holdingRow['name'] = preg_replace('/^grupo\s+/i', '', trim($holdingRow['name']));
             $holdingData = $holdingRow;
             $companyHoldingModel = new \App\Models\CompanyHoldingModel();
             $holdingCompanies = $companyHoldingModel->getCompaniesByHolding($holdingRow['id'], 100);

@@ -1091,9 +1091,9 @@
                             
                             <?php if (!empty($holdingData) && !empty($holdingGraphData)): ?>
                                 <!-- Sección del Holding (Mapa de Poder) -->
-                                <div style="background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 2rem; margin-bottom: 2rem; position: relative; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                                <div style="margin-bottom: 4rem;">
                                     
-                                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
                                         <div>
                                             <h2 class="no-after-line" style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 12px;">
                                                 <span style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #fff; padding: 8px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.2);">
@@ -1113,7 +1113,7 @@
                                     </div>
 
                                     <!-- Tabla Premium (Top Empresas Hermanas) -->
-                                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden; margin-top: 1rem;">
+                                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden;">
                                         <div style="overflow-x: auto;">
                                             <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
                                                 <thead style="background: #f8fafc;">

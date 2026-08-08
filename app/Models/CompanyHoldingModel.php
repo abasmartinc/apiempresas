@@ -26,7 +26,7 @@ class CompanyHoldingModel extends Model
     public function getCompaniesByHolding($holdingId, $limit = 100, $filters = [])
     {
         $builder = $this->db->table('company_holdings')
-            ->select('companies.id, companies.cif, companies.company_name as name, companies.capital_social_raw as social_capital, companies.estado as status, companies.registro_mercantil as province')
+            ->select("companies.id, companies.cif, companies.company_name as name, companies.capital_social_raw as social_capital, companies.estado as status, companies.registro_mercantil as province, CAST(REPLACE(REPLACE(REPLACE(companies.capital_social_raw, ' €', ''), '.', ''), ',', '.') AS DECIMAL(15,2)) as capital_limpio")
             ->join('companies', 'companies.id = company_holdings.company_id')
             ->where('company_holdings.holding_id', $holdingId);
 
@@ -45,7 +45,7 @@ class CompanyHoldingModel extends Model
             }
         }
 
-        return $builder->orderBy('CAST(companies.capital_social_raw AS DECIMAL)', 'DESC')
+        return $builder->orderBy('capital_limpio', 'DESC')
             ->limit($limit)
             ->get()
             ->getResultArray();
@@ -71,7 +71,7 @@ class CompanyHoldingModel extends Model
         $query = $db->query("
             SELECT 
                 COUNT(c.id) as total_companies,
-                SUM(CAST(c.capital_social_raw AS DECIMAL(15,2))) as total_capital
+                SUM(CAST(REPLACE(REPLACE(REPLACE(c.capital_social_raw, ' €', ''), '.', ''), ',', '.') AS DECIMAL(15,2))) as total_capital
             FROM company_holdings ch
             JOIN companies c ON ch.company_id = c.id
             WHERE ch.holding_id = " . (int)$holdingId
@@ -88,6 +88,22 @@ class CompanyHoldingModel extends Model
             LIMIT 3
         ");
         $aggregates['top_provinces'] = $queryProv->getResultArray();
+        
+        $queryCnae = $db->query("
+            SELECT c.cnae_label as sector, COUNT(c.id) as count
+            FROM company_holdings ch
+            JOIN companies c ON ch.company_id = c.id
+            WHERE ch.holding_id = " . (int)$holdingId . " 
+              AND c.cnae_label != '' 
+              AND c.cnae_label IS NOT NULL 
+              AND c.cnae_label NOT LIKE '%Desconocid%'
+              AND c.cnae_label NOT LIKE '00 %'
+              AND c.cnae_label != '0'
+            GROUP BY c.cnae_label
+            ORDER BY count DESC
+            LIMIT 1
+        ");
+        $aggregates['top_sector'] = $queryCnae->getRowArray();
         
         return $aggregates;
     }

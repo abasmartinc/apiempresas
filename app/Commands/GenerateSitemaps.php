@@ -160,5 +160,86 @@ class GenerateSitemaps extends BaseCommand
                 }
             }
         }
+
+        // ==========================================
+        // 2. GENERATE AI-READY SITEMAP
+        // ==========================================
+        CLI::write("Starting AI-Ready sitemap generation...", 'green');
+        
+        $aiBuilder = $db->table('companies');
+        $aiBuilder->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text, company_enrichment.updated_at')
+                  ->join('company_enrichment', 'company_enrichment.company_id = companies.id')
+                  ->where('company_enrichment.ai_seo_text IS NOT NULL')
+                  ->where("company_enrichment.ai_seo_text != ''");
+                  
+        $lastAiId = 0;
+        $aiFileIndex = 1;
+        $aiUrlCount = 0;
+        
+        $currentAiFile = $publicPath . "sitemap-ai-ready-{$aiFileIndex}.xml";
+        $xmlAiContent = $xmlHeader;
+        $totalAiIncluded = 0;
+
+        while (true) {
+            $aiCompanies = $aiBuilder->where('companies.id >', $lastAiId)
+                                     ->orderBy('companies.id', 'ASC')
+                                     ->limit($batchSize)
+                                     ->get()
+                                     ->getResultArray();
+                                     
+            if (empty($aiCompanies)) {
+                break;
+            }
+
+            foreach ($aiCompanies as $company) {
+                $lastAiId = $company['id'];
+
+                if (!shouldIndexCompany($company)) {
+                    continue;
+                }
+
+                $url = company_url($company);
+                $priority = '1.0'; // High priority because it has AI text
+                $lastMod = !empty($company['updated_at']) ? date('Y-m-d', strtotime($company['updated_at'])) : date('Y-m-d');
+                
+                $urlEntry = '<url>' . PHP_EOL . '  <loc>' . esc($url) . '</loc>' . PHP_EOL . '  <lastmod>' . $lastMod . '</lastmod>' . PHP_EOL . '  <changefreq>weekly</changefreq>' . PHP_EOL . '  <priority>' . $priority . '</priority>' . PHP_EOL . '</url>' . PHP_EOL;
+                
+                $xmlAiContent .= $urlEntry;
+                $aiUrlCount++;
+                $totalAiIncluded++;
+                
+                if ($aiUrlCount >= $urlsPerFile) {
+                    $xmlAiContent .= '</urlset>';
+                    file_put_contents($currentAiFile, $xmlAiContent);
+                    
+                    CLI::write("Generated AI sitemap {$aiFileIndex} with {$aiUrlCount} URLs.", 'yellow');
+                    
+                    $aiFileIndex++;
+                    $aiUrlCount = 0;
+                    $currentAiFile = $publicPath . "sitemap-ai-ready-{$aiFileIndex}.xml";
+                    $xmlAiContent = $xmlHeader;
+                }
+            }
+        }
+
+        if ($aiUrlCount > 0) {
+            $xmlAiContent .= '</urlset>';
+            file_put_contents($currentAiFile, $xmlAiContent);
+            CLI::write("Generated AI sitemap {$aiFileIndex} with {$aiUrlCount} URLs.", 'yellow');
+        }
+        
+        file_put_contents($publicPath . 'sitemap-ai-ready-count.txt', $aiFileIndex);
+        
+        $existingAi = glob($publicPath . 'sitemap-ai-ready-*.xml');
+        foreach ($existingAi as $file) {
+            if (preg_match('/sitemap-ai-ready-(\d+)\.xml$/', $file, $matches)) {
+                $num = (int)$matches[1];
+                if ($num > $aiFileIndex) {
+                    @unlink($file);
+                }
+            }
+        }
+
+        CLI::write("Done! Included {$totalAiIncluded} AI-enriched companies in {$aiFileIndex} sitemap files.", 'green');
     }
 }

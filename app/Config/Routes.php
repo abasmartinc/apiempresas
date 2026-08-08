@@ -397,6 +397,7 @@ $routes->get('sitemap-contratos.xml', 'Sitemap::contratos');
 $routes->get('sitemap-companies-(:num).xml', 'Sitemap::companies/$1');
 $routes->get('sitemap-en-companies-(:num).xml', 'Sitemap::companies/$1');
 $routes->get('sitemap-holdings-(:num).xml', 'Sitemap::holdings/$1');
+$routes->get('sitemap-ai-ready-(:num).xml', 'Sitemap::aiReady/$1');
 
 // --- Webhook CRON SEO ---
 $routes->get('cron/seo-sync/(:any)', 'RadarController::syncStatsWebhook/$1');

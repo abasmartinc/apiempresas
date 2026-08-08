@@ -17,6 +17,9 @@ class Holding extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Grupo empresarial no encontrado.");
         }
 
+        // Clean up 'Grupo' prefix to avoid 'Grupo Grupo' in views
+        $holding['name'] = preg_replace('/^grupo\s+/i', '', trim($holding['name']));
+
         $companyHoldingModel = new CompanyHoldingModel();
         
         // Capture filters
@@ -50,7 +53,8 @@ class Holding extends BaseController
         ];
         
         foreach ($holdingCompanies as $hc) {
-            $capital = (float)$hc['social_capital'];
+            $capitalStr = str_replace([' €', '.', ','], ['', '', '.'], $hc['social_capital'] ?? '0');
+            $capital = (float)$capitalStr;
             
             // Logarithmic scale for size
             $nodeSize = 15; // Base slightly larger for the holding view

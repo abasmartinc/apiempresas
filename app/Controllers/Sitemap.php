@@ -63,7 +63,6 @@ class Sitemap extends Controller
         if (!$isEn) {
             // 6. Páginas de Holdings (40.000 por página)
             $holdingModel = new \App\Models\HoldingModel();
-            $holdingTotal = 135000; // Hardcoded approximation or $holdingModel->countAllResults(); 
             // Better to just use a fast count. 134505 / 40000 = 4 pages
             $holdingTotal = $holdingModel->countAllResults();
             $holdingPages = ceil($holdingTotal / 40000);
@@ -71,6 +70,20 @@ class Sitemap extends Controller
             for ($i = 1; $i <= $holdingPages; $i++) {
                 $xml .= '<sitemap>';
                 $xml .= '<loc>' . site_url("sitemap-holdings-{$i}.xml") . '</loc>';
+                $xml .= '</sitemap>';
+            }
+
+            // 7. Sitemap VIP de Empresas Enriquecidas con IA
+            $aiPages = 0;
+            if (file_exists(WRITEPATH . 'sitemaps/sitemap-ai-ready-count.txt')) {
+                $aiPages = (int) file_get_contents(WRITEPATH . 'sitemaps/sitemap-ai-ready-count.txt');
+            } elseif (file_exists(FCPATH . 'sitemap-ai-ready-count.txt')) {
+                $aiPages = (int) file_get_contents(FCPATH . 'sitemap-ai-ready-count.txt');
+            }
+            
+            for ($i = 1; $i <= $aiPages; $i++) {
+                $xml .= '<sitemap>';
+                $xml .= '<loc>' . site_url("sitemap-ai-ready-{$i}.xml") . '</loc>';
                 $xml .= '</sitemap>';
             }
         }
@@ -505,4 +518,21 @@ class Sitemap extends Controller
         $xml .= '</urlset>';
         return $this->response->setContentType('application/xml')->setBody($xml);
     }
+
+    /**
+     * Sub-sitemap de empresas con IA (sitemap-ai-ready-X.xml)
+     */
+    public function aiReady($page = 1)
+    {
+        $page = (int) $page;
+        if ($page < 1) $page = 1;
+
+        $staticFile = WRITEPATH . 'sitemaps/sitemap-ai-ready-' . $page . '.xml';
+        if (file_exists($staticFile)) {
+            return $this->response->setContentType('application/xml')->setBody(file_get_contents($staticFile));
+        }
+
+        return $this->response->setStatusCode(404);
+    }
 }
+

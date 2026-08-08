@@ -20,6 +20,7 @@
                 <h4 class="foot-title">Directorio B2B</h4>
                 <ul class="foot-links">
                     <li><a href="<?=site_url('listado-de-empresas') ?>">Directorio Histórico</a></li>
+                    <li><a href="<?=site_url('listado-de-grupos-empresariales') ?>">Grupos Empresariales</a></li>
                     <li><a href="<?=site_url('search_company') ?>">Buscador de Empresas</a></li>
                     <li><a href="<?=site_url('autocompletado-cif-empresas') ?>">Autocompletado Pro</a></li>
                     <li><a href="<?=site_url('base-de-datos-de-empresas') ?>">Descargas de BBDD</a></li>
