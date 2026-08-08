@@ -396,6 +396,7 @@ $routes->get('sitemap-subvenciones.xml', 'Sitemap::subvenciones');
 $routes->get('sitemap-contratos.xml', 'Sitemap::contratos');
 $routes->get('sitemap-companies-(:num).xml', 'Sitemap::companies/$1');
 $routes->get('sitemap-en-companies-(:num).xml', 'Sitemap::companies/$1');
+$routes->get('sitemap-holdings-(:num).xml', 'Sitemap::holdings/$1');
 
 // --- Webhook CRON SEO ---
 $routes->get('cron/seo-sync/(:any)', 'RadarController::syncStatsWebhook/$1');
@@ -467,6 +468,13 @@ $routes->get('empresas-(:any)-en-(:any)', 'RadarController::sectorProvince/$1/$2
 
 // Directorios SEO (Listado de empresas)
 $routes->get('listado-de-empresas', 'Directory::index');
+$routes->get('listado-de-grupos-empresariales', 'HoldingDirectory::index');
+
+// Perfil público SEO (URL base amigable + ID + Nombre)
+$routes->get('directorios-de-empresas/(:segment)', 'SeoController::hubProvincia/$1');
+$routes->get('directorio-de-empresas/(:segment)/(:segment)', 'SeoController::hubMunicipio/$1/$2');
+$routes->get('informacion-empresa/(:segment)', 'Company::show/$1'); // Ficha de empresa
+$routes->get('grupos-empresariales/(:segment)', 'Holding::show/$1'); // Ficha de holding
 
 // CNAE / Sectores
 $routes->get('listado-de-empresas/sector-(:segment)', 'Directory::cnae/$1');

@@ -2,7 +2,6 @@
 
 namespace App\Controllers;
 
-use App\Models\RadarDemoEventModel;
 use App\Models\TrackingEventModel;
 use CodeIgniter\API\ResponseTrait;
 
@@ -14,7 +13,7 @@ class TrackingController extends BaseController
 
     public function __construct()
     {
-        $this->eventModel = new RadarDemoEventModel();
+        $this->eventModel = new TrackingEventModel();
     }
 
     /**
@@ -96,22 +95,30 @@ class TrackingController extends BaseController
             }
             $visitorId = $session->get('radar_visitor_id');
 
-            // 3. Capturar Metadatos del Entorno
+            // 3. Empaquetar metadatos adicionales en JSON
+            $metadataArray = [];
+            if (isset($json['metadata'])) {
+                $metadataArray = is_array($json['metadata']) ? $json['metadata'] : (json_decode($json['metadata'], true) ?: []);
+            }
+            $metadataArray['cta_label'] = substr($json['cta_label'] ?? '', 0, 150);
+            $metadataArray['url'] = substr($json['url'] ?? '', 0, 255);
+            $metadataArray['referrer'] = substr($this->request->getServer('HTTP_REFERER') ?? '', 0, 255);
+            $metadataArray['ip_address'] = $this->request->getIPAddress();
+            $metadataArray['user_agent'] = substr($this->request->getUserAgent()->getAgentString(), 0, 500);
+
+            // 4. Mapear al formato global de tracking_events
             $data = [
-                'visitor_id'    => $visitorId,
-                'user_id'       => $session->get('user_id'),
-                'event_type'    => $eventType,
-                'source'        => $source,
-                'page'          => $json['page'] ?? 'radar-demo',
-                'cta_label'     => substr($json['cta_label'] ?? '', 0, 150),
-                'url'           => substr($json['url'] ?? '', 0, 255),
-                'referrer'      => substr($this->request->getServer('HTTP_REFERER') ?? '', 0, 255),
-                'ip_address'    => $this->request->getIPAddress(),
-                'user_agent'    => substr($this->request->getUserAgent()->getAgentString(), 0, 500),
-                'metadata_json' => isset($json['metadata']) ? json_encode($json['metadata']) : null,
+                'event_name'   => substr($eventType, 0, 100),
+                'page'         => substr($json['page'] ?? 'radar-demo', 0, 255),
+                'user_id'      => $session->get('user_id'),
+                'session_id'   => substr(session_id(), 0, 100),
+                'anonymous_id' => substr($visitorId, 0, 100),
+                'element'      => substr($source, 0, 255),
+                'metadata'     => json_encode($metadataArray),
+                'created_at'   => date('Y-m-d H:i:s'),
             ];
 
-            // 4. Guardar en Base de Datos
+            // 5. Guardar en Base de Datos
             if ($this->eventModel->insert($data)) {
                 log_message('error', '[TrackingDebug] Registro guardado con éxito. ID: ' . $this->eventModel->getInsertID());
                 return $this->response->setJSON(['success' => true]);

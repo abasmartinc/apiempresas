@@ -359,9 +359,85 @@ class Company extends BaseController
         $ratingModel = new \App\Models\CompanyRatingModel();
         $ratingStats = $ratingModel->getRatingStats((int)$company['id']);
 
+        // --- HOLDINGS LOGIC ---
+        $holdingData = null;
+        $holdingGraphData = null;
+        $holdingCompanies = [];
+        
+        $holdingRow = $db->table('company_holdings')
+            ->select('holdings.id, holdings.name, holdings.slug')
+            ->join('holdings', 'holdings.id = company_holdings.holding_id')
+            ->where('company_holdings.company_id', $company['id'])
+            ->get()->getRowArray();
+            
+        if ($holdingRow) {
+            $holdingData = $holdingRow;
+            $companyHoldingModel = new \App\Models\CompanyHoldingModel();
+            $holdingCompanies = $companyHoldingModel->getCompaniesByHolding($holdingRow['id'], 100);
+            $totalHoldingCompaniesCount = $companyHoldingModel->getTotalCompaniesByHolding($holdingRow['id']);
+            
+            // Build Graph Data for Vis.js
+            $nodes = [];
+            $edges = [];
+            
+            // Central Node (Holding)
+            $nodes[] = [
+                'id' => 'h_' . $holdingRow['id'],
+                'label' => $holdingRow['name'],
+                'shape' => 'box',
+                'color' => [
+                    'background' => '#1a202c',
+                    'border' => '#0f172a'
+                ],
+                'font' => ['color' => '#ffffff', 'size' => 16, 'face' => 'Inter', 'bold' => true],
+                'margin' => 12
+            ];
+            
+            foreach ($holdingCompanies as $hc) {
+                $isCurrent = ($hc['id'] == $company['id']);
+                $capital = (float)$hc['social_capital'];
+                
+                // Calcular tamaño dinámico (escala logarítmica para evitar nodos gigantes)
+                $nodeSize = 12; // Base
+                if ($capital > 0) {
+                    $nodeSize = 12 + (log10($capital) * 3);
+                    if ($nodeSize > 35) $nodeSize = 35; // Cap máximo
+                }
+                if ($isCurrent && $nodeSize < 22) $nodeSize = 22; // Resaltar el actual
+
+                $estado = esc($hc['status'] ?? 'Desconocido');
+                $provincia = esc(ucwords(strtolower($hc['province'] ?? '')));
+                $nodes[] = [
+                    'id' => 'c_' . $hc['id'],
+                    // Sin 'label' para evitar la bola de pelo de textos solapados
+                    'shape' => 'dot',
+                    'color' => $isCurrent ? '#4F46E5' : '#94a3b8', // Añil si es actual, gris azulado para hermanas
+                    'title' => "{$hc['name']}\nCIF: {$hc['cif']}\nProvincia: {$provincia}\nEstado: {$estado}",
+                    'size' => $nodeSize
+                ];
+                
+                $edges[] = [
+                    'from' => 'h_' . $holdingRow['id'],
+                    'to' => 'c_' . $hc['id'],
+                    'color' => '#cbd5e1',
+                    'length' => 150
+                ];
+            }
+            
+            $holdingGraphData = [
+                'nodes' => $nodes,
+                'edges' => $edges
+            ];
+        }
+        // --- END HOLDINGS LOGIC ---
+
         return [
             'companyName'      => $name,
             'company'          => $company,
+            'holdingData'      => $holdingData ?? null,
+            'holdingCompanies' => $holdingCompanies ?? [],
+            'holdingGraphData' => $holdingGraphData ?? null,
+            'totalHoldingCompaniesCount' => $totalHoldingCompaniesCount ?? 0,
             'statusRaw'        => $statusRaw,
             'statusClass'      => $isActive ? 'company-status company-status--active' : 'company-status company-status--inactive',
             'companyCif'       => $cif, // Pasamos el cif limpio a la vista
@@ -385,6 +461,9 @@ class Company extends BaseController
             'contracts'        => $contracts,
             'subsidies'        => $subsidies,
             'countFormatted'   => $countFormatted,
+            'holdingData'      => $holdingData,
+            'holdingCompanies' => $holdingCompanies,
+            'holdingGraphData' => $holdingGraphData,
         ];
     }
 

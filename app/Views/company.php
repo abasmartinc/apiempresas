@@ -337,6 +337,13 @@
                                         Datos oficiales Reg. Mercantil
                                     </div>
                                     
+                                    <?php if (!empty($holdingData)): ?>
+                                    <a href="<?= site_url('grupos-empresariales/' . esc($holdingData['slug'])) ?>" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #f8fafc; padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; border: 1px solid #334155; letter-spacing: 0.5px; text-transform: uppercase; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 6px rgba(15, 23, 42, 0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                        Grupo <?= esc($holdingData['name']) ?> (<?= number_format($totalHoldingCompaniesCount ?? count($holdingCompanies), 0, ',', '.') ?>)
+                                    </a>
+                                    <?php endif; ?>
+                                    
                                     <?php if (!empty($contracts)): ?>
                                     <div style="display: inline-flex; align-items: center; gap: 4px; background: #eef2ff; color: #4f46e5; padding: 4px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; border: 1px solid #c7d2fe; letter-spacing: 0.5px; text-transform: uppercase;">
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-0e887e56"></use></svg>
@@ -1082,6 +1089,185 @@
                     <?php if (!empty($administrators)): ?>
                         <div id="administradores" class="reveal-on-scroll" style="margin-top: 4rem;">
                             
+                            <?php if (!empty($holdingData) && !empty($holdingGraphData)): ?>
+                                <!-- Sección del Holding (Mapa de Poder) -->
+                                <div style="background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 2rem; margin-bottom: 2rem; position: relative; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                                    
+                                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                                        <div>
+                                            <h2 class="no-after-line" style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 12px;">
+                                                <span style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #fff; padding: 8px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.2);">
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                                                </span>
+                                                Grupo Empresarial: <?= esc($holdingData['name']) ?>
+                                            </h2>
+                                            <p style="color: #64748b; font-size: 0.95rem; margin: 0;">
+                                                Esta empresa forma parte de un ecosistema corporativo de <strong><?= number_format($totalHoldingCompaniesCount, 0, ',', '.') ?> empresas</strong> conectadas entre sí.
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <button id="btn-show-graph" onclick="toggleHoldingGraph()" style="background: #4F46E5; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#4338ca'" onmouseout="this.style.background='#4F46E5'">
+                                                <span id="btn-graph-text"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 6px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>Explorar Mapa de Poder</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Tabla Premium (Top Empresas Hermanas) -->
+                                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden; margin-top: 1rem;">
+                                        <div style="overflow-x: auto;">
+                                            <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                                                <thead style="background: #f8fafc;">
+                                                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                                                        <th style="text-align: left; padding: 14px 20px; color: #475569; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Empresa</th>
+                                                        <th style="text-align: left; padding: 14px 20px; color: #475569; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">CIF</th>
+                                                        <th style="text-align: left; padding: 14px 20px; color: #475569; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Provincia</th>
+                                                        <th style="text-align: right; padding: 14px 20px; color: #475569; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Estado</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php 
+                                                    $limit = 5;
+                                                    $counter = 0;
+                                                    foreach ($holdingCompanies as $hc): 
+                                                        $isCurrent = ($hc['id'] == $company['id']);
+                                                        $counter++;
+                                                        $isHidden = $counter > $limit;
+                                                    ?>
+                                                    <tr class="<?= $isHidden ? 'holding-hidden-row' : '' ?>" style="<?= $isHidden ? 'display: none;' : '' ?> border-bottom: 1px solid #f1f5f9; transition: background 0.2s; <?= $isCurrent ? 'background: #eff6ff;' : '' ?>" onmouseover="this.style.background='<?= $isCurrent ? '#eff6ff' : '#f8fafc' ?>'" onmouseout="this.style.background='<?= $isCurrent ? '#eff6ff' : 'transparent' ?>'">
+                                                        <td style="padding: 14px 20px; color: #0f172a; font-weight: <?= $isCurrent ? '700' : '500' ?>; font-size: 0.95rem;">
+                                                            <?php if(!$isCurrent): ?><a href="<?= site_url($hc['cif']) ?>" style="color: inherit; text-decoration: none;"><?php endif; ?>
+                                                            <?= esc($hc['name']) ?> <?= $isCurrent ? '<span style="font-size: 0.7rem; background:#3b82f6; color:#ffffff; padding:2px 8px; border-radius:12px; margin-left:8px; font-weight:600; letter-spacing: 0.02em;">ACTUAL</span>' : '' ?>
+                                                            <?php if(!$isCurrent): ?></a><?php endif; ?>
+                                                        </td>
+                                                        <td style="padding: 14px 20px; color: #64748b; font-family: 'Courier New', Courier, monospace; font-size: 0.9rem;"><?= esc($hc['cif']) ?></td>
+                                                        <?php
+                                                        $statusLower = strtolower($hc['status'] ?? '');
+                                                        $isActiva = ($statusLower === 'activa' || $statusLower === 'activo');
+                                                        $estadoColor = $isActiva ? '#16a34a' : '#64748b';
+                                                        $estadoBg = $isActiva ? '#dcfce7' : '#f1f5f9';
+                                                        ?>
+                                                        <td style="padding: 14px 20px; color: #475569; font-size: 0.95rem; text-transform: capitalize;"><?= esc(strtolower($hc['province'] ?? '')) ?: '-' ?></td>
+                                                        <td style="padding: 14px 20px; text-align: right;">
+                                                            <span style="font-size: 0.75rem; background: <?= $estadoBg ?>; color: <?= $estadoColor ?>; padding: 4px 10px; border-radius: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;">
+                                                                <?= esc($hc['status']) ?: 'Desconocido' ?>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <?php endforeach; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        
+                                        <?php if($totalHoldingCompaniesCount > 5): ?>
+                                            <div style="background: #f8fafc; padding: 12px 20px; text-align: center; border-top: 1px solid #e2e8f0;">
+                                                <?php $remainingCount = $totalHoldingCompaniesCount - 5; ?>
+                                                <button id="btn-toggle-table" onclick="toggleHoldingTable()" style="background: none; border: none; color: #4f46e5; font-weight: 600; font-size: 0.9rem; cursor: pointer; text-decoration: underline;">
+                                                    Ver las otras <?= number_format($remainingCount, 0, ',', '.') ?> empresas hermanas más en este grupo
+                                                </button>
+                                                <?php if($totalHoldingCompaniesCount > 100): ?>
+                                                    <div id="holding-limit-notice" style="display: none; color: #64748b; font-size: 0.85rem; margin-top: 8px;">
+                                                        (Mostrando el top 100 de empresas por relevancia de capital social para optimizar el rendimiento)
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <!-- Graph Wrapper (Hidden by default) -->
+                                    <div id="holding-graph-wrapper" style="display: none; margin-top: 2rem; border-top: 1px solid #e2e8f0; padding-top: 1.5rem;">
+                                        <div id="holding-network" style="width: 100%; height: 500px; background: #f8fafc; border-radius: 12px; border: 1px dashed #cbd5e1;"></div>
+                                        
+                                        <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+                                        <script>
+                                            let holdingNetwork = null;
+                                            function toggleHoldingGraph() {
+                                                const wrapper = document.getElementById('holding-graph-wrapper');
+                                                const btnText = document.getElementById('btn-graph-text');
+                                                
+                                                if (wrapper.style.display === 'none' || wrapper.style.display === '') {
+                                                    wrapper.style.display = 'block';
+                                                    btnText.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 6px;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>Ocultar Mapa de Poder';
+                                                    
+                                                    if (!holdingNetwork) {
+                                                        const container = document.getElementById('holding-network');
+                                                        const rawData = <?= json_encode($holdingGraphData) ?>;
+                                                    
+                                                    const data = {
+                                                        nodes: new vis.DataSet(rawData.nodes),
+                                                        edges: new vis.DataSet(rawData.edges)
+                                                    };
+                                                    
+                                                    const options = {
+                                                        nodes: {
+                                                            borderWidth: 2,
+                                                            borderWidthSelected: 4,
+                                                        },
+                                                        edges: {
+                                                            width: 1,
+                                                            smooth: {
+                                                                type: 'continuous'
+                                                            }
+                                                        },
+                                                        physics: {
+                                                            barnesHut: {
+                                                                gravitationalConstant: -4000,
+                                                                centralGravity: 0.1,
+                                                                springLength: 250,
+                                                                damping: 0.09
+                                                            },
+                                                            stabilization: {
+                                                                iterations: 150
+                                                            }
+                                                        },
+                                                        interaction: {
+                                                            hover: true,
+                                                            tooltipDelay: 200,
+                                                            zoomView: true,
+                                                            dragView: true
+                                                        }
+                                                    };
+                                                    
+                                                    holdingNetwork = new vis.Network(container, data, options);
+                                                    
+                                                    holdingNetwork.on("selectNode", function (params) {
+                                                        if (params.nodes.length == 1) {
+                                                            var nodeId = params.nodes[0];
+                                                            var node = data.nodes.get(nodeId);
+                                                            if(node.url) {
+                                                                window.location.href = node.url;
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                            } else {
+                                                wrapper.style.display = 'none';
+                                                btnText.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 6px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>Explorar Mapa de Poder';
+                                            }
+                                        }
+
+                                        function toggleHoldingTable() {
+                                            const rows = document.querySelectorAll('.holding-hidden-row');
+                                            const btn = document.getElementById('btn-toggle-table');
+                                            const notice = document.getElementById('holding-limit-notice');
+                                            
+                                            if (rows.length === 0) return;
+                                            const isHidden = rows[0].style.display === 'none' || rows[0].style.display === '';
+                                            
+                                            if (isHidden) {
+                                                rows.forEach(el => el.style.display = 'table-row');
+                                                btn.innerHTML = 'Ocultar filiales y contraer tabla';
+                                                if(notice) notice.style.display = 'block';
+                                            } else {
+                                                rows.forEach(el => el.style.display = 'none');
+                                                btn.innerHTML = 'Ver las otras <?= number_format($remainingCount ?? 0, 0, ',', '.') ?> empresas hermanas más en este grupo';
+                                                if(notice) notice.style.display = 'none';
+                                            }
+                                        }
+                                        </script>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+
                             <h2 class="no-after-line"
                                 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 2rem; display: flex; align-items: center; gap: 12px;">
                                 <span

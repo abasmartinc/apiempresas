@@ -59,6 +59,21 @@ class Sitemap extends Controller
             $xml .= '<loc>' . site_url("{$prefix}{$i}.xml") . '</loc>';
             $xml .= '</sitemap>';
         }
+
+        if (!$isEn) {
+            // 6. Páginas de Holdings (40.000 por página)
+            $holdingModel = new \App\Models\HoldingModel();
+            $holdingTotal = 135000; // Hardcoded approximation or $holdingModel->countAllResults(); 
+            // Better to just use a fast count. 134505 / 40000 = 4 pages
+            $holdingTotal = $holdingModel->countAllResults();
+            $holdingPages = ceil($holdingTotal / 40000);
+            
+            for ($i = 1; $i <= $holdingPages; $i++) {
+                $xml .= '<sitemap>';
+                $xml .= '<loc>' . site_url("sitemap-holdings-{$i}.xml") . '</loc>';
+                $xml .= '</sitemap>';
+            }
+        }
         
         $xml .= '</sitemapindex>';
 
@@ -90,6 +105,7 @@ class Sitemap extends Controller
                 ['loc' => site_url('search_company'), 'priority' => '0.9', 'freq' => 'daily'],
                 ['loc' => site_url('blog'), 'priority' => '0.8', 'freq' => 'daily'],
                 ['loc' => site_url('empresas-nuevas'), 'priority' => '1.0', 'freq' => 'daily'],
+                ['loc' => site_url('listado-de-grupos-empresariales'), 'priority' => '1.0', 'freq' => 'daily'],
             ];
         }
 
@@ -446,6 +462,44 @@ class Sitemap extends Controller
         foreach ($organos as $o) {
             $slug = url_title($o['organo_contratacion'], '-', true);
             $xml .= '<url><loc>' . site_url('licitaciones-del-estado/organo-' . $slug) . '</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>';
+        }
+
+        $xml .= '</urlset>';
+        return $this->response->setContentType('application/xml')->setBody($xml);
+    }
+    
+    /**
+     * Sitemap dinámico para Holdings (paginado en bloques de 40.000)
+     */
+    public function holdings($page = 1)
+    {
+        $perPage = 40000;
+        $offset = ($page - 1) * $perPage;
+
+        $holdingModel = new \App\Models\HoldingModel();
+        
+        // Optimize query by selecting only what we need
+        $holdings = $holdingModel->select('slug, updated_at')
+                                 ->orderBy('id', 'ASC')
+                                 ->limit($perPage, $offset)
+                                 ->findAll();
+
+        if (empty($holdings)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+
+        foreach ($holdings as $holding) {
+            $lastMod = !empty($holding['updated_at']) ? date('c', strtotime($holding['updated_at'])) : date('c');
+            
+            $xml .= '<url>';
+            $xml .= '<loc>' . site_url('grupos-empresariales/' . $holding['slug']) . '</loc>';
+            $xml .= '<lastmod>' . $lastMod . '</lastmod>';
+            $xml .= '<changefreq>monthly</changefreq>';
+            $xml .= '<priority>0.7</priority>';
+            $xml .= '</url>';
         }
 
         $xml .= '</urlset>';

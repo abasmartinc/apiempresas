@@ -14,7 +14,6 @@ use App\Models\SubscriptionModel;
 use App\Models\EmailLogModel;
 use App\Models\InvoiceModel;
 use App\Models\BlockedIpModel;
-use App\Models\SystemStatsModel;
 
 class Dashboard extends BaseController
 {
@@ -29,7 +28,6 @@ class Dashboard extends BaseController
     protected $emailLogModel;
     protected $invoiceModel;
     protected $blockedIpModel;
-    protected $systemStatsModel;
 
     public function __construct()
     {
@@ -44,7 +42,6 @@ class Dashboard extends BaseController
         $this->emailLogModel = new EmailLogModel();
         $this->invoiceModel = new InvoiceModel();
         $this->blockedIpModel = new BlockedIpModel();
-        $this->systemStatsModel = new SystemStatsModel();
     }
 
     /**

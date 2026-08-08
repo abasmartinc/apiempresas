@@ -106,8 +106,8 @@
                         <a href="https://vertice.apiempresas.es" target="_blank" style="height: 100%;">
                             <div class="nav-item-icon">📍</div>
                             <div>
-                                <strong>Inteligencia Comercial</strong>
-                                <span>Analiza la viabilidad y competencia de cualquier municipio con IA.</span>
+                                <strong>Vértice</strong>
+                                <span>Geomarketing avanzado para analizar ubicaciones, competidores y expandir tu red comercial.</span>
                             </div>
                         </a>
                         <a href="#" class="js-track-wp-cta" style="height: 100%;">
@@ -154,6 +154,13 @@
                         <div>
                             <strong>Directorio Histórico</strong>
                             <span>Explora el directorio B2B completo.</span>
+                        </div>
+                    </a>
+                    <a href="<?= site_url('listado-de-grupos-empresariales') ?>">
+                        <div class="nav-item-icon">🕸️</div>
+                        <div>
+                            <strong>Grupos y Holdings</strong>
+                            <span>Descubre 134.000 entramados societarios.</span>
                         </div>
                     </a>
                     <a href="<?= site_url('base-de-datos-de-empresas') ?>">
@@ -327,6 +334,9 @@
                     <div class="mobile-nav-label">Listados</div>
                     <a href="<?= site_url('listado-de-empresas') ?>" class="mobile-nav-link">
                         <span>Directorio Histórico</span>
+                    </a>
+                    <a href="<?= site_url('listado-de-grupos-empresariales') ?>" class="mobile-nav-link">
+                        <span>Grupos y Holdings</span>
                     </a>
                     <a href="<?= site_url('base-de-datos-de-empresas') ?>" class="mobile-nav-link">
                         <span>Descarga de Listados</span>
