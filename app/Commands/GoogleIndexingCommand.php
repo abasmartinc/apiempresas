@@ -22,8 +22,8 @@ class GoogleIndexingCommand extends BaseCommand
             CLI::write("DRY RUN MODE: No requests will be sent to Google.", 'yellow');
         }
 
-        // Check for Google API Client
         if (!class_exists('\Google_Client') && !class_exists('\Google\Client')) {
+            $this->sendEmailReport(0, "Error crítico: La librería Google API Client no está instalada en producción.");
             CLI::error("Google API Client is not installed. Please run: composer require google/apiclient:^2.15.0");
             return;
         }
@@ -47,6 +47,7 @@ class GoogleIndexingCommand extends BaseCommand
         $companies = $builder->get()->getResultArray();
 
         if (empty($companies)) {
+            $this->sendEmailReport(0, "No hay nuevas empresas enriquecidas pendientes de indexar en Google. (Cola vacía o límite de 30 días no alcanzado).");
             CLI::write("No AI enriched companies found to submit.", 'yellow');
             return;
         }
@@ -58,6 +59,7 @@ class GoogleIndexingCommand extends BaseCommand
         // Need credentials.json from Google Cloud Service Account
         $credentialsPath = WRITEPATH . 'credentials/google-service-account.json';
         if (!file_exists($credentialsPath)) {
+            $this->sendEmailReport(0, "Error crítico: No se encuentra el archivo JSON de credenciales de Google en:\n{$credentialsPath}\nPor favor, súbelo a producción.");
             CLI::error("Credentials file not found at: {$credentialsPath}. Please download your Service Account JSON and place it there.");
             return;
         }
@@ -66,6 +68,7 @@ class GoogleIndexingCommand extends BaseCommand
             $client->setAuthConfig($credentialsPath);
             $httpClient = $client->authorize();
         } catch (\Exception $e) {
+            $this->sendEmailReport(0, "Error autorizando el cliente de Google:\n" . $e->getMessage());
             CLI::error("Failed to authorize Google Client: " . $e->getMessage());
             return;
         }
@@ -111,6 +114,10 @@ class GoogleIndexingCommand extends BaseCommand
                 CLI::error("Exception submitting {$url}: " . $e->getMessage());
                 if (strpos($e->getMessage(), 'quota') !== false || strpos($e->getMessage(), 'Rate Limit') !== false || strpos($e->getMessage(), '429') !== false) {
                     CLI::write("Quota exceeded. Stopping for today.", 'yellow');
+                    if ($submitted == 0) {
+                        $this->sendEmailReport(0, "Límite de cuota de Google alcanzado en el primer intento.\nError:\n" . $e->getMessage());
+                        return; // Early return as email is sent
+                    }
                     break;
                 }
             }
@@ -122,14 +129,18 @@ class GoogleIndexingCommand extends BaseCommand
 
         if (!$isDryRun) {
             $cifListText = !empty($submittedCifs) ? "\n\nCIFs procesados:\n" . implode(', ', $submittedCifs) : "";
-            
-            $email = \Config\Services::email();
-            $email->setTo('papelo.amh@gmail.com');
-            $email->setSubject('Reporte Diario: Google Indexing API');
-            $email->setMessage("El comando automático seo:indexing-api ha finalizado.\n\nSe han enviado {$submitted} URLs enriquecidas con IA a Google para forzar su indexación rápida.\nLímite máximo permitido diario: 200.{$cifListText}\n\nAPIEmpresas.es Cron");
-            if (!$email->send()) {
-                CLI::error("No se pudo enviar el email de reporte.");
-            }
+            $this->sendEmailReport($submitted, "Se han enviado {$submitted} URLs enriquecidas con IA a Google para forzar su indexación rápida.\nLímite máximo permitido diario: 200.{$cifListText}");
+        }
+    }
+
+    private function sendEmailReport(int $submitted, string $details)
+    {
+        $email = \Config\Services::email();
+        $email->setTo('papelo.amh@gmail.com');
+        $email->setSubject("Reporte Diario: Google Indexing API ({$submitted})");
+        $email->setMessage("El comando automático seo:indexing-api ha finalizado.\n\n{$details}\n\nAPIEmpresas.es Cron");
+        if (!$email->send()) {
+            CLI::error("No se pudo enviar el email de reporte de Google.");
         }
     }
 }

@@ -24,6 +24,7 @@ class BingIndexingCommand extends BaseCommand
 
         $apiKey = env('BING_INDEXING_API_KEY');
         if (empty($apiKey)) {
+            $this->sendEmailReport(0, "Error: BING_INDEXING_API_KEY no está configurada en el archivo .env de producción.");
             CLI::error("BING_INDEXING_API_KEY is not set in .env");
             return;
         }
@@ -47,6 +48,7 @@ class BingIndexingCommand extends BaseCommand
         $companies = $builder->get()->getResultArray();
 
         if (empty($companies)) {
+            $this->sendEmailReport(0, "No hay nuevas empresas enriquecidas pendientes de indexar en Bing. (Cola vacía o límite de 30 días no alcanzado).");
             CLI::write("No AI enriched companies found to submit to Bing.", 'yellow');
             return;
         }
@@ -116,13 +118,18 @@ class BingIndexingCommand extends BaseCommand
                         }
                     }
                 }
-            } else {
-                CLI::error("Failed to submit chunk to Bing. HTTP Status: {$httpCode}");
-                CLI::write("Response: {$response}", 'red');
+                $errorMsg = "Failed to submit chunk to Bing. HTTP Status: {$httpCode}\nResponse: {$response}\n";
                 if ($error) {
-                    CLI::write("cURL Error: {$error}", 'red');
+                    $errorMsg .= "cURL Error: {$error}";
                 }
+                CLI::error($errorMsg);
                 $hasError = true;
+                
+                // Si falla en el primer lote, enviamos email con el error
+                if ($submitted == 0) {
+                    $this->sendEmailReport(0, "Error crítico conectando con Bing API:\n\n" . $errorMsg);
+                    return; // Early return as email is sent
+                }
                 break; // Stop processing further chunks if we hit an API error
             }
             
@@ -136,16 +143,18 @@ class BingIndexingCommand extends BaseCommand
         CLI::write("Done! Processed {$submitted} URLs to Bing.", 'green');
 
         // Send email report
-        if ($submitted > 0) {
-            $cifListText = !empty($submittedCifs) ? "\n\nCIFs procesados (Bing):\n" . implode(', ', $submittedCifs) : "";
-            
-            $email = \Config\Services::email();
-            $email->setTo('papelo.amh@gmail.com');
-            $email->setSubject("Reporte Diario: Bing Indexing API ({$submitted})");
-            $email->setMessage("El comando automático seo:indexing-bing ha finalizado.\n\nSe han enviado {$submitted} URLs enriquecidas con IA a Bing para forzar su indexación rápida.\nLímite máximo permitido diario: 10,000.{$cifListText}\n\nAPIEmpresas.es Cron");
-            if (!$email->send()) {
-                CLI::error("No se pudo enviar el email de reporte de Bing.");
-            }
+        $cifListText = !empty($submittedCifs) ? "\n\nCIFs procesados (Bing):\n" . implode(', ', $submittedCifs) : "";
+        $this->sendEmailReport($submitted, "Se han enviado {$submitted} URLs enriquecidas con IA a Bing para forzar su indexación rápida.\nLímite máximo permitido diario: 10,000.{$cifListText}");
+    }
+
+    private function sendEmailReport(int $submitted, string $details)
+    {
+        $email = \Config\Services::email();
+        $email->setTo('papelo.amh@gmail.com');
+        $email->setSubject("Reporte Diario: Bing Indexing API ({$submitted})");
+        $email->setMessage("El comando automático seo:indexing-bing ha finalizado.\n\n{$details}\n\nAPIEmpresas.es Cron");
+        if (!$email->send()) {
+            CLI::error("No se pudo enviar el email de reporte de Bing.");
         }
     }
 }
