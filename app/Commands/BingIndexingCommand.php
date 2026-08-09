@@ -118,6 +118,7 @@ class BingIndexingCommand extends BaseCommand
                         }
                     }
                 }
+            } else {
                 $errorMsg = "Failed to submit chunk to Bing. HTTP Status: {$httpCode}\nResponse: {$response}\n";
                 if ($error) {
                     $errorMsg .= "cURL Error: {$error}";
