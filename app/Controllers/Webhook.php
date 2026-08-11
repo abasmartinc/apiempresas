@@ -426,6 +426,13 @@ class Webhook extends Controller
         $planModel = new \App\Models\ApiPlanModel();
         $plan = $planModel->where('slug', $planSlug)->first();
         
+        $customPlanName = null;
+        if ($planSlug === 'custom_bonus') {
+            $plan = clone $planModel->find(1); // Use free plan as a dummy base
+            $credits = (int)($metadata->credits ?? 0);
+            $customPlanName = "Paquete de {$credits} créditos";
+        }
+        
         if (!$plan && isset($invoice->subtotal)) {
             $basePrice = (float)($invoice->subtotal / 100);
             $plan = $planModel->where('price_monthly', $basePrice)->first();
@@ -485,7 +492,8 @@ class Webhook extends Controller
             ],
             $invoice->id,
             $baseAmount,
-            $taxAmount
+            $taxAmount,
+            $customPlanName
         );
 
         if ($dbInvoice) {
@@ -494,7 +502,7 @@ class Webhook extends Controller
                 'invoice'        => $dbInvoice,
                 'customer_name'  => $dbInvoice->billing_name,
                 'customer_email' => $dbInvoice->billing_email,
-                'plan_name'      => $plan->name ?? 'Descarga Excel',
+                'plan_name'      => $customPlanName ?? ($plan->name ?? 'Descarga Excel'),
                 'amount'         => $dbInvoice->total_amount,
                 'currency'       => $dbInvoice->currency,
                 'invoice_number' => $dbInvoice->invoice_number

@@ -563,3 +563,5 @@ $routes->post('unsubscribe/confirm', 'Unsubscribe::confirm');
 // Company pages: CIF-based and Slug-based URLs (must be last)
 $routes->get('([a-zA-Z][0-9]{7}[a-zA-Z0-9].*)', 'Company::show/$1');
 $routes->get('(:segment)', 'Company::show/$1');
+
+$routes->get('testpdf2', 'TestPdf2::index');

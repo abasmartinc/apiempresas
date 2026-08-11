@@ -20,7 +20,7 @@ class InvoiceService
     /**
      * Genera un registro de factura y su PDF correspondiente
      */
-    public function createInvoiceFromPayment(int $userId, int $planId, array $billingData = [], ?string $stripeInvoiceId = null, ?float $forcedAmount = null, ?float $forcedTax = null)
+    public function createInvoiceFromPayment(int $userId, int $planId, array $billingData = [], ?string $stripeInvoiceId = null, ?float $forcedAmount = null, ?float $forcedTax = null, ?string $customPlanName = null)
     {
         $userModel = new UserModel();
         $user = $userModel->find($userId);
@@ -66,7 +66,8 @@ class InvoiceService
         $invoice = $this->invoiceModel->find($invoiceId);
 
         // Generar PDF
-        $pdfPath = $this->generatePdf($invoice, $plan->name);
+        $planName = $customPlanName ?? $plan->name;
+        $pdfPath = $this->generatePdf($invoice, $planName);
         
         if ($pdfPath) {
             $this->invoiceModel->update($invoiceId, ['pdf_path' => $pdfPath]);
