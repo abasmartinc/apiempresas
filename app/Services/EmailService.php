@@ -17,7 +17,7 @@ class EmailService
             'invoice_number' => $data['invoice_number'] ?? '',
             'customer'       => $data['customer_name'] ?? 'Cliente',
             'email'          => $data['customer_email'] ?? 'N/A',
-            'plan'           => $data['plan_name'] ?? 'Plan API',
+            'plan_name'      => $data['plan_name'] ?? 'Plan API',
             'amount'         => $data['amount'] ?? '0.00',
             'currency'       => $data['currency'] ?? 'EUR',
             'invoice'        => $data['invoice'] ?? ''

@@ -160,8 +160,16 @@ class Webhook extends Controller
         $planModel = new ApiPlanModel();
         $plan = $planModel->where('slug', $planSlug)->first();
 
+        if (!$plan && isset($session->amount_subtotal)) {
+            $basePrice = (float)($session->amount_subtotal / 100);
+            $plan = $planModel->where('price_monthly', $basePrice)->first();
+            if ($plan) {
+                log_message('info', "[Webhook::stripe] Plan fallback found by amount ({$basePrice}) -> {$plan->slug}");
+            }
+        }
+
         if (!$plan) {
-            log_message('error', "[Webhook::stripe] Plan not found for slug: {$planSlug}");
+            log_message('error', "[Webhook::stripe] Plan not found for slug: {$planSlug} or amount");
             return;
         }
 
@@ -417,6 +425,12 @@ class Webhook extends Controller
 
         $planModel = new \App\Models\ApiPlanModel();
         $plan = $planModel->where('slug', $planSlug)->first();
+        
+        if (!$plan && isset($invoice->subtotal)) {
+            $basePrice = (float)($invoice->subtotal / 100);
+            $plan = $planModel->where('price_monthly', $basePrice)->first();
+        }
+
         if (!$plan) {
             $plan = $planModel->where('slug', 'radar')->first();
         }
@@ -456,6 +470,9 @@ class Webhook extends Controller
             $billingEmail = $dbUser->email;
         }
 
+        $baseAmount = (float)($invoice->amount_paid / 100) - (float)($invoice->tax / 100);
+        $taxAmount  = (float)($invoice->tax / 100);
+
         $invoiceService = new \App\Services\InvoiceService();
         $dbInvoice = $invoiceService->createInvoiceFromPayment(
             (int)$userId, 
@@ -466,7 +483,9 @@ class Webhook extends Controller
                 'address' => $billingAddress,
                 'vat'     => $billingVat
             ],
-            $invoice->id
+            $invoice->id,
+            $baseAmount,
+            $taxAmount
         );
 
         if ($dbInvoice) {
