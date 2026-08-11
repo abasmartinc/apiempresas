@@ -101,23 +101,6 @@
                                 timerProgressBar: true
                             });
                         });
-<div class="tkt-container">
-            <!-- Columna Izquierda: Mensajes -->
-            <div>
-                
-                <?php if(session()->getFlashdata('success')): ?>
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            Swal.fire({
-                                toast: true,
-                                position: 'top-end',
-                                icon: 'success',
-                                title: '<?= esc(session()->getFlashdata('success')) ?>',
-                                showConfirmButton: false,
-                                timer: 3000,
-                                timerProgressBar: true
-                            });
-                        });
                     </script>
                 <?php endif; ?>
 
