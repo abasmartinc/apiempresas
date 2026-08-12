@@ -511,17 +511,65 @@
             <?= nl2br(esc($company['ai_seo_text'])) ?>
         <?php else: ?>
             <div id="fallback-seo-text" style="display:none;">
-                <p>La empresa <strong><?= esc($companyName) ?></strong>
-                <?php if (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-'): ?>
-                    cuenta con el <strong>CIF <?= esc($companyCif) ?></strong> y
-                <?php endif; ?>
-                mantiene su <strong>domicilio social</strong> en
-                <?php if (!empty($provinceUrl)): ?>
-                    <a href="<?= esc($provinceUrl) ?>" style="color:inherit;font-weight:700;"><?= esc($companyProv) ?></a>.
-                <?php else: ?>
-                    <strong><?= esc($companyProv) ?></strong>.
-                <?php endif; ?>
-                </p>
+                <?php
+                $fallbackIndex = rand(0, 9);
+                $provText = !empty($provinceUrl) ? '<a href="' . esc($provinceUrl) . '" style="color:inherit;font-weight:700;">' . esc($companyProv) . '</a>' : '<strong>' . esc($companyProv) . '</strong>';
+                $cifText = (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-') ? ' (CIF <strong>' . esc($companyCif) . '</strong>)' : '';
+                
+                // Extraer año de constitución
+                $foundedYear = '';
+                if (!empty($company['founded']) && $company['founded'] !== '0000-00-00' && $company['founded'] !== '-') {
+                    $foundedYear = substr(trim($company['founded']), 0, 4);
+                }
+                
+                // Extraer CNAE
+                $cnaeText = '';
+                if (!empty($company['cnae_label']) && strtolower(trim($company['cnae_label'])) !== 'desconocido') {
+                    $cnaeText = strtolower(trim($company['cnae_label']));
+                } elseif (!empty($sectorName) && strtolower(trim($sectorName)) !== 'este sector') {
+                    $cnaeText = strtolower(trim($sectorName));
+                }
+                
+                // Estado registral
+                $isActive = (!empty($statusRaw) && strtoupper(trim($statusRaw)) === 'ACTIVA');
+                $statusPhrase = $isActive ? ' actualmente activa' : '';
+                
+                // Frases condicionales
+                $cnaePhrase = $cnaeText ? " dentro del sector de <strong>" . esc($cnaeText) . "</strong>" : " en su respectivo sector";
+                $yearPhrase = $foundedYear ? " desde el año " . esc($foundedYear) : "";
+                
+                switch ($fallbackIndex) {
+                    case 0: ?>
+                        <p>La empresa <strong><?= esc($companyName) ?></strong><?= $cifText ?> es una entidad destacada<?= $statusPhrase ?> con sede principal y domicilio social registrado en <?= $provText ?>. Su trayectoria mercantil<?= $yearPhrase ?><?= $cnaePhrase ?> la convierten en un agente económico relevante en su zona geográfica de operaciones, cumpliendo con todas las normativas exigidas para el desarrollo de su objeto social.</p>
+                        <?php break;
+                    case 1: ?>
+                        <p>Con instalaciones principales ubicadas en la provincia de <?= $provText ?>, <strong><?= esc($companyName) ?></strong><?= $cifText ?> desarrolla sus operaciones comerciales y empresariales<?= $cnaePhrase ?>. La información depositada en los registros oficiales subraya la evolución de esta sociedad mercantil<?= $yearPhrase ?>, perfilando su actividad como parte integral del desarrollo económico nacional.</p>
+                        <?php break;
+                    case 2: ?>
+                        <p>El perfil comercial de <strong><?= esc($companyName) ?></strong><?= $cifText ?> indica que la sociedad está establecida legalmente en <?= $provText ?>. A través de su estructura organizativa<?= $cnaePhrase ?>, la empresa participa dinámicamente en el mercado mercantil español<?= $yearPhrase ?>, manteniendo sus obligaciones societarias al día e impulsando su desarrollo corporativo.</p>
+                        <?php break;
+                    case 3: ?>
+                        <p>Operando activamente<?= $yearPhrase ?> desde su sede en <?= $provText ?>, <strong><?= esc($companyName) ?></strong><?= $cifText ?> se ha consolidado como un participante recurrente<?= $cnaePhrase ?>. Las métricas de su actividad y su información corporativa reflejan a una firma comprometida con su entorno comercial, generando valor a través de los servicios inherentes a su actividad principal.</p>
+                        <?php break;
+                    case 4: ?>
+                        <p>Registrada oficialmente en <?= $provText ?>, la organización <strong><?= esc($companyName) ?></strong><?= $cifText ?> ejerce sus funciones mercantiles<?= $statusPhrase ?> de acuerdo a sus estatutos corporativos. Su presencia continua en España<?= $yearPhrase ?><?= $cnaePhrase ?> demuestra su solidez, estableciendo relaciones comerciales sostenidas y garantizando el cumplimiento normativo.</p>
+                        <?php break;
+                    case 5: ?>
+                        <p>La información mercantil de <strong><?= esc($companyName) ?></strong><?= $cifText ?> confirma que su sede administrativa y fiscal se encuentra en <?= $provText ?>. Al analizar su actividad comercial<?= $cnaePhrase ?>, se evidencia que la sociedad mantiene un flujo de operaciones constante<?= $yearPhrase ?>, adaptándose a las exigencias regulatorias y manteniendo su estructura plenamente operativa.</p>
+                        <?php break;
+                    case 6: ?>
+                        <p>Como sociedad mercantil con domicilio en <?= $provText ?>, <strong><?= esc($companyName) ?></strong><?= $cifText ?> lleva a cabo diversas actividades empresariales que contribuyen al ecosistema corporativo local. Especializada<?= $cnaePhrase ?>, la empresa ha destinado sus recursos a la consecución de sus fines comerciales<?= $yearPhrase ?>, manteniendo la transparencia en sus registros oficiales.</p>
+                        <?php break;
+                    case 7: ?>
+                        <p>Establecida en el territorio de <?= $provText ?>, la firma <strong><?= esc($companyName) ?></strong><?= $cifText ?> mantiene sus registros vigentes y participa activamente en la dinamización de la economía española. Sus operaciones<?= $cnaePhrase ?> están avaladas por su correcto desempeño societario<?= $yearPhrase ?>, lo que le permite afianzarse en su nicho estratégico de mercado.</p>
+                        <?php break;
+                    case 8: ?>
+                        <p>Cumpliendo con los rigurosos requisitos de inscripción legal, <strong><?= esc($companyName) ?></strong><?= $cifText ?> opera desde su sede en <?= $provText ?> y fomenta su actividad corporativa a través de una sólida estructura. Sus procesos comerciales<?= $cnaePhrase ?>, desarrollados de forma continua<?= $yearPhrase ?>, la convierten en un exponente fundamental dentro de su categoría empresarial.</p>
+                        <?php break;
+                    case 9: ?>
+                        <p>Al estudiar el impacto empresarial de <strong><?= esc($companyName) ?></strong><?= $cifText ?>, destaca su sólida implantación en la provincia de <?= $provText ?> y su especialización funcional<?= $cnaePhrase ?>. La trazabilidad de su historia mercantil<?= $yearPhrase ?> refleja una evolución acorde a las exigencias actuales del entorno de los negocios en España, operando<?= $statusPhrase ?> con alto grado de consistencia.</p>
+                        <?php break;
+                } ?>
             </div>
             <div id="ai-seo-container" style="position:relative; min-height:80px;">
                 <div class="ai-skeleton" style="display:flex;flex-direction:column;gap:10px;">
