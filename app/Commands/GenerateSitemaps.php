@@ -48,8 +48,6 @@ class GenerateSitemaps extends BaseCommand
         $db = \Config\Database::connect();
         $db->saveQueries = false; // Prevent memory leak from query history
         $builder = $db->table('companies');
-        $builder->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text')
-                 ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
         
         $lastId = 0;
         $batchSize = 10000;
@@ -70,7 +68,9 @@ class GenerateSitemaps extends BaseCommand
         $totalIncluded = 0;
 
         while (true) {
-            $companies = $builder->where('companies.id >', $lastId)
+            $companies = $builder->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text')
+                                 ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left')
+                                 ->where('companies.id >', $lastId)
                                  ->orderBy('companies.id', 'ASC')
                                  ->limit($batchSize)
                                  ->get()
@@ -168,10 +168,6 @@ class GenerateSitemaps extends BaseCommand
         CLI::write("Starting AI-Ready sitemap generation...", 'green');
         
         $aiBuilder = $db->table('companies');
-        $aiBuilder->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text, company_enrichment.updated_at')
-                  ->join('company_enrichment', 'company_enrichment.company_id = companies.id')
-                  ->where('company_enrichment.ai_seo_text IS NOT NULL')
-                  ->where("company_enrichment.ai_seo_text != ''");
                   
         $lastAiId = 0;
         $aiFileIndex = 1;
@@ -182,7 +178,11 @@ class GenerateSitemaps extends BaseCommand
         $totalAiIncluded = 0;
 
         while (true) {
-            $aiCompanies = $aiBuilder->where('companies.id >', $lastAiId)
+            $aiCompanies = $aiBuilder->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text, company_enrichment.updated_at')
+                                     ->join('company_enrichment', 'company_enrichment.company_id = companies.id')
+                                     ->where('company_enrichment.ai_seo_text IS NOT NULL')
+                                     ->where("company_enrichment.ai_seo_text != ''")
+                                     ->where('companies.id >', $lastAiId)
                                      ->orderBy('companies.id', 'ASC')
                                      ->limit($batchSize)
                                      ->get()
