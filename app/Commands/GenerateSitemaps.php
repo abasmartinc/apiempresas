@@ -48,7 +48,8 @@ class GenerateSitemaps extends BaseCommand
         $db = \Config\Database::connect();
         $db->saveQueries = false; // Prevent memory leak from query history
         $builder = $db->table('companies');
-        $builder->select('id, cif, company_name as name, cnae_code as cnae, registro_mercantil as province, objeto_social as corporate_purpose');
+        $builder->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text')
+                 ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
         
         $lastId = 0;
         $batchSize = 10000;
