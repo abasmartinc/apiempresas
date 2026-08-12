@@ -70,8 +70,8 @@ class GenerateSitemaps extends BaseCommand
         $totalIncluded = 0;
 
         while (true) {
-            $companies = $builder->where('id >', $lastId)
-                                 ->orderBy('id', 'ASC')
+            $companies = $builder->where('companies.id >', $lastId)
+                                 ->orderBy('companies.id', 'ASC')
                                  ->limit($batchSize)
                                  ->get()
                                  ->getResultArray();
