@@ -196,7 +196,13 @@ class AiCopilotController extends Controller
 
         $prompt = "Contexto de la empresa:\n- Nombre: {$company['name']}\n- Sector/Actividad: " . ($company['cnae_label'] ?? 'Desconocido') . "\n";
         if (!empty($company['founded'])) $prompt .= "- Año de fundación: " . substr($company['founded'], 0, 4) . "\n";
-        if (!empty($company['capital_social_raw']) && (float)$company['capital_social_raw'] > 0) $prompt .= "- Capital Social: " . number_format((float)$company['capital_social_raw'], 0, ',', '.') . "€\n";
+        if (!empty($company['capital_social_raw'])) {
+            $rawCap = str_replace([' Euros', ' Euros.', 'Euros', '€', '.', ' '], '', $company['capital_social_raw']);
+            $rawCap = str_replace(',', '.', $rawCap);
+            if ((float)$rawCap > 0) {
+                $prompt .= "- Capital Social: " . number_format((float)$rawCap, 0, ',', '.') . "€\n";
+            }
+        }
         if (!empty($company['province'])) $prompt .= "- Ubicación: {$company['municipality']} ({$company['province']})\n";
         if (!empty($company['website_official'])) $prompt .= "- Web: {$company['website_official']}\n";
         if (!empty($company['corporate_purpose'])) $prompt .= "- Objeto Social: {$company['corporate_purpose']}\n";
