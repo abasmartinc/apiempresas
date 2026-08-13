@@ -40,7 +40,7 @@ class CompanyAdministratorModel extends Model
 
         $db = \Config\Database::connect();
         return $db->table($this->table)
-            ->select('company_administrators.*, companies.cif, companies.company_name as linked_company_name, companies.status as linked_company_status')
+            ->select('company_administrators.*, companies.cif, companies.company_name as linked_company_name, companies.estado as linked_company_status')
             ->join('companies', 'companies.id = company_administrators.company_id')
             ->whereIn('company_administrators.name', $adminNames)
             ->where('company_administrators.company_id !=', $excludeCompanyId)
