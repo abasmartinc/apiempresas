@@ -116,7 +116,7 @@ class CompanyNetworkController extends BaseApiController
                 'success' => true,
                 'data' => [
                     'nodes' => [
-                        ['id' => 'C_' . $company['id'], 'type' => 'company', 'label' => $company['company_name'], 'cif' => $company['cif']]
+                        ['id' => 'C_' . $company['id'], 'type' => 'company', 'label' => $company['name'] ?? $company['company_name'] ?? '', 'cif' => $company['cif']]
                     ],
                     'edges' => []
                 ],
@@ -140,7 +140,7 @@ class CompanyNetworkController extends BaseApiController
         $nodes[] = [
             'id' => $rootNodeId,
             'type' => 'company',
-            'label' => $company['company_name'],
+            'label' => $company['name'] ?? $company['company_name'] ?? '',
             'cif' => $company['cif'],
             'root' => true
         ];
