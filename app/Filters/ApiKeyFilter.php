@@ -80,12 +80,36 @@ class ApiKeyFilter implements FilterInterface
         // 3) Validar contra DB
         $db = \Config\Database::connect('default');
 
-        $row = $db->table('api_keys')
-            ->select('api_keys.id AS api_key_id, api_keys.user_id, api_keys.is_active, api_keys.last_used_at, api_keys.allowed_countries, users.is_active as user_active, users.created_at, users.migration_reset_done, users.email')
-            ->join('users', 'users.id = api_keys.user_id', 'left')
-            ->where('api_keys.api_key', $apiKey)
-            ->get()
-            ->getRow();
+        $clientIp = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $request->getIPAddress();
+        $escapedIp = $db->escape($clientIp);
+
+        $builder = $db->table('api_keys ak')
+            ->select('
+                ak.id AS api_key_id, 
+                ak.user_id, 
+                ak.is_active, 
+                ak.last_used_at, 
+                ak.allowed_countries, 
+                u.is_active AS user_active, 
+                u.email,
+                uw.balance AS wallet_balance,
+                us.id AS subscription_id,
+                (us.id IS NOT NULL AND (us.plan_id = 1 OR us.current_period_end IS NULL OR us.current_period_end > NOW())) AS is_subscription_valid,
+                ap.id AS effective_plan_id,
+                ap.slug AS effective_plan_slug,
+                ap.monthly_quota AS effective_monthly_quota,
+                (EXISTS (SELECT 1 FROM api_whitelist_ips awp WHERE awp.user_id = ak.user_id AND awp.ip_address = ' . $escapedIp . ' LIMIT 1)) AS is_ip_whitelisted
+            ')
+            ->join('users u', 'u.id = ak.user_id', 'left')
+            ->join('user_wallets uw', 'uw.user_id = ak.user_id', 'left');
+
+        $subQuery = "(SELECT MAX(us2.id) FROM user_subscriptions us2 JOIN api_plans ap2 ON ap2.id = us2.plan_id WHERE us2.user_id = ak.user_id AND us2.status = 'active' AND ap2.product_type IN ('api', 'bundle'))";
+        $builder->join("user_subscriptions us", "us.id = $subQuery", 'left');
+        $builder->join('api_plans ap', 'ap.id = CASE WHEN us.plan_id IS NOT NULL AND (us.plan_id = 1 OR us.current_period_end IS NULL OR us.current_period_end > NOW()) THEN us.plan_id ELSE 1 END', 'left');
+
+        $builder->where('ak.api_key', $apiKey);
+
+        $row = $builder->get()->getRow();
 
         if (!$row) {
             return service('response')->setStatusCode(401)->setJSON(['error' => 'API key inválida']);
@@ -96,74 +120,16 @@ class ApiKeyFilter implements FilterInterface
         }
 
         // 3.1) IP Whitelist Check (Geo-Bypass)
-        $isIpWhitelisted = false;
-        if ($db->tableExists('api_whitelist_ips')) {
-            $whitelistedIps = $db->table('api_whitelist_ips')
-                ->where('user_id', $row->user_id)
-                ->get()
-                ->getResult();
-            
-            if (!empty($whitelistedIps)) {
-                $clientIp = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $request->getIPAddress();
-                foreach ($whitelistedIps as $wIp) {
-                    if ($wIp->ip_address === $clientIp) {
-                        $isIpWhitelisted = true;
-                        break;
-                    }
-                }
-            }
-        }
+        $isIpWhitelisted = !empty($row->is_ip_whitelisted);
 
         // 4.1) Resolver suscripción y plan
+        $planId         = (int)$row->effective_plan_id;
+        $planSlug       = $row->effective_plan_slug;
+        $monthlyQuota   = isset($row->effective_monthly_quota) ? (int)$row->effective_monthly_quota : get_free_plan_limit();
+
         $subscriptionId = null;
-        $planId         = 1;
-        $planSlug       = 'free';
-
-        try {
-            if ($db->tableExists('user_subscriptions')) {
-                $sub = $db->table('user_subscriptions')
-                    ->select('user_subscriptions.id AS subscription_id, user_subscriptions.plan_id, user_subscriptions.status, user_subscriptions.current_period_end, api_plans.slug as plan_slug')
-                    ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id')
-                    ->where('user_subscriptions.user_id', (int)$row->user_id)
-                    ->where('user_subscriptions.status', 'active')
-                    ->groupStart()
-                        ->where('api_plans.product_type', 'api')
-                        ->orWhere('api_plans.product_type', 'bundle')
-                    ->groupEnd()
-                    ->orderBy('user_subscriptions.id', 'DESC')
-                    ->get()
-                    ->getRow();
-
-                if ($sub) {
-                    $now = date('Y-m-d H:i:s');
-                    if ($sub->plan_slug === 'free' || $sub->current_period_end > $now) {
-                        $subscriptionId = (int)$sub->subscription_id;
-                        $planId         = (int)$sub->plan_id;
-                        $planSlug       = $sub->plan_slug;
-                    }
-                }
-            } elseif ($db->tableExists('usersuscriptions')) {
-                $sub = $db->table('usersuscriptions')
-                    ->select('usersuscriptions.id AS subscription_id, usersuscriptions.plan_id, usersuscriptions.status, api_plans.slug as plan_slug')
-                    ->join('api_plans', 'api_plans.id = usersuscriptions.plan_id')
-                    ->where('usersuscriptions.user_id', (int)$row->user_id)
-                    ->where('usersuscriptions.status', 'active')
-                    ->groupStart()
-                        ->where('api_plans.product_type', 'api')
-                        ->orWhere('api_plans.product_type', 'bundle')
-                    ->groupEnd()
-                    ->orderBy('usersuscriptions.id', 'DESC')
-                    ->get()
-                    ->getRow();
-
-                if ($sub) {
-                    $subscriptionId = (int)$sub->subscription_id;
-                    $planId         = (int)$sub->plan_id;
-                    $planSlug       = $sub->plan_slug;
-                }
-            }
-        } catch (\Throwable $e) {
-            log_message('error', '[ApiKeyFilter::before:subscription] ' . $e->getMessage());
+        if (!empty($row->subscription_id) && !empty($row->is_subscription_valid)) {
+            $subscriptionId = (int)$row->subscription_id;
         }
 
         // 3.5) Detección de Anomalías Geográficas (CF-IPCountry)
@@ -235,21 +201,13 @@ class ApiKeyFilter implements FilterInterface
             self::$apiSkipBilling = true;
         }
 
-        $walletBalance = 0;
-        if ($creditCost > 0 && $db->tableExists('user_wallets')) {
-            $walletRow = $db->table('user_wallets')->where('user_id', (int)$row->user_id)->get()->getRow();
-            if ($walletRow) {
-                $walletBalance = (int)$walletRow->balance;
-            }
-        }
+        $walletBalance = isset($row->wallet_balance) ? (int)$row->wallet_balance : 0;
 
         $subCost = 0;
         $walletCost = 0;
 
         // 4.2) Verificar Límites de Consumo
         try {
-            $planRow = $db->table('api_plans')->select('monthly_quota')->where('id', (int)$planId)->get()->getRow();
-            $monthlyQuota = $planRow ? (int)$planRow->monthly_quota : get_free_plan_limit();
 
             $currentMonth = date('Y-m');
             $cacheKey = ((int)$planId === 1) ? "api_usage_lifetime_{$row->user_id}" : "api_usage_{$row->user_id}_{$currentMonth}";
