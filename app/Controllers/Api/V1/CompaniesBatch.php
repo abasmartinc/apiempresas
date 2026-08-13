@@ -120,7 +120,7 @@ class CompaniesBatch extends BaseApiController
         }
 
         // 3. Query Database
-        $companies = $this->companyModel->getByCifs($cleanCifs);
+        $companies = $this->companyModel->getByCifs($cleanCifs, true);
         $foundCount = count($companies);
 
         if ($foundCount === 0) {

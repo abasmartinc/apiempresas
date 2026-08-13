@@ -44,17 +44,44 @@ class CompanyModel extends Model
         'company_enrichment.ai_borme_summary',
     ];
 
-    public function getByCif(string $cif): ?array
+    /**
+     * Proyección exclusiva para API (Optimización)
+     * Elimina todos los blobs pesados de IA y PII que la API descarta.
+     */
+    public array $apiSelectFields = [
+        'companies.id                AS id', // Requerido internamente para ?admin=true
+        'companies.company_name       AS name',
+        'companies.cif                AS cif',
+        'companies.cnae_code          AS cnae',
+        'companies.cnae_label         AS cnae_label',
+        'cnae_2009_2025.cnae_2025  AS cnae_2025',
+        'cnae_2009_2025.label_2025 AS cnae_2025_label',
+        'companies.objeto_social      AS corporate_purpose',
+        'companies.fecha_constitucion AS founded',
+        'companies.capital_social_raw AS capital_social_raw',
+        'companies.registro_mercantil AS province',
+        'companies.address',
+        'companies.municipality',
+        'companies.lat_num AS lat',
+        'companies.lng_num AS lng',
+        'companies.estado             AS status',
+    ];
+
+    public function getByCif(string $cif, bool $forApi = false): ?array
     {
         $cif = strtoupper(trim($cif));
         if ($cif === '')
             return null;
 
-        $result = $this->asArray()
-            ->select(implode(', ', $this->selectFields))
-            ->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left')
-            ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left')
-            ->where('companies.cif', $cif)
+        $builder = $this->asArray()
+            ->select(implode(', ', $forApi ? $this->apiSelectFields : $this->selectFields))
+            ->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
+            
+        if (!$forApi) {
+            $builder->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
+        }
+
+        $result = $builder->where('companies.cif', $cif)
             ->limit(1)
             ->get()
             ->getRowArray() ?: null;
@@ -66,7 +93,7 @@ class CompanyModel extends Model
         return null;
     }
 
-    public function getByCifs(array $cifs): array
+    public function getByCifs(array $cifs, bool $forApi = false): array
     {
         $cifs = array_map('trim', $cifs);
         $cifs = array_filter($cifs);
@@ -74,11 +101,15 @@ class CompanyModel extends Model
             return [];
         }
 
-        return $this->asArray()
-            ->select(implode(', ', $this->selectFields))
-            ->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left')
-            ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left')
-            ->whereIn('companies.cif', $cifs)
+        $builder = $this->asArray()
+            ->select(implode(', ', $forApi ? $this->apiSelectFields : $this->selectFields))
+            ->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
+            
+        if (!$forApi) {
+            $builder->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
+        }
+
+        return $builder->whereIn('companies.cif', $cifs)
             ->limit(100)
             ->get()
             ->getResultArray();
@@ -444,7 +475,7 @@ class CompanyModel extends Model
      * Busca múltiples empresas por término (CIF, Nombre, CNAE o Provincia).
      * Prioriza CIF, luego FULLTEXT y finalmente LIKE.
      */
-    public function searchMany(string $term, int $limit = 20, int $page = 1, bool $returnMeta = false): array
+    public function searchMany(string $term, int $limit = 20, int $page = 1, bool $returnMeta = false, bool $forApi = false): array
     {
         $term = trim($term);
         if ($term === '' || mb_strlen($term) < 2) {
@@ -555,9 +586,11 @@ class CompanyModel extends Model
             $ids = array_column($results, 'id');
 
             $builderData = $this->builder();
-            $builderData->select(implode(', ', $this->selectFields));
+            $builderData->select(implode(', ', $forApi ? $this->apiSelectFields : $this->selectFields));
             $builderData->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
-            $builderData->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
+            if (!$forApi) {
+                $builderData->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
+            }
             $builderData->whereIn('companies.id', $ids);
 
             $fetchedRows = $builderData->get()->getResultArray();
