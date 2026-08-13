@@ -196,6 +196,9 @@ class Company extends BaseController
             }
         }
         // --- ASYNC AI SEO TEXT GENERATION (QUEUE) ---
+if (empty($company['ai_seo_text'])) {
+    service('response')->setHeader('X-Robots-Tag', 'index, follow');
+}
 
         // --- DINAMIC SEO INDEXING ---
         $indexable = shouldIndexCompany($company);

@@ -510,7 +510,7 @@
         <?php if (!empty($company['ai_seo_text'])): ?>
             <?= nl2br(esc($company['ai_seo_text'])) ?>
         <?php else: ?>
-            <div id="fallback-seo-text" style="display:none;">
+            <div id="fallback-seo-text">
                 <?php
                 $fallbackIndex = rand(0, 9);
                 $provText = !empty($provinceUrl) ? '<a href="' . esc($provinceUrl) . '" style="color:inherit;font-weight:700;">' . esc($companyProv) . '</a>' : '<strong>' . esc($companyProv) . '</strong>';
