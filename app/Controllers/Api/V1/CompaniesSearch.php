@@ -170,7 +170,7 @@ class CompaniesSearch extends BaseApiController
         try {
             if ($multiple) {
                 // Pasamos true como cuarto argumento para $returnMeta
-                $results = $this->companyModel->searchMany($name, $limit, $page, true);
+                $results = $this->companyModel->searchMany($name, $limit, $page, true, true);
 
                 if (empty($results['data'])) {
                     return $this->respond(

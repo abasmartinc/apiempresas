@@ -176,7 +176,7 @@ class CompaniesByCif extends BaseApiController
         }
 
         try {
-            $company = $this->companyModel->getByCif($cif);
+            $company = $this->companyModel->getByCif($cif, true);
 
             if (!$company) {
                 return $this->respond(
