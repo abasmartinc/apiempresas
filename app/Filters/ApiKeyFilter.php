@@ -104,8 +104,8 @@ class ApiKeyFilter implements FilterInterface
             ->join('user_wallets uw', 'uw.user_id = ak.user_id', 'left');
 
         $subQuery = "(SELECT MAX(us2.id) FROM user_subscriptions us2 JOIN api_plans ap2 ON ap2.id = us2.plan_id WHERE us2.user_id = ak.user_id AND us2.status = 'active' AND ap2.product_type IN ('api', 'bundle'))";
-        $builder->join("user_subscriptions us", "us.id = $subQuery", 'left');
-        $builder->join('api_plans ap', 'ap.id = CASE WHEN us.plan_id IS NOT NULL AND (us.plan_id = 1 OR us.current_period_end IS NULL OR us.current_period_end > NOW()) THEN us.plan_id ELSE 1 END', 'left');
+        $builder->join("user_subscriptions us", "us.id = $subQuery", 'left', false);
+        $builder->join('api_plans ap', 'ap.id = CASE WHEN us.plan_id IS NOT NULL AND (us.plan_id = 1 OR us.current_period_end IS NULL OR us.current_period_end > NOW()) THEN us.plan_id ELSE 1 END', 'left', false);
 
         $builder->where('ak.api_key', $apiKey);
 
