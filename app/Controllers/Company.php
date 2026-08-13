@@ -46,7 +46,7 @@ class Company extends BaseController
         }
 
         // REDIRECCIÓN 301: Mandar siempre a la nueva URL canónica
-        $slug = url_title($company['name'], '-', true);
+        $slug = $this->companyModel->generateSlug($company['name']);
         if (!empty($company['cif'])) {
             $canonicalUrl = site_url($company['cif'] . ($slug ? ('-' . $slug) : ''));
             return redirect()->to($canonicalUrl, 301);
@@ -554,13 +554,13 @@ if (empty($company['ai_seo_text'])) {
         // Verificar si la empresa ahora tiene un CIF válido
         if (!empty($company['cif']) && preg_match('/^[A-Z][0-9]{7}[A-Z0-9]$/i', $company['cif'])) {
             // MIGRACIÓN AUTOMÁTICA: Redirigir a URL con CIF (301)
-            $correctSlug = url_title($company['name'], '-', true);
+            $correctSlug = $this->companyModel->generateSlug($company['name']);
             $canonicalUrl = site_url($company['cif'] . ($correctSlug ? ('-' . $correctSlug) : ''));
             return redirect()->to($canonicalUrl, 301);
         }
         
         // La empresa no tiene CIF válido, verificar que el slug sea correcto
-        $correctSlug = url_title($company['name'], '-', true);
+        $correctSlug = $this->companyModel->generateSlug($company['name']);
         
         if ($cleanSlug !== $correctSlug) {
             // Redirigir al slug correcto (301)
@@ -646,7 +646,7 @@ if (empty($company['ai_seo_text'])) {
             
             if ($company) {
                 // Éxito: Redirigir a formato canónico (CIF-slug o slug)
-                $correctSlug = url_title($company['company_name'], '-', true);
+                $correctSlug = $this->companyModel->generateSlug($company['company_name']);
                 $targetUrl = !empty($company['cif']) 
                     ? site_url($company['cif'] . ($correctSlug ? ('-' . $correctSlug) : ''))
                     : site_url($correctSlug);

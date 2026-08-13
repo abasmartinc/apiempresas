@@ -68,10 +68,13 @@ class GenerateSitemaps extends BaseCommand
         $totalIncluded = 0;
 
         while (true) {
-            $companies = $builder->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text')
+            $builder->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text')
                                  ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left')
-                                 ->where('companies.id >', $lastId)
-                                 ->orderBy('companies.id', 'ASC')
+                                 ->join('company_privacy_optouts', 'company_privacy_optouts.cif = companies.cif COLLATE utf8mb4_general_ci', 'left', false)
+                                 ->where('company_privacy_optouts.cif IS NULL')
+                                 ->where('companies.id >', $lastId);
+                                 
+            $companies = $builder->orderBy('companies.id', 'ASC')
                                  ->limit($batchSize)
                                  ->get()
                                  ->getResultArray();
@@ -178,12 +181,15 @@ class GenerateSitemaps extends BaseCommand
         $totalAiIncluded = 0;
 
         while (true) {
-            $aiCompanies = $aiBuilder->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text, company_enrichment.updated_at')
+            $aiBuilder->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text, company_enrichment.updated_at')
                                      ->join('company_enrichment', 'company_enrichment.company_id = companies.id')
+                                     ->join('company_privacy_optouts', 'company_privacy_optouts.cif = companies.cif COLLATE utf8mb4_general_ci', 'left', false)
+                                     ->where('company_privacy_optouts.cif IS NULL')
                                      ->where('company_enrichment.ai_seo_text IS NOT NULL')
                                      ->where("company_enrichment.ai_seo_text != ''")
-                                     ->where('companies.id >', $lastAiId)
-                                     ->orderBy('companies.id', 'ASC')
+                                     ->where('companies.id >', $lastAiId);
+                                     
+            $aiCompanies = $aiBuilder->orderBy('companies.id', 'ASC')
                                      ->limit($batchSize)
                                      ->get()
                                      ->getResultArray();

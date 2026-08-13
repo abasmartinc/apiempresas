@@ -201,10 +201,13 @@ class Sitemap extends Controller
 
         // Obtener lote de empresas
         // Necesitamos campos extra para el cálculo del score SEO (shouldIndexCompany)
-        $companies = $model->builder()
+        $builder = $model->builder()
             ->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text') 
             ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left')
-            ->orderBy('companies.id', 'ASC') // Orden consistente
+            ->join('company_privacy_optouts cpo', 'cpo.cif = companies.cif COLLATE utf8mb4_general_ci', 'left', false)
+            ->where('cpo.cif IS NULL');
+            
+        $companies = $builder->orderBy('companies.id', 'ASC') // Orden consistente
             ->limit($this->perPage, $offset)
             ->get()
             ->getResultArray();
