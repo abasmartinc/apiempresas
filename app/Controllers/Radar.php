@@ -607,7 +607,7 @@ class Radar extends BaseController
         $userPrefMap = $this->getUserPersonalizationMap($userId);
 
         foreach ($companies as &$co) {
-            $groupKey = strtolower(trim($co['cnae_label'] ?? '')) . '|' . strtolower(trim($co['registro_mercantil'] ?? ''));
+            $groupKey = strtolower(trim($co['cnae_code'] ?? '')) . '|' . strtolower(trim($co['registro_mercantil'] ?? ''));
             $groupScore = $groupMap[$groupKey] ?? 0;
             $userScore = $userPrefMap[$groupKey] ?? 0;
             
@@ -1273,7 +1273,7 @@ class Radar extends BaseController
     {
         if (!$userId) return [];
         
-        $cacheKey = "radar_user_pref_{$userId}_v1";
+        $cacheKey = "radar_user_pref_{$userId}_v2";
         $cached = cache($cacheKey);
         if ($cached) return $cached;
 
@@ -1290,9 +1290,9 @@ class Radar extends BaseController
             // 2. Agrupar interacciones específicas del usuario por Sector + Provincia
             $userEngaged = $db->table('radar_lead_events rle')
                 ->join('companies c', 'c.id = rle.lead_id')
-                ->select("c.cnae_label, c.registro_mercantil, COUNT(DISTINCT c.id) as engaged_count")
+                ->select("c.cnae_code, c.registro_mercantil, COUNT(DISTINCT c.id) as engaged_count")
                 ->where('rle.user_id', $userId)
-                ->groupBy('c.cnae_label, c.registro_mercantil')
+                ->groupBy('c.registro_mercantil, c.cnae_code')
                 ->get()
                 ->getResultArray();
 
@@ -1301,12 +1301,12 @@ class Radar extends BaseController
             foreach ($userEngaged as $ue) {
                 // Denominador: Total de leads en este nicho (para normalizar el interés)
                 $groupTotal = $db->table('companies')
-                    ->where('cnae_label', $ue['cnae_label'])
+                    ->where('cnae_code', $ue['cnae_code'])
                     ->where('registro_mercantil', $ue['registro_mercantil'])
                     ->countAllResults();
                 
                 if ($groupTotal > 0) {
-                    $key = strtolower(trim($ue['cnae_label'])) . '|' . strtolower(trim($ue['registro_mercantil']));
+                    $key = strtolower(trim($ue['cnae_code'] ?? '')) . '|' . strtolower(trim($ue['registro_mercantil'] ?? ''));
                     $rate = (int)($ue['engaged_count'] / $groupTotal * 100);
                     $finalUserMap[$key] = $rate;
                 }
@@ -1327,7 +1327,7 @@ class Radar extends BaseController
      */
     protected function getGroupEngagementMap()
     {
-        $cacheKey = 'radar_group_learning_map_v1';
+        $cacheKey = 'radar_group_learning_map_v2';
         $cached = cache($cacheKey);
         if ($cached) return $cached;
 
@@ -1336,25 +1336,25 @@ class Radar extends BaseController
             
             // 1. Volumen total por grupo (Sector + Provincia)
             $totals = $db->table('companies')
-                ->select("cnae_label, registro_mercantil, COUNT(id) as total")
-                ->where('cnae_label IS NOT NULL')
+                ->select("cnae_code, registro_mercantil, COUNT(id) as total")
+                ->where('cnae_code IS NOT NULL')
                 ->where('registro_mercantil IS NOT NULL')
-                ->groupBy('cnae_label, registro_mercantil')
+                ->groupBy('registro_mercantil, cnae_code')
                 ->get()
                 ->getResultArray();
 
             // 2. Leads con interacciones reales por grupo
             $engaged = $db->table('radar_lead_events rle')
                 ->join('companies c', 'c.id = rle.lead_id')
-                ->select("c.cnae_label, c.registro_mercantil, COUNT(DISTINCT c.id) as engaged_count")
-                ->groupBy('c.cnae_label, c.registro_mercantil')
+                ->select("c.cnae_code, c.registro_mercantil, COUNT(DISTINCT c.id) as engaged_count")
+                ->groupBy('c.registro_mercantil, c.cnae_code')
                 ->get()
                 ->getResultArray();
 
             // 3. Mapear participaciones para cruce rápido
             $engagedMap = [];
             foreach ($engaged as $e) {
-                $key = strtolower(trim($e['cnae_label'])) . '|' . strtolower(trim($e['registro_mercantil']));
+                $key = strtolower(trim($e['cnae_code'] ?? '')) . '|' . strtolower(trim($e['registro_mercantil'] ?? ''));
                 $engagedMap[$key] = (int)$e['engaged_count'];
             }
 
@@ -1364,7 +1364,7 @@ class Radar extends BaseController
                 $totalInGroup = (int)$t['total'];
                 if ($totalInGroup < 20) continue; // Escudo estadístico: grupos pequeños no influyen
 
-                $key = strtolower(trim($t['cnae_label'])) . '|' . strtolower(trim($t['registro_mercantil']));
+                $key = strtolower(trim($t['cnae_code'] ?? '')) . '|' . strtolower(trim($t['registro_mercantil'] ?? ''));
                 $countEngaged = $engagedMap[$key] ?? 0;
                 
                 $rate = ($countEngaged > 0) ? ($countEngaged / $totalInGroup) : 0;
