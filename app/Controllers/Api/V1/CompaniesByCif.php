@@ -160,10 +160,11 @@ class CompaniesByCif extends BaseApiController
             $includeAdmins = filter_var($this->request->getGet('admin'), FILTER_VALIDATE_BOOLEAN);
             if ($includeAdmins && ((int)$planId > 1 || $walletBalance > 0) && $companyId) {
                 $db = \Config\Database::connect();
-                $cached['administrators'] = $db->table('company_administrators')
+                $admins = $db->table('company_administrators')
                     ->select('name, position')
                     ->where('company_id', $companyId)
                     ->get()->getResultArray();
+                $cached['administrators'] = group_administrators($admins);
             }
 
             return $this->respond(
@@ -208,10 +209,11 @@ class CompaniesByCif extends BaseApiController
             $includeAdmins = filter_var($this->request->getGet('admin'), FILTER_VALIDATE_BOOLEAN);
             if ($includeAdmins && ((int)$planId > 1 || $walletBalance > 0) && $companyId) {
                 $db = \Config\Database::connect();
-                $company['administrators'] = $db->table('company_administrators')
+                $admins = $db->table('company_administrators')
                     ->select('name, position')
                     ->where('company_id', $companyId)
                     ->get()->getResultArray();
+                $company['administrators'] = group_administrators($admins);
             }
 
             return $this->respond(

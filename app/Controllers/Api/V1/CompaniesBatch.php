@@ -210,7 +210,7 @@ class CompaniesBatch extends BaseApiController
             $cid = $company['id'];
             $company = filter_company_data($company);
             if ($includeAdmins && isset($administratorsMap[$cid])) {
-                $company['administrators'] = $administratorsMap[$cid];
+                $company['administrators'] = group_administrators($administratorsMap[$cid]);
             }
         }
 

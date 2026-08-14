@@ -57,3 +57,41 @@ function is_valid_cif(?string $cif): bool
     
     return true;
 }
+
+/**
+ * Group administrators by name and combine their positions
+ *
+ * @param array $administrators Array of administrator records
+ * @return array Grouped administrators
+ */
+function group_administrators(array $administrators): array
+{
+    $grouped = [];
+    foreach ($administrators as $admin) {
+        $name = trim($admin['name'] ?? '');
+        $position = trim($admin['position'] ?? '');
+        
+        if (empty($name)) continue;
+
+        if (!isset($grouped[$name])) {
+            $grouped[$name] = [
+                'name' => $name,
+                'positions' => []
+            ];
+        }
+        
+        if (!empty($position) && !in_array($position, $grouped[$name]['positions'])) {
+            $grouped[$name]['positions'][] = $position;
+        }
+    }
+
+    $result = [];
+    foreach ($grouped as $admin) {
+        $result[] = [
+            'name' => $admin['name'],
+            'position' => empty($admin['positions']) ? '' : implode(', ', $admin['positions'])
+        ];
+    }
+
+    return $result;
+}
