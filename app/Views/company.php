@@ -627,11 +627,11 @@
                                             Ubicación
                                         </a></li>
                                 <?php endif; ?>
-                                <?php if (!empty($filteredAdmins)): ?>
+                                <?php if (!empty($administrators)): ?>
                                     <li><a href="#administradores">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                                 stroke="currentColor" stroke-width="2"><use href="#icon-6ba5abb4"></use></svg>
-                                            Administradores
+                                            Cargos
                                         </a></li>
                                 <?php endif; ?>
                                 <?php if (!empty($bormePosts)): ?>
@@ -657,7 +657,7 @@
                                     <li><a href="#empresas-relacionadas">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                                 stroke="currentColor" stroke-width="2"><use href="#icon-f15f4088"></use></svg>
-                                            Empresas relacionadas
+                                            Relacionadas
                                         </a></li>
                                 <?php endif; ?>
                                 <?php if (!session('logged_in')): ?>
