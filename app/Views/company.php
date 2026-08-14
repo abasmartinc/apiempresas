@@ -627,6 +627,20 @@
                                             Ubicación
                                         </a></li>
                                 <?php endif; ?>
+                                <?php if (!empty($filteredAdmins)): ?>
+                                    <li><a href="#administradores">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2"><use href="#icon-6ba5abb4"></use></svg>
+                                            Administradores
+                                        </a></li>
+                                <?php endif; ?>
+                                <?php if (!empty($bormePosts)): ?>
+                                    <li><a href="#borme">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2"><use href="#icon-82d4f2aa"></use></svg>
+                                            BORME
+                                        </a></li>
+                                <?php endif; ?>
                                 <?php if (!empty($contracts) || !empty($subsidies)): ?>
                                     <li><a href="#financial-data">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -1316,7 +1330,7 @@
                                 </div>
                             <?php endif; ?>
 
-                            <h2 class="no-after-line"
+                            <h2 id="administradores" class="no-after-line"
                                 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 2rem; display: flex; align-items: center; gap: 12px;">
                                 <span
                                     style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color: #fff; padding: 8px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);">

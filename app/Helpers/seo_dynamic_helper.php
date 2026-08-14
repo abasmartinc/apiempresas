@@ -116,7 +116,12 @@ if (!function_exists('getOrGenerateAiSeoData')) {
             }
             
             $prompt = "Genera un objeto JSON que contenga los siguientes campos obligatorios:
-            1. 'seo_text': Un texto descriptivo de la empresa '{$name}' altamente optimizado para SEO. Escribe exactamente 2 párrafos redactados con excelente estilo periodístico y de negocios. El primer párrafo debe presentar a la empresa, integrando de forma natural su sector de actividad (CNAE: {$cnae}) y su trayectoria (ubicación: {$prov}, fundación: {$founded}) de forma fluida. Evita empezar con plantillas robóticas como 'La empresa X es...'. El segundo párrafo debe sintetizar su objeto social ({$purpose}) detallando sus servicios, valor diferencial en el mercado y operaciones. No uses Markdown, asteriscos, negritas ni viñetas. Separa los párrafos con un salto de línea doble.
+            1. 'seo_text': Un texto descriptivo altamente optimizado para SEO semántico local sobre '{$name}'. Escribe exactamente 2 párrafos redactados con excelente estilo periodístico. Reglas estrictas:
+               - No uses frases genéricas o vacías de relleno (ej: 'compromiso con la innovación', 'en la soleada...').
+               - Varía el vocabulario. En lugar de repetir la categoría (CNAE: {$cnae}), usa sinónimos y palabras clave semánticas (LSI keywords) relacionadas con su objeto social ({$purpose}).
+               - Destaca de 2 a 4 conceptos clave o servicios concretos usando etiquetas HTML <strong>. NO pongas en negrita el nombre de la empresa ni la ciudad.
+               - Convierte el nombre de la empresa a formato Título (Title Case), corrigiendo mayúsculas excesivas si las tiene.
+               - Integra de forma natural la ciudad ({$prov}) y el año de inicio ({$founded}). Separa los párrafos con un salto de línea doble.
             2. 'faqs': Una lista de exactamente 3 preguntas frecuentes ('q') y respuestas ('a') personalizadas y de alta calidad para esta empresa. Las preguntas deben ser específicas sobre la actividad, servicios o sector de la empresa basándose en su objeto social y CNAE (evita preguntas totalmente genéricas). Las respuestas deben ser profesionales, informativas y en formato de texto plano sin Markdown ni negritas.
             3. 'seo_tags': Un array de strings con 5 a 8 palabras clave o servicios específicos extraídos de su objeto social (ej: [\"Construcción\", \"Reformas\", \"Albañilería\"]). Ideal para SEO.
             4. 'seo_pitch': Una sola frase comercial atractiva de máximo 150 caracteres que resuma lo que hace la empresa. Ideal para la meta description.
