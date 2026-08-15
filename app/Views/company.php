@@ -512,7 +512,8 @@
         <?php else: ?>
             <div id="fallback-seo-text" style="display:none;">
                 <?php
-                $fallbackIndex = rand(0, 9);
+                $companyIdForFallback = !empty($company['id']) ? (int)$company['id'] : rand(0, 9);
+                $fallbackIndex = $companyIdForFallback % 10;
                 $provText = !empty($provinceUrl) ? '<a href="' . esc($provinceUrl) . '" style="color:inherit;font-weight:700;">' . esc($companyProv) . '</a>' : '<strong>' . esc($companyProv) . '</strong>';
                 $cifText = (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-') ? ' (CIF <strong>' . esc($companyCif) . '</strong>)' : '';
                 
