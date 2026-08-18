@@ -196,9 +196,15 @@ class Company extends BaseController
             }
         }
         // --- ASYNC AI SEO TEXT GENERATION (QUEUE) ---
-if (empty($company['ai_seo_text'])) {
-    service('response')->setHeader('X-Robots-Tag', 'index, follow');
-}
+
+        // --- FETCH ADMINS & BORME FOR SEO SCORE ---
+        // Fetch Administrators early for SEO calculation
+        $adminsRaw = $this->adminModel->getByCompanyId((int)$company['id']);
+        $company['num_admins'] = count($adminsRaw);
+        
+        // Fetch BORME early for SEO calculation
+        $bormePosts = $this->bormePostsModel->getByCompanyId((int)$company['id']);
+        $company['num_borme_posts'] = count($bormePosts);
 
         // --- DINAMIC SEO INDEXING ---
         $indexable = shouldIndexCompany($company);
@@ -210,13 +216,12 @@ if (empty($company['ai_seo_text'])) {
             service('response')->setHeader('X-Robots-Tag', 'noindex, follow');
         }
         
-        // Añadir flag al objeto empresa para uso en sitemaps/logs
+        // Aadir flag al objeto empresa para uso en sitemaps/logs
         $company['seo_indexable'] = $indexable;
         $company['seo_score']     = calculateCompanySeoScore($company);
         // --- DINAMIC SEO INDEXING ---
 
-        // Administrators
-        $adminsRaw = $this->adminModel->getByCompanyId((int)$company['id']);
+        // Administrators (Already fetched above for SEO score)
         $filteredAdmins = [];
         $excludeKeywords = ['CAPITAL', 'DOMICILIO', 'OBJETO SOCIAL', 'OTROS CONCEPTOS', 'COMIENZO DE OPERACIONES', 'INSCRIPCION', 'RESULTANTE', 'SUSCRITO', 'EURO', 'REMITIDO'];
         $seenAdmins = [];
@@ -454,7 +459,7 @@ if (empty($company['ai_seo_text'])) {
             'ratingAvg'        => $ratingStats['avg'],
             'ratingCount'      => $ratingStats['count'],
             'related'          => $related,
-            'bormePosts'       => $this->bormePostsModel->getByCompanyId((int)$company['id']),
+            'bormePosts'       => $bormePosts, // Already fetched above
             'administrators'   => $filteredAdmins,
             'provinceUrl'      => $provinceUrl,
             'cnaeUrl'          => $cnaeUrl,
