@@ -184,7 +184,7 @@ class CompaniesByCif extends BaseApiController
                     [
                         'success' => false,
                         'error'   => 'COMPANY_NOT_FOUND',
-                        'message' => 'Empresa no encontrada en BD principal. Ha sido encolada automáticamente y estará disponible en los próximos minutos.'
+                        'message' => 'Empresa no encontrada.'
                     ],
                     ResponseInterface::HTTP_NOT_FOUND
                 );

@@ -33,7 +33,7 @@ class SandboxController extends \App\Controllers\Api\V1\BaseApiController
         return $this->respond([
             'success' => false,
             'error' => 'TEST_MODE_RESTRICTION',
-            'message' => 'Estás usando la API Key en modo Sandbox. Para buscar datos reales, utiliza tu Live API Key en la URL de producción. Los CIFs permitidos en pruebas son A15075062 (éxito), B00000000 (no encontrado), C11111111 (encolado).'
+            'message' => 'Estás usando la API Key en modo Sandbox. Para buscar datos reales, utiliza tu Live API Key en la URL de producción. Los CIFs permitidos en pruebas son A15075062 (éxito) y B00000000 (no encontrado).'
         ], ResponseInterface::HTTP_FORBIDDEN);
     }
 
@@ -71,12 +71,8 @@ class SandboxController extends \App\Controllers\Api\V1\BaseApiController
         $cif = $this->validateMagicCif($cifRaw);
         if (!$cif) return $this->getForbiddenResponse();
 
-        if ($cif === 'B00000000') {
-            return $this->respond(['success' => false, 'error' => 'COMPANY_NOT_FOUND', 'message' => 'Empresa de prueba no encontrada.'], 404);
-        }
-
-        if ($cif === 'C11111111') {
-            return $this->respond(['success' => false, 'error' => 'COMPANY_NOT_FOUND', 'message' => 'Empresa no encontrada en BD principal. Ha sido encolada automáticamente y estará disponible en los próximos minutos.'], 404);
+        if ($cif === 'B00000000' || $cif === 'C11111111') {
+            return $this->respond(['success' => false, 'error' => 'COMPANY_NOT_FOUND', 'message' => 'Empresa no encontrada.'], 404);
         }
 
         // A15075062 (Inditex) - Mock Data
