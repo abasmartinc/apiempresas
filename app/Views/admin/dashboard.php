@@ -148,6 +148,10 @@
                         <span class="link-icon icon-sub-red"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" /></svg></span>
                         <div class="link-text"><strong>Centro de Seguridad</strong><p>Gestión de bloqueos e IPs maliciosas.</p></div>
                     </a>
+                    <a href="<?= site_url('admin/rgpd') ?>" class="group-link">
+                        <span class="link-icon icon-sub-amber"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg></span>
+                        <div class="link-text"><strong>Privacidad & RGPD</strong><p>Gestión de supresiones y derecho al olvido.</p></div>
+                    </a>
                     <a href="#" class="group-link" id="btn-clear-cache-card">
                         <span class="link-icon icon-sub-blue"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg></span>
                         <div class="link-text"><strong>Limpiar Caché</strong><p>Forzar regeneración de datos estáticos.</p></div>

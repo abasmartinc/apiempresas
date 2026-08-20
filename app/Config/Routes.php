@@ -269,6 +269,12 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('metrics', 'Admin\MetricsController::index');
     $routes->get('event-tracking', 'Admin\MetricsController::eventTracking');
 
+    // RGPD (Derecho al olvido)
+    $routes->get('rgpd', 'Admin\RgpdController::index');
+    $routes->post('rgpd/preview', 'Admin\RgpdController::preview');
+    $routes->post('rgpd/execute', 'Admin\RgpdController::execute');
+
+
     // Tickets
     $routes->get('tickets', 'Admin\TicketsController::index');
     $routes->get('tickets/(:num)', 'Admin\TicketsController::show/$1');

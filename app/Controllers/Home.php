@@ -7,63 +7,6 @@ class Home extends BaseController
     public function index()
     {
 
-
-        // SSR: Fetch latest blog posts for SEO (Cached 1h)
-        $cache = \Config\Services::cache();
-        $cacheKey = 'home_blog_posts_v1';
-        $posts = $cache->get($cacheKey);
-
-        if ($posts === null) {
-            $siteUrl = 'https://blog.apiempresas.es';
-            $endpoint = '/index.php?rest_route=/wp/v2/posts&per_page=6';
-            $requestUrl = $siteUrl . $endpoint;
-
-            $posts = [];
-            try {
-                $ch = curl_init($requestUrl);
-                curl_setopt_array($ch, [
-                    CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_TIMEOUT => 3, // Fast timeout for home page
-                    CURLOPT_USERAGENT => 'APIEmpresasHomeSSR/1.0',
-                    CURLOPT_HTTPHEADER => ['Accept: application/json'],
-                ]);
-                $response = curl_exec($ch);
-                curl_close($ch);
-
-                if ($response) {
-                    $rawPosts = json_decode($response, true);
-                    if (is_array($rawPosts)) {
-                        foreach ($rawPosts as $post) {
-                            $excerpt = strip_tags($post['excerpt']['rendered'] ?? '');
-                            if (mb_strlen($excerpt, 'UTF-8') > 190) {
-                                $excerpt = mb_substr($excerpt, 0, 187, 'UTF-8') . '…';
-                            }
-
-                            $contentText = strip_tags($post['content']['rendered'] ?? '');
-                            $wordCount = str_word_count($contentText);
-                            $minutes = max(3, min(15, (int) ceil($wordCount / 220)));
-
-                            $posts[] = [
-                                'title' => $post['title']['rendered'] ?? '',
-                                'slug' => $post['slug'] ?? '',
-                                'excerpt' => $excerpt,
-                                'date' => isset($post['date']) ? date('d/m/Y', strtotime($post['date'])) : '',
-                                'reading' => $minutes . ' min de lectura',
-                                'url' => site_url('blog/' . ($post['slug'] ?? ''))
-                            ];
-                        }
-                    }
-                }
-
-                // Cache the results for 1 hour
-                $cache->save($cacheKey, $posts, 3600);
-            } catch (\Exception $e) {
-                log_message('error', '[Home::index] Blog SSR failed: ' . $e->getMessage());
-                $posts = [];
-            }
-        }
-
-
         // Review Modal Logic
         $showReviewModal = false;
         $db = \Config\Database::connect();
@@ -118,7 +61,6 @@ class Home extends BaseController
         $freeLimit = get_free_plan_limit();
 
         return view('home', [
-            'latest_posts' => $posts,
             'showReviewModal' => $showReviewModal,
             'socialProofText' => $socialProofText,
             'freeLimit' => $freeLimit

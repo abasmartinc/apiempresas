@@ -41,7 +41,7 @@ class AdministratorController extends BaseController
         $db = \Config\Database::connect();
         $isOptedOut = $db->table('admin_privacy_optouts')->where('slug', $slug)->countAllResults() > 0;
         if ($isOptedOut) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Perfil eliminado por privacidad.');
+            return $this->response->setStatusCode(410)->setBody(view('errors/html/error_410', ['message' => 'Perfil eliminado por privacidad RGPD.']));
         }
         $robots = 'index,follow';
 
