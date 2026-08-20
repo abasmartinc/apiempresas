@@ -96,17 +96,31 @@
 
 <?= $this->section('scripts') ?>
 <script>
+    const csrfName = '<?= csrf_token() ?>';
+    const csrfHash = '<?= csrf_hash() ?>';
+
     function simulateRgpd() {
         const name = document.getElementById('rgpdName').value;
         const slug = document.getElementById('rgpdSlug').value;
         
         if(!name || !slug) {
-            alert("Por favor, rellena el nombre y el slug.");
+            Swal.fire('Atención', 'Por favor, rellena el nombre y el slug.', 'warning');
             return;
         }
 
+        Swal.fire({
+            title: 'Buscando...',
+            text: 'Analizando las bases de datos mercantiles y el BORME...',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         const formData = new FormData();
         formData.append('name', name);
+        formData.append(csrfName, csrfHash);
 
         fetch('<?= site_url('admin/rgpd/preview') ?>', {
             method: 'POST',
@@ -114,42 +128,68 @@
         })
         .then(res => res.json())
         .then(data => {
+            Swal.close();
             if(data.success) {
                 document.getElementById('adminCount').innerText = data.adminCount;
                 document.getElementById('bormeCount').innerText = data.bormeCount;
                 document.getElementById('previewBox').style.display = 'block';
                 document.getElementById('certBox').style.display = 'none';
             } else {
-                alert(data.message);
+                Swal.fire('Error', data.message, 'error');
             }
         });
     }
 
     function executeRgpd() {
-        if(!confirm("¿Estás 100% seguro de anonimizar estos datos?")) return;
-
-        const name = document.getElementById('rgpdName').value;
-        const slug = document.getElementById('rgpdSlug').value;
-
-        const formData = new FormData();
-        formData.append('name', name);
-        formData.append('slug', slug);
-
-        fetch('<?= site_url('admin/rgpd/execute') ?>', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.success) {
-                document.getElementById('previewBox').style.display = 'none';
-                document.getElementById('certBox').style.display = 'block';
+        Swal.fire({
+            title: '¿Estás 100% seguro?',
+            text: 'Esta acción va a anonimizar los datos y no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Sí, ejecutar supresión',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
                 
-                const responseTemplate = `Estimado usuario,\n\nLe confirmamos que hemos procesado su solicitud de supresión de datos conforme al RGPD.\n\nSe han anonimizado sus datos en las bases de datos mercantiles y publicaciones del BORME asociadas, preservando el histórico de las empresas pero desvinculando su identidad personal.\n\nSu perfil público (https://apiempresas.es/administrador/${slug}) ha sido marcado con el código HTTP 410 (Gone) para forzar a los buscadores a eliminarlo permanentemente de sus índices.\n\nSus datos ya no son accesibles a través de nuestra API, exportaciones o herramientas de búsqueda.\n\nAtentamente,\nEl equipo de APIEmpresas`;
-                
-                document.getElementById('certText').value = responseTemplate;
-            } else {
-                alert("Error: " + data.message);
+                Swal.fire({
+                    title: 'Procesando...',
+                    text: 'Aplicando la anonimización en la base de datos (esto puede tardar unos segundos)...',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const name = document.getElementById('rgpdName').value;
+                const slug = document.getElementById('rgpdSlug').value;
+
+                const formData = new FormData();
+                formData.append('name', name);
+                formData.append('slug', slug);
+                formData.append(csrfName, csrfHash);
+
+                fetch('<?= site_url('admin/rgpd/execute') ?>', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        Swal.fire('¡Hecho!', data.message, 'success');
+                        
+                        document.getElementById('previewBox').style.display = 'none';
+                        document.getElementById('certBox').style.display = 'block';
+                        
+                        const responseTemplate = `Estimado usuario,\n\nLe confirmamos que hemos procesado su solicitud de supresión de datos conforme al RGPD.\n\nSe han anonimizado sus datos en las bases de datos mercantiles y publicaciones del BORME asociadas, preservando el histórico de las empresas pero desvinculando su identidad personal.\n\nSu perfil público (https://apiempresas.es/administrador/${slug}) ha sido marcado con el código HTTP 410 (Gone) para forzar a los buscadores a eliminarlo permanentemente de sus índices.\n\nSus datos ya no son accesibles a través de nuestra API, exportaciones o herramientas de búsqueda.\n\nAtentamente,\nEl equipo de APIEmpresas`;
+                        
+                        document.getElementById('certText').value = responseTemplate;
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                });
             }
         });
     }

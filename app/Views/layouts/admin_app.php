@@ -10,7 +10,7 @@
 
     <?= view('partials/header_admin') ?>
 
-    <main class="container-admin" style="padding: 40px 0 80px;" id="admin-app-content">
+    <main class="container-admin" style="padding-top: 40px; padding-bottom: 80px;" id="admin-app-content">
         <?= $this->renderSection('content') ?>
     </main>
 

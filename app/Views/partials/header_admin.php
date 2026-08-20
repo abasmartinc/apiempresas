@@ -1,6 +1,7 @@
 <header>
-    <div class="container-admin nav">
-        <div class="brand">
+    <div class="container-admin">
+        <div class="nav">
+            <div class="brand">
             <a href="<?=site_url() ?>">
                 <svg class="ve-logo" width="32" height="32" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
                     <defs>
@@ -87,6 +88,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
 </header>
 

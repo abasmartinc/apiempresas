@@ -28,14 +28,14 @@ class RgpdController extends BaseController
 
         $db = \Config\Database::connect();
 
-        // 1. Count company administrators
+        // 1. Count company administrators (Optimizamos usando WHERE para aprovechar índices B-Tree)
         $adminCount = $db->table('company_administrators')
-                         ->like('name', trim($name))
+                         ->where('name', trim($name))
                          ->countAllResults();
 
         // 2. Count borme posts
         $bormeCount = $db->table('borme_posts')
-                         ->like('text', trim($name))
+                         ->like('description', trim($name))
                          ->countAllResults();
 
         return $this->response->setJSON([
@@ -70,14 +70,14 @@ class RgpdController extends BaseController
             ]);
         }
 
-        // 2. Update company_administrators
+        // 2. Update company_administrators (Optimizamos con WHERE exacto para usar el índice)
         $db->table('company_administrators')
-           ->like('name', $name)
+           ->where('name', $name)
            ->update(['name' => 'Identidad Protegida (RGPD)']);
 
         // 3. Update borme_posts
         // using DB raw query for REPLACE
-        $sql = "UPDATE borme_posts SET text = REPLACE(text, ?, 'Identidad Protegida (RGPD)') WHERE text LIKE ?";
+        $sql = "UPDATE borme_posts SET description = REPLACE(description, ?, 'Identidad Protegida (RGPD)') WHERE description LIKE ?";
         $db->query($sql, [$name, '%' . $name . '%']);
 
         $db->transComplete();
