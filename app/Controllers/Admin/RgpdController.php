@@ -83,15 +83,25 @@ class RgpdController extends BaseController
         $name = trim($name);
         $slug = trim($slug);
 
-        // PASO 1: Identificar qué empresas van a ser afectadas (ANTES de borrar el nombre)
-        $companyIds = [];
-        
-        $adminCompanies = $db->table('company_administrators')->select('company_id')->where('name', $name)->get()->getResultArray();
-        $bormeCompanies = $db->table('borme_posts')->select('company_id')->like('description', $name)->get()->getResultArray();
+        // PASO 1: LECTURA INOFENSIVA (Fuera de la transacción para no bloquear la base de datos)
+        // Buscamos los IDs primarios (y company_id) afectados. 
+        $adminRoles = $db->table('company_administrators')
+                         ->select('id, company_id')
+                         ->where('name', $name)
+                         ->get()->getResultArray();
+                         
+        $bormePosts = $db->table('borme_posts')
+                         ->select('id, company_id')
+                         ->like('description', $name)
+                         ->get()->getResultArray();
 
-        foreach ($adminCompanies as $c) { if (!empty($c['company_id'])) $companyIds[] = $c['company_id']; }
-        foreach ($bormeCompanies as $c) { if (!empty($c['company_id'])) $companyIds[] = $c['company_id']; }
-        
+        $adminIds = array_column($adminRoles, 'id');
+        $bormeIds = array_column($bormePosts, 'id');
+
+        // Extraemos los IDs de las empresas para la caché
+        $companyIds = [];
+        foreach ($adminRoles as $c) { if (!empty($c['company_id'])) $companyIds[] = $c['company_id']; }
+        foreach ($bormePosts as $c) { if (!empty($c['company_id'])) $companyIds[] = $c['company_id']; }
         $companyIds = array_unique($companyIds);
 
         // PASO 2: Recopilar las URLs exactas de esas empresas
@@ -106,15 +116,12 @@ class RgpdController extends BaseController
             foreach ($companies as $c) {
                 if (!empty($c['cif']) && !empty($c['company_name'])) {
                     $slugEmpresa = $companyModel->generateSlug($c['company_name']);
-                    // Construimos la URL pública con el formato solicitado
-                    // Aseguramos de usar el dominio de producción si es necesario
-                    $publicUrl = "https://apiempresas.es/" . $c['cif'] . '-' . $slugEmpresa;
-                    $urlsToPurge[] = $publicUrl;
+                    $urlsToPurge[] = "https://apiempresas.es/" . $c['cif'] . '-' . $slugEmpresa;
                 }
             }
         }
 
-        // PASO 3: Ejecutar la supresión en base de datos
+        // PASO 3: ACTUALIZACIÓN QUIRÚRGICA (Transacción ultra rápida usando Primary Keys)
         $db->transStart();
 
         $exists = $db->table('admin_privacy_optouts')->where('slug', $slug)->countAllResults() > 0;
@@ -125,12 +132,21 @@ class RgpdController extends BaseController
             ]);
         }
 
-        $db->table('company_administrators')
-           ->where('name', $name)
-           ->update(['name' => 'Identidad Protegida (RGPD)']);
+        if (!empty($adminIds)) {
+            $db->table('company_administrators')
+               ->whereIn('id', $adminIds)
+               ->update(['name' => 'Identidad Protegida (RGPD)']);
+        }
 
-        $sql = "UPDATE borme_posts SET description = REPLACE(description, ?, 'Identidad Protegida (RGPD)') WHERE description LIKE ?";
-        $db->query($sql, [$name, '%' . $name . '%']);
+        if (!empty($bormeIds)) {
+            // Creamos los placeholders dinámicos para el IN (?, ?, ?)
+            $placeholders = implode(',', array_fill(0, count($bormeIds), '?'));
+            $sql = "UPDATE borme_posts SET description = REPLACE(description, ?, 'Identidad Protegida (RGPD)') WHERE id IN ($placeholders)";
+            
+            // Los parámetros son: el $name (para el REPLACE) seguido de todos los IDs
+            $params = array_merge([$name], $bormeIds);
+            $db->query($sql, $params);
+        }
 
         $db->transComplete();
 
@@ -145,7 +161,6 @@ class RgpdController extends BaseController
             $cfToken = env('CLOUDFLARE_API_TOKEN');
             
             if ($cfZoneId && $cfToken) {
-                // Cloudflare permite purgar hasta 30 URLs por llamada
                 $chunks = array_chunk($urlsToPurge, 30);
                 $client = \Config\Services::curlrequest();
                 
