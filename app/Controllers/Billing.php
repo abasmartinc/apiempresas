@@ -361,25 +361,35 @@ class Billing extends BaseController
      */
     public function checkout_bonus()
     {
-        $postData = $this->request->getPost();
+        $postData = $this->request->getPost() ?: $this->request->getGet();
 
         if (!session('logged_in')) {
             // Guardar contexto para después del registro rápido
-            session()->set('pending_checkout_bonus', $postData);
+            // Solo guardar si tiene los datos necesarios
+            if (!empty($postData['credits'])) {
+                session()->set('pending_checkout_bonus', $postData);
+            }
             return redirect()->to(site_url('register/quick?redirect=billing/checkout_bonus'));
         }
 
-
-        if (empty($postData) || !isset($postData['credits'])) {
-            $postData = session('pending_checkout_bonus') ?? [];
+        // Si el POST/GET no trae créditos, intentar recuperar de sesión (viene de registro rápido)
+        if (empty($postData['credits'])) {
+            $pending = session('pending_checkout_bonus') ?? [];
+            session()->remove('pending_checkout_bonus');
+            if (!empty($pending['credits'])) {
+                $postData = $pending;
+            }
+        } else {
+            // Limpiar cualquier sesión pendiente si ya llegaron datos directamente
             session()->remove('pending_checkout_bonus');
         }
 
         $userId = (int) session('user_id');
         $credits = (int) ($postData['credits'] ?? 0);
 
+        // Validar mínimo de créditos - redirigir explícitamente a la página del bono (nunca al dashboard)
         if ($credits < 10000) {
-            return redirect()->back()->with('error', lang('Messages.flash_10'));
+            return redirect()->to(site_url('crear-bono-api'))->with('error', lang('Messages.flash_10'));
         }
 
         // Lógica de Precios (Igual a la de Javascript por seguridad) delegada a BillingService
@@ -433,8 +443,11 @@ class Billing extends BaseController
                 'client_reference_id' => (string) $userId,
             ];
 
-            $user = clone $this->userModel; // Use clone or fresh model just to be safe
-            $user_row = clone $this->userModel->find($userId);
+            $user_row = $this->userModel->find($userId);
+            if (!$user_row) {
+                return redirect()->back()->with('error', 'Usuario no encontrado.');
+            }
+
             if (!empty($user_row->stripe_customer_id)) {
                 $sessionParams['customer'] = $user_row->stripe_customer_id;
             } else {

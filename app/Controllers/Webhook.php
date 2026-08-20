@@ -428,7 +428,10 @@ class Webhook extends Controller
         
         $customPlanName = null;
         if ($planSlug === 'custom_bonus') {
-            $plan = clone $planModel->find(1); // Use free plan as a dummy base
+            $freePlan = $planModel->find(1); // Use free plan as a dummy base for invoice generation
+            if ($freePlan) {
+                $plan = $freePlan;
+            }
             $credits = (int)($metadata->credits ?? 0);
             $customPlanName = "Paquete de {$credits} créditos";
         }

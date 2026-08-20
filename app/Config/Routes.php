@@ -176,6 +176,7 @@ $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function
 
     // TEMP
     $routes->get('temp-upgrade', 'TempUpgrade::index');
+    $routes->get('test-cif', 'TestCif::index');
 
     // Auth Webw Commercial Endpoints (Expansion)
     $routes->get('api/v1/companies', 'Api\V1\CompaniesByCif::index');
