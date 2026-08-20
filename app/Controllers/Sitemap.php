@@ -202,7 +202,7 @@ class Sitemap extends Controller
         // Obtener lote de empresas
         // Necesitamos campos extra para el cálculo del score SEO (shouldIndexCompany)
         $builder = $model->builder()
-            ->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text, (SELECT COUNT(id) FROM company_administrators WHERE company_administrators.company_id = companies.id) AS num_admins, (SELECT COUNT(id) FROM borme_posts WHERE borme_posts.company_id = companies.id) AS num_borme_posts') 
+            ->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text, (SELECT COUNT(id) FROM company_administrators WHERE company_administrators.company_id = companies.id) AS num_admins, (SELECT COUNT(id) FROM borme_posts WHERE borme_posts.company_id = companies.id) AS num_borme_posts', false) 
 
             ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left')
             ->join('company_privacy_optouts cpo', 'cpo.cif = companies.cif COLLATE utf8mb4_general_ci', 'left', false)
