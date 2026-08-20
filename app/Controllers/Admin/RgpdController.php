@@ -29,19 +29,43 @@ class RgpdController extends BaseController
         $db = \Config\Database::connect();
 
         // 1. Count company administrators (Optimizamos usando WHERE para aprovechar índices B-Tree)
-        $adminCount = $db->table('company_administrators')
-                         ->where('name', trim($name))
-                         ->countAllResults();
+        $adminCount = $db->table('company_administrators')->where('name', trim($name))->countAllResults();
 
         // 2. Count borme posts
-        $bormeCount = $db->table('borme_posts')
-                         ->like('description', trim($name))
-                         ->countAllResults();
+        $bormeCount = $db->table('borme_posts')->like('description', trim($name))->countAllResults();
+
+        // 3. Recopilar URLs afectadas
+        $companyIds = [];
+        $adminCompanies = $db->table('company_administrators')->select('company_id')->where('name', trim($name))->get()->getResultArray();
+        $bormeCompanies = $db->table('borme_posts')->select('company_id')->like('description', trim($name))->get()->getResultArray();
+
+        foreach ($adminCompanies as $c) { if (!empty($c['company_id'])) $companyIds[] = $c['company_id']; }
+        foreach ($bormeCompanies as $c) { if (!empty($c['company_id'])) $companyIds[] = $c['company_id']; }
+        
+        $companyIds = array_unique($companyIds);
+
+        $urlsToPurge = [];
+        if (!empty($companyIds)) {
+            $companyModel = new \App\Models\CompanyModel();
+            $companies = $db->table('companies')
+                            ->select('cif, company_name')
+                            ->whereIn('id', $companyIds)
+                            ->get()->getResultArray();
+                            
+            foreach ($companies as $c) {
+                if (!empty($c['cif']) && !empty($c['company_name'])) {
+                    $slugEmpresa = $companyModel->generateSlug($c['company_name']);
+                    $publicUrl = "https://apiempresas.es/" . $c['cif'] . '-' . $slugEmpresa;
+                    $urlsToPurge[] = $publicUrl;
+                }
+            }
+        }
 
         return $this->response->setJSON([
             'success' => true,
             'adminCount' => $adminCount,
             'bormeCount' => $bormeCount,
+            'urls' => $urlsToPurge,
             'name' => $name
         ]);
     }
@@ -59,9 +83,40 @@ class RgpdController extends BaseController
         $name = trim($name);
         $slug = trim($slug);
 
+        // PASO 1: Identificar qué empresas van a ser afectadas (ANTES de borrar el nombre)
+        $companyIds = [];
+        
+        $adminCompanies = $db->table('company_administrators')->select('company_id')->where('name', $name)->get()->getResultArray();
+        $bormeCompanies = $db->table('borme_posts')->select('company_id')->like('description', $name)->get()->getResultArray();
+
+        foreach ($adminCompanies as $c) { if (!empty($c['company_id'])) $companyIds[] = $c['company_id']; }
+        foreach ($bormeCompanies as $c) { if (!empty($c['company_id'])) $companyIds[] = $c['company_id']; }
+        
+        $companyIds = array_unique($companyIds);
+
+        // PASO 2: Recopilar las URLs exactas de esas empresas
+        $urlsToPurge = [];
+        if (!empty($companyIds)) {
+            $companyModel = new \App\Models\CompanyModel();
+            $companies = $db->table('companies')
+                            ->select('cif, company_name')
+                            ->whereIn('id', $companyIds)
+                            ->get()->getResultArray();
+                            
+            foreach ($companies as $c) {
+                if (!empty($c['cif']) && !empty($c['company_name'])) {
+                    $slugEmpresa = $companyModel->generateSlug($c['company_name']);
+                    // Construimos la URL pública con el formato solicitado
+                    // Aseguramos de usar el dominio de producción si es necesario
+                    $publicUrl = "https://apiempresas.es/" . $c['cif'] . '-' . $slugEmpresa;
+                    $urlsToPurge[] = $publicUrl;
+                }
+            }
+        }
+
+        // PASO 3: Ejecutar la supresión en base de datos
         $db->transStart();
 
-        // 1. Insert into admin_privacy_optouts
         $exists = $db->table('admin_privacy_optouts')->where('slug', $slug)->countAllResults() > 0;
         if (!$exists) {
             $db->table('admin_privacy_optouts')->insert([
@@ -70,13 +125,10 @@ class RgpdController extends BaseController
             ]);
         }
 
-        // 2. Update company_administrators (Optimizamos con WHERE exacto para usar el índice)
         $db->table('company_administrators')
            ->where('name', $name)
            ->update(['name' => 'Identidad Protegida (RGPD)']);
 
-        // 3. Update borme_posts
-        // using DB raw query for REPLACE
         $sql = "UPDATE borme_posts SET description = REPLACE(description, ?, 'Identidad Protegida (RGPD)') WHERE description LIKE ?";
         $db->query($sql, [$name, '%' . $name . '%']);
 
@@ -86,9 +138,38 @@ class RgpdController extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => 'Error al procesar la solicitud en la base de datos']);
         }
 
+        // PASO 4: Vaciar la caché en Cloudflare para las URLs afectadas
+        $cfPurged = false;
+        if (!empty($urlsToPurge)) {
+            $cfZoneId = env('CLOUDFLARE_ZONE_ID');
+            $cfToken = env('CLOUDFLARE_API_TOKEN');
+            
+            if ($cfZoneId && $cfToken) {
+                // Cloudflare permite purgar hasta 30 URLs por llamada
+                $chunks = array_chunk($urlsToPurge, 30);
+                $client = \Config\Services::curlrequest();
+                
+                foreach ($chunks as $chunk) {
+                    try {
+                        $client->post("https://api.cloudflare.com/client/v4/zones/{$cfZoneId}/purge_cache", [
+                            'headers' => [
+                                'Authorization' => 'Bearer ' . $cfToken,
+                                'Content-Type'  => 'application/json',
+                            ],
+                            'json' => ['files' => $chunk],
+                            'http_errors' => false
+                        ]);
+                        $cfPurged = true;
+                    } catch (\Exception $e) {
+                        log_message('error', 'Error purgado Cloudflare RGPD: ' . $e->getMessage());
+                    }
+                }
+            }
+        }
+
         return $this->response->setJSON([
             'success' => true,
-            'message' => 'Datos anonimizados correctamente.'
+            'message' => 'Datos anonimizados correctamente.' . ($cfPurged ? ' Caché limpia en ' . count($urlsToPurge) . ' empresas.' : '')
         ]);
     }
 }

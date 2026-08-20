@@ -57,6 +57,9 @@
         <ul style="font-size: 1.1rem; color: #475569; line-height: 1.8;">
             <li>Cargos directivos encontrados: <strong id="adminCount">0</strong></li>
             <li>Publicaciones BORME encontradas: <strong id="bormeCount">0</strong></li>
+            <li id="urlsListItem" style="display:none;">Fichas de empresa afectadas:
+                <ul id="affectedUrls" style="margin-top: 5px; margin-bottom: 0;"></ul>
+            </li>
         </ul>
         <p style="color: #ef4444; font-weight: 600; margin-top: 16px;">¿Confirmas que deseas anonimizar estos datos? Esta acción no se puede deshacer.</p>
         <button class="btn btn-danger" onclick="executeRgpd()">Ejecutar Supresión</button>
@@ -132,6 +135,20 @@
             if(data.success) {
                 document.getElementById('adminCount').innerText = data.adminCount;
                 document.getElementById('bormeCount').innerText = data.bormeCount;
+                
+                const urlsList = document.getElementById('affectedUrls');
+                urlsList.innerHTML = ''; // clear previous
+                if (data.urls && data.urls.length > 0) {
+                    data.urls.forEach(url => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<a href="${url}" target="_blank" style="color: #2152ff; font-weight: 500; font-size: 0.95rem;">${url}</a>`;
+                        urlsList.appendChild(li);
+                    });
+                    document.getElementById('urlsListItem').style.display = 'list-item';
+                } else {
+                    document.getElementById('urlsListItem').style.display = 'none';
+                }
+
                 document.getElementById('previewBox').style.display = 'block';
                 document.getElementById('certBox').style.display = 'none';
             } else {
