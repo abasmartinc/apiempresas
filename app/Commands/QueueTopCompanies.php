@@ -24,7 +24,8 @@ class QueueTopCompanies extends BaseCommand
         $query = "
             SELECT page, COUNT(*) as visits
             FROM tracking_events
-            WHERE page LIKE '%-%'
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) 
+              AND page LIKE '%-%'
             GROUP BY page
             ORDER BY visits DESC
             LIMIT 2000

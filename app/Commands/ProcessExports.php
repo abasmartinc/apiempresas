@@ -181,27 +181,42 @@ class ProcessExports extends BaseCommand
         
         fputcsv($fp, ['CIF', 'Razón Social', 'Provincia', 'Sector', 'Teléfono', 'Email', 'Sitio Web']);
 
-        $builder = $db->table('companies');
-        $builder->select('cif, name, provincia, cnae_label, phone, email, website');
+        $lastId = 0;
+        $batchSize = 25000;
 
-        if ($province !== '' && $province !== 'España') {
-            $builder->where('provincia', $province);
-        }
-        if ($sector !== '' && $sector !== 'General') {
-            $builder->like('cnae_label', $sector, 'both');
-        }
+        while (true) {
+            $builder = $db->table('companies');
+            $builder->select('id, cif, name, provincia, cnae_label, phone, email, website');
 
-        $query = $builder->get();
-        while ($row = $query->getUnbufferedRow('array')) {
-            fputcsv($fp, [
-                $row['cif'],
-                $row['name'],
-                $row['provincia'],
-                $row['cnae_label'],
-                $row['phone'],
-                $row['email'],
-                $row['website']
-            ]);
+            if ($province !== '' && $province !== 'España') {
+                $builder->where('provincia', $province);
+            }
+            if ($sector !== '' && $sector !== 'General') {
+                $builder->like('cnae_label', $sector, 'both');
+            }
+
+            $builder->where('id >', $lastId);
+            $builder->orderBy('id', 'ASC');
+            $builder->limit($batchSize);
+
+            $rows = $builder->get()->getResultArray();
+
+            if (empty($rows)) {
+                break;
+            }
+
+            foreach ($rows as $row) {
+                fputcsv($fp, [
+                    $row['cif'],
+                    $row['name'],
+                    $row['provincia'],
+                    $row['cnae_label'],
+                    $row['phone'],
+                    $row['email'],
+                    $row['website']
+                ]);
+                $lastId = $row['id'];
+            }
         }
     }
 }

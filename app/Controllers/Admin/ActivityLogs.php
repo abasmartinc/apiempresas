@@ -59,7 +59,7 @@ class ActivityLogs extends BaseController
         $data['stats'] = [
             'total_24h' => $this->activityModel->where('created_at >=', date('Y-m-d H:i:s', strtotime('-24 hours')))->countAllResults(),
             'logins_24h' => $this->activityModel->where('action', 'login')->where('created_at >=', date('Y-m-d H:i:s', strtotime('-24 hours')))->countAllResults(),
-            'active_users' => $this->activityModel->where('created_at >=', date('Y-m-d H:i:s', strtotime('-24 hours')))->select('user_id')->groupBy('user_id')->findAll() ? count($this->activityModel->where('created_at >=', date('Y-m-d H:i:s', strtotime('-24 hours')))->select('user_id')->groupBy('user_id')->findAll()) : 0,
+            'active_users' => (int) ($this->activityModel->builder()->where('created_at >=', date('Y-m-d H:i:s', strtotime('-24 hours')))->select('COUNT(DISTINCT user_id) as total')->get()->getRow()->total ?? 0),
             'top_action' => $this->activityModel->getActivityStats(date('Y-m-d', strtotime('-24 hours')), date('Y-m-d'))[0]['action'] ?? 'None'
         ];
 

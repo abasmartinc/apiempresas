@@ -68,7 +68,7 @@ class GenerateSitemaps extends BaseCommand
         $totalIncluded = 0;
 
         while (true) {
-            $builder->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text, (SELECT COUNT(id) FROM company_administrators WHERE company_administrators.company_id = companies.id) AS num_admins, (SELECT COUNT(id) FROM borme_posts WHERE borme_posts.company_id = companies.id) AS num_borme_posts', false)
+            $builder->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text', false)
                                  ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left')
                                  ->join('company_privacy_optouts', 'company_privacy_optouts.cif = companies.cif COLLATE utf8mb4_general_ci', 'left', false)
                                  ->where('company_privacy_optouts.cif IS NULL')
@@ -82,6 +82,36 @@ class GenerateSitemaps extends BaseCommand
             if (empty($companies)) {
                 break; // No more records
             }
+
+            $companyIds = array_column($companies, 'id');
+            $adminCounts = [];
+            $bormeCounts = [];
+            
+            if (!empty($companyIds)) {
+                $admins = $db->table('company_administrators')
+                             ->select('company_id, COUNT(id) as cnt')
+                             ->whereIn('company_id', $companyIds)
+                             ->groupBy('company_id')
+                             ->get()->getResultArray();
+                foreach ($admins as $row) {
+                    $adminCounts[$row['company_id']] = $row['cnt'];
+                }
+                
+                $borme = $db->table('borme_posts')
+                            ->select('company_id, COUNT(id) as cnt')
+                            ->whereIn('company_id', $companyIds)
+                            ->groupBy('company_id')
+                            ->get()->getResultArray();
+                foreach ($borme as $row) {
+                    $bormeCounts[$row['company_id']] = $row['cnt'];
+                }
+            }
+            
+            foreach ($companies as &$companyRef) {
+                $companyRef['num_admins'] = $adminCounts[$companyRef['id']] ?? 0;
+                $companyRef['num_borme_posts'] = $bormeCounts[$companyRef['id']] ?? 0;
+            }
+            unset($companyRef);
 
             foreach ($companies as $company) {
                 $lastId = $company['id'];
@@ -181,7 +211,7 @@ class GenerateSitemaps extends BaseCommand
         $totalAiIncluded = 0;
 
         while (true) {
-            $aiBuilder->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text, company_enrichment.updated_at, (SELECT COUNT(id) FROM company_administrators WHERE company_administrators.company_id = companies.id) AS num_admins, (SELECT COUNT(id) FROM borme_posts WHERE borme_posts.company_id = companies.id) AS num_borme_posts', false)
+            $aiBuilder->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text, company_enrichment.updated_at', false)
                                      ->join('company_enrichment', 'company_enrichment.company_id = companies.id')
                                      ->join('company_privacy_optouts', 'company_privacy_optouts.cif = companies.cif COLLATE utf8mb4_general_ci', 'left', false)
                                      ->where('company_privacy_optouts.cif IS NULL')
@@ -197,6 +227,36 @@ class GenerateSitemaps extends BaseCommand
             if (empty($aiCompanies)) {
                 break;
             }
+
+            $companyIds = array_column($aiCompanies, 'id');
+            $adminCounts = [];
+            $bormeCounts = [];
+            
+            if (!empty($companyIds)) {
+                $admins = $db->table('company_administrators')
+                             ->select('company_id, COUNT(id) as cnt')
+                             ->whereIn('company_id', $companyIds)
+                             ->groupBy('company_id')
+                             ->get()->getResultArray();
+                foreach ($admins as $row) {
+                    $adminCounts[$row['company_id']] = $row['cnt'];
+                }
+                
+                $borme = $db->table('borme_posts')
+                            ->select('company_id, COUNT(id) as cnt')
+                            ->whereIn('company_id', $companyIds)
+                            ->groupBy('company_id')
+                            ->get()->getResultArray();
+                foreach ($borme as $row) {
+                    $bormeCounts[$row['company_id']] = $row['cnt'];
+                }
+            }
+            
+            foreach ($aiCompanies as &$companyRef) {
+                $companyRef['num_admins'] = $adminCounts[$companyRef['id']] ?? 0;
+                $companyRef['num_borme_posts'] = $bormeCounts[$companyRef['id']] ?? 0;
+            }
+            unset($companyRef);
 
             foreach ($aiCompanies as $company) {
                 $lastAiId = $company['id'];
