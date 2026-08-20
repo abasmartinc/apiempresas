@@ -361,6 +361,17 @@ class Billing extends BaseController
      */
     public function checkout_bonus()
     {
+        // === DIAG TEMPORAL — borrar tras confirmar fix ===
+        log_message('info', '[DIAG::checkout_bonus] method=' . $this->request->getMethod()
+            . ' | logged_in=' . (session('logged_in') ? 'YES' : 'NO')
+            . ' | user_id=' . session('user_id')
+            . ' | POST=' . json_encode($this->request->getPost())
+            . ' | GET=' . json_encode($this->request->getGet())
+            . ' | IP=' . $this->request->getIPAddress()
+            . ' | PROTO=' . ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? 'none')
+        );
+        // === /DIAG ===
+
         $postData = $this->request->getPost() ?: $this->request->getGet();
 
         if (!session('logged_in')) {
