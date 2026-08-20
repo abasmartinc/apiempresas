@@ -461,6 +461,7 @@ class Billing extends BaseController
 
             if (!empty($user_row->stripe_customer_id)) {
                 $sessionParams['customer'] = $user_row->stripe_customer_id;
+                unset($sessionParams['customer_creation']); // Evita error 400 de Stripe si se envían ambos
             } else {
                 $sessionParams['customer_email'] = $user_row->email ?? null;
             }
