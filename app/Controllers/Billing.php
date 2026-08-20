@@ -334,6 +334,7 @@ class Billing extends BaseController
                 $user = $this->userModel->find($userId);
                 if (!empty($user->stripe_customer_id)) {
                     $sessionParams['customer'] = $user->stripe_customer_id;
+                    unset($sessionParams['customer_creation']); // Evitar error 400 en pagos únicos recurrentes
                 } else {
                     // Solo enviamos email si no hay customer asignado (Stripe fallará si envías ambos)
                     $sessionParams['customer_email'] = $email ?: null;
