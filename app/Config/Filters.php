@@ -60,7 +60,9 @@ class Filters extends BaseFilters
      */
     public array $required = [
         'before' => [
-            'forcehttps', // Force Global Secure Requests
+            // forcehttps removed: Cloudflare handles HTTPS at edge level.
+            // With Cloudflare Flexible SSL, server receives HTTP from CF proxy.
+            // ForceHTTPS was converting POSTs to GETs, breaking all form submissions.
             'pagecache',  // Web Page Caching
         ],
         'after' => [
