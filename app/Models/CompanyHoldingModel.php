@@ -45,8 +45,7 @@ class CompanyHoldingModel extends Model
             }
         }
 
-        return $builder->orderBy('capital_limpio', 'DESC')
-            ->limit($limit)
+        return $builder->limit($limit)
             ->get()
             ->getResultArray();
     }
