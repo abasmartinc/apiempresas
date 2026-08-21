@@ -443,9 +443,23 @@ class Company extends BaseController
         }
         // --- END HOLDINGS LOGIC ---
 
+        // --- RISK PROFILE LOGIC ---
+        $riskProfile = null;
+        if (!empty($cif)) {
+            $riskRow = $db->table('company_risk_profiles')->where('cif', $cif)->get()->getRowArray();
+            if ($riskRow) {
+                $riskProfile = $riskRow;
+                if (!empty($riskProfile['risk_profile'])) {
+                    $riskProfile['data'] = json_decode($riskProfile['risk_profile'], true);
+                }
+            }
+        }
+        // --- END RISK PROFILE LOGIC ---
+
         return [
             'companyName'      => $name,
             'company'          => $company,
+            'riskProfile'      => $riskProfile,
             'holdingData'      => $holdingData ?? null,
             'holdingCompanies' => $holdingCompanies ?? [],
             'holdingGraphData' => $holdingGraphData ?? null,

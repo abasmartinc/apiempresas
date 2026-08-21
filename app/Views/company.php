@@ -491,6 +491,8 @@
                     </div> <!-- /b2b-header-wrapper -->
 
 
+
+
                         <?php
                         // --- TOC START ---
                         ?>
@@ -895,6 +897,252 @@
                             </div>
                         <?php endif; ?>
                     </div> <!-- /b2b-grid-2col -->
+
+                    <!-- RISK PROFILE SECTION -->
+                    <?php if (!empty($riskProfile)): ?>
+                        <div class="b2b-card" style="margin-bottom:24px; padding: 0; overflow: hidden; position: relative;">
+                            
+                            <!-- HEADER -->
+                            <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start; background: #fff;">
+                                <div>
+                                    <h2 class="no-after-line" style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 4px 0; display: flex; align-items: center; gap: 10px; text-transform: uppercase;">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"></polyline></svg>
+                                        Índice de Estabilidad Societaria
+                                    </h2>
+                                    <p style="margin: 0 0 12px 34px; font-size: 0.9rem; color: #64748b;">Análisis algorítmico basado en registros del BORME, contratos públicos y subvenciones.</p>
+                                    <div style="margin-left: 34px; width: 60px; height: 3px; background: linear-gradient(90deg, #3b82f6 0%, #10b981 100%); border-radius: 2px;"></div>
+                                </div>
+                            </div>
+
+                            <div style="padding: 24px; position: relative; background: #fff; min-height: 260px;">
+                                <?php if (!session('logged_in')): ?>
+                                    <!-- TEASER PARA USUARIOS PÚBLICOS -->
+                                    <div style="padding: 20px; position: relative; display: flex; align-items: center; justify-content: center; min-height: 480px; overflow: hidden; background: #fafafa; margin: -24px; margin-bottom: 0;">
+                                        <!-- BLURRED BACKGROUND (Absolute, behind the text) -->
+                                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; filter: blur(6px); opacity: 0.6; pointer-events: none; display: flex; flex-wrap: nowrap; gap: 100px; align-items: center; justify-content: center; padding: 24px;">
+                                            <!-- Fake Score Circle -->
+                                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 180px; transform: translateX(-40px) scale(1.15);">
+                                                <div style="width: 150px; height: 150px; border-radius: 50%; border: 12px solid #f87171; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; background: #fff; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.2);">
+                                                    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                                </div>
+                                                <span style="background: #f87171; color: #fff; padding: 8px 20px; border-radius: 999px; font-size: 1rem; font-weight: 800; letter-spacing: 1px;">
+                                                    ACCESO RESTRINGIDO
+                                                </span>
+                                            </div>
+
+                                            <!-- Fake Factors -->
+                                            <div style="flex: 1; min-width: 340px; max-width: 500px; transform: translateX(40px) scale(1.1);">
+                                                <div style="display: flex; flex-direction: column; gap: 20px;">
+                                                    <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; display: flex; gap: 20px; align-items: center; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                                                        <div style="width: 56px; height: 56px; border-radius: 50%; background: #eff6ff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                                        </div>
+                                                        <div style="width: 100%; margin-top: 4px;">
+                                                            <div style="width: 80%; height: 16px; background: #cbd5e1; margin-bottom: 12px; border-radius: 4px;"></div>
+                                                            <div style="width: 50%; height: 10px; background: #22c55e; border-radius: 4px;"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; display: flex; gap: 20px; align-items: center; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                                                        <div style="width: 100%; margin-top: 4px;">
+                                                            <div style="width: 65%; height: 16px; background: #cbd5e1; margin-bottom: 12px; border-radius: 4px;"></div>
+                                                            <div style="width: 90%; height: 10px; background: #e2e8f0; border-radius: 4px;"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- FOREGROUND CONTENT (The Box) -->
+                                        <div style="position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; text-align: center; width: 540px; background: #fff; padding: 48px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08); border: 1px solid #f1f5f9;">
+                                            <div style="background: #eff6ff; color: #3b82f6; padding: 18px; border-radius: 50%; margin-bottom: 24px;">
+                                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                            </div>
+                                            <h3 style="font-size: 1.7rem; font-weight: 800; color: #0f172a; margin-bottom: 16px; margin-top: 0; letter-spacing: -0.5px;">Contenido Protegido</h3>
+                                            <p style="color: #334155; margin-bottom: 32px; margin-top: 0; font-size: 1.05rem; line-height: 1.6; font-weight: 500; max-width: 420px;">Descubre si esta empresa tiene <strong style="color: #ef4444;">riesgos ocultos</strong> en el BORME o deudas. Crea tu cuenta para ver el análisis completo.</p>
+                                            
+                                            <!-- Feature Highlights -->
+                                            <div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; padding: 20px 16px; display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 36px; box-sizing: border-box;">
+                                                <div style="display: flex; gap: 10px; align-items: center; flex: 1; justify-content: center;">
+                                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" style="flex-shrink: 0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"></polyline></svg>
+                                                    <span style="font-size: 0.8rem; color: #475569; text-align: left; line-height: 1.3;">Datos oficiales<br>del BORME</span>
+                                                </div>
+                                                <div style="width: 1px; height: 36px; background: #e2e8f0;"></div>
+                                                <div style="display: flex; gap: 10px; align-items: center; flex: 1; justify-content: center;">
+                                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" style="flex-shrink: 0;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                                    <span style="font-size: 0.8rem; color: #475569; text-align: left; line-height: 1.3;">Análisis completo<br>y detallado</span>
+                                                </div>
+                                                <div style="width: 1px; height: 36px; background: #e2e8f0;"></div>
+                                                <div style="display: flex; gap: 10px; align-items: center; flex: 1; justify-content: center;">
+                                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" style="flex-shrink: 0;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                                                    <span style="font-size: 0.8rem; color: #475569; text-align: left; line-height: 1.3;">Actualizado<br>continuamente</span>
+                                                </div>
+                                            </div>
+
+                                            <?php 
+                                            $slugVal = $company['slug'] ?? url_title($company['name'] ?? '', '-', true);
+                                            $redirectPath = 'empresa/' . $company['id'] . '-' . $slugVal; 
+                                            ?>
+                                            <a href="<?= site_url('register') ?>?intent=view_risk_profile&redirect=<?= urlencode($redirectPath) ?>" style="background: #0f172a; color: #fff; padding: 18px 24px; border-radius: 12px; font-weight: 800; text-decoration: none; font-size: 1.15rem; display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; box-sizing: border-box; transition: background 0.2s;" onmouseover="this.style.background='#1e293b';" onmouseout="this.style.background='#0f172a';">
+                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                                                Ver Análisis Gratis
+                                            </a>
+                                            
+                                            <div style="display: flex; align-items: center; gap: 6px; margin-top: 20px; color: #64748b; font-size: 0.85rem; font-weight: 500;">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                                Sin tarjeta de crédito &bull; Cancelación en 1 clic
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                <?php else: ?>
+                                    <!-- VISTA PARA USUARIOS LOGUEADOS -->
+                                    <?php 
+                                    $score = $riskProfile['risk_score'] ?? 50;
+                                    if ($score < 30) {
+                                        $color = '#22c55e'; // Verde
+                                        $label = 'BAJO';
+                                    } elseif ($score < 70) {
+                                        $color = '#f59e0b'; // Naranja
+                                        $label = 'MEDIO';
+                                    } else {
+                                        $color = '#ef4444'; // Rojo
+                                        $label = 'ALTO';
+                                    }
+                                    $riskLevelText = $riskProfile['data']['risk_level'] ?? $label;
+                                    ?>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 32px; align-items: stretch;">
+                                        
+                                        <!-- LEFT COLUMN (Score) -->
+                                        <div style="width: 280px; background: #f8fafc; border-radius: 16px; border: 1px solid #f1f5f9; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; flex-shrink: 0;">
+                                            <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin: 0 0 24px 0; font-weight: 700; text-align: center;">Nivel de Riesgo</h4>
+                                            
+                                            <!-- Circle -->
+                                            <div style="width: 160px; height: 160px; border-radius: 50%; border: 12px solid <?= $color ?>; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 24px; background: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.05);">
+                                                <span style="font-size: 4rem; font-weight: 900; color: #0f172a; line-height: 1; letter-spacing: -1px;"><?= $score ?></span>
+                                                <span style="font-size: 0.9rem; font-weight: 600; color: #94a3b8; margin-top: 2px;">de 100</span>
+                                            </div>
+                                            
+                                            <div style="text-align: center; margin-bottom: 24px;">
+                                                <div style="font-size: 1.5rem; font-weight: 800; color: <?= $color ?>; text-transform: uppercase; letter-spacing: 1px; line-height: 1.2;"><?= $riskLevelText ?></div>
+                                                <div style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">Nivel de riesgo</div>
+                                            </div>
+
+                                            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; display: flex; gap: 12px; align-items: center; width: 100%; box-sizing: border-box;">
+                                                <div style="background: #ecfdf5; color: #10b981; padding: 8px; border-radius: 8px; flex-shrink: 0;">
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+                                                </div>
+                                                <p style="margin: 0; font-size: 0.75rem; color: #475569; line-height: 1.4; font-weight: 500;">
+                                                    Puntuación baja indica mayor estabilidad societaria.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- RIGHT COLUMN (Factors) -->
+                                        <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column;">
+                                            
+                                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                                <div style="background: #eff6ff; color: #3b82f6; padding: 6px; border-radius: 50%;">
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                                                </div>
+                                                <h4 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0; text-transform: uppercase;">Factores Analizados</h4>
+                                            </div>
+                                            <p style="margin: 0 0 24px 0; font-size: 0.9rem; color: #64748b;">Evaluación automática de los principales indicadores de estabilidad corporativa.</p>
+                                            
+                                            <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+                                                <?php if (!empty($riskProfile['data']['flags'])): ?>
+                                                    <?php foreach ($riskProfile['data']['flags'] as $flag): ?>
+                                                        <?php 
+                                                        $sev = $flag['severity'] ?? 'low';
+                                                        if ($sev === 'high') {
+                                                            $iconColor = '#ef4444';
+                                                            $iconBg = '#fee2e2';
+                                                            $badgeColor = '#b91c1c';
+                                                            $badgeBg = '#fef2f2';
+                                                            $badgeBorder = '#fecaca';
+                                                            $sevLabel = 'ALERTA';
+                                                        } elseif ($sev === 'medium') {
+                                                            $iconColor = '#f59e0b';
+                                                            $iconBg = '#fef3c7';
+                                                            $badgeColor = '#b45309';
+                                                            $badgeBg = '#fffbeb';
+                                                            $badgeBorder = '#fde68a';
+                                                            $sevLabel = 'ATENCIÓN';
+                                                        } else {
+                                                            $iconColor = '#22c55e';
+                                                            $iconBg = '#dcfce7';
+                                                            $badgeColor = '#15803d';
+                                                            $badgeBg = '#f0fdf4';
+                                                            $badgeBorder = '#bbf7d0';
+                                                            $sevLabel = 'POSITIVO';
+                                                        }
+                                                        ?>
+                                                        <div style="border: 1px solid #f1f5f9; border-radius: 12px; padding: 20px; display: flex; gap: 16px; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                                                            <div style="width: 48px; height: 48px; border-radius: 50%; background: <?= $iconBg ?>; color: <?= $iconColor ?>; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                                                <?php if ($sev === 'high'): ?>
+                                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                                                <?php elseif ($sev === 'medium'): ?>
+                                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+                                                                <?php else: ?>
+                                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                            <div style="flex: 1;">
+                                                                <p style="margin: 0 0 6px 0; font-size: 1rem; font-weight: 700; color: #0f172a;"><?= esc(ucwords(strtolower(str_replace('_', ' ', $flag['code'] ?? 'EVENTO REPORTADO')))) ?></p>
+                                                                <p style="margin: 0; font-size: 0.9rem; color: #64748b; line-height: 1.4;"><?= esc($flag['description'] ?? 'Basado en histórico público') ?></p>
+                                                            </div>
+                                                            <span style="background: <?= $badgeBg ?>; color: <?= $badgeColor ?>; border: 1px solid <?= $badgeBorder ?>; padding: 6px 14px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; flex-shrink: 0;">
+                                                                <?= $sevLabel ?>
+                                                            </span>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                <?php else: ?>
+                                                    <div style="border: 1px solid #f1f5f9; border-radius: 12px; padding: 20px; display: flex; gap: 16px; align-items: center;">
+                                                        <div style="width: 48px; height: 48px; border-radius: 50%; background: #dcfce7; color: #22c55e; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                        </div>
+                                                        <div style="flex: 1;">
+                                                            <p style="margin: 0 0 6px 0; font-size: 1rem; font-weight: 700; color: #0f172a;">Sin eventos de riesgo detectados</p>
+                                                            <p style="margin: 0; font-size: 0.9rem; color: #64748b; line-height: 1.4;">No se han detectado eventos societarios que indiquen riesgo a corto plazo.</p>
+                                                        </div>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+
+                                            <!-- Info Box: Cómo se calcula -->
+                                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; display: flex; gap: 20px; align-items: center; position: relative; overflow: hidden;">
+                                                <div style="color: #3b82f6; flex-shrink: 0;">
+                                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                                </div>
+                                                <div style="flex: 1; z-index: 2;">
+                                                    <p style="margin: 0 0 6px 0; font-size: 1rem; font-weight: 700; color: #1e293b;">¿Cómo se calcula?</p>
+                                                    <p style="margin: 0; font-size: 0.9rem; color: #475569; line-height: 1.5;">Este índice combina múltiples variables societarias y de contratación pública para generar una puntuación de 0 a 100, donde 100 representa el mayor riesgo.</p>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+
+                            <!-- FOOTER / DISCLAIMER -->
+                            <div style="padding: 24px 32px; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; gap: 16px; align-items: center;">
+                                <div style="width: 42px; height: 42px; border-radius: 50%; background: #fff; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.03); color: #64748b;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                      <path d="M12 3v18"></path>
+                                      <path d="M3 9h18"></path>
+                                      <path d="M5 9l-2 6a3 3 0 0 0 6 0l-2-6"></path>
+                                      <path d="M19 9l-2 6a3 3 0 0 0 6 0l-2-6"></path>
+                                      <path d="M9 3h6"></path>
+                                    </svg>
+                                </div>
+                                <p style="margin: 0; font-size: 0.85rem; color: #64748b; line-height: 1.5; font-weight: 500;">
+                                    <strong style="color: #334155; margin-right: 4px;">Aviso Legal:</strong> Este índice es una estimación automática generada a partir de información pública y no constituye asesoramiento financiero, jurídico ni una evaluación crediticia oficial.
+                                </p>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                    <!-- END RISK PROFILE SECTION -->
+
 
                     <div style="margin-bottom:24px;">
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start;">
