@@ -21,28 +21,37 @@ class RgpdController extends BaseController
 
     public function preview()
     {
+        $cif = $this->request->getPost('cif');
         $name = $this->request->getPost('name');
-        if (empty($name)) {
-            return $this->response->setJSON(['success' => false, 'message' => 'El nombre es obligatorio']);
+        
+        if (empty($cif) || empty($name)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'El CIF y el nombre son obligatorios']);
         }
 
         $db = \Config\Database::connect();
+        $cif = trim($cif);
+        
+        $company = $db->table('companies')->select('id')->where('cif', $cif)->get()->getRowArray();
+        if (!$company) {
+            return $this->response->setJSON(['success' => false, 'message' => 'No se ha encontrado ninguna empresa con ese CIF']);
+        }
+        
+        $companyId = $company['id'];
 
-        // 1. Count company administrators (Optimizamos usando WHERE para aprovechar índices B-Tree)
-        $adminCount = $db->table('company_administrators')->where('name', trim($name))->countAllResults();
+        // 1. Count company administrators (Optimizamos usando WHERE para aprovechar índices B-Tree y por empresa)
+        $adminCount = $db->table('company_administrators')
+                         ->where('company_id', $companyId)
+                         ->where('name', trim($name))
+                         ->countAllResults();
 
-        // 2. Count borme posts
-        $bormeCount = $db->table('borme_posts')->like('description', trim($name))->countAllResults();
+        // 2. Count borme posts (Mucho más rápido al buscar por company_id en lugar de full table scan)
+        $bormeCount = $db->table('borme_posts')
+                         ->where('company_id', $companyId)
+                         ->like('description', trim($name))
+                         ->countAllResults();
 
         // 3. Recopilar URLs afectadas
-        $companyIds = [];
-        $adminCompanies = $db->table('company_administrators')->select('company_id')->where('name', trim($name))->get()->getResultArray();
-        $bormeCompanies = $db->table('borme_posts')->select('company_id')->like('description', trim($name))->get()->getResultArray();
-
-        foreach ($adminCompanies as $c) { if (!empty($c['company_id'])) $companyIds[] = $c['company_id']; }
-        foreach ($bormeCompanies as $c) { if (!empty($c['company_id'])) $companyIds[] = $c['company_id']; }
-        
-        $companyIds = array_unique($companyIds);
+        $companyIds = [$companyId]; // Ahora solo es una empresa
 
         $urlsToPurge = [];
         if (!empty($companyIds)) {
@@ -72,26 +81,36 @@ class RgpdController extends BaseController
 
     public function execute()
     {
+        $cif = $this->request->getPost('cif');
         $name = $this->request->getPost('name');
         $slug = $this->request->getPost('slug');
 
-        if (empty($name) || empty($slug)) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Faltan datos (nombre o slug)']);
+        if (empty($cif) || empty($name) || empty($slug)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Faltan datos (CIF, nombre o slug)']);
         }
 
         $db = \Config\Database::connect();
+        $cif = trim($cif);
         $name = trim($name);
         $slug = trim($slug);
 
-        // PASO 1: LECTURA INOFENSIVA (Fuera de la transacción para no bloquear la base de datos)
-        // Buscamos los IDs primarios (y company_id) afectados. 
+        $company = $db->table('companies')->select('id')->where('cif', $cif)->get()->getRowArray();
+        if (!$company) {
+            return $this->response->setJSON(['success' => false, 'message' => 'No se ha encontrado ninguna empresa con ese CIF']);
+        }
+        $companyId = $company['id'];
+
+        // PASO 1: LECTURA INOFENSIVA
+        // Buscamos los IDs primarios (restringido a esta empresa específica)
         $adminRoles = $db->table('company_administrators')
                          ->select('id, company_id')
+                         ->where('company_id', $companyId)
                          ->where('name', $name)
                          ->get()->getResultArray();
                          
         $bormePosts = $db->table('borme_posts')
                          ->select('id, company_id')
+                         ->where('company_id', $companyId)
                          ->like('description', $name)
                          ->get()->getResultArray();
 
@@ -99,10 +118,7 @@ class RgpdController extends BaseController
         $bormeIds = array_column($bormePosts, 'id');
 
         // Extraemos los IDs de las empresas para la caché
-        $companyIds = [];
-        foreach ($adminRoles as $c) { if (!empty($c['company_id'])) $companyIds[] = $c['company_id']; }
-        foreach ($bormePosts as $c) { if (!empty($c['company_id'])) $companyIds[] = $c['company_id']; }
-        $companyIds = array_unique($companyIds);
+        $companyIds = [$companyId];
 
         // PASO 2: Recopilar las URLs exactas de esas empresas
         $urlsToPurge = [];

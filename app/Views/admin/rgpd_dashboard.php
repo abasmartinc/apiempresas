@@ -40,7 +40,11 @@
     <h2 style="margin-top:0;">Nueva Solicitud de Supresión</h2>
     <p style="color: #64748b; margin-bottom: 24px;">Introduce los datos del administrador para buscar y anonimizar sus registros históricos.</p>
     
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+        <div class="form-group">
+            <label><strong>CIF de la Empresa</strong></label>
+            <input type="text" id="rgpdCif" class="form-control" placeholder="Ej: B12345678">
+        </div>
         <div class="form-group">
             <label><strong>Nombre Exacto (Ej: LUIS MIGUEL GARCIA GONZALEZ)</strong></label>
             <input type="text" id="rgpdName" class="form-control" placeholder="Nombre completo sin acentos">
@@ -102,18 +106,31 @@
     const csrfName = '<?= csrf_token() ?>';
     const csrfHash = '<?= csrf_hash() ?>';
 
+    // Auto-generar slug basado en el nombre
+    document.getElementById('rgpdName').addEventListener('input', function() {
+        let name = this.value;
+        let slug = name.toLowerCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quitar acentos
+            .replace(/[^a-z0-9]/g, '-')                       // Cambiar caracteres raros/espacios por guiones
+            .replace(/-+/g, '-')                              // Evitar guiones duplicados
+            .replace(/^-|-$/g, '');                           // Quitar guiones al principio o final
+            
+        document.getElementById('rgpdSlug').value = slug;
+    });
+
     function simulateRgpd() {
+        const cif = document.getElementById('rgpdCif').value;
         const name = document.getElementById('rgpdName').value;
         const slug = document.getElementById('rgpdSlug').value;
         
-        if(!name || !slug) {
-            Swal.fire('Atención', 'Por favor, rellena el nombre y el slug.', 'warning');
+        if(!cif || !name || !slug) {
+            Swal.fire('Atención', 'Por favor, rellena el CIF, el nombre y el slug.', 'warning');
             return;
         }
 
         Swal.fire({
             title: 'Buscando...',
-            text: 'Analizando las bases de datos mercantiles y el BORME...',
+            text: 'Analizando las bases de datos mercantiles y el BORME para esa empresa...',
             allowOutsideClick: false,
             showConfirmButton: false,
             didOpen: () => {
@@ -122,7 +139,9 @@
         });
 
         const formData = new FormData();
+        formData.append('cif', cif);
         formData.append('name', name);
+        formData.append('slug', slug);
         formData.append(csrfName, csrfHash);
 
         fetch('<?= site_url('admin/rgpd/preview') ?>', {
@@ -180,10 +199,12 @@
                     }
                 });
 
+                const cif = document.getElementById('rgpdCif').value;
                 const name = document.getElementById('rgpdName').value;
                 const slug = document.getElementById('rgpdSlug').value;
 
                 const formData = new FormData();
+                formData.append('cif', cif);
                 formData.append('name', name);
                 formData.append('slug', slug);
                 formData.append(csrfName, csrfHash);
