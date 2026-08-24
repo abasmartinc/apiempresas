@@ -544,9 +544,13 @@ class Company extends BaseController
 
         // $this->cachePage(86400); // Cache temporalmente desactivada
         
-        // Etiqueta secreta para que Cloudflare sepa que ESTA PÁGINA SÍ se puede cachear (1 día)
-        $this->response->setHeader('Cache-Control', 'public, s-maxage=86400, max-age=86400');
-
+        if (session('is_logged_in')) {
+            $this->response->setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate, max-age=0');
+            $this->response->setHeader('Pragma', 'no-cache');
+        } else {
+            // Etiqueta para que Cloudflare cachee (1 día), pero max-age=0 para que el navegador siempre pregunte y no se "coma" la versión cacheada si el usuario se loguea
+            $this->response->setHeader('Cache-Control', 'public, s-maxage=86400, max-age=0');
+        }
         $viewName = (service('request')->getLocale() === 'en') ? 'company_en' : 'company';
         return $this->response->setBody(view($viewName, $data));
     }
@@ -600,9 +604,13 @@ class Company extends BaseController
 
         // $this->cachePage(86400); // Cache temporalmente desactivada
 
-        // Etiqueta secreta para que Cloudflare sepa que ESTA PÁGINA SÍ se puede cachear (1 día)
-        $this->response->setHeader('Cache-Control', 'public, s-maxage=86400, max-age=86400');
-
+        if (session('is_logged_in')) {
+            $this->response->setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate, max-age=0');
+            $this->response->setHeader('Pragma', 'no-cache');
+        } else {
+            // Etiqueta para que Cloudflare cachee (1 día), pero max-age=0 para que el navegador siempre pregunte
+            $this->response->setHeader('Cache-Control', 'public, s-maxage=86400, max-age=0');
+        }
         $viewName = (service('request')->getLocale() === 'en') ? 'company_en' : 'company';
         return $this->response->setBody(view($viewName, $data));
     }
