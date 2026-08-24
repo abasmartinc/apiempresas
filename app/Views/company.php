@@ -1032,7 +1032,7 @@
                                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
                                                 </div>
                                                 <p style="margin: 0; font-size: 0.75rem; color: #475569; line-height: 1.4; font-weight: 500;">
-                                                    Puntuación baja indica mayor estabilidad societaria.
+                                                    <?= esc($riskProfile['data']['summary_message'] ?? 'Puntuación procesada correctamente.') ?>
                                                 </p>
                                             </div>
                                         </div>
@@ -1049,8 +1049,8 @@
                                             <p style="margin: 0 0 24px 0; font-size: 0.9rem; color: #64748b;">Evaluación automática de los principales indicadores de estabilidad corporativa.</p>
                                             
                                             <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
-                                                <?php if (!empty($riskProfile['data']['flags'])): ?>
-                                                    <?php foreach ($riskProfile['data']['flags'] as $flag): ?>
+                                                <?php if (!empty($riskProfile['data']['canonical_events'])): ?>
+                                                    <?php foreach ($riskProfile['data']['canonical_events'] as $flag): ?>
                                                         <?php 
                                                         $sev = $flag['severity'] ?? 'low';
                                                         if ($sev === 'high') {
@@ -1079,11 +1079,11 @@
                                                         <div style="border: 1px solid #f1f5f9; border-radius: 12px; padding: 20px; display: flex; gap: 16px; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
                                                             <div style="width: 48px; height: 48px; border-radius: 50%; background: <?= $iconBg ?>; color: <?= $iconColor ?>; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                                                 <?php if ($sev === 'high'): ?>
-                                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                                                                 <?php elseif ($sev === 'medium'): ?>
-                                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+                                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
                                                                 <?php else: ?>
-                                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                                                 <?php endif; ?>
                                                             </div>
                                                             <div style="flex: 1;">
@@ -1101,8 +1101,8 @@
                                                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                                         </div>
                                                         <div style="flex: 1;">
-                                                            <p style="margin: 0 0 6px 0; font-size: 1rem; font-weight: 700; color: #0f172a;">Sin eventos de riesgo detectados</p>
-                                                            <p style="margin: 0; font-size: 0.9rem; color: #64748b; line-height: 1.4;">No se han detectado eventos societarios que indiquen riesgo a corto plazo.</p>
+                                                            <p style="margin: 0 0 6px 0; font-size: 1rem; font-weight: 700; color: #0f172a;">Análisis Favorable</p>
+                                                            <p style="margin: 0; font-size: 0.9rem; color: #64748b; line-height: 1.4;"><?= esc($riskProfile['data']['summary_message'] ?? 'No se han detectado eventos societarios que indiquen riesgo.') ?></p>
                                                         </div>
                                                     </div>
                                                 <?php endif; ?>
@@ -1115,7 +1115,7 @@
                                                 </div>
                                                 <div style="flex: 1; z-index: 2;">
                                                     <p style="margin: 0 0 6px 0; font-size: 1rem; font-weight: 700; color: #1e293b;">¿Cómo se calcula?</p>
-                                                    <p style="margin: 0; font-size: 0.9rem; color: #475569; line-height: 1.5;">Este índice combina múltiples variables societarias y de contratación pública para generar una puntuación de 0 a 100, donde 100 representa el mayor riesgo.</p>
+                                                    <p style="margin: 0; font-size: 0.9rem; color: #475569; line-height: 1.5;">El motor de riesgo evalúa en tiempo real 6 dimensiones clave: estado legal, cumplimiento registral (BORME y Cuentas), gobernanza, capital, volatilidad estructural y factores estabilizadores. Estos datos se consolidan en una puntuación de 0 a 100, donde 100 representa el mayor nivel de riesgo.</p>
                                                 </div>
                                             </div>
 

@@ -1249,9 +1249,10 @@ class Company extends BaseController
             }
         } catch (\Exception $e) {}
 
-        // Contracts & Subsidies
+        // Contracts & Subsidies & Risk Profile
         $contracts = [];
         $subsidies = [];
+        $riskProfile = null;
         if (!empty($company['cif'])) {
             $db = \Config\Database::connect();
             $contracts = $db->table('company_contracts')
@@ -1263,6 +1264,14 @@ class Company extends BaseController
                 ->where('company_cif', $company['cif'])
                 ->orderBy('fecha_concesion', 'DESC')
                 ->get()->getResultArray();
+                
+            $riskRow = $db->table('company_risk_profiles')->where('cif', $company['cif'])->get()->getRowArray();
+            if ($riskRow) {
+                $riskProfile = $riskRow;
+                if (!empty($riskProfile['risk_profile'])) {
+                    $riskProfile['data'] = json_decode($riskProfile['risk_profile'], true);
+                }
+            }
         }
 
         // Dompdf configuration
@@ -1279,6 +1288,7 @@ class Company extends BaseController
             'radarScore'      => $dynamicScoreData,
             'contracts'       => $contracts,
             'subsidies'       => $subsidies,
+            'riskProfile'     => $riskProfile,
             'brandColor'      => $order['brand_color'] ?: '#0f172a',
             'brandName'       => $order['agency_name'],
             'brandFooterText' => $order['footer_text'],

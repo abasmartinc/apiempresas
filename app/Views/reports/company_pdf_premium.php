@@ -221,6 +221,77 @@
         .level-medium { color: #ca8a04; }
         .level-high { color: #dc2626; }
 
+        /* ÍNDICE DE ESTABILIDAD SOCIETARIA (IES) */
+        .ies-container {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .ies-score-col {
+            width: 35%;
+            vertical-align: top;
+            padding-right: 20px;
+        }
+        .ies-factors-col {
+            width: 65%;
+            vertical-align: top;
+        }
+        .ies-score-box {
+            background-color: #f8fafc;
+            border: 1px solid #f1f5f9;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .ies-score-badge {
+            font-size: 36pt;
+            font-weight: bold;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        .ies-factor-card {
+            border: 1px solid #f1f5f9;
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 8px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .ies-factor-icon {
+            width: 30px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .ies-factor-icon-circle {
+            width: 22px;
+            height: 22px;
+            border-radius: 11px;
+            line-height: 22px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 11pt;
+            display: inline-block;
+        }
+        .ies-factor-text {
+            vertical-align: middle;
+            padding-left: 8px;
+        }
+        .ies-factor-badge-col {
+            width: 65px;
+            vertical-align: middle;
+            text-align: right;
+        }
+        .ies-badge {
+            font-size: 6pt;
+            font-weight: bold;
+            padding: 3px 5px;
+            border-radius: 8px;
+            text-transform: uppercase;
+        }
+
         /* BORME Y CARGOS */
         .list-table {
             width: 100%;
@@ -544,12 +615,106 @@
         </div>
     </div>
 
-    <!-- PÁGINA 3: ADMINISTRADORES Y BORME -->
-    <?php if (!empty($administrators) || !empty($bormePosts)): ?>
+    <!-- PÁGINA 3: IES, ADMINISTRADORES Y BORME -->
+    <?php if (!empty($riskProfile) || !empty($administrators) || !empty($bormePosts)): ?>
     <div class="page-break"></div>
     <div class="header-bar"></div>
     <div class="container">
         
+        <!-- ÍNDICE DE ESTABILIDAD SOCIETARIA -->
+        <?php if (!empty($riskProfile)): ?>
+        <div class="no-break" style="margin-bottom: 20px;">
+            <div class="section-title" style="margin-top: 0;">Índice de Estabilidad Societaria</div>
+            <?php 
+                $score = $riskProfile['risk_score'] ?? 50;
+                if ($score < 30) {
+                    $color = '#22c55e'; // Verde
+                    $label = 'BAJO';
+                } elseif ($score < 70) {
+                    $color = '#f59e0b'; // Naranja
+                    $label = 'MEDIO';
+                } else {
+                    $color = '#ef4444'; // Rojo
+                    $label = 'ALTO';
+                }
+                $riskLevelText = $riskProfile['data']['risk_level'] ?? $label;
+            ?>
+            <table class="ies-container">
+                <tr>
+                    <td class="ies-score-col">
+                        <div class="ies-score-box">
+                            <div style="font-size: 8.5pt; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 15px;">Nivel de Riesgo</div>
+                            <div class="ies-score-badge" style="background-color: <?= $color ?>;">
+                                <?= $score ?>
+                            </div>
+                            <div style="font-size: 14pt; font-weight: bold; color: <?= $color ?>; text-transform: uppercase; margin-bottom: 5px;"><?= $riskLevelText ?></div>
+                            <div style="font-size: 8pt; color: #64748b;">Puntuación de 0 a 100</div>
+                        </div>
+                    </td>
+                    <td class="ies-factors-col">
+                        <div style="font-size: 10pt; font-weight: bold; color: #0f172a; margin-bottom: 5px; text-transform: uppercase;">Factores Analizados</div>
+                        <div style="font-size: 8pt; color: #64748b; margin-bottom: 15px;">Evaluación automática de los principales indicadores de estabilidad corporativa.</div>
+                        
+                        <?php if (!empty($riskProfile['data']['flags'])): ?>
+                            <?php foreach ($riskProfile['data']['flags'] as $flag): ?>
+                                <?php 
+                                $sev = $flag['severity'] ?? 'low';
+                                if ($sev === 'high') {
+                                    $iconColor = '#ef4444'; $iconBg = '#fee2e2';
+                                    $badgeColor = '#b91c1c'; $badgeBg = '#fef2f2'; $badgeBorder = '#fecaca';
+                                    $sevLabel = 'ALERTA'; $iconSymbol = '!';
+                                } elseif ($sev === 'medium') {
+                                    $iconColor = '#f59e0b'; $iconBg = '#fef3c7';
+                                    $badgeColor = '#b45309'; $badgeBg = '#fffbeb'; $badgeBorder = '#fde68a';
+                                    $sevLabel = 'ATENCIÓN'; $iconSymbol = '?';
+                                } else {
+                                    $iconColor = '#22c55e'; $iconBg = '#dcfce7';
+                                    $badgeColor = '#15803d'; $badgeBg = '#f0fdf4'; $badgeBorder = '#bbf7d0';
+                                    $sevLabel = 'POSITIVO'; $iconSymbol = '✓';
+                                }
+                                ?>
+                                <table class="ies-factor-card">
+                                    <tr>
+                                        <td class="ies-factor-icon">
+                                            <div class="ies-factor-icon-circle" style="background-color: <?= $iconBg ?>; color: <?= $iconColor ?>;">
+                                                <?= $iconSymbol ?>
+                                            </div>
+                                        </td>
+                                        <td class="ies-factor-text">
+                                            <div style="font-size: 9pt; font-weight: bold; color: #0f172a; margin-bottom: 2px;">
+                                                <?= esc(ucwords(strtolower(str_replace('_', ' ', $flag['code'] ?? 'EVENTO REPORTADO')))) ?>
+                                            </div>
+                                            <div style="font-size: 8pt; color: #64748b;">
+                                                <?= esc($flag['description'] ?? 'Basado en histórico público') ?>
+                                            </div>
+                                        </td>
+                                        <td class="ies-factor-badge-col">
+                                            <span class="ies-badge" style="background-color: <?= $badgeBg ?>; color: <?= $badgeColor ?>; border: 1px solid <?= $badgeBorder ?>;">
+                                                <?= $sevLabel ?>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <table class="ies-factor-card">
+                                <tr>
+                                    <td class="ies-factor-icon">
+                                        <div class="ies-factor-icon-circle" style="background-color: #dcfce7; color: #22c55e;">✓</div>
+                                    </td>
+                                    <td class="ies-factor-text">
+                                        <div style="font-size: 9pt; font-weight: bold; color: #0f172a; margin-bottom: 2px;">Sin eventos de riesgo detectados</div>
+                                        <div style="font-size: 8pt; color: #64748b;">No se han detectado eventos societarios que indiquen riesgo a corto plazo.</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <?php endif; ?>
+
         <?php if (!empty($administrators)): ?>
         <div class="no-break">
             <div class="section-title">Estructura Corporativa y de Poder</div>
