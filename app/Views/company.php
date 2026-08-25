@@ -510,7 +510,7 @@
     <!-- Texto SEO -->
     <div style="padding:18px 24px; line-height:1.7; color:#334155; font-size:1rem;">
         <?php if (!empty($company['ai_seo_text'])): ?>
-            <?= nl2br(esc($company['ai_seo_text'])) ?>
+            <?= nl2br(strip_tags($company['ai_seo_text'], '<strong><em><b><i><br><a><ul><li><ol><p>')) ?>
         <?php else: ?>
             <div id="fallback-seo-text" style="display:none;">
                 <?php
@@ -2663,5 +2663,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </html>
 
 <?= view('partials/svg_sprite_company') ?>
+
+
 
 
