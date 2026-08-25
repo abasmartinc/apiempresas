@@ -1342,4 +1342,38 @@ class Company extends BaseController
 
         return $this->response->download($filePath, null)->setFileName('Informe_Premium.pdf');
     }
+
+    /**
+     * Endpoint AJAX para cargar datos protegidos/sesión en fichas de empresa cacheadas
+     */
+    public function ajaxPrivateData($cif)
+    {
+        if (!session('logged_in')) {
+            return $this->response->setJSON(['logged_in' => false]);
+        }
+
+        $db = \Config\Database::connect();
+        
+        $riskProfile = null;
+        if (!empty($cif)) {
+            $riskRow = $db->table('company_risk_profiles')->where('cif', $cif)->get()->getRowArray();
+            if ($riskRow) {
+                $riskProfile = $riskRow;
+                if (!empty($riskProfile['risk_profile'])) {
+                    $riskProfile['data'] = json_decode($riskProfile['risk_profile'], true);
+                }
+            }
+        }
+
+        $riskProfileHtml = view('partials/company_risk_profile', [
+            'riskProfile' => $riskProfile,
+            'company' => ['registro_mercantil' => $cif]
+        ]);
+
+        return $this->response->setJSON([
+            'logged_in' => true,
+            'risk_profile_html' => $riskProfileHtml
+        ]);
+    }
+
 }

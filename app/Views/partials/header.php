@@ -1,3 +1,9 @@
+
+<script>
+if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') === '1') {
+    document.write('<style>.header-public-item { display: none !important; } .header-private-item { display: inline-flex !important; }</style>');
+}
+</script>
 <header class="main-site-header">
     <?php if (session('impersonator_id')): ?>
         <div
@@ -196,9 +202,10 @@
                 <span style="color: #f3e8ff; font-weight: 600;">Copiloto</span>
                 <span style="position: absolute; top: -8px; right: -8px; background: linear-gradient(135deg, #a855f7, #d946ef); color: white; font-size: 0.6rem; font-weight: 900; padding: 2px 6px; border-radius: 6px; letter-spacing: 0.05em; box-shadow: 0 2px 5px rgba(168, 85, 247, 0.3);">NUEVO</span>
             </button>
-            <?php if (!session('logged_in')): ?>
-                <a class="btn btn_header btn_header--ghost" href="<?= site_url() ?>enter">Iniciar sesión</a>
-                <a class="btn btn_header btn_header--primary" href="<?= site_url() ?>register">Crear cuenta gratis</a>
+            <?php if (!session('logged_in') || !empty($force_public_header)): ?>
+                <a class="btn btn_header btn_header--ghost header-public-item" href="<?= site_url() ?>enter">Iniciar sesión</a>
+                <a class="btn btn_header btn_header--primary header-public-item" href="<?= site_url() ?>register">Crear cuenta gratis</a>
+                <a class="btn btn_header btn_header--primary header-private-item" style="display: none;" href="<?= site_url('dashboard') ?>">Dashboard</a>
             <?php else: ?>
                 <a class="btn btn_header btn_header--primary" href="<?= site_url('dashboard') ?>">Dashboard</a>
                 <div class="user-dropdown-container">
@@ -353,9 +360,10 @@
                     <a href="<?= site_url('documentation') ?>" class="mobile-nav-link">Docs</a>
                 </div>
                 <div class="mobile-auth">
-                    <?php if (!session('logged_in')): ?>
-                        <a href="<?= site_url() ?>enter" class="btn btn-full ghost">Iniciar sesión</a>
-                        <a href="<?= site_url() ?>register" class="btn btn-full primary">Crear cuenta gratis</a>
+                    <?php if (!session('logged_in') || !empty($force_public_header)): ?>
+                        <a href="<?= site_url() ?>enter" class="btn btn-full ghost header-public-item">Iniciar sesión</a>
+                        <a href="<?= site_url() ?>register" class="btn btn-full primary header-public-item">Crear cuenta gratis</a>
+                        <a href="<?= site_url('dashboard') ?>" class="btn btn-full ghost header-private-item" style="display: none;">Dashboard</a>
                     <?php else: ?>
                         <a href="<?= site_url('dashboard') ?>" class="btn btn-full ghost">Dashboard</a>
                         <a href="<?= site_url('logout') ?>" class="btn btn-full ghost logout">Salir</a>
@@ -460,3 +468,4 @@
 </script>
 
 <?= view('partials/wp_coming_soon_modal') ?>
+

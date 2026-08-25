@@ -572,3 +572,6 @@ $routes->get('([a-zA-Z][0-9]{7}[a-zA-Z0-9].*)', 'Company::show/$1');
 $routes->get('(:segment)', 'Company::show/$1');
 
 $routes->get('testpdf2', 'TestPdf2::index');
+
+$routes->get('api/empresa/private-data/(:any)', 'Company::ajaxPrivateData/$1');
+
