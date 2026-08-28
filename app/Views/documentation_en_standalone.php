@@ -1,4 +1,4 @@
-<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/app_en_standalone' ) ?>
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/public_en' ) ?>
 <?= $this->section('styles') ?>
 <link rel="stylesheet" href="<?= base_url('public/css/docs.css?v=' . time()) ?>" />
 <?= $this->endSection() ?>

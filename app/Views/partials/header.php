@@ -1,5 +1,11 @@
 
 <script>
+<?php if (!session('logged_in')): ?>
+    if (typeof localStorage !== 'undefined') localStorage.removeItem('is_logged_in');
+<?php else: ?>
+    if (typeof localStorage !== 'undefined') localStorage.setItem('is_logged_in', '1');
+<?php endif; ?>
+
 if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') === '1') {
     document.write('<style>.header-public-item { display: none !important; } .header-private-item { display: inline-flex !important; }</style>');
 }
@@ -206,6 +212,9 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                 <a class="btn btn_header btn_header--ghost header-public-item" href="<?= site_url() ?>enter">Iniciar sesión</a>
                 <a class="btn btn_header btn_header--primary header-public-item" href="<?= site_url() ?>register">Crear cuenta gratis</a>
                 <a class="btn btn_header btn_header--primary header-private-item" style="display: none;" href="<?= site_url('dashboard') ?>">Dashboard</a>
+                <a class="btn btn_header btn_header--ghost header-private-item" style="display: none; padding: 8px 12px;" href="<?= site_url('logout') ?>" title="Cerrar sesión">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                </a>
             <?php else: ?>
                 <a class="btn btn_header btn_header--primary" href="<?= site_url('dashboard') ?>">Dashboard</a>
                 <div class="user-dropdown-container">
@@ -364,6 +373,7 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                         <a href="<?= site_url() ?>enter" class="btn btn-full ghost header-public-item">Iniciar sesión</a>
                         <a href="<?= site_url() ?>register" class="btn btn-full primary header-public-item">Crear cuenta gratis</a>
                         <a href="<?= site_url('dashboard') ?>" class="btn btn-full ghost header-private-item" style="display: none;">Dashboard</a>
+                        <a href="<?= site_url('logout') ?>" class="btn btn-full ghost logout header-private-item" style="display: none;">Salir</a>
                     <?php else: ?>
                         <a href="<?= site_url('dashboard') ?>" class="btn btn-full ghost">Dashboard</a>
                         <a href="<?= site_url('logout') ?>" class="btn btn-full ghost logout">Salir</a>
