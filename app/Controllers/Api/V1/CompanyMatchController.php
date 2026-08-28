@@ -126,8 +126,27 @@ class CompanyMatchController extends BaseApiController
             $company = array_merge($company, $scoring);
         }
 
-        // Calculate Match
+        // Calculate Match V1 (Public)
         $matchResult = RadarAnalyzer::calculateMatch($company, $sellerSector);
+
+        // SHADOW MODE V2
+        try {
+            $config = config('B2BScoring');
+            if ($config && in_array($config->mode, ['shadow', 'v2'])) {
+                $scorerV2 = new \App\Libraries\B2B\B2BOpportunityScorer();
+                $resultV2 = $scorerV2->calculate($company, $sellerSector);
+                
+                if ($config->mode === 'shadow') {
+                    // Log comparison manually (query to be provided to user)
+                    // ...
+                    log_message('info', 'V2 Shadow calculated for ' . $cif);
+                } elseif ($config->mode === 'v2') {
+                    $matchResult = $resultV2; // Replace completely
+                }
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'V2 Scoring Error: ' . $e->getMessage());
+        }
 
         // Record usage
         $accessService->recordUsage($userId);

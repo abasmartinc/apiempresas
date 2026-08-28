@@ -28,9 +28,9 @@ class AiCopilotController extends Controller
         $modifier = $this->request->getPost('modifier');
         $targetRole = $this->request->getPost('target_role') ?: 'CEO';
         
-        // Append role to product for caching and context purposes
-        $product = $rawProduct . " (Dirigido a: " . $targetRole . ")";
-
+        // V1 uses concatenated string for scoring, V2 uses rawProduct only.
+        $productForV1 = $rawProduct . " (Dirigido a: " . $targetRole . ")";
+        $product = $rawProduct; // V2 isolated product
         if (empty($cif) || empty($product)) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Faltan parámetros obligatorios.'])->setStatusCode(400);
         }
@@ -83,8 +83,20 @@ class AiCopilotController extends Controller
         if ($scoring) {
             $company = array_merge($company, $scoring);
         }
-        $matchResult = \App\Libraries\RadarAnalyzer::calculateMatch($company, $product);
+        $matchResult = \App\Libraries\RadarAnalyzer::calculateMatch($company, $productForV1);
         $hardcodedScore = $matchResult['match_score'];
+        
+        // SHADOW MODE V2
+        try {
+            $config = config('B2BScoring');
+            if ($config && in_array($config->mode, ['shadow', 'v2'])) {
+                $scorerV2 = new \App\Libraries\B2B\B2BOpportunityScorer();
+                $resultV2 = $scorerV2->calculate($company, $product);
+                if ($config->mode === 'v2') {
+                    $hardcodedScore = $resultV2['opportunity_fit'];
+                }
+            }
+        } catch (\Exception $e) {}
 
         // 3.5 Check Cache (Only if no modifier is requested)
         $cachedLog = null;
