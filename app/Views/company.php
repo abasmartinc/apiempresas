@@ -2649,7 +2649,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             localStorage.removeItem('is_logged_in');
             const publicItems = document.querySelectorAll('.header-public-item');
-            publicItems.forEach(el => el.style.removeProperty('display'));
+            publicItems.forEach(el => el.style.setProperty('display', 'inline-flex', 'important'));
             const privateItems = document.querySelectorAll('.header-private-item');
             privateItems.forEach(el => el.style.setProperty('display', 'none', 'important'));
         }
