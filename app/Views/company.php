@@ -2419,8 +2419,8 @@
                     <li style="display: flex; gap: 12px; align-items: flex-start;">
                         <span style="color: #34d399; background: rgba(16, 185, 129, 0.2); padding: 8px; border-radius: 10px; display: inline-flex;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#icon-4d8be45b"></use></svg></span>
                         <div>
-                            <strong style="color: #ffffff; display: block; margin-bottom: 4px; font-size: 1rem;">Diseño Espectacular</strong>
-                            <span style="color: #94a3b8; font-size: 0.9rem; line-height: 1.4; display: block;">Portada premium, tipografías modernas y gráficas visuales. Todo adaptado a tus colores.</span>
+                            <strong style="color: #ffffff; display: block; margin-bottom: 4px; font-size: 1rem;">Índice de Estabilidad Societaria</strong>
+                            <span style="color: #94a3b8; font-size: 0.9rem; line-height: 1.4; display: block;">Análisis avanzado del riesgo de cierre o disolución basado en históricos mercantiles y societarios.</span>
                         </div>
                     </li>
                     <li style="display: flex; gap: 12px; align-items: flex-start;">
@@ -2649,7 +2649,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             localStorage.removeItem('is_logged_in');
             const publicItems = document.querySelectorAll('.header-public-item');
-            publicItems.forEach(el => el.style.removeProperty('display'));
+            publicItems.forEach(el => el.style.setProperty('display', 'inline-flex', 'important'));
             const privateItems = document.querySelectorAll('.header-private-item');
             privateItems.forEach(el => el.style.setProperty('display', 'none', 'important'));
         }
