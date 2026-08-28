@@ -18,11 +18,49 @@ class ThrottleFilter implements FilterInterface
     public function before(RequestInterface $request, $arguments = null)
     {
         $throttler = Services::throttler();
+        
+        $uri = $request->getUri()->getPath();
+        $ip = $request->getIPAddress();
+        
+        // --- BYPASS PARA BOTS BUENOS (Google, Bing, etc.) ---
+        $userAgent = strtolower($request->getServer('HTTP_USER_AGENT') ?? '');
+        if (
+            strpos($userAgent, 'googlebot') !== false || 
+            strpos($userAgent, 'google-inspectiontool') !== false ||
+            strpos($userAgent, 'googleother') !== false ||
+            strpos($userAgent, 'bingbot') !== false ||
+            strpos($userAgent, 'yandexbot') !== false
+        ) {
+            // Permitir paso libre a rastreadores de buscadores
+            return;
+        }
 
-        // Restringir a 120 peticiones por minuto por IP (120 peticiones cada 60 segundos)
-        // Puedes ajustar estos valores según necesites
-        if ($throttler->check(md5($request->getIPAddress()), 120, 60) === false) {
-            return Services::response()->setStatusCode(429)->setBody('Too Many Requests');
+        // --- LÍMITES ESTRICTOS (Exportaciones y Administradores) ---
+        // 1 petición por minuto
+        if (strpos($uri, 'empresa/export') !== false) {
+            if ($throttler->check(md5($ip . '_export'), 1, 60) === false) {
+                return Services::response()->setStatusCode(429)->setBody('Too Many Requests (Exports)');
+            }
+        }
+
+        // 5 peticiones por minuto
+        if (strpos($uri, 'administrador/') !== false) {
+            if ($throttler->check(md5($ip . '_admin'), 5, 60) === false) {
+                return Services::response()->setStatusCode(429)->setBody('Too Many Requests (Admin)');
+            }
+        }
+
+        // --- LÍMITES GENERALES (Separación API vs WEB) ---
+        if (strpos($uri, 'api/') === 0) {
+            // Límite para la API: 120 peticiones por minuto
+            if ($throttler->check(md5($ip . '_api'), 120, 60) === false) {
+                return Services::response()->setStatusCode(429)->setBody('Too Many Requests (API)');
+            }
+        } else {
+            // Límite para el resto de la web: 60 peticiones por minuto
+            if ($throttler->check(md5($ip . '_web'), 60, 60) === false) {
+                return Services::response()->setStatusCode(429)->setBody('Too Many Requests (Web)');
+            }
         }
     }
 
