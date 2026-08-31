@@ -10,6 +10,42 @@ class Sitemap extends Controller
     protected $perPage = 10000;
 
     /**
+     * Entrega dinámica de robots.txt según el hostname de la petición
+     */
+    public function robots()
+    {
+        $rawHost = (string) $this->request->getServer('HTTP_HOST');
+        $host = strtolower(trim(explode(':', $rawHost)[0]));
+
+        // Lista blanca explícita de dominios para evitar Host Header Injection
+        if (in_array($host, ['spaincompanyapi.com', 'www.spaincompanyapi.com', 'spaincompanyapi.test', 'spaincompanyapi.local'], true) 
+            || strpos($host, 'spaincompanyapi') !== false) {
+            $sitemapUrl = 'https://spaincompanyapi.com/sitemap.xml';
+        } else {
+            $sitemapUrl = 'https://apiempresas.es/sitemap.xml';
+        }
+
+        $content = "User-agent: *" . PHP_EOL
+                 . "Crawl-delay: 5" . PHP_EOL
+                 . "Disallow: /api/" . PHP_EOL
+                 . "Disallow: /empresa/export/" . PHP_EOL
+                 . PHP_EOL
+                 . "# Opcional pero recomendado: bloquear parámetros" . PHP_EOL
+                 . "Disallow: /*?cif=" . PHP_EOL
+                 . "Disallow: /*?" . PHP_EOL
+                 . PHP_EOL
+                 . "# Permitir todo lo demás" . PHP_EOL
+                 . "Allow: /" . PHP_EOL
+                 . PHP_EOL
+                 . "# Sitemap" . PHP_EOL
+                 . "Sitemap: {$sitemapUrl}" . PHP_EOL;
+
+        return $this->response
+            ->setContentType('text/plain; charset=UTF-8')
+            ->setBody($content);
+    }
+
+    /**
      * Índice del sitemap (sitemap.xml)
      */
     public function index()
@@ -200,7 +236,9 @@ class Sitemap extends Controller
     public function companies($page = 1)
     {
         $page = (int) $page;
-        if ($page < 1) $page = 1;
+        if ($page < 1) {
+            return $this->response->setStatusCode(404);
+        }
 
         $isEn = (strpos((string)$this->request->getServer('HTTP_HOST'), 'spaincompanyapi') !== false);
         $prefix = $isEn ? 'sitemap-en-companies-' : 'sitemap-companies-';
@@ -208,6 +246,19 @@ class Sitemap extends Controller
         $staticFile = WRITEPATH . 'sitemaps/' . $prefix . $page . '.xml';
         if (file_exists($staticFile)) {
             return $this->response->setContentType('application/xml')->setBody(file_get_contents($staticFile));
+        }
+
+        // Fast-404: Si el conteo de sitemaps precalculado existe y la página está fuera de rango,
+        // o si el archivo estático no existe en un entorno con sitemaps pregenerados, devolver 404 inmediato.
+        $maxPages = 0;
+        if (file_exists(WRITEPATH . 'sitemaps/sitemap-companies-count.txt')) {
+            $maxPages = (int) file_get_contents(WRITEPATH . 'sitemaps/sitemap-companies-count.txt');
+        } elseif (file_exists(FCPATH . 'sitemap-companies-count.txt')) {
+            $maxPages = (int) file_get_contents(FCPATH . 'sitemap-companies-count.txt');
+        }
+
+        if ($maxPages > 0) {
+            return $this->response->setStatusCode(404);
         }
 
         $model = new CompanyModel();
@@ -508,10 +559,22 @@ class Sitemap extends Controller
      */
     public function holdings($page = 1)
     {
-        $perPage = 40000;
-        $offset = ($page - 1) * $perPage;
+        $page = (int) $page;
+        if ($page < 1) {
+            return $this->response->setStatusCode(404);
+        }
 
+        $perPage = 40000;
         $holdingModel = new \App\Models\HoldingModel();
+
+        // Verificación rápida del rango de páginas para evitar scans de DB
+        $holdingTotal = $holdingModel->countAllResults();
+        $holdingPages = ceil($holdingTotal / $perPage);
+        if ($holdingPages > 0 && $page > $holdingPages) {
+            return $this->response->setStatusCode(404);
+        }
+
+        $offset = ($page - 1) * $perPage;
         
         // Optimize query by selecting only what we need
         $holdings = $holdingModel->select('slug, updated_at')

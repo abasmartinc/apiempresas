@@ -1,4 +1,0 @@
-User-agent: *
-Disallow:
-
-Sitemap: https://apiempresas.es/sitemap.xml

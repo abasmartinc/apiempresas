@@ -144,8 +144,8 @@ class GenerateSitemaps extends BaseCommand
                 if ($urlCount >= $urlsPerFile) {
                     $xmlContent .= '</urlset>';
                     $xmlContentEn .= '</urlset>';
-                    file_put_contents($currentFile, $xmlContent);
-                    file_put_contents($currentFileEn, $xmlContentEn);
+                    $this->writeSitemapAtomically($currentFile, $xmlContent);
+                    $this->writeSitemapAtomically($currentFileEn, $xmlContentEn);
                     
                     CLI::write("Generated sitemaps {$fileIndex} (ES & EN) with {$urlCount} URLs.", 'yellow');
                     
@@ -169,8 +169,8 @@ class GenerateSitemaps extends BaseCommand
         if ($urlCount > 0) {
             $xmlContent .= '</urlset>';
             $xmlContentEn .= '</urlset>';
-            file_put_contents($currentFile, $xmlContent);
-            file_put_contents($currentFileEn, $xmlContentEn);
+            $this->writeSitemapAtomically($currentFile, $xmlContent);
+            $this->writeSitemapAtomically($currentFileEn, $xmlContentEn);
             CLI::write("Generated sitemap {$fileIndex} (ES & EN) with {$urlCount} URLs.", 'yellow');
         }
 
@@ -277,7 +277,7 @@ class GenerateSitemaps extends BaseCommand
                 
                 if ($aiUrlCount >= $urlsPerFile) {
                     $xmlAiContent .= '</urlset>';
-                    file_put_contents($currentAiFile, $xmlAiContent);
+                    $this->writeSitemapAtomically($currentAiFile, $xmlAiContent);
                     
                     CLI::write("Generated AI sitemap {$aiFileIndex} with {$aiUrlCount} URLs.", 'yellow');
                     
@@ -291,7 +291,7 @@ class GenerateSitemaps extends BaseCommand
 
         if ($aiUrlCount > 0) {
             $xmlAiContent .= '</urlset>';
-            file_put_contents($currentAiFile, $xmlAiContent);
+            $this->writeSitemapAtomically($currentAiFile, $xmlAiContent);
             CLI::write("Generated AI sitemap {$aiFileIndex} with {$aiUrlCount} URLs.", 'yellow');
         }
         
@@ -308,5 +308,49 @@ class GenerateSitemaps extends BaseCommand
         }
 
         CLI::write("Done! Included {$totalAiIncluded} AI-enriched companies in {$aiFileIndex} sitemap files.", 'green');
+    }
+
+    /**
+     * Escribe de forma atómica un archivo de sitemap utilizando un archivo temporal
+     * en el mismo directorio antes de renombrarlo al nombre final.
+     *
+     * @param string $targetFile Ruta completa del archivo destino
+     * @param string $content Contenido XML a escribir
+     * @return bool True si la escritura y el renombrado fueron exitosos
+     */
+    protected function writeSitemapAtomically(string $targetFile, string $content): bool
+    {
+        $dir = dirname($targetFile);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
+
+        $tempFile = $targetFile . '.' . uniqid('tmp_', true) . '.tmp';
+        
+        $bytesWritten = file_put_contents($tempFile, $content, LOCK_EX);
+        if ($bytesWritten === false || $bytesWritten !== strlen($content)) {
+            @unlink($tempFile);
+            CLI::error("Error al escribir el archivo temporal: {$tempFile}");
+            log_message('error', "GenerateSitemaps: Falló la escritura del temporal {$tempFile}");
+            return false;
+        }
+
+        // Validación básica de cierre de XML
+        if (strpos($content, '</urlset>') === false) {
+            @unlink($tempFile);
+            CLI::error("Error: el contenido XML está incompleto para {$targetFile}");
+            log_message('error', "GenerateSitemaps: XML incompleto para {$targetFile}");
+            return false;
+        }
+
+        // Renombrado atómico en el mismo sistema de archivos
+        if (!@rename($tempFile, $targetFile)) {
+            @unlink($tempFile);
+            CLI::error("Error al renombrar {$tempFile} a {$targetFile}");
+            log_message('error', "GenerateSitemaps: Falló rename de {$tempFile} a {$targetFile}");
+            return false;
+        }
+
+        return true;
     }
 }

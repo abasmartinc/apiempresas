@@ -391,20 +391,23 @@ $routes->post('api/chat', 'AiChat::sendMessage');
 $routes->post('api/chat/reset', 'AiChat::resetChat');
 $routes->post('api/chat/assistant', 'Api\ChatAssistantController::handle');
 
-// Sitemap
-$routes->get('sitemap.xml', 'Sitemap::index');
-$routes->get('sitemap-static.xml', 'Sitemap::static');
-$routes->get('sitemap-blog.xml', 'Sitemap::blog');
-$routes->get('sitemap-directories.xml', 'Sitemap::directories');
-$routes->get('sitemap-informes-provincias.xml', 'Sitemap::informesProvincias');
-$routes->get('sitemap-informes-sectores.xml', 'Sitemap::informesSectores');
-$routes->get('sitemap-informes-wp.xml', 'Sitemap::informesWp');
-$routes->get('sitemap-subvenciones.xml', 'Sitemap::subvenciones');
-$routes->get('sitemap-contratos.xml', 'Sitemap::contratos');
-$routes->get('sitemap-companies-(:num).xml', 'Sitemap::companies/$1');
-$routes->get('sitemap-en-companies-(:num).xml', 'Sitemap::companies/$1');
-$routes->get('sitemap-holdings-(:num).xml', 'Sitemap::holdings/$1');
-$routes->get('sitemap-ai-ready-(:num).xml', 'Sitemap::aiReady/$1');
+// Robots.txt dinámico por dominio
+$routes->match(['get', 'head'], 'robots.txt', 'Sitemap::robots');
+
+// Sitemap (Soporte GET y HEAD)
+$routes->match(['get', 'head'], 'sitemap.xml', 'Sitemap::index');
+$routes->match(['get', 'head'], 'sitemap-static.xml', 'Sitemap::static');
+$routes->match(['get', 'head'], 'sitemap-blog.xml', 'Sitemap::blog');
+$routes->match(['get', 'head'], 'sitemap-directories.xml', 'Sitemap::directories');
+$routes->match(['get', 'head'], 'sitemap-informes-provincias.xml', 'Sitemap::informesProvincias');
+$routes->match(['get', 'head'], 'sitemap-informes-sectores.xml', 'Sitemap::informesSectores');
+$routes->match(['get', 'head'], 'sitemap-informes-wp.xml', 'Sitemap::informesWp');
+$routes->match(['get', 'head'], 'sitemap-subvenciones.xml', 'Sitemap::subvenciones');
+$routes->match(['get', 'head'], 'sitemap-contratos.xml', 'Sitemap::contratos');
+$routes->match(['get', 'head'], 'sitemap-companies-(:num).xml', 'Sitemap::companies/$1');
+$routes->match(['get', 'head'], 'sitemap-en-companies-(:num).xml', 'Sitemap::companies/$1');
+$routes->match(['get', 'head'], 'sitemap-holdings-(:num).xml', 'Sitemap::holdings/$1');
+$routes->match(['get', 'head'], 'sitemap-ai-ready-(:num).xml', 'Sitemap::aiReady/$1');
 
 // --- Webhook CRON SEO ---
 $routes->get('cron/seo-sync/(:any)', 'RadarController::syncStatsWebhook/$1');
