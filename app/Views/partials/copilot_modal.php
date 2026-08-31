@@ -406,7 +406,7 @@ function generateAiScript(modifier = null) {
                 <div id="ai-tab-1">
                     <div style="background: #fff; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; margin-bottom: 16px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                         <div style="text-align: center; min-width: 80px; border-right: 1px solid #e2e8f0; padding-right: 16px;">
-                            <div style="font-size: 2.5rem; font-weight: 800; color: ${d.score >= 80 ? '#10b981' : (d.score >= 50 ? '#f59e0b' : '#ef4444')}; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">${d.score || '-'}</div>
+                            <div style="font-size: 2.5rem; font-weight: 800; color: ${(d.score !== null && d.score !== undefined && d.score >= 80) ? '#10b981' : ((d.score !== null && d.score !== undefined && d.score >= 50) ? '#f59e0b' : '#ef4444')}; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">${(d.score !== null && d.score !== undefined && d.score !== '') ? d.score : '-'}</div>
                             <div style="font-size: 0.7rem; color: #64748b; font-weight: 800; text-transform: uppercase; margin-top: 6px; letter-spacing: 0.5px;">Score</div>
                         </div>
                         <div style="flex-grow: 1;">
@@ -416,6 +416,46 @@ function generateAiScript(modifier = null) {
                             </div>
                         </div>
                     </div>
+
+                    ${d.v2_evidence ? `
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 14px 16px; border-radius: 10px; margin-bottom: 16px;">
+                        <div style="font-size: 0.75rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                            <span>🔍 Desglose de Inteligencia V2</span>
+                            <span style="background: #e2e8f0; color: #334155; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold;">Evidencia Verificada</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+                            <div style="background: #fff; border: 1px solid #e2e8f0; padding: 10px 12px; border-radius: 8px;">
+                                <div style="font-size: 0.7rem; color: #64748b; font-weight: bold; text-transform: uppercase;">Fiabilidad Evidencia</div>
+                                <div style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-top: 2px;">
+                                    ${(d.v2_evidence.confidence_score * 100).toFixed(1)}%
+                                </div>
+                                <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Certidumbre técnica</div>
+                            </div>
+                            <div style="background: #fff; border: 1px solid #e2e8f0; padding: 10px 12px; border-radius: 8px;">
+                                <div style="font-size: 0.7rem; color: #64748b; font-weight: bold; text-transform: uppercase;">Encaje Sectorial (CNAE)</div>
+                                <div style="font-size: 0.85rem; font-weight: 700; color: #2563eb; margin-top: 2px;">
+                                    ${d.v2_evidence.tax_match_level === 'class' ? '🎯 Clase CNAE (Exacto 100%)' :
+                                      (d.v2_evidence.tax_match_level === 'group' ? '📈 Grupo CNAE (Alto 90%)' :
+                                      (d.v2_evidence.tax_match_level === 'division' ? '🏢 División CNAE (80%)' :
+                                      (d.v2_evidence.tax_match_level === 'section' ? '🌐 Sección CNAE (60%)' :
+                                      (d.v2_evidence.tax_match_level === 'label_match' ? '🏷️ Coincidencia Comercial' : '🚫 Sin Coincidencia Directa'))))}
+                                </div>
+                                <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                                    CNAE ${d.v2_evidence.cnae_code || ''} ${d.v2_evidence.cnae_label || ''}
+                                </div>
+                            </div>
+                            <div style="background: #fff; border: 1px solid #e2e8f0; padding: 10px 12px; border-radius: 8px;">
+                                <div style="font-size: 0.7rem; color: #64748b; font-weight: bold; text-transform: uppercase;">Impulso / Timing</div>
+                                <div style="font-size: 1.1rem; font-weight: 800; color: ${d.v2_evidence.trigger_score > 0 ? '#10b981' : '#64748b'}; margin-top: 2px;">
+                                    ${d.v2_evidence.trigger_score} / 100
+                                </div>
+                                <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
+                                    ${d.v2_evidence.trigger_score > 0 ? 'Señales recientes' : 'Sin señal reciente'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
 
                     ${data.admins ? `
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.85rem; color: #334155; display: flex; align-items: center; gap: 8px;">

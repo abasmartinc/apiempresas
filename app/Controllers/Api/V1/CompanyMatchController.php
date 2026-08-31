@@ -126,8 +126,33 @@ class CompanyMatchController extends BaseApiController
             $company = array_merge($company, $scoring);
         }
 
-        // Calculate Match
+        // Calculate Match V1 (Public)
         $matchResult = RadarAnalyzer::calculateMatch($company, $sellerSector);
+
+        // SHADOW & V2 MODE SWITCH
+        try {
+            $config = config('B2BScoring');
+            if ($config && in_array($config->mode, ['shadow', 'v2'])) {
+                $scorerV2 = new \App\Libraries\B2B\B2BOpportunityScorer();
+                $resultV2 = $scorerV2->calculate($company, $sellerSector);
+                
+                if ($config->mode === 'shadow') {
+                    log_message('info', 'V2 Shadow calculated for ' . $cif);
+                } elseif ($config->mode === 'v2') {
+                    $matchResult = array_merge($matchResult, [
+                        'match_score' => $resultV2['opportunity_fit'] ?? 0,
+                        'opportunity_fit' => $resultV2['opportunity_fit'],
+                        'trigger_score' => $resultV2['trigger_score'],
+                        'confidence_score' => $resultV2['confidence_score'],
+                        'score_status' => $resultV2['score_status'],
+                        'scoring_version' => $resultV2['model']['scoring_version'] ?? '2.3.0',
+                        'product_profile_version' => $resultV2['model']['product_profile_version'] ?? '1.2.0',
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'V2 Scoring Error: ' . $e->getMessage());
+        }
 
         // Record usage
         $accessService->recordUsage($userId);
