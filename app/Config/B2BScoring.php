@@ -17,18 +17,18 @@ class B2BScoring extends BaseConfig
     public bool $scale_enabled = false;
 
     // Feature Weights
-    public string $scoring_version = '2.1.0';
-    public string $product_profile_version = '1.0.0';
+    public string $scoring_version = '2.3.0';
+    public string $product_profile_version = '1.2.0';
     public string $embedding_model = 'text-embedding-3-small';
     public string $embedding_version = '1.0.0';
     public int $expected_embedding_dimensions = 1536;
 
-    // Heuristics V1
+    // Heuristics V2 Calibration
     public float $weight_sector = 0.65;
     public float $weight_scale = 0.35;
     
-    public float $cosine_lower_bound = 0.35;
-    public float $cosine_upper_bound = 0.75;
+    public float $cosine_lower_bound = 0.25;
+    public float $cosine_upper_bound = 0.50;
     
     public float $sector_cnae_weight = 0.80;
     public float $sector_semantic_weight = 0.20;
@@ -49,4 +49,6 @@ class B2BScoring extends BaseConfig
     public int $strong_risk_cap = 40;
     public float $conflict_confidence_penalty = 0.30;
     public float $missing_semantic_confidence_penalty = 0.20;
+    public float $exact_taxonomy_missing_semantic_penalty = 0.05;
+    public float $semantic_only_confidence_cap = 0.65;
 }

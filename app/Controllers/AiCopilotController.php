@@ -86,15 +86,27 @@ class AiCopilotController extends Controller
         $matchResult = \App\Libraries\RadarAnalyzer::calculateMatch($company, $productForV1);
         $hardcodedScore = $matchResult['match_score'];
         
-        // SHADOW MODE V2
+        $v2Evidence = null;
+        // SHADOW & V2 MODE SWITCH
         try {
             $config = config('B2BScoring');
             if ($config && in_array($config->mode, ['shadow', 'v2'])) {
                 $scorerV2 = new \App\Libraries\B2B\B2BOpportunityScorer();
                 $resultV2 = $scorerV2->calculate($company, $product);
                 if ($config->mode === 'v2') {
-                    $hardcodedScore = $resultV2['opportunity_fit'];
+                    $hardcodedScore = ($resultV2['opportunity_fit'] !== null) ? (int)$resultV2['opportunity_fit'] : 0;
                 }
+                $v2Evidence = [
+                    'opportunity_fit' => $resultV2['opportunity_fit'],
+                    'confidence_score' => $resultV2['confidence_score'],
+                    'trigger_score' => $resultV2['trigger_score'],
+                    'tax_match_level' => $resultV2['components']['sector_fit']['tax_match_level'] ?? null,
+                    'tax_matched_cnae' => $resultV2['components']['sector_fit']['tax_matched_cnae'] ?? null,
+                    'disqualified' => $resultV2['disqualified'] ?? false,
+                    'risk_level' => $resultV2['risk']['level'] ?? 'none',
+                    'cnae_code' => $company['cnae_code'] ?? '',
+                    'cnae_label' => $company['cnae_label'] ?? ''
+                ];
             }
         } catch (\Exception $e) {}
 
@@ -127,6 +139,10 @@ class AiCopilotController extends Controller
         if ($cachedLog && !empty($cachedLog['ai_response_json'])) {
             $parsedResult = json_decode($cachedLog['ai_response_json'], true);
             if ($parsedResult) {
+                $parsedResult['score'] = $hardcodedScore; // Override cached score with current mode score
+                if ($v2Evidence) {
+                    $parsedResult['v2_evidence'] = $v2Evidence;
+                }
                 // Calculate trials left
                 $trialsLeft = 'ilimitado';
                 if ($isLoggedIn) {
@@ -327,6 +343,11 @@ class AiCopilotController extends Controller
             
             if (!$parsedResult) {
                 throw new \Exception("OpenAI no devolvió un JSON válido.");
+            }
+
+            $parsedResult['score'] = $hardcodedScore; // Explicitly enforce calculated score
+            if ($v2Evidence) {
+                $parsedResult['v2_evidence'] = $v2Evidence;
             }
 
             $trialsLeft = 'ilimitado';

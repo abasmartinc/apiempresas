@@ -57,6 +57,15 @@ class Sitemap extends Controller
         for ($i = 1; $i <= $pages; $i++) {
             $xml .= '<sitemap>';
             $xml .= '<loc>' . site_url("{$prefix}{$i}.xml") . '</loc>';
+            
+            // Añadimos el lastmod basado en la fecha de creación del sitemap estático
+            $staticFile = WRITEPATH . 'sitemaps/' . $prefix . $i . '.xml';
+            if (file_exists($staticFile)) {
+                $xml .= '<lastmod>' . date('c', filemtime($staticFile)) . '</lastmod>';
+            } else {
+                $xml .= '<lastmod>' . date('c') . '</lastmod>';
+            }
+            
             $xml .= '</sitemap>';
         }
 
@@ -84,6 +93,14 @@ class Sitemap extends Controller
             for ($i = 1; $i <= $aiPages; $i++) {
                 $xml .= '<sitemap>';
                 $xml .= '<loc>' . site_url("sitemap-ai-ready-{$i}.xml") . '</loc>';
+                
+                $staticAiFile = WRITEPATH . 'sitemaps/sitemap-ai-ready-' . $i . '.xml';
+                if (file_exists($staticAiFile)) {
+                    $xml .= '<lastmod>' . date('c', filemtime($staticAiFile)) . '</lastmod>';
+                } else {
+                    $xml .= '<lastmod>' . date('c') . '</lastmod>';
+                }
+                
                 $xml .= '</sitemap>';
             }
         }

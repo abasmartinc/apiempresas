@@ -134,11 +134,17 @@ class SectorFitScorer {
 
         } elseif ($taxActive) {
             $finalScore = $taxScore;
-            $finalConf  = $taxConf - $config->missing_semantic_confidence_penalty;
+            // Exact CNAE class match gets reduced penalty (0.05), non-exact gets full missing penalty (0.20)
+            $penalty = ($taxMatchLevel === 'class' && $taxScore >= 100)
+                ? ($config->exact_taxonomy_missing_semantic_penalty ?? 0.05)
+                : ($config->missing_semantic_confidence_penalty ?? 0.20);
+            $finalConf = $taxConf - $penalty;
 
         } elseif ($semanticActive) {
             $finalScore = $semScore;
-            $finalConf  = $semConf;
+            // Cap semantic-only confidence when taxonomy is inactive (0.65 max)
+            $cap = $config->semantic_only_confidence_cap ?? 0.65;
+            $finalConf = min($semConf, $cap);
         }
 
         return [

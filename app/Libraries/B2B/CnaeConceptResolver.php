@@ -64,6 +64,12 @@ class CnaeConceptResolver {
         'teneduria de libros'                 => ['6920', 'Actividades de contabilidad, teneduría de libros, auditoría y asesoría fiscal', 'class'],
         'asesoría fiscal'                     => ['6920', 'Actividades de contabilidad, teneduría de libros, auditoría y asesoría fiscal', 'class'],
         'asesoria fiscal'                     => ['6920', 'Actividades de contabilidad, teneduría de libros, auditoría y asesoría fiscal', 'class'],
+        'asesorías fiscales'                  => ['6920', 'Actividades de contabilidad, teneduría de libros, auditoría y asesoría fiscal', 'class'],
+        'asesorias fiscales'                  => ['6920', 'Actividades de contabilidad, teneduría de libros, auditoría y asesoría fiscal', 'class'],
+        'asesorías'                           => ['6920', 'Actividades de contabilidad, teneduría de libros, auditoría y asesoría fiscal', 'class'],
+        'asesorias'                           => ['6920', 'Actividades de contabilidad, teneduría de libros, auditoría y asesoría fiscal', 'class'],
+        'asesoría'                            => ['6920', 'Actividades de contabilidad, teneduría de libros, auditoría y asesoría fiscal', 'class'],
+        'asesoria'                            => ['6920', 'Actividades de contabilidad, teneduría de libros, auditoría y asesoría fiscal', 'class'],
         'auditoría'                           => ['6920', 'Actividades de contabilidad, teneduría de libros, auditoría y asesoría fiscal', 'class'],
         'auditoria'                           => ['6920', 'Actividades de contabilidad, teneduría de libros, auditoría y asesoría fiscal', 'class'],
         'contabil'                            => ['6920', 'Actividades de contabilidad, teneduría de libros, auditoría y asesoría fiscal', 'class'],
@@ -118,6 +124,9 @@ class CnaeConceptResolver {
         'metalúrgi'                           => ['24', 'Metalurgia', 'division'],
         'metalurgi'                           => ['24', 'Metalurgia', 'division'],
         'industria manufacturera'             => ['C', 'Industria manufacturera', 'section'],
+        'sector industrial'                   => ['C', 'Industria manufacturera', 'section'],
+        'sector manufacturero'                => ['C', 'Industria manufacturera', 'section'],
+        'industria'                           => ['C', 'Industria manufacturera', 'section'],
         'servicios de ingeniería'             => ['711', 'Servicios técnicos de ingeniería', 'group'],
         'servicios de ingenieria'             => ['711', 'Servicios técnicos de ingeniería', 'group'],
         'maquinaria'                          => ['28', 'Fabricación de maquinaria y equipo n.c.o.p.', 'division'],
@@ -146,7 +155,14 @@ class CnaeConceptResolver {
 
         foreach ($concepts as $concept) {
             $normalized = self::normalize($concept);
-            $best = self::matchConceptMap($normalized);
+            
+            // 1. Direct CNAE code detection (4 digits = class, 3 = group, 2 = division, 1 letter = section)
+            $best = self::matchDirectCnaeCode($normalized);
+
+            // 2. Deterministic concept dictionary lookup
+            if (!$best) {
+                $best = self::matchConceptMap($normalized);
+            }
 
             if ($best) {
                 $key = $best['cnae_code'];
@@ -158,6 +174,53 @@ class CnaeConceptResolver {
         }
 
         return $results;
+    }
+
+    /**
+     * Direct CNAE numeric/letter code detector.
+     * Matches 4 digits (class), 3 digits (group), 2 digits (division), 1 letter A-U (section),
+     * as well as official dotted class notation NN.NN (e.g. 26.11, 28.99, 33.12).
+     */
+    private static function matchDirectCnaeCode(string $normalized): ?array {
+        $clean = preg_replace('/^cnae[\.\s]*/i', '', trim($normalized));
+        $clean = preg_replace('/\s*[-–:].*$/', '', $clean);
+        $clean = trim($clean);
+
+        // Official dotted class notation NN.NN (e.g. 26.11, 28.99, 33.12)
+        if (preg_match('/^([0-9]{2})\.([0-9]{2})$/', $clean, $m)) {
+            $code = $m[1] . $m[2];
+            return [
+                'cnae_code'       => $code,
+                'label'           => 'CNAE ' . $code,
+                'match_level'     => 'class',
+                'matched_concept' => $normalized,
+            ];
+        }
+
+        // Standard numeric (2 to 4 digits) or section letter A-U
+        if (preg_match('/^([0-9]{2,4}|[A-U])$/i', $clean, $m)) {
+            $code = strtoupper($m[1]);
+            $len = strlen($code);
+            if (ctype_digit($code)) {
+                if ($len >= 2 && $len <= 4) {
+                    $level = self::codeLengthToLevel($len);
+                    return [
+                        'cnae_code'       => $code,
+                        'label'           => 'CNAE ' . $code,
+                        'match_level'     => $level,
+                        'matched_concept' => $normalized,
+                    ];
+                }
+            } elseif ($len === 1 && ctype_alpha($code)) {
+                return [
+                    'cnae_code'       => $code,
+                    'label'           => 'CNAE Sección ' . $code,
+                    'match_level'     => 'section',
+                    'matched_concept' => $normalized,
+                ];
+            }
+        }
+        return null;
     }
 
     /**
@@ -227,37 +290,61 @@ class CnaeConceptResolver {
     }
 
     private static function computeHierarchyMatch(string $compCode, string $targetCode): ?string {
-        // Handle letter sections (A-U)
-        if (strlen($targetCode) === 1 && ctype_alpha($targetCode)) {
-            $sectionMap = self::getSectionMap();
-            if (isset($sectionMap[$targetCode])) {
-                [$divStart, $divEnd] = $sectionMap[$targetCode];
-                $compDiv = (int)substr($compCode, 0, 2);
-                if ($compDiv >= $divStart && $compDiv <= $divEnd) {
-                    return 'section';
-                }
-            }
-            return null;
-        }
-
-        $tLen = strlen($targetCode);
         $cLen = strlen($compCode);
+        $tLen = strlen($targetCode);
 
-        // Exact match
+        // 1. Exact match
         if ($compCode === $targetCode) {
             return self::codeLengthToLevel($tLen);
         }
 
-        // Company code is more specific (longer); target is ancestor
+        // 2. Ancestor/Descendant substring match (e.g. target is ancestor 862 or 86, or target is longer)
         if ($tLen < $cLen && substr($compCode, 0, $tLen) === $targetCode) {
             return self::codeLengthToLevel($tLen);
         }
-
-        // Target is more specific; company code is ancestor — treat as section-level match
         if ($tLen > $cLen && substr($targetCode, 0, $cLen) === $compCode) {
             return self::codeLengthToLevel($cLen);
         }
 
+        // 3. Sibling CNAE comparisons (both numeric)
+        if (ctype_digit($compCode) && ctype_digit($targetCode)) {
+            // Same class (4 digits)
+            if ($cLen >= 4 && $tLen >= 4 && substr($compCode, 0, 4) === substr($targetCode, 0, 4)) {
+                return 'class';
+            }
+            // Same group (3 digits)
+            if ($cLen >= 3 && $tLen >= 3 && substr($compCode, 0, 3) === substr($targetCode, 0, 3)) {
+                return 'group';
+            }
+            // Same division (2 digits)
+            if ($cLen >= 2 && $tLen >= 2 && substr($compCode, 0, 2) === substr($targetCode, 0, 2)) {
+                return 'division';
+            }
+        }
+
+        // 4. Section match (letter-to-numeric or numeric-to-numeric sharing same section letter A-U)
+        $compSec   = self::getSectionForCode($compCode);
+        $targetSec = self::getSectionForCode($targetCode);
+        if ($compSec !== null && $targetSec !== null && $compSec === $targetSec) {
+            return 'section';
+        }
+
+        return null;
+    }
+
+    private static function getSectionForCode(string $code): ?string {
+        if (strlen($code) === 1 && ctype_alpha($code)) {
+            return strtoupper($code);
+        }
+        if (strlen($code) >= 2 && ctype_digit(substr($code, 0, 2))) {
+            $div = (int)substr($code, 0, 2);
+            $sectionMap = self::getSectionMap();
+            foreach ($sectionMap as $letter => [$start, $end]) {
+                if ($div >= $start && $div <= $end) {
+                    return $letter;
+                }
+            }
+        }
         return null;
     }
 
@@ -272,9 +359,9 @@ class CnaeConceptResolver {
 
     private static function levelToScore(string $level): int {
         return match($level) {
-            'class'    => 90,
-            'group'    => 80,
-            'division' => 70,
+            'class'    => 100,
+            'group'    => 90,
+            'division' => 80,
             'section'  => 60,
             default    => 20,
         };
