@@ -29,7 +29,7 @@ class QueueTopCompanies extends BaseCommand
               AND page LIKE '%-%'
             GROUP BY page
             ORDER BY unique_visitors DESC
-            LIMIT 2000
+            LIMIT 25000
         ";
         
         $events = $db->query($query)->getResultArray();
