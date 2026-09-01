@@ -16,18 +16,19 @@ class QueueTopCompanies extends BaseCommand
     {
         $db = \Config\Database::connect();
         
-        $limit = 100; // Queue top 100 per run
+        $limit = 100; // Hard-cap: máximo 100 empresas por ejecución
         
-        CLI::write("Buscando las empresas más visitadas para encolar...", 'cyan');
+        CLI::write("Buscando las empresas con mayor tráfico único para encolar...", 'cyan');
 
-        // Since tracking_events 'page' might contain full URL, we can group by page
+        // Ranking por visitantes únicos (COUNT DISTINCT anonymous_id) en los últimos 30 días con event_name = 'page_view'
         $query = "
-            SELECT page, COUNT(*) as visits
+            SELECT page, COUNT(DISTINCT anonymous_id) as unique_visitors
             FROM tracking_events
-            WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) 
+            WHERE event_name = 'page_view'
+              AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) 
               AND page LIKE '%-%'
             GROUP BY page
-            ORDER BY visits DESC
+            ORDER BY unique_visitors DESC
             LIMIT 2000
         ";
         
@@ -47,21 +48,42 @@ class QueueTopCompanies extends BaseCommand
             
             $segment = ltrim($path, '/');
             
-            // Ficha de empresa CIF (first letter + 7 digits + char)
+            // Ficha de empresa CIF (primera letra + 7 dígitos + carácter)
             if (preg_match('/^([a-zA-Z][0-9]{7}[a-zA-Z0-9])(-.*)?$/', $segment, $matches)) {
                 $cif = $matches[1];
                 
                 $company = $companyModel->getByCif($cif);
                 
-                if ($company && empty($company['ai_seo_text'])) {
-                    // Check if already in queue
-                    $inQueue = $db->table('seo_generation_queue')->where('company_id', $company['id'])->countAllResults() > 0;
-                    
-                    if (!$inQueue) {
-                        $db->query("INSERT IGNORE INTO seo_generation_queue (company_id, requested_at, status) VALUES (?, ?, 'pending')", [$company['id'], date('Y-m-d H:i:s')]);
-                        CLI::write("Encolada: {$company['name']} (Visitas: {$event['visits']})", 'green');
-                        $queued++;
-                    }
+                if (!$company) {
+                    continue;
+                }
+
+                // 1. Filtro de calidad mercantil: exclusivamente empresa ACTIVA
+                $estado = trim((string)($company['status'] ?? $company['estado'] ?? ''));
+                if ($estado !== 'ACTIVA') {
+                    continue;
+                }
+
+                // 2. Filtro de contenido: objeto social con longitud útil (> 10 caracteres)
+                $objetoSocial = trim((string)($company['corporate_purpose'] ?? $company['objeto_social'] ?? ''));
+                if (mb_strlen($objetoSocial) <= 10) {
+                    continue;
+                }
+
+                // 3. AI Guard: no encolar si ya tiene texto IA (normalizando whitespace)
+                $aiText = trim((string)($company['ai_seo_text'] ?? ''));
+                if ($aiText !== '') {
+                    continue;
+                }
+
+                // 4. Deduplicación en cola (comprueba si ya existe en cualquier estado, incluyendo pending, processing y failed)
+                $inQueue = $db->table('seo_generation_queue')->where('company_id', $company['id'])->countAllResults() > 0;
+                
+                if (!$inQueue) {
+                    $db->query("INSERT IGNORE INTO seo_generation_queue (company_id, requested_at, status) VALUES (?, ?, 'pending')", [$company['id'], date('Y-m-d H:i:s')]);
+                    $compName = $company['name'] ?? $company['company_name'] ?? 'N/A';
+                    CLI::write("Encolada: {$compName} (Visitantes únicos: {$event['unique_visitors']})", 'green');
+                    $queued++;
                 }
             }
         }
@@ -71,7 +93,7 @@ class QueueTopCompanies extends BaseCommand
         $email = \Config\Services::email();
         $email->setTo('papelo.amh@gmail.com');
         $email->setSubject("Reporte Diario: Encolado SEO IA ({$queued} empresas)");
-        $email->setMessage("El comando seo:queue-top ha finalizado.\n\nSe han encolado exitosamente {$queued} nuevas empresas (las más visitadas del mes) para ser enriquecidas proactivamente por la IA.\n\nAPIEmpresas.es Cron");
+        $email->setMessage("El comando seo:queue-top ha finalizado.\n\nSe han encolado exitosamente {$queued} nuevas empresas (con mayor número de visitantes únicos en el mes y datos mercantiles activos) para ser enriquecidas proactivamente por la IA.\n\nAPIEmpresas.es Cron");
         if (!$email->send()) {
             CLI::error("No se pudo enviar el email de reporte.");
         }

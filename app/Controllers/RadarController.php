@@ -359,30 +359,6 @@ class RadarController extends BaseController
         return $data;
     }
 
-    /**
-     * Called by the Python importer after each daily import to bust the radar cache.
-     * Usage: GET /cron/radar-cache-clear/{token}
-     */
-    public function clearRadarCache($token)
-    {
-        $secretToken = env('RADAR_CACHE_TOKEN', 'radar_clear_2026');
-
-        if ($token !== $secretToken) {
-            return $this->response->setStatusCode(403)->setJSON(['error' => 'Token inválido']);
-        }
-
-        $cache = \Config\Services::cache();
-        $cache->clean(); // Clears all app cache
-
-        log_message('info', '[RadarController] Cache purgado por importador Python - ' . date('Y-m-d H:i:s'));
-
-        return $this->response->setJSON([
-            'status' => 'ok',
-            'message' => 'Cache de Radar eliminado correctamente',
-            'timestamp' => date('Y-m-d H:i:s'),
-        ]);
-    }
-
     private function deSlugify($slug)
     {
         $provinces = [
@@ -447,72 +423,6 @@ class RadarController extends BaseController
 
         $key = strtolower($slug);
         return $provinces[$key] ?? strtoupper(str_replace('-', ' ', $slug));
-    }
-
-
-
-    /**
-     * Webhook CRON (Sincronización Nocturna)
-     */
-    public function syncStatsWebhook($token)
-    {
-        $secretToken = 'sync_seo_api_2026';
-        if ($token !== $secretToken) {
-            return $this->response->setStatusCode(403)->setJSON(['error' => 'Token inválido']);
-        }
-
-        set_time_limit(0);
-        ini_set('memory_limit', '1024M');
-
-        $db = \Config\Database::connect();
-        $provincesCount = 0;
-        $sectorsCount = 0;
-
-        // 1. Sincronizar Provincias
-        $provinces = $db->query("SELECT DISTINCT registro_mercantil FROM companies WHERE registro_mercantil IS NOT NULL AND registro_mercantil != ''")->getResultArray();
-
-        foreach ($provinces as $row) {
-            $province = $row['registro_mercantil'];
-            $totalRow = $db->query("SELECT COUNT(*) as total FROM companies WHERE registro_mercantil = ?", [$province])->getRow();
-            $total = $totalRow->total;
-
-            $oneYearAgo = date('Y-m-d', strtotime('-1 year'));
-            $newRow = $db->query("SELECT COUNT(*) as total FROM companies WHERE registro_mercantil = ? AND fecha_constitucion >= ?", [$province, $oneYearAgo])->getRow();
-            $newCount = $newRow->total;
-
-            $growthPct = ($total > 0) ? round(($newCount / $total) * 100, 2) : 0;
-
-            $topSectors = $db->query("
-                SELECT cnae_code as cnae, cnae_label, COUNT(id) as total 
-                FROM companies 
-                WHERE registro_mercantil = ? AND cnae_label IS NOT NULL AND cnae_label != '' 
-                AND fecha_constitucion >= ?
-                GROUP BY cnae_code, cnae_label 
-                ORDER BY total DESC 
-                LIMIT 8
-            ", [$province, date('Y-m-d', strtotime('-90 days'))])->getResultArray();
-
-            $sql = "INSERT INTO seo_stats (province, total_companies, growth_pct, top_sectors) 
-                    VALUES (?, ?, ?, ?) 
-                    ON DUPLICATE KEY UPDATE 
-                        total_companies = VALUES(total_companies), 
-                        growth_pct = VALUES(growth_pct), 
-                        top_sectors = VALUES(top_sectors)";
-            $db->query($sql, [$province, $total, $growthPct, json_encode($topSectors)]);
-            $provincesCount++;
-        }
-
-        // 2. Sincronizar CNAE has been removed due to deprecation of seo_stats_cnae table
-
-        return $this->response->setJSON([
-            'status' => 'success',
-            'message' => 'Sincronización SEO completada',
-            'stats' => [
-                'provinces_updated' => $provincesCount,
-                'sectors_updated' => 0
-            ],
-            'timestamp' => date('Y-m-d H:i:s')
-        ]);
     }
 
     /**

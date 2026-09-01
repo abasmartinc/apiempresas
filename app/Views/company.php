@@ -512,7 +512,7 @@
         <?php if (!empty($company['ai_seo_text'])): ?>
             <?= nl2br(strip_tags($company['ai_seo_text'], '<strong><em><b><i><br><a><ul><li><ol><p>')) ?>
         <?php else: ?>
-            <div id="fallback-seo-text" style="display:none;">
+            <div id="fallback-seo-text">
                 <?php
                 $companyIdForFallback = !empty($company['id']) ? (int)$company['id'] : rand(0, 9);
                 $fallbackIndex = $companyIdForFallback % 10;
@@ -573,17 +573,6 @@
                         <p>Al estudiar el impacto empresarial de <strong><?= esc($companyName) ?></strong><?= $cifText ?>, destaca su sólida implantación en la provincia de <?= $provText ?> y su especialización funcional<?= $cnaePhrase ?>. La trazabilidad de su historia mercantil<?= $yearPhrase ?> refleja una evolución acorde a las exigencias actuales del entorno de los negocios en España, operando<?= $statusPhrase ?> con alto grado de consistencia.</p>
                         <?php break;
                 } ?>
-            </div>
-            <div id="ai-seo-container" style="position:relative; min-height:80px;">
-                <div class="ai-skeleton" style="display:flex;flex-direction:column;gap:10px;">
-                    <div style="height:16px;background:#e2e8f0;border-radius:4px;width:100%;animation:pulse 2s infinite;"></div>
-                    <div style="height:16px;background:#e2e8f0;border-radius:4px;width:90%;animation:pulse 2s infinite;"></div>
-                    <div style="height:16px;background:#e2e8f0;border-radius:4px;width:95%;animation:pulse 2s infinite;"></div>
-                </div>
-                <div style="display:flex;align-items:center;gap:6px;margin-top:10px;color:#94a3b8;font-size:0.85rem;">
-                    <svg class="spin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#icon-38e7a7c3"></use></svg>
-                    Analizando trayectoria de la empresa con IA...
-                </div>
             </div>
         <?php endif; ?>
     </div>
@@ -2267,80 +2256,6 @@
                         loadMap();
                     }
                 }
-            <?php endif; ?>
-
-            <?php if (empty($company['ai_seo_text'])): ?>
-                // Fetch AI SEO Text if not cached
-                fetch('<?= site_url("api/internal/generate-seo-text") ?>', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        'cif': '<?= esc($companyCif) ?>'
-                    })
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network error or rate limit');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        const container = document.getElementById('ai-seo-container');
-                        if (container && (data.status === 'generated' || data.status === 'cached')) {
-                            // Replace newlines with <br> and fade in
-                            const htmlText = data.text.replace(/\n/g, '<br>');
-                            container.style.opacity = 0;
-                            container.innerHTML = htmlText;
-                            setTimeout(() => {
-                                container.style.transition = 'opacity 0.5s';
-                                container.style.opacity = 1;
-                            }, 50);
-
-                            // Dynamically update FAQs if generated
-                            if (data.faqs && data.faqs.length > 0) {
-                                const faqList = document.getElementById('faq-list-container');
-                                if (faqList) {
-                                    const escapeHtml = (str) => {
-                                        return str
-                                            .replace(/&/g, "&amp;")
-                                            .replace(/</g, "&lt;")
-                                            .replace(/>/g, "&gt;")
-                                            .replace(/"/g, "&quot;")
-                                            .replace(/'/g, "&#039;");
-                                    };
-                                    let html = '';
-                                    data.faqs.forEach(faq => {
-                                        html += `<div>
-                                    <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; color: #111;">
-                                        ${escapeHtml(faq.q)}
-                                    </h4>
-                                    <div style="font-size: 0.9rem; color: #555; line-height: 1.5;">
-                                        ${escapeHtml(faq.a)}
-                                    </div>
-                                </div>`;
-                                    });
-                                    faqList.innerHTML = html;
-                                }
-                            }
-                        } else {
-                            throw new Error('API generated an error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error generating AI text:', error);
-                        const container = document.getElementById('ai-seo-container');
-                        const fallback = document.getElementById('fallback-seo-text');
-                        if (container && fallback) {
-                            container.style.opacity = 0;
-                            container.innerHTML = fallback.innerHTML;
-                            setTimeout(() => {
-                                container.style.transition = 'opacity 0.5s';
-                                container.style.opacity = 1;
-                            }, 50);
-                        }
-                    });
             <?php endif; ?>
         });
 

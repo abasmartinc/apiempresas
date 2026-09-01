@@ -226,7 +226,6 @@ $routes->get('api/user/usage-status', 'Api\UsageStatus::index');
 $routes->post('api/user/log-event', 'Api\EventTracker::log');
 
 // AI Internal Routes
-$routes->post('api/internal/generate-seo-text', 'AiSeoController::generate');
 $routes->post('api/ai/copilot/generate', 'AiCopilotController::generate');
 $routes->post('api/ai/copilot/email', 'AiCopilotController::emailDossier');
 $routes->post('api/ai/copilot/feedback', 'AiCopilotController::submitFeedback');
@@ -408,10 +407,6 @@ $routes->match(['get', 'head'], 'sitemap-companies-(:num).xml', 'Sitemap::compan
 $routes->match(['get', 'head'], 'sitemap-en-companies-(:num).xml', 'Sitemap::companies/$1');
 $routes->match(['get', 'head'], 'sitemap-holdings-(:num).xml', 'Sitemap::holdings/$1');
 $routes->match(['get', 'head'], 'sitemap-ai-ready-(:num).xml', 'Sitemap::aiReady/$1');
-
-// --- Webhook CRON SEO ---
-$routes->get('cron/seo-sync/(:any)', 'RadarController::syncStatsWebhook/$1');
-$routes->get('cron/radar-cache-clear/(:any)', 'RadarController::clearRadarCache/$1');
 
 // --- Export Routes ---
 $routes->get('excel/preview', 'RadarController::excel_preview');

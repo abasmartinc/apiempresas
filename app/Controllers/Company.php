@@ -172,31 +172,6 @@ class Company extends BaseController
         if ($prov && $cnaeCode) {
             $provinceCnaeUrl = site_url('listado-de-empresas/' . urlencode($prov) . '/sector-' . $cnaeCode);
         }
-
-        // --- ASYNC AI SEO TEXT GENERATION (QUEUE) ---
-        if (empty($company['ai_seo_text']) && !empty($company['id'])) {
-            $agent = service('request')->getUserAgent();
-            $isBot = $agent->isRobot();
-            if (!$isBot) {
-                $userAgentString = strtolower($agent->getAgentString());
-                $botKeywords = ['googlebot', 'bingbot', 'yandex', 'baidu', 'duckduck', 'crawler', 'spider', 'archiver'];
-                foreach ($botKeywords as $kw) {
-                    if (strpos($userAgentString, $kw) !== false) {
-                        $isBot = true;
-                        break;
-                    }
-                }
-            }
-
-            // Apuntar en la cola en lugar de llamar a OpenAI para no bloquear la respuesta
-            if ($isBot) {
-                $db = \Config\Database::connect();
-                // Usamos IGNORE para no duplicar si ya está en cola
-                $db->query("INSERT IGNORE INTO seo_generation_queue (company_id, requested_at, status) VALUES (?, ?, 'pending')", [$company['id'], date('Y-m-d H:i:s')]);
-            }
-        }
-        // --- ASYNC AI SEO TEXT GENERATION (QUEUE) ---
-
         // --- FETCH ADMINS & BORME FOR SEO SCORE ---
         // Fetch Administrators early for SEO calculation
         $adminsRaw = $this->adminModel->getByCompanyId((int)$company['id']);

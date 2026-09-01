@@ -26,90 +26,77 @@ class QuickUnlock extends BaseController
         $user = $userModel->where('email', $email)->first();
 
         if ($user) {
-            // Existing user
-            if (($user->is_admin ?? 0) == 1) {
-                return $this->response->setJSON([
-                    'status' => 'exists',
-                    'message' => 'Inicia sesión como administrador para gestionar tus llaves.',
-                    'redirect' => site_url('enter?redirect=dashboard')
-                ]);
-            }
+            // Existing user: Do NOT create/adopt session and do NOT expose or generate API Key
+            $redirectUrl = site_url('enter?redirect=dashboard&email=' . urlencode($email));
+            $message = (($user->is_admin ?? 0) == 1)
+                ? 'Inicia sesión como administrador para gestionar tus llaves.'
+                : 'Ya existe una cuenta con este correo. Inicia sesión para acceder a tu API Key.';
 
-            session()->regenerate();
-            session()->set([
-                'user_id' => $user->id,
-                'user_email' => $user->email,
-                'user_name' => $user->name,
-                'logged_in' => true,
+            return $this->response->setJSON([
+                'status'   => 'exists',
+                'message'  => $message,
+                'redirect' => $redirectUrl,
             ]);
-        } else {
-            // New user
-            $password = bin2hex(random_bytes(8));
-            $token = bin2hex(random_bytes(32));
-            
-            $user_id = $userModel->insert([
-                'name' => explode('@', $email)[0],
-                'email' => $email,
-                'password_hash' => password_hash($password, PASSWORD_DEFAULT),
-                'reset_token' => $token,
-                'reset_expires' => date('Y-m-d H:i:s', strtotime('+48 hours')),
-                'is_active' => 1,
-                'api_access' => 1,
-                'source_app' => 'apiempresas',
-                'preferred_product' => 'api',
-                'created_at' => date('Y-m-d H:i:s'),
-            ]);
-
-            // Default Subscription (Free)
-            $subModel->insert([
-                'user_id' => $user_id,
-                'plan_id' => 1,
-                'status' => 'active',
-                'current_period_start' => date('Y-m-d H:i:s'),
-                'current_period_end' => date('Y-m-d H:i:s', strtotime('+1 month')),
-                'created_at' => date('Y-m-d H:i:s'),
-            ]);
-
-            session()->regenerate();
-            session()->set([
-                'user_id' => $user_id,
-                'user_email' => $email,
-                'user_name' => explode('@', $email)[0],
-                'logged_in' => true,
-            ]);
-
-            $emailService->sendRegistrationAdminNotification([
-                'user_id' => $user_id,
-                'name'    => explode('@', $email)[0],
-                'email'   => $email,
-                'company' => 'N/A (Quick Unlock)'
-            ]);
-            
-            $emailService->sendSetPasswordEmail($email, $token);
         }
 
-        $userId = session('user_id');
+        // New user registration flow
+        $password = bin2hex(random_bytes(8));
+        $token = bin2hex(random_bytes(32));
         
-        // Generate API Key if not exists
-        $apiKey = $apiKeyModel->where(['user_id' => $userId, 'is_active' => 1])->first();
-        if (!$apiKey) {
-            $keyValue = bin2hex(random_bytes(32));
-            $apiKeyModel->insert([
-                'user_id' => $userId,
-                'name' => 'Default API Key',
-                'api_key' => $keyValue,
-                'is_active' => 1,
-                'created_at' => date('Y-m-d H:i:s'),
-            ]);
-            $apiKey = $keyValue;
-        } else {
-            $apiKey = $apiKey->api_key;
-        }
+        $userId = $userModel->insert([
+            'name' => explode('@', $email)[0],
+            'email' => $email,
+            'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+            'reset_token' => $token,
+            'reset_expires' => date('Y-m-d H:i:s', strtotime('+48 hours')),
+            'is_active' => 1,
+            'api_access' => 1,
+            'source_app' => 'apiempresas',
+            'preferred_product' => 'api',
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        // Default Subscription (Free)
+        $subModel->insert([
+            'user_id' => $userId,
+            'plan_id' => 1,
+            'status' => 'active',
+            'current_period_start' => date('Y-m-d H:i:s'),
+            'current_period_end' => date('Y-m-d H:i:s', strtotime('+1 month')),
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        session()->regenerate();
+        session()->set([
+            'user_id' => $userId,
+            'user_email' => $email,
+            'user_name' => explode('@', $email)[0],
+            'logged_in' => true,
+        ]);
+
+        $emailService->sendRegistrationAdminNotification([
+            'user_id' => $userId,
+            'name'    => explode('@', $email)[0],
+            'email'   => $email,
+            'company' => 'N/A (Quick Unlock)'
+        ]);
+        
+        $emailService->sendSetPasswordEmail($email, $token);
+
+        // Generate API Key for the new user
+        $keyValue = bin2hex(random_bytes(32));
+        $apiKeyModel->insert([
+            'user_id' => $userId,
+            'name' => 'Default API Key',
+            'api_key' => $keyValue,
+            'is_active' => 1,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
 
         return $this->response->setJSON([
             'status' => 'success',
-            'api_key' => $apiKey,
-            'redirect' => site_url('documentation?key=' . $apiKey)
+            'api_key' => $keyValue,
+            'redirect' => site_url('documentation?key=' . $keyValue)
         ]);
     }
 }
