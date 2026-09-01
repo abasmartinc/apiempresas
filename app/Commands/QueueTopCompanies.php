@@ -16,7 +16,7 @@ class QueueTopCompanies extends BaseCommand
     {
         $db = \Config\Database::connect();
         
-        $limit = 100; // Hard-cap: máximo 100 empresas por ejecución
+        $limit = 1000; // Hard-cap: máximo 1000 empresas por ejecución
         
         CLI::write("Buscando las empresas con mayor tráfico único para encolar...", 'cyan');
 
