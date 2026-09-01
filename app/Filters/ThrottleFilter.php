@@ -22,19 +22,6 @@ class ThrottleFilter implements FilterInterface
         $uri = $request->getUri()->getPath();
         $ip = $request->getIPAddress();
         
-        // --- BYPASS PARA BOTS BUENOS (Google, Bing, etc.) ---
-        $userAgent = strtolower($request->getServer('HTTP_USER_AGENT') ?? '');
-        if (
-            strpos($userAgent, 'googlebot') !== false || 
-            strpos($userAgent, 'google-inspectiontool') !== false ||
-            strpos($userAgent, 'googleother') !== false ||
-            strpos($userAgent, 'bingbot') !== false ||
-            strpos($userAgent, 'yandexbot') !== false
-        ) {
-            // Permitir paso libre a rastreadores de buscadores
-            return;
-        }
-
         // --- LÍMITES ESTRICTOS (Exportaciones y Administradores) ---
         // 1 petición por minuto
         if (strpos($uri, 'empresa/export') !== false) {
@@ -63,9 +50,63 @@ class ThrottleFilter implements FilterInterface
                 return Services::response()->setStatusCode(429)->setBody('Too Many Requests (API)');
             }
         } else {
-            // Límite para el resto de la web: 60 peticiones por minuto
-            if ($throttler->check(md5($ip . '_web'), 60, 60) === false) {
-                return Services::response()->setStatusCode(429)->setBody('Too Many Requests (Web)');
+            // --- WEB PÚBLICA (Separación Usuario vs Rastreadores en Rutas SEO) ---
+            $method = strtoupper((string) $request->getMethod());
+            $isReadMethod = in_array($method, ['GET', 'HEAD'], true);
+
+            $userAgent = strtolower($request->getServer('HTTP_USER_AGENT') ?? '');
+            $isCrawlerUserAgent = (
+                strpos($userAgent, 'googlebot') !== false || 
+                strpos($userAgent, 'google-inspectiontool') !== false ||
+                strpos($userAgent, 'googleother') !== false ||
+                strpos($userAgent, 'bingbot') !== false ||
+                strpos($userAgent, 'yandexbot') !== false
+            );
+
+            // Whitelist estricta de rutas de contenido público indexable
+            $isSeoPublicPath = (
+                $path === '' ||
+                $path === 'robots.txt' ||
+                (preg_match('/^sitemap(?:-(?:static|blog|directories|informes-(?:provincias|sectores|wp)|subvenciones|contratos|(?:en-)?companies-\d+|holdings-\d+|ai-ready-\d+))?\.xml$/i', $path) === 1) ||
+                (preg_match('/^[a-zA-Z][0-9]{7}[a-zA-Z0-9].*$/', $path) === 1) ||
+                (preg_match('/^empresa\/\d+(?:-.*)?$/', $path) === 1) ||
+                strpos($path, 'informacion-empresa/') === 0 ||
+                strpos($path, 'grupos-empresariales/') === 0 ||
+                $path === 'listado-de-grupos-empresariales' ||
+                $path === 'listado-de-empresas' ||
+                strpos($path, 'listado-de-empresas/') === 0 ||
+                strpos($path, 'directorios-de-empresas/') === 0 ||
+                strpos($path, 'directorio-de-empresas/') === 0 ||
+                $path === 'empresas-nuevas' ||
+                strpos($path, 'empresas-nuevas/') === 0 ||
+                strpos($path, 'empresas-nuevas-') === 0 ||
+                (preg_match('/^empresas-.+-en-.+$/', $path) === 1) ||
+                strpos($path, 'empresas/') === 0 ||
+                $path === 'licitaciones-del-estado' ||
+                strpos($path, 'licitaciones-del-estado/') === 0 ||
+                $path === 'subvenciones-empresas' ||
+                strpos($path, 'subvenciones-empresas/') === 0 ||
+                $path === 'mayores-empresas-contratistas-del-estado' ||
+                $path === 'empresas-mas-subvencionadas-espana' ||
+                strpos($path, 'informes/') === 0 ||
+                $path === 'base-de-datos-de-empresas' ||
+                $path === 'blog' ||
+                strpos($path, 'blog/') === 0 ||
+                in_array($path, ['docs', 'documentation', 'documentation/en', 'api-docs'], true) ||
+                in_array($path, ['planes/free', 'planes/pro', 'planes/business'], true) ||
+                in_array($path, ['api-empresas', 'spanish-company-api', 'spanish-company-data-api', 'leads-empresas-nuevas', 'radar-demo', 'copilot-pro', 'autocompletado-cif-empresas', 'plugin-wordpress-buscador-empresas'], true)
+            );
+
+            if ($isReadMethod && $isCrawlerUserAgent && $isSeoPublicPath) {
+                // Límite acotado para rastreo de contenido SEO público (GET/HEAD): 300 peticiones por minuto
+                if ($throttler->check(md5($ip . '_crawler'), 300, 60) === false) {
+                    return Services::response()->setStatusCode(429)->setBody('Too Many Requests (Crawler)');
+                }
+            } else {
+                // Límite para el resto de la web (búsqueda, auth, tracking, account, escritura): 60 peticiones por minuto
+                if ($throttler->check(md5($ip . '_web'), 60, 60) === false) {
+                    return Services::response()->setStatusCode(429)->setBody('Too Many Requests (Web)');
+                }
             }
         }
     }
