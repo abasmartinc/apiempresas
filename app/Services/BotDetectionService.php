@@ -15,30 +15,13 @@ class BotDetectionService
     }
 
     /**
-     * Get the real IP address, considering proxies
-     * Loading reseller may use proxies, so we check X-Forwarded-For
+     * Get the real IP address, considering trusted proxies
      *
      * @param RequestInterface $request
      * @return string
      */
     public function getRealIp(RequestInterface $request): string
     {
-        // Check for X-Forwarded-For header (common in proxy/load balancer setups)
-        $forwardedFor = $request->getServer('HTTP_X_FORWARDED_FOR');
-        
-        if ($forwardedFor) {
-            // X-Forwarded-For can contain multiple IPs (client, proxy1, proxy2, ...)
-            // The first one is usually the real client IP
-            $ips = array_map('trim', explode(',', $forwardedFor));
-            $realIp = $ips[0];
-            
-            // Validate it's a proper IP
-            if (filter_var($realIp, FILTER_VALIDATE_IP)) {
-                return $realIp;
-            }
-        }
-        
-        // Fallback to standard method
         return $request->getIPAddress();
     }
 
