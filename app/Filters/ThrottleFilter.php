@@ -51,8 +51,14 @@ class ThrottleFilter implements FilterInterface
         }
 
         // --- LÍMITES GENERALES (Separación API vs WEB) ---
-        if (strpos($uri, 'api/') === 0) {
-            // Límite para la API: 120 peticiones por minuto
+        $path = ltrim($uri, '/');
+        if ($path === 'api/v1' || strpos($path, 'api/v1/') === 0) {
+            // La API comercial autenticada (/api/v1/*) se autolimita por API Key en ApiKeyFilter (2 o 20 RPS)
+            return;
+        }
+
+        if (strpos($path, 'api/') === 0) {
+            // Límite para el resto de la API (sandbox, anónima): 120 peticiones por minuto
             if ($throttler->check(md5($ip . '_api'), 120, 60) === false) {
                 return Services::response()->setStatusCode(429)->setBody('Too Many Requests (API)');
             }

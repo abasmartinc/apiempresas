@@ -80,7 +80,7 @@ class ApiKeyFilter implements FilterInterface
         // 3) Validar contra DB
         $db = \Config\Database::connect('default');
 
-        $clientIp = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $request->getIPAddress();
+        $clientIp = $request->getIPAddress();
         $escapedIp = $db->escape($clientIp);
 
         $builder = $db->table('api_keys ak')
@@ -163,7 +163,7 @@ class ApiKeyFilter implements FilterInterface
         try {
             $maxRequestsPerSecond = ((int)$planId === 1) ? 2 : 20;
             
-            $rateLimitKey = 'throttle_' . (int)$row->api_key_id . '_' . date('s');
+            $rateLimitKey = 'throttle_' . (int)$row->api_key_id . '_' . time();
             $requestsThisSecond = (int) cache()->get($rateLimitKey);
             
             if ($requestsThisSecond >= $maxRequestsPerSecond) {
