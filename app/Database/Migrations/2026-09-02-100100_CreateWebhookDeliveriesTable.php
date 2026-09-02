@@ -3,6 +3,7 @@
 namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
+use CodeIgniter\Database\RawSql;
 
 class CreateWebhookDeliveriesTable extends Migration
 {
@@ -64,8 +65,9 @@ class CreateWebhookDeliveriesTable extends Migration
                 'null' => true,
             ],
             'next_attempt_at' => [
-                'type' => 'DATETIME',
-                'null' => true,
+                'type'    => 'DATETIME',
+                'default' => new RawSql('CURRENT_TIMESTAMP'),
+                'null'    => false,
             ],
             'last_attempt_at' => [
                 'type' => 'DATETIME',
@@ -89,8 +91,9 @@ class CreateWebhookDeliveriesTable extends Migration
                 'null'       => true,
             ],
             'created_at' => [
-                'type' => 'DATETIME',
-                'null' => true,
+                'type'    => 'DATETIME',
+                'default' => new RawSql('CURRENT_TIMESTAMP'),
+                'null'    => false,
             ],
             'completed_at' => [
                 'type' => 'DATETIME',
