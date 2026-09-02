@@ -228,6 +228,10 @@
             <p class="endpoints-subtitle">Además de todos los endpoints de los planes Free y Pro, desbloqueas:</p>
             <div class="endpoints-grid">
                 <div class="endpoint-card">
+                    <div class="endpoint-route">GET /companies/contracts</div>
+                    <p class="endpoint-desc">Consulta adjudicaciones y contratos públicos asociados a empresas mediante CIF para analizar adjudicaciones e importes.</p>
+                </div>
+                <div class="endpoint-card">
                     <div class="endpoint-route">GET /companies/match</div>
                     <p class="endpoint-desc">Encuentra empresas gemelas y negocios similares a tus mejores clientes usando nuestra IA para prospección comercial automatizada.</p>
                 </div>
@@ -235,7 +239,7 @@
                     <div class="endpoint-route">GET /companies/contact-prep</div>
                     <p class="endpoint-desc">Genera tácticas de ventas, enfoques y borradores de emails altamente personalizados por IA antes de contactar a un prospecto.</p>
                 </div>
-                <div class="endpoint-card" style="grid-column: 1 / -1; max-width: 600px; margin: 0 auto; width: 100%;">
+                <div class="endpoint-card">
                     <div class="endpoint-route">POST /companies/batch</div>
                     <p class="endpoint-desc">Enriquece y procesa el estado de múltiples empresas (por lotes) en una sola llamada para actualizar tu base de datos rápidamente.</p>
                 </div>

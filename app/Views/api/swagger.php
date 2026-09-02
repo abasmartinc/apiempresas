@@ -215,7 +215,7 @@
         <p>Nuestra API está diseñada de forma acumulativa para que siempre tengas lo máximo posible según tu tarifa:</p>
         <ul>
             <li>El <strong>Plan Pro</strong> incluye por defecto todo lo del Plan Free + endpoints Avanzados.</li>
-            <li>El <strong>Plan Business</strong> incluye todo lo del Plan Pro + endpoints Premium (IA & Webhooks).</li>
+            <li>El <strong>Plan Business</strong> incluye todo lo del Plan Pro + endpoints Premium (IA, Contratos Públicos & Webhooks).</li>
         </ul>
     </div>
 </div>

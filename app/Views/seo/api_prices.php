@@ -1482,6 +1482,28 @@
                                 </td>
                             </tr>
 
+                            <!-- CONTRACTS -->
+                            <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 18px 20px;">
+                                    <div
+                                        style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">
+                                        GET /companies/contracts</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Filtros: cif, page, limit</div>
+                                </td>
+                                <td style="padding: 18px 20px;">
+                                    <strong
+                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Contratos y Adjudicaciones Públicas</strong>
+                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
+                                        Historial de contratos y adjudicaciones públicas de la empresa, órgano de contratación e importe de adjudicación.
+                                    </p>
+                                </td>
+                                <td style="padding: 18px 20px; text-align: center;"><span
+                                        style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span></td>
+                                <td style="padding: 18px 20px; text-align: center;">
+                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_contracts')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                </td>
+                            </tr>
+
                             <!-- WEBHOOKS -->
                             <tr class="api-endpoint-row">
                                 <td style="padding: 18px 20px;">
@@ -2257,6 +2279,36 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         ]
                     }
                 },
+                get_contracts: {
+                    success: true,
+                    data: {
+                        cif: "A01001411",
+                        company_name: "RHEINMETALL EXPAL MUNITIONS SA",
+                        summary: {
+                            total_contracts: 32,
+                            total_amount: "617746086.47",
+                            currency: "EUR"
+                        },
+                        contracts: [
+                            {
+                                tender_id: "https://contrataciondelestado.es/sindicacion/licitacionesPerfilContratante/20344437",
+                                title: "Suministro de 27.000 granadas de mortero de 81 mm...",
+                                contracting_authority: "Jefatura de Asuntos Económicos del Mando de Apoyo Logístico",
+                                award_date: "2026-08-25",
+                                amount: "4395320.00",
+                                currency: "EUR",
+                                tender_url: "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=B4EkDEGFvaA%2Bk2oCbDosIw%3D%3D"
+                            }
+                        ],
+                        pagination: {
+                            total: 32,
+                            page: 1,
+                            limit: 20,
+                            total_pages: 2,
+                            has_more: true
+                        }
+                    }
+                },
                 get_match: {
                     success: true,
                     data: {
@@ -2304,6 +2356,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                     get_radar: 'GET /companies/radar',
                     get_network: 'GET /companies/network',
                     get_match: 'GET /companies/match',
+                    get_contracts: 'GET /companies/contracts',
                     post_webhook: 'POST /webhooks',
                     get_webhooks: 'GET /webhooks',
                     delete_webhook: 'DELETE /webhooks/{id}'

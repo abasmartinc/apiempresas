@@ -368,6 +368,152 @@
             "description": "Endpoints premium exclusivos del Plan Business o superior.",
             "item": [
                 {
+                    "name": "Contratos Públicos",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/contracts?cif=A01001411&page=1&limit=20",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "contracts"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "A01001411",
+                                    "description": "CIF de la empresa a consultar"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Número de página (por defecto 1)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20",
+                                    "description": "Límite de contratos por página (por defecto 20, máximo 100)"
+                                }
+                            ]
+                        },
+                        "description": "Consulta adjudicaciones y contratos públicos asociados a una empresa mediante CIF. Exclusivo del Plan Business."
+                    },
+                    "response": [
+                        {
+                            "name": "200 OK - Plan Business",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-API-KEY",
+                                        "value": "{{API_KEY}}",
+                                        "type": "text"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "https://apiempresas.es/api/v1/companies/contracts?cif=A01001411&page=1&limit=20",
+                                    "protocol": "https",
+                                    "host": [
+                                        "apiempresas",
+                                        "es"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "companies",
+                                        "contracts"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "cif",
+                                            "value": "A01001411"
+                                        },
+                                        {
+                                            "key": "page",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "limit",
+                                            "value": "20"
+                                        }
+                                    ]
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n    \"success\": true,\n    \"data\": {\n        \"cif\": \"A01001411\",\n        \"company_name\": \"RHEINMETALL EXPAL MUNITIONS SA\",\n        \"summary\": {\n            \"total_contracts\": 32,\n            \"total_amount\": \"617746086.47\",\n            \"currency\": \"EUR\"\n        },\n        \"contracts\": [\n            {\n                \"tender_id\": \"https://contrataciondelestado.es/sindicacion/licitacionesPerfilContratante/20344437\",\n                \"title\": \"Suministro de 27.000 granadas de mortero de 81 mm...\",\n                \"contracting_authority\": \"Jefatura de Asuntos Económicos del Mando de Apoyo Logístico\",\n                \"award_date\": \"2026-08-25\",\n                \"amount\": \"4395320.00\",\n                \"currency\": \"EUR\",\n                \"tender_url\": \"https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=B4EkDEGFvaA%2Bk2oCbDosIw%3D%3D\"\n            }\n        ],\n        \"pagination\": {\n            \"total\": 32,\n            \"page\": 1,\n            \"limit\": 20,\n            \"total_pages\": 2,\n            \"has_more\": true\n        }\n    }\n}"
+                        },
+                        {
+                            "name": "403 Forbidden - Plan Free / Pro",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-API-KEY",
+                                        "value": "{{API_KEY}}",
+                                        "type": "text"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "https://apiempresas.es/api/v1/companies/contracts?cif=A01001411",
+                                    "protocol": "https",
+                                    "host": [
+                                        "apiempresas",
+                                        "es"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "companies",
+                                        "contracts"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "cif",
+                                            "value": "A01001411"
+                                        }
+                                    ]
+                                }
+                            },
+                            "status": "Forbidden",
+                            "code": 403,
+                            "_postman_previewlanguage": "json",
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n    \"success\": false,\n    \"error\": \"PLAN_RESTRICTION\",\n    \"message\": \"El acceso a contratos públicos requiere el plan Business.\"\n}"
+                        }
+                    ]
+                },
+                {
                     "name": "Insights IA",
                     "request": {
                         "method": "GET",

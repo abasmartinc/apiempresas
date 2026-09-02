@@ -421,6 +421,308 @@
                 }
             }
         },
+        "/api/v1/companies/contracts": {
+            "get": {
+                "tags": [
+                    "3. Plan Business"
+                ],
+                "summary": "Contratos Públicos y Licitaciones",
+                "description": "Devuelve el historial oficial de adjudicaciones y licitaciones del Sector Público asociadas a una empresa mediante su CIF. **Coste:** 1 llamada. Exclusivo para el plan Business.",
+                "operationId": "913bc49002ae09495216682d7892e506",
+                "parameters": [
+                    {
+                        "name": "cif",
+                        "in": "query",
+                        "description": "El CIF de la empresa a consultar",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "A10007516"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número de página (>= 1). Por defecto: 1.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Número de resultados por página (1 a 100). Por defecto: 20.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Historial de contratos públicos de la empresa",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "cif": {
+                                                    "type": "string",
+                                                    "example": "A10007516"
+                                                },
+                                                "company_name": {
+                                                    "type": "string",
+                                                    "example": "CONSTRUCCIONES ALOR SA"
+                                                },
+                                                "summary": {
+                                                    "properties": {
+                                                        "total_contracts": {
+                                                            "type": "integer",
+                                                            "example": 14
+                                                        },
+                                                        "total_amount": {
+                                                            "type": "string",
+                                                            "example": "311190.55"
+                                                        },
+                                                        "currency": {
+                                                            "type": "string",
+                                                            "example": "EUR"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "contracts": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "tender_id": {
+                                                                "type": "string",
+                                                                "example": "https://contrataciondelestado.es/sindicacion/licitacionesPerfilContratante/16026766",
+                                                                "nullable": true
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Obras de Restauración de la Ermita de San Jorge de Alor en Cáceres",
+                                                                "nullable": true
+                                                            },
+                                                            "contracting_authority": {
+                                                                "type": "string",
+                                                                "example": "Consejería de Cultura, Turismo, Jóvenes y Deportes",
+                                                                "nullable": true
+                                                            },
+                                                            "award_date": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "2024-12-30",
+                                                                "nullable": true
+                                                            },
+                                                            "amount": {
+                                                                "type": "string",
+                                                                "example": "311190.55",
+                                                                "nullable": true
+                                                            },
+                                                            "currency": {
+                                                                "type": "string",
+                                                                "example": "EUR"
+                                                            },
+                                                            "tender_url": {
+                                                                "type": "string",
+                                                                "example": "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=T1rE11yqCklWhbmkna2nXQ%3D%3D",
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "pagination": {
+                                                    "properties": {
+                                                        "total": {
+                                                            "type": "integer",
+                                                            "example": 14
+                                                        },
+                                                        "page": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "limit": {
+                                                            "type": "integer",
+                                                            "example": 20
+                                                        },
+                                                        "total_pages": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "has_more": {
+                                                            "type": "boolean",
+                                                            "example": false
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error de validación de parámetros",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "VALIDATION_ERROR"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El parámetro \"cif\" es obligatorio."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autorizado (API key inválida o inactiva)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "UNAUTHORIZED"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "API key inválida o inactiva."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Restricción de plan (exclusivo Business)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "PLAN_RESTRICTION"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El acceso a contratos públicos requiere el plan Business."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Empresa no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "COMPANY_NOT_FOUND"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Empresa no encontrada."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Límite de peticiones excedido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "TOO_MANY_REQUESTS"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Has superado el límite de peticiones."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "SERVER_ERROR"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Se ha producido un error interno al consultar los contratos públicos."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/companies/score": {
             "get": {
                 "tags": [

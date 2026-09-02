@@ -85,9 +85,15 @@
                             </a>
                         </li>
                         <li>
+                            <a href="#endpoint-contracts">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                <span class="nav-num">9.</span> Contratos Públicos <span class="sidebar-badge biz">Biz</span>
+                            </a>
+                        </li>
+                        <li>
                             <a href="#endpoint-usage">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="18" y="3" width="4" height="18"></rect><rect x="10" y="8" width="4" height="13"></rect><rect x="2" y="13" width="4" height="8"></rect></svg>
-                                <span class="nav-num">9.</span> Consumo
+                                <span class="nav-num">10.</span> Consumo
                             </a>
                         </li>
                     </ul>
@@ -962,9 +968,71 @@ Accept: application/json</code></pre>
                     </table>
                 </section>
 
+                <!-- CONTRATOS PUBLICOS -->
+                <section class="docs-section" id="endpoint-contracts">
+                    <h2>9. Contratos Públicos (Solo Business)</h2>
+                    <p>Consulta adjudicaciones y contratos públicos asociados a empresas mediante CIF en nuestra base de datos. Permite conocer el historial de adjudicaciones, el órgano de contratación, el importe de adjudicación y el enlace oficial a la licitación.</p>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/companies/contracts</code>
+                        <span class="plan-badge business">Business</span>
+                    </div>
+
+                    <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <thead style="background: #f8fafc;">
+                            <tr><th style="width: 20%;">Parámetro</th><th style="width: 15%;">Tipo</th><th style="width: 15%;">Requerido</th><th>Descripción</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">cif</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td><span style="background: #fef2f2; color: #ef4444; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">Requerido</span></td><td style="color: #475569;">CIF de la empresa a consultar (ej: <code>A01001411</code>).</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">page</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td><span style="color: #94a3b8; font-size: 0.8rem;">Opcional</span></td><td style="color: #475569;">Número de página a consultar. Valor por defecto: <code>1</code>.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">limit</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td><span style="color: #94a3b8; font-size: 0.8rem;">Opcional</span></td><td style="color: #475569;">Cantidad de contratos por página. Por defecto: <code>20</code> (máximo permitido: <code>100</code>).</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Respuesta de éxito (200 OK - Plan Business)</h4>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "cif": "A01001411",
+    "company_name": "RHEINMETALL EXPAL MUNITIONS SA",
+    "summary": {
+      "total_contracts": 32,
+      "total_amount": "617746086.47",
+      "currency": "EUR"
+    },
+    "contracts": [
+      {
+        "tender_id": "https://contrataciondelestado.es/sindicacion/licitacionesPerfilContratante/20344437",
+        "title": "Suministro de 27.000 granadas de mortero de 81 mm...",
+        "contracting_authority": "Jefatura de Asuntos Económicos del Mando de Apoyo Logístico",
+        "award_date": "2026-08-25",
+        "amount": "4395320.00",
+        "currency": "EUR",
+        "tender_url": "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=B4EkDEGFvaA%2Bk2oCbDosIw%3D%3D"
+      }
+    ],
+    "pagination": {
+      "total": 32,
+      "page": 1,
+      "limit": 20,
+      "total_pages": 2,
+      "has_more": true
+    }
+  }
+}</code></pre>
+
+                    <h4>Respuesta restringida (403 Forbidden - Planes Free y Pro)</h4>
+                    <pre><code class="language-json">{
+  "success": false,
+  "error": "PLAN_RESTRICTION",
+  "message": "El acceso a contratos públicos requiere el plan Business."
+}</code></pre>
+                </section>
+
                 <!-- USAGE -->
                 <section class="docs-section" id="endpoint-usage">
-                    <h2>9. Estadísticas de Consumo</h2>
+                    <h2>10. Estadísticas de Consumo</h2>
                     <p>Obtén el recuento de peticiones del mes actual y el historial de empresas consultadas asociado a tu API Key.</p>
                     
                     <div class="endpoint-header">
