@@ -15,6 +15,7 @@ class PlanAccessService
             'insights'       => false,
             'contact_prep'    => false,
             'webhooks'       => false,
+            'public_contracts' => false,
         ],
         'pro' => [
             'company_score'   => 'full',
@@ -23,6 +24,7 @@ class PlanAccessService
             'insights'       => 'preview',   // Solo etiquetas de sector/perfil, sin pitch
             'contact_prep'    => false,
             'webhooks'       => false,
+            'public_contracts' => false,
         ],
         'business' => [
             'company_score'   => 'full',
@@ -31,6 +33,7 @@ class PlanAccessService
             'insights'       => 'full',      // Análisis IA completo
             'contact_prep'    => true,       // Mensajes IA sugeridos
             'webhooks'       => true,
+            'public_contracts' => true,
         ],
     ];
 
