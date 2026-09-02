@@ -132,40 +132,17 @@ class ApiKeyFilter implements FilterInterface
             $subscriptionId = (int)$row->subscription_id;
         }
 
-        // 3.5) Detección de Anomalías Geográficas (CF-IPCountry con validación de Cloudflare Proxy)
-        $allowedCountries = $row->allowed_countries
-            ? explode(',', strtoupper(str_replace(' ', '', (string)$row->allowed_countries)))
-            : [];
-
-        $geoGuardApplies = !$isIpWhitelisted
-            && !empty($allowedCountries)
-            && (int)$row->user_id !== 166
-            && (int)$planId !== 1;
-
-        if ($geoGuardApplies) {
-            $remoteAddr = (string)($request->getServer('REMOTE_ADDR') ?? '');
-
-            // Validar que la conexión TCP provenga de un proxy legítimo de Cloudflare
-            if (!$this->isCloudflareProxy($remoteAddr)) {
-                log_message('warning', "GEO-ANOMALY DENIED: API Key {$row->api_key_id} direct-origin connection blocked (allowed_countries enforced). Remote: {$remoteAddr}. User: {$row->email}");
+        // 3.5) Detección de Anomalías Geográficas (CF-IPCountry)
+        $cfCountry = isset($_SERVER['HTTP_CF_IPCOUNTRY']) ? strtoupper((string)$_SERVER['HTTP_CF_IPCOUNTRY']) : null;
+        
+        // Si la IP está en la lista blanca o es plan free, saltamos el chequeo geográfico
+        if (!$isIpWhitelisted && $cfCountry && (int)$row->user_id !== 166 && (int)$planId !== 1) {
+            $allowedCountries = $row->allowed_countries ? explode(',', strtoupper(str_replace(' ', '', $row->allowed_countries))) : [];
+            if (!empty($allowedCountries) && !in_array($cfCountry, $allowedCountries)) {
+                // Denegar acceso sin inactivar la clave (evita caídas de servicio legítimo)
+                log_message('warning', "GEO-ANOMALY DENIED: API Key {$row->api_key_id} blocked request from {$cfCountry}. User: {$row->email}");
                 return service('response')->setStatusCode(403)->setJSON([
-                    'error' => 'Acceso denegado. Petición no canalizada a través de proxy seguro verificado.'
-                ]);
-            }
-
-            $rawCfCountry = $_SERVER['HTTP_CF_IPCOUNTRY'] ?? null;
-            $cfCountry = is_string($rawCfCountry) ? strtoupper(trim($rawCfCountry)) : '';
-
-            $isValidCountry = $cfCountry !== ''
-                && preg_match('/^[A-Z]{2}$/', $cfCountry) === 1
-                && $cfCountry !== 'XX'
-                && $cfCountry !== 'T1';
-
-            if (!$isValidCountry || !in_array($cfCountry, $allowedCountries, true)) {
-                $reportedCountry = ($cfCountry !== '' && preg_match('/^[A-Z0-9]{2}$/', $cfCountry)) ? $cfCountry : 'UNKNOWN';
-                log_message('warning', "GEO-ANOMALY DENIED: API Key {$row->api_key_id} blocked request from {$reportedCountry}. User: {$row->email}");
-                return service('response')->setStatusCode(403)->setJSON([
-                    'error' => 'Acceso denegado. Petición originada desde país no autorizado (' . $reportedCountry . ').'
+                    'error' => 'Acceso denegado. Petición originada desde país no autorizado (' . $cfCountry . ').'
                 ]);
             }
         }
@@ -479,100 +456,5 @@ class ApiKeyFilter implements FilterInterface
         } catch (\Throwable $e) {
             log_message('error', '[ApiKeyFilter::checkThresholdNotification] ' . $e->getMessage());
         }
-    }
-
-    /**
-     * Check if the given remote IP address matches any trusted Cloudflare proxy range.
-     *
-     * @param string $ip Immediate TCP peer IP (REMOTE_ADDR)
-     * @return bool
-     */
-    private function isCloudflareProxy(string $ip): bool
-    {
-        if ($ip === '' || !filter_var($ip, FILTER_VALIDATE_IP)) {
-            return false;
-        }
-
-        $config = config('App');
-        $proxyIPs = $config->proxyIPs ?? [];
-
-        foreach ($proxyIPs as $proxyIP => $header) {
-            $cidr = is_string($proxyIP) ? $proxyIP : '';
-            if ($cidr === '') {
-                continue;
-            }
-
-            if ($this->isIpInCidr($ip, $cidr)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Compare an IP against a CIDR block (supports IPv4 and IPv6).
-     *
-     * @param string $ip
-     * @param string $cidr
-     * @return bool
-     */
-    private function isIpInCidr(string $ip, string $cidr): bool
-    {
-        if (!str_contains($cidr, '/')) {
-            return $ip === $cidr;
-        }
-
-        $parts = explode('/', $cidr, 2);
-        if (count($parts) !== 2) {
-            return false;
-        }
-
-        [$net, $maskLenStr] = $parts;
-
-        if ($maskLenStr === '' || !ctype_digit($maskLenStr)) {
-            return false;
-        }
-
-        $maskLen = (int)$maskLenStr;
-
-        $ipBytes = @inet_pton($ip);
-        $netBytes = @inet_pton($net);
-
-        if ($ipBytes === false || $netBytes === false) {
-            return false;
-        }
-
-        $ipLen = strlen($ipBytes);
-        $netLen = strlen($netBytes);
-
-        if ($ipLen !== $netLen) {
-            return false;
-        }
-
-        $maxBits = $ipLen * 8; // 32 for IPv4, 128 for IPv6
-        if ($maskLen > $maxBits) {
-            return false;
-        }
-
-        if ($maskLen === 0) {
-            return true;
-        }
-
-        $fullBytes = intdiv($maskLen, 8);
-        $remainingBits = $maskLen % 8;
-
-        if ($fullBytes > 0 && substr($ipBytes, 0, $fullBytes) !== substr($netBytes, 0, $fullBytes)) {
-            return false;
-        }
-
-        if ($remainingBits > 0) {
-            $mask = chr((0xFF << (8 - $remainingBits)) & 0xFF);
-            if (($ipBytes[$fullBytes] & $mask) !== ($netBytes[$fullBytes] & $mask)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 }
