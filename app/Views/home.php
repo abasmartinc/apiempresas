@@ -734,6 +734,19 @@
                             <tr>
                                 <td>
                                     <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Contratos y Adjudicaciones Públicas</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies/contracts</div>
+                                        <div class="cap-feature-desc">Consulta el historial de adjudicaciones y contratos públicos de la empresa, órgano de contratación e importes.</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('get_contracts')" class="btn-json-preview">Ver Respuesta JSON</button>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
                                         <div class="cap-feature-name">Webhooks PUSH</div>
                                         <div class="cap-feature-endpoint">POST /api/v1/webhooks</div>
                                         <div class="cap-feature-desc">Sincroniza eventos en tiempo real con tu CRM sin necesidad de consultar la API.</div>
@@ -1084,6 +1097,36 @@
                     key_metrics: ["+20% empleados este año", "Última ronda: Series A"]
                 }
             },
+            get_contracts: {
+                success: true,
+                data: {
+                    cif: "A01001411",
+                    company_name: "RHEINMETALL EXPAL MUNITIONS SA",
+                    summary: {
+                        total_contracts: 32,
+                        total_amount: "617746086.47",
+                        currency: "EUR"
+                    },
+                    contracts: [
+                        {
+                            tender_id: "https://contrataciondelestado.es/sindicacion/licitacionesPerfilContratante/20344437",
+                            title: "Suministro de 27.000 granadas de mortero de 81 mm...",
+                            contracting_authority: "Jefatura de Asuntos Económicos del Mando de Apoyo Logístico",
+                            award_date: "2026-08-25",
+                            amount: "4395320.00",
+                            currency: "EUR",
+                            tender_url: "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=B4EkDEGFvaA%2Bk2oCbDosIw%3D%3D"
+                        }
+                    ],
+                    pagination: {
+                        total: 32,
+                        page: 1,
+                        limit: 20,
+                        total_pages: 2,
+                        has_more: true
+                    }
+                }
+            },
             post_webhook: {
                 success: true,
                 message: "Webhook creado correctamente",
@@ -1108,6 +1151,7 @@
                 get_network: 'GET /companies/network',
                 get_match: 'GET /companies/match',
                 get_contact_prep: 'GET /companies/contact-prep',
+                get_contracts: 'GET /companies/contracts',
                 post_webhook: 'POST /webhooks'
             };
 
