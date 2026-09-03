@@ -9,31 +9,34 @@ class PlanAccessService
      */
     protected array $matrix = [
         'free' => [
-            'company_score'   => 'basic',     // Enmascarado
-            'company_signals' => false,
-            'radar'          => 'limited',   // 10 resultados, enmascarado
-            'insights'       => false,
-            'contact_prep'    => false,
-            'webhooks'       => false,
-            'public_contracts' => false,
+            'company_score'          => 'basic',     // Enmascarado
+            'company_signals'        => false,
+            'radar'                  => 'limited',   // 10 resultados, enmascarado
+            'insights'               => false,
+            'contact_prep'           => false,
+            'webhooks'               => false,
+            'public_contracts'       => false,
+            'corporate_risk_profile' => false,
         ],
         'pro' => [
-            'company_score'   => 'full',
-            'company_signals' => true,
-            'radar'          => 'pro',       // 100 resultados, sin enmascarar
-            'insights'       => 'preview',   // Solo etiquetas de sector/perfil, sin pitch
-            'contact_prep'    => false,
-            'webhooks'       => false,
-            'public_contracts' => false,
+            'company_score'          => 'full',
+            'company_signals'        => true,
+            'radar'                  => 'pro',       // 100 resultados, sin enmascarar
+            'insights'               => 'preview',   // Solo etiquetas de sector/perfil, sin pitch
+            'contact_prep'           => false,
+            'webhooks'               => false,
+            'public_contracts'       => false,
+            'corporate_risk_profile' => false,
         ],
         'business' => [
-            'company_score'   => 'full',
-            'company_signals' => true,
-            'radar'          => 'unlimited', // Sin límites, sin enmascarar
-            'insights'       => 'full',      // Análisis IA completo
-            'contact_prep'    => true,       // Mensajes IA sugeridos
-            'webhooks'       => true,
-            'public_contracts' => true,
+            'company_score'          => 'full',
+            'company_signals'        => true,
+            'radar'                  => 'unlimited', // Sin límites, sin enmascarar
+            'insights'               => 'full',      // Análisis IA completo
+            'contact_prep'           => true,       // Mensajes IA sugeridos
+            'webhooks'               => true,
+            'public_contracts'       => true,
+            'corporate_risk_profile' => true,
         ],
     ];
 

@@ -29,7 +29,7 @@ class EmailAutomationCommand extends BaseCommand
 
         CLI::write('🚀 Iniciando proceso de automatización de emails...', 'cyan');
 
-        // Solo procesamos usuarios FREE activos
+        // Solo procesamos usuarios FREE activos (excluyendo registros específicos de perfiles de riesgo B2B)
         $db = \Config\Database::connect();
         $usersToCheck = $db->table('users')
             ->select('users.*, user_subscriptions.plan_id')
@@ -39,6 +39,10 @@ class EmailAutomationCommand extends BaseCommand
             ->where('users.is_admin', 0)
             ->where('users.unsuscribe', 0)
             ->where('users.source_app', 'apiempresas')
+            ->groupStart()
+                ->where('users.signup_intent !=', 'view_risk_profile')
+                ->orWhere('users.signup_intent IS NULL')
+            ->groupEnd()
             ->get()->getResultArray();
 
         CLI::write('- Usuarios Free detectados: ' . count($usersToCheck));
@@ -57,6 +61,10 @@ class EmailAutomationCommand extends BaseCommand
 
     protected function processTriggersForUser(array $user)
     {
+        if (($user['signup_intent'] ?? '') === 'view_risk_profile') {
+            return;
+        }
+
         $userId = (int)$user['id'];
         $totalRequests = $this->getTotalRequests($userId);
         $lastRequestTime = $this->getLastRequestTime($userId);

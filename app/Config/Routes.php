@@ -193,6 +193,7 @@ $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function
     $routes->get('api/v1/companies/network', 'Api\V1\CompanyNetworkController::index');
     $routes->get('api/v1/companies/borme', 'Api\V1\CompanyBormeController::index');
     $routes->get('api/v1/companies/contracts', 'Api\V1\CompanyContractsController::index');
+    $routes->get('api/v1/companies/risk-profile', 'Api\V1\CompanyRiskProfileController::index');
 
     // Webhooks CRUD
     $routes->get('api/v1/webhooks', 'Api\V1\WebhookController::index');

@@ -96,6 +96,11 @@ class EmailService
      */
     public function sendWelcomeEmail(array $userData)
     {
+        // No enviar email técnico de la API si el registro es con intención de ver perfil de riesgo
+        if (($userData['signup_intent'] ?? '') === 'view_risk_profile') {
+            return false;
+        }
+
         $userEmail = $userData['email'];
         $templateData = ['name' => $userData['name'] ?? 'Usuario'];
 

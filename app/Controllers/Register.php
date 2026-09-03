@@ -235,17 +235,20 @@ class Register extends BaseController
 
             // 4) Enviar notificaciones
             $userData = [
-                'user_id' => $user_id,
-                'name'    => $data['name'],
-                'company' => $data['company'],
-                'email'   => $data['email']
+                'user_id'       => $user_id,
+                'name'          => $data['name'],
+                'company'       => $data['company'],
+                'email'         => $data['email'],
+                'signup_intent' => $data['signup_intent'] ?? null,
             ];
 
             // Notificación al Admin (papelo.amh@gmail.com)
             $this->emailService->sendRegistrationAdminNotification($userData);
 
-            // Correo de Bienvenida al usuario
-            $this->emailService->sendWelcomeEmail($userData);
+            // Correo de Bienvenida al usuario (solo si no viene con intención de perfil de riesgo)
+            if (($data['signup_intent'] ?? '') !== 'view_risk_profile') {
+                $this->emailService->sendWelcomeEmail($userData);
+            }
 
             // 6) Auto-Login al usuario (RE-HABILITADO para mejorar conversión)
             $this->userModel->update($user_id, [
