@@ -1522,9 +1522,9 @@ class Company extends BaseController
         $cleanCif = strtoupper(trim(explode('-', (string)$cif)[0]));
         $db = \Config\Database::connect();
         
-        $company = $this->companyModel->where('cif', $cleanCif)->orWhere('nif', $cleanCif)->first();
+        $company = $this->companyModel->where('cif', $cleanCif)->first();
         if (!$company && !empty($cif)) {
-            $company = $this->companyModel->where('cif', $cif)->orWhere('nif', $cif)->first();
+            $company = $this->companyModel->where('cif', $cif)->first();
         }
         if (!$company) {
             $company = ['id' => 0, 'name' => 'Empresa', 'cif' => $cleanCif];
