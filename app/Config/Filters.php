@@ -83,14 +83,14 @@ class Filters extends BaseFilters
              'cors',          // Permitir peticiones Cross-Origin (Preflight OPTIONS)
              'throttle',      // Limitar la tasa de peticiones por IP
              'botprotection', // Check blocked IPs first
-             'honeypot' => ['except' => ['admin/*']],
+             'honeypot' => ['except' => ['admin/*', 'api/*']],
              'user_activity',
              'csrf' => ['except' => ['api/*', 'tracking/*', 'webhook/*', 'events/*', 'company/rate', 'company/rate_feedback']],
             // 'invalidchars',
         ],
         'after' => [
             'activity_logger',
-             'honeypot' => ['except' => ['admin/*']],
+             'honeypot' => ['except' => ['admin/*', 'api/*']],
             // 'secureheaders',
         ],
     ];
