@@ -533,6 +533,7 @@ $routes->get('empresa/download-premium-pdf', 'Company::generateAndDownloadPremiu
 $routes->get('empresa/download-premium-pdf/(:any)', 'Company::downloadPremiumPdf/$1');
 $routes->get('empresa/(:num)-(:any)', 'Company::showById/$1/$2');
 $routes->get('empresa/(:num)', 'Company::showById/$1');
+$routes->get('api/empresa/private-data/(:any)', 'Company::ajaxPrivateData/$1');
 $routes->get('test-pdf', 'TestPdf::index');
 
 // Fallback for broken "no disponible" links
@@ -574,6 +575,4 @@ $routes->get('([a-zA-Z][0-9]{7}[a-zA-Z0-9].*)', 'Company::show/$1');
 $routes->get('(:segment)', 'Company::show/$1');
 
 $routes->get('testpdf2', 'TestPdf2::index');
-
-$routes->get('api/empresa/private-data/(:any)', 'Company::ajaxPrivateData/$1');
 

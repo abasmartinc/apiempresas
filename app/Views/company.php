@@ -252,7 +252,7 @@
 <body>
     <div class="bg-halo" aria-hidden="true"></div>
 
-    <?= view('partials/header', ['force_public_header' => true]) ?>
+    <?= view('partials/header', ['force_public_header' => (!session('logged_in') && (int)(session('user_id') ?? 0) <= 0)]) ?>
 
     <main style="padding:40px 0 70px;">
         <section class="container" style="max-width: 1200px;">
@@ -908,7 +908,7 @@
                             </div>
 
                             <div id="risk-profile-container" style="padding: 24px; position: relative; background: #fff; min-height: 260px;">
-                                <?php if (session('logged_in')): ?>
+                                <?php if (session('logged_in') || (int)(session('user_id') ?? 0) > 0): ?>
                                     <?php if (!empty($riskQuota) && empty($riskQuota['allowed'])): ?>
                                         <?= view('partials/company_risk_paywall', [
                                             'company'   => $company,
@@ -2594,7 +2594,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const cif = '<?= esc($companyCif ?? $company['registro_mercantil'] ?? '') ?>';
     if (!cif) return;
     
-    const requestUrl = '<?= site_url('api/empresa/private-data/') ?>' + encodeURIComponent(cif) + '?_ts=' + new Date().getTime();
+    // Usar origen actual del navegador para garantizar same-origin y envío de cookies de sesión
+    const requestUrl = window.location.origin + '<?= rtrim(site_url('/'), '/') === rtrim(base_url('/'), '/') ? '' : '' ?>/api/empresa/private-data/' + encodeURIComponent(cif) + '?_ts=' + new Date().getTime();
     
     fetch(requestUrl, {
         method: 'GET',
