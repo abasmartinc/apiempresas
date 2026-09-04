@@ -112,27 +112,6 @@ $isEn = (service('request')->getLocale() === 'en');
             const statusClass = (company.status || '').toLowerCase() === 'activa' ? 'activa' : 'inactiva';
             const statusText = (company.status || '').toLowerCase() === 'activa' ? '<?= $isEn ? 'ACTIVE' : 'ACTIVA' ?>' : '<?= $isEn ? 'INACTIVE' : 'INACTIVA' ?>';
 
-            // 1. DETECTAR ANTIGÜEDAD
-            let año_constitucion = null;
-            if (company.founded) {
-                const match = company.founded.toString().match(/\d{4}/);
-                if (match) año_constitucion = parseInt(match[0]);
-            }
-            const currentYear = new Date().getFullYear();
-            const años = año_constitucion ? currentYear - año_constitucion : null;
-
-            // 2. BLOQUE PRINCIPAL DINÁMICO
-            let radarTitle = "";
-            if (años === null) {
-                radarTitle = "Accede a nuevas oportunidades comerciales";
-            } else if (años <= 1) {
-                radarTitle = "Empresa de reciente creación";
-            } else if (años <= 5) {
-                radarTitle = "Empresa en fase de actividad";
-            } else {
-                radarTitle = "Empresa consolidada";
-            }
-
             $resultado.html(`
 <div class="search-result-card reveal" style="background: #ffffff; border-radius: 24px; padding: 40px; box-shadow: 0 20px 50px -10px rgba(0,0,0,0.08); border: 1px solid #f1f5f9;">
   
@@ -213,37 +192,31 @@ $isEn = (service('request')->getLocale() === 'en');
     </div>
   </div>
 
-  <?php if (!$isEn): ?>
-  <!-- Bridge to Radar Dinámico -->
-  <div class="radar-bridge" style="background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); border: 1px solid #dcfce7; border-radius: 24px; padding: 32px; display: flex; gap: 28px; align-items: center; margin-bottom: 24px; position: relative; overflow: hidden; text-align: left;">
-    <div style="position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);"></div>
+  <!-- Bridge to API Integration CTA -->
+  <div class="api-bridge-card" style="background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%); border: 1px solid #bfdbfe; border-radius: 24px; padding: 32px; display: flex; gap: 28px; align-items: center; margin-bottom: 24px; position: relative; overflow: hidden; text-align: left;">
+    <div style="position: absolute; top: -20px; right: -20px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, transparent 70%); pointer-events: none;"></div>
     
-    <div style="width: 56px; height: 56px; background: #ffffff; color: #16a34a; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4M12 16V8"/></svg>
+    <div style="width: 56px; height: 56px; background: #ffffff; color: #2563eb; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.1); border: 1px solid #e0e7ff;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
     </div>
     
     <div style="flex-grow: 1;">
-      <div class="radar-badge" style="background: #ffffff; border: 1px solid #dcfce7; display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 800; color: #16a34a; margin-bottom: 12px;">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-        +1.400 empresas nuevas esta semana
+      <div style="background: #ffffff; border: 1px solid #bfdbfe; display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 800; color: #2563eb; margin-bottom: 12px;">
+        <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #2563eb;"></span>
+        <?= $isEn ? '⚡ Instant REST Integration' : '⚡ Integración en 5 minutos' ?>
       </div>
-      <h4 style="margin: 0 0 8px 0; font-size: 1.25rem; color: #0f172a; font-weight: 900;">${radarTitle}</h4>
-      <p style="margin: 0; font-size: 1rem; color: #475569; line-height: 1.6; max-width: 480px;">Además de consultar esta empresa, puedes detectar nuevas sociedades con potencial de negocio y trabajarlas antes que la competencia.</p>
+      <h4 style="margin: 0 0 8px 0; font-size: 1.25rem; color: #0f172a; font-weight: 900;"><?= $isEn ? 'Automate company verification in your systems' : 'Automatiza la validación de empresas en tu software' ?></h4>
+      <p style="margin: 0; font-size: 1rem; color: #475569; line-height: 1.6; max-width: 520px;"><?= $isEn ? 'Query CIF, company status, CNAE activity and legal data directly from your CRM, ERP or web checkout with our ultra-fast API.' : 'Consulta CIF, estado mercantil, actividad CNAE y datos oficiales directamente desde tu CRM, ERP o pasarela web con nuestra API REST.' ?></p>
     </div>
     
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 1;">
-        <a href="${radarUrl}" class="btn-radar" style="padding: 12px 24px; font-size: 0.95rem; border-radius: 14px; background: #ecfdf5; color: #059669 !important; border: 1px solid #10b981; box-shadow: none; margin: 0; font-weight: 800; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: all 0.2s ease;" onmouseover="this.style.background='#d1fae5'" onmouseout="this.style.background='#ecfdf5'">
-            Ver empresas nuevas hoy
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; z-index: 1; flex-shrink: 0;">
+        <a href="<?= site_url('register?intent=api') ?>" style="padding: 14px 28px; font-size: 1rem; border-radius: 14px; background: #2563eb; color: #ffffff !important; border: none; box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25); font-weight: 800; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: all 0.2s ease;" onmouseover="this.style.background='#1d4ed8'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#2563eb'; this.style.transform='translateY(0)';">
+            <?= $isEn ? 'Get free API Key' : 'Obtener API Key gratis' ?>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
         </a>
-        <span style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-align: center; opacity: 0.8;">Oportunidades limitadas en el tiempo</span>
+        <span style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-align: center;"><?= $isEn ? get_free_plan_limit() . ' free queries · No credit card' : get_free_plan_limit() . ' consultas gratis · Sin tarjeta' ?></span>
     </div>
   </div>
-
-  <div style="text-align: center; margin-bottom: 20px;">
-    <span class="radar-context-text" style="font-size: 0.95rem; font-weight: 500;">“La detección temprana de empresas puede marcar la diferencia en procesos comerciales.”</span>
-  </div>
-  <?php endif; ?>
 </div>`);
 
             $container.show();
