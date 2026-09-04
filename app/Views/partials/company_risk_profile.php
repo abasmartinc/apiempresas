@@ -15,8 +15,19 @@ $riskLevelText = $riskProfile['data']['risk_level'] ?? $label;
 <div style="display: flex; flex-wrap: wrap; gap: 32px; align-items: stretch;">
     
     <!-- LEFT COLUMN (Score) -->
-    <div style="width: 280px; background: #f8fafc; border-radius: 16px; border: 1px solid #f1f5f9; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; flex-shrink: 0;">
-        <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin: 0 0 24px 0; font-weight: 700; text-align: center;">Nivel de Riesgo</h4>
+    <div style="width: 280px; background: #f8fafc; border-radius: 16px; border: 1px solid #f1f5f9; padding: 22px 20px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; flex-shrink: 0; box-sizing: border-box;">
+        <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 20px;">
+            <h4 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin: 0; font-weight: 800; text-align: center;">Nivel de Riesgo</h4>
+            <?php if (!empty($riskQuota['is_subscriber'])): ?>
+                <span style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 3px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                    ⭐ Solvencia Pro &bull; Ilimitado
+                </span>
+            <?php else: ?>
+                <span style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; padding: 3px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;" title="Límite mensual gratuito de 3 empresas">
+                    🟢 <?= (int)($riskQuota['views_used'] ?? 1) ?> de 3 consultas este mes
+                </span>
+            <?php endif; ?>
+        </div>
         
         <!-- Circle -->
         <div style="width: 160px; height: 160px; border-radius: 50%; border: 12px solid <?= $color ?>; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 24px; background: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.05);">
@@ -123,3 +134,51 @@ $riskLevelText = $riskProfile['data']['risk_level'] ?? $label;
 
     </div>
 </div>
+
+<!-- CTA BANNER: DESCARGAR INFORME DE RIESGO EN PDF -->
+<?php 
+$compBtnId = !empty($company['id']) ? (int)$company['id'] : 0; 
+$compNameStr = !empty($company['name']) ? $company['name'] : 'esta empresa';
+?>
+<div style="margin-top: 24px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 16px; padding: 24px 28px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12); border: 1px solid #334155;">
+    <div style="flex: 1; min-width: 260px;">
+        <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); color: #93c5fd; padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Dictamen Oficial Descargable
+        </div>
+        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.3px;">
+            Descargar Informe Oficial de Riesgo en PDF
+        </h4>
+        <p style="margin: 0; color: #94a3b8; font-size: 0.9rem; line-height: 1.4;">
+            Obtén el dictamen ejecutivo con certificación de solvencia, semáforo de riesgo y detalle de eventos BORME listo para adjuntar a tu expediente de cliente.
+        </p>
+        <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; color: #cbd5e1; font-size: 0.8rem; font-weight: 500;">
+            <span style="display: flex; align-items: center; gap: 5px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Descarga instantánea en 1 clic
+            </span>
+            <span style="display: flex; align-items: center; gap: 5px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Factura deducible con IVA español
+            </span>
+        </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+        <?php if (!empty($riskQuota['is_subscriber'])): ?>
+            <a href="<?= site_url('empresa/export-risk/' . $compBtnId) ?>" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 14px 24px; border: none; border-radius: 12px; font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); text-decoration: none;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)';">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Descargar Informe en PDF 📥
+            </a>
+            <span style="color: #6ee7b7; font-size: 0.75rem; font-weight: 600;">⭐ Incluido en tu plan Solvencia Pro</span>
+        <?php else: ?>
+            <button type="button" onclick="openRiskPdfModal(<?= $compBtnId ?>, '<?= esc($company['cif'] ?? '') ?>');" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 14px 24px; border: none; border-radius: 12px; font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); text-decoration: none;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 129 rgba(16, 185, 129, 0.4)';">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Descargar Informe (3,90 € + IVA)
+            </button>
+            <span style="color: #64748b; font-size: 0.75rem;">Pago seguro vía Stripe &bull; Sin permanencia</span>
+        <?php endif; ?>
+    </div>
+</div>
+
+

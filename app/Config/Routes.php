@@ -523,6 +523,8 @@ $routes->post('company/rate', 'Company::submitRating');
 $routes->post('company/rate_feedback', 'Company::submitRatingFeedback');
 
 $routes->get('empresa/export/(:num)', 'Company::exportPdf/$1');
+$routes->get('empresa/export-risk/(:num)', 'Company::exportRiskPdf/$1');
+$routes->get('empresa/preview-risk/(:num)', 'Company::previewRiskPdf/$1');
 $routes->get('empresa/preview-premium/(:num)', 'Company::previewPremiumPdf/$1');
 $routes->post('empresa/checkout-premium-pdf', 'Company::checkoutPremiumPdf');
 $routes->post('empresa/update-premium-pdf', 'Company::updatePremiumPdf');

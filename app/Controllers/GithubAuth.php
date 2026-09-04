@@ -31,6 +31,10 @@ class GithubAuth extends BaseController
             return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_27'));
         }
 
+        if ($this->request->getGet('intent')) {
+            session()->set('signup_intent', trim((string)$this->request->getGet('intent')));
+        }
+
         $url = "https://github.com/login/oauth/authorize?client_id={$this->clientId}&redirect_uri={$this->redirectUri}&scope=user:email";
         return redirect()->to($url);
     }
@@ -142,18 +146,22 @@ class GithubAuth extends BaseController
             $apiKey = bin2hex(random_bytes(16)); // not 'sk_' actually wait, it was $apiKey
             $host = $this->request->getServer('HTTP_HOST') ?? '';
             $lang = (strpos((string)$host, 'spaincompanyapi') !== false) ? 'en' : 'es';
+            $intent = session()->get('signup_intent') ?: 'api';
+            session()->remove('signup_intent');
 
             $userData = [
-                'name'          => $name,
-                'email'         => $email,
-                'lang'          => $lang,
-                'github_id'     => $githubId,
-                'avatar'        => $avatar,
-                'api_key'       => $apiKey,
-                'is_active'     => 1,
-                'api_access'    => 1,
-                'source_app'    => 'apiempresas',
-                'password_hash' => password_hash(bin2hex(random_bytes(10)), PASSWORD_DEFAULT) // Password aleatorio
+                'name'              => $name,
+                'email'             => $email,
+                'lang'              => $lang,
+                'github_id'         => $githubId,
+                'avatar'            => $avatar,
+                'api_key'           => $apiKey,
+                'is_active'         => 1,
+                'api_access'        => 1,
+                'source_app'        => 'apiempresas',
+                'signup_intent'     => $intent,
+                'preferred_product' => ($intent === 'radar') ? 'radar' : 'api',
+                'password_hash'     => password_hash(bin2hex(random_bytes(10)), PASSWORD_DEFAULT) // Password aleatorio
             ];
 
             $userId = $this->userModel->insert($userData);

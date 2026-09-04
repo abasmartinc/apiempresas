@@ -33,11 +33,7 @@ $siteUrl = rtrim(site_url('/'), '/');     // ej: https://apiempresas.es  o  http
 $homeUrl = $siteUrl . '/';
 
 // Canonical: si no viene, usa URL actual sin querystring
-$canonicalUrl = $canonical ?? (function () use ($siteUrl) {
-    $uri = $_SERVER['REQUEST_URI'] ?? '/';
-    $uriNoQuery = explode('?', $uri, 2)[0];
-    return $siteUrl . $uriNoQuery;
-})();
+$canonicalUrl = $canonical ?? current_url();
 
 // Assets
 $logoUrl = $logoUrl ?? ($siteUrl . '/logo.png');
@@ -208,7 +204,7 @@ $enUrl = str_replace(['apiempresas.es', 'apiempresas.local'], ['spaincompanyapi.
       "url": "<?= esc($homeUrl) ?>",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "description": "<?= esc($seoDesc) ?>",
+      "description": "<?= esc($defaultDesc) ?>",
       "publisher": { "@id": "<?= esc($homeUrl) ?>#org" },
       "image": "<?= esc($ogImage) ?>",
       "offers": [
@@ -231,7 +227,7 @@ $enUrl = str_replace(['apiempresas.es', 'apiempresas.local'], ['spaincompanyapi.
         "@type": "Country",
         "name": "España"
       },
-      "description": "<?= esc($seoDesc) ?>"
+      "description": "<?= esc($defaultDesc) ?>"
     }
   ]
 }

@@ -966,7 +966,7 @@
 
                 <!-- CTAs -->
                 <div class="api-hero-actions">
-                    <a href="<?= site_url('register') ?>" class="api-hero-btn-primary">
+                    <a href="<?= site_url('register?intent=api') ?>" class="api-hero-btn-primary">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
                         Probar API gratis
                     </a>
@@ -1670,7 +1670,7 @@
                                 </svg> Grafos de Poder Societario</li>
                         </ul>
 
-                        <a href="<?= site_url('register') ?>" class="api-pricing-btn primary">Activar Plan Pro</a>
+                        <a href="<?= site_url('register?intent=api&plan=pro') ?>" class="api-pricing-btn primary">Activar Plan Pro</a>
                     </div>
 
                     <!-- BUSINESS -->
@@ -1704,7 +1704,7 @@
                                 </svg> Soporte Prioritario Slack</li>
                         </ul>
 
-                        <a href="<?= site_url('register') ?>" class="api-pricing-btn">Activar Business</a>
+                        <a href="<?= site_url('register?intent=api&plan=business') ?>" class="api-pricing-btn">Activar Business</a>
                     </div>
                 </div>
 
@@ -2044,7 +2044,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
 
                         <!-- CTA Button + disclaimer stacked -->
                         <div style="display: flex; flex-direction: column; align-items: center; gap: 14px;">
-                            <a href="<?= site_url('register') ?>"
+                            <a href="<?= site_url('register?intent=api') ?>"
                                 style="display: inline-block; background: linear-gradient(135deg, #facc15 0%, #f97316 100%); color: #0b1020; font-weight: 900; font-size: 1.05rem; padding: 18px 48px; border-radius: 16px; text-decoration: none; box-shadow: 0 10px 30px -5px rgba(15,23,42,0.45); transition: all 0.3s ease; letter-spacing: 0.01em;">
                                 Obtener API Key gratis
                             </a>

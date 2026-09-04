@@ -95,34 +95,34 @@ class Company extends BaseController
         }
         
         if ($isEn) {
-            $title = "{$name} - VAT {$cif}, Phone, Address and Directors";
+            $title = "{$name} - VAT {$cif}, Solvency, Phone & Directors";
             if ($prov) $title .= " | {$prov}";
             $title .= " - SpainCompanyAPI.com";
 
-            $desc = "All commercial information for {$name}";
+            $desc = "Commercial and solvency report for {$name}";
             if ($cif) {
                 $desc .= " (VAT {$cif})";
             }
             if ($prov) {
                 $desc .= " in {$prov}";
             }
-            $desc .= ". Get the phone number, address, board members, financials, and BORME registry acts.";
+            $desc .= ". Check credit risk scoring, financials, board members, and official BORME registry acts.";
         } else {
-            $title = "{$name} - CIF {$cif}, Teléfono, Dirección y Cargos";
+            $title = "{$name} - CIF {$cif}, Solvencia, Teléfono y BORME";
             if ($prov) $title .= " | {$prov}";
             $title .= " - APIEmpresas.es";
 
-            $desc = "Toda la información mercantil de {$name}";
+            $desc = "Informe mercantil y solvencia de {$name}";
             if ($cif) {
                 $desc .= " (CIF {$cif})";
             }
             if ($prov) {
                 $desc .= " en {$prov}";
             }
-            $desc .= ". Conoce su teléfono, dirección, cargos directivos, balances y actos en el BORME.";
+            $desc .= ". Consulta su scoring de riesgo de impago, teléfono, dirección, directivos, balances y actos en el BORME.";
         }
         
-        $desc = character_limiter($desc, 155, '');
+        $desc = character_limiter($desc, 160, '');
 
         // Related companies
         $related = $this->companyModel->getRelated(
@@ -420,6 +420,9 @@ class Company extends BaseController
 
         // --- RISK PROFILE LOGIC ---
         $riskProfile = null;
+        $userId = (int)session('user_id');
+        $riskQuota = $this->getRiskViewQuota($userId, (string)$cif);
+
         if (!empty($cif)) {
             $riskRow = $db->table('company_risk_profiles')->where('cif', $cif)->get()->getRowArray();
             if ($riskRow) {
@@ -435,6 +438,7 @@ class Company extends BaseController
             'companyName'      => $name,
             'company'          => $company,
             'riskProfile'      => $riskProfile,
+            'riskQuota'        => $riskQuota,
             'holdingData'      => $holdingData ?? null,
             'holdingCompanies' => $holdingCompanies ?? [],
             'holdingGraphData' => $holdingGraphData ?? null,
@@ -730,6 +734,139 @@ class Company extends BaseController
     }
 
     /**
+     * Exporta el Dictamen de Riesgo y Solvencia en PDF
+     */
+    public function exportRiskPdf($id)
+    {
+        $id = (int)$id;
+        $company = $this->companyModel->getById($id);
+        if (!$company) {
+            throw PageNotFoundException::forPageNotFound();
+        }
+
+        $userId = (int)session('user_id');
+        $riskQuota = $this->getRiskViewQuota($userId, (string)($company['cif'] ?? ''));
+
+        if (!$riskQuota['is_subscriber']) {
+            return redirect()->to(site_url('empresa/' . $company['id']))->with('error', 'Esta descarga directa requiere suscripción activa a Solvencia Pro.');
+        }
+
+        $contracts = [];
+        $subsidies = [];
+        $riskProfile = null;
+        if (!empty($company['cif'])) {
+            $db = \Config\Database::connect();
+            $contracts = $db->table('company_contracts')
+                ->where('company_cif', $company['cif'])
+                ->orderBy('fecha_adjudicacion', 'DESC')
+                ->get()->getResultArray();
+                
+            $subsidies = $db->table('company_subsidies')
+                ->where('company_cif', $company['cif'])
+                ->orderBy('fecha_concesion', 'DESC')
+                ->get()->getResultArray();
+                
+            $riskRow = $db->table('company_risk_profiles')->where('cif', $company['cif'])->get()->getRowArray();
+            if ($riskRow) {
+                $riskProfile = $riskRow;
+                if (!empty($riskProfile['risk_profile'])) {
+                    $riskProfile['data'] = json_decode($riskProfile['risk_profile'], true);
+                }
+            }
+        }
+
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
+        
+        $dompdf = new Dompdf($options);
+        
+        $html = view('reports/risk_pdf_report', [
+            'company'         => $company,
+            'riskProfile'     => $riskProfile,
+            'contracts'       => $contracts,
+            'subsidies'       => $subsidies,
+            'brandName'       => 'APIEmpresas',
+            'brandColor'      => '#0f172a',
+            'brandFooterText' => 'Documento confidencial generado por APIEmpresas.'
+        ]);
+
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'informe_riesgo_' . url_title($company['name'], '_', true) . '.pdf';
+        
+        return $this->response->setHeader('Content-Type', 'application/pdf')
+                              ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+                              ->setHeader('X-Robots-Tag', 'noindex, nofollow')
+                              ->setBody($dompdf->output());
+    }
+
+    /**
+     * Previsualización online del Informe de Riesgo en PDF
+     */
+    public function previewRiskPdf($id)
+    {
+        $id = (int)$id;
+        $company = $this->companyModel->getById($id);
+        if (!$company) {
+            throw PageNotFoundException::forPageNotFound();
+        }
+
+        $contracts = [];
+        $subsidies = [];
+        $riskProfile = null;
+        if (!empty($company['cif'])) {
+            $db = \Config\Database::connect();
+            $contracts = $db->table('company_contracts')
+                ->where('company_cif', $company['cif'])
+                ->orderBy('fecha_adjudicacion', 'DESC')
+                ->get()->getResultArray();
+                
+            $subsidies = $db->table('company_subsidies')
+                ->where('company_cif', $company['cif'])
+                ->orderBy('fecha_concesion', 'DESC')
+                ->get()->getResultArray();
+                
+            $riskRow = $db->table('company_risk_profiles')->where('cif', $company['cif'])->get()->getRowArray();
+            if ($riskRow) {
+                $riskProfile = $riskRow;
+                if (!empty($riskProfile['risk_profile'])) {
+                    $riskProfile['data'] = json_decode($riskProfile['risk_profile'], true);
+                }
+            }
+        }
+
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
+        
+        $dompdf = new Dompdf($options);
+        
+        $html = view('reports/risk_pdf_report', [
+            'company'         => $company,
+            'riskProfile'     => $riskProfile,
+            'contracts'       => $contracts,
+            'subsidies'       => $subsidies,
+            'brandName'       => 'APIEmpresas',
+            'brandColor'      => '#0f172a',
+            'brandFooterText' => 'Documento confidencial generado por APIEmpresas.'
+        ]);
+
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'informe_riesgo_previsualizacion.pdf';
+        
+        return $this->response->setHeader('Content-Type', 'application/pdf')
+                              ->setHeader('Content-Disposition', 'inline; filename="' . $filename . '"')
+                              ->setHeader('X-Robots-Tag', 'noindex, nofollow')
+                              ->setBody($dompdf->output());
+    }
+
+    /**
      * Endpoint AJAX para guardar la valoración de una empresa
      */
     public function submitRating()
@@ -908,18 +1045,42 @@ class Company extends BaseController
         }
 
         $companyId = (int)$request->getPost('company_id');
-        $agencyName = trim((string)$request->getPost('agency_name'));
-        $brandColor = trim((string)$request->getPost('brand_color'));
+        $reportType = trim((string)$request->getPost('report_type')) ?: 'risk';
+        $agencyName = trim((string)$request->getPost('agency_name')) ?: 'APIEmpresas';
+        $brandColor = trim((string)$request->getPost('brand_color')) ?: '#0f172a';
         $footerText = trim((string)$request->getPost('footer_text'));
         $email = trim((string)$request->getPost('email'));
 
-        if ($companyId <= 0 || empty($agencyName)) {
-            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Datos inválidos. El nombre de la agencia es obligatorio.']);
+        if ($companyId <= 0) {
+            $cifParam = trim((string)$request->getPost('cif'));
+            if (!empty($cifParam)) {
+                $cComp = $this->companyModel->where('cif', $cifParam)->first();
+                if ($cComp) {
+                    $companyId = (int)$cComp['id'];
+                }
+            }
+        }
+
+        if ($companyId <= 0) {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Identificador de empresa no válido.']);
         }
 
         $company = $this->companyModel->getById($companyId);
         if (!$company) {
             return $this->response->setStatusCode(404)->setJSON(['status' => 'error', 'message' => 'Empresa no encontrada']);
+        }
+
+        // Tag report type in footer_text for order reconstruction
+        if ($reportType === 'risk') {
+            $footerText = '[RISK_REPORT] ' . ($footerText ?: 'Documento generado por ' . $agencyName);
+            $unitAmount = 390; // 3,90 € + IVA
+            $productTitle = 'Informe de Riesgo y Solvencia - ' . $company['name'];
+            $productDesc = 'Dictamen de Estabilidad Societaria y Alertas BORME (PDF)';
+        } else {
+            $footerText = ($footerText ?: 'Documento generado por ' . $agencyName);
+            $unitAmount = 590; // 5,90 € + IVA
+            $productTitle = 'Dossier Completo 360º - ' . $company['name'];
+            $productDesc = 'Dossier Mercantil Integral, BORME y Riesgo (PDF)';
         }
 
         // Handle Image Upload
@@ -978,10 +1139,10 @@ class Company extends BaseController
                 'line_items' => [[
                     'price_data' => [
                         'currency' => 'eur',
-                        'unit_amount' => 390, // 3,90 €
+                        'unit_amount' => $unitAmount,
                         'product_data' => [
-                            'name' => 'Informe Marca Blanca - ' . $company['name'],
-                            'description' => 'Dossier Ejecutivo Premium (PDF)',
+                            'name' => $productTitle,
+                            'description' => $productDesc,
                         ],
                     ],
                     'quantity' => 1,
@@ -1256,20 +1417,43 @@ class Company extends BaseController
         
         $dompdf = new \Dompdf\Dompdf($options);
         
-        $html = view('reports/company_pdf_premium', [
-            'company'         => $company,
-            'administrators'  => $filteredAdmins,
-            'bormePosts'      => $this->bormePostsModel->getByCompanyId($companyId),
-            'radarScore'      => $dynamicScoreData,
-            'contracts'       => $contracts,
-            'subsidies'       => $subsidies,
-            'riskProfile'     => $riskProfile,
-            'brandColor'      => $order['brand_color'] ?: '#0f172a',
-            'brandName'       => $order['agency_name'],
-            'brandFooterText' => $order['footer_text'],
-            'brandLogoBase64' => $brandLogoBase64,
-            'qrBase64'        => $qrBase64
-        ]);
+        $isRiskReport = strpos($order['footer_text'] ?? '', '[RISK_REPORT]') !== false;
+        $cleanFooterText = trim(str_replace('[RISK_REPORT]', '', $order['footer_text'] ?? ''));
+        if (empty($cleanFooterText)) {
+            $cleanFooterText = 'Documento generado por ' . ($order['agency_name'] ?: 'APIEmpresas');
+        }
+
+        if ($isRiskReport) {
+            $html = view('reports/risk_pdf_report', [
+                'company'         => $company,
+                'riskProfile'     => $riskProfile,
+                'contracts'       => $contracts,
+                'subsidies'       => $subsidies,
+                'brandColor'      => $order['brand_color'] ?: '#0f172a',
+                'brandName'       => $order['agency_name'] ?: 'APIEmpresas',
+                'brandFooterText' => $cleanFooterText,
+                'brandLogoBase64' => $brandLogoBase64
+            ]);
+            $filenamePrefix = 'informe_riesgo_';
+            $emailSubject = 'Tu Informe de Riesgo y Solvencia - ' . $company['name'];
+        } else {
+            $html = view('reports/company_pdf_premium', [
+                'company'         => $company,
+                'administrators'  => $filteredAdmins,
+                'bormePosts'      => $this->bormePostsModel->getByCompanyId($companyId),
+                'radarScore'      => $dynamicScoreData,
+                'contracts'       => $contracts,
+                'subsidies'       => $subsidies,
+                'riskProfile'     => $riskProfile,
+                'brandColor'      => $order['brand_color'] ?: '#0f172a',
+                'brandName'       => $order['agency_name'] ?: 'APIEmpresas',
+                'brandFooterText' => $cleanFooterText,
+                'brandLogoBase64' => $brandLogoBase64,
+                'qrBase64'        => $qrBase64
+            ]);
+            $filenamePrefix = 'dossier_completo_';
+            $emailSubject = 'Tu Dossier Completo 360º - ' . $company['name'];
+        }
 
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
@@ -1288,8 +1472,8 @@ class Company extends BaseController
             $emailService = \Config\Services::email();
             $emailService->setFrom('noreply@apiempresas.es', 'APIEmpresas');
             $emailService->setTo($order['email']);
-            $emailService->setSubject('Tu Informe Premium Marca Blanca - ' . $company['name']);
-            $emailService->setMessage('Hola,<br><br>Adjuntamos el informe mercantil premium que acabas de generar para <b>' . esc($company['name']) . '</b>.<br><br>Un saludo.');
+            $emailService->setSubject($emailSubject);
+            $emailService->setMessage('Hola,<br><br>Adjuntamos el informe que acabas de generar para <b>' . esc($company['name']) . '</b>.<br><br>Un saludo.');
             $emailService->attach($filePath);
             $emailService->send();
             
@@ -1298,7 +1482,7 @@ class Company extends BaseController
         }
 
         return $this->response->setHeader('Content-Type', 'application/pdf')
-                              ->setHeader('Content-Disposition', 'attachment; filename="informe_marca_blanca_' . $company['cif'] . '.pdf"')
+                              ->setHeader('Content-Disposition', 'attachment; filename="' . $filenamePrefix . ($company['cif'] ?? $company['id']) . '.pdf"')
                               ->setHeader('X-Robots-Tag', 'noindex, nofollow')
                               ->setBody($pdfContent);
     }
@@ -1329,8 +1513,42 @@ class Company extends BaseController
 
         $db = \Config\Database::connect();
         
+        $company = $this->companyModel->where('cif', $cif)->first();
+        if (!$company) {
+            $company = ['id' => 0, 'name' => 'Empresa', 'cif' => $cif];
+        }
+
+        $userId = (int)session('user_id');
+        $riskQuota = $this->getRiskViewQuota($userId, (string)$cif);
+
+        if (!$riskQuota['allowed']) {
+            $paywallHtml = view('partials/company_risk_paywall', [
+                'company'   => $company,
+                'riskQuota' => $riskQuota
+            ]);
+
+            return $this->response->setJSON([
+                'logged_in'         => true,
+                'limit_reached'     => true,
+                'risk_quota'        => $riskQuota,
+                'risk_profile_html' => $paywallHtml
+            ]);
+        }
+
+        $contracts = [];
+        $subsidies = [];
         $riskProfile = null;
         if (!empty($cif)) {
+            $contracts = $db->table('company_contracts')
+                ->where('company_cif', $cif)
+                ->orderBy('fecha_adjudicacion', 'DESC')
+                ->get()->getResultArray();
+                
+            $subsidies = $db->table('company_subsidies')
+                ->where('company_cif', $cif)
+                ->orderBy('fecha_concesion', 'DESC')
+                ->get()->getResultArray();
+
             $riskRow = $db->table('company_risk_profiles')->where('cif', $cif)->get()->getRowArray();
             if ($riskRow) {
                 $riskProfile = $riskRow;
@@ -1342,13 +1560,118 @@ class Company extends BaseController
 
         $riskProfileHtml = view('partials/company_risk_profile', [
             'riskProfile' => $riskProfile,
-            'company' => ['registro_mercantil' => $cif]
+            'company'     => $company,
+            'contracts'   => $contracts,
+            'subsidies'   => $subsidies,
+            'riskQuota'   => $riskQuota
         ]);
 
         return $this->response->setJSON([
-            'logged_in' => true,
+            'logged_in'         => true,
+            'limit_reached'     => false,
+            'risk_quota'        => $riskQuota,
             'risk_profile_html' => $riskProfileHtml
         ]);
+    }
+
+    /**
+     * Calcula la cuota de consultas de perfil de riesgo para el usuario en el mes actual.
+     */
+    private function getRiskViewQuota(int $userId, string $cif): array
+    {
+        if ($userId <= 0) {
+            return [
+                'allowed'       => false,
+                'reason'        => 'unauthenticated',
+                'is_subscriber' => false,
+                'views_used'    => 0,
+                'views_limit'   => 3
+            ];
+        }
+
+        // 1. Verificar si tiene suscripción activa ESPECÍFICA para el producto de Riesgo / Solvencia (risk_pro o bundle)
+        $db = \Config\Database::connect();
+        $activeRiskSub = $db->table('user_subscriptions')
+            ->select('user_subscriptions.*, api_plans.name as plan_name, api_plans.slug as plan_slug')
+            ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id')
+            ->where('user_subscriptions.user_id', $userId)
+            ->groupStart()
+                ->where('api_plans.product_type', 'risk')
+                ->orWhere('api_plans.product_type', 'bundle')
+                ->orWhere('api_plans.slug', 'risk_pro')
+            ->groupEnd()
+            ->groupStart()
+                ->where('user_subscriptions.status', 'active')
+                ->orGroupStart()
+                    ->where('user_subscriptions.status', 'canceled')
+                    ->where('user_subscriptions.current_period_end >', date('Y-m-d H:i:s'))
+                ->groupEnd()
+            ->groupEnd()
+            ->orderBy('FIELD(user_subscriptions.status, "active", "canceled")', 'ASC', false)
+            ->orderBy('user_subscriptions.current_period_end', 'DESC')
+            ->get()->getRow();
+
+        if ($activeRiskSub) {
+            return [
+                'allowed'       => true,
+                'is_subscriber' => true,
+                'plan_name'     => $activeRiskSub->plan_name ?? 'Solvencia Pro',
+                'views_used'    => 0,
+                'views_limit'   => 'unlimited'
+            ];
+        }
+
+        // 2. Para usuarios gratuitos o de otros planes (API Pro, etc.): límite de 3 empresas distintas al mes natural
+        $db = \Config\Database::connect();
+        $startOfMonth = date('Y-m-01 00:00:00');
+        
+        $viewsThisMonth = $db->table('user_events')
+            ->select('trigger_type')
+            ->where('user_id', $userId)
+            ->where('event_type', 'view_risk_profile')
+            ->where('created_at >=', $startOfMonth)
+            ->groupBy('trigger_type')
+            ->get()->getResultArray();
+
+        $distinctCifs = array_filter(array_map('trim', array_column($viewsThisMonth, 'trigger_type')));
+        $distinctCount = count($distinctCifs);
+        $cleanCif = strtoupper(trim($cif));
+        $alreadyViewed = (!empty($cleanCif) && in_array($cleanCif, array_map('strtoupper', $distinctCifs)));
+
+        if ($alreadyViewed) {
+            return [
+                'allowed'          => true,
+                'is_subscriber'    => false,
+                'already_unlocked' => true,
+                'views_used'       => $distinctCount,
+                'views_limit'      => 3
+            ];
+        }
+
+        if ($distinctCount < 3) {
+            // Registrar el evento de consulta para esta nueva empresa
+            if (!empty($cleanCif)) {
+                $userEventsModel = new \App\Models\UserEventsModel();
+                $userEventsModel->logEvent($userId, 'view_risk_profile', $cleanCif);
+            }
+
+            return [
+                'allowed'          => true,
+                'is_subscriber'    => false,
+                'already_unlocked' => false,
+                'views_used'       => $distinctCount + 1,
+                'views_limit'      => 3
+            ];
+        }
+
+        // Límite de 3 consultas alcanzado
+        return [
+            'allowed'       => false,
+            'reason'        => 'limit_reached',
+            'is_subscriber' => false,
+            'views_used'    => 3,
+            'views_limit'   => 3
+        ];
     }
 
 }

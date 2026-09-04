@@ -1047,7 +1047,7 @@
         </div>
 
         <div class="hero-cta-row">
-          <a href="<?=site_url('register') ?>" class="btn primary hero-cta-primary">Empieza gratis con la API</a>
+          <a href="<?=site_url('register?intent=api') ?>" class="btn primary hero-cta-primary">Empieza gratis con la API</a>
           <a href="<?=site_url('documentation') ?>" class="btn ghost hero-cta-ghost">Ver documentación</a>
         </div>
 
@@ -1246,7 +1246,7 @@
                 </div>
 
                 <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 14px;">
-                    <a href="<?=site_url('register') ?>" class="btn primary" style="padding: 16px 32px; font-size: 16px; font-weight: 950; border-radius: 14px; box-shadow: 0 15px 30px rgba(33, 82, 255, 0.2);">
+                    <a href="<?=site_url('register?intent=api') ?>" class="btn primary" style="padding: 16px 32px; font-size: 16px; font-weight: 950; border-radius: 14px; box-shadow: 0 15px 30px rgba(33, 82, 255, 0.2);">
                         Empieza gratis con la API
                     </a>
                     <a href="<?=site_url('documentation') ?>" class="btn ghost" style="padding: 16px 32px; font-size: 16px; font-weight: 950; border-radius: 14px; border: 2px solid #e2e8f0; background: white; color: var(--primary);">
@@ -1401,7 +1401,7 @@
         </p>
 
         <div style="display:flex; flex-wrap:wrap; justify-content:center; gap: 16px;">
-            <a href="<?=site_url('register') ?>" class="btn primary"
+            <a href="<?=site_url('register?intent=api') ?>" class="btn primary"
                 style="padding: 22px 50px; font-size: 18px; font-weight: 950; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(33, 82, 255, 0.35); display: flex; align-items: center; gap: 12px;">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 1 9 22 2"></polygon></svg>
                 <span>Empieza gratis con la API</span>

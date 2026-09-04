@@ -31,6 +31,10 @@ class LinkedinAuth extends BaseController
             return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_32'));
         }
 
+        if ($this->request->getGet('intent')) {
+            session()->set('signup_intent', trim((string)$this->request->getGet('intent')));
+        }
+
         $state = bin2hex(random_bytes(16));
         session()->set('linkedin_state', $state);
 
@@ -132,16 +136,21 @@ class LinkedinAuth extends BaseController
         // 3. Si sigue sin existir, crear usuario nuevo
         if (!$user) {
             $apiKey = 'sk_' . bin2hex(random_bytes(16));
+            $intent = session()->get('signup_intent') ?: 'api';
+            session()->remove('signup_intent');
+
             $userData = [
-                'name'          => $name,
-                'email'         => $email,
-                'linkedin_id'   => $linkedinId,
-                'avatar'        => $avatar,
-                'api_key'       => $apiKey,
-                'is_active'     => 1,
-                'api_access'    => 1,
-                'source_app'    => 'apiempresas',
-                'password_hash' => password_hash(bin2hex(random_bytes(10)), PASSWORD_DEFAULT)
+                'name'              => $name,
+                'email'             => $email,
+                'linkedin_id'       => $linkedinId,
+                'avatar'            => $avatar,
+                'api_key'           => $apiKey,
+                'is_active'         => 1,
+                'api_access'        => 1,
+                'source_app'        => 'apiempresas',
+                'signup_intent'     => $intent,
+                'preferred_product' => ($intent === 'radar') ? 'radar' : 'api',
+                'password_hash'     => password_hash(bin2hex(random_bytes(10)), PASSWORD_DEFAULT)
             ];
 
             $userId = $this->userModel->insert($userData);

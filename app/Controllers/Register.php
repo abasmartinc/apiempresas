@@ -39,6 +39,9 @@ class Register extends BaseController
         }
         $validation = session('validation') ?? \Config\Services::validation();
         $redirectUrl = $this->request->getGet('redirect') ?? '';
+        if ($this->request->getGet('intent')) {
+            session()->set('signup_intent', trim((string)$this->request->getGet('intent')));
+        }
 
         return view('auth/register', [
             'validation' => $validation,
@@ -57,6 +60,9 @@ class Register extends BaseController
         }
         $validation = session('validation') ?? \Config\Services::validation();
         $redirectUrl = $this->request->getGet('redirect') ?? '';
+        if ($this->request->getGet('intent')) {
+            session()->set('signup_intent', trim((string)$this->request->getGet('intent')));
+        }
 
         return view('auth/register_en', [
             'validation' => $validation,
@@ -179,7 +185,25 @@ class Register extends BaseController
         $apiKey = bin2hex(random_bytes(32));
 
         $redirectUrl = $this->request->getGet('redirect') ?? $this->request->getPost('redirect');
-        $prefProduct = (strpos((string)$redirectUrl, 'radar') !== false) ? 'radar' : 'api';
+
+        $intent = $this->request->getPost('intent') 
+            ? trim((string) $this->request->getPost('intent')) 
+            : (session()->get('signup_intent') ?: null);
+
+        if (!$intent) {
+            if (strpos((string)$redirectUrl, 'radar') !== false) {
+                $intent = 'radar';
+            } elseif (strpos((string)$redirectUrl, 'database') !== false || strpos((string)$redirectUrl, 'listado') !== false) {
+                $intent = 'database';
+            } elseif (strpos((string)$redirectUrl, 'risk') !== false || strpos((string)$redirectUrl, 'score') !== false) {
+                $intent = 'view_risk_profile';
+            } else {
+                $intent = 'api';
+            }
+        }
+        session()->remove('signup_intent');
+
+        $prefProduct = ($intent === 'radar' || strpos((string)$redirectUrl, 'radar') !== false) ? 'radar' : 'api';
         
         $host = $this->request->getServer('HTTP_HOST') ?? '';
         $lang = (strpos((string)$host, 'spaincompanyapi') !== false) ? 'en' : 'es';
@@ -193,7 +217,7 @@ class Register extends BaseController
             'is_active' => 1,
             'api_access' => 1,
             'source_app' => 'apiempresas', // Default source
-            'signup_intent' => $this->request->getPost('intent') ? trim((string) $this->request->getPost('intent')) : null,
+            'signup_intent' => $intent,
             'preferred_product' => $prefProduct,
             'unsuscribe' => $this->request->getPost('no_marketing') ? 1 : 0,
             'created_at' => date('Y-m-d H:i:s'),
@@ -365,6 +389,26 @@ class Register extends BaseController
         $password = bin2hex(random_bytes(8)); // Temporary password
         $token = bin2hex(random_bytes(32)); // Reset token for setting password
         $expires = date('Y-m-d H:i:s', strtotime('+48 hours'));
+        $redirect = $this->request->getPost('redirect') ?: 'billing/checkout';
+
+        $intent = $this->request->getPost('intent') 
+            ? trim((string) $this->request->getPost('intent')) 
+            : (session()->get('signup_intent') ?: null);
+
+        if (!$intent) {
+            if (strpos($redirect, 'radar') !== false) {
+                $intent = 'radar';
+            } elseif (strpos($redirect, 'database') !== false || strpos($redirect, 'listado') !== false) {
+                $intent = 'database';
+            } elseif (strpos($redirect, 'risk') !== false || strpos($redirect, 'score') !== false) {
+                $intent = 'view_risk_profile';
+            } else {
+                $intent = 'api';
+            }
+        }
+        session()->remove('signup_intent');
+
+        $prefProduct = ($intent === 'radar' || strpos($redirect, 'radar') !== false) ? 'radar' : 'api';
 
         $host = $this->request->getServer('HTTP_HOST') ?? '';
         $lang = (strpos((string)$host, 'spaincompanyapi') !== false) ? 'en' : 'es';
@@ -379,7 +423,8 @@ class Register extends BaseController
             'is_active' => 1,
             'api_access' => 1,
             'source_app' => 'apiempresas',
-            'signup_intent' => $this->request->getPost('intent') ? trim((string) $this->request->getPost('intent')) : null,
+            'signup_intent' => $intent,
+            'preferred_product' => $prefProduct,
             'unsuscribe' => $this->request->getPost('no_marketing') ? 1 : 0,
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),

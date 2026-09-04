@@ -52,6 +52,7 @@ class QuickUnlock extends BaseController
             'is_active' => 1,
             'api_access' => 1,
             'source_app' => 'apiempresas',
+            'signup_intent' => 'api',
             'preferred_product' => 'api',
             'created_at' => date('Y-m-d H:i:s'),
         ]);

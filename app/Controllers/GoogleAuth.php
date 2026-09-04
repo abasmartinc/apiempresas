@@ -40,6 +40,9 @@ class GoogleAuth extends BaseController
         if ($this->request->getGet('intent')) {
             session()->set('signup_intent', trim((string)$this->request->getGet('intent')));
         }
+        if ($this->request->getGet('redirect')) {
+            session()->set('auth_redirect', trim((string)$this->request->getGet('redirect')));
+        }
         return redirect()->to($this->googleClient->createAuthUrl());
     }
 
@@ -114,6 +117,12 @@ class GoogleAuth extends BaseController
             // 4. Iniciar sesión
             $this->loginUser($user);
 
+            $authRedirect = session()->get('auth_redirect');
+            if ($authRedirect) {
+                session()->remove('auth_redirect');
+                return redirect()->to(site_url($authRedirect))->with('success', '¡Bienvenido, ' . $user->name . '!');
+            }
+
             return redirect()->to(site_url('dashboard'))->with('success', '¡Bienvenido de nuevo, ' . $user->name . '!');
 
         } catch (\Throwable $e) {
@@ -134,6 +143,19 @@ class GoogleAuth extends BaseController
         $lang = (strpos((string)$host, 'spaincompanyapi') !== false) ? 'en' : 'es';
 
         try {
+            if (!$intent) {
+                $redirect = (string)($this->request->getGet('redirect') ?? session()->get('auth_redirect'));
+                if (strpos($redirect, 'radar') !== false) {
+                    $intent = 'radar';
+                } elseif (strpos($redirect, 'database') !== false || strpos($redirect, 'listado') !== false) {
+                    $intent = 'database';
+                } elseif (strpos($redirect, 'risk') !== false || strpos($redirect, 'score') !== false) {
+                    $intent = 'view_risk_profile';
+                } else {
+                    $intent = 'api';
+                }
+            }
+
             // Datos del usuario
             $userData = [
                 'name'          => $name,
@@ -146,6 +168,7 @@ class GoogleAuth extends BaseController
                 'api_access'    => 1,
                 'source_app'    => 'apiempresas',
                 'signup_intent' => $intent,
+                'preferred_product' => ($intent === 'radar') ? 'radar' : 'api',
                 'created_at'    => date('Y-m-d H:i:s'),
                 'updated_at'    => date('Y-m-d H:i:s'),
                 'last_login_at' => date('Y-m-d H:i:s'),

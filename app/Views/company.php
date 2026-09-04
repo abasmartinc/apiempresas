@@ -10,13 +10,102 @@
     ]) ?>
 
     <?php
-    // Generación dinámica y segura del Schema JSON-LD para la entidad principal
-    $schemaOrg = [
-        '@context' => 'https://schema.org',
-        '@type'    => 'Organization',
-        'name'     => $companyName ?? ($company['company_name'] ?? ''),
-        'taxID'    => $companyCif ?? '',
-        'url'      => $canonical ?? current_url(),
+    // --- VARIABLES DE ENTIDAD Y PERFIL ---
+    $statusRaw = (string) ($company['status'] ?? '');
+    $isActive = strtoupper($statusRaw) === 'ACTIVA';
+    $statusClass = $isActive ? 'company-status company-status--active' : 'company-status company-status--inactive';
+
+    $cnaeFull = (!empty($company['cnae']) && !empty($company['cnae_label']))
+        ? ($company['cnae'] . ' · ' . $company['cnae_label'])
+        : ($company['cnae_label'] ?? ($company['cnae'] ?? '-'));
+
+    $jsonForCode = ['success' => true, 'data' => $company];
+    $jsonPretty = json_encode($jsonForCode, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+    $companyName = $company['name'] ?? ($company['company_name'] ?? 'Esta empresa');
+    $companyCif = $company['cif'] ?? $company['nif'] ?? 'Desconocido';
+    $companyProv = $company['province'] ?? $company['provincia'] ?? 'España';
+
+    $rawAddr = $company['address'] ?? '';
+    $companyAddr = $rawAddr ? "{$rawAddr}, {$companyProv}" : "{$companyProv}, España";
+    $companyAct = $company['cnae_label'] ?? 'su actividad registrada';
+
+    // Phone logic
+    $phone = $company['phone'] ?? $company['phone_mobile'] ?? null;
+    $phoneHtml = $phone ? "**{$phone}**" : "el teléfono de {$companyName} en nuestro informe";
+
+    $adminNames = [];
+    if (!empty($administrators)) {
+        foreach (array_slice($administrators, 0, 3) as $adm) {
+            $adminNames[] = $adm['name'];
+        }
+    }
+    $adminResponse = !empty($adminNames)
+        ? "Entre los administradores y cargos actuales de **{$companyName}** se encuentran: **" . implode(', ', $adminNames) . "**. Puede consultar el listado completo y sus funciones en la sección de Cargos Directivos de esta misma ficha."
+        : "Para conocer a los administradores y cargos de la empresa, consulte la sección específica de **Cargos Directivos** en este perfil.";
+
+    $faqs = [
+        [
+            'q' => "¿Es fiable {$companyName}?",
+            'a' => "Sí, **{$companyName}** es una sociedad registrada en España con CIF **{$companyCif}**. Su estado actual es **{$statusRaw}**, según consta en el Registro Mercantil. Puede consultar su scoring de riesgo comercial, solvencia, balance y publicaciones del BORME para verificar su fiabilidad operativa y financiera."
+        ],
+        [
+            'q' => "¿Cómo consultar la solvencia y riesgo de impago de {$companyName}?",
+            'a' => "En APIEmpresas puede obtener el **Informe de Solvencia y Riesgo Oficial de {$companyName}** (CIF {$companyCif}) en PDF. Incluye índice de riesgo (Scoring IES), límite de crédito recomendado, análisis de balance y detección de incidencias o reclamaciones societarias en el BORME."
+        ],
+        [
+            'q' => "¿Cuál es el teléfono y dirección de {$companyName}?",
+            'a' => "La empresa tiene su domicilio social en **{$companyAddr}**. Para contactar, puede llamar al {$phoneHtml} o visitar su delegación más cercana en {$companyProv}."
+        ],
+        [
+            'q' => "¿Quiénes son los administradores de {$companyName}?",
+            'a' => "{$adminResponse} Adicionalmente, en la sección de **Actos del BORME** puede revisar el histórico oficial de nombramientos, ceses y dimisiones desde su constitución."
+        ]
+    ];
+
+    // Sobrescribir con FAQs de IA si existen
+    if (!empty($company['ai_faqs'])) {
+        $aiFaqsDecoded = json_decode($company['ai_faqs'], true);
+        if (json_last_error() === JSON_ERROR_NONE && !empty($aiFaqsDecoded) && is_array($aiFaqsDecoded)) {
+            $faqs = $aiFaqsDecoded;
+        }
+    }
+
+    // --- SCHEMA JSON-LD COMPLETO (@GRAPH) ---
+    $organizationSchema = [
+        '@type' => 'Organization',
+        '@id'   => ($canonical ?? current_url()) . '#organization',
+        'name'  => $companyName,
+        'taxID' => $companyCif,
+        'url'   => $canonical ?? current_url(),
+        'description' => $meta_description ?? '',
+        'logo'  => site_url('logo.png'),
+        'knowsAbout' => [
+            'Solvencia empresarial',
+            'Scoring de riesgo de impago',
+            'Informes mercantiles',
+            $company['cnae_label'] ?? 'Actividad empresarial'
+        ],
+        'makesOffer' => [
+            [
+                '@type' => 'Offer',
+                'name' => 'Informe de Solvencia y Riesgo Oficial PDF - ' . $companyName,
+                'description' => 'Informe financiero oficial en PDF con scoring de riesgo de impago, balance, incidencias BORME y límite de crédito recomendado.',
+                'price' => '3.90',
+                'priceCurrency' => 'EUR',
+                'availability' => 'https://schema.org/InStock',
+                'url' => $canonical ?? current_url()
+            ],
+            [
+                '@type' => 'Offer',
+                'name' => 'APIEmpresas Solvencia Pro - Consultas de Riesgo Ilimitadas',
+                'description' => 'Acceso ilimitado a scorings de riesgo comercial, cartera de seguimiento BORME y balances de todas las empresas españolas.',
+                'price' => '29.00',
+                'priceCurrency' => 'EUR',
+                'availability' => 'https://schema.org/InStock',
+                'url' => $canonical ?? current_url()
+            ]
+        ]
     ];
 
     $addressData = [];
@@ -34,18 +123,119 @@
     if (!empty($addressData)) {
         $addressData['@type'] = 'PostalAddress';
         $addressData['addressCountry'] = 'ES';
-        $schemaOrg['address'] = $addressData;
+        $organizationSchema['address'] = $addressData;
     }
 
     if (!empty($company['phone'])) {
-        $schemaOrg['telephone'] = $company['phone'];
-    }
-    if (!empty($company['cnae_label'])) {
-        $schemaOrg['knowsAbout'] = $company['cnae_label'];
+        $organizationSchema['telephone'] = $company['phone'];
     }
     if (!empty($company['fecha_constitucion']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $company['fecha_constitucion'])) {
-        $schemaOrg['foundingDate'] = $company['fecha_constitucion'];
+        $organizationSchema['foundingDate'] = $company['fecha_constitucion'];
     }
+
+    if (!empty($administrators)) {
+        $organizationSchema['employee'] = [];
+        foreach (array_slice($administrators, 0, 10) as $adm) {
+            $organizationSchema['employee'][] = [
+                '@type' => 'Person',
+                'name' => $adm['name'],
+                'jobTitle' => $adm['position']
+            ];
+        }
+    }
+
+    if (!empty($ratingCount) && $ratingCount > 0) {
+        $organizationSchema['aggregateRating'] = [
+            '@type' => 'AggregateRating',
+            'ratingValue' => round($ratingAvg, 1),
+            'reviewCount' => (int)$ratingCount,
+            'bestRating' => '5',
+            'worstRating' => '1'
+        ];
+    }
+
+    $breadcrumbElements = [
+        [
+            '@type' => 'ListItem',
+            'position' => 1,
+            'name' => 'Inicio',
+            'item' => site_url()
+        ]
+    ];
+    if (!empty($provinceUrl)) {
+        $breadcrumbElements[] = [
+            '@type' => 'ListItem',
+            'position' => 2,
+            'name' => 'Directorio',
+            'item' => site_url('listado-de-empresas')
+        ];
+        $breadcrumbElements[] = [
+            '@type' => 'ListItem',
+            'position' => 3,
+            'name' => $company['province'] ?? $company['provincia'] ?? 'Provincia',
+            'item' => $provinceUrl
+        ];
+        $breadcrumbElements[] = [
+            '@type' => 'ListItem',
+            'position' => 4,
+            'name' => $companyName,
+            'item' => $canonical ?? current_url()
+        ];
+    } else {
+        $breadcrumbElements[] = [
+            '@type' => 'ListItem',
+            'position' => 2,
+            'name' => 'Buscador',
+            'item' => site_url('search_company')
+        ];
+        $breadcrumbElements[] = [
+            '@type' => 'ListItem',
+            'position' => 3,
+            'name' => $companyName,
+            'item' => $canonical ?? current_url()
+        ];
+    }
+
+    $schemaGraph = [
+        $organizationSchema,
+        [
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => $breadcrumbElements
+        ],
+        [
+            '@type' => 'FAQPage',
+            'mainEntity' => array_map(function ($item) {
+                return [
+                    '@type' => 'Question',
+                    'name' => $item['q'],
+                    'acceptedAnswer' => [
+                        '@type' => 'Answer',
+                        'text' => $item['a']
+                    ]
+                ];
+            }, $faqs)
+        ]
+    ];
+
+    if (!empty($company['lat']) && !empty($company['lng'])) {
+        $schemaGraph[] = [
+            '@type' => 'LocalBusiness',
+            '@id' => ($canonical ?? current_url()) . '#localbusiness',
+            'name' => $companyName,
+            'address' => !empty($addressData) ? $addressData : null,
+            'geo' => [
+                '@type' => 'GeoCoordinates',
+                'latitude' => $company['lng'],
+                'longitude' => $company['lat']
+            ],
+            'url' => $canonical ?? current_url()
+        ];
+    }
+
+    $schemaOrg = [
+        '@context' => 'https://schema.org',
+        '@graph' => array_values(array_filter($schemaGraph))
+    ];
     ?>
     <script type="application/ld+json">
     <?= json_encode($schemaOrg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
@@ -86,190 +276,6 @@
             </nav>
 
             <div>
-
-
-                <?php
-                $statusRaw = (string) ($company['status'] ?? '');
-                $isActive = strtoupper($statusRaw) === 'ACTIVA';
-                $statusClass = $isActive ? 'company-status company-status--active' : 'company-status company-status--inactive';
-
-                $cnaeFull = (!empty($company['cnae']) && !empty($company['cnae_label']))
-                    ? ($company['cnae'] . ' · ' . $company['cnae_label'])
-                    : ($company['cnae_label'] ?? ($company['cnae'] ?? '-'));
-
-                $jsonForCode = ['success' => true, 'data' => $company];
-                $jsonPretty = json_encode($jsonForCode, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-
-                // --- AUTO-GENERATED FAQS ---
-                $companyName = $company['name'] ?? 'Esta empresa';
-                $companyCif = $company['cif'] ?? $company['nif'] ?? 'Desconocido';
-                $companyProv = $company['province'] ?? $company['provincia'] ?? 'España';
-
-                // Dirección inteligente: si hay domicilio, úsalo. Si no, provincia.
-                $rawAddr = $company['address'] ?? $company['address'] ?? '';
-                $companyAddr = $rawAddr ? "{$rawAddr}, {$companyProv}" : "{$companyProv}, España";
-
-                $companyAct = $company['cnae_label'] ?? 'su actividad registrada';
-
-                // Phone logic
-                $phone = $company['phone'] ?? $company['phone_mobile'] ?? null;
-                $phoneHtml = $phone ? "**{$phone}**" : "el teléfono de {$companyName} en nuestro informe";
-
-                $adminNames = [];
-                if (!empty($administrators)) {
-                    foreach (array_slice($administrators, 0, 3) as $adm) {
-                        $adminNames[] = $adm['name'];
-                    }
-                }
-                $adminResponse = !empty($adminNames)
-                    ? "Entre los administradores y cargos actuales de **{$companyName}** se encuentran: **" . implode(', ', $adminNames) . "**. Puede consultar el listado completo y sus funciones en la sección de Cargos Directivos de esta misma ficha."
-                    : "Para conocer a los administradores y cargos de la empresa, consulte la sección específica de **Cargos Directivos** en este perfil.";
-
-                $faqs = [
-                    [
-                        'q' => "¿Es fiable {$companyName}?",
-                        'a' => "Sí, **{$companyName}** es una sociedad registrada en España con CIF **{$companyCif}**. Su estado actual es **{$statusRaw}**, según consta en el Registro Mercantil. Puede consultar sus cuentas anuales, informes y actos del BORME para verificar su solvencia."
-                    ],
-                    [
-                        'q' => "¿Cuál es el teléfono y dirección de {$companyName}?",
-                        'a' => "La empresa tiene su domicilio social en **{$companyAddr}**. Para contactar, puede llamar al {$phoneHtml} o visitar su delegación más cercana en {$companyProv}."
-                    ],
-                    [
-                        'q' => "¿Quiénes son los administradores de {$companyName}?",
-                        'a' => "{$adminResponse} Adicionalmente, en la sección de **Actos del BORME** puede revisar el histórico oficial de nombramientos, ceses y dimisiones desde su constitución."
-                    ]
-                ];
-
-                // Sobrescribir con FAQs de IA si existen
-                if (!empty($company['ai_faqs'])) {
-                    $aiFaqsDecoded = json_decode($company['ai_faqs'], true);
-                    if (json_last_error() === JSON_ERROR_NONE && !empty($aiFaqsDecoded) && is_array($aiFaqsDecoded)) {
-                        $faqs = $aiFaqsDecoded;
-                    }
-                }
-
-                // Schema.org Data
-                $organizationSchema = [
-                    "@type" => "Organization",
-                    "@id" => $canonical . "#organization",
-                    "name" => $companyName,
-                    "taxID" => $companyCif,
-                    "url" => $canonical,
-                    "address" => [
-                        "@type" => "PostalAddress",
-                        "streetAddress" => $rawAddr ?: null,
-                        "addressRegion" => $companyProv,
-                        "addressCountry" => "ES"
-                    ],
-                    "foundingDate" => $company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '',
-                    "description" => $meta_description ?? '',
-                    "logo" => site_url('logo.png')
-                ];
-
-                if (!empty($administrators)) {
-                    $organizationSchema['employee'] = [];
-                    foreach (array_slice($administrators, 0, 10) as $adm) {
-                        $organizationSchema['employee'][] = [
-                            "@type" => "Person",
-                            "name" => $adm['name'],
-                            "jobTitle" => $adm['position']
-                        ];
-                    }
-                }
-
-                if (!empty($ratingCount) && $ratingCount > 0) {
-                    $organizationSchema['aggregateRating'] = [
-                        "@type" => "AggregateRating",
-                        "ratingValue" => round($ratingAvg, 1),
-                        "reviewCount" => $ratingCount,
-                        "bestRating" => 5,
-                        "worstRating" => 1
-                    ];
-                }
-
-                $schemaOrg = [
-                    "@context" => "https://schema.org",
-                    "@graph" => [
-                        $organizationSchema,
-                        (!empty($company['lat']) && !empty($company['lng'])) ? [
-                            "@type" => "LocalBusiness",
-                            "@id" => $canonical . "#localbusiness",
-                            "name" => $companyName,
-                            "address" => [
-                                "@type" => "PostalAddress",
-                                "streetAddress" => $rawAddr ?: null,
-                                "addressRegion" => $companyProv,
-                                "addressCountry" => "ES"
-                            ],
-                            "geo" => [
-                                "@type" => "GeoCoordinates",
-                                "latitude" => $company['lng'], // Coords están invertidas en DB
-                                "longitude" => $company['lat']
-                            ],
-                            "url" => $canonical
-                        ] : null,
-                        [
-                            "@type" => "BreadcrumbList",
-                            "itemListElement" => [
-                                [
-                                    "@type" => "ListItem",
-                                    "position" => 1,
-                                    "name" => "Inicio",
-                                    "item" => site_url()
-                                ],
-                                    // Logic for intermediate crumb
-                                (!empty($provinceUrl) ?
-                                    [
-                                        "@type" => "ListItem",
-                                        "position" => 2,
-                                        "name" => $company['province'] ?? $company['provincia'],
-                                        "item" => $provinceUrl
-                                    ] :
-                                    [
-                                        "@type" => "ListItem",
-                                        "position" => 2,
-                                        "name" => "Buscador",
-                                        "item" => site_url('search_company')
-                                    ]),
-                                [
-                                    "@type" => "ListItem",
-                                    "position" => 3,
-                                    "name" => $companyName,
-                                    "item" => $canonical
-                                ]
-                            ]
-                        ],
-                        [
-                            "@type" => "FAQPage",
-                            "mainEntity" => array_map(function ($item) {
-                                return [
-                                    "@type" => "Question",
-                                    "name" => $item['q'],
-                                    "acceptedAnswer" => [
-                                        "@type" => "Answer",
-                                        "text" => $item['a'] // Google permite HTML básico aquí
-                                    ]
-                                ];
-                            }, $faqs)
-                        ]
-                    ]
-                ];
-
-                if (isset($ratingCount) && $ratingCount > 0) {
-                    foreach ($schemaOrg['@graph'] as &$node) {
-                        if ($node && in_array($node['@type'], ['Organization', 'LocalBusiness'])) {
-                            $node['aggregateRating'] = [
-                                "@type" => "AggregateRating",
-                                "ratingValue" => round($ratingAvg, 1),
-                                "ratingCount" => $ratingCount,
-                                "bestRating" => "5",
-                                "worstRating" => "1"
-                            ];
-                        }
-                    }
-                    unset($node);
-                }
-                ?>
                 <div style="max-width: 1200px; margin: 0 auto; padding: 0px;">
                     <!-- HERO SECTION -->
                     <div class="b2b-header-wrapper"
@@ -902,85 +908,154 @@
                             </div>
 
                             <div id="risk-profile-container" style="padding: 24px; position: relative; background: #fff; min-height: 260px;">
-                                    <!-- TEASER PARA USUARIOS PÚBLICOS -->
+                                <?php if (session('logged_in')): ?>
+                                    <?php if (!empty($riskQuota) && empty($riskQuota['allowed'])): ?>
+                                        <?= view('partials/company_risk_paywall', [
+                                            'company'   => $company,
+                                            'riskQuota' => $riskQuota
+                                        ]) ?>
+                                    <?php else: ?>
+                                        <?= view('partials/company_risk_profile', [
+                                            'riskProfile' => $riskProfile,
+                                            'company'     => $company,
+                                            'contracts'   => $contracts ?? [],
+                                            'subsidies'   => $subsidies ?? [],
+                                            'riskQuota'   => $riskQuota ?? []
+                                        ]) ?>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    <!-- TEASER PARA USUARIOS PÚBLICOS CON GANCHO BORME DINÁMICO -->
+                                    <?php 
+                                    $teaserEvents = $riskProfile['data']['canonical_events'] ?? [];
+                                    $teaserTotalAlerts = count($teaserEvents);
+                                    $teaserHighAlerts = 0;
+                                    $teaserMediumAlerts = 0;
+                                    foreach ($teaserEvents as $ev) {
+                                        $sev = strtolower($ev['severity'] ?? '');
+                                        if ($sev === 'high') $teaserHighAlerts++;
+                                        elseif ($sev === 'medium') $teaserMediumAlerts++;
+                                    }
+                                    $teaserScore = (int)($riskProfile['risk_score'] ?? 50);
+                                    $teaserColor = '#22c55e';
+                                    if ($teaserScore >= 70) $teaserColor = '#ef4444';
+                                    elseif ($teaserScore >= 30) $teaserColor = '#f59e0b';
+                                    
+                                    $slugVal = $company['slug'] ?? url_title($company['name'] ?? '', '-', true);
+                                    $redirectPath = 'empresa/' . $company['id'] . '-' . $slugVal; 
+                                    ?>
                                     <div style="padding: 20px; position: relative; display: flex; align-items: center; justify-content: center; min-height: 480px; overflow: hidden; background: #fafafa; margin: -24px; margin-bottom: 0;">
-                                        <!-- BLURRED BACKGROUND (Absolute, behind the text) -->
-                                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; filter: blur(6px); opacity: 0.6; pointer-events: none; display: flex; flex-wrap: nowrap; gap: 100px; align-items: center; justify-content: center; padding: 24px;">
-                                            <!-- Fake Score Circle -->
-                                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 180px; transform: translateX(-40px) scale(1.15);">
-                                                <div style="width: 150px; height: 150px; border-radius: 50%; border: 12px solid #f87171; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; background: #fff; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.2);">
-                                                    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                                                </div>
-                                                <span style="background: #f87171; color: #fff; padding: 8px 20px; border-radius: 999px; font-size: 1rem; font-weight: 800; letter-spacing: 1px;">
-                                                    ACCESO RESTRINGIDO
-                                                </span>
+                                        <!-- BLURRED BACKGROUND (Reflejo dinámico del score y factores reales) -->
+                                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; filter: blur(7px); opacity: 0.45; pointer-events: none; display: flex; flex-wrap: nowrap; gap: 80px; align-items: center; justify-content: center; padding: 24px;">
+                                            <!-- Score Card -->
+                                            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px 20px; text-align: center; width: 190px;">
+                                                <div style="font-size: 0.8rem; font-weight: bold; color: #64748b; margin-bottom: 12px;">NIVEL DE RIESGO</div>
+                                                <div style="width: 80px; height: 75px; background: <?= $teaserColor ?>; border-radius: 12px; margin: 0 auto 12px auto; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 2rem; font-weight: 800;"><?= $teaserScore ?></div>
+                                                <div style="font-size: 1.1rem; font-weight: bold; color: <?= $teaserColor ?>;">ANÁLISIS</div>
                                             </div>
 
-                                            <!-- Fake Factors -->
-                                            <div style="flex: 1; min-width: 340px; max-width: 500px; transform: translateX(40px) scale(1.1);">
-                                                <div style="display: flex; flex-direction: column; gap: 20px;">
-                                                    <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; display: flex; gap: 20px; align-items: center; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
-                                                        <div style="width: 56px; height: 56px; border-radius: 50%; background: #eff6ff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                                        </div>
-                                                        <div style="width: 100%; margin-top: 4px;">
-                                                            <div style="width: 80%; height: 16px; background: #cbd5e1; margin-bottom: 12px; border-radius: 4px;"></div>
-                                                            <div style="width: 50%; height: 10px; background: #22c55e; border-radius: 4px;"></div>
-                                                        </div>
+                                            <!-- Factors List -->
+                                            <div style="flex: 1; max-width: 480px; display: flex; flex-direction: column; gap: 12px;">
+                                                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; display: flex; gap: 12px; align-items: center;">
+                                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center; font-weight: bold;">!</div>
+                                                    <div style="flex: 1;">
+                                                        <div style="height: 14px; width: 60%; background: #0f172a; border-radius: 4px; margin-bottom: 6px;"></div>
+                                                        <div style="height: 10px; width: 85%; background: #cbd5e1; border-radius: 3px;"></div>
                                                     </div>
-                                                    <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; display: flex; gap: 20px; align-items: center; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
-                                                        <div style="width: 100%; margin-top: 4px;">
-                                                            <div style="width: 65%; height: 16px; background: #cbd5e1; margin-bottom: 12px; border-radius: 4px;"></div>
-                                                            <div style="width: 90%; height: 10px; background: #e2e8f0; border-radius: 4px;"></div>
-                                                        </div>
+                                                </div>
+                                                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; display: flex; gap: 12px; align-items: center;">
+                                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; font-weight: bold;">✓</div>
+                                                    <div style="flex: 1;">
+                                                        <div style="height: 14px; width: 45%; background: #0f172a; border-radius: 4px; margin-bottom: 6px;"></div>
+                                                        <div style="height: 10px; width: 70%; background: #cbd5e1; border-radius: 3px;"></div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         
-                                        <!-- FOREGROUND CONTENT (The Box) -->
-                                        <div style="position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; text-align: center; width: 540px; background: #fff; padding: 48px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08); border: 1px solid #f1f5f9;">
-                                            <div style="background: #eff6ff; color: #3b82f6; padding: 18px; border-radius: 50%; margin-bottom: 24px;">
-                                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                                            </div>
-                                            <h3 style="font-size: 1.7rem; font-weight: 800; color: #0f172a; margin-bottom: 16px; margin-top: 0; letter-spacing: -0.5px;">Contenido Protegido</h3>
-                                            <p style="color: #334155; margin-bottom: 32px; margin-top: 0; font-size: 1.05rem; line-height: 1.6; font-weight: 500; max-width: 420px;">Descubre si esta empresa tiene <strong style="color: #ef4444;">riesgos ocultos</strong> en el BORME o deudas. Crea tu cuenta para ver el análisis completo.</p>
+                                        <!-- FOREGROUND CONVERSION CARD -->
+                                        <div style="position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; max-width: 560px; background: #ffffff; padding: 36px 32px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0;">
                                             
-                                            <!-- Feature Highlights -->
-                                            <div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; padding: 20px 16px; display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 36px; box-sizing: border-box;">
-                                                <div style="display: flex; gap: 10px; align-items: center; flex: 1; justify-content: center;">
-                                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" style="flex-shrink: 0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"></polyline></svg>
-                                                    <span style="font-size: 0.8rem; color: #475569; text-align: left; line-height: 1.3;">Datos oficiales<br>del BORME</span>
+                                            <!-- DYNAMIC BORME HOOK BANNER -->
+                                            <?php if ($teaserHighAlerts > 0): ?>
+                                                <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 14px; padding: 14px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; text-align: left; width: 100%; box-sizing: border-box;">
+                                                    <div style="background: #fee2e2; color: #ef4444; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; font-weight: 800;">
+                                                        ⚠️
+                                                    </div>
+                                                    <div>
+                                                        <div style="font-weight: 800; color: #991b1b; font-size: 0.92rem; line-height: 1.3;">
+                                                            <?= $teaserTotalAlerts ?> <?= $teaserTotalAlerts === 1 ? 'incidencia societaria' : 'incidencias societarias' ?> (<?= $teaserHighAlerts ?> de gravedad alta en BORME)
+                                                        </div>
+                                                        <div style="color: #7f1d1d; font-size: 0.8rem; margin-top: 2px; line-height: 1.35;">
+                                                            Constan actos registrales relevantes que afectan a la estabilidad de <strong><?= esc(rtrim($companyName, '.')) ?></strong>.
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div style="width: 1px; height: 36px; background: #e2e8f0;"></div>
-                                                <div style="display: flex; gap: 10px; align-items: center; flex: 1; justify-content: center;">
-                                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" style="flex-shrink: 0;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                                                    <span style="font-size: 0.8rem; color: #475569; text-align: left; line-height: 1.3;">Análisis completo<br>y detallado</span>
+                                            <?php elseif ($teaserTotalAlerts > 0): ?>
+                                                <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 14px; padding: 14px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; text-align: left; width: 100%; box-sizing: border-box;">
+                                                    <div style="background: #fef3c7; color: #d97706; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; font-weight: 800;">
+                                                        🔍
+                                                    </div>
+                                                    <div>
+                                                        <div style="font-weight: 800; color: #92400e; font-size: 0.92rem; line-height: 1.3;">
+                                                            <?= $teaserTotalAlerts ?> <?= $teaserTotalAlerts === 1 ? 'observación de estabilidad societaria' : 'observaciones de estabilidad societaria' ?>
+                                                        </div>
+                                                        <div style="color: #78350f; font-size: 0.8rem; margin-top: 2px; line-height: 1.35;">
+                                                            Existen indicadores clave en el registro oficial para <strong><?= esc(rtrim($companyName, '.')) ?></strong>. Regístrate gratis para ver el desglose.
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div style="width: 1px; height: 36px; background: #e2e8f0;"></div>
-                                                <div style="display: flex; gap: 10px; align-items: center; flex: 1; justify-content: center;">
-                                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" style="flex-shrink: 0;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                                                    <span style="font-size: 0.8rem; color: #475569; text-align: left; line-height: 1.3;">Actualizado<br>continuamente</span>
+                                            <?php else: ?>
+                                                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; padding: 14px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; text-align: left; width: 100%; box-sizing: border-box;">
+                                                    <div style="background: #dcfce7; color: #16a34a; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; font-weight: 800;">
+                                                        🛡️
+                                                    </div>
+                                                    <div>
+                                                        <div style="font-weight: 800; color: #166534; font-size: 0.92rem; line-height: 1.3;">
+                                                            Dictamen de Solvencia y Scoring BORME disponible
+                                                        </div>
+                                                        <div style="color: #14532d; font-size: 0.8rem; margin-top: 2px; line-height: 1.35;">
+                                                            Evaluación algorítmica procesada en tiempo real. Crea tu cuenta gratis para ver el resultado.
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            <?php endif; ?>
 
-                                            <?php 
-                                            $slugVal = $company['slug'] ?? url_title($company['name'] ?? '', '-', true);
-                                            $redirectPath = 'empresa/' . $company['id'] . '-' . $slugVal; 
-                                            ?>
-                                            <a href="<?= site_url('register') ?>?intent=view_risk_profile&redirect=<?= urlencode($redirectPath) ?>" style="background: #0f172a; color: #fff; padding: 18px 24px; border-radius: 12px; font-weight: 800; text-decoration: none; font-size: 1.15rem; display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; box-sizing: border-box; transition: background 0.2s;" onmouseover="this.style.background='#1e293b';" onmouseout="this.style.background='#0f172a';">
-                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                                                Ver Análisis Gratis
-                                            </a>
+                                            <h3 style="font-size: 1.45rem; font-weight: 900; color: #0f172a; margin-bottom: 8px; margin-top: 0; letter-spacing: -0.5px;">
+                                                Consulta el Nivel de Riesgo Oficial
+                                            </h3>
+                                            <p style="color: #475569; margin-bottom: 20px; margin-top: 0; font-size: 0.92rem; line-height: 1.5; max-width: 440px;">
+                                                Accede al semáforo de solvencia, alertas BORME e historial de contratación pública creando tu cuenta gratis:
+                                            </p>
                                             
-                                            <div style="display: flex; align-items: center; gap: 6px; margin-top: 20px; color: #64748b; font-size: 0.85rem; font-weight: 500;">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                                                Sin tarjeta de crédito &bull; Cancelación en 1 clic
+                                            <!-- Registration CTAs -->
+                                            <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; margin-bottom: 16px;">
+                                                <!-- 1-Click Google -->
+                                                <a href="<?= site_url('auth/google') ?>?intent=view_risk_profile&redirect=<?= urlencode($redirectPath) ?>" style="background: #ffffff; color: #1e293b; border: 1.5px solid #cbd5e1; padding: 13px 20px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; box-sizing: border-box; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.03);" onmouseover="this.style.background='#f8fafc'; this.style.borderColor='#94a3b8';" onmouseout="this.style.background='#ffffff'; this.style.borderColor='#cbd5e1';">
+                                                    <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                                                    <span>Continuar con Google (1 Clic)</span>
+                                                </a>
+
+                                                <!-- Email Signup -->
+                                                <a href="<?= site_url('register') ?>?intent=view_risk_profile&redirect=<?= urlencode($redirectPath) ?>" style="background: #2563eb; color: #fff; padding: 13px 20px; border-radius: 12px; font-weight: 800; text-decoration: none; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);" onmouseover="this.style.background='#1d4ed8'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#2563eb'; this.style.transform='translateY(0)';">
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                                    <span>Registrarse con Email (3 Consultas Gratis/mes)</span>
+                                                </a>
+                                            </div>
+                                            
+                                            <div style="margin-top: 4px; text-align: center;">
+                                                <button type="button" onclick="openRiskPdfModal(<?= (int)$company['id'] ?>, '<?= esc($company['cif'] ?? '') ?>');" style="background: none; border: none; color: #2563eb; font-size: 0.85rem; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 4px;" onmouseover="this.style.color='#1d4ed8';" onmouseout="this.style.color='#2563eb';">
+                                                    o Descargar Dictamen Oficial en PDF (3,90 € + IVA)
+                                                </button>
+                                            </div>
+                                            
+                                            <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 14px; color: #64748b; font-size: 0.78rem; font-weight: 500;">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                                Sin tarjeta de crédito &bull; 3 consultas gratuitas al mes &bull; Acceso instantáneo
                                             </div>
                                         </div>
                                     </div>
-
-                                </div>
+                                <?php endif; ?>
+                            </div>
                             <!-- FOOTER / DISCLAIMER -->
                             <div style="padding: 24px 32px; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; gap: 16px; align-items: center;">
                                 <div style="width: 42px; height: 42px; border-radius: 50%; background: #fff; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.03); color: #64748b;">
@@ -998,6 +1073,7 @@
                             </div>
                         </div>
                     <?php endif; ?>
+                    <?= view('partials/risk_pdf_modal', ['company' => $company]) ?>
                     <!-- END RISK PROFILE SECTION -->
 
 
@@ -1981,11 +2057,6 @@
                     </div> <!-- /b2b-grid-content-aside -->
 
 
-                    <!-- Schema.org JSON-LD -->
-                    <script type="application/ld+json">
-                    <?= json_encode($schemaOrg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
-                </script>
-
                     <script>
                         document.addEventListener('DOMContentLoaded', function () {
                             const cifVal = document.getElementById('cif-val');
@@ -2389,25 +2460,18 @@
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1e293b;">Logotipo (PNG/JPG)</label>
                     <input type="file" name="brand_logo" accept="image/png, image/jpeg" style="width: 100%; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; font-size: 0.9rem;">
-                </div>
-
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1e293b;">Texto de pie de página</label>
-                    <input type="text" name="footer_text" placeholder="Documento confidencial generado por Global Consultores" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem;">
-                </div>
-
-                <div style="margin-bottom: 25px;">
+                             <div style="margin-bottom: 25px;">
                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1e293b;">Enviar copia al correo electrónico</label>
                     <input type="email" name="email" placeholder="tu@email.com" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem;">
                 </div>
 
                 <button type="submit" id="btn-whitelabel-submit" style="width: 100%; padding: 14px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
-                    Pagar 3,90€ + IVA y Descargar
+                    Pagar 5,90€ + IVA y Descargar
                 </button>
             </form>
         </div>
     </div>
-    
+
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('whitelabel-form');
@@ -2422,12 +2486,11 @@
                 btnSubmit.innerHTML = 'Conectando con Stripe... ⏳';
                 
                 const formData = new FormData(this);
+                formData.append('report_type', 'dossier');
                 
                 fetch('<?= site_url("empresa/checkout-premium-pdf") ?>', {
                     method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     body: formData
                 })
                 .then(response => response.json())
@@ -2440,16 +2503,16 @@
                         `;
                         window.location.href = data.checkout_url;
                     } else {
-                        alert('Error: ' + data.message);
+                        statusArea.innerHTML = `<div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px 14px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; font-size: 0.88rem; text-align: center;">⚠️ ${data.message || 'Error'}</div>`;
                         btnSubmit.disabled = false;
-                        btnSubmit.innerHTML = 'Pagar 3,90€ + IVA y Descargar';
+                        btnSubmit.innerHTML = 'Pagar 5,90€ + IVA y Descargar';
                     }
                 })
                 .catch(error => {
                     console.error(error);
-                    alert('Ocurrió un error en la conexión.');
+                    statusArea.innerHTML = `<div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px 14px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; font-size: 0.88rem; text-align: center;">⚠️ Ocurrió un error en la conexión.</div>`;
                     btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = 'Pagar 3,90€ + IVA y Descargar';
+                    btnSubmit.innerHTML = 'Pagar 5,90€ + IVA y Descargar';
                 });
             });
         }

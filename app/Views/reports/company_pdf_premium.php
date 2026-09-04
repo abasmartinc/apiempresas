@@ -655,8 +655,11 @@
                         <div style="font-size: 10pt; font-weight: bold; color: #0f172a; margin-bottom: 5px; text-transform: uppercase;">Factores Analizados</div>
                         <div style="font-size: 8pt; color: #64748b; margin-bottom: 15px;">Evaluación automática de los principales indicadores de estabilidad corporativa.</div>
                         
-                        <?php if (!empty($riskProfile['data']['flags'])): ?>
-                            <?php foreach ($riskProfile['data']['flags'] as $flag): ?>
+                        <?php 
+                        $flags = $riskProfile['data']['canonical_events'] ?? $riskProfile['data']['flags'] ?? [];
+                        ?>
+                        <?php if (!empty($flags)): ?>
+                            <?php foreach ($flags as $flag): ?>
                                 <?php 
                                 $sev = $flag['severity'] ?? 'low';
                                 if ($sev === 'high') {

@@ -77,13 +77,18 @@ class Webhook extends Controller
                     $user = $userModel->where('email', $email)->first();
                     if (!$user) {
                         $password = bin2hex(random_bytes(8));
+                        $isRadar = (strpos((string)$planSlug, 'radar') !== false) || (!empty($session->metadata->type) && $session->metadata->type === 'radar_export');
+                        $guestIntent = $isRadar ? 'radar' : 'database';
+                        $prefProduct = $isRadar ? 'radar' : 'excel_single';
+
                         $userId = $userModel->insert([
                             'name' => $session->customer_details->name ?? explode('@', $email)[0],
                             'email' => $email,
                             'password_hash' => password_hash($password, PASSWORD_DEFAULT),
                             'is_active' => 1,
                             'source_app' => 'apiempresas',
-                            'preferred_product' => 'excel_single',
+                            'signup_intent' => $guestIntent,
+                            'preferred_product' => $prefProduct,
                             'stripe_customer_id' => $stripeCustomerId,
                             'created_at' => date('Y-m-d H:i:s'),
                         ]);
@@ -175,9 +180,14 @@ class Webhook extends Controller
 
         $subscriptionModel = new UsersuscriptionsModel();
         
-        // 2. Buscar si ya tenía suscripciones activas
-        $oldSubscriptions = $subscriptionModel->where('user_id', $userId)
-                                              ->where('status', 'active')
+        // 2. Buscar si ya tenía suscripciones activas del MISMO tipo de producto (ej: solo 'risk' o solo 'api')
+        $targetProductType = $plan->product_type ?? 'api';
+        
+        $oldSubscriptions = $subscriptionModel->select('user_subscriptions.*')
+                                              ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id')
+                                              ->where('user_subscriptions.user_id', $userId)
+                                              ->where('user_subscriptions.status', 'active')
+                                              ->where('api_plans.product_type', $targetProductType)
                                               ->findAll();
 
         foreach ($oldSubscriptions as $oldSub) {
@@ -186,17 +196,18 @@ class Webhook extends Controller
                 try {
                     $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));
                     $stripe->subscriptions->cancel($oldSub->stripe_subscription_id);
-                    log_message('info', "[Webhook::stripe] Cancelada suscripción anterior en Stripe: {$oldSub->stripe_subscription_id}");
+                    log_message('info', "[Webhook::stripe] Cancelada suscripción anterior de {$targetProductType} en Stripe: {$oldSub->stripe_subscription_id}");
                 } catch (\Exception $e) {
                     log_message('error', "[Webhook::stripe] Error al cancelar suscripción anterior en Stripe: " . $e->getMessage());
                 }
             }
         }
 
-        // 3. Desactivar suscripciones anteriores en nuestra BD
-        // Nota: El ENUM no permite 'inactive', usamos '' o 'canceled'. 
-        // Para mantener coherencia con el resto del sistema, usaremos '' que es lo que el ENUM permite como fallback.
-        $subscriptionModel->where('user_id', $userId)->set(['status' => ''])->update();
+        // 3. Desactivar SOLO suscripciones anteriores del MISMO product_type en nuestra BD
+        $oldSubIds = array_column($oldSubscriptions, 'id');
+        if (!empty($oldSubIds)) {
+            $subscriptionModel->whereIn('id', $oldSubIds)->set(['status' => ''])->update();
+        }
 
         // 4. Crear nueva suscripción (Recuperamos fechas reales de Stripe)
         $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));

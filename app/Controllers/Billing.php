@@ -116,7 +116,7 @@ class Billing extends BaseController
         $period = strtolower(trim((string) ($postData['period'] ?? 'single')));
         $pm = strtolower(trim((string) ($postData['payment_method'] ?? 'stripe')));
 
-        if (!in_array($plan, ['pro', 'business', 'radar', 'copiloto_ventas', 'directory_single', 'subsidies_single', 'contracts_single', 'lookalike_single'], true)) {
+        if (!in_array($plan, ['pro', 'business', 'radar', 'risk_pro', 'copiloto_ventas', 'directory_single', 'subsidies_single', 'contracts_single', 'lookalike_single'], true)) {
             $plan = 'radar'; // default fallback for single downloads
         }
         if (!in_array($period, ['monthly', 'annual', 'single'], true)) {
@@ -861,7 +861,19 @@ class Billing extends BaseController
             return $this->renderView('billing/success_radar', $data);
         }
 
-        // 3. API Subscription Success (Pro/Business)
+        // 3. Solvencia Pro Success (Risk Plan)
+        if ($subscription && (($subscription->plan_slug ?? '') === 'risk_pro' || ($subscription->product_type ?? '') === 'risk')) {
+            $data = [
+                'plan_name' => $subscription->plan_name ?? 'Solvencia Pro',
+                'base_price' => $subscription->price_monthly ?? '29',
+                'period_name' => 'Mensual',
+                'payment_method' => 'Tarjeta (Stripe)',
+                'order_ref' => 'SUB-' . str_pad($subscription->id ?? '0', 6, '0', STR_PAD_LEFT),
+            ];
+            return $this->renderView('billing/success_risk', $data);
+        }
+
+        // 4. API Subscription Success (Pro/Business)
         if ($subscription && strtolower($subscription->plan_slug ?? '') !== 'free' && (float) ($subscription->price_monthly ?? 0) > 0) {
             $data = [
                 'plan_name' => $subscription->plan_name ?? 'Pro',

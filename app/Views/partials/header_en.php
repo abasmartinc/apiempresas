@@ -39,7 +39,7 @@
         <div class="desktop-only auth-buttons" style="display: flex; gap: 12px;">
             <?php if (!session('logged_in')): ?>
                 <a class="btn" href="/enter" style="color: #fff; text-decoration: none; font-weight: 700; font-size: 0.9rem; padding: 10px 16px; border-radius: 99px; background: rgba(255,255,255,0.1);">Log In</a>
-                <a class="btn" href="/register" style="color: #0f172a; background: #FACC15; text-decoration: none; font-weight: 800; font-size: 0.9rem; padding: 10px 20px; border-radius: 99px; box-shadow: 0 4px 14px 0 rgba(250,204,21,0.25);">Get API Key</a>
+                <a class="btn" href="/register?intent=api" style="color: #0f172a; background: #FACC15; text-decoration: none; font-weight: 800; font-size: 0.9rem; padding: 10px 20px; border-radius: 99px; box-shadow: 0 4px 14px 0 rgba(250,204,21,0.25);">Get API Key</a>
             <?php else: ?>
                 <a href="/dashboard" class="btn" style="color: #fff; text-decoration: none; font-weight: 700; font-size: 0.9rem; padding: 10px 16px; border-radius: 99px; background: rgba(255,255,255,0.1);">Dashboard</a>
             <?php endif; ?>
@@ -70,7 +70,7 @@
                 <div class="mobile-auth" style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px;">
                     <?php if (!session('logged_in')): ?>
                         <a href="/enter" class="btn" style="background: #f1f5f9; color: #0f172a; text-align: center; font-weight: 700; padding: 12px; border-radius: 12px; text-decoration: none;">Log In</a>
-                        <a href="/register" class="btn" style="background: #FACC15; color: #0f172a; text-align: center; font-weight: 700; padding: 12px; border-radius: 12px; text-decoration: none;">Get API Key</a>
+                        <a href="/register?intent=api" class="btn" style="background: #FACC15; color: #0f172a; text-align: center; font-weight: 700; padding: 12px; border-radius: 12px; text-decoration: none;">Get API Key</a>
                     <?php else: ?>
                         <a href="/dashboard" class="btn" style="background: #2563eb; color: #fff; text-align: center; font-weight: 700; padding: 12px; border-radius: 12px; text-decoration: none;">Dashboard</a>
                         <a href="/logout" class="btn" style="background: #f1f5f9; color: #475569; text-align: center; font-weight: 600; padding: 12px; border-radius: 12px; text-decoration: none;">Log out</a>

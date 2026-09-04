@@ -270,16 +270,48 @@ class EmailService
     }
 
     /**
-     * TRIGGER: monthly_usage_report
+     * TRIGGER: risk_paywall_abandoned_2h
      */
-    public function sendMonthlyUsageReport(array $userData, int $totalRequests)
+    public function sendRiskPaywallAbandoned(array $userData, array $companyData = []): array
     {
-        $hoursSaved = round(($totalRequests * 5) / 60, 1);
+        $compName = !empty($companyData['name']) ? $companyData['name'] : 'la empresa que consultaste';
+        $redirectUrl = !empty($companyData['id']) 
+            ? base_url('empresa/' . $companyData['id']) 
+            : base_url('search');
+
         $templateData = [
             'name'        => $userData['name'] ?? 'Usuario',
-            'content'     => "Este mes has realizado <b>{$totalRequests} validaciones</b> con éxito.<br><br>Gracias a la automatización de la API, has ahorrado aproximadamente <b>{$hoursSaved} horas</b> de entrada manual de datos y búsqueda en registros oficiales.<br><br>Sigue optimizando tus procesos con nosotros.",
-            'button_text' => 'Ver estadísticas detalladas',
-            'button_url'  => base_url('dashboard')
+            'content'     => "Vimos que alcanzaste el límite mensual de 3 consultas gratuitas mientras analizabas a <b>{$compName}</b>.<br><br>Si necesitas el dictamen oficial con scoring algorítmico, semáforo de riesgo y detalle de eventos BORME para cerrar una operación comercial o evaluar solvencia:<br><br>• <b>Opción 1:</b> Descarga puntual del dictamen en PDF por <b>3,90 € + IVA</b> (un 85% más económico que Informa/Axesor).<br>• <b>Opción 2:</b> Suscripción <b>Solvencia Pro (29 € / mes)</b> con consultas y dictámenes 100% ilimitados de toda España sin permanencia.<br><br>Desbloquea el informe al instante para no dejar tu análisis a medias:",
+            'button_text' => 'Desbloquear Dictamen Oficial',
+            'button_url'  => $redirectUrl
+        ];
+        return $this->sendTemplateEmail('automation_generic', $templateData, $userData['email'], ['papelo.amh@gmail.com']);
+    }
+
+    /**
+     * TRIGGER: risk_educational_savings_48h
+     */
+    public function sendRiskEducationalSavings(array $userData): array
+    {
+        $templateData = [
+            'name'        => $userData['name'] ?? 'Usuario',
+            'content'     => "La mayoría de empresas pagan entre 25 € y 35 € por cada informe mercantil en proveedores tradicionales, además de cuotas fijas o permanencias anuales.<br><br>En <b>APIEmpresas</b> hemos cambiado las reglas del sector:<br><br>✅ <b>Solvencia Pro por 29 € / mes:</b> Tarifa plana para auditar todas las empresas que quieras en España sin límites.<br>✅ <b>Sin ataduras:</b> Activa tu suscripción cuando tengas auditorías y cancélala en 1 clic cuando termines.<br>✅ <b>Datos oficiales y en tiempo real:</b> Semáforo de riesgo, scoring IES, incidencias BORME y contratación pública.<br><br>Protege tu negocio de impagos y toma mejores decisiones hoy mismo:",
+            'button_text' => 'Ver Ventajas de Solvencia Pro',
+            'button_url'  => base_url('billing')
+        ];
+        return $this->sendTemplateEmail('automation_generic', $templateData, $userData['email'], ['papelo.amh@gmail.com']);
+    }
+
+    /**
+     * TRIGGER: risk_monthly_renewal
+     */
+    public function sendRiskMonthlyRenewal(array $userData): array
+    {
+        $templateData = [
+            'name'        => $userData['name'] ?? 'Usuario',
+            'content'     => "Te recordamos que se renuevan tus <b>3 consultas de solvencia y riesgo gratuitas</b> en tu cuenta de APIEmpresas.<br><br>Ya puedes volver a buscar cualquier empresa en España para evaluar su estabilidad societaria, semáforo de riesgo y actos mercantiles del BORME.<br><br>Entra a la plataforma y revisa tus próximos clientes o proveedores:",
+            'button_text' => 'Buscar Empresas Gratis',
+            'button_url'  => base_url('search')
         ];
         return $this->sendTemplateEmail('automation_generic', $templateData, $userData['email'], ['papelo.amh@gmail.com']);
     }
