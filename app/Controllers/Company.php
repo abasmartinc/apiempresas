@@ -1507,19 +1507,31 @@ class Company extends BaseController
      */
     public function ajaxPrivateData($cif)
     {
-        if (!session('logged_in')) {
-            return $this->response->setJSON(['logged_in' => false]);
+        $userId = (int)(session('user_id') ?? 0);
+        $isLoggedIn = session('logged_in') || $userId > 0;
+
+        $response = $this->response
+            ->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0')
+            ->setHeader('Pragma', 'no-cache')
+            ->setHeader('Expires', 'Sat, 01 Jan 2000 00:00:00 GMT');
+
+        if (!$isLoggedIn) {
+            return $response->setJSON(['logged_in' => false]);
         }
 
+        $cleanCif = strtoupper(trim(explode('-', (string)$cif)[0]));
         $db = \Config\Database::connect();
         
-        $company = $this->companyModel->where('cif', $cif)->first();
+        $company = $this->companyModel->where('cif', $cleanCif)->orWhere('nif', $cleanCif)->first();
+        if (!$company && !empty($cif)) {
+            $company = $this->companyModel->where('cif', $cif)->orWhere('nif', $cif)->first();
+        }
         if (!$company) {
-            $company = ['id' => 0, 'name' => 'Empresa', 'cif' => $cif];
+            $company = ['id' => 0, 'name' => 'Empresa', 'cif' => $cleanCif];
         }
 
-        $userId = (int)session('user_id');
-        $riskQuota = $this->getRiskViewQuota($userId, (string)$cif);
+        $targetCif = (string)($company['cif'] ?? $cleanCif);
+        $riskQuota = $this->getRiskViewQuota($userId, $targetCif);
 
         if (!$riskQuota['allowed']) {
             $paywallHtml = view('partials/company_risk_paywall', [
@@ -1527,8 +1539,10 @@ class Company extends BaseController
                 'riskQuota' => $riskQuota
             ]);
 
-            return $this->response->setJSON([
+            return $response->setJSON([
                 'logged_in'         => true,
+                'user_name'         => session('user_name') ?? 'Usuario',
+                'user_email'        => session('user_email') ?? '',
                 'limit_reached'     => true,
                 'risk_quota'        => $riskQuota,
                 'risk_profile_html' => $paywallHtml
@@ -1538,18 +1552,18 @@ class Company extends BaseController
         $contracts = [];
         $subsidies = [];
         $riskProfile = null;
-        if (!empty($cif)) {
+        if (!empty($targetCif)) {
             $contracts = $db->table('company_contracts')
-                ->where('company_cif', $cif)
+                ->where('company_cif', $targetCif)
                 ->orderBy('fecha_adjudicacion', 'DESC')
                 ->get()->getResultArray();
                 
             $subsidies = $db->table('company_subsidies')
-                ->where('company_cif', $cif)
+                ->where('company_cif', $targetCif)
                 ->orderBy('fecha_concesion', 'DESC')
                 ->get()->getResultArray();
 
-            $riskRow = $db->table('company_risk_profiles')->where('cif', $cif)->get()->getRowArray();
+            $riskRow = $db->table('company_risk_profiles')->where('cif', $targetCif)->get()->getRowArray();
             if ($riskRow) {
                 $riskProfile = $riskRow;
                 if (!empty($riskProfile['risk_profile'])) {
@@ -1566,8 +1580,10 @@ class Company extends BaseController
             'riskQuota'   => $riskQuota
         ]);
 
-        return $this->response->setJSON([
+        return $response->setJSON([
             'logged_in'         => true,
+            'user_name'         => session('user_name') ?? 'Usuario',
+            'user_email'        => session('user_email') ?? '',
             'limit_reached'     => false,
             'risk_quota'        => $riskQuota,
             'risk_profile_html' => $riskProfileHtml

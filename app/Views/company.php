@@ -2594,12 +2594,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const cif = '<?= esc($companyCif ?? $company['registro_mercantil'] ?? '') ?>';
     if (!cif) return;
     
-    fetch('<?= site_url('api/empresa/private-data/') ?>' + encodeURIComponent(cif), {
+    const requestUrl = '<?= site_url('api/empresa/private-data/') ?>' + encodeURIComponent(cif) + '?_ts=' + new Date().getTime();
+    
+    fetch(requestUrl, {
+        method: 'GET',
+        credentials: 'same-origin',
+        cache: 'no-store',
         headers: {
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Requested-With': 'XMLHttpRequest',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok: ' + response.status);
+        return response.json();
+    })
     .then(data => {
         if (data.logged_in) {
             // Hide public CTAs
@@ -2609,16 +2619,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const ctaBanner = document.getElementById('descargar-excel');
             if (ctaBanner) ctaBanner.style.display = 'none';
             
-            // Update Risk Profile
+            // Update Risk Profile container with private data (Risk Profile or Paywall)
             const riskContainer = document.getElementById('risk-profile-container');
             if (riskContainer && data.risk_profile_html) {
                 riskContainer.innerHTML = data.risk_profile_html;
             }
             
-            // Update Header UI via localStorage sync
+            // Sync Header UI with localStorage
             localStorage.setItem('is_logged_in', '1');
             
-            // Apply styles manually for this page load if they weren't applied synchronously
             const publicItems = document.querySelectorAll('.header-public-item');
             publicItems.forEach(el => el.style.setProperty('display', 'none', 'important'));
             

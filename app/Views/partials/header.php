@@ -1,6 +1,8 @@
 
 <script>
-<?php if (!session('logged_in')): ?>
+<?php if (!empty($force_public_header)): ?>
+    // En páginas con cache pública, no sobreescribir localStorage hasta que responda el AJAX
+<?php elseif (!session('logged_in')): ?>
     if (typeof localStorage !== 'undefined') localStorage.removeItem('is_logged_in');
 <?php else: ?>
     if (typeof localStorage !== 'undefined') localStorage.setItem('is_logged_in', '1');
