@@ -36,11 +36,15 @@ class ProcessSeoQueue extends BaseCommand
         $lockFile = WRITEPATH . 'seo_process_queue.lock';
         $lockFp = @fopen($lockFile, 'c+');
 
-        if (!$lockFp || !flock($lockFp, LOCK_EX | LOCK_NB)) {
+        if (!$lockFp) {
+            log_message('error', "[seo:process-queue] No se pudo abrir/crear el archivo de bloqueo ({$lockFile}). Comprueba permisos de escritura.");
+            CLI::error("Error: No se pudo abrir/crear el archivo de bloqueo ({$lockFile}). Comprueba permisos.");
+            return;
+        }
+
+        if (!flock($lockFp, LOCK_EX | LOCK_NB)) {
             CLI::write("Otra instancia de seo:process-queue está en ejecución. Saliendo limpiamente.", 'yellow');
-            if ($lockFp) {
-                fclose($lockFp);
-            }
+            fclose($lockFp);
             return;
         }
 
