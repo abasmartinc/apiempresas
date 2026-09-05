@@ -219,6 +219,7 @@ $routes->group('api/sandbox/v1', ['filter' => ['apikey']], static function ($rou
     $routes->get('companies/match', 'Api\V1\Sandbox\SandboxController::match');
     $routes->get('companies/network', 'Api\V1\Sandbox\SandboxController::network');
     $routes->get('companies/borme', 'Api\V1\Sandbox\SandboxController::borme');
+    $routes->get('companies/risk-profile', 'Api\V1\Sandbox\SandboxController::riskProfile');
     $routes->post('companies/batch', 'Api\V1\Sandbox\SandboxController::batch');
 });
 // ----------- API SANDBOX ----------- //

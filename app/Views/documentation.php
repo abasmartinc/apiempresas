@@ -91,9 +91,15 @@
                             </a>
                         </li>
                         <li>
+                            <a href="#endpoint-risk-profile">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                <span class="nav-num">10.</span> Perfil de Riesgo <span class="sidebar-badge biz">Biz</span>
+                            </a>
+                        </li>
+                        <li>
                             <a href="#endpoint-usage">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="18" y="3" width="4" height="18"></rect><rect x="10" y="8" width="4" height="13"></rect><rect x="2" y="13" width="4" height="8"></rect></svg>
-                                <span class="nav-num">10.</span> Consumo
+                                <span class="nav-num">11.</span> Consumo
                             </a>
                         </li>
                     </ul>
@@ -105,37 +111,37 @@
                         <li>
                             <a href="#errores">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                                <span class="nav-num">10.</span> Gestión de Errores
+                                <span class="nav-num">12.</span> Gestión de Errores
                             </a>
                         </li>
                         <li>
                             <a href="#throttling">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                                <span class="nav-num">11.</span> Rate Limiting
+                                <span class="nav-num">13.</span> Rate Limiting
                             </a>
                         </li>
                         <li>
                             <a href="#paginacion">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                                <span class="nav-num">12.</span> Paginación
+                                <span class="nav-num">14.</span> Paginación
                             </a>
                         </li>
                         <li>
                             <a href="#sdks">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
-                                <span class="nav-num">13.</span> SDKs Oficiales
+                                <span class="nav-num">15.</span> SDKs Oficiales
                             </a>
                         </li>
                         <li>
                             <a href="#examples">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                                <span class="nav-num">14.</span> Ejemplos
+                                <span class="nav-num">16.</span> Ejemplos
                             </a>
                         </li>
                         <li>
                             <a href="#postman">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                                <span class="nav-num">15.</span> Postman
+                                <span class="nav-num">17.</span> Postman
                             </a>
                         </li>
                     </ul>
@@ -203,6 +209,7 @@
                                     <option value="/api/sandbox/v1/companies/network">GET /companies/network (Red Vínculos)</option>
                                     <option value="/api/sandbox/v1/companies/borme">GET /companies/borme (Historial BORME)</option>
                                     <option value="/api/sandbox/v1/companies/radar">GET /companies/radar (Radar Pro)</option>
+                                    <option value="/api/sandbox/v1/companies/risk-profile">GET /companies/risk-profile (Perfil de Riesgo)</option>
                                 </select>
                             </div>
 
@@ -1030,9 +1037,89 @@ Accept: application/json</code></pre>
 }</code></pre>
                 </section>
 
+                <!-- PERFIL DE RIESGO -->
+                <section class="docs-section" id="endpoint-risk-profile">
+                    <h2>10. Perfil de Riesgo Corporativo (Solo Business)</h2>
+                    <p>Devuelve el perfil de riesgo corporativo, cumplimiento registral (depósito de cuentas anuales), estabilidad de gobernanza, volatilidad de capital y alertas mercantiles asociadas a una empresa mediante su CIF. Diseñado para automatizar la evaluación de solvencia y riesgo de impago en procesos de onboarding y compliance B2B.</p>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/companies/risk-profile</code>
+                        <span class="plan-badge business">Business</span>
+                    </div>
+
+                    <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <thead style="background: #f8fafc;">
+                            <tr><th style="width: 20%;">Parámetro</th><th style="width: 15%;">Tipo</th><th style="width: 15%;">Requerido</th><th>Descripción</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">cif</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td><span style="background: #fef2f2; color: #ef4444; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">Requerido</span></td><td style="color: #475569;">CIF de la empresa a auditar (ej: <code>A01001411</code> o <code>A15075062</code> en Sandbox).</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Respuesta de éxito (200 OK - Plan Business)</h4>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "cif": "A01001411",
+    "company_name": "RHEINMETALL EXPAL MUNITIONS SA",
+    "risk_score": 62,
+    "risk_level": "ALTO",
+    "confidence_score": 49,
+    "data_quality_score": 70,
+    "summary_message": "Atención: Constan indicadores de elevado riesgo financiero o corporativo.",
+    "legal_state": "REGISTRY_CLOSURE_GENERICO",
+    "data_sources": {
+      "borme_status": "CHECKED_WITH_RECORDS",
+      "accounts_status": "KNOWN_DELAYED",
+      "official_status": "KNOWN"
+    },
+    "dimensions": {
+      "legal_distress": 60,
+      "filing_compliance": 0,
+      "governance_volatility": 30,
+      "capital_instability": 0,
+      "structural_volatility": 0,
+      "stabilizing_credit": 0
+    },
+    "canonical_events": [
+      {
+        "code": "LEGAL_STATE_REGISTRY_CLOSURE_GENERICO",
+        "dimension": "legal_distress",
+        "severity": "high",
+        "description": "Consta publicación registral de cierre sin especificación de causa.",
+        "event_date": "2026-08-24",
+        "classification_confidence": "LOW"
+      }
+    ],
+    "model_version": "2.0.0",
+    "calculated_at": "2026-08-24T00:00:00Z"
+  }
+}</code></pre>
+
+                    <h4>Respuesta restringida (403 Forbidden - Planes Free y Pro)</h4>
+                    <pre><code class="language-json">{
+  "success": false,
+  "error": "PLAN_RESTRICTION",
+  "message": "El acceso al perfil de riesgo corporativo requiere el plan Business."
+}</code></pre>
+
+                    <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <thead style="background: #f8fafc;">
+                            <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">risk_score</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer (0-100)</span></td><td style="color: #475569;">Puntuación algorítmica de riesgo consolidada (valores más altos indican mayor riesgo de impago/concursal).</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">risk_level</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Semáforo cualitativo de riesgo: <code>BAJO</code>, <code>MEDIO</code>, <code>ALTO</code>, <code>CRITICO</code>.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">dimensions</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">object</span></td><td style="color: #475569;">Desglose por áreas de análisis: legal distress, depósito de cuentas, volatilidad de gobernanza, estabilidad de capital y crédito mitigador.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">canonical_events[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">Lista cronológica de eventos mercantiles clasificados con su severidad e impacto en el cálculo.</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+
                 <!-- USAGE -->
                 <section class="docs-section" id="endpoint-usage">
-                    <h2>10. Estadísticas de Consumo</h2>
+                    <h2>11. Estadísticas de Consumo</h2>
                     <p>Obtén el recuento de peticiones del mes actual y el historial de empresas consultadas asociado a tu API Key.</p>
                     
                     <div class="endpoint-header">
@@ -1067,9 +1154,86 @@ Accept: application/json</code></pre>
                     </table>
                 </section>
 
+                <!-- ERRORES -->
+                <section class="docs-section" id="errores">
+                    <h2>12. Gestión de Errores (RFC 7807)</h2>
+                    <p>Las respuestas de error de la API incluyen los campos legacy (<code>success</code>, <code>error</code>, <code>message</code>) y además implementan el estándar moderno <strong>RFC 7807 (Problem Details)</strong>. Si hay un error, el código de estado HTTP será diferente a 200 y recibirás un JSON detallado.</p>
+                    <pre><code class="language-json">{
+  "success": false,
+  "error": "COMPANY_NOT_FOUND",
+  "message": "Empresa no encontrada.",
+  "type": "https://apiempresas.com/docs/errors/company_not_found",
+  "title": "COMPANY_NOT_FOUND",
+  "status": 404,
+  "detail": "Empresa no encontrada.",
+  "instance": "req_8f73b1a2c9"
+}</code></pre>
+                    <p>El campo <code>instance</code> es único para cada petición y resulta muy útil si necesitas reportar un problema a soporte.</p>
+                </section>
+
+                <!-- THROTTLING -->
+                <section class="docs-section" id="throttling">
+                    <h2>13. Límites de Peticiones (Rate Limiting)</h2>
+                    <p>Para proteger la estabilidad de la API y ayudarte a monitorizar tu consumo, devolvemos <strong>cabeceras HTTP estándar</strong> en cada respuesta que te informan en tiempo real de tu cuota mensual y tu límite de velocidad por segundo.</p>
+                    
+                    <h4 style="margin-top: 24px; margin-bottom: 12px; font-size: 1.1rem; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                        Cabeceras HTTP de Respuesta
+                    </h4>
+                    <table class="docs-table" style="margin-bottom: 24px;">
+                        <thead>
+                            <tr>
+                                <th>Cabecera HTTP</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>X-RateLimit-Limit</code></td>
+                                <td>Peticiones máximas permitidas por segundo (2 en Free, 20 en Pago).</td>
+                            </tr>
+                            <tr>
+                                <td><code>X-RateLimit-Remaining</code></td>
+                                <td>Peticiones por segundo restantes en la ventana de tiempo actual.</td>
+                            </tr>
+                            <tr>
+                                <td><code>X-RateLimit-Reset</code></td>
+                                <td>Timestamp Unix indicando cuándo se reinicia el límite de velocidad.</td>
+                            </tr>
+                            <tr>
+                                <td><code>X-Quota-Limit</code></td>
+                                <td>Límite mensual total de consultas de tu plan actual.</td>
+                            </tr>
+                            <tr>
+                                <td><code>X-Quota-Remaining</code></td>
+                                <td>Consultas mensuales que te quedan antes de empezar a usar saldo del monedero.</td>
+                            </tr>
+                            <tr>
+                                <td><code>X-Request-Id</code></td>
+                                <td>Identificador único de trazabilidad de la petición. Útil para darte soporte técnico rápido.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p>Si superas el límite por segundo, recibirás un error <code>429 Too Many Requests</code> junto con la cabecera <code>Retry-After: 1</code> indicando que esperes 1 segundo. Si necesitas procesar muchas empresas de golpe, te recomendamos utilizar el endpoint <a href="#batch">Batch</a>.</p>
+                </section>
+
+                <!-- PAGINACION -->
+                <section class="docs-section" id="paginacion">
+                    <h2>14. Paginación por Cursores</h2>
+                    <p>En el endpoint de búsqueda múltiple (<code>/api/v1/companies/search?multiple=true</code>), puedes utilizar el parámetro <code>page</code> tradicional o el parámetro <code>cursor</code> para paginar los resultados de forma más segura.</p>
+                    <p>Si la respuesta contiene más páginas, el objeto <code>meta</code> incluirá un <code>next_cursor</code>. Solo tienes que enviar ese valor exacto en tu siguiente petición para obtener la siguiente página de resultados de manera automática:</p>
+                    <pre><code class="language-json">"meta": {
+  "page": 1,
+  "limit": 20,
+  "has_more": true,
+  "next_cursor": "eyJwIjoyfQ=="
+}</code></pre>
+                </section>
+
                 <!-- SDKS -->
                 <section class="docs-section" id="sdks">
-                    <h2>13. SDKs Oficiales (Publicados)</h2>
+                    <h2>15. SDKs Oficiales (Publicados)</h2>
                     <p>Agiliza la integración en tus aplicaciones utilizando nuestras librerías oficiales con tipado estático y manejo de errores nativo. Estos SDKs están listos para usarse en entornos de producción.</p>
                     
                     <div style="display: flex; flex-direction: column; gap: 20px; margin-top: 24px;">
@@ -1137,7 +1301,7 @@ print(empresa.name)</code></pre>
 
                 <!-- EXAMPLES -->
                 <section class="docs-section" id="examples">
-                    <h2>14. Ejemplos de Código Manual</h2>
+                    <h2>16. Ejemplos de Código Manual</h2>
                     <p>Implementa la conexión en minutos con estos ejemplos listos para usar.</p>
 
                     <div class="code-tabs">
@@ -1236,86 +1400,9 @@ print(response.json())</code></pre>
                     </div>
                 </section>
 
-                <!-- ERRORES -->
-                <section class="docs-section" id="errores">
-                    <h2>10. Gestión de Errores (RFC 7807)</h2>
-                    <p>Las respuestas de error de la API incluyen los campos legacy (<code>success</code>, <code>error</code>, <code>message</code>) y además implementan el estándar moderno <strong>RFC 7807 (Problem Details)</strong>. Si hay un error, el código de estado HTTP será diferente a 200 y recibirás un JSON detallado.</p>
-                    <pre><code class="language-json">{
-  "success": false,
-  "error": "COMPANY_NOT_FOUND",
-  "message": "Empresa no encontrada.",
-  "type": "https://apiempresas.com/docs/errors/company_not_found",
-  "title": "COMPANY_NOT_FOUND",
-  "status": 404,
-  "detail": "Empresa no encontrada.",
-  "instance": "req_8f73b1a2c9"
-}</code></pre>
-                    <p>El campo <code>instance</code> es único para cada petición y resulta muy útil si necesitas reportar un problema a soporte.</p>
-                </section>
-
-                <!-- THROTTLING -->
-                <section class="docs-section" id="throttling">
-                    <h2>11. Límites de Peticiones (Rate Limiting)</h2>
-                    <p>Para proteger la estabilidad de la API y ayudarte a monitorizar tu consumo, devolvemos <strong>cabeceras HTTP estándar</strong> en cada respuesta que te informan en tiempo real de tu cuota mensual y tu límite de velocidad por segundo.</p>
-                    
-                    <h4 style="margin-top: 24px; margin-bottom: 12px; font-size: 1.1rem; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                        Cabeceras HTTP de Respuesta
-                    </h4>
-                    <table class="docs-table" style="margin-bottom: 24px;">
-                        <thead>
-                            <tr>
-                                <th>Cabecera HTTP</th>
-                                <th>Descripción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><code>X-RateLimit-Limit</code></td>
-                                <td>Peticiones máximas permitidas por segundo (2 en Free, 20 en Pago).</td>
-                            </tr>
-                            <tr>
-                                <td><code>X-RateLimit-Remaining</code></td>
-                                <td>Peticiones por segundo restantes en la ventana de tiempo actual.</td>
-                            </tr>
-                            <tr>
-                                <td><code>X-RateLimit-Reset</code></td>
-                                <td>Timestamp Unix indicando cuándo se reinicia el límite de velocidad.</td>
-                            </tr>
-                            <tr>
-                                <td><code>X-Quota-Limit</code></td>
-                                <td>Límite mensual total de consultas de tu plan actual.</td>
-                            </tr>
-                            <tr>
-                                <td><code>X-Quota-Remaining</code></td>
-                                <td>Consultas mensuales que te quedan antes de empezar a usar saldo del monedero.</td>
-                            </tr>
-                            <tr>
-                                <td><code>X-Request-Id</code></td>
-                                <td>Identificador único de trazabilidad de la petición. Útil para darte soporte técnico rápido.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <p>Si superas el límite por segundo, recibirás un error <code>429 Too Many Requests</code> junto con la cabecera <code>Retry-After: 1</code> indicando que esperes 1 segundo. Si necesitas procesar muchas empresas de golpe, te recomendamos utilizar el endpoint <a href="#batch">Batch</a>.</p>
-                </section>
-
-                <!-- PAGINACION -->
-                <section class="docs-section" id="paginacion">
-                    <h2>12. Paginación por Cursores</h2>
-                    <p>En el endpoint de búsqueda múltiple (<code>/api/v1/companies/search?multiple=true</code>), puedes utilizar el parámetro <code>page</code> tradicional o el parámetro <code>cursor</code> para paginar los resultados de forma más segura.</p>
-                    <p>Si la respuesta contiene más páginas, el objeto <code>meta</code> incluirá un <code>next_cursor</code>. Solo tienes que enviar ese valor exacto en tu siguiente petición para obtener la siguiente página de resultados de manera automática:</p>
-                    <pre><code class="language-json">"meta": {
-  "page": 1,
-  "limit": 20,
-  "has_more": true,
-  "next_cursor": "eyJwIjoyfQ=="
-}</code></pre>
-                </section>
-
                 <!-- POSTMAN -->
                 <section class="docs-section" id="postman">
-                    <h2>15. Postman Collection</h2>
+                    <h2>17. Postman Collection</h2>
                     <p>Si prefieres probar la API directamente en Postman, puedes descargarte nuestra colección oficial e importarla con un clic.</p>
                     
                     <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px dashed #cbd5e1; text-align: center; margin-top: 20px;">

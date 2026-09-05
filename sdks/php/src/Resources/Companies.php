@@ -126,4 +126,29 @@ class Companies
         $response = $this->client->request('GET', "/companies/network?$params");
         return $response['data'] ?? [];
     }
+
+    /**
+     * (Business) Obtiene los contratos públicos y licitaciones adjudicadas a una empresa.
+     */
+    public function contracts(string $cif, int $page = 1, int $limit = 20): array
+    {
+        $params = http_build_query([
+            'cif' => $cif,
+            'page' => $page,
+            'limit' => $limit,
+        ]);
+        $response = $this->client->request('GET', "/companies/contracts?$params");
+        return $response['data'] ?? [];
+    }
+
+    /**
+     * (Business) Obtiene el perfil de riesgo corporativo y solvencia de una empresa.
+     */
+    public function riskProfile(string $cif): array
+    {
+        $params = http_build_query(['cif' => $cif]);
+        $response = $this->client->request('GET', "/companies/risk-profile?$params");
+        return $response['data'] ?? [];
+    }
 }
+

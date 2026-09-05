@@ -512,6 +512,19 @@
                             <tr>
                                 <td>
                                     <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Perfil de Riesgo y Solvencia</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies/risk-profile</div>
+                                        <div class="cap-feature-desc">Scoring algorítmico de riesgo, cumplimiento de depósito de cuentas y alertas societarias.</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('get_risk_profile')" class="btn-json-preview">Ver Respuesta JSON</button>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
                                         <div class="cap-feature-name">Webhooks PUSH</div>
                                         <div class="cap-feature-endpoint">POST /api/v1/webhooks</div>
                                         <div class="cap-feature-desc">Sincroniza eventos en tiempo real con tu CRM sin necesidad de consultar la API.</div>
@@ -876,6 +889,44 @@
                     }
                 }
             },
+            get_risk_profile: {
+                success: true,
+                data: {
+                    cif: "A01001411",
+                    company_name: "RHEINMETALL EXPAL MUNITIONS SA",
+                    risk_score: 62,
+                    risk_level: "ALTO",
+                    confidence_score: 49,
+                    data_quality_score: 70,
+                    summary_message: "Atención: Constan indicadores de elevado riesgo financiero o corporativo.",
+                    legal_state: "REGISTRY_CLOSURE_GENERICO",
+                    data_sources: {
+                        borme_status: "CHECKED_WITH_RECORDS",
+                        accounts_status: "KNOWN_DELAYED",
+                        official_status: "KNOWN"
+                    },
+                    dimensions: {
+                        legal_distress: 60,
+                        filing_compliance: 0,
+                        governance_volatility: 30,
+                        capital_instability: 0,
+                        structural_volatility: 0,
+                        stabilizing_credit: 0
+                    },
+                    canonical_events: [
+                        {
+                            code: "LEGAL_STATE_REGISTRY_CLOSURE_GENERICO",
+                            dimension: "legal_distress",
+                            severity: "high",
+                            description: "Consta publicación registral de cierre sin especificación de causa.",
+                            event_date: "2026-08-24",
+                            classification_confidence: "LOW"
+                        }
+                    ],
+                    model_version: "2.0.0",
+                    calculated_at: "2026-08-24T00:00:00Z"
+                }
+            },
             post_webhook: {
                 success: true,
                 message: "Webhook creado correctamente",
@@ -901,6 +952,7 @@
                 get_match: 'GET /companies/match',
                 get_contact_prep: 'GET /companies/contact-prep',
                 get_contracts: 'GET /companies/contracts',
+                get_risk_profile: 'GET /companies/risk-profile',
                 post_webhook: 'POST /webhooks'
             };
 

@@ -381,4 +381,59 @@ class SandboxController extends \App\Controllers\Api\V1\BaseApiController
             ]
         ]);
     }
+
+    // =========================================================================
+    // ENDPOINT: /api/sandbox/v1/companies/risk-profile
+    // =========================================================================
+    public function riskProfile()
+    {
+        $cifRaw = $this->request->getGet('cif');
+        if (!$cifRaw) return $this->respond(['success' => false, 'error' => 'VALIDATION_ERROR', 'message' => 'CIF es requerido'], 400);
+
+        $cif = $this->validateMagicCif($cifRaw);
+        if (!$cif) return $this->getForbiddenResponse();
+
+        if ($cif !== 'A15075062') {
+            return $this->respond(['success' => false, 'error' => 'COMPANY_NOT_FOUND', 'message' => 'Empresa no encontrada.'], 404);
+        }
+
+        return $this->respond([
+            'success' => true,
+            'data' => [
+                'cif' => $cif,
+                'company_name' => 'INDUSTRIA DE DISENO TEXTIL SA',
+                'risk_score' => 15,
+                'risk_level' => 'BAJO',
+                'confidence_score' => 95,
+                'data_quality_score' => 98,
+                'summary_message' => 'Excelente solvencia y estabilidad societaria. Sin incidencias registrales ni alertas mercantiles activas.',
+                'legal_state' => 'ACTIVA',
+                'data_sources' => [
+                    'borme_status' => 'CHECKED_WITH_RECORDS',
+                    'accounts_status' => 'KNOWN_ON_TIME',
+                    'official_status' => 'KNOWN'
+                ],
+                'dimensions' => [
+                    'legal_distress' => 0,
+                    'filing_compliance' => 10,
+                    'governance_volatility' => 5,
+                    'capital_instability' => 0,
+                    'structural_volatility' => 0,
+                    'stabilizing_credit' => 85
+                ],
+                'canonical_events' => [
+                    [
+                        'code' => 'ACCOUNTS_FILED_ON_TIME',
+                        'dimension' => 'filing_compliance',
+                        'severity' => 'low',
+                        'description' => 'Depósito de cuentas anuales presentado en plazo en el Registro Mercantil.',
+                        'event_date' => date('Y-07-15'),
+                        'classification_confidence' => 'HIGH'
+                    ]
+                ],
+                'model_version' => '2.0.0',
+                'calculated_at' => date('Y-m-d\TH:i:s\Z')
+            ]
+        ]);
+    }
 }

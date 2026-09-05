@@ -514,6 +514,134 @@
                     ]
                 },
                 {
+                    "name": "Perfil de Riesgo Corporativo",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/risk-profile?cif=B12345678",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "risk-profile"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "B12345678",
+                                    "description": "CIF de la empresa a consultar"
+                                }
+                            ]
+                        },
+                        "description": "Consulta el perfil de riesgo corporativo, score de solvencia, dimensiones de riesgo y eventos canónicos de una empresa mediante CIF. Exclusivo del Plan Business."
+                    },
+                    "response": [
+                        {
+                            "name": "200 OK - Plan Business",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-API-KEY",
+                                        "value": "{{API_KEY}}",
+                                        "type": "text"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "https://apiempresas.es/api/v1/companies/risk-profile?cif=B12345678",
+                                    "protocol": "https",
+                                    "host": [
+                                        "apiempresas",
+                                        "es"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "companies",
+                                        "risk-profile"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "cif",
+                                            "value": "B12345678"
+                                        }
+                                    ]
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n    \"success\": true,\n    \"data\": {\n        \"cif\": \"B12345678\",\n        \"risk_score\": 22,\n        \"risk_level\": \"BAJO\",\n        \"confidence_score\": 0.95,\n        \"data_quality_score\": 0.90,\n        \"summary_message\": \"Empresa con bajo riesgo legal y solvencia acreditada.\",\n        \"legal_state\": \"ACTIVA\",\n        \"data_sources\": {\n            \"borme_active\": true,\n            \"judicial_bulletins\": false\n        },\n        \"dimensions\": {\n            \"legal_distress\": {\n                \"level\": \"BAJO\",\n                \"score\": 10\n            },\n            \"filing_compliance\": {\n                \"level\": \"OPTIMO\",\n                \"score\": 95\n            }\n        },\n        \"canonical_events\": [],\n        \"model_version\": \"2.1.0\",\n        \"calculated_at\": \"2024-05-15T10:00:00Z\"\n    }\n}"
+                        },
+                        {
+                            "name": "403 Forbidden - Plan Free / Pro",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-API-KEY",
+                                        "value": "{{API_KEY}}",
+                                        "type": "text"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "https://apiempresas.es/api/v1/companies/risk-profile?cif=B12345678",
+                                    "protocol": "https",
+                                    "host": [
+                                        "apiempresas",
+                                        "es"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "companies",
+                                        "risk-profile"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "cif",
+                                            "value": "B12345678"
+                                        }
+                                    ]
+                                }
+                            },
+                            "status": "Forbidden",
+                            "code": 403,
+                            "_postman_previewlanguage": "json",
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n    \"success\": false,\n    \"error\": \"PLAN_RESTRICTION\",\n    \"message\": \"El acceso al perfil de riesgo corporativo requiere el plan Business.\"\n}"
+                        }
+                    ]
+                },
+                {
                     "name": "Insights IA",
                     "request": {
                         "method": "GET",

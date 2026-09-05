@@ -91,9 +91,15 @@
                             </a>
                         </li>
                         <li>
+                            <a href="#endpoint-risk-profile">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                <span class="nav-num">10.</span> Risk Profile <span class="sidebar-badge biz">Biz</span>
+                            </a>
+                        </li>
+                        <li>
                             <a href="#endpoint-usage">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="18" y="3" width="4" height="18"></rect><rect x="10" y="8" width="4" height="13"></rect><rect x="2" y="13" width="4" height="8"></rect></svg>
-                                <span class="nav-num">10.</span> Usage
+                                <span class="nav-num">11.</span> Usage
                             </a>
                         </li>
                     </ul>
@@ -105,37 +111,37 @@
                         <li>
                             <a href="#errores">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                                <span class="nav-num">10.</span> Error Handling
+                                <span class="nav-num">12.</span> Error Handling
                             </a>
                         </li>
                         <li>
                             <a href="#throttling">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                                <span class="nav-num">11.</span> Rate Limiting
+                                <span class="nav-num">13.</span> Rate Limiting
                             </a>
                         </li>
                         <li>
                             <a href="#paginacion">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                                <span class="nav-num">12.</span> Pagination
+                                <span class="nav-num">14.</span> Pagination
                             </a>
                         </li>
                         <li>
                             <a href="#sdks">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
-                                <span class="nav-num">13.</span> Official SDKs
+                                <span class="nav-num">15.</span> Official SDKs
                             </a>
                         </li>
                         <li>
                             <a href="#examples">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                                <span class="nav-num">14.</span> Examples
+                                <span class="nav-num">16.</span> Examples
                             </a>
                         </li>
                         <li>
                             <a href="#postman">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                                <span class="nav-num">15.</span> Postman
+                                <span class="nav-num">17.</span> Postman
                             </a>
                         </li>
                     </ul>
@@ -203,6 +209,7 @@
                                     <option value="/api/sandbox/v1/companies/network">GET /companies/network (Corporate Network)</option>
                                     <option value="/api/sandbox/v1/companies/borme">GET /companies/borme (BORME History)</option>
                                     <option value="/api/sandbox/v1/companies/radar">GET /companies/radar (Radar Pro)</option>
+                                    <option value="/api/sandbox/v1/companies/risk-profile">GET /companies/risk-profile (Risk Profile)</option>
                                 </select>
                             </div>
 
@@ -1014,9 +1021,89 @@ Accept: application/json</code></pre>
 }</code></pre>
                 </section>
 
+                <!-- CORPORATE RISK PROFILE -->
+                <section class="docs-section" id="endpoint-risk-profile">
+                    <h2>10. Corporate Risk Profile (Business Plan Only)</h2>
+                    <p>Returns the corporate risk profile, registry compliance (annual accounts filing), governance stability, capital volatility, and official distress alerts associated with a company by CIF. Designed to automate credit scoring, solvency checks, and compliance in B2B onboarding workflows.</p>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/companies/risk-profile</code>
+                        <span class="plan-badge business">Business</span>
+                    </div>
+
+                    <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <thead style="background: #f8fafc;">
+                            <tr><th style="width: 20%;">Parameter</th><th style="width: 15%;">Type</th><th style="width: 15%;">Required</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">cif</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td><span style="background: #fef2f2; color: #ef4444; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">Required</span></td><td style="color: #475569;">Company CIF/NIF to audit (e.g. <code>A01001411</code> or <code>A15075062</code> in Sandbox).</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Success response (200 OK - Business Plan)</h4>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "cif": "A01001411",
+    "company_name": "RHEINMETALL EXPAL MUNITIONS SA",
+    "risk_score": 62,
+    "risk_level": "ALTO",
+    "confidence_score": 49,
+    "data_quality_score": 70,
+    "summary_message": "Atención: Constan indicadores de elevado riesgo financiero o corporativo.",
+    "legal_state": "REGISTRY_CLOSURE_GENERICO",
+    "data_sources": {
+      "borme_status": "CHECKED_WITH_RECORDS",
+      "accounts_status": "KNOWN_DELAYED",
+      "official_status": "KNOWN"
+    },
+    "dimensions": {
+      "legal_distress": 60,
+      "filing_compliance": 0,
+      "governance_volatility": 30,
+      "capital_instability": 0,
+      "structural_volatility": 0,
+      "stabilizing_credit": 0
+    },
+    "canonical_events": [
+      {
+        "code": "LEGAL_STATE_REGISTRY_CLOSURE_GENERICO",
+        "dimension": "legal_distress",
+        "severity": "high",
+        "description": "Consta publicación registral de cierre sin especificación de causa.",
+        "event_date": "2026-08-24",
+        "classification_confidence": "LOW"
+      }
+    ],
+    "model_version": "2.0.0",
+    "calculated_at": "2026-08-24T00:00:00Z"
+  }
+}</code></pre>
+
+                    <h4>Plan restricted response (403 Forbidden - Free & Pro Plans)</h4>
+                    <pre><code class="language-json">{
+  "success": false,
+  "error": "PLAN_RESTRICTION",
+  "message": "El acceso al perfil de riesgo corporativo requiere el plan Business."
+}</code></pre>
+
+                    <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <thead style="background: #f8fafc;">
+                            <tr><th style="width: 25%;">Field</th><th style="width: 15%;">Type</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">risk_score</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer (0-100)</span></td><td style="color: #475569;">Consolidated algorithmic risk rating (higher values denote higher default or distress risk).</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">risk_level</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Qualitative risk grade: <code>BAJO</code>, <code>MEDIO</code>, <code>ALTO</code>, <code>CRITICO</code>.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">dimensions</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">object</span></td><td style="color: #475569;">Detailed breakdown of risk factors: legal distress, filing compliance, governance changes, capital instability and credit mitigation.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">canonical_events[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">Chronological list of official corporate and mercantile registry events with severity assessment.</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+
                 <!-- USAGE -->
                 <section class="docs-section" id="endpoint-usage">
-                    <h2>10. Usage Statistics</h2>
+                    <h2>11. Usage Statistics</h2>
                     <p>Get the request count for the current month and the history of companies queried associated with your API Key.</p>
                     
                     <div class="endpoint-header">
@@ -1053,7 +1140,7 @@ Accept: application/json</code></pre>
 
                 <!-- ERROR HANDLING -->
                 <section class="docs-section" id="errores">
-                    <h2>10. Error Handling (RFC 7807)</h2>
+                    <h2>12. Error Handling (RFC 7807)</h2>
                     <p>API error responses include legacy fields (<code>success</code>, <code>error</code>, <code>message</code>) and also implement the modern <strong>RFC 7807 (Problem Details)</strong> standard. If there is an error, the HTTP status code will be different from 200 and you will receive a detailed JSON.</p>
                     <pre><code class="language-json">{
   "success": false,
@@ -1070,7 +1157,7 @@ Accept: application/json</code></pre>
 
                 <!-- RATE LIMITING -->
                 <section class="docs-section" id="throttling">
-                    <h2>11. Rate Limiting</h2>
+                    <h2>13. Rate Limiting</h2>
                     <p>To protect the API's stability and help you monitor your consumption, we return <strong>standard HTTP headers</strong> in every response that inform you in real time of your monthly quota and per-second speed limit.</p>
                     
                     <h4 style="margin-top: 24px; margin-bottom: 12px; font-size: 1.1rem; color: #0f172a; display: flex; align-items: center; gap: 8px;">
@@ -1117,7 +1204,7 @@ Accept: application/json</code></pre>
 
                 <!-- PAGINATION -->
                 <section class="docs-section" id="paginacion">
-                    <h2>12. Cursor-based Pagination</h2>
+                    <h2>14. Cursor-based Pagination</h2>
                     <p>In the multiple search endpoint (<code>/api/v1/companies/search?multiple=true</code>), you can use the traditional <code>page</code> parameter or the <code>cursor</code> parameter to paginate results more safely.</p>
                     <p>If the response contains more pages, the <code>meta</code> object will include a <code>next_cursor</code>. Simply send that exact value in your next request to automatically get the next page of results:</p>
                     <pre><code class="language-json">"meta": {
@@ -1130,7 +1217,7 @@ Accept: application/json</code></pre>
 
                 <!-- OFFICIAL SDKs -->
                 <section class="docs-section" id="sdks">
-                    <h2>13. Official SDKs (Published)</h2>
+                    <h2>15. Official SDKs (Published)</h2>
                     <p>Speed up integration in your applications using our official libraries with static typing and native error handling. These SDKs are production-ready.</p>
                     
                     <div style="display: flex; flex-direction: column; gap: 20px; margin-top: 24px;">
@@ -1198,7 +1285,7 @@ print(company.name)</code></pre>
 
                 <!-- CODE EXAMPLES -->
                 <section class="docs-section" id="examples">
-                    <h2>14. Manual Code Examples</h2>
+                    <h2>16. Manual Code Examples</h2>
                     <p>Implement the connection in minutes with these ready-to-use examples.</p>
 
                     <div class="code-tabs">
@@ -1299,7 +1386,7 @@ print(response.json())</code></pre>
 
                 <!-- POSTMAN -->
                 <section class="docs-section" id="postman">
-                    <h2>15. Postman Collection</h2>
+                    <h2>17. Postman Collection</h2>
                     <p>If you prefer to test the API directly in Postman, you can download our official collection and import it with one click.</p>
                     
                     <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px dashed #cbd5e1; text-align: center; margin-top: 20px;">

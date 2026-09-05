@@ -481,6 +481,32 @@
                             <tr>
                                 <td>
                                     <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Public Contracts & Tenders</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies/contracts</div>
+                                        <div class="cap-feature-desc">Query public tenders, awarded contracts, contracting authorities and award amounts.</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('get_contracts')" class="btn-json-preview">View JSON Response</button>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Corporate Risk Profile</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies/risk-profile</div>
+                                        <div class="cap-feature-desc">Algorithmic risk scoring, annual accounts filing compliance and official distress alerts.</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('get_risk_profile')" class="btn-json-preview">View JSON Response</button>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
                                         <div class="cap-feature-name">Webhooks PUSH</div>
                                         <div class="cap-feature-endpoint">POST /api/v1/webhooks</div>
                                         <div class="cap-feature-desc">Synchronize events in real time with your CRM without having to poll the API.</div>
@@ -816,6 +842,74 @@
                     key_metrics: ["+20% empleados este año", "Última ronda: Series A"]
                 }
             },
+            get_contracts: {
+                success: true,
+                data: {
+                    cif: "A01001411",
+                    company_name: "RHEINMETALL EXPAL MUNITIONS SA",
+                    summary: {
+                        total_contracts: 32,
+                        total_amount: "617746086.47",
+                        currency: "EUR"
+                    },
+                    contracts: [
+                        {
+                            tender_id: "https://contrataciondelestado.es/sindicacion/licitacionesPerfilContratante/20344437",
+                            title: "Suministro de 27.000 granadas de mortero de 81 mm...",
+                            contracting_authority: "Jefatura de Asuntos Económicos del Mando de Apoyo Logístico",
+                            award_date: "2026-08-25",
+                            amount: "4395320.00",
+                            currency: "EUR",
+                            tender_url: "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=B4EkDEGFvaA%2Bk2oCbDosIw%3D%3D"
+                        }
+                    ],
+                    pagination: {
+                        total: 32,
+                        page: 1,
+                        limit: 20,
+                        total_pages: 2,
+                        has_more: true
+                    }
+                }
+            },
+            get_risk_profile: {
+                success: true,
+                data: {
+                    cif: "A01001411",
+                    company_name: "RHEINMETALL EXPAL MUNITIONS SA",
+                    risk_score: 62,
+                    risk_level: "ALTO",
+                    confidence_score: 49,
+                    data_quality_score: 70,
+                    summary_message: "Atención: Constan indicadores de elevado riesgo financiero o corporativo.",
+                    legal_state: "REGISTRY_CLOSURE_GENERICO",
+                    data_sources: {
+                        borme_status: "CHECKED_WITH_RECORDS",
+                        accounts_status: "KNOWN_DELAYED",
+                        official_status: "KNOWN"
+                    },
+                    dimensions: {
+                        legal_distress: 60,
+                        filing_compliance: 0,
+                        governance_volatility: 30,
+                        capital_instability: 0,
+                        structural_volatility: 0,
+                        stabilizing_credit: 0
+                    },
+                    canonical_events: [
+                        {
+                            code: "LEGAL_STATE_REGISTRY_CLOSURE_GENERICO",
+                            dimension: "legal_distress",
+                            severity: "high",
+                            description: "Consta publicación registral de cierre sin especificación de causa.",
+                            event_date: "2026-08-24",
+                            classification_confidence: "LOW"
+                        }
+                    ],
+                    model_version: "2.0.0",
+                    calculated_at: "2026-08-24T00:00:00Z"
+                }
+            },
             post_webhook: {
                 success: true,
                 mosage: "Webhook creado correctamente",
@@ -840,6 +934,8 @@
                 get_network: 'GET /companies/network',
                 get_match: 'GET /companies/match',
                 get_contact_prep: 'GET /companies/contact-prep',
+                get_contracts: 'GET /companies/contracts',
+                get_risk_profile: 'GET /companies/risk-profile',
                 post_webhook: 'POST /webhooks'
             };
 

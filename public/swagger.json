@@ -984,6 +984,329 @@
                 }
             }
         },
+        "/api/v1/companies/risk-profile": {
+            "get": {
+                "tags": [
+                    "3. Plan Business"
+                ],
+                "summary": "Perfil de Riesgo Corporativo",
+                "description": "Devuelve el perfil de riesgo corporativo, cumplimiento registral (depósito de cuentas), estabilidad de gobernanza y alertas mercantiles asociadas a una empresa mediante su CIF. **Coste:** 1 llamada. Exclusivo para el plan Business.",
+                "operationId": "7b9f77b80bc5fc065e5157fe0cee8b54",
+                "parameters": [
+                    {
+                        "name": "cif",
+                        "in": "query",
+                        "description": "El CIF de la empresa a consultar",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "A01001411"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Perfil de riesgo corporativo de la empresa",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "cif": {
+                                                    "type": "string",
+                                                    "example": "A01001411"
+                                                },
+                                                "company_name": {
+                                                    "type": "string",
+                                                    "example": "RHEINMETALL EXPAL MUNITIONS SA"
+                                                },
+                                                "risk_score": {
+                                                    "type": "integer",
+                                                    "example": 62
+                                                },
+                                                "risk_level": {
+                                                    "type": "string",
+                                                    "example": "ALTO"
+                                                },
+                                                "confidence_score": {
+                                                    "type": "integer",
+                                                    "example": 49,
+                                                    "nullable": true
+                                                },
+                                                "data_quality_score": {
+                                                    "type": "integer",
+                                                    "example": 70,
+                                                    "nullable": true
+                                                },
+                                                "summary_message": {
+                                                    "type": "string",
+                                                    "example": "Atención: Constan indicadores de elevado riesgo financiero o corporativo.",
+                                                    "nullable": true
+                                                },
+                                                "legal_state": {
+                                                    "type": "string",
+                                                    "example": "REGISTRY_CLOSURE_GENERICO",
+                                                    "nullable": true
+                                                },
+                                                "data_sources": {
+                                                    "properties": {
+                                                        "borme_status": {
+                                                            "type": "string",
+                                                            "example": "CHECKED_WITH_RECORDS",
+                                                            "nullable": true
+                                                        },
+                                                        "accounts_status": {
+                                                            "type": "string",
+                                                            "example": "KNOWN_DELAYED",
+                                                            "nullable": true
+                                                        },
+                                                        "official_status": {
+                                                            "type": "string",
+                                                            "example": "KNOWN",
+                                                            "nullable": true
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "dimensions": {
+                                                    "properties": {
+                                                        "legal_distress": {
+                                                            "type": "integer",
+                                                            "example": 60
+                                                        },
+                                                        "filing_compliance": {
+                                                            "type": "integer",
+                                                            "example": 0
+                                                        },
+                                                        "governance_volatility": {
+                                                            "type": "integer",
+                                                            "example": 30
+                                                        },
+                                                        "capital_instability": {
+                                                            "type": "integer",
+                                                            "example": 0
+                                                        },
+                                                        "structural_volatility": {
+                                                            "type": "integer",
+                                                            "example": 0
+                                                        },
+                                                        "stabilizing_credit": {
+                                                            "type": "integer",
+                                                            "example": 0
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "canonical_events": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "code": {
+                                                                "type": "string",
+                                                                "example": "LEGAL_STATE_REGISTRY_CLOSURE_GENERICO",
+                                                                "nullable": true
+                                                            },
+                                                            "dimension": {
+                                                                "type": "string",
+                                                                "example": "legal_distress",
+                                                                "nullable": true
+                                                            },
+                                                            "severity": {
+                                                                "type": "string",
+                                                                "example": "high",
+                                                                "nullable": true
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "Consta publicación registral de cierre sin especificación de causa.",
+                                                                "nullable": true
+                                                            },
+                                                            "event_date": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "2026-08-24",
+                                                                "nullable": true
+                                                            },
+                                                            "classification_confidence": {
+                                                                "type": "string",
+                                                                "example": "LOW",
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "model_version": {
+                                                    "type": "string",
+                                                    "example": "2.0.0"
+                                                },
+                                                "calculated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2026-08-24T00:00:00Z",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error de validación de parámetros",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "VALIDATION_ERROR"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El parámetro \"cif\" es obligatorio."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autorizado (API key inválida o inactiva)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "UNAUTHORIZED"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "API key inválida o inactiva."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Restricción de plan (exclusivo Business)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "PLAN_RESTRICTION"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El acceso al perfil de riesgo corporativo requiere el plan Business."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Empresa no encontrada o perfil no disponible",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "COMPANY_NOT_FOUND"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Empresa no encontrada."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Límite de peticiones excedido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "TOO_MANY_REQUESTS"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Has superado el límite de peticiones."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "SERVER_ERROR"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Se ha producido un error interno al consultar el perfil de riesgo."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/professional/search": {
             "get": {
                 "tags": [

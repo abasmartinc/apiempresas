@@ -45,3 +45,12 @@ class Companies:
     def network(self, cif: str) -> dict:
         """(Business) Obtiene la red o entramado societario (Network) de una empresa."""
         return self._client.request('GET', '/companies/network', params={'cif': cif})
+
+    def contracts(self, cif: str, page: int = 1, limit: int = 20) -> dict:
+        """(Business) Obtiene los contratos públicos y licitaciones adjudicadas a una empresa."""
+        return self._client.request('GET', '/companies/contracts', params={'cif': cif, 'page': page, 'limit': limit})
+
+    def risk_profile(self, cif: str) -> dict:
+        """(Business) Obtiene el perfil de riesgo corporativo y solvencia de una empresa."""
+        return self._client.request('GET', '/companies/risk-profile', params={'cif': cif})
+

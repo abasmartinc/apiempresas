@@ -226,7 +226,10 @@
         <div class="endpoints-section">
             <h3 class="endpoints-title">Endpoints incluidos en el Plan Business</h3>
             <p class="endpoints-subtitle">Además de todos los endpoints de los planes Free y Pro, desbloqueas:</p>
-            <div class="endpoints-grid">
+                <div class="endpoint-card">
+                    <div class="endpoint-route">GET /companies/risk-profile</div>
+                    <p class="endpoint-desc">Scoring de riesgo algorítmico, cumplimiento de depósito de cuentas anuales y alertas mercantiles BORME para evaluar solvencia y riesgo de impago.</p>
+                </div>
                 <div class="endpoint-card">
                     <div class="endpoint-route">GET /companies/contracts</div>
                     <p class="endpoint-desc">Consulta adjudicaciones y contratos públicos asociados a empresas mediante CIF para analizar adjudicaciones e importes.</p>

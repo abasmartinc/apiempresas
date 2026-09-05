@@ -112,4 +112,23 @@ export class Companies {
     const response = await this.client.request<BaseResponse<any>>(`/companies/network?${params.toString()}`);
     return response.data!;
   }
+
+  /**
+   * (Business) Obtiene los contratos públicos y licitaciones adjudicadas a una empresa.
+   */
+  public async contracts(cif: string, page: number = 1, limit: number = 20): Promise<any> {
+    const params = new URLSearchParams({ cif, page: page.toString(), limit: limit.toString() });
+    const response = await this.client.request<BaseResponse<any>>(`/companies/contracts?${params.toString()}`);
+    return response.data!;
+  }
+
+  /**
+   * (Business) Obtiene el perfil de riesgo corporativo y solvencia de una empresa.
+   */
+  public async riskProfile(cif: string): Promise<any> {
+    const params = new URLSearchParams({ cif });
+    const response = await this.client.request<BaseResponse<any>>(`/companies/risk-profile?${params.toString()}`);
+    return response.data!;
+  }
 }
+

@@ -936,6 +936,30 @@
                                 <td style="padding: 18px 20px; text-align: center;"><span style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span></td>
                                 <td style="padding: 18px 20px; text-align: center;"><button type="button" onclick="event.preventDefault(); showJsonPreview('get_match')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VIEW JSON</button></td>
                             </tr>
+                            <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 18px 20px;">
+                                    <div style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">GET /companies/contracts</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Filters: cif, page, limit</div>
+                                </td>
+                                <td style="padding: 18px 20px;">
+                                    <strong style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Public Contracts & Awards</strong>
+                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">Historical government tenders, contracting authorities, and award amounts associated with a company.</p>
+                                </td>
+                                <td style="padding: 18px 20px; text-align: center;"><span style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span></td>
+                                <td style="padding: 18px 20px; text-align: center;"><button type="button" onclick="event.preventDefault(); showJsonPreview('get_contracts')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VIEW JSON</button></td>
+                            </tr>
+                            <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 18px 20px;">
+                                    <div style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">GET /companies/risk-profile</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Filters: cif</div>
+                                </td>
+                                <td style="padding: 18px 20px;">
+                                    <strong style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Corporate Risk & Solvency Profile</strong>
+                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">Algorithmic risk score, accounts filing compliance, governance volatility, and official distress alerts.</p>
+                                </td>
+                                <td style="padding: 18px 20px; text-align: center;"><span style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span></td>
+                                <td style="padding: 18px 20px; text-align: center;"><button type="button" onclick="event.preventDefault(); showJsonPreview('get_risk_profile')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VIEW JSON</button></td>
+                            </tr>
                             <tr class="api-endpoint-row">
                                 <td style="padding: 18px 20px;">
                                     <div style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">POST /webhooks</div>
@@ -1348,6 +1372,8 @@ getCompany(<span style="color:#98c379;">'B12345678'</span>);</code></pre>
             get_radar: { success: true, meta: { plan: "business", count: 142, limit: 500 }, data: [{ name: "NEW CORP SL", cif: "B99887766", founded: "2024-05-05", province: "BARCELONA", score: 88 }] },
             get_network: { success: true, data: { cif: "B12345678", administrators: [{ name: "GARCIA LOPEZ JUAN", position: "Sole Administrator", linked_companies: [{ name: "OTRA EMPRESA SL", cif: "B87654321", status: "ACTIVA" }] }] } },
             get_match: { success: true, data: { cif: "B12345678", seller_sector: "software", match_score: 85, analysis: { match_level: "High", synergy: "High synergy", buyer_needs: ["Digitalisation", "CRM"] }, sales_pitch: "I noticed you're growing fast. Our software can help you..." } },
+            get_contracts: { success: true, count: 1, cif: "B12345678", contracts: [{ organ: "Ministerio de Transformación Digital", amount: 154200.50, award_date: "2024-02-15", status: "Adjudicado", description: "Desarrollo plataforma cloud" }] },
+            get_risk_profile: { success: true, data: { cif: "B12345678", risk_score: 22, risk_level: "BAJO", confidence_score: 0.95, data_quality_score: 0.90, summary_message: "Empresa con bajo riesgo legal y solvencia acreditada.", legal_state: "ACTIVA", data_sources: { borme_active: true, judicial_bulletins: false }, dimensions: { legal_distress: { level: "BAJO", score: 10 }, filing_compliance: { level: "OPTIMO", score: 95 } }, canonical_events: [], model_version: "2.1.0", calculated_at: "2024-05-15T10:00:00Z" } },
             post_webhook: { success: true, message: "Webhook created successfully", id: 789 },
             get_webhooks: { success: true, data: [{ id: "789", url: "https://yourcrm.com/api/callback", event: "company.created" }] },
             delete_webhook: { success: true, message: "Webhook deleted" }
@@ -1357,7 +1383,7 @@ getCompany(<span style="color:#98c379;">'B12345678'</span>);</code></pre>
             const modal    = document.getElementById('json-modal');
             const content  = document.getElementById('modal-json-content');
             const endpoint = document.getElementById('modal-endpoint-name');
-            const names = { get_companies: 'GET /companies', get_search: 'GET /companies/search', post_batch: 'POST /companies/batch', get_score: 'GET /companies/score', get_signals: 'GET /companies/signals', get_borme: 'GET /companies/borme', get_insights: 'GET /companies/insights', get_radar: 'GET /companies/radar', get_network: 'GET /companies/network', get_match: 'GET /companies/match', post_webhook: 'POST /webhooks', get_webhooks: 'GET /webhooks', delete_webhook: 'DELETE /webhooks/{id}' };
+            const names = { get_companies: 'GET /companies', get_search: 'GET /companies/search', post_batch: 'POST /companies/batch', get_score: 'GET /companies/score', get_signals: 'GET /companies/signals', get_borme: 'GET /companies/borme', get_insights: 'GET /companies/insights', get_radar: 'GET /companies/radar', get_network: 'GET /companies/network', get_match: 'GET /companies/match', get_contracts: 'GET /companies/contracts', get_risk_profile: 'GET /companies/risk-profile', post_webhook: 'POST /webhooks', get_webhooks: 'GET /webhooks', delete_webhook: 'DELETE /webhooks/{id}' };
             endpoint.textContent = names[key];
             content.innerHTML = syntaxHighlight(jsonExamples[key]);
             modal.style.display = 'flex';
