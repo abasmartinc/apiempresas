@@ -205,6 +205,23 @@ class GoogleAuth extends BaseController
                 'company' => 'Google Signup'
             ]);
 
+            if ($intent === 'view_risk_profile') {
+                $redirectUrl = (string)($this->request->getGet('redirect') ?? session()->get('auth_redirect') ?? '');
+                $this->emailService->sendRiskWelcomeEmail([
+                    'user_id'       => $user_id,
+                    'name'          => $name,
+                    'email'         => $email,
+                    'signup_intent' => $intent
+                ], $redirectUrl);
+            } elseif ($intent === 'api') {
+                $this->emailService->sendWelcomeEmail([
+                    'user_id'       => $user_id,
+                    'name'          => $name,
+                    'email'         => $email,
+                    'signup_intent' => $intent
+                ]);
+            }
+
             $db->transComplete();
 
             if ($db->transStatus() === false) {

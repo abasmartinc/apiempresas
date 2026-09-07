@@ -153,9 +153,8 @@ class EmailAutomationCommand extends BaseCommand
               AND u.id NOT IN (
                   SELECT us.user_id 
                   FROM user_subscriptions us
-                  JOIN api_plans ap ON ap.id = us.plan_id
                   WHERE us.status = 'active'
-                    AND (ap.product_type = 'risk' OR ap.slug = 'risk_pro' OR ap.product_type = 'bundle')
+                    AND us.plan_id > 1
               )
         ", [$startOfMonth])->getResultArray();
 
@@ -232,8 +231,9 @@ class EmailAutomationCommand extends BaseCommand
 
             // =========================================================================
             // 3) TRIGGER: risk_monthly_renewal (Días 28-31 de mes avisando renovación de 3 créditos)
+            // Solo para usuarios con intención específica de riesgo
             // =========================================================================
-            if ($isEndOfMonth && $distinctCount >= 1) {
+            if (($user['signup_intent'] ?? '') === 'view_risk_profile' && $isEndOfMonth && $distinctCount >= 1) {
                 if (!$this->automationModel->wasSentRecently($userId, 'risk_monthly_renewal', 25)) {
                     CLI::write("  -> Enviando 'risk_monthly_renewal' a {$user['email']}...");
                     $result = $this->emailService->sendRiskMonthlyRenewal($user);
@@ -241,6 +241,25 @@ class EmailAutomationCommand extends BaseCommand
                         $this->automationModel->markAsSent($userId, 'risk_monthly_renewal', $result['body']);
                         $this->recordTracking($userId, 'email_sent_risk_monthly_renewal');
                         CLI::write("     [SENT] risk_monthly_renewal OK", 'yellow');
+                    }
+                    continue;
+                }
+            }
+
+            // =========================================================================
+            // 4) TRIGGER: risk_unused_credits_48h (Recordatorio tras 24-72h si le quedan créditos gratis)
+            // Solo para usuarios con intención específica de riesgo
+            // =========================================================================
+            $userAgeSeconds = time() - strtotime($user['created_at']);
+            if (($user['signup_intent'] ?? '') === 'view_risk_profile' && $userAgeSeconds >= 86400 && $userAgeSeconds <= 604800 && $distinctCount < 3) {
+                if (!$this->automationModel->wasSentRecently($userId, 'risk_unused_credits_48h', 30)) {
+                    $remainingCredits = max(0, 3 - $distinctCount);
+                    CLI::write("  -> Enviando 'risk_unused_credits_48h' a {$user['email']}...");
+                    $result = $this->emailService->sendRiskUnusedCreditsReminder($user, $remainingCredits);
+                    if ($result['success']) {
+                        $this->automationModel->markAsSent($userId, 'risk_unused_credits_48h', $result['body']);
+                        $this->recordTracking($userId, 'email_sent_risk_unused_credits');
+                        CLI::write("     [SENT] risk_unused_credits_48h OK", 'yellow');
                     }
                 }
             }
@@ -350,6 +369,8 @@ class EmailAutomationCommand extends BaseCommand
             JOIN user_subscriptions us ON us.user_id = u.id AND us.status = 'active' AND us.plan_id = 1
             JOIN api_requests r ON r.user_id = u.id AND DATE(r.created_at) = CURDATE()
             WHERE u.is_admin = 0
+              AND u.unsuscribe = 0
+              AND u.signup_intent = 'api'
               AND u.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
               AND u.id NOT IN (
                   SELECT user_id FROM user_email_automation

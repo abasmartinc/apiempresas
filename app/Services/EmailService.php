@@ -96,8 +96,8 @@ class EmailService
      */
     public function sendWelcomeEmail(array $userData)
     {
-        // No enviar email técnico de la API si el registro es con intención de ver perfil de riesgo
-        if (($userData['signup_intent'] ?? '') === 'view_risk_profile') {
+        // Solo enviar email técnico de la API si el registro es para la API
+        if (($userData['signup_intent'] ?? 'api') !== 'api') {
             return false;
         }
 
@@ -105,6 +105,22 @@ class EmailService
         $templateData = ['name' => $userData['name'] ?? 'Usuario'];
 
         return $this->sendTemplateEmail('welcome_email', $templateData, $userEmail, ['papelo.amh@gmail.com'], [], $userData['user_id'] ?? 0);
+    }
+
+    /**
+     * Send welcome email specifically for risk profile users.
+     */
+    public function sendRiskWelcomeEmail(array $userData, string $redirectUrl = '')
+    {
+        $userEmail = $userData['email'];
+        $buttonUrl = !empty($redirectUrl) ? site_url(ltrim($redirectUrl, '/')) : site_url('search');
+
+        $templateData = [
+            'name'       => $userData['name'] ?? 'Usuario',
+            'button_url' => $buttonUrl
+        ];
+
+        return $this->sendTemplateEmail('welcome_risk', $templateData, $userEmail, ['papelo.amh@gmail.com'], [], $userData['user_id'] ?? 0);
     }
 
     /**
@@ -317,6 +333,21 @@ class EmailService
     }
 
     /**
+     * TRIGGER: risk_unused_credits_48h
+     */
+    public function sendRiskUnusedCreditsReminder(array $userData, int $remainingCredits): array
+    {
+        $credText = ($remainingCredits === 1) ? '1 consulta' : "{$remainingCredits} consultas";
+
+        $templateData = [
+            'name'              => $userData['name'] ?? 'Usuario',
+            'remaining_credits' => $credText,
+            'button_url'        => base_url('search')
+        ];
+        return $this->sendTemplateEmail('risk_unused_credits_48h', $templateData, $userData['email'], ['papelo.amh@gmail.com'], [], $userData['user_id'] ?? 0);
+    }
+
+    /**
      * CORE: Send email using a database template
      */
     private function sendTemplateEmail(string $slug, array $data, string $to, array $bcc = [], array $attachments = [], int $userId = 0)
@@ -330,7 +361,7 @@ class EmailService
         }
 
         // Define which templates are purely transactional (must send even if unsubscribed)
-        $transactionalSlugs = ['payment_notification', 'user_invoice', 'admin_registration', 'set_password', 'welcome_email'];
+        $transactionalSlugs = ['payment_notification', 'user_invoice', 'admin_registration', 'set_password', 'welcome_email', 'welcome_risk'];
 
         // Check if the recipient is unsubscribed
         if (!in_array($slug, $transactionalSlugs) && $this->isUnsubscribed($to)) {

@@ -168,7 +168,13 @@ class LinkedinAuth extends BaseController
             // Email de bienvenida
             try {
                 $emailService = new EmailService();
-                $emailService->sendWelcomeEmail((array)$user, $apiKey);
+                $userArr = (array)$user;
+                $userArr['signup_intent'] = $intent;
+                if ($intent === 'view_risk_profile') {
+                    $emailService->sendRiskWelcomeEmail($userArr);
+                } elseif ($intent === 'api') {
+                    $emailService->sendWelcomeEmail($userArr);
+                }
             } catch (\Exception $e) {
                 log_message('error', '[LinkedinAuth] Error enviando email: ' . $e->getMessage());
             }

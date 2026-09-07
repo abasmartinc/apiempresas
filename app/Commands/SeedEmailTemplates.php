@@ -26,6 +26,22 @@ class SeedEmailTemplates extends BaseCommand
                 'trigger' => 'Se envía inmediatamente después de que un usuario completa su registro.'
             ],
             [
+                'slug'    => 'welcome_risk',
+                'name'    => 'Bienvenida (Riesgo y Solvencia)',
+                'subject' => '🛡️ Tu cuenta está lista: dispones de 3 informes de riesgo gratis este mes',
+                'view'    => 'welcome_risk',
+                'vars'    => '{name}, {button_url}',
+                'trigger' => 'Se envía inmediatamente a los usuarios registrados con intención de ver perfil de riesgo (view_risk_profile).'
+            ],
+            [
+                'slug'    => 'risk_unused_credits_48h',
+                'name'    => 'Recordatorio Créditos de Riesgo (24h-72h)',
+                'subject' => '🛡️ Tienes {remaining_credits} consultas de solvencia gratuitas disponibles este mes',
+                'view'    => 'risk_unused_credits_48h',
+                'vars'    => '{name}, {remaining_credits}, {button_url}',
+                'trigger' => 'Se envía a usuarios de riesgo tras 24h-72h del registro si aún les quedan créditos gratuitos sin consumir.'
+            ],
+            [
                 'slug'    => 'payment_notification',
                 'name'    => 'Notificación de Pago (Admin)',
                 'subject' => '💰 ¡Nuevo Pago Recibido! - {invoice_number}',

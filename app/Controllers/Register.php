@@ -269,8 +269,10 @@ class Register extends BaseController
             // Notificación al Admin (papelo.amh@gmail.com)
             $this->emailService->sendRegistrationAdminNotification($userData);
 
-            // Correo de Bienvenida al usuario (solo si no viene con intención de perfil de riesgo)
-            if (($data['signup_intent'] ?? '') !== 'view_risk_profile') {
+            // Correo de Bienvenida al usuario
+            if (($data['signup_intent'] ?? '') === 'view_risk_profile') {
+                $this->emailService->sendRiskWelcomeEmail($userData, (string)($redirectUrl ?? ''));
+            } elseif (($data['signup_intent'] ?? '') === 'api') {
                 $this->emailService->sendWelcomeEmail($userData);
             }
 

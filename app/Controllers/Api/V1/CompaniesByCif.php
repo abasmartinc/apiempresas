@@ -244,7 +244,7 @@ class CompaniesByCif extends BaseApiController
                         if (!$automationModel->wasSent($userId, 'first_request')) {
                             $userModel = new \App\Models\UserModel();
                             $user = $userModel->asArray()->find($userId);
-                            if ($user && (int)$user['is_admin'] === 0) {
+                            if ($user && (int)$user['is_admin'] === 0 && (int)($user['unsuscribe'] ?? 0) === 0 && ($user['signup_intent'] ?? '') === 'api') {
                                 $this->emailService->sendFirstRequestMilestone($user);
                                 $automationModel->markAsSent($userId, 'first_request');
                             }

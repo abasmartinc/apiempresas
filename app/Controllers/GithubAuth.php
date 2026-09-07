@@ -179,8 +179,13 @@ class GithubAuth extends BaseController
             // Enviar email de bienvenida
             try {
                 $emailService = new EmailService();
-                // Convertimos el objeto $user a array para que EmailService no explote
-                $emailService->sendWelcomeEmail((array)$user, $apiKey);
+                $userArr = (array)$user;
+                $userArr['signup_intent'] = $intent;
+                if ($intent === 'view_risk_profile') {
+                    $emailService->sendRiskWelcomeEmail($userArr);
+                } elseif ($intent === 'api') {
+                    $emailService->sendWelcomeEmail($userArr);
+                }
             } catch (\Exception $e) {
                 log_message('error', '[GithubAuth] Error enviando email bienvenida: ' . $e->getMessage());
             }
