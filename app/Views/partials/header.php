@@ -75,82 +75,92 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                         <path d="m6 9 6 6 6-6" />
                     </svg>
                 </button>
-                <div class="nav-dropdown-menu nav-dropdown-mega" style="width: 760px !important; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px !important;">
+                <div class="nav-dropdown-menu nav-dropdown-mega">
                     
-                        <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 12px; margin-left: 16px;">Productos</h4>
-                        <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 12px; margin-left: 16px;">Integraciones</h4>
+                        <h4 style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin: 0 0 6px 10px;">Productos</h4>
+                        <h4 style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin: 0 0 6px 10px;">Integraciones</h4>
 
-                        <!-- Fila 1 -->
-                        <a href="<?= site_url('api-empresas') ?>" style="height: 100%;">
+                        <!-- Fila 1: API Empresas | Plugin WordPress -->
+                        <a href="<?= site_url('api-empresas') ?>">
                             <div class="nav-item-icon">🔌</div>
                             <div>
                                 <strong>API Empresas</strong>
-                                <span>Integra datos oficiales del Registro Mercantil en tu software y automatiza B2B.</span>
+                                <span>Integra datos oficiales del Registro Mercantil en tu software.</span>
                             </div>
                         </a>
-                        <a href="<?= site_url('plugin-wordpress-buscador-empresas') ?>" style="height: 100%;">
+                        <a href="<?= site_url('plugin-wordpress-buscador-empresas') ?>">
                             <div class="nav-item-icon">
-                                <img src="<?= base_url('public/img/logos/wordpress.svg') ?>" width="20" height="20" alt="WordPress" style="display: block;">
+                                <img src="<?= base_url('public/img/logos/wordpress.svg') ?>" width="18" height="18" alt="WordPress" style="display: block;">
                             </div>
                             <div>
-                                <strong style="display: flex; align-items: center; gap: 8px;">Plugin WordPress <b style="background: #10b981; color: white; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; display: inline-block; line-height: 1;">DISPONIBLE</b></strong>
-                                <span>Instala nuestro buscador B2B y convierte tu web en un imán de leads corporativos.</span>
+                                <strong style="display: flex; align-items: center; gap: 6px;">Plugin WordPress <b style="background: #10b981; color: white; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">DISPONIBLE</b></strong>
+                                <span>Buscador B2B para convertir tu web en imán de leads corporativos.</span>
                             </div>
                         </a>
 
-                        <!-- Fila 2 -->
-                        <a href="<?= getRadarRedirect('header') ?>" style="height: 100%;">
-                            <div class="nav-item-icon">📡</div>
+                        <!-- Fila 2: Perfil de Riesgo | Extensión Google Sheets -->
+                        <a href="<?= site_url('perfil-de-riesgo') ?>">
+                            <div class="nav-item-icon">🛡️</div>
                             <div>
-                                <strong>Radar Inteligente</strong>
-                                <span>Detecta en tiempo real empresas de reciente creación publicadas en el BORME.</span>
+                                <strong style="display: flex; align-items: center; gap: 6px;">Perfil de Riesgo <b style="background: #2563eb; color: white; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">NUEVO</b></strong>
+                                <span>Consulta scoring de solvencia, alertas BORME y riesgo comercial.</span>
                             </div>
                         </a>
-                        <a href="<?= site_url('integraciones/google-sheets') ?>" style="height: 100%;">
+                        <a href="<?= site_url('integraciones/google-sheets') ?>">
                             <div class="nav-item-icon">
-                                <img src="<?= base_url('public/img/logos/googlesheets.svg') ?>" width="20" height="20" alt="Google Sheets" style="display: block;">
+                                <img src="<?= base_url('public/img/logos/googlesheets.svg') ?>" width="18" height="18" alt="Google Sheets" style="display: block;">
                             </div>
                             <div>
-                                <strong style="display: flex; align-items: center; gap: 8px;">Extensión Google Sheets <b style="background: #10b981; color: white; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; display: inline-block; line-height: 1;">DISPONIBLE</b></strong>
-                                <span>Sincroniza y enriquece bases de datos B2B masivamente sin salir de tus hojas de cálculo.</span>
+                                <strong style="display: flex; align-items: center; gap: 6px;">Extensión Google Sheets <b style="background: #10b981; color: white; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">DISPONIBLE</b></strong>
+                                <span>Sincroniza y enriquece BBDD masivamente desde tus hojas de cálculo.</span>
                             </div>
                         </a>
 
-                        <!-- Fila 3 -->
-                        <a href="https://vertice.apiempresas.es" target="_blank" style="height: 100%;">
-                            <div class="nav-item-icon">📍</div>
-                            <div>
-                                <strong>Vértice</strong>
-                                <span>Geomarketing avanzado para analizar ubicaciones, competidores y expandir tu red comercial.</span>
-                            </div>
-                        </a>
-                        <a href="#" class="js-track-wp-cta" style="height: 100%;">
-                            <div class="nav-item-icon">
-                                <img src="<?= base_url('public/img/logos/zapier.svg') ?>" width="20" height="20" alt="Zapier" style="display: block;">
-                            </div>
-                            <div>
-                                <strong style="display: flex; align-items: center; gap: 8px;">App para Zapier / Make <b style="background: #f1f5f9; color: #64748b; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; display: inline-block; line-height: 1;">PRÓXIMAMENTE</b></strong>
-                                <span>Automatiza tus procesos comerciales conectando nuestra API con miles de apps.</span>
-                            </div>
-                        </a>
-
-                        <!-- Fila 4 -->
-                        <a href="<?= site_url('encontrar-empresas-similares') ?>" style="height: 100%;">
+                        <!-- Fila 3: Empresas Gemelas | App Zapier / Make -->
+                        <a href="<?= site_url('encontrar-empresas-similares') ?>">
                             <div class="nav-item-icon">👥</div>
                             <div>
                                 <strong>Empresas Gemelas</strong>
-                                <span>Encuentra empresas idénticas a tus mejores clientes con nuestra IA.</span>
+                                <span>Encuentra empresas idénticas a tus clientes con IA.</span>
                             </div>
                         </a>
-                        <a href="#" class="js-track-wp-cta" style="height: 100%;">
+                        <a href="#" class="js-track-wp-cta">
                             <div class="nav-item-icon">
-                                <img src="<?= base_url('public/img/logos/shopify.svg') ?>" width="20" height="20" alt="Shopify" style="display: block;">
+                                <img src="<?= base_url('public/img/logos/zapier.svg') ?>" width="18" height="18" alt="Zapier" style="display: block;">
                             </div>
                             <div>
-                                <strong style="display: flex; align-items: center; gap: 8px;">Plugin Shopify B2B <b style="background: #f1f5f9; color: #64748b; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; display: inline-block; line-height: 1;">PRÓXIMAMENTE</b></strong>
-                                <span>Valida automáticamente el CIF y la salud financiera de tus clientes en el checkout.</span>
+                                <strong style="display: flex; align-items: center; gap: 6px;">App Zapier / Make <b style="background: #f1f5f9; color: #64748b; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">PRÓXIMAMENTE</b></strong>
+                                <span>Automatiza conectando nuestra API con miles de herramientas.</span>
                             </div>
                         </a>
+
+                        <!-- Fila 4: Radar Inteligente | Plugin Shopify B2B -->
+                        <a href="<?= getRadarRedirect('header') ?>">
+                            <div class="nav-item-icon">📡</div>
+                            <div>
+                                <strong>Radar Inteligente</strong>
+                                <span>Detecta en tiempo real nuevas empresas publicadas en el BORME.</span>
+                            </div>
+                        </a>
+                        <a href="#" class="js-track-wp-cta">
+                            <div class="nav-item-icon">
+                                <img src="<?= base_url('public/img/logos/shopify.svg') ?>" width="18" height="18" alt="Shopify" style="display: block;">
+                            </div>
+                            <div>
+                                <strong style="display: flex; align-items: center; gap: 6px;">Plugin Shopify B2B <b style="background: #f1f5f9; color: #64748b; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">PRÓXIMAMENTE</b></strong>
+                                <span>Valida CIF y solvencia financiera en el checkout B2B.</span>
+                            </div>
+                        </a>
+
+                        <!-- Fila 5: Vértice | Espacio libre -->
+                        <a href="https://vertice.apiempresas.es" target="_blank">
+                            <div class="nav-item-icon">📍</div>
+                            <div>
+                                <strong>Vértice</strong>
+                                <span>Geomarketing avanzado para expandir tu red comercial.</span>
+                            </div>
+                        </a>
+                        <div style="height: 100%;"></div>
 
                 </div>
             </div>
@@ -331,14 +341,17 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                     <a href="<?= site_url('api-empresas') ?>" class="mobile-nav-link">
                         <span>API Empresas</span>
                     </a>
+                    <a href="<?= site_url('perfil-de-riesgo') ?>" class="mobile-nav-link">
+                        <span>Perfil de Riesgo</span>
+                    </a>
+                    <a href="<?= site_url('encontrar-empresas-similares') ?>" class="mobile-nav-link">
+                        <span>Empresas Gemelas</span>
+                    </a>
                     <a href="<?= getRadarRedirect('mobile_header') ?>" class="mobile-nav-link">
                         <span>Radar Inteligente</span>
                     </a>
                     <a href="https://vertice.apiempresas.es" target="_blank" class="mobile-nav-link">
-                        <span>Inteligencia Comercial</span>
-                    </a>
-                    <a href="<?= site_url('encontrar-empresas-similares') ?>" class="mobile-nav-link">
-                        <span>Empresas Gemelas</span>
+                        <span>Vértice</span>
                     </a>
 
                     <div style="padding: 16px 18px 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em;">Integraciones</div>

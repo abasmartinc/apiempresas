@@ -547,6 +547,11 @@ $routes->get('autocompletado-cif-empresas/get', 'CompanySuggestions::getSuggesti
 $routes->addRedirect('company-suggestions', 'autocompletado-cif-empresas');
 $routes->addRedirect('company-suggestions/get', 'autocompletado-cif-empresas/get');
 
+// Herramienta de Perfil de Riesgo y Solvencia Corporativa
+$routes->get('perfil-de-riesgo', 'RiskProfileController::index');
+$routes->post('perfil-de-riesgo', 'RiskProfileController::index');
+$routes->get('api/perfil-de-riesgo/lookup', 'RiskProfileController::ajaxLookup');
+
 
 // Traffic Advice (Chrome prefetching)
 $routes->get('.well-known/traffic-advice', static function () {

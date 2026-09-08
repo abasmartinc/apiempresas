@@ -6789,18 +6789,21 @@ footer .container {
         font-weight: 500;
     }
 
-    /* Mega Menu Modification */
+    /* Mega Menu Modification (Compact & Clean) */
     .nav-dropdown-mega {
-        width: 720px !important;
-        padding: 24px !important;
+        width: 700px !important;
+        padding: 16px 18px !important;
         display: grid !important;
         grid-template-columns: 1fr 1fr;
-        gap: 16px;
+        gap: 8px 16px !important;
     }
 
     .nav-dropdown-mega a {
-        align-items: flex-start;
-        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 10px;
         border: 1px solid transparent;
     }
 
@@ -6810,9 +6813,10 @@ footer .container {
     }
 
     .nav-dropdown-mega .nav-item-icon {
-        width: 44px;
-        height: 44px;
-        font-size: 22px;
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+        border-radius: 8px;
         flex-shrink: 0;
         background: #f1f5f9;
         border: 1px solid #e2e8f0;
@@ -6820,15 +6824,16 @@ footer .container {
     }
 
     .nav-dropdown-mega strong {
-        font-size: 16px;
-        font-weight: 800;
-        margin-bottom: 6px;
+        font-size: 13.5px;
+        font-weight: 700;
+        margin-bottom: 1px;
+        line-height: 1.25;
     }
 
     .nav-dropdown-mega span {
-        font-size: 13px;
-        line-height: 1.5;
-        color: #475569;
+        font-size: 11.5px;
+        line-height: 1.35;
+        color: #64748b;
         white-space: normal;
     }
 
