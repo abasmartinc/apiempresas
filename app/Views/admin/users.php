@@ -46,7 +46,46 @@
         }
         .kpi-label { font-size: 0.85rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
         .kpi-value { font-size: 2.5rem; font-weight: 900; color: #1e293b; letter-spacing: -0.02em; margin-bottom: 0.5rem; line-height: 1; }
-        .kpi-sub { font-size: 0.85rem; color: #94a3b8; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+        .kpi-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+        }
+        .kpi-top-row .kpi-icon-wrapper {
+            margin-bottom: 0;
+        }
+        .kpi-trend-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0.28rem 0.65rem;
+            border-radius: 9999px;
+            letter-spacing: 0.01em;
+            line-height: 1;
+        }
+        .kpi-trend-badge svg {
+            width: 13px;
+            height: 13px;
+            stroke-width: 2.5;
+        }
+        .kpi-trend-badge.trend-up {
+            background-color: #ecfdf5;
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+        .kpi-trend-badge.trend-down {
+            background-color: #fef2f2;
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+        }
+        .kpi-trend-badge.trend-neutral {
+            background-color: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+        }
         .progress-bar-container {
             width: 100%;
             height: 6px;
@@ -73,42 +112,98 @@
         </div>
     </div>
 
+    <?php
+        $trendTotal = $stats['trend_total'] ?? ['diff' => 0, 'percent' => 0, 'direction' => 'neutral', 'formatted_percent' => '0%', 'previous' => 0];
+        $trendNew = $stats['trend_new'] ?? ['diff' => 0, 'percent' => 0, 'direction' => 'neutral', 'formatted_percent' => '0%', 'previous' => 0];
+        $trendActive = $stats['trend_active'] ?? ['diff' => 0, 'percent' => 0, 'direction' => 'neutral', 'formatted_percent' => '0%', 'previous' => 0];
+        $trendAdmin = $stats['trend_admin'] ?? ['diff' => 0, 'percent' => 0, 'direction' => 'neutral', 'formatted_percent' => '0%', 'previous' => 0];
+        $prevMonthName = esc($stats['prev_month_name'] ?? 'mes anterior');
+    ?>
+
     <!-- KPIs -->
     <div class="kpi-grid">
         <div class="kpi-card" style="--kpi-color: var(--kpi-blue);">
-            <div class="kpi-icon-wrapper">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <div class="kpi-top-row">
+                <div class="kpi-icon-wrapper">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </div>
+                <span class="kpi-trend-badge trend-<?= $trendTotal['direction'] ?>" title="Crecimiento neto en el mes vs. cierre de <?= $prevMonthName ?>">
+                    <?php if ($trendTotal['direction'] === 'up'): ?>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                    <?php elseif ($trendTotal['direction'] === 'down'): ?>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
+                    <?php else: ?>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <?php endif; ?>
+                    <?= $trendTotal['formatted_percent'] ?>
+                </span>
             </div>
             <span class="kpi-label">Total Usuarios</span>
             <span class="kpi-value"><?= number_format($stats['total_users'], 0, ',', '.') ?></span>
-            <span class="kpi-sub">Usuarios registrados en la plataforma</span>
+            <span class="kpi-sub">+<?= number_format($trendTotal['diff'], 0, ',', '.') ?> este mes (vs. <?= number_format($trendTotal['previous'], 0, ',', '.') ?> en <?= $prevMonthName ?>)</span>
         </div>
 
         <div class="kpi-card" style="--kpi-color: var(--kpi-green);">
-            <div class="kpi-icon-wrapper">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="16" y1="11" x2="22" y2="11"></line></svg>
+            <div class="kpi-top-row">
+                <div class="kpi-icon-wrapper">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="16" y1="11" x2="22" y2="11"></line></svg>
+                </div>
+                <span class="kpi-trend-badge trend-<?= $trendNew['direction'] ?>" title="Variación de altas respecto a <?= $prevMonthName ?>">
+                    <?php if ($trendNew['direction'] === 'up'): ?>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                    <?php elseif ($trendNew['direction'] === 'down'): ?>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
+                    <?php else: ?>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <?php endif; ?>
+                    <?= $trendNew['formatted_percent'] ?>
+                </span>
             </div>
             <span class="kpi-label">Nuevos (Este Mes)</span>
             <span class="kpi-value">+<?= number_format($stats['new_users_month'], 0, ',', '.') ?></span>
-            <span class="kpi-sub">Altas registradas desde el día 1</span>
+            <span class="kpi-sub">vs. <?= number_format($trendNew['previous'], 0, ',', '.') ?> altas en <?= $prevMonthName ?></span>
         </div>
 
         <div class="kpi-card" style="--kpi-color: var(--kpi-purple);">
-            <div class="kpi-icon-wrapper">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            <div class="kpi-top-row">
+                <div class="kpi-icon-wrapper">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                </div>
+                <span class="kpi-trend-badge trend-<?= $trendActive['direction'] ?>" title="Variación vs. periodo anterior de 30 días">
+                    <?php if ($trendActive['direction'] === 'up'): ?>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                    <?php elseif ($trendActive['direction'] === 'down'): ?>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
+                    <?php else: ?>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <?php endif; ?>
+                    <?= $trendActive['formatted_percent'] ?>
+                </span>
             </div>
             <span class="kpi-label">Activos (30d)</span>
             <span class="kpi-value"><?= number_format($stats['active_users_30d'], 0, ',', '.') ?></span>
-            <span class="kpi-sub">Usuarios con login reciente</span>
+            <span class="kpi-sub">vs. <?= number_format($trendActive['previous'], 0, ',', '.') ?> activos periodo anterior</span>
         </div>
 
         <div class="kpi-card" style="--kpi-color: var(--kpi-rose);">
-            <div class="kpi-icon-wrapper">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <div class="kpi-top-row">
+                <div class="kpi-icon-wrapper">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </div>
+                <span class="kpi-trend-badge trend-<?= $trendAdmin['direction'] ?>" title="Variación vs. <?= $prevMonthName ?>">
+                    <?php if ($trendAdmin['direction'] === 'up'): ?>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                    <?php elseif ($trendAdmin['direction'] === 'down'): ?>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
+                    <?php else: ?>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <?php endif; ?>
+                    <?= $trendAdmin['formatted_percent'] ?>
+                </span>
             </div>
             <span class="kpi-label">Administradores</span>
             <span class="kpi-value"><?= number_format($stats['admin_users'], 0, ',', '.') ?></span>
-            <span class="kpi-sub">Cuentas con acceso total</span>
+            <span class="kpi-sub"><?= $trendAdmin['diff'] == 0 ? 'Sin cambios vs. ' . $prevMonthName : ($trendAdmin['diff'] > 0 ? '+' . $trendAdmin['diff'] : $trendAdmin['diff']) . ' vs. ' . $prevMonthName ?></span>
         </div>
     </div>
 
@@ -117,6 +212,15 @@
             <div>
                 <label class="input-label">Buscar por nombre, email o empresa</label>
                 <input type="text" name="q" class="input w-full" placeholder="Ej: Juan Pérez..." value="<?= esc($q) ?>">
+            </div>
+            <div>
+                <label class="input-label">Tipo / Intención</label>
+                <select name="signup_intent" class="input w-full" style="min-width: 170px;">
+                    <option value="">Todos los tipos</option>
+                    <option value="api" <?= $signup_intent === 'api' ? 'selected' : '' ?>>⚡ API (<?= $stats['api_users'] ?? 0 ?>)</option>
+                    <option value="view_risk_profile" <?= $signup_intent === 'view_risk_profile' ? 'selected' : '' ?>>🛡️ Perfil de Riesgo (<?= $stats['risk_profile_users'] ?? 0 ?>)</option>
+                    <option value="radar" <?= $signup_intent === 'radar' ? 'selected' : '' ?>>🎯 Radar (<?= $stats['radar_users'] ?? 0 ?>)</option>
+                </select>
             </div>
             <div>
                 <label class="input-label">Estado</label>
@@ -135,6 +239,31 @@
             </div>
         </form>
 
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #f1f5f9; align-items: center;">
+            <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin-right: 4px;">Filtrar rápido:</span>
+            <a href="<?= site_url('admin/users?' . http_build_query(array_filter(['q' => $q, 'is_active' => $is_active, 'signup_intent' => '']))) ?>" 
+               class="pill" style="text-decoration: none; padding: 5px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= empty($signup_intent) ? 'background: #2152ff; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
+               Todos (<?= $stats['total_users'] ?>)
+            </a>
+            <a href="<?= site_url('admin/users?' . http_build_query(array_filter(['q' => $q, 'is_active' => $is_active, 'signup_intent' => 'api']))) ?>" 
+               class="pill" style="text-decoration: none; padding: 5px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $signup_intent === 'api' ? 'background: #2563eb; color: white;' : 'background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe;' ?>">
+               ⚡ API (<?= $stats['api_users'] ?? 0 ?>)
+            </a>
+            <a href="<?= site_url('admin/users?' . http_build_query(array_filter(['q' => $q, 'is_active' => $is_active, 'signup_intent' => 'view_risk_profile']))) ?>" 
+               class="pill" style="text-decoration: none; padding: 5px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $signup_intent === 'view_risk_profile' ? 'background: #d97706; color: white;' : 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' ?>">
+               🛡️ Perfil de Riesgo (<?= $stats['risk_profile_users'] ?? 0 ?>)
+            </a>
+            <a href="<?= site_url('admin/users?' . http_build_query(array_filter(['q' => $q, 'is_active' => $is_active, 'signup_intent' => 'radar']))) ?>" 
+               class="pill" style="text-decoration: none; padding: 5px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $signup_intent === 'radar' ? 'background: #059669; color: white;' : 'background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0;' ?>">
+               🎯 Radar (<?= $stats['radar_users'] ?? 0 ?>)
+            </a>
+
+            <a href="<?= site_url('admin/risk-profile') ?>" 
+               class="pill" style="text-decoration: none; padding: 5px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; background: #fffbeb; color: #b45309; border: 1px dashed #f59e0b; margin-left: auto;" title="Abrir panel específico de estadísticas y funnel de Solvencia">
+               📊 Panel Analítico de Solvencia &rarr;
+            </a>
+        </div>
+
         <?php if (isset($pager) && $pager->getTotal() > 0): ?>
         <div class="bulk-actions" style="margin-top: 1rem;">
             <form action="<?= site_url('admin/users/email/bulk') ?>" method="post" style="display: inline;">
@@ -142,6 +271,7 @@
                 <input type="hidden" name="q" value="<?= esc($q) ?>">
                 <input type="hidden" name="is_active" value="<?= esc($is_active) ?>">
                 <input type="hidden" name="is_admin" value="<?= esc($is_admin) ?>">
+                <input type="hidden" name="signup_intent" value="<?= esc($signup_intent) ?>">
                 <input type="hidden" name="select_all_filtered" value="1">
                 <button type="submit" class="btn secondary btn-sm">
                     ✉️ Enviar Email a toda la lista (<?= $pager->getTotal() ?> usuarios)
@@ -176,6 +306,8 @@
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">ID</th>
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Nombre</th>
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Email</th>
+                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Tipo / Origen</th>
+                    <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Fecha Registro</th>
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Estado</th>
                     <th style="padding: 12px; color: #64748b; font-size: 0.85rem;">Acciones</th>
                 </tr>
@@ -188,11 +320,43 @@
                     <td>
                         <div class="font-bold"><?= esc($user->name) ?></div>
                         <div class="text-xs text-slate"><?= esc($user->company ?: '-') ?></div>
-                        <?php if (isset($user->source_app) && $user->source_app === 'alertaempresas'): ?>
-                            <span class="pill pill-sm" style="background: #fff1f2; color: #be123c; border: 1px solid #fda4af;">Alertas 🔔</span>
-                        <?php endif; ?>
                     </td>
                     <td class="text-slate-darker"><?= esc($user->email) ?></td>
+                    <td>
+                        <?php 
+                        $intent = $user->signup_intent ?? '';
+                        if ($intent === 'view_risk_profile'): ?>
+                            <span class="pill" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-size: 0.78rem; font-weight: 700; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                🛡️ Riesgo
+                            </span>
+                        <?php elseif ($intent === 'api'): ?>
+                            <span class="pill" style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; font-size: 0.78rem; font-weight: 700; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                ⚡ API
+                            </span>
+                        <?php elseif ($intent === 'radar'): ?>
+                            <span class="pill" style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-size: 0.78rem; font-weight: 700; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                🎯 Radar
+                            </span>
+                        <?php elseif (!empty($intent)): ?>
+                            <span class="pill" style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; font-size: 0.78rem; font-weight: 600; white-space: nowrap;">
+                                <?= esc($intent) ?>
+                            </span>
+                        <?php else: ?>
+                            <span class="pill" style="background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; font-size: 0.78rem;">-</span>
+                        <?php endif; ?>
+
+                        <?php if (isset($user->source_app) && $user->source_app === 'alertaempresas'): ?>
+                            <span class="pill pill-sm" style="background: #fff1f2; color: #be123c; border: 1px solid #fda4af; margin-top: 4px; display: inline-block;">Alertas 🔔</span>
+                        <?php endif; ?>
+                    </td>
+                    <td style="color: #64748b; font-size: 0.85rem; white-space: nowrap;">
+                        <?php if (!empty($user->created_at)): ?>
+                            <div style="font-weight: 600; color: #334155;"><?= date('d/m/Y', strtotime($user->created_at)) ?></div>
+                            <div class="text-xs text-slate"><?= date('H:i', strtotime($user->created_at)) ?></div>
+                        <?php else: ?>
+                            <span class="text-slate">-</span>
+                        <?php endif; ?>
+                    </td>
                     <td>
                         <?php if ($user->is_admin ?? false): ?>
                             <span class="pill pill-admin">Admin</span>

@@ -43,6 +43,18 @@
             </div>
         </div>
 
+        <nav class="admin-top-nav desktop-only">
+            <a href="<?= site_url('dashboard') ?>" class="admin-top-nav-link <?= current_url() == site_url('dashboard') ? 'active' : '' ?>">
+                Dashboard
+            </a>
+            <a href="<?= site_url('admin/users') ?>" class="admin-top-nav-link <?= (strpos(current_url(), 'admin/users') !== false || current_url() == site_url('admin/dashboard')) ? 'active' : '' ?>">
+                Usuarios
+            </a>
+            <a href="<?= site_url('admin/invoices') ?>" class="admin-top-nav-link <?= strpos(current_url(), 'admin/invoices') !== false ? 'active' : '' ?>">
+                Facturas
+            </a>
+        </nav>
+
         <div class="desktop-only auth-buttons">
             <div class="user-dropdown-container">
                 <button class="user-avatar-trigger" id="userMenuTrigger">
@@ -67,19 +79,27 @@
                         <span class="user-email-display"><?= esc(session('user_email')) ?></span>
                     </div>
                     <div class="dropdown-divider"></div>
-                    <a href="<?= site_url('admin/dashboard') ?>" class="dropdown-item">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-                        Admin Dashboard
-                    </a>
                     <a href="<?= site_url('dashboard') ?>" class="dropdown-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                        Dashboard Admin
+                    </a>
+                    <a href="<?= site_url('admin/risk-profile') ?>" class="dropdown-item" style="color: #d97706; font-weight: 800;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        🛡️ Perfil de Riesgo
+                    </a>
+                    <a href="<?= site_url('admin/users') ?>" class="dropdown-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                        Gestión Usuarios
+                    </a>
+                    <a href="<?= site_url('admin/invoices') ?>" class="dropdown-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        Facturas
+                    </a>
+                    <a href="<?= site_url('dashboard?view=client') ?>" class="dropdown-item">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                         Ver como Usuario
                     </a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" id="btn-clear-cache" class="dropdown-item">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                        Limpiar Caché
-                    </a>
+
                     <div class="dropdown-divider"></div>
                     <a href="<?= site_url('logout') ?>" class="dropdown-item logout-item" hx-boost="false">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
@@ -93,6 +113,30 @@
 </header>
 
 <style>
+    .admin-top-nav {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-left: 24px;
+    }
+    .admin-top-nav-link {
+        color: rgba(255, 255, 255, 0.82);
+        text-decoration: none;
+        font-size: 13.5px;
+        font-weight: 700;
+        padding: 6px 14px;
+        border-radius: 99px;
+        transition: all 0.2s ease;
+    }
+    .admin-top-nav-link:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.15);
+    }
+    .admin-top-nav-link.active {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.22);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+    }
     .auth-buttons { display: flex; align-items: center; gap: 14px; }
     
     /* User Dropdown Styles */
@@ -194,39 +238,5 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
-    // Clear Cache
-    document.getElementById('btn-clear-cache')?.addEventListener('click', function(e) {
-        e.preventDefault();
-        userMenu.classList.remove('active');
-        
-        Swal.fire({
-            title: '¿Limpiar Caché?',
-            text: 'Esto regenerará los datos del Radar con los precios actuales de la base de datos.',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, limpiar',
-            cancelButtonText: 'Cancelar',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.showLoading();
-                fetch('<?= site_url('admin/clear-cache') ?>', {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    Swal.fire({
-                        title: data.status === 'success' ? '¡Hecho!' : 'Error',
-                        text: data.message,
-                        icon: data.status === 'success' ? 'success' : 'error'
-                    });
-                })
-                .catch(err => {
-                    Swal.fire('Error', 'No se pudo limpiar la caché', 'error');
-                });
-            }
-        });
-    });
 });
 </script>

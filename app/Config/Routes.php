@@ -268,8 +268,6 @@ $routes->post('leads/subscribe', 'Leads::subscribe');
 // Admin Routes
 $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('dashboard', 'Admin\Dashboard::index');
-    $routes->get('metrics', 'Admin\MetricsController::index');
-    $routes->get('event-tracking', 'Admin\MetricsController::eventTracking');
 
     // RGPD (Derecho al olvido)
     $routes->get('rgpd', 'Admin\RgpdController::index');
@@ -297,14 +295,9 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->match(['GET', 'POST'], 'users/email/bulk', 'Admin\Dashboard::compose_bulk');
     $routes->post('users/email/send-bulk', 'Admin\Dashboard::send_bulk');
 
-    // Logs de búsqueda
-    $routes->get('logs', 'Admin\Dashboard::logs');
-    $routes->get('logs/toggle-included/(:num)', 'Admin\Dashboard::toggle_log_included/$1');
-    $routes->get('logs/check-cif', 'Admin\Dashboard::check_cif');
     $routes->get('api-requests', 'Admin\Dashboard::api_requests');
     $routes->get('usage-daily', 'Admin\Dashboard::usage_daily');
     $routes->get('blocked-ips', 'Admin\Dashboard::blocked_ips');
-    $routes->get('clear-cache', 'Admin\Dashboard::clear_cache');
 
     // $routes->get('usage', 'Admin\Dashboard::usage_daily'); // Removed incorrect alias
 
@@ -354,6 +347,11 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('invoices', 'Admin\Dashboard::invoices');
     $routes->get('invoices/download/(:num)', 'Admin\Dashboard::invoice_download/$1');
 
+    // Risk Profile & Solvencia Business Analytics
+    $routes->get('risk-profile', 'Admin\RiskProfileAnalytics::index');
+    $routes->post('risk-profile/email-single', 'Admin\RiskProfileAnalytics::sendSingleEmail');
+    $routes->post('risk-profile/email-bulk', 'Admin\RiskProfileAnalytics::sendBulkEmail');
+
     // Activity Logs
     $routes->get('activity-logs', 'Admin\ActivityLogs::index');
     $routes->get('activity-logs/user/(:num)', 'Admin\ActivityLogs::user/$1');
@@ -365,18 +363,6 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->post('email-templates/update/(:num)', 'Admin\EmailTemplates::update/$1');
     $routes->get('email-templates/preview/(:num)', 'Admin\EmailTemplates::preview/$1');
 
-    // IA Marketing
-    $routes->get('ia-marketing', 'Admin\Dashboard::ia_marketing');
-    $routes->get('email-history/(:num)', 'Admin\Dashboard::email_history_ajax/$1');
-
-    // Google Search Console
-    $routes->get('search-console', 'Admin\Dashboard::search_console');
-    $routes->get('search-console/kpis', 'Admin\Dashboard::search_console_kpis');
-    $routes->get('search-console/sitemaps', 'Admin\Dashboard::search_console_sitemaps');
-    $routes->post('search-console/inspect', 'Admin\Dashboard::search_console_inspect');
-
-    // Email Sender (Manual Assisted)
-    $routes->post('send-message', 'Admin\MetricsController::sendMessage');
 
     // SEO Auto Posts
     $routes->get('seo-auto-posts', 'Admin\SeoAutoPostsController::index');
@@ -567,10 +553,6 @@ $routes->group('api', function($routes) {
     $routes->post('tracking/event', 'TrackingController::logEvent');
 });
 
-// Admin Tracking de Eventos
-$routes->get('admin/event-tracking', 'Admin\MetricsController::eventTracking');
-$routes->get('admin/event-tracking/table', 'Admin\MetricsController::getTable');
-$routes->get('admin/event-tracking/ai-analyze', 'Admin\MetricsController::getAiAnalysis');
 
 // Unsubscribe
 $routes->get('unsubscribe/(:any)', 'Unsubscribe::index/$1');

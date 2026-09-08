@@ -16,7 +16,7 @@ class RadarController extends BaseController
         $this->companyModel = new CompanyModel();
         $this->subscriptionModel = new UsersuscriptionsModel();
         $this->radarService = new \App\Services\RadarService();
-        helper(['company', 'pricing']);
+        helper(['company', 'pricing', 'url']);
     }
 
     public function index()
@@ -503,51 +503,59 @@ class RadarController extends BaseController
         $cnae = $params['cnae'] ?? '';
         $cnae_text = $params['cnae_text'] ?? '';
         $estado = $params['estado'] ?? '';
+        $has_phone = $params['has_phone'] ?? '';
 
         $allowedPeriods = ['7', '30', '90', 'hoy', 'semana', 'mes', '30days', 'general'];
-        if (($params['is_historical'] ?? '0') === '1') {
+        if (($params['is_historical'] ?? '0') === '1' || $cnae !== '') {
             $period = 'general';
         }
         if (!in_array($period, $allowedPeriods, true)) {
-            $period = '30days';
+            $period = $cnae !== '' ? 'general' : '30days';
         }
 
         $db = \Config\Database::connect();
         $builder = $db->table('companies');
         $builder->select('id, company_name as name, cif, fecha_constitucion, cnae_label, registro_mercantil, municipality, address, objeto_social, phone');
 
+        // Prioridad de filtrado CNAE / Sector: si viene código CNAE explícito, no resolver sector para evitar conflicto WHERE
         if ($cnae !== '') {
             $builder->where('cnae_code LIKE', $cnae . '%');
         } elseif ($cnae_text !== '') {
             $builder->like('cnae_label', $cnae_text, 'both');
+        } elseif ($sector && mb_strtolower($sector, 'UTF-8') !== 'general') {
+            $resolution = $this->radarService->resolveCnaeCodes(url_title($sector, '-', true));
+            if ($resolution) {
+                $codes = $resolution['codes'];
+                if (count($codes) === 1) {
+                    $builder->where('cnae_code LIKE', $codes[0] . '%');
+                } else {
+                    $builder->groupStart();
+                    foreach ($codes as $code) {
+                        $builder->orLike('cnae_code', $code, 'after');
+                    }
+                    $builder->groupEnd();
+                }
+            }
         }
 
         if ($estado !== '') {
             $builder->where('estado', $estado);
         }
 
-        if ($province && mb_strtolower($province, 'UTF-8') !== 'españa' && $province !== $sector) {
+        if ($has_phone == '1') {
+            $builder->groupStart()
+                    ->groupStart()->where('phone IS NOT NULL', null, false)->where('phone !=', '')->groupEnd()
+                    ->orGroupStart()->where('phone_mobile IS NOT NULL', null, false)->where('phone_mobile !=', '')->groupEnd()
+                    ->groupEnd();
+        }
+
+        if ($province && mb_strtolower($province, 'UTF-8') !== 'españa' && mb_strtolower($province, 'UTF-8') !== mb_strtolower($sector, 'UTF-8') && $province !== $cnae_text) {
             if (in_array(mb_strtolower($province, 'UTF-8'), ['alicante', 'alacant', 'alicante/alacant'])) {
                 $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
             } elseif (in_array(mb_strtolower($province, 'UTF-8'), ['araba/álava', 'álava', 'álava-araba', 'araba', 'alava'])) {
                 $builder->whereIn('registro_mercantil', ['ÁLAVA', 'Álava-Araba', 'Araba/Álava', 'ALAVA']);
             } else {
                 $builder->where('registro_mercantil', $province);
-            }
-        }
-
-        if ($sector && mb_strtolower($sector, 'UTF-8') !== 'general') {
-            $resolution = $this->radarService->resolveCnaeCodes(url_title($sector, '-', true));
-            if ($resolution) {
-                $codes = $resolution['codes'];
-                if (count($codes) === 1)
-                    $builder->where('cnae_code LIKE', $codes[0] . '%');
-                else {
-                    $builder->groupStart();
-                    foreach ($codes as $code)
-                        $builder->orLike('cnae_code', $code, 'after');
-                    $builder->groupEnd();
-                }
             }
         }
 

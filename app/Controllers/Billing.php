@@ -736,8 +736,10 @@ class Billing extends BaseController
      */
     public function success()
     {
-        // Permitir acceso sin login si viene del simulador con contexto de excel en sesión
-        $hasSimulatorContext = session('checkout_context') !== null || session('simulator_excel_token') !== null;
+        // Permitir acceso sin login si viene del simulador con contexto de excel en sesión o con session_id de Stripe
+        $stripeSessionId = $this->request->getGet('session_id');
+        $hasStripeSession = !empty($stripeSessionId) && str_starts_with($stripeSessionId, 'cs_');
+        $hasSimulatorContext = session('checkout_context') !== null || session('simulator_excel_token') !== null || session('just_bought_excel') !== null || $hasStripeSession;
         if (!session('logged_in') && !$hasSimulatorContext) {
             return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_13'));
         }
@@ -749,6 +751,19 @@ class Billing extends BaseController
 
         $checkoutData = session('checkout_context') ?? [];
         $lastInfo = session('last_purchase_info') ?? [];
+
+        // Fallback: Recuperar contexto desde la sesión de Stripe si la sesión de PHP se perdió en la redirección
+        if (empty($checkoutData) && empty($lastInfo) && $hasStripeSession) {
+            try {
+                $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));
+                $stripeSession = $stripe->checkout->sessions->retrieve($stripeSessionId);
+                if ($stripeSession && !empty($stripeSession->metadata->export_context)) {
+                    $checkoutData = json_decode($stripeSession->metadata->export_context, true) ?? [];
+                }
+            } catch (\Exception $e) {
+                log_message('error', '[Billing::success] Error recuperando sesión Stripe: ' . $e->getMessage());
+            }
+        }
 
         // 1.5 Custom Bonus Success
         if (($checkoutData['type'] ?? '') === 'custom_bonus') {
@@ -811,8 +826,8 @@ class Billing extends BaseController
                 $exportParams['cnae'] = $lastInfo['cnae'];
             }
 
-            // Retroactive fix: If we detected it's a directory download but exportParams is missing the flag
-            if ($isDir && (!isset($exportParams['is_historical']) || $exportParams['is_historical'] !== '1')) {
+            // Retroactive fix: If we detected it's a directory download or has cnae, ensure historical flag
+            if (($isDir || !empty($exportParams['cnae'])) && (!isset($exportParams['is_historical']) || $exportParams['is_historical'] !== '1')) {
                 $exportParams['is_historical'] = '1';
                 $exportParams['period'] = 'general';
                 $lastInfo['export_params'] = $exportParams;

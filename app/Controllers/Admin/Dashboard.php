@@ -52,6 +52,7 @@ class Dashboard extends BaseController
         $q = $this->request->getGet('q');
         $active = $this->request->getGet('is_active');
         $admin = $this->request->getGet('is_admin');
+        $signupIntent = $this->request->getGet('signup_intent');
 
         $builder = $this->userModel;
 
@@ -71,6 +72,59 @@ class Dashboard extends BaseController
             $builder->where('is_admin', $admin);
         }
 
+        if ($signupIntent !== null && $signupIntent !== '') {
+            $builder->where('signup_intent', $signupIntent);
+        }
+
+        $db = \Config\Database::connect();
+        $startThisMonth = date('Y-m-01 00:00:00');
+        $startLastMonth = date('Y-m-01 00:00:00', strtotime('first day of last month'));
+
+        $monthNames = [
+            1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril',
+            5 => 'mayo', 6 => 'junio', 7 => 'julio', 8 => 'agosto',
+            9 => 'septiembre', 10 => 'octubre', 11 => 'noviembre', 12 => 'diciembre'
+        ];
+        $prevMonthName = $monthNames[(int)date('n', strtotime('first day of last month'))] ?? 'mes anterior';
+
+        // Helper para calcular variación porcentual y tendencia
+        $calcTrend = function($current, $previous) {
+            $diff = $current - $previous;
+            if ($previous == 0) {
+                $percent = $current > 0 ? 100 : 0;
+            } else {
+                $percent = round(($diff / $previous) * 100, 1);
+            }
+            return [
+                'current' => (int)$current,
+                'previous' => (int)$previous,
+                'diff' => (int)$diff,
+                'percent' => abs($percent),
+                'direction' => $diff > 0 ? 'up' : ($diff < 0 ? 'down' : 'neutral'),
+                'formatted_percent' => ($diff > 0 ? '+' : ($diff < 0 ? '-' : '')) . abs($percent) . '%'
+            ];
+        };
+
+        // 1. Total usuarios
+        $totalUsers = $db->table('users')->countAllResults();
+        $prevTotalUsers = $db->table('users')->where('created_at <', $startThisMonth)->countAllResults();
+        $trendTotal = $calcTrend($totalUsers, $prevTotalUsers);
+
+        // 2. Nuevos usuarios este mes
+        $newThisMonth = $db->table('users')->where('created_at >=', $startThisMonth)->countAllResults();
+        $newLastMonth = $db->table('users')->where('created_at >=', $startLastMonth)->where('created_at <', $startThisMonth)->countAllResults();
+        $trendNew = $calcTrend($newThisMonth, $newLastMonth);
+
+        // 3. Activos últimos 30 días
+        $active30d = $db->table('users')->where('last_login_at >=', date('Y-m-d H:i:s', strtotime('-30 days')))->countAllResults();
+        $activePrior30d = $db->table('users')->where('last_login_at >=', date('Y-m-d H:i:s', strtotime('-60 days')))->where('last_login_at <', date('Y-m-d H:i:s', strtotime('-30 days')))->countAllResults();
+        $trendActive = $calcTrend($active30d, $activePrior30d);
+
+        // 4. Administradores
+        $adminCount = $db->table('users')->where('is_admin', 1)->countAllResults();
+        $adminLastMonth = $db->table('users')->where('is_admin', 1)->where('created_at <', $startThisMonth)->countAllResults();
+        $trendAdmin = $calcTrend($adminCount, $adminLastMonth);
+
         $data = [
             'title' => 'Gestión de Usuarios | APIEmpresas',
             'users' => $builder->orderBy('created_at', 'DESC')->paginate(20),
@@ -78,136 +132,26 @@ class Dashboard extends BaseController
             'q' => $q,
             'is_active' => $active,
             'is_admin' => $admin,
+            'signup_intent' => $signupIntent,
             'stats' => [
-                'total_users' => $this->userModel->countAllResults(),
-                'new_users_month' => $this->userModel->where('created_at >=', date('Y-m-01 00:00:00'))->countAllResults(),
-                'active_users_30d' => $this->userModel->where('last_login_at >=', date('Y-m-d H:i:s', strtotime('-30 days')))->countAllResults(),
-                'admin_users' => $this->userModel->where('is_admin', 1)->countAllResults(),
+                'total_users' => $totalUsers,
+                'new_users_month' => $newThisMonth,
+                'active_users_30d' => $active30d,
+                'admin_users' => $adminCount,
+                'api_users' => $db->table('users')->where('signup_intent', 'api')->countAllResults(),
+                'risk_profile_users' => $db->table('users')->where('signup_intent', 'view_risk_profile')->countAllResults(),
+                'radar_users' => $db->table('users')->where('signup_intent', 'radar')->countAllResults(),
+                'prev_month_name' => $prevMonthName,
+                'trend_total' => $trendTotal,
+                'trend_new' => $trendNew,
+                'trend_active' => $trendActive,
+                'trend_admin' => $trendAdmin,
             ]
         ];
 
         return $this->renderView('admin/users', $data);
     }
 
-    /**
-     * Listado de logs de búsqueda
-     */
-    public function logs()
-    {
-        $httpStatus = $this->request->getGet('http_status');
-        $zeroResults = $this->request->getGet('zero');
-        $q = $this->request->getGet('q');
-        $fromDate = $this->request->getGet('from_date');
-        $toDate = $this->request->getGet('to_date');
-        $channel = $this->request->getGet('channel');
-
-        $builder = $this->searchLogModel;
-
-        if ($httpStatus) {
-            $builder->where('http_status', $httpStatus);
-        }
-
-        if ($zeroResults) {
-            $builder->where('result_count', 0);
-        }
-
-        if ($q) {
-            $builder->groupStart()
-                    ->like('query_raw', $q)
-                    ->orLike('ip_address', $q)
-                    ->orLike('user_agent', $q)
-                    ->groupEnd();
-        }
-
-        if ($fromDate) {
-            $builder->where('created_at >=', $fromDate . ' 00:00:00');
-        }
-
-        if ($toDate) {
-            $builder->where('created_at <=', $toDate . ' 23:59:59');
-        }
-
-        if ($channel) {
-            $builder->where('channel', $channel);
-        }
-
-        $paginatedLogs = $builder->orderBy('created_at', 'DESC')->paginate(30, 'default');
-        
-        $data = [
-            'title' => 'Logs de Búsqueda | APIEmpresas',
-            'logs' => $paginatedLogs,
-            'pager' => $this->searchLogModel->pager,
-            'http_status' => $httpStatus,
-            'zero' => $zeroResults,
-            'q' => $q,
-            'from_date' => $fromDate,
-            'to_date' => $toDate,
-            'channel' => $channel,
-            'stats' => [
-                'total_searches' => $this->searchLogModel->countAllResults(),
-                'no_results' => $this->searchLogModel->where('result_count', 0)->countAllResults(),
-                'searches_today' => $this->searchLogModel->where('created_at >=', date('Y-m-d 00:00:00'))->countAllResults(),
-            ]
-        ];
-
-        // Calcular tasa de éxito
-        $total = $data['stats']['total_searches'];
-        $fail = $data['stats']['no_results'];
-        $data['stats']['success_rate'] = $total > 0 ? round((($total - $fail) / $total) * 100, 1) : 0;
-
-        // Determinar qué logs de tipo CIF que fueron 0 ahora existen
-        $cifsToCheck = [];
-        foreach ($data['logs'] as $log) {
-            if ($log->result_count == 0 && $log->query_type == 'cif') {
-                $cifsToCheck[] = $log->query_raw;
-            }
-        }
-
-        $resolvedCifs = [];
-        if (!empty($cifsToCheck)) {
-            $existing = $this->companyModel->select('cif')
-                             ->whereIn('cif', $cifsToCheck)
-                             ->findAll();
-            $resolvedCifs = array_column($existing, 'cif');
-        }
-        $data['resolved_cifs'] = $resolvedCifs;
-
-        return $this->renderView('admin/logs', $data);
-    }
-
-    /**
-     * Cambiar estado de 'included' en un log
-     */
-    public function toggle_log_included($id)
-    {
-        $log = $this->searchLogModel->find($id);
-        if (!$log) {
-            return redirect()->back()->with('error', 'Log no encontrado.');
-        }
-
-        $newStatus = $log->included ? 0 : 1;
-        $this->searchLogModel->update($id, ['included' => $newStatus]);
-
-        return redirect()->back()->with('message', 'Estado actualizado correctamente.');
-    }
-
-    /**
-     * Verificar si un CIF existe en la base de datos (AJAX)
-     */
-    public function check_cif()
-    {
-        $cif = $this->request->getGet('cif');
-        if (!$cif) {
-            return $this->response->setJSON(['exists' => false, 'error' => 'CIF no proporcionado']);
-        }
-
-        $exists = $this->companyModel->where('cif', $cif)->first();
-
-        return $this->response->setJSON([
-            'exists' => $exists ? true : false,
-            'company_name' => $exists ? $exists->company_name : null
-        ]);
-    }
 
     /**
      * Listado de peticiones API
@@ -328,22 +272,6 @@ class Dashboard extends BaseController
         return $this->renderView('admin/blocked_ips', $data);
     }
 
-    /**
-     * Limpiar todas las cachés
-     */
-    public function clear_cache()
-    {
-        if (!$this->request->isAJAX()) {
-            return $this->response->setStatusCode(403)->setBody('Acceso no permitido');
-        }
-
-        try {
-            cache()->clean();
-            return $this->response->setJSON(['status' => 'success', 'message' => 'Caché limpiada correctamente.']);
-        } catch (\Exception $e) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Error al limpiar la caché: ' . $e->getMessage()]);
-        }
-    }
 
     /**
      * Formulario para redactar email
@@ -550,28 +478,196 @@ class Dashboard extends BaseController
      */
     public function invoices()
     {
+        $db = \Config\Database::connect();
         $invoiceModel = new \App\Models\InvoiceModel();
 
-        // Búsqueda simple
-        $search = $this->request->getGet('search');
-        if ($search) {
-            $invoiceModel->groupStart()
-                ->like('invoice_number', $search)
-                ->orLike('billing_name', $search)
-                ->orLike('billing_email', $search)
+        // Parámetros de filtro
+        $search = trim($this->request->getGet('search') ?? $this->request->getGet('q') ?? '');
+        $userId = $this->request->getGet('user_id');
+        $status = $this->request->getGet('status');
+        $dateFrom = $this->request->getGet('date_from');
+        $dateTo = $this->request->getGet('date_to');
+        $datePreset = $this->request->getGet('date_preset');
+        $orderBy = $this->request->getGet('order_by') ?? 'created_at_desc';
+
+        // Manejo de date_preset rápido
+        if ($datePreset) {
+            switch ($datePreset) {
+                case 'this_month':
+                    $dateFrom = date('Y-m-01');
+                    $dateTo = date('Y-m-t');
+                    break;
+                case 'last_month':
+                    $dateFrom = date('Y-m-01', strtotime('first day of last month'));
+                    $dateTo = date('Y-m-t', strtotime('last month'));
+                    break;
+                case 'last_30d':
+                    $dateFrom = date('Y-m-d', strtotime('-30 days'));
+                    $dateTo = date('Y-m-d');
+                    break;
+                case 'this_year':
+                    $dateFrom = date('Y-01-01');
+                    $dateTo = date('Y-12-31');
+                    break;
+                case 'all':
+                    $dateFrom = '';
+                    $dateTo = '';
+                    break;
+            }
+        }
+
+        // Construir consulta con JOIN a usuarios
+        $builder = $invoiceModel;
+        $builder->select('invoices.*, users.name as user_account_name, users.email as user_account_email, users.company as user_company');
+        $builder->join('users', 'users.id = invoices.user_id', 'left');
+
+        // Filtro de búsqueda textual
+        if ($search !== '') {
+            $builder->groupStart()
+                ->like('invoices.invoice_number', $search)
+                ->orLike('invoices.billing_name', $search)
+                ->orLike('invoices.billing_email', $search)
+                ->orLike('invoices.billing_vat', $search)
+                ->orLike('invoices.stripe_invoice_id', $search)
+                ->orLike('users.name', $search)
+                ->orLike('users.email', $search)
+                ->orLike('users.company', $search)
                 ->groupEnd();
         }
 
+        // Filtro por usuario
+        if ($userId !== null && $userId !== '') {
+            $builder->where('invoices.user_id', (int)$userId);
+        }
+
+        // Filtro por estado
+        if ($status !== null && $status !== '') {
+            $builder->where('invoices.status', $status);
+        }
+
+        // Filtros por rango de fecha
+        if ($dateFrom) {
+            $builder->where('invoices.created_at >=', $dateFrom . ' 00:00:00');
+        }
+        if ($dateTo) {
+            $builder->where('invoices.created_at <=', $dateTo . ' 23:59:59');
+        }
+
+        // Ordenación
+        switch ($orderBy) {
+            case 'created_at_asc':
+                $builder->orderBy('invoices.created_at', 'ASC');
+                break;
+            case 'amount_desc':
+                $builder->orderBy('invoices.total_amount', 'DESC');
+                break;
+            case 'amount_asc':
+                $builder->orderBy('invoices.total_amount', 'ASC');
+                break;
+            case 'number_desc':
+                $builder->orderBy('invoices.invoice_number', 'DESC');
+                break;
+            case 'number_asc':
+                $builder->orderBy('invoices.invoice_number', 'ASC');
+                break;
+            case 'created_at_desc':
+            default:
+                $builder->orderBy('invoices.created_at', 'DESC');
+                break;
+        }
+
+        $invoices = $builder->paginate(20);
+        $pager = $invoiceModel->pager;
+
+        // Lista de usuarios con facturas para el desplegable de filtro
+        $usersWithInvoices = $db->table('invoices')
+            ->select('invoices.user_id, users.name, users.email, COUNT(invoices.id) as invoice_count')
+            ->join('users', 'users.id = invoices.user_id', 'left')
+            ->where('invoices.user_id IS NOT NULL', null, false)
+            ->groupBy('invoices.user_id, users.name, users.email')
+            ->orderBy('users.name', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        // Fechas para comparativa mensual en KPIs
+        $startThisMonth = date('Y-m-01 00:00:00');
+        $startLastMonth = date('Y-m-01 00:00:00', strtotime('first day of last month'));
+
+        $monthNames = [
+            1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril',
+            5 => 'mayo', 6 => 'junio', 7 => 'julio', 8 => 'agosto',
+            9 => 'septiembre', 10 => 'octubre', 11 => 'noviembre', 12 => 'diciembre'
+        ];
+        $prevMonthName = $monthNames[(int)date('n', strtotime('first day of last month'))] ?? 'mes anterior';
+
+        // Helper para calcular métricas de variación
+        $calcTrend = function($current, $previous) {
+            $diff = $current - $previous;
+            if ($previous == 0) {
+                $percent = $current > 0 ? 100 : 0;
+            } else {
+                $percent = round(($diff / $previous) * 100, 1);
+            }
+            return [
+                'current' => $current,
+                'previous' => $previous,
+                'diff' => $diff,
+                'percent' => abs($percent),
+                'direction' => $diff > 0 ? 'up' : ($diff < 0 ? 'down' : 'neutral'),
+                'formatted_percent' => ($diff > 0 ? '+' : ($diff < 0 ? '-' : '')) . abs($percent) . '%'
+            ];
+        };
+
+        // Facturación este mes vs mes anterior
+        $revThisMonth = (float)($db->table('invoices')->where('status', 'paid')->where('created_at >=', $startThisMonth)->selectSum('total_amount')->get()->getRowArray()['total_amount'] ?? 0);
+        $revLastMonth = (float)($db->table('invoices')->where('status', 'paid')->where('created_at >=', $startLastMonth)->where('created_at <', $startThisMonth)->selectSum('total_amount')->get()->getRowArray()['total_amount'] ?? 0);
+        $trendRevenue = $calcTrend($revThisMonth, $revLastMonth);
+
+        // Cantidad de facturas emitidas este mes vs mes anterior
+        $countThisMonth = $db->table('invoices')->where('created_at >=', $startThisMonth)->countAllResults();
+        $countLastMonth = $db->table('invoices')->where('created_at >=', $startLastMonth)->where('created_at <', $startThisMonth)->countAllResults();
+        $trendCount = $calcTrend($countThisMonth, $countLastMonth);
+
+        // Ticket medio este mes vs mes anterior
+        $avgThisMonth = (float)($db->table('invoices')->where('status', 'paid')->where('created_at >=', $startThisMonth)->selectAvg('total_amount')->get()->getRowArray()['total_amount'] ?? 0);
+        $avgLastMonth = (float)($db->table('invoices')->where('status', 'paid')->where('created_at >=', $startLastMonth)->where('created_at <', $startThisMonth)->selectAvg('total_amount')->get()->getRowArray()['total_amount'] ?? 0);
+        $trendAvg = $calcTrend($avgThisMonth, $avgLastMonth);
+
+        // Facturas pendientes
+        $pendingCount = $db->table('invoices')->where('status !=', 'paid')->countAllResults();
+        $pendingLastMonth = $db->table('invoices')->where('status !=', 'paid')->where('created_at >=', $startLastMonth)->where('created_at <', $startThisMonth)->countAllResults();
+        $trendPending = $calcTrend($pendingCount, $pendingLastMonth);
+
+        // Contadores globales por estado
+        $paidCount = $db->table('invoices')->where('status', 'paid')->countAllResults();
+        $failedCount = $db->table('invoices')->whereIn('status', ['failed', 'uncollectible'])->countAllResults();
+        $totalInvoicesCount = $db->table('invoices')->countAllResults();
+
         $data = [
-            'title' => 'Gestión de Facturas',
-            'invoices' => $invoiceModel->orderBy('created_at', 'DESC')->paginate(20),
-            'pager' => $invoiceModel->pager,
+            'title' => 'Gestión de Facturas | APIEmpresas',
+            'invoices' => $invoices,
+            'pager' => $pager,
             'search' => $search,
+            'user_id' => $userId,
+            'status' => $status,
+            'date_from' => $dateFrom,
+            'date_to' => $dateTo,
+            'date_preset' => $datePreset,
+            'order_by' => $orderBy,
+            'users_with_invoices' => $usersWithInvoices,
             'stats' => [
-                'revenue_month' => $invoiceModel->where('status', 'paid')->where('created_at >=', date('Y-m-01'))->selectSum('total_amount')->get()->getRowArray()['total_amount'] ?? 0,
-                'count_month' => $invoiceModel->where('created_at >=', date('Y-m-01'))->countAllResults(),
-                'avg_ticket' => round($invoiceModel->where('status', 'paid')->where('created_at >=', date('Y-m-01'))->selectAvg('total_amount')->get()->getRowArray()['total_amount'] ?? 0, 2),
-                'pending_count' => $invoiceModel->where('status !=', 'paid')->countAllResults(),
+                'revenue_month' => $revThisMonth,
+                'count_month' => $countThisMonth,
+                'avg_ticket' => round($avgThisMonth, 2),
+                'pending_count' => $pendingCount,
+                'paid_count' => $paidCount,
+                'failed_count' => $failedCount,
+                'total_invoices' => $totalInvoicesCount,
+                'prev_month_name' => $prevMonthName,
+                'trend_revenue' => $trendRevenue,
+                'trend_count' => $trendCount,
+                'trend_avg' => $trendAvg,
+                'trend_pending' => $trendPending,
             ]
         ];
 
@@ -680,6 +776,7 @@ class Dashboard extends BaseController
         $filter_q = $this->request->getVar('q');
         $filter_active = $this->request->getVar('is_active');
         $filter_admin = $this->request->getVar('is_admin');
+        $filter_intent = $this->request->getVar('signup_intent');
         $selectAll = $this->request->getVar('select_all_filtered');
         $returnTo = $this->request->getVar('return_to') ?: 'admin/users';
 
@@ -702,6 +799,9 @@ class Dashboard extends BaseController
             }
             if ($filter_admin !== null && $filter_admin !== '') {
                 $builder->where('is_admin', $filter_admin);
+            }
+            if ($filter_intent !== null && $filter_intent !== '') {
+                $builder->where('signup_intent', $filter_intent);
             }
             $count = $builder->countAllResults(false); // false to not reset query for next call if needed, though here we just count
             $targetDescription = "Todos los usuarios filtrados ($count)";
@@ -728,6 +828,7 @@ class Dashboard extends BaseController
                 'q' => $filter_q,
                 'is_active' => $filter_active,
                 'is_admin' => $filter_admin,
+                'signup_intent' => $filter_intent,
                 'select_all_filtered' => $selectAll,
                 'return_to' => $returnTo
             ]
@@ -753,6 +854,7 @@ class Dashboard extends BaseController
             $filter_q = $this->request->getPost('q');
             $filter_active = $this->request->getPost('is_active');
             $filter_admin = $this->request->getPost('is_admin');
+            $filter_intent = $this->request->getPost('signup_intent');
 
             $builder = $this->userModel;
             if ($filter_q) {
@@ -767,6 +869,9 @@ class Dashboard extends BaseController
             }
             if ($filter_admin !== null && $filter_admin !== '') {
                 $builder->where('is_admin', $filter_admin);
+            }
+            if ($filter_intent !== null && $filter_intent !== '') {
+                $builder->where('signup_intent', $filter_intent);
             }
             $users = $builder->findAll();
         } elseif ($ids) {
@@ -1542,268 +1647,5 @@ class Dashboard extends BaseController
     ];
 
         return $this->renderView('admin/email_logs', $data);
-    }
-    /**
-     * Dashboard de IA Marketing: Lead Scoring
-     */
-    public function ia_marketing()
-    {
-        $db = \Config\Database::connect();
-        
-        $daysInactive   = (int) $this->request->getGet('days_inactive');
-        $minSearches    = (int) $this->request->getGet('min_searches');
-        $minApiRequests = (int) $this->request->getGet('min_api');
-        $emailStatus    = $this->request->getGet('email_status') ?: 'all';
-        
-        $sortBy  = $this->request->getGet('sort_by') ?: 'score';
-        $sortDir = strtoupper($this->request->getGet('sort_dir') ?: 'DESC');
-        if (!in_array($sortDir, ['ASC', 'DESC'])) $sortDir = 'DESC';
-
-        $excludeSubject = $this->request->getGet('exclude_subject');
-
-        $whereSql = "";
-        if ($daysInactive > 0) {
-            $cutoffDate = date('Y-m-d H:i:s', strtotime("-$daysInactive days"));
-            $whereSql .= " AND (u.last_login_at <= '$cutoffDate' OR u.last_login_at IS NULL)";
-        }
-
-        // Determine SQL sorting
-        $sqlOrderBy = "created_at DESC"; // Default for 'score' sorting fallback
-        $validSqlSortFields = [
-            'created_at'         => 'created_at',
-            'last_login_at'      => 'last_login_at',
-            'total_searches'     => 'total_searches',
-            'total_api_requests' => 'total_api_requests'
-        ];
-
-        if (isset($validSqlSortFields[$sortBy])) {
-            $sqlOrderBy = $validSqlSortFields[$sortBy] . " " . $sortDir;
-        }
-        
-        $emailWhere = "";
-        if ($emailStatus === 'never') {
-            $emailWhere = " AND total_emails_sent = 0";
-        } elseif ($emailStatus === 'at_least_one') {
-            $emailWhere = " AND total_emails_sent > 0";
-        }
-
-        if ($excludeSubject) {
-            $emailWhere .= " AND u.id NOT IN (SELECT DISTINCT user_id FROM email_logs WHERE subject = " . $db->escape($excludeSubject) . ")";
-        }
-
-        $sql = "
-            SELECT * FROM (
-                SELECT 
-                    u.id, u.name, u.email, u.created_at, u.last_login_at,
-                    (SELECT COUNT(id) FROM company_search_logs sl WHERE sl.user_id = u.id) as total_searches,
-                    IFNULL((SELECT SUM(requests_count) FROM api_usage_daily aud WHERE aud.user_id = u.id), 0) as total_api_requests,
-                    (SELECT COUNT(id) FROM user_activity_logs al WHERE al.user_id = u.id) as total_activity,
-                    IFNULL((SELECT status FROM user_subscriptions sub WHERE sub.user_id = u.id AND sub.status = 'active' LIMIT 1), 'inactive') as sub_status,
-                    (SELECT plan_id FROM user_subscriptions sub WHERE sub.user_id = u.id AND sub.status = 'active' LIMIT 1) as plan_id,
-                    (SELECT created_at FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_at,
-                    (SELECT status FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_status,
-                    (SELECT subject FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_subject,
-                    (SELECT opened_at FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_opened,
-                    (SELECT clicked_at FROM email_logs el WHERE el.user_id = u.id ORDER BY created_at DESC LIMIT 1) as last_email_clicked,
-                    (SELECT COUNT(id) FROM email_logs el WHERE el.user_id = u.id) as total_emails_sent
-                FROM users u
-                WHERE 1=1 $whereSql
-            ) AS lead_data
-            WHERE total_searches >= $minSearches
-              AND total_api_requests >= $minApiRequests
-              $emailWhere
-            ORDER BY $sqlOrderBy
-            LIMIT 200
-        ";
-        
-        $usersResult = $db->query($sql)->getResult();
-        
-        $leads = [];
-        $totalHotLeads = 0;
-        $totalScoreSum = 0;
-        $scoredUsersCount = 0;
-        
-        foreach($usersResult as $u) {
-            $score = 0;
-            
-            // 1. Recencia (20 ptos max)
-            if ($u->last_login_at) {
-                $daysSinceLogin = (strtotime(date('Y-m-d')) - strtotime($u->last_login_at)) / (60 * 60 * 24);
-                if ($daysSinceLogin <= 3) $score += 20;
-                elseif ($daysSinceLogin <= 7) $score += 15;
-                elseif ($daysSinceLogin <= 30) $score += 10;
-                elseif ($daysSinceLogin <= 90) $score += 5;
-            }
-            
-            // 2. Búsquedas Web (15 ptos max)
-            if ($u->total_searches >= 50) $score += 15;
-            elseif ($u->total_searches >= 20) $score += 10;
-            elseif ($u->total_searches >= 5) $score += 5;
-
-            // 3. API Requests (50 ptos max)
-            if ($u->total_api_requests >= 5000) $score += 50;
-            elseif ($u->total_api_requests >= 1000) $score += 35;
-            elseif ($u->total_api_requests >= 100) $score += 20;
-            elseif ($u->total_api_requests >= 10) $score += 10;
-            
-            // 4. Activity Logs (15 ptos max)
-            if ($u->total_activity >= 50) $score += 15;
-            elseif ($u->total_activity >= 20) $score += 10;
-            elseif ($u->total_activity >= 5) $score += 5;
-            
-            $u->score = $score;
-            $u->total_searches     = (int) $u->total_searches;
-            $u->total_api_requests = (int) $u->total_api_requests;
-            $u->total_activity     = (int) $u->total_activity;
-            
-            // Skip users who already have an active PAID subscription (plan_id > 1)
-            // If they are 'active' but on 'plan_id = 1', they are still leads.
-            if ($u->sub_status === 'active' && $u->plan_id > 1) continue;
-
-            $leads[] = $u;
-            if ($score > 0) {
-                $scoredUsersCount++;
-                $totalScoreSum += $score;
-            }
-            
-            if ($score >= 50 && ($u->sub_status !== 'active' || $u->plan_id == 1)) {
-                $totalHotLeads++;
-            }
-        }
-        
-        // Ordenar por score si es el campo seleccionado (PHP sort)
-        if ($sortBy === 'score') {
-            usort($leads, function($a, $b) use ($sortDir) {
-                if ($sortDir === 'DESC') {
-                    return $b->score <=> $a->score;
-                } else {
-                    return $a->score <=> $b->score;
-                }
-            });
-        }
-
-        // Obtener asuntos únicos para el filtro
-        $availableSubjects = $db->table('email_logs')
-                                ->select('subject')
-                                ->distinct()
-                                ->orderBy('subject', 'ASC')
-                                ->get()
-                                ->getResult();
-
-        $data = [
-            'title' => 'IA Marketing: Lead Scoring | APIEmpresas',
-            'leads' => $leads,
-            'filters' => [
-                'days_inactive'   => $daysInactive ?: '',
-                'min_searches'    => $minSearches ?: '',
-                'min_api'         => $minApiRequests ?: '',
-                'email_status'    => $emailStatus,
-                'exclude_subject' => $excludeSubject,
-                'sort_by'         => $sortBy,
-                'sort_dir'        => $sortDir,
-            ],
-            'stats' => [
-                'total_leads' => count($leads),
-                'total_hot_leads' => $totalHotLeads,
-                'average_score' => $scoredUsersCount > 0 ? round($totalScoreSum / $scoredUsersCount) : 0
-            ],
-            'available_subjects' => $availableSubjects
-        ];
-        
-        return $this->renderView('admin/ia_marketing', $data);
-    }
-
-    /**
-     * Dashboard de Google Search Console
-     */
-    public function search_console()
-    {
-        $data = [
-            'title' => 'Google Search Console | APIEmpresas'
-        ];
-        
-        return $this->renderView('admin/search_console', $data);
-    }
-    
-    /**
-     * AJAX endpoint para traer los datos de Google Search Console
-     */
-    public function search_console_kpis()
-    {
-        if (!$this->request->isAJAX()) {
-            return $this->response->setStatusCode(400)->setJSON(['error' => 'Invalid request']);
-        }
-        
-        $gscService = new \App\Services\GoogleSearchConsoleService();
-        $result = $gscService->getKpisWithComparison();
-        
-        if ($result['status'] === 'error') {
-            return $this->response->setStatusCode(500)->setJSON($result);
-        }
-        
-        return $this->response->setJSON($result);
-    }
-
-    /**
-     * AJAX endpoint para obtener los sitemaps de Google Search Console
-     */
-    public function search_console_sitemaps()
-    {
-        if (!$this->request->isAJAX()) {
-            return $this->response->setStatusCode(400)->setJSON(['error' => 'Invalid request']);
-        }
-
-        $gscService = new \App\Services\GoogleSearchConsoleService();
-        $result = $gscService->getSitemaps();
-
-        if ($result['status'] === 'error') {
-            return $this->response->setStatusCode(500)->setJSON($result);
-        }
-
-        return $this->response->setJSON($result);
-    }
-
-    /**
-     * AJAX endpoint para inspeccionar una URL en Google Search Console
-     */
-    public function search_console_inspect()
-    {
-        if (!$this->request->isAJAX()) {
-            return $this->response->setStatusCode(400)->setJSON(['error' => 'Invalid request']);
-        }
-
-        $url = $this->request->getPost('url');
-        if (!$url) {
-            return $this->response->setStatusCode(400)->setJSON(['error' => 'URL no proporcionada']);
-        }
-
-        // Validar que la URL sea del dominio permitido
-        if (strpos($url, 'https://apiempresas.es') !== 0) {
-            return $this->response->setStatusCode(400)->setJSON(['error' => 'La URL debe empezar por https://apiempresas.es']);
-        }
-
-        $gscService = new \App\Services\GoogleSearchConsoleService();
-        $result = $gscService->inspectUrl($url);
-
-        if ($result['status'] === 'error') {
-            return $this->response->setStatusCode(500)->setJSON($result);
-        }
-
-        return $this->response->setJSON($result);
-    }
-
-    /**
-     * Obtener el historial de emails de un usuario por AJAX
-     */
-    public function email_history_ajax($userId)
-    {
-        // Removed isAJAX check to facilitate debugging and some environment compatibility
-
-        $logs = $this->emailLogModel->where('user_id', $userId)
-                                    ->orderBy('created_at', 'DESC')
-                                    ->limit(10)
-                                    ->findAll();
-
-        return $this->response->setJSON($logs);
     }
 }

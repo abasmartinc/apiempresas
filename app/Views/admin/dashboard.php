@@ -5,14 +5,34 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-        <div style="margin-bottom: 48px;">
+        <div style="margin-bottom: 32px;">
             <h1 class="title" style="font-size: 2.8rem; margin-bottom: 8px;">Dashboard <span class="grad">Admin</span>
             </h1>
             <p style="color: #64748b; font-size: 1.1rem;">Bienvenido de nuevo, <?= esc(session('user_name')) ?>. Aquí
                 tienes el resumen de hoy. <a href="<?= site_url('dashboard?view=client') ?>" style="color: #2152ff; font-weight: 700; text-decoration: none; margin-left: 10px;">Ver mi Dashboard como Cliente &rarr;</a></p>
         </div>
 
-        <!-- KPIs Section Removed for Performance -->
+        <!-- Banner Destacado: Perfil de Riesgo & Solvencia -->
+        <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 24px; padding: 24px 30px; margin-bottom: 40px; color: white; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; box-shadow: 0 12px 30px -8px rgba(15, 23, 42, 0.35); border: 1px solid rgba(255, 255, 255, 0.1);">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="width: 58px; height: 58px; border-radius: 18px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); display: flex; align-items: center; justify-content: center; font-size: 1.9rem; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35); flex-shrink: 0;">
+                    🛡️
+                </div>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                        <h2 style="margin: 0; font-size: 1.35rem; font-weight: 800; color: #ffffff;">Perfil de Riesgo & Solvencia Empresarial</h2>
+                        <span style="background: #f59e0b; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 99px;">NUEVA PANTALLA</span>
+                    </div>
+                    <p style="margin: 0; color: #94a3b8; font-size: 0.92rem; max-width: 680px;">Analítica de negocio y embudo: consulta quiénes consumen sus 3 auditorías gratuitas (Hot Leads), su historial de CIFs y contáctalos por email directamente.</p>
+                </div>
+            </div>
+            <div>
+                <a href="<?= site_url('admin/risk-profile') ?>" class="btn" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border: none; padding: 12px 24px; font-weight: 800; border-radius: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4); font-size: 0.95rem;">
+                    <span>Entrar a Perfil de Riesgo</span>
+                    <span>&rarr;</span>
+                </a>
+            </div>
+        </div>
 
         <!-- Grid de Grupos de Gestión -->
         <div class="dashboard-groups" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 32px;">
@@ -32,6 +52,17 @@
                     <a href="<?= site_url('admin/users') ?>" class="group-link">
                         <span class="link-icon icon-sub-blue"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" /></svg></span>
                         <div class="link-text"><strong>Usuarios</strong><p>Gestión de cuentas y perfiles.</p></div>
+                    </a>
+
+                    <a href="<?= site_url('admin/risk-profile') ?>" class="group-link">
+                        <span class="link-icon icon-sub-amber"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+                        <div class="link-text">
+                            <strong style="display: flex; align-items: center; gap: 6px;">
+                                Perfil de Riesgo & Solvencia
+                                <span style="background: #f59e0b; color: white; font-size: 0.65rem; padding: 1px 6px; border-radius: 99px; font-weight: 800;">PRO</span>
+                            </strong>
+                            <p>Analítica de negocio, embudo y monetización.</p>
+                        </div>
                     </a>
 
                     <a href="<?= site_url('admin/tickets') ?>" class="group-link">
@@ -85,14 +116,9 @@
                     <a href="<?= site_url('admin/api-requests') ?>" class="group-link">
                         <span class="link-icon icon-sub-purple"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" /></svg></span>
                         <div class="link-text"><strong>Peticiones API</strong><p>Monitorización técnica en tiempo real.</p></div>
-                    </a>
-                    <a href="<?= site_url('admin/usage-daily') ?>" class="group-link">
+                                <a href="<?= site_url('admin/usage-daily') ?>" class="group-link">
                         <span class="link-icon icon-sub-emerald"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" /></svg></span>
                         <div class="link-text"><strong>Consumo Diario</strong><p>Análisis agregado por fecha.</p></div>
-                    </a>
-                    <a href="<?= site_url('admin/event-tracking') ?>" class="group-link">
-                        <span class="link-icon icon-sub-amber"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M18.757 14.743l-1.591-1.591m-14.166-8.318 1.591 1.591M3.75 10.5H6m.743 4.243 1.591-1.591" /></svg></span>
-                        <div class="link-text"><strong>Event Tracking</strong><p>Seguimiento de comportamiento (Heatmap).</p></div>
                     </a>
                 </div>
             </div>
@@ -109,10 +135,6 @@
                     </div>
                 </div>
                 <div style="padding: 8px 0;">
-                    <a href="<?= site_url('admin/ia-marketing') ?>" class="group-link">
-                        <span class="link-icon icon-sub-green"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg></span>
-                        <div class="link-text"><strong>IA Marketing</strong><p>Leads inteligentes y análisis de conversión.</p></div>
-                    </a>
                     <a href="<?= site_url('admin/seo-auto-posts') ?>" class="group-link">
                         <span class="link-icon icon-sub-purple"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg></span>
                         <div class="link-text"><strong>SEO Auto Posts</strong><p>Generación automatizada de contenidos.</p></div>
@@ -120,14 +142,6 @@
                     <a href="<?= site_url('admin/email-templates') ?>" class="group-link">
                         <span class="link-icon icon-sub-blue"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg></span>
                         <div class="link-text"><strong>Gestor de Emails</strong><p>Configuración de plantillas transaccionales.</p></div>
-                    </a>
-                    <a href="<?= site_url('admin/search-console') ?>" class="group-link">
-                        <span class="link-icon icon-sub-sky"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg></span>
-                        <div class="link-text"><strong>Search Console</strong><p>Integración oficial con métricas de Google.</p></div>
-                    </a>
-                    <a href="<?= site_url('admin/metrics') ?>" class="group-link">
-                        <span class="link-icon icon-sub-indigo"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" /></svg></span>
-                        <div class="link-text"><strong>Métricas de Funnel</strong><p>Salud del negocio y KPIs de activación.</p></div>
                     </a>
                 </div>
             </div>
@@ -152,14 +166,6 @@
                         <span class="link-icon icon-sub-amber"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg></span>
                         <div class="link-text"><strong>Privacidad & RGPD</strong><p>Gestión de supresiones y derecho al olvido.</p></div>
                     </a>
-                    <a href="#" class="group-link" id="btn-clear-cache-card">
-                        <span class="link-icon icon-sub-blue"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg></span>
-                        <div class="link-text"><strong>Limpiar Caché</strong><p>Forzar regeneración de datos estáticos.</p></div>
-                    </a>
-                    <a href="<?= site_url('admin/logs?zero=1') ?>" class="group-link">
-                        <span class="link-icon icon-sub-orange"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg></span>
-                        <div class="link-text"><strong>Top Búsquedas</strong><p>Análisis de demanda y términos populares.</p></div>
-                    </a>
                 </div>
             </div>
 
@@ -169,69 +175,20 @@
 <?= $this->section('scripts') ?>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                // KPIs removed for performance as requested.
-
-                // Lógica de cuenta atrás para el refresco (Opcional: podrías querer quitarla si solo refrescaba KPIs)
+                // Lógica de cuenta atrás para el refresco
                 let timeLeft = 60;
                 const timerEl = document.getElementById('refresh-timer');
 
                 setInterval(function () {
                     timeLeft--;
                     if (timeLeft <= 0) {
-                        // loadKpis(); // Removed
-                        location.reload(); // Recargar página completa si se desea mantener algún tipo de refresco, o simplemente refrescar nada
+                        location.reload();
                         timeLeft = 60;
                     }
                     if (timerEl) {
                         timerEl.innerText = timeLeft + 's';
                     }
                 }, 1000);
-
-                // Gestor de Caché
-                const clearCacheBtn = document.getElementById('btn-clear-cache-card');
-                if (clearCacheBtn) {
-                    clearCacheBtn.addEventListener('click', function (e) {
-                        e.preventDefault();
-
-                        Swal.fire({
-                            title: '¿Limpiar caché?',
-                            text: "Esta acción eliminará todos los datos temporales del sistema.",
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#2152ff',
-                            cancelButtonColor: '#64748b',
-                            confirmButtonText: 'Sí, limpiar todo',
-                            cancelButtonText: 'Cancelar',
-                            background: '#ffffff'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                const icon = clearCacheBtn.querySelector('.admin-icon-wrapper');
-                                const originalHtml = icon ? icon.innerHTML : '';
-                                if (icon) icon.innerHTML = '⌛';
-
-                                fetch('<?= site_url('admin/clear-cache') ?>', {
-                                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                                })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (icon) icon.innerHTML = originalHtml;
-                                        Swal.fire({
-                                            title: data.status === 'success' ? '¡Limpiado!' : 'Error',
-                                            text: data.message,
-                                            icon: data.status === 'success' ? 'success' : 'error',
-                                            confirmButtonColor: '#2152ff'
-                                        });
-                                    })
-                                    .catch(err => {
-                                        if (icon) icon.innerHTML = originalHtml;
-                                        Swal.fire('Error', 'No se pudo completar la acción', 'error');
-                                    });
-                            }
-                        });
-                    });
-                }
-
-
             });
         </script>
 <?= $this->endSection() ?>
