@@ -9,7 +9,7 @@
             --kpi-purple: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
             --kpi-rose: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
         }
-        .container-admin { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .admin-tickets-wrapper { max-width: 1200px; margin: 0 auto; }
         .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
         .kpi-card { 
             position: relative; overflow: hidden; background: white; border-radius: 24px; padding: 2rem; 
@@ -51,6 +51,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<div class="admin-tickets-wrapper">
     <?php if(session()->getFlashdata('success')): ?>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -195,5 +196,6 @@
             </tbody>
         </table>
     </div>
+</div>
 <?= $this->endSection() ?>
 

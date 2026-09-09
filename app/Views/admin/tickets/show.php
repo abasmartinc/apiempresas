@@ -3,8 +3,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        .admin-body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .container-admin { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .admin-tickets-wrapper { max-width: 1200px; margin: 0 auto; }
         
         .btn-back { display: inline-flex; align-items: center; gap: 8px; color: #64748b; text-decoration: none; font-weight: 600; margin-bottom: 24px; transition: color 0.2s; }
         .btn-back:hover { color: #0f172a; }
@@ -12,9 +11,9 @@
         .layout-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start; }
         
         /* Chat Area */
-        .chat-area { background: white; border-radius: 20px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         .chat-header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9; }
-        .chat-header h1 { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0; }
+        .chat-header h1 { font-size: 1.5rem; font-weight: 800; color: #2152ff; margin: 0; line-height: 1.3; }
+        .ticket-id-badge { background: #eff6ff; color: #2152ff; font-weight: 800; font-size: 1.05rem; padding: 4px 10px; border-radius: 8px; border: 1px solid #bfdbfe; display: inline-flex; align-items: center; }
         
         .chat-container { display: flex; flex-direction: column; gap: 20px; margin-bottom: 32px; max-height: 500px; overflow-y: auto; padding-right: 10px; }
         .message-bubble { max-width: 85%; padding: 16px 20px; border-radius: 16px; text-align: left !important; }
@@ -58,6 +57,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+    <div class="admin-tickets-wrapper">
         <a href="<?= site_url('admin/tickets') ?>" class="btn-back">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Volver al listado
@@ -83,7 +83,10 @@
             <!-- Left Column: Chat -->
             <div class="chat-area">
                 <div class="chat-header">
-                    <h1>#<?= $ticket['id'] ?> - <?= esc($ticket['subject']) ?></h1>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap;">
+                        <span class="ticket-id-badge">#<?= $ticket['id'] ?></span>
+                        <h1><?= esc($ticket['subject']) ?></h1>
+                    </div>
                     <div style="color: #64748b; font-size: 0.9rem; font-weight: 500;">
                         Usuario: <strong><?= esc($ticket['user_name'] ?? 'Usuario Desconocido') ?></strong> (<?= esc($ticket['user_email'] ?? '') ?>)
                     </div>
@@ -235,7 +238,8 @@
                 </form>
             </div>
         </div>
-    <?= $this->endSection() ?>
+    </div>
+<?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
 <!-- Modal for Internal Note -->

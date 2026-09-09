@@ -1,6 +1,5 @@
 <?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/app' ) ?>
 <?= $this->section('styles') ?>
-" />
     <style>
         .tkt-wrapper { background-color: #f3f6f9; min-height: calc(100vh - 80px); padding: 40px 0 80px; }
         
