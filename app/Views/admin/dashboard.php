@@ -12,27 +12,6 @@
                 tienes el resumen de hoy. <a href="<?= site_url('dashboard?view=client') ?>" style="color: #2152ff; font-weight: 700; text-decoration: none; margin-left: 10px;">Ver mi Dashboard como Cliente &rarr;</a></p>
         </div>
 
-        <!-- Banner Destacado: Perfil de Riesgo & Solvencia -->
-        <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 24px; padding: 24px 30px; margin-bottom: 40px; color: white; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; box-shadow: 0 12px 30px -8px rgba(15, 23, 42, 0.35); border: 1px solid rgba(255, 255, 255, 0.1);">
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <div style="width: 58px; height: 58px; border-radius: 18px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); display: flex; align-items: center; justify-content: center; font-size: 1.9rem; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35); flex-shrink: 0;">
-                    🛡️
-                </div>
-                <div>
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
-                        <h2 style="margin: 0; font-size: 1.35rem; font-weight: 800; color: #ffffff;">Perfil de Riesgo & Solvencia Empresarial</h2>
-                        <span style="background: #f59e0b; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 99px;">NUEVA PANTALLA</span>
-                    </div>
-                    <p style="margin: 0; color: #94a3b8; font-size: 0.92rem; max-width: 680px;">Analítica de negocio y embudo: consulta quiénes consumen sus 3 auditorías gratuitas (Hot Leads), su historial de CIFs y contáctalos por email directamente.</p>
-                </div>
-            </div>
-            <div>
-                <a href="<?= site_url('admin/risk-profile') ?>" class="btn" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border: none; padding: 12px 24px; font-weight: 800; border-radius: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4); font-size: 0.95rem;">
-                    <span>Entrar a Perfil de Riesgo</span>
-                    <span>&rarr;</span>
-                </a>
-            </div>
-        </div>
 
         <!-- Grid de Grupos de Gestión -->
         <div class="dashboard-groups" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 32px;">
