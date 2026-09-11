@@ -738,17 +738,50 @@ class Company extends BaseController
      */
     public function exportRiskPdf($id)
     {
-        $id = (int)$id;
-        $company = $this->companyModel->getById($id);
+        if (is_numeric($id)) {
+            $company = $this->companyModel->getById((int)$id);
+        } else {
+            $company = $this->companyModel->getByCif((string)$id);
+        }
+
+        if (!$company && !is_numeric($id)) {
+            $company = $this->companyModel->where('cif', strtoupper(trim((string)$id)))->first();
+        }
+
         if (!$company) {
             throw PageNotFoundException::forPageNotFound();
         }
 
-        $userId = (int)session('user_id');
-        $riskQuota = $this->getRiskViewQuota($userId, (string)($company['cif'] ?? ''));
+        if (empty($company['name']) && !empty($company['company_name'])) {
+            $company['name'] = $company['company_name'];
+        }
 
-        if (!$riskQuota['is_subscriber']) {
-            return redirect()->to(site_url('empresa/' . $company['id']))->with('error', 'Esta descarga directa requiere suscripción activa a Solvencia Pro.');
+        $userId = (int)session('user_id');
+        if ($userId <= 0) {
+            return redirect()->to(site_url('enter'))->with('error', 'Debes iniciar sesión para descargar el informe.');
+        }
+
+        $targetCif = (string)($company['cif'] ?? '');
+        $riskQuota = $this->getRiskViewQuota($userId, $targetCif);
+
+        // Comprobar si el usuario ya ha consultado/visto esta empresa
+        $db = \Config\Database::connect();
+        $hasViewed = false;
+        if (!empty($targetCif)) {
+            $hasViewed = $db->table('user_events')
+                ->where('user_id', $userId)
+                ->where('event_type', 'view_risk_profile')
+                ->where('trigger_type', $targetCif)
+                ->countAllResults() > 0;
+        }
+
+        $canDownload = !empty($riskQuota['is_subscriber']) 
+                    || !empty($riskQuota['already_unlocked']) 
+                    || $hasViewed 
+                    || (bool)session('is_admin');
+
+        if (!$canDownload) {
+            return redirect()->to(site_url('dashboard?view=risk'))->with('error', 'Para descargar este informe en PDF debes haberlo consultado previamente o disponer de Solvencia Pro.');
         }
 
         $contracts = [];

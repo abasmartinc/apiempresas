@@ -165,12 +165,17 @@ $compNameStr = !empty($company['name']) ? $company['name'] : 'esta empresa';
     </div>
 
     <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-        <?php if (!empty($riskQuota['is_subscriber'])): ?>
-            <a href="<?= site_url('empresa/export-risk/' . $compBtnId) ?>" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 14px 24px; border: none; border-radius: 12px; font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); text-decoration: none;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)';">
+        <?php 
+        $canDownloadRiskPdf = !empty($riskQuota['is_subscriber']) || !empty($riskQuota['already_unlocked']) || !empty($riskQuota['allowed']);
+        ?>
+        <?php if ($canDownloadRiskPdf): ?>
+            <a href="<?= site_url('empresa/export-risk/' . ($compBtnId > 0 ? $compBtnId : esc($company['cif'] ?? ''))) ?>" hx-boost="false" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 14px 24px; border: none; border-radius: 12px; font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); text-decoration: none;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)';">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                 Descargar Informe en PDF 📥
             </a>
-            <span style="color: #6ee7b7; font-size: 0.75rem; font-weight: 600;">⭐ Incluido en tu plan Solvencia Pro</span>
+            <span style="color: #6ee7b7; font-size: 0.75rem; font-weight: 600;">
+                <?= !empty($riskQuota['is_subscriber']) ? '⭐ Incluido en tu plan Solvencia Pro' : '✓ Dictamen oficial generado para esta empresa' ?>
+            </span>
         <?php else: ?>
             <button type="button" onclick="openRiskPdfModal(<?= $compBtnId ?>, '<?= esc($company['cif'] ?? '') ?>');" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 14px 24px; border: none; border-radius: 12px; font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); text-decoration: none;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 129 rgba(16, 185, 129, 0.4)';">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -180,5 +185,61 @@ $compNameStr = !empty($company['name']) ? $company['name'] : 'esta empresa';
         <?php endif; ?>
     </div>
 </div>
+
+<?php 
+$isSubscriber = !empty($riskQuota['is_subscriber']);
+$viewsUsed = (int)($riskQuota['views_used'] ?? 1);
+$viewsRemaining = max(0, 3 - $viewsUsed);
+?>
+
+<?php if (!$isSubscriber && $viewsRemaining > 0): ?>
+    <!-- ACTIVATION CALLOUT: PROMPT TO USE REMAINING FREE AUDITS -->
+    <div style="margin-top: 24px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 2px dashed #3b82f6; border-radius: 16px; padding: 22px 26px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.06);">
+        <div style="flex: 1; min-width: 260px;">
+            <div style="display: inline-flex; align-items: center; gap: 6px; background: #2563eb; color: #ffffff; padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">
+                ⚡ Cuota Disponible (<?= $viewsUsed ?> de 3 usadas)
+            </div>
+            <h4 style="margin: 0 0 4px 0; color: #1e3a8a; font-size: 1.15rem; font-weight: 900; letter-spacing: -0.3px;">
+                Te <?= $viewsRemaining === 1 ? 'queda' : 'quedan' ?> <?= $viewsRemaining ?> <?= $viewsRemaining === 1 ? 'consulta gratuita' : 'consultas gratuitas' ?> este mes
+            </h4>
+            <p style="margin: 0; color: #334155; font-size: 0.88rem; line-height: 1.45;">
+                No dejes consultas sin utilizar. Comprueba ahora la salud crediticia y estabilidad de otro cliente, socio o proveedor:
+            </p>
+        </div>
+        
+        <div style="flex: 1; min-width: 260px; max-width: 460px;">
+            <form onsubmit="handleActivationSearch(event, this);" style="display: flex; gap: 8px; margin: 0;">
+                <input 
+                    type="text" 
+                    name="cif" 
+                    placeholder="CIF o nombre (ej. B85402030, Mercadona...)" 
+                    style="flex: 1; padding: 11px 14px; border: 1.5px solid #93c5fd; border-radius: 10px; font-size: 0.9rem; font-weight: 600; outline: none; background: #ffffff; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                    required
+                >
+                <button type="submit" style="background: #2563eb; color: #ffffff; border: none; padding: 11px 18px; border-radius: 10px; font-weight: 800; font-size: 0.88rem; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 10px rgba(37,99,235,0.25); transition: background 0.2s;" onmouseover="this.style.background='#1d4ed8';" onmouseout="this.style.background='#2563eb';">
+                    Auditar Gratis ➔
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    if (typeof handleActivationSearch !== 'function') {
+        window.handleActivationSearch = function(e, form) {
+            if (e && e.preventDefault) e.preventDefault();
+            const input = form ? form.querySelector('input[name="cif"]') : null;
+            const val = input ? input.value.trim() : '';
+            if (!val) return false;
+            
+            if (typeof window.lookupCifInDashboard === 'function') {
+                window.lookupCifInDashboard(val);
+            } else {
+                window.location.href = '<?= site_url("dashboard?view=risk&cif=") ?>' + encodeURIComponent(val);
+            }
+            return false;
+        };
+    }
+    </script>
+<?php endif; ?>
 
 

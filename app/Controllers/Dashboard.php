@@ -47,8 +47,9 @@ class Dashboard extends BaseController
         $data['show_wizard'] = ((int)($user->wizard_completed ?? 0) === 0);
 
 
-        // Allow admins to view the client dashboard with ?view=client
-        if (($user->is_admin ?? false) && $this->request->getGet('view') !== 'client') {
+        // Allow admins to view client, risk or api dashboards
+        $viewParam = $this->request->getGet('view');
+        if (($user->is_admin ?? false) && !in_array($viewParam, ['client', 'risk', 'api'], true)) {
             $data['title'] = 'Panel de Administración';
 
             // --- Online Users Logic ---
@@ -227,6 +228,23 @@ class Dashboard extends BaseController
                                                ->where('status', 'answered')
                                                ->findAll();
 
+        // --- DASHBOARD ESPECÍFICO DE PERFIL DE RIESGO & SOLVENCIA ---
+        $intent = (string)($user->signup_intent ?? '');
+        $prefProduct = (string)($user->preferred_product ?? '');
+        $hasRiskPlan = false;
+        if (!empty($data['plan'])) {
+            $pSlug = strtolower(trim((string)($data['plan']->plan_slug ?? '')));
+            $pType = strtolower(trim((string)($data['plan']->product_type ?? '')));
+            if ($pSlug === 'risk_pro' || $pType === 'risk') {
+                $hasRiskPlan = true;
+            }
+        }
+        $isRiskUser = ($intent === 'view_risk_profile' || $prefProduct === 'risk' || session('intended_product') === 'risk' || $hasRiskPlan);
+
+        if (($isRiskUser || $viewParam === 'risk') && $viewParam !== 'api') {
+            return $this->renderRiskDashboard($user, $data);
+        }
+
         // Si tiene plan activo, va al dashboard correspondiente
         if ($data['plan']) {
             // Buscamos si alguno de sus planes activos es de tipo radar o bundle
@@ -365,6 +383,158 @@ class Dashboard extends BaseController
         $this->userModel->update($userId, ['wizard_completed' => 1]);
 
         return $this->response->setJSON(['success' => true]);
+    }
+
+    /**
+     * Renderiza el Dashboard exclusivo para clientes de Solvencia & Perfil de Riesgo Mercantil
+     */
+    private function renderRiskDashboard($user, array $data)
+    {
+        $db = \Config\Database::connect();
+        $userId = (int)($user->id ?? session('user_id'));
+
+        // 1. Verificar si tiene suscripción activa a Solvencia Pro
+        $activeRiskSub = $db->table('user_subscriptions')
+            ->select('user_subscriptions.*, api_plans.name as plan_name, api_plans.slug as plan_slug, api_plans.product_type')
+            ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id')
+            ->where('user_subscriptions.user_id', $userId)
+            ->groupStart()
+                ->where('api_plans.product_type', 'risk')
+                ->orWhere('api_plans.product_type', 'bundle')
+                ->orWhere('api_plans.slug', 'risk_pro')
+            ->groupEnd()
+            ->groupStart()
+                ->where('user_subscriptions.status', 'active')
+                ->orGroupStart()
+                    ->where('user_subscriptions.status', 'canceled')
+                    ->where('user_subscriptions.current_period_end >', date('Y-m-d H:i:s'))
+                ->groupEnd()
+            ->groupEnd()
+            ->orderBy('FIELD(user_subscriptions.status, "active", "canceled")', 'ASC', false)
+            ->orderBy('user_subscriptions.current_period_end', 'DESC')
+            ->get()->getRow();
+
+        $isSubscriber = !empty($activeRiskSub);
+        $planName = $isSubscriber ? ($activeRiskSub->plan_name ?? 'Solvencia Pro') : 'Plan Gratuito';
+
+        // 2. Consultas de riesgo usadas en el mes natural actual
+        $startOfMonth = date('Y-m-01 00:00:00');
+        $eventsThisMonth = $db->table('user_events')
+            ->select('trigger_type')
+            ->where('user_id', $userId)
+            ->where('event_type', 'view_risk_profile')
+            ->where('created_at >=', $startOfMonth)
+            ->groupBy('trigger_type')
+            ->get()->getResultArray();
+
+        $distinctMonthCifs = array_filter(array_map('trim', array_column($eventsThisMonth, 'trigger_type')));
+        $viewsUsed = count($distinctMonthCifs);
+        $viewsLimit = $isSubscriber ? 'unlimited' : 3;
+        $viewsRemaining = $isSubscriber ? 'Ilimitadas' : max(0, 3 - $viewsUsed);
+
+        // Fecha de renovación de cuota mensual
+        $nextCycleDate = date('d/m/Y', strtotime('first day of next month'));
+
+        // 3. Historial de auditorías realizadas por el usuario
+        $rawHistory = $db->table('user_events')
+            ->select('trigger_type as cif, MAX(created_at) as last_view_at, COUNT(id) as total_views')
+            ->where('user_id', $userId)
+            ->where('event_type', 'view_risk_profile')
+            ->where('trigger_type IS NOT NULL')
+            ->where('trigger_type !=', '')
+            ->groupBy('trigger_type')
+            ->orderBy('last_view_at', 'DESC')
+            ->limit(30)
+            ->get()->getResultArray();
+
+        $historyCifs = array_filter(array_map('trim', array_column($rawHistory, 'cif')));
+        
+        $companiesMap = [];
+        $riskProfilesMap = [];
+
+        if (!empty($historyCifs)) {
+            // Cargar empresas asociadas
+            $compRows = $db->table('companies')
+                ->select('id, cif, company_name, cnae_code, cnae_label, registro_mercantil as province')
+                ->whereIn('cif', $historyCifs)
+                ->get()->getResultArray();
+
+            foreach ($compRows as $cr) {
+                $companiesMap[strtoupper(trim($cr['cif']))] = $cr;
+            }
+
+            // Cargar perfiles de riesgo calculados
+            $riskRows = $db->table('company_risk_profiles')
+                ->select('cif, risk_score, risk_profile, updated_at')
+                ->whereIn('cif', $historyCifs)
+                ->get()->getResultArray();
+
+            foreach ($riskRows as $rr) {
+                $parsedData = !empty($rr['risk_profile']) ? json_decode($rr['risk_profile'], true) : [];
+                $riskProfilesMap[strtoupper(trim($rr['cif']))] = [
+                    'risk_score'   => (int)($rr['risk_score'] ?? 50),
+                    'risk_level'   => $parsedData['risk_level'] ?? ($rr['risk_score'] >= 70 ? 'ALTO' : ($rr['risk_score'] >= 30 ? 'MEDIO' : 'BAJO')),
+                    'summary'      => $parsedData['summary_message'] ?? 'Perfil mercantil procesado.',
+                    'alerts_count' => count($parsedData['canonical_events'] ?? [])
+                ];
+            }
+        }
+
+        $audits = [];
+        foreach ($rawHistory as $h) {
+            $cleanCif = strtoupper(trim($h['cif']));
+            $comp = $companiesMap[$cleanCif] ?? null;
+            $risk = $riskProfilesMap[$cleanCif] ?? [
+                'risk_score'   => 50,
+                'risk_level'   => 'MEDIO',
+                'summary'      => 'Evaluación algorítmica procesada.',
+                'alerts_count' => 0
+            ];
+
+            $compId = (int)($comp['id'] ?? 0);
+            $compName = $comp['company_name'] ?? ('Empresa ' . $cleanCif);
+            $compSlug = url_title($compName, '-', true);
+
+            $audits[] = [
+                'cif'          => $cleanCif,
+                'company_id'   => $compId,
+                'company_name' => $compName,
+                'slug'         => $compSlug,
+                'url'          => $compId > 0 ? site_url('empresa/' . $compId . '-' . $compSlug) : site_url('perfil-de-riesgo?cif=' . urlencode($cleanCif)),
+                'risk_score'   => $risk['risk_score'],
+                'risk_level'   => $risk['risk_level'],
+                'summary'      => $risk['summary'],
+                'alerts_count' => $risk['alerts_count'],
+                'cnae_label'   => $comp['cnae_label'] ?? '',
+                'provincia'    => $comp['province'] ?? '',
+                'last_view_at' => $h['last_view_at'],
+                'total_views'  => (int)$h['total_views'],
+                'unlocked'     => true
+            ];
+        }
+
+        // Tickets contestados por administración
+        $ticketModel = new \App\Models\TicketModel();
+        $answeredTickets = $ticketModel->where('user_id', $userId)
+                                       ->where('status', 'answered')
+                                       ->findAll();
+
+        $viewData = array_merge($data, [
+            'title'           => 'Panel de Solvencia & Riesgo Mercantil | APIEmpresas',
+            'user'            => $user,
+            'isSubscriber'    => $isSubscriber,
+            'planName'        => $planName,
+            'viewsUsed'       => $viewsUsed,
+            'viewsLimit'      => $viewsLimit,
+            'viewsRemaining'  => $viewsRemaining,
+            'nextCycleDate'   => $nextCycleDate,
+            'audits'          => $audits,
+            'answeredTickets' => $answeredTickets,
+            'api_key'         => $data['api_key'] ?? null,
+            'initialCif'      => trim((string)$this->request->getGet('cif'))
+        ]);
+
+        return $this->renderView('risk_profile/dashboard', $viewData);
     }
 }
 

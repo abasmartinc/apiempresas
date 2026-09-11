@@ -42,6 +42,46 @@ class SeedEmailTemplates extends BaseCommand
                 'trigger' => 'Se envía a usuarios de riesgo tras 24h-72h del registro si aún les quedan créditos gratuitos sin consumir.'
             ],
             [
+                'slug'    => 'risk_first_query_nudge',
+                'name'    => 'Seguimiento 1ª Consulta de Riesgo (12h-48h)',
+                'subject' => '🛡️ Tu análisis de {company_name}: te quedan 2 consultas de solvencia gratis este mes',
+                'view'    => 'risk_first_query_nudge',
+                'vars'    => '{name}, {company_name}, {button_url}',
+                'trigger' => 'Se envía 12h-48h tras la primera consulta de riesgo para incentivar el uso de los créditos restantes.'
+            ],
+            [
+                'slug'    => 'risk_paywall_abandoned',
+                'name'    => 'Paywall de Riesgo Alcanzado (Límite 3/3)',
+                'subject' => '⚠️ Desbloquea el dictamen de solvencia oficial de {company_name}',
+                'view'    => 'risk_paywall_abandoned',
+                'vars'    => '{name}, {company_name}, {button_url}, {pdf_url}',
+                'trigger' => 'Se envía 2h tras agotar las 3 consultas gratuitas de riesgo al intentar auditar una empresa.'
+            ],
+            [
+                'slug'    => 'risk_pack_welcome',
+                'name'    => 'Bienvenida Pack Auditorías (Compra)',
+                'subject' => '🛡️ Tu pack de {credits} auditorías de solvencia ya está activo',
+                'view'    => 'risk_pack_welcome',
+                'vars'    => '{name}, {credits}, {button_url}',
+                'trigger' => 'Se envía inmediatamente tras la compra de un Pack de Auditorías de Solvencia (risk_pack_5).'
+            ],
+            [
+                'slug'    => 'risk_pro_welcome',
+                'name'    => 'Bienvenida Solvencia Pro (Suscripción)',
+                'subject' => '⭐ Tu suscripción Solvencia Pro está activa: consultas y PDFs ilimitados',
+                'view'    => 'risk_pro_welcome',
+                'vars'    => '{name}, {button_url}',
+                'trigger' => 'Se envía inmediatamente al suscribirse a Solvencia Pro (risk_pro).'
+            ],
+            [
+                'slug'    => 'risk_credits_low_upsell',
+                'name'    => 'Upsell Solvencia Pro (Créditos de Pack Bajos/Agotados)',
+                'subject' => '⚠️ Saldo de auditorías ({remaining_credits_text}): Pasa a Solvencia Pro ilimitado',
+                'view'    => 'risk_credits_low_upsell',
+                'vars'    => '{name}, {remaining_credits_text}, {credits_status_phrase}, {button_url}, {pack_url}',
+                'trigger' => 'Se envía automáticamente a compradores de packs cuando les queda <= 1 crédito para ofrecer Solvencia Pro.'
+            ],
+            [
                 'slug'    => 'payment_notification',
                 'name'    => 'Notificación de Pago (Admin)',
                 'subject' => '💰 ¡Nuevo Pago Recibido! - {invoice_number}',

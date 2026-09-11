@@ -58,7 +58,48 @@ class Billing extends BaseController
         $data['current_plan'] = is_array($data['plan']) ? ($data['plan']['plan_name'] ?? null) : (is_object($data['plan']) ? ($data['plan']->plan_name ?? null) : null);
         $data['stripe_customer_id'] = $user->stripe_customer_id ?? null;
 
+        // --- VISTA ESPECÍFICA PARA PERFIL DE RIESGO & SOLVENCIA PRO ---
+        $intent = (string)($user->signup_intent ?? '');
+        $prefProduct = (string)($user->preferred_product ?? '');
+        $hasRiskPlan = false;
+        if (!empty($data['plan'])) {
+            $pSlug = strtolower(trim((string)($data['plan']->plan_slug ?? '')));
+            $pType = strtolower(trim((string)($data['plan']->product_type ?? '')));
+            if ($pSlug === 'risk_pro' || $pType === 'risk') {
+                $hasRiskPlan = true;
+            }
+        }
+        $isRiskUser = ($intent === 'view_risk_profile' || $prefProduct === 'risk' || session('intended_product') === 'risk' || $hasRiskPlan);
+        $viewParam = $this->request->getGet('view');
+        $planParam = $this->request->getGet('plan');
+
+        if (($isRiskUser || $viewParam === 'risk' || $planParam === 'risk_pro') && $viewParam !== 'api') {
+            return $this->renderRiskBilling($user, $data);
+        }
+
         return $this->renderView('billing', $data);
+    }
+
+    /**
+     * Renderiza la vista de facturación exclusiva para Solvencia Pro (sin planes de API)
+     */
+    private function renderRiskBilling($user, array $data)
+    {
+        $planModel = new \App\Models\ApiPlanModel();
+        $riskPlan = $planModel->where('slug', 'risk_pro')->first();
+        $data['risk_plan'] = $riskPlan;
+
+        $isSubscribed = false;
+        if (!empty($data['plan'])) {
+            $pSlug = strtolower(trim((string)($data['plan']->plan_slug ?? '')));
+            $pType = strtolower(trim((string)($data['plan']->product_type ?? '')));
+            if (($pSlug === 'risk_pro' || $pType === 'risk') && ($data['plan']->status ?? '') === 'active') {
+                $isSubscribed = true;
+            }
+        }
+        $data['is_risk_subscribed'] = $isSubscribed;
+
+        return $this->renderView('risk_profile/billing', $data);
     }
 
     /**
@@ -93,10 +134,10 @@ class Billing extends BaseController
         $period = strtolower(trim((string) ($postData['period'] ?? 'single')));
 
         if (!session('logged_in')) {
-            if ($period === 'single') {
+            if ($period === 'single' && ($postData['plan'] ?? '') !== 'risk_pack_5') {
                 $userId = 0; // Guest User
             } else {
-                // Subscription mode still requires login
+                // Subscription mode and credit packs require login
                 session()->set('pending_checkout', $postData);
                 return redirect()->to(site_url('register/quick'));
             }
@@ -116,7 +157,7 @@ class Billing extends BaseController
         $period = strtolower(trim((string) ($postData['period'] ?? 'single')));
         $pm = strtolower(trim((string) ($postData['payment_method'] ?? 'stripe')));
 
-        if (!in_array($plan, ['pro', 'business', 'radar', 'risk_pro', 'copiloto_ventas', 'directory_single', 'subsidies_single', 'contracts_single', 'lookalike_single'], true)) {
+        if (!in_array($plan, ['pro', 'business', 'radar', 'risk_pro', 'risk_pack_5', 'copiloto_ventas', 'directory_single', 'subsidies_single', 'contracts_single', 'lookalike_single'], true)) {
             $plan = 'radar'; // default fallback for single downloads
         }
         if (!in_array($period, ['monthly', 'annual', 'single'], true)) {
@@ -130,13 +171,17 @@ class Billing extends BaseController
         $billEmail = trim((string) $this->request->getPost('email')) ?: (string) ($user->email ?? '');
         $billName = trim((string) $this->request->getPost('name'));
 
-
-
         if (env('BILLING_MODE') === 'simulator') {
             $simulator = new \App\Libraries\BillingSimulator();
 
-            // Set context for simulator too if it's an excel download
-            if ($period === 'single') {
+            if ($plan === 'risk_pack_5') {
+                session()->set('checkout_context', [
+                    'type'       => 'risk_pack_5',
+                    'credits'    => 5,
+                    'amount'     => 9.90,
+                    'target_cif' => $postData['cif'] ?? ''
+                ]);
+            } elseif ($period === 'single') {
                 $downloadData = $this->billingService->getExcelDownloadContext($plan, $postData, $this->request->getGet() ?? []);
                 session()->set('checkout_context', $downloadData['context']);
 
@@ -218,9 +263,68 @@ class Billing extends BaseController
                 $cancelUrl = site_url('checkout/contracts-export' . ($cancelParams ? '?' . http_build_query($cancelParams) : ''));
             } elseif ($plan === 'lookalike_single') {
                 $cancelUrl = site_url('encontrar-empresas-similares');
+            } elseif ($plan === 'risk_pack_5') {
+                $cancelUrl = !empty($postData['cif']) 
+                    ? site_url('empresa/' . rawurlencode($postData['cif'])) 
+                    : site_url('dashboard?view=risk');
             }
 
-            if ($period === 'single' || ($plan === 'radar' && $period === 'single') || $plan === 'directory_single' || $plan === 'subsidies_single' || $plan === 'contracts_single' || $plan === 'lookalike_single') {
+            if ($plan === 'risk_pack_5') {
+                $productName = 'Pack 5 Auditorías de Solvencia & Riesgo';
+                $productDesc = '5 auditorías completas de riesgo mercantil con dictámenes oficiales en PDF descargables sin caducidad.';
+                $amount = 9.90;
+                $metadataPlan = 'risk_pack_5';
+
+                session()->set('checkout_context', [
+                    'type'       => 'risk_pack_5',
+                    'credits'    => 5,
+                    'amount'     => $amount,
+                    'target_cif' => $postData['cif'] ?? '',
+                ]);
+
+                $lineItem = $this->billingService->buildSinglePaymentLineItem(
+                    $productName,
+                    $productDesc,
+                    $amount,
+                    $this->stripeService->getTaxRateId()
+                );
+
+                $sessionParams = [
+                    'mode' => 'payment',
+                    'line_items' => [$lineItem],
+                    'success_url' => $successUrl,
+                    'cancel_url' => $cancelUrl,
+                    'customer_creation' => 'if_required',
+                    'billing_address_collection' => 'required',
+                    'tax_id_collection' => ['enabled' => true],
+                    'invoice_creation' => [
+                        'enabled' => true,
+                        'invoice_data' => [
+                            'metadata' => [
+                                'user_id' => (string) $userId,
+                                'plan' => $metadataPlan,
+                                'period' => 'single',
+                                'credits' => '5',
+                                'target_cif' => (string) ($postData['cif'] ?? ''),
+                            ]
+                        ]
+                    ],
+                    'metadata' => [
+                        'user_id' => (string) $userId,
+                        'plan' => $metadataPlan,
+                        'period' => 'single',
+                        'credits' => '5',
+                        'target_cif' => (string) ($postData['cif'] ?? ''),
+                    ],
+                ];
+
+                if ($userId > 0) {
+                    $sessionParams['client_reference_id'] = (string) $userId;
+                    if ($email) {
+                        $sessionParams['customer_email'] = $email;
+                    }
+                }
+            } elseif ($period === 'single' || ($plan === 'radar' && $period === 'single') || $plan === 'directory_single' || $plan === 'subsidies_single' || $plan === 'contracts_single' || $plan === 'lookalike_single') {
                 $downloadData = $this->billingService->getExcelDownloadContext($plan, $postData, $this->request->getGet() ?? []);
                 session()->set('checkout_context', $downloadData['context']);
 
@@ -282,6 +386,14 @@ class Billing extends BaseController
                     $amount = 79.00;
                     $planName = 'Radar B2B';
                     $planDesc = 'Acceso ilimitado al Radar de nuevas empresas.';
+                } elseif ($plan === 'risk_pro') {
+                    $planName = $dbPlan->name ?? 'Solvencia Pro';
+                    $planDesc = 'Acceso ilimitado a scoring predictivo de solvencia, riesgo mercantil y dictámenes oficiales en PDF.';
+                    if ($period === 'annual') {
+                        $amount = isset($dbPlan->price_annual) ? (float) $dbPlan->price_annual : 290.00;
+                    } else {
+                        $amount = isset($dbPlan->price_monthly) ? (float) $dbPlan->price_monthly : 29.00;
+                    }
                 } else {
                     if ($period === 'annual') {
                         if (isset($dbPlan->price_annual)) {
@@ -759,10 +871,55 @@ class Billing extends BaseController
                 $stripeSession = $stripe->checkout->sessions->retrieve($stripeSessionId);
                 if ($stripeSession && !empty($stripeSession->metadata->export_context)) {
                     $checkoutData = json_decode($stripeSession->metadata->export_context, true) ?? [];
+                } elseif ($stripeSession && ($stripeSession->metadata->plan ?? '') === 'risk_pack_5') {
+                    $checkoutData = [
+                        'type'       => 'risk_pack_5',
+                        'credits'    => (int)($stripeSession->metadata->credits ?? 5),
+                        'target_cif' => (string)($stripeSession->metadata->target_cif ?? ''),
+                    ];
                 }
             } catch (\Exception $e) {
                 log_message('error', '[Billing::success] Error recuperando sesión Stripe: ' . $e->getMessage());
             }
+        }
+
+        // 1.4 Risk Pack 5 Success (Tripwire product: 5 auditorías de solvencia sin suscripción)
+        $isRiskPack = ($checkoutData['type'] ?? '') === 'risk_pack_5' 
+            || (isset($stripeSession) && ($stripeSession->metadata->plan ?? '') === 'risk_pack_5');
+
+        if ($isRiskPack) {
+            $credits = (int)($checkoutData['credits'] ?? ($stripeSession->metadata->credits ?? 5));
+            if ($credits <= 0) {
+                $credits = 5;
+            }
+
+            if ($userId > 0) {
+                $db = \Config\Database::connect();
+                $sessionKey = 'risk_pack_credited_' . ($stripeSessionId ?: 'sim_' . date('YmdH'));
+                if (!session()->get($sessionKey)) {
+                    $db->table('users')
+                        ->where('id', $userId)
+                        ->set('risk_credits', 'risk_credits + ' . $credits, false)
+                        ->update();
+                    session()->set($sessionKey, true);
+
+                    $userEventsModel = new \App\Models\UserEventsModel();
+                    $userEventsModel->logEvent($userId, 'purchase_risk_pack', (string)$credits);
+                }
+            }
+
+            $userRow = $userId > 0 ? (new \App\Models\UserModel())->find($userId) : null;
+            $totalCredits = (int)($userRow->risk_credits ?? $credits);
+
+            $data = [
+                'credits_bought' => $credits,
+                'total_credits'  => $totalCredits,
+                'price'          => 9.90,
+                'order_ref'      => 'RISK-' . date('Ymd') . '-' . rand(1000, 9999),
+                'target_cif'     => $checkoutData['target_cif'] ?? ($stripeSession->metadata->target_cif ?? ''),
+            ];
+            session()->remove('checkout_context');
+            return $this->renderView('billing/success_risk_pack', $data);
         }
 
         // 1.5 Custom Bonus Success
@@ -878,10 +1035,17 @@ class Billing extends BaseController
 
         // 3. Solvencia Pro Success (Risk Plan)
         if ($subscription && (($subscription->plan_slug ?? '') === 'risk_pro' || ($subscription->product_type ?? '') === 'risk')) {
+            $isAnnual = false;
+            if (!empty($subscription->current_period_start) && !empty($subscription->current_period_end)) {
+                $days = (strtotime((string)$subscription->current_period_end) - strtotime((string)$subscription->current_period_start)) / 86400;
+                if ($days > 40) {
+                    $isAnnual = true;
+                }
+            }
             $data = [
                 'plan_name' => $subscription->plan_name ?? 'Solvencia Pro',
-                'base_price' => $subscription->price_monthly ?? '29',
-                'period_name' => 'Mensual',
+                'base_price' => $isAnnual ? ($subscription->price_annual ?? '290') : ($subscription->price_monthly ?? '29'),
+                'period_name' => $isAnnual ? 'Anual' : 'Mensual',
                 'payment_method' => 'Tarjeta (Stripe)',
                 'order_ref' => 'SUB-' . str_pad($subscription->id ?? '0', 6, '0', STR_PAD_LEFT),
             ];

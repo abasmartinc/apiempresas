@@ -113,7 +113,7 @@ class EmailService
     public function sendRiskWelcomeEmail(array $userData, string $redirectUrl = '')
     {
         $userEmail = $userData['email'];
-        $buttonUrl = !empty($redirectUrl) ? site_url(ltrim($redirectUrl, '/')) : site_url('search');
+        $buttonUrl = !empty($redirectUrl) ? site_url(ltrim($redirectUrl, '/')) : site_url('dashboard');
 
         $templateData = [
             'name'       => $userData['name'] ?? 'Usuario',
@@ -286,22 +286,50 @@ class EmailService
     }
 
     /**
+     * TRIGGER: monthly_report
+     */
+    public function sendMonthlyUsageReport(array $userData, int $usage): array
+    {
+        $templateData = [
+            'name'        => $userData['name'] ?? 'Usuario',
+            'content'     => "Aquí tienes el resumen de actividad de tu cuenta en los últimos 30 días:<br><br>• <b>Consultas a la API realizadas:</b> {$usage}<br><br>Si tu consumo sigue aumentando y necesitas asegurar disponibilidad, mayor tasa de peticiones y datos mercantiles completos sin restricciones, te recomendamos revisar nuestros planes:",
+            'button_text' => 'Ver Planes y Facturación',
+            'button_url'  => site_url('billing')
+        ];
+        return $this->sendTemplateEmail('automation_generic', $templateData, $userData['email'], ['papelo.amh@gmail.com']);
+    }
+
+    /**
+     * TRIGGER: risk_first_query_nudge_24h
+     * Sent 12-24h after the user executes their first free audit (72.7% drop-off recovery).
+     */
+    public function sendRiskFirstQueryNudge(array $userData, array $companyData = []): array
+    {
+        $compName = !empty($companyData['name']) ? $companyData['name'] : (!empty($companyData['cif']) ? $companyData['cif'] : 'tu cliente');
+
+        $templateData = [
+            'name'         => $userData['name'] ?? 'Usuario',
+            'company_name' => $compName,
+            'button_url'   => site_url('dashboard')
+        ];
+        return $this->sendTemplateEmail('risk_first_query_nudge', $templateData, $userData['email'], ['papelo.amh@gmail.com'], [], $userData['user_id'] ?? 0);
+    }
+
+    /**
      * TRIGGER: risk_paywall_abandoned_2h
      */
     public function sendRiskPaywallAbandoned(array $userData, array $companyData = []): array
     {
-        $compName = !empty($companyData['name']) ? $companyData['name'] : 'la empresa que consultaste';
-        $redirectUrl = !empty($companyData['id']) 
-            ? base_url('empresa/' . $companyData['id']) 
-            : base_url('search');
+        $compName = !empty($companyData['name']) ? $companyData['name'] : (!empty($companyData['cif']) ? $companyData['cif'] : 'tu última consulta');
+        $cif = $companyData['cif'] ?? '';
 
         $templateData = [
-            'name'        => $userData['name'] ?? 'Usuario',
-            'content'     => "Vimos que alcanzaste el límite mensual de 3 consultas gratuitas mientras analizabas a <b>{$compName}</b>.<br><br>Si necesitas el dictamen oficial con scoring algorítmico, semáforo de riesgo y detalle de eventos BORME para cerrar una operación comercial o evaluar solvencia:<br><br>• <b>Opción 1:</b> Descarga puntual del dictamen en PDF por <b>3,90 € + IVA</b> (un 85% más económico que Informa/Axesor).<br>• <b>Opción 2:</b> Suscripción <b>Solvencia Pro (29 € / mes)</b> con consultas y dictámenes 100% ilimitados de toda España sin permanencia.<br><br>Desbloquea el informe al instante para no dejar tu análisis a medias:",
-            'button_text' => 'Desbloquear Dictamen Oficial',
-            'button_url'  => $redirectUrl
+            'name'         => $userData['name'] ?? 'Usuario',
+            'company_name' => $compName,
+            'button_url'   => site_url('billing?plan=risk_pro'),
+            'pdf_url'      => !empty($cif) ? site_url('dashboard?cif=' . urlencode((string)$cif)) : site_url('dashboard')
         ];
-        return $this->sendTemplateEmail('automation_generic', $templateData, $userData['email'], ['papelo.amh@gmail.com']);
+        return $this->sendTemplateEmail('risk_paywall_abandoned', $templateData, $userData['email'], ['papelo.amh@gmail.com'], [], $userData['user_id'] ?? 0);
     }
 
     /**
@@ -313,7 +341,7 @@ class EmailService
             'name'        => $userData['name'] ?? 'Usuario',
             'content'     => "La mayoría de empresas pagan entre 25 € y 35 € por cada informe mercantil en proveedores tradicionales, además de cuotas fijas o permanencias anuales.<br><br>En <b>APIEmpresas</b> hemos cambiado las reglas del sector:<br><br>✅ <b>Solvencia Pro por 29 € / mes:</b> Tarifa plana para auditar todas las empresas que quieras en España sin límites.<br>✅ <b>Sin ataduras:</b> Activa tu suscripción cuando tengas auditorías y cancélala en 1 clic cuando termines.<br>✅ <b>Datos oficiales y en tiempo real:</b> Semáforo de riesgo, scoring IES, incidencias BORME y contratación pública.<br><br>Protege tu negocio de impagos y toma mejores decisiones hoy mismo:",
             'button_text' => 'Ver Ventajas de Solvencia Pro',
-            'button_url'  => base_url('billing')
+            'button_url'  => site_url('billing?plan=risk_pro')
         ];
         return $this->sendTemplateEmail('automation_generic', $templateData, $userData['email'], ['papelo.amh@gmail.com']);
     }
@@ -325,9 +353,9 @@ class EmailService
     {
         $templateData = [
             'name'        => $userData['name'] ?? 'Usuario',
-            'content'     => "Te recordamos que se renuevan tus <b>3 consultas de solvencia y riesgo gratuitas</b> en tu cuenta de APIEmpresas.<br><br>Ya puedes volver a buscar cualquier empresa en España para evaluar su estabilidad societaria, semáforo de riesgo y actos mercantiles del BORME.<br><br>Entra a la plataforma y revisa tus próximos clientes o proveedores:",
-            'button_text' => 'Buscar Empresas Gratis',
-            'button_url'  => base_url('search')
+            'content'     => "Te recordamos que se renuevan tus <b>3 consultas de solvencia y riesgo gratuitas</b> en tu cuenta de APIEmpresas.<br><br>Ya puedes volver a buscar cualquier empresa en España para evaluar su estabilidad societaria, semáforo de riesgo y actos mercantiles del BORME.<br><br>Entra a tu panel y revisa tus próximos clientes o proveedores:",
+            'button_text' => 'Auditar Empresas en mi Panel',
+            'button_url'  => site_url('dashboard')
         ];
         return $this->sendTemplateEmail('automation_generic', $templateData, $userData['email'], ['papelo.amh@gmail.com']);
     }
@@ -342,9 +370,65 @@ class EmailService
         $templateData = [
             'name'              => $userData['name'] ?? 'Usuario',
             'remaining_credits' => $credText,
-            'button_url'        => base_url('search')
+            'button_url'        => site_url('dashboard')
         ];
         return $this->sendTemplateEmail('risk_unused_credits_48h', $templateData, $userData['email'], ['papelo.amh@gmail.com'], [], $userData['user_id'] ?? 0);
+    }
+
+    /**
+     * ONBOARDING: Send welcome email when user purchases a Risk Pack (e.g. 5 audits).
+     */
+    public function sendRiskPackWelcome(array $userData, int $credits = 5, string $targetCif = ''): array
+    {
+        $buttonUrl = !empty($targetCif) ? site_url('dashboard?cif=' . urlencode($targetCif)) : site_url('dashboard');
+
+        $templateData = [
+            'name'       => $userData['name'] ?? 'Usuario',
+            'credits'    => (string)$credits,
+            'button_url' => $buttonUrl
+        ];
+
+        return $this->sendTemplateEmail('risk_pack_welcome', $templateData, $userData['email'], ['papelo.amh@gmail.com'], [], $userData['user_id'] ?? 0);
+    }
+
+    /**
+     * ONBOARDING: Send welcome email when user subscribes to Solvencia Pro.
+     */
+    public function sendRiskProWelcome(array $userData): array
+    {
+        $templateData = [
+            'name'       => $userData['name'] ?? 'Usuario',
+            'button_url' => site_url('dashboard')
+        ];
+
+        return $this->sendTemplateEmail('risk_pro_welcome', $templateData, $userData['email'], ['papelo.amh@gmail.com'], [], $userData['user_id'] ?? 0);
+    }
+
+    /**
+     * UPSELL: Sent when a pack buyer has low (<=1) or zero credits remaining, offering Solvencia Pro.
+     */
+    public function sendRiskCreditsLowUpsell(array $userData, int $remainingCredits = 0): array
+    {
+        if ($remainingCredits <= 0) {
+            $credText = '0 créditos';
+            $phrase   = 'has consumido todas las auditorías';
+        } elseif ($remainingCredits === 1) {
+            $credText = 'solo 1 crédito restante';
+            $phrase   = 'te queda únicamente 1 crédito';
+        } else {
+            $credText = "{$remainingCredits} créditos";
+            $phrase   = "te quedan {$remainingCredits} créditos";
+        }
+
+        $templateData = [
+            'name'                   => $userData['name'] ?? 'Usuario',
+            'remaining_credits_text' => $credText,
+            'credits_status_phrase'  => $phrase,
+            'button_url'             => site_url('billing?plan=risk_pro'),
+            'pack_url'               => site_url('billing?plan=risk_pack_5')
+        ];
+
+        return $this->sendTemplateEmail('risk_credits_low_upsell', $templateData, $userData['email'], ['papelo.amh@gmail.com'], [], $userData['user_id'] ?? 0);
     }
 
     /**
@@ -361,7 +445,16 @@ class EmailService
         }
 
         // Define which templates are purely transactional (must send even if unsubscribed)
-        $transactionalSlugs = ['payment_notification', 'user_invoice', 'admin_registration', 'set_password', 'welcome_email', 'welcome_risk'];
+        $transactionalSlugs = [
+            'payment_notification',
+            'user_invoice',
+            'admin_registration',
+            'set_password',
+            'welcome_email',
+            'welcome_risk',
+            'risk_pack_welcome',
+            'risk_pro_welcome'
+        ];
 
         // Check if the recipient is unsubscribed
         if (!in_array($slug, $transactionalSlugs) && $this->isUnsubscribed($to)) {

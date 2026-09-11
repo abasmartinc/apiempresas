@@ -10,9 +10,22 @@
         
         /* Chat Area */
         .chat-area { background: white; border-radius: 20px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
-        .chat-header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9; }
-        .chat-header h1 { font-size: 1.5rem; font-weight: 800; color: #2152ff; margin: 0; line-height: 1.3; }
-        .ticket-id-badge { background: #eff6ff; color: #2152ff; font-weight: 800; font-size: 1.05rem; padding: 4px 10px; border-radius: 8px; border: 1px solid #bfdbfe; display: inline-flex; align-items: center; }
+        .chat-header {
+            background: linear-gradient(135deg, #133A82 0%, #1e4ea3 100%);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            box-shadow: 0 4px 12px rgba(19, 58, 130, 0.15);
+        }
+        .chat-header h1 { font-size: 1.35rem; font-weight: 800; color: #ffffff !important; margin: 0; line-height: 1.35; }
+        .ticket-id-badge { background: #ffffff; color: #133A82; font-weight: 800; font-size: 1rem; padding: 4px 12px; border-radius: 999px; display: inline-flex; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .chat-header-user { color: rgba(255, 255, 255, 0.85); font-size: 0.9rem; font-weight: 500; text-align: right; }
+        .chat-header-user strong { color: #ffffff; font-weight: 700; }
         
         .chat-container { display: flex; flex-direction: column; gap: 20px; margin-bottom: 32px; max-height: 500px; overflow-y: auto; padding-right: 10px; }
         .message-bubble { max-width: 85%; padding: 16px 20px; border-radius: 16px; text-align: left !important; }
@@ -81,11 +94,11 @@
             <!-- Left Column: Chat -->
             <div class="chat-area">
                 <div class="chat-header">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; flex: 1; min-width: 260px;">
                         <span class="ticket-id-badge">#<?= $ticket['id'] ?></span>
                         <h1><?= esc($ticket['subject']) ?></h1>
                     </div>
-                    <div style="color: #64748b; font-size: 0.9rem; font-weight: 500;">
+                    <div class="chat-header-user">
                         Usuario: <strong><?= esc($ticket['user_name'] ?? 'Usuario Desconocido') ?></strong> (<?= esc($ticket['user_email'] ?? '') ?>)
                     </div>
                 </div>

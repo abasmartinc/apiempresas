@@ -82,7 +82,7 @@
 }
 
 /* Header */
-.chat-header {
+#ai-chat-window .chat-header {
     background: linear-gradient(135deg, #133A82 0%, #1e4ea3 100%);
     padding: 20px;
     color: white;

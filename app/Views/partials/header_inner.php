@@ -22,7 +22,7 @@
         }
     }
     
-    $isStandardPlan = in_array($userPlanId, [1, 2, 3, 6]);
+    $isStandardPlan = in_array($userPlanId, [1, 2, 3, 6, 14]);
 ?>
 
     <header>

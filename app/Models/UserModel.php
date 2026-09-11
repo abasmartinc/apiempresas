@@ -39,6 +39,7 @@ class UserModel extends Model
         'unsuscribe',
         'wizard_completed',
         'ai_copilot_trials',
+        'risk_credits',
     ];
 
     protected $useTimestamps = false;

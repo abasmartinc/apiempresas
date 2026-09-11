@@ -57,10 +57,11 @@ class EmailAutomationCommand extends BaseCommand
         }
 
         // =========================================================================
-        // BLOQUE 2: FLUJO DE RIESGO Y PAYWALL ABANDONADO
+        // BLOQUE 2: FLUJO DE RIESGO, PAYWALL Y UPSELL PACKS
         // =========================================================================
         CLI::write('🛡️ [2/3] Procesando automatizaciones de Riesgo y Solvencia...', 'cyan');
         $this->processRiskPaywallTriggers();
+        $this->processRiskPackUpsellTriggers();
 
         // =========================================================================
         // BLOQUE 3: USUARIOS CON ALTA TASA DE ERRORES 400 EN API
@@ -192,7 +193,7 @@ class EmailAutomationCommand extends BaseCommand
                             if ($compRow) {
                                 $compData = [
                                     'id'   => $compRow['id'],
-                                    'name' => $compRow['name'] ?? $lastCif,
+                                    'name' => $compRow['company_name'] ?? $compRow['name'] ?? $lastCif,
                                     'cif'  => $lastCif
                                 ];
                             }
@@ -247,12 +248,45 @@ class EmailAutomationCommand extends BaseCommand
             }
 
             // =========================================================================
-            // 4) TRIGGER: risk_unused_credits_48h (Recordatorio tras 24-72h si le quedan créditos gratis)
+            // 4) TRIGGER: risk_first_query_nudge_24h (12h-72h tras la 1ª consulta para recuperar el 72.7% de abandonos)
+            // =========================================================================
+            if ($distinctCount === 1 && $lastEvent) {
+                $secondsSinceLastView = time() - strtotime($lastEvent['created_at']);
+                if ($secondsSinceLastView >= 43200 && $secondsSinceLastView <= 259200) { // Entre 12h y 72h
+                    if (!$this->automationModel->wasSentRecently($userId, 'risk_first_query_nudge_24h', 30)) {
+                        $lastCif = trim((string)$lastEvent['trigger_type']);
+                        $compData = [];
+                        if ($lastCif) {
+                            $compRow = $this->companyModel->where('cif', $lastCif)->first();
+                            if ($compRow) {
+                                $compData = [
+                                    'id'   => $compRow['id'],
+                                    'name' => $compRow['company_name'] ?? $compRow['name'] ?? $lastCif,
+                                    'cif'  => $lastCif
+                                ];
+                            }
+                        }
+
+                        CLI::write("  -> Enviando 'risk_first_query_nudge_24h' a {$user['email']}...");
+                        $result = $this->emailService->sendRiskFirstQueryNudge($user, $compData);
+                        if ($result['success']) {
+                            $this->automationModel->markAsSent($userId, 'risk_first_query_nudge_24h', $result['body']);
+                            $this->recordTracking($userId, 'email_sent_risk_first_query_nudge');
+                            CLI::write("     [SENT] risk_first_query_nudge_24h OK", 'yellow');
+                        }
+                        continue;
+                    }
+                }
+            }
+
+            // =========================================================================
+            // 5) TRIGGER: risk_unused_credits_48h (Recordatorio tras 24-72h si le quedan créditos gratis)
             // Solo para usuarios con intención específica de riesgo
             // =========================================================================
             $userAgeSeconds = time() - strtotime($user['created_at']);
             if (($user['signup_intent'] ?? '') === 'view_risk_profile' && $userAgeSeconds >= 86400 && $userAgeSeconds <= 604800 && $distinctCount < 3) {
-                if (!$this->automationModel->wasSentRecently($userId, 'risk_unused_credits_48h', 30)) {
+                if (!$this->automationModel->wasSentRecently($userId, 'risk_unused_credits_48h', 30) &&
+                    !$this->automationModel->wasSentRecently($userId, 'risk_first_query_nudge_24h', 2)) {
                     $remainingCredits = max(0, 3 - $distinctCount);
                     CLI::write("  -> Enviando 'risk_unused_credits_48h' a {$user['email']}...");
                     $result = $this->emailService->sendRiskUnusedCreditsReminder($user, $remainingCredits);
@@ -261,6 +295,52 @@ class EmailAutomationCommand extends BaseCommand
                         $this->recordTracking($userId, 'email_sent_risk_unused_credits');
                         CLI::write("     [SENT] risk_unused_credits_48h OK", 'yellow');
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     * Procesa el upsell a Solvencia Pro para compradores de pack con créditos bajos (<= 1) o agotados
+     */
+    protected function processRiskPackUpsellTriggers()
+    {
+        $db = \Config\Database::connect();
+
+        // Usuarios que han comprado un pack de solvencia, tienen <= 1 crédito, y NO tienen Solvencia Pro activo
+        $packBuyers = $db->query("
+            SELECT DISTINCT u.id, u.email, u.name, u.created_at, u.risk_credits
+            FROM users u
+            WHERE u.is_admin = 0
+              AND u.unsuscribe = 0
+              AND u.source_app = 'apiempresas'
+              AND u.risk_credits <= 1
+              AND u.id IN (
+                  SELECT user_id FROM user_events 
+                  WHERE event_type = 'purchase_risk_pack'
+              )
+              AND u.id NOT IN (
+                  SELECT us.user_id 
+                  FROM user_subscriptions us
+                  JOIN api_plans ap ON ap.id = us.plan_id
+                  WHERE us.status = 'active'
+                    AND ap.slug = 'risk_pro'
+              )
+        ")->getResultArray();
+
+        CLI::write("  - Compradores de pack con créditos bajos (<=1) detectados: " . count($packBuyers));
+
+        foreach ($packBuyers as $user) {
+            $userId = (int)$user['id'];
+            $remainingCredits = (int)($user['risk_credits'] ?? 0);
+
+            if (!$this->automationModel->wasSentRecently($userId, 'risk_credits_low_upsell', 30)) {
+                CLI::write("  -> Enviando 'risk_credits_low_upsell' a {$user['email']} (Créditos: {$remainingCredits})...");
+                $result = $this->emailService->sendRiskCreditsLowUpsell($user, $remainingCredits);
+                if ($result['success']) {
+                    $this->automationModel->markAsSent($userId, 'risk_credits_low_upsell', $result['body']);
+                    $this->recordTracking($userId, 'email_sent_risk_credits_low_upsell');
+                    CLI::write("     [SENT] risk_credits_low_upsell OK", 'yellow');
                 }
             }
         }

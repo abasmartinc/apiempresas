@@ -128,6 +128,38 @@ class Webhook extends Controller
                 }
             }
 
+            // RISK PACK (TRIPWIRE: PACK AUDITORIAS DE SOLVENCIA)
+            if ($planSlug === 'risk_pack_5' || strpos((string)$planSlug, 'risk_pack_') === 0) {
+                $credits = (int) ($session->metadata->credits ?? 5);
+                if ($credits <= 0) {
+                    $credits = 5;
+                }
+                if ($userId > 0) {
+                    $db = \Config\Database::connect();
+                    $db->table('users')
+                        ->where('id', $userId)
+                        ->set('risk_credits', 'risk_credits + ' . $credits, false)
+                        ->update();
+
+                    $userEventsModel = new \App\Models\UserEventsModel();
+                    $userEventsModel->logEvent($userId, 'purchase_risk_pack', (string)$credits);
+
+                    // Enviar email transaccional de bienvenida y confirmación de créditos
+                    $userRow = (new \App\Models\UserModel())->find($userId);
+                    if ($userRow) {
+                        $emailService = new \App\Services\EmailService();
+                        $targetCif = $session->metadata->target_cif ?? '';
+                        $emailService->sendRiskPackWelcome([
+                            'name'    => $userRow->name,
+                            'email'   => $userRow->email,
+                            'user_id' => $userRow->id
+                        ], $credits, $targetCif);
+                    }
+
+                    log_message('info', "[Webhook::stripe] Added {$credits} risk_credits and sent welcome email to user {$userId} from {$planSlug}");
+                }
+            }
+
             // EXPORT JOBS
             if (in_array($planSlug, ['directory_single', 'subsidies_single', 'contracts_single', 'radar'])) {
                 $exportContext = json_decode($session->metadata->export_context ?? '{}', true);
@@ -229,6 +261,19 @@ class Webhook extends Controller
             'created_at'             => date('Y-m-d H:i:s'),
             'updated_at'             => date('Y-m-d H:i:s'),
         ]);
+
+        // Enviar email de bienvenida a Solvencia Pro si corresponde
+        if ($plan->slug === 'risk_pro') {
+            $userRow = (new \App\Models\UserModel())->find($userId);
+            if ($userRow) {
+                $emailService = new \App\Services\EmailService();
+                $emailService->sendRiskProWelcome([
+                    'name'    => $userRow->name,
+                    'email'   => $userRow->email,
+                    'user_id' => $userRow->id
+                ]);
+            }
+        }
 
         log_message('info', "[Webhook::stripe] Subscription created for user {$userId}");
     }

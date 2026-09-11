@@ -24,7 +24,7 @@
             </p>
 
             <div class="hero-actions">
-                <a class="btn btn_primary" href="<?= site_url('/') ?>" style="background: #2563eb; border-color: #2563eb; padding: 14px 28px; font-weight: 800; font-size: 1rem;">Ir a la Home</a>
+                <a class="btn btn_primary" href="<?= site_url('dashboard') ?>" style="background: #2563eb; border-color: #2563eb; padding: 14px 28px; font-weight: 800; font-size: 1rem;">Ir a mi Panel de Solvencia</a>
             </div>
 
             <div class="hero-note">

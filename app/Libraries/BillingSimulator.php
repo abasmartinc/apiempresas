@@ -25,6 +25,31 @@ class BillingSimulator
             ]
         ];
 
+        if ($planSlug === 'risk_pack_5' || strpos($planSlug, 'risk_pack_') === 0) {
+            if ($userId > 0) {
+                $db = \Config\Database::connect();
+                $db->table('users')
+                    ->where('id', $userId)
+                    ->set('risk_credits', 'risk_credits + 5', false)
+                    ->update();
+
+                $userEventsModel = new \App\Models\UserEventsModel();
+                $userEventsModel->logEvent($userId, 'purchase_risk_pack', '5');
+
+                $userRow = (new \App\Models\UserModel())->find($userId);
+                if ($userRow) {
+                    $emailService = new \App\Services\EmailService();
+                    $emailService->sendRiskPackWelcome([
+                        'name'    => $userRow->name,
+                        'email'   => $userRow->email,
+                        'user_id' => $userRow->id
+                    ], 5);
+                }
+            }
+            log_message('info', "[Simulator] Added 5 risk_credits to user {$userId}");
+            return true;
+        }
+
         if ($period === 'single') {
             log_message('info', "[Simulator] One-time purchase simulated for user {$userId}. Skipping plan activation.");
             return true;
@@ -68,6 +93,19 @@ class BillingSimulator
             'created_at'             => date('Y-m-d H:i:s'),
             'updated_at'             => date('Y-m-d H:i:s'),
         ]);
+
+        // Enviar email de bienvenida a Solvencia Pro si corresponde
+        if ($planSlug === 'risk_pro') {
+            $userRow = (new \App\Models\UserModel())->find($userId);
+            if ($userRow) {
+                $emailService = new \App\Services\EmailService();
+                $emailService->sendRiskProWelcome([
+                    'name'    => $userRow->name,
+                    'email'   => $userRow->email,
+                    'user_id' => $userRow->id
+                ]);
+            }
+        }
 
         // Generar Factura (Simulada)
         $invoiceService = new \App\Services\InvoiceService();

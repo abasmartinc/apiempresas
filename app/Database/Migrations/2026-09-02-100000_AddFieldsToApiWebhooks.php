@@ -9,20 +9,13 @@ class AddFieldsToApiWebhooks extends Migration
     public function up()
     {
         $fields = [
-            'is_active' => [
-                'type'       => 'TINYINT',
-                'constraint' => 1,
-                'default'    => 1,
-                'null'       => false,
-                'after'      => 'filters',
-            ],
             'failure_count' => [
                 'type'       => 'INT',
                 'constraint' => 10,
                 'unsigned'   => true,
                 'default'    => 0,
                 'null'       => false,
-                'after'      => 'is_active',
+                'after'      => 'filters',
             ],
             'last_delivery_at' => [
                 'type'  => 'DATETIME',
@@ -48,27 +41,46 @@ class AddFieldsToApiWebhooks extends Migration
             ],
         ];
 
-        $this->forge->addColumn('api_webhooks', $fields);
+        $fieldsToAdd = [];
+        foreach ($fields as $fieldName => $fieldDef) {
+            if (!$this->db->fieldExists($fieldName, 'api_webhooks')) {
+                $fieldsToAdd[$fieldName] = $fieldDef;
+            }
+        }
+        if (!empty($fieldsToAdd)) {
+            $this->forge->addColumn('api_webhooks', $fieldsToAdd);
+        }
 
         // Add performance indexes for background processing and user lookup
-        $this->db->query("CREATE INDEX `idx_user_active` ON `api_webhooks` (`user_id`, `is_active`)");
-        $this->db->query("CREATE INDEX `idx_event_active` ON `api_webhooks` (`event`, `is_active`)");
+        $existingIndexes = array_column($this->db->getIndexData('api_webhooks'), 'name');
+        if (!in_array('idx_user_active', $existingIndexes)) {
+            $this->db->query("CREATE INDEX `idx_user_active` ON `api_webhooks` (`user_id`, `is_active`)");
+        }
+        if (!in_array('idx_event_active', $existingIndexes)) {
+            $this->db->query("CREATE INDEX `idx_event_active` ON `api_webhooks` (`event`, `is_active`)");
+        }
     }
 
     public function down()
     {
-        // Drop added indexes
-        $this->db->query("DROP INDEX `idx_user_active` ON `api_webhooks`");
-        $this->db->query("DROP INDEX `idx_event_active` ON `api_webhooks`");
+        $existingIndexes = array_column($this->db->getIndexData('api_webhooks'), 'name');
+        if (in_array('idx_user_active', $existingIndexes)) {
+            $this->db->query("DROP INDEX `idx_user_active` ON `api_webhooks`");
+        }
+        if (in_array('idx_event_active', $existingIndexes)) {
+            $this->db->query("DROP INDEX `idx_event_active` ON `api_webhooks`");
+        }
 
         // Drop added columns
-        $this->forge->dropColumn('api_webhooks', [
-            'is_active',
-            'failure_count',
-            'last_delivery_at',
-            'last_success_at',
-            'last_status_code',
-            'disabled_at',
-        ]);
+        $colsToDrop = [];
+        $candidates = ['is_active', 'failure_count', 'last_delivery_at', 'last_success_at', 'last_status_code', 'disabled_at'];
+        foreach ($candidates as $col) {
+            if ($this->db->fieldExists($col, 'api_webhooks')) {
+                $colsToDrop[] = $col;
+            }
+        }
+        if (!empty($colsToDrop)) {
+            $this->forge->dropColumn('api_webhooks', $colsToDrop);
+        }
     }
 }

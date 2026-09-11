@@ -45,11 +45,18 @@ class CompanyRiskService
                 'reason'        => 'unauthenticated',
                 'is_subscriber' => false,
                 'views_used'    => 0,
-                'views_limit'   => 3
+                'views_limit'   => 3,
+                'risk_credits'  => 0,
             ];
         }
 
         $db = Database::connect();
+        $cleanCif = $this->cleanCif($cif);
+
+        // Obtener datos del usuario (admin y créditos disponibles)
+        $userRow = $db->table('users')->select('is_admin, risk_credits')->where('id', $userId)->get()->getRow();
+        $userRiskCredits = (int)($userRow->risk_credits ?? 0);
+        $isAdmin = (bool)session('is_admin') || ($userRow && (int)$userRow->is_admin === 1);
 
         // 1. Verificar si tiene suscripción activa ESPECÍFICA para el producto de Riesgo / Solvencia (risk_pro o bundle)
         $activeRiskSub = $db->table('user_subscriptions')
@@ -72,19 +79,35 @@ class CompanyRiskService
             ->orderBy('user_subscriptions.current_period_end', 'DESC')
             ->get()->getRow();
 
-        if ($activeRiskSub) {
+        if ($activeRiskSub || $isAdmin) {
+            // Registrar siempre la consulta para que aparezca en el historial y se mantenga al recargar
+            if (!empty($cleanCif)) {
+                $userEventsModel = new UserEventsModel();
+                $userEventsModel->logEvent($userId, 'view_risk_profile', $cleanCif);
+            }
+
             return [
                 'allowed'       => true,
                 'is_subscriber' => true,
-                'plan_name'     => $activeRiskSub->plan_name ?? 'Solvencia Pro',
+                'plan_name'     => $activeRiskSub ? ($activeRiskSub->plan_name ?? 'Solvencia Pro') : 'Solvencia Pro (Admin)',
                 'views_used'    => 0,
-                'views_limit'   => 'unlimited'
+                'views_limit'   => 'unlimited',
+                'risk_credits'  => $userRiskCredits,
             ];
         }
 
-        // 2. Para usuarios gratuitos o de otros planes (API Pro, etc.): límite de 3 empresas distintas al mes natural
+        // 2. Comprobar si esta empresa ya ha sido consultada/desbloqueada por el usuario alguna vez
+        $alreadyViewedEver = false;
+        if (!empty($cleanCif)) {
+            $alreadyViewedEver = $db->table('user_events')
+                ->where('user_id', $userId)
+                ->where('event_type', 'view_risk_profile')
+                ->where('trigger_type', $cleanCif)
+                ->countAllResults() > 0;
+        }
+
+        // Consultas de empresas distintas en el mes natural actual
         $startOfMonth = date('Y-m-01 00:00:00');
-        
         $viewsThisMonth = $db->table('user_events')
             ->select('trigger_type')
             ->where('user_id', $userId)
@@ -95,21 +118,27 @@ class CompanyRiskService
 
         $distinctCifs = array_filter(array_map('trim', array_column($viewsThisMonth, 'trigger_type')));
         $distinctCount = count($distinctCifs);
-        $cleanCif = $this->cleanCif($cif);
-        $alreadyViewed = (!empty($cleanCif) && in_array($cleanCif, array_map('strtoupper', $distinctCifs)));
 
-        if ($alreadyViewed) {
+        if ($alreadyViewedEver) {
+            // Empresa ya desbloqueada: actualizar fecha registrando evento, no consume cuota ni crédito
+            if (!empty($cleanCif)) {
+                $userEventsModel = new UserEventsModel();
+                $userEventsModel->logEvent($userId, 'view_risk_profile', $cleanCif);
+            }
+
             return [
                 'allowed'          => true,
                 'is_subscriber'    => false,
                 'already_unlocked' => true,
+                'from_pack'        => false,
                 'views_used'       => $distinctCount,
-                'views_limit'      => 3
+                'views_limit'      => 3,
+                'risk_credits'     => $userRiskCredits,
             ];
         }
 
+        // 3. Si aún tiene consultas gratis del mes (hasta 3 empresas)
         if ($distinctCount < 3) {
-            // Registrar el evento de consulta para esta nueva empresa
             if (!empty($cleanCif)) {
                 $userEventsModel = new UserEventsModel();
                 $userEventsModel->logEvent($userId, 'view_risk_profile', $cleanCif);
@@ -119,18 +148,49 @@ class CompanyRiskService
                 'allowed'          => true,
                 'is_subscriber'    => false,
                 'already_unlocked' => false,
+                'from_pack'        => false,
                 'views_used'       => $distinctCount + 1,
-                'views_limit'      => 3
+                'views_limit'      => 3,
+                'risk_credits'     => $userRiskCredits,
             ];
         }
 
-        // Límite de 3 consultas alcanzado
+        // 4. Si ha alcanzado el límite mensual gratuito pero tiene créditos comprados (Tripwire pack)
+        if ($userRiskCredits > 0) {
+            if (!empty($cleanCif)) {
+                // Descontar 1 crédito de forma atómica
+                $db->table('users')
+                    ->where('id', $userId)
+                    ->where('risk_credits >', 0)
+                    ->set('risk_credits', 'risk_credits - 1', false)
+                    ->update();
+
+                $userEventsModel = new UserEventsModel();
+                $userEventsModel->logEvent($userId, 'view_risk_profile', $cleanCif);
+            }
+
+            $remainingCredits = max(0, $userRiskCredits - 1);
+
+            return [
+                'allowed'          => true,
+                'is_subscriber'    => false,
+                'already_unlocked' => false,
+                'from_pack'        => true,
+                'credits_remaining'=> $remainingCredits,
+                'risk_credits'     => $remainingCredits,
+                'views_used'       => $distinctCount + 1,
+                'views_limit'      => 3,
+            ];
+        }
+
+        // 5. Límite de 3 consultas alcanzado y sin créditos
         return [
             'allowed'       => false,
             'reason'        => 'limit_reached',
             'is_subscriber' => false,
-            'views_used'    => 3,
-            'views_limit'   => 3
+            'views_used'    => $distinctCount,
+            'views_limit'   => 3,
+            'risk_credits'  => 0,
         ];
     }
 
@@ -160,6 +220,13 @@ class CompanyRiskService
         if (!$company) {
             $company = $this->companyModel->where('cif', $cleanCif)->first();
         }
+        if (!$company && !empty($cif)) {
+            $rawTerm = trim($cif);
+            $company = $this->companyModel->where('company_name', $rawTerm)->first();
+            if (!$company && strlen($rawTerm) >= 4) {
+                $company = $this->companyModel->like('company_name', $rawTerm)->first();
+            }
+        }
 
         if (!$company) {
             return [
@@ -169,6 +236,10 @@ class CompanyRiskService
                 'riskProfile' => null,
                 'error'       => 'COMPANY_NOT_FOUND'
             ];
+        }
+
+        if (empty($company['name']) && !empty($company['company_name'])) {
+            $company['name'] = $company['company_name'];
         }
 
         $targetCif = (string)($company['cif'] ?? $cleanCif);

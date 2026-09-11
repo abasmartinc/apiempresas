@@ -5,6 +5,41 @@ $compCifStr = $company['cif'] ?? '';
 ?>
 
 <!-- PAYWALL CUOTA ALCANZADA (3/3) -->
+<style>
+    .risk-paywall-card {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+        max-width: 900px;
+        background: #ffffff;
+        padding: 36px 36px 30px;
+        border-radius: 20px;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
+        border: 1px solid #e2e8f0;
+        margin: 16px auto;
+    }
+    .risk-paywall-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        width: 100%;
+        margin-bottom: 22px;
+        text-align: left;
+    }
+    @media (max-width: 768px) {
+        .risk-paywall-grid {
+            grid-template-columns: 1fr;
+        }
+        .risk-paywall-card {
+            padding: 24px 16px;
+        }
+    }
+</style>
+
 <div style="padding: 20px; position: relative; display: flex; align-items: center; justify-content: center; min-height: 480px; overflow: hidden; background: #fafafa; margin: -24px; margin-bottom: 0; border-radius: 0 0 16px 16px;">
     
     <!-- BLURRED BACKGROUND (Scorecard & Factors Behind) -->
@@ -35,24 +70,24 @@ $compCifStr = $company['cif'] ?? '';
         </div>
     </div>
 
-    <!-- FOREGROUND CONVERSION MODAL / CARD -->
-    <div style="position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; max-width: 580px; background: #ffffff; padding: 36px 32px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12); border: 1px solid #e2e8f0;">
+    <!-- FOREGROUND CONVERSION MODAL / CARD (ANCHO AMPLIADO Y PACKS EN PARALELO) -->
+    <div class="risk-paywall-card">
         
         <!-- Icon & Badge -->
         <div style="display: inline-flex; align-items: center; gap: 6px; background: #fffbeb; border: 1px solid #fde68a; color: #b45309; padding: 4px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 800; text-transform: uppercase; margin-bottom: 14px;">
             ⚠️ Límite Mensual Alcanzado (3/3)
         </div>
 
-        <h3 style="font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 0 0 10px 0; letter-spacing: -0.5px;">
+        <h3 style="font-size: 1.6rem; font-weight: 900; color: #0f172a; margin: 0 0 10px 0; letter-spacing: -0.5px;">
             Has alcanzado tus 3 consultas gratuitas
         </h3>
         
-        <p style="color: #475569; margin: 0 0 24px 0; font-size: 0.92rem; line-height: 1.5; max-width: 480px;">
-            Has analizado el límite mensual de 3 empresas gratuitas. Para consultar el dictamen de <strong style="color: #0f172a;"><?= esc($compNameStr) ?></strong> o desbloquear todas las empresas:
+        <p style="color: #475569; margin: 0 0 22px 0; font-size: 0.95rem; line-height: 1.5; max-width: 660px;">
+            Has analizado el límite mensual de 3 empresas gratuitas. Para consultar el dictamen de <strong style="color: #0f172a;"><?= esc($compNameStr) ?></strong> o desbloquear más empresas:
         </p>
 
         <!-- COMPARATIVA VS COMPETENCIA TRADICIONAL (PRICE ANCHORING) -->
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 16px; width: 100%; margin-bottom: 20px; box-sizing: border-box; text-align: left;">
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 18px; width: 100%; margin-bottom: 22px; box-sizing: border-box; text-align: left;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                 <span style="font-size: 0.72rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">
                     Comparativa frente a informes tradicionales
@@ -62,7 +97,7 @@ $compCifStr = $company['cif'] ?? '';
                 </span>
             </div>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.78rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.78rem;">
                 <!-- Informa / Axesor -->
                 <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 12px; color: #64748b;">
                     <div style="font-weight: 700; color: #94a3b8; font-size: 0.75rem; margin-bottom: 2px;">Informa D&B / Axesor</div>
@@ -78,42 +113,66 @@ $compCifStr = $company['cif'] ?? '';
             </div>
         </div>
 
-        <!-- Monetization Options Grid -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; margin-bottom: 20px; text-align: left;">
+        <!-- Monetization Options Grid (3 Opciones alineadas horizontalmente) -->
+        <div class="risk-paywall-grid">
             
-            <!-- Option 1: PDF Download (Transactional) -->
-            <div style="border: 2px solid #10b981; background: #f0fdf4; border-radius: 14px; padding: 18px 16px; display: flex; flex-direction: column; justify-content: space-between;">
+            <!-- Option 1: PDF Download (Transactional 1 empresa) -->
+            <div style="border: 1.5px solid #cbd5e1; background: #ffffff; border-radius: 14px; padding: 18px 16px; display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
-                    <div style="font-size: 0.72rem; font-weight: 800; color: #15803d; text-transform: uppercase; margin-bottom: 4px;">PAGO PUNTUAL</div>
-                    <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 6px;">Informe en PDF</div>
-                    <div style="font-size: 0.78rem; color: #475569; line-height: 1.35; margin-bottom: 12px;">Descarga oficial con score IES y alertas BORME de esta empresa.</div>
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">PUNTUAL</div>
+                    <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">1 Informe PDF</div>
+                    <div style="font-size: 0.78rem; color: #475569; line-height: 1.35; margin-bottom: 12px;">Dictamen oficial y scoring de esta empresa.</div>
                 </div>
                 <div>
-                    <div style="font-size: 1.25rem; font-weight: 900; color: #059669; margin-bottom: 8px;">3,90 € <span style="font-size: 0.75rem; font-weight: 600; color: #64748b;">+ IVA</span></div>
-                    <button type="button" onclick="openRiskPdfModal(<?= $compBtnId ?>, '<?= esc($compCifStr) ?>');" style="width: 100%; background: #10b981; color: #fff; border: none; padding: 10px 12px; border-radius: 8px; font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#059669';" onmouseout="this.style.background='#10b981';">
-                        Descargar PDF 💳
+                    <div style="font-size: 1.25rem; font-weight: 900; color: #0f172a; margin-bottom: 8px;">3,90 € <span style="font-size: 0.72rem; font-weight: 600; color: #64748b;">+ IVA</span></div>
+                    <button type="button" onclick="openRiskPdfModal(<?= $compBtnId ?>, '<?= esc($compCifStr) ?>');" style="width: 100%; background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; padding: 10px 8px; border-radius: 8px; font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f1f5f9';">
+                        Descargar 1 PDF 📄
                     </button>
                 </div>
             </div>
 
-            <!-- Option 2: Monthly Pro Subscription (MRR) -->
-            <div style="border: 2px solid #2563eb; background: #eff6ff; border-radius: 14px; padding: 18px 16px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
-                <div style="position: absolute; top: -10px; right: 12px; background: #2563eb; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; text-transform: uppercase;">
-                    RECOMENDADO
+            <!-- Option 2: PACK 5 AUDITORÍAS (TRIPWIRE - LIMPIO CON TOQUE TEAL/PETRÓLEO MATE) -->
+            <div style="border: 1.5px solid #cbd5e1; background: #ffffff; border-radius: 14px; padding: 18px 16px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+                <div style="position: absolute; top: -11px; right: 12px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.3px;">
+                    PAGO ÚNICO
                 </div>
                 <div>
-                    <div style="font-size: 0.72rem; font-weight: 800; color: #1d4ed8; text-transform: uppercase; margin-bottom: 4px;">PASE MENSUAL</div>
-                    <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 6px;">Solvencia Pro</div>
-                    <div style="font-size: 0.78rem; color: #475569; line-height: 1.35; margin-bottom: 12px;">Consultas ilimitadas de riesgo y solvencia mercantil sin restricciones.</div>
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">SIN SUSCRIPCIÓN</div>
+                    <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Pack 5 Auditorías</div>
+                    <div style="font-size: 0.78rem; color: #64748b; line-height: 1.35; margin-bottom: 12px;">5 auditorías completas + PDFs. <strong>1,98 €/informe</strong>. Sin caducidad.</div>
                 </div>
                 <div>
-                    <div style="font-size: 1.25rem; font-weight: 900; color: #1d4ed8; margin-bottom: 8px;">29 € <span style="font-size: 0.75rem; font-weight: 600; color: #64748b;">/ mes</span></div>
+                    <div style="font-size: 1.25rem; font-weight: 900; color: #0f172a; margin-bottom: 8px;">9,90 € <span style="font-size: 0.72rem; font-weight: 600; color: #64748b;">+ IVA</span></div>
+                    <form method="post" action="<?= site_url('billing/checkout') ?>" style="margin: 0;">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="plan" value="risk_pack_5">
+                        <input type="hidden" name="period" value="single">
+                        <input type="hidden" name="cif" value="<?= esc($compCifStr) ?>">
+                        <button type="submit" style="width: 100%; border: none; cursor: pointer; text-align: center; background: #0f766e; color: #ffffff; padding: 10px 8px; border-radius: 8px; font-weight: 800; font-size: 0.85rem; transition: background 0.2s;" onmouseover="this.style.background='#115e59';" onmouseout="this.style.background='#0f766e';">
+                            Comprar Pack 5 ⚡
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Option 3: Monthly Pro Subscription (HERO DESTACADO INDISCUTIBLE) -->
+            <div style="border: 2.5px solid #2563eb; background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%); border-radius: 14px; padding: 18px 16px; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-shadow: 0 12px 28px -4px rgba(37, 99, 235, 0.28); transform: translateY(-3px);">
+                <div style="position: absolute; top: -12px; right: 12px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; font-size: 0.68rem; font-weight: 900; padding: 3px 12px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.4px; box-shadow: 0 3px 8px rgba(37, 99, 235, 0.35);">
+                    ⭐ RECOMENDADO
+                </div>
+                <div>
+                    <div style="font-size: 0.72rem; font-weight: 900; color: #1d4ed8; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.3px;">TARIFA PLANA ILIMITADA</div>
+                    <div style="font-size: 1.08rem; font-weight: 900; color: #0f172a; margin-bottom: 4px;">Solvencia Pro</div>
+                    <div style="font-size: 0.78rem; color: #1e40af; font-weight: 500; line-height: 1.35; margin-bottom: 12px;">Consultas y dictámenes oficiales ilimitados de cualquier empresa.</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.35rem; font-weight: 900; color: #1d4ed8; margin-bottom: 8px;">29 € <span style="font-size: 0.72rem; font-weight: 600; color: #64748b;">/ mes</span></div>
                     <form method="post" action="<?= site_url('billing/checkout') ?>" style="margin: 0;">
                         <?= csrf_field() ?>
                         <input type="hidden" name="plan" value="risk_pro">
                         <input type="hidden" name="period" value="monthly">
-                        <button type="submit" style="width: 100%; border: none; cursor: pointer; text-align: center; background: #2563eb; color: #fff; padding: 10px 12px; border-radius: 8px; font-weight: 800; font-size: 0.85rem; transition: background 0.2s;" onmouseover="this.style.background='#1d4ed8';" onmouseout="this.style.background='#2563eb';">
-                            Activar Solvencia Pro ⭐
+                        <button type="submit" style="width: 100%; border: none; cursor: pointer; text-align: center; background: #2563eb; color: #fff; padding: 11px 8px; border-radius: 8px; font-weight: 900; font-size: 0.88rem; transition: all 0.2s; box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);" onmouseover="this.style.background='#1d4ed8'; this.style.transform='scale(1.02)';" onmouseout="this.style.background='#2563eb'; this.style.transform='none';">
+                            Activar Pro ⭐
                         </button>
                     </form>
                 </div>
