@@ -22,6 +22,7 @@ class RiskProfileAnalytics extends BaseController
         $period = $this->request->getGet('period') ?? 'this_month';
         $userStatusFilter = $this->request->getGet('status_filter') ?? 'all';
         $search = trim($this->request->getGet('q') ?? '');
+        $sort = $this->request->getGet('sort') ?? 'usage_desc';
 
         // Rango de fechas según periodo
         $startOfMonth = date('Y-m-01 00:00:00');
@@ -399,12 +400,53 @@ class RiskProfileAnalytics extends BaseController
             }));
         }
 
+        // -------------------------------------------------------------
+        // 4.1 ORDENACIÓN DE LA TABLA DE USUARIOS
+        // -------------------------------------------------------------
+        usort($filteredUsers, function($a, $b) use ($sort) {
+            switch ($sort) {
+                case 'usage_asc':
+                    if ($a['month_views'] === $b['month_views']) {
+                        return strcmp($b['created_at'] ?? '', $a['created_at'] ?? '');
+                    }
+                    return $a['month_views'] <=> $b['month_views'];
+
+                case 'history_desc':
+                    if ($a['total_views'] === $b['total_views']) {
+                        return $b['month_views'] <=> $a['month_views'];
+                    }
+                    return $b['total_views'] <=> $a['total_views'];
+
+                case 'date_desc':
+                    return strcmp($b['created_at'] ?? '', $a['created_at'] ?? '');
+
+                case 'date_asc':
+                    return strcmp($a['created_at'] ?? '', $b['created_at'] ?? '');
+
+                case 'name_asc':
+                    $nameA = $a['name'] ?: $a['email'];
+                    $nameB = $b['name'] ?: $b['email'];
+                    return strcasecmp($nameA, $nameB);
+
+                case 'usage_desc':
+                default:
+                    if ($a['month_views'] === $b['month_views']) {
+                        if ($a['total_views'] === $b['total_views']) {
+                            return strcmp($b['created_at'] ?? '', $a['created_at'] ?? '');
+                        }
+                        return $b['total_views'] <=> $a['total_views'];
+                    }
+                    return $b['month_views'] <=> $a['month_views'];
+            }
+        });
+
         $data = [
             'title' => 'Analítica de Perfil de Riesgo & Solvencia',
             'period' => $period,
             'period_label' => $periodLabel,
             'user_status_filter' => $userStatusFilter,
             'search' => $search,
+            'sort' => $sort,
             'stats' => [
                 'total_users' => $totalRiskUsers,
                 'new_users' => $newUsersCurrent,

@@ -352,6 +352,11 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->post('risk-profile/email-single', 'Admin\RiskProfileAnalytics::sendSingleEmail');
     $routes->post('risk-profile/email-bulk', 'Admin\RiskProfileAnalytics::sendBulkEmail');
 
+    // API & Developer Business Analytics
+    $routes->get('api-analytics', 'Admin\ApiAnalytics::index');
+    $routes->post('api-analytics/email-single', 'Admin\ApiAnalytics::sendSingleEmail');
+    $routes->post('api-analytics/email-bulk', 'Admin\ApiAnalytics::sendBulkEmail');
+
     // Activity Logs
     $routes->get('activity-logs', 'Admin\ActivityLogs::index');
     $routes->get('activity-logs/user/(:num)', 'Admin\ActivityLogs::user/$1');

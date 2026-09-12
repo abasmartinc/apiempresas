@@ -165,37 +165,38 @@
         </div>
     <?php endif; ?>
 
-    <!-- Selector de Periodo -->
-    <div class="card" style="margin-bottom: 2rem; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <span style="font-size: 0.85rem; font-weight: 700; color: #475569; margin-right: 6px;">📅 Periodo de análisis:</span>
-            
-            <a href="<?= site_url('admin/risk-profile?period=this_month&status_filter=' . $user_status_filter) ?>" 
-               class="pill" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'this_month' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
-               Este mes
-            </a>
-            <a href="<?= site_url('admin/risk-profile?period=last_month&status_filter=' . $user_status_filter) ?>" 
-               class="pill" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'last_month' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
-               Mes anterior
-            </a>
-            <a href="<?= site_url('admin/risk-profile?period=last_30d&status_filter=' . $user_status_filter) ?>" 
-               class="pill" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'last_30d' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
-               Últimos 30 días
-            </a>
-            <a href="<?= site_url('admin/risk-profile?period=this_year&status_filter=' . $user_status_filter) ?>" 
-               class="pill" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'this_year' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
-               Año <?= date('Y') ?>
-            </a>
-            <a href="<?= site_url('admin/risk-profile?period=all&status_filter=' . $user_status_filter) ?>" 
-               class="pill" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'all' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
-               Todo el histórico
-            </a>
-        </div>
+    <div id="analyticsDashboardContainer" style="position: relative; transition: opacity 0.2s ease;">
+        <!-- Selector de Periodo -->
+        <div class="card" style="margin-bottom: 2rem; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="font-size: 0.85rem; font-weight: 700; color: #475569; margin-right: 6px;">📅 Periodo de análisis:</span>
+                
+                <a href="<?= site_url('admin/risk-profile?period=this_month&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" 
+                   class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'this_month' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
+                   Este mes
+                </a>
+                <a href="<?= site_url('admin/risk-profile?period=last_month&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" 
+                   class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'last_month' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
+                   Mes anterior
+                </a>
+                <a href="<?= site_url('admin/risk-profile?period=last_30d&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" 
+                   class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'last_30d' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
+                   Últimos 30 días
+                </a>
+                <a href="<?= site_url('admin/risk-profile?period=this_year&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" 
+                   class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'this_year' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
+                   Año <?= date('Y') ?>
+                </a>
+                <a href="<?= site_url('admin/risk-profile?period=all&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" 
+                   class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'all' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
+                   Todo el histórico
+                </a>
+            </div>
 
-        <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;">
-            Mostrando datos de: <span style="color: #1e293b; font-weight: 800;"><?= esc($period_label) ?></span>
+            <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;">
+                Mostrando datos de: <span style="color: #1e293b; font-weight: 800;"><?= esc($period_label) ?></span>
+            </div>
         </div>
-    </div>
 
     <!-- KPIs Ejecutivos -->
     <div class="kpi-grid">
@@ -385,15 +386,30 @@
                 <p style="margin: 0; font-size: 0.85rem; color: #64748b;">Seguimiento individual de consumo mensual (límite de 3 consultas) y estado de monetización</p>
             </div>
 
-            <!-- Buscador dentro de la tabla -->
-            <form action="<?= site_url('admin/risk-profile') ?>" method="get" style="display: flex; gap: 8px;">
+            <!-- Buscador dentro de la tabla y Ordenación -->
+            <form action="<?= site_url('admin/risk-profile') ?>" method="get" class="ajax-search-form" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <input type="hidden" name="period" value="<?= esc($period) ?>">
                 <input type="hidden" name="status_filter" value="<?= esc($user_status_filter) ?>">
-                <input type="text" name="q" value="<?= esc($search) ?>" placeholder="Buscar por nombre, email..." class="input" style="padding: 6px 12px; font-size: 0.85rem; width: 220px;">
-                <button type="submit" class="btn primary" style="padding: 6px 14px; font-size: 0.85rem;">Buscar</button>
-                <?php if (!empty($search)): ?>
-                    <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=' . $user_status_filter) ?>" class="btn ghost" style="padding: 6px 10px;">🔄</a>
-                <?php endif; ?>
+                
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #475569;">Ordenar:</span>
+                    <select name="sort" class="ajax-sort-select" style="padding: 6px 10px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.82rem; background: white; color: #0f172a; font-weight: 700; cursor: pointer;">
+                        <option value="usage_desc" <?= $sort === 'usage_desc' ? 'selected' : '' ?>>🔥 Mayor consumo este mes</option>
+                        <option value="usage_asc" <?= $sort === 'usage_asc' ? 'selected' : '' ?>>📉 Menor consumo este mes</option>
+                        <option value="history_desc" <?= $sort === 'history_desc' ? 'selected' : '' ?>>📈 Mayor histórico de consultas</option>
+                        <option value="date_desc" <?= $sort === 'date_desc' ? 'selected' : '' ?>>📅 Más recientes (Alta)</option>
+                        <option value="date_asc" <?= $sort === 'date_asc' ? 'selected' : '' ?>>⏳ Más antiguos (Alta)</option>
+                        <option value="name_asc" <?= $sort === 'name_asc' ? 'selected' : '' ?>>🔤 Nombre (A - Z)</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <input type="text" name="q" value="<?= esc($search) ?>" placeholder="Buscar usuario..." class="input" style="padding: 6px 12px; font-size: 0.82rem; width: 180px;">
+                    <button type="submit" class="btn primary" style="padding: 6px 14px; font-size: 0.82rem;">Buscar</button>
+                    <?php if (!empty($search)): ?>
+                        <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" class="btn ghost ajax-filter-link" style="padding: 5px 8px;">🔄</a>
+                    <?php endif; ?>
+                </div>
             </form>
         </div>
 
@@ -402,32 +418,32 @@
             <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin-right: 4px;">Segmento:</span>
 
             <!-- Todos -->
-            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=all&q=' . urlencode($search)) ?>" 
-               class="pill" style="text-decoration: none; padding: 6px 13px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $user_status_filter === 'all' ? 'background: #0f172a; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
+            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=all&q=' . urlencode($search) . '&sort=' . $sort) ?>" 
+               class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 13px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $user_status_filter === 'all' ? 'background: #0f172a; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
                Todos (<?= $stats['total_users'] ?>)
             </a>
 
             <!-- Hot Leads: En el límite 3/3 -->
-            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=limit_reached&q=' . urlencode($search)) ?>" 
-               class="pill" style="text-decoration: none; padding: 6px 13px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $user_status_filter === 'limit_reached' ? 'background: #dc2626; color: white;' : 'background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;' ?>">
+            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=limit_reached&q=' . urlencode($search) . '&sort=' . $sort) ?>" 
+               class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 13px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $user_status_filter === 'limit_reached' ? 'background: #dc2626; color: white;' : 'background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;' ?>">
                🚨 En el Límite 3/3 (Hot Leads) (<?= $stats['count_limit_reached'] ?>)
             </a>
 
             <!-- Activos 1-2 -->
-            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=active_free&q=' . urlencode($search)) ?>" 
-               class="pill" style="text-decoration: none; padding: 6px 13px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $user_status_filter === 'active_free' ? 'background: #d97706; color: white;' : 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' ?>">
+            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=active_free&q=' . urlencode($search) . '&sort=' . $sort) ?>" 
+               class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 13px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $user_status_filter === 'active_free' ? 'background: #d97706; color: white;' : 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' ?>">
                ⚡ Activos Free (1-2) (<?= $stats['count_active_free'] ?>)
             </a>
 
             <!-- Inactivos 0 -->
-            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=inactive&q=' . urlencode($search)) ?>" 
-               class="pill" style="text-decoration: none; padding: 6px 13px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $user_status_filter === 'inactive' ? 'background: #64748b; color: white;' : 'background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0;' ?>">
+            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=inactive&q=' . urlencode($search) . '&sort=' . $sort) ?>" 
+               class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 13px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $user_status_filter === 'inactive' ? 'background: #64748b; color: white;' : 'background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0;' ?>">
                💤 Sin consultas (0) (<?= $stats['count_inactive'] ?>)
             </a>
 
             <!-- Suscriptores de Pago -->
-            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=paid&q=' . urlencode($search)) ?>" 
-               class="pill" style="text-decoration: none; padding: 6px 13px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $user_status_filter === 'paid' ? 'background: #059669; color: white;' : 'background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0;' ?>">
+            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=paid&q=' . urlencode($search) . '&sort=' . $sort) ?>" 
+               class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 13px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $user_status_filter === 'paid' ? 'background: #059669; color: white;' : 'background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0;' ?>">
                👑 Solvencia Pro (Pago) (<?= $stats['count_paid'] ?>)
             </a>
         </div>
@@ -470,9 +486,39 @@
                         <th style="padding: 12px; width: 38px; text-align: center;">
                             <input type="checkbox" id="selectAllCheckbox" title="Seleccionar todos" style="cursor: pointer; width: 16px; height: 16px; accent-color: #2563eb;">
                         </th>
-                        <th style="padding: 12px; font-weight: 700;">Usuario</th>
-                        <th style="padding: 12px; font-weight: 700; text-align: center;">Consumo Este Mes</th>
-                        <th style="padding: 12px; font-weight: 700; text-align: center;">Histórico</th>
+                        <th style="padding: 12px;">
+                            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=' . $user_status_filter . '&q=' . urlencode($search) . '&sort=' . ($sort === 'name_asc' ? 'date_desc' : 'name_asc')) ?>" 
+                               class="ajax-filter-link" 
+                               style="text-decoration: none; color: <?= $sort === 'name_asc' ? '#2563eb' : 'inherit' ?>; display: inline-flex; align-items: center; gap: 4px; font-weight: 700;"
+                               title="Ordenar por nombre">
+                                <span>Usuario</span>
+                                <?= $sort === 'name_asc' ? '▲' : '' ?>
+                            </a>
+                        </th>
+                        <th style="padding: 12px; text-align: center;">
+                            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=' . $user_status_filter . '&q=' . urlencode($search) . '&sort=' . ($sort === 'usage_desc' ? 'usage_asc' : 'usage_desc')) ?>" 
+                               class="ajax-filter-link" 
+                               style="text-decoration: none; color: <?= in_array($sort, ['usage_desc', 'usage_asc']) ? '#2563eb' : 'inherit' ?>; display: inline-flex; align-items: center; justify-content: center; gap: 4px; font-weight: 800;"
+                               title="Clic para alternar orden de consumo">
+                                <span>Consumo Este Mes</span>
+                                <?php if ($sort === 'usage_desc'): ?>
+                                    <span style="font-size: 0.85rem;">▼</span>
+                                <?php elseif ($sort === 'usage_asc'): ?>
+                                    <span style="font-size: 0.85rem;">▲</span>
+                                <?php else: ?>
+                                    <span style="color: #94a3b8; font-size: 0.75rem;">⇅</span>
+                                <?php endif; ?>
+                            </a>
+                        </th>
+                        <th style="padding: 12px; text-align: center;">
+                            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=' . $user_status_filter . '&q=' . urlencode($search) . '&sort=' . ($sort === 'history_desc' ? 'usage_desc' : 'history_desc')) ?>" 
+                               class="ajax-filter-link" 
+                               style="text-decoration: none; color: <?= $sort === 'history_desc' ? '#2563eb' : 'inherit' ?>; display: inline-flex; align-items: center; justify-content: center; gap: 4px; font-weight: 700;"
+                               title="Ordenar por consultas históricas">
+                                <span>Histórico</span>
+                                <?= $sort === 'history_desc' ? '▼' : '' ?>
+                            </a>
+                        </th>
                         <th style="padding: 12px; font-weight: 700;">Última Empresa Auditada</th>
                         <th style="padding: 12px; font-weight: 700;">Estado Plan</th>
                         <th style="padding: 12px; font-weight: 700; text-align: right;">Acciones</th>
@@ -618,6 +664,7 @@
             </table>
         </div>
     </div>
+    </div> <!-- /#analyticsDashboardContainer -->
 
     <!-- MODAL: Enviar Email Individual -->
     <div id="modalSingleEmail" class="rp-modal-backdrop" style="display: none;">
@@ -852,16 +899,7 @@
         // Plantillas precargadas desde PHP
         const emailTemplates = <?= json_encode($email_templates ?? []) ?>;
 
-        // Elementos UI
-        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-        const userRowCheckboxes = document.querySelectorAll('.user-row-checkbox');
-        const selectedCountBadge = document.getElementById('selectedCountBadge');
-        const btnOpenBulkModal = document.getElementById('btnOpenBulkModal');
-        const btnClearSelection = document.getElementById('btnClearSelection');
-        const btnSelectAllVisible = document.getElementById('btnSelectAllVisible');
-        const btnSelectHotLeads = document.getElementById('btnSelectHotLeads');
-
-        // Modal Individual
+        // Modal Individual (elementos estáticos fuera del contenedor)
         const modalSingle = document.getElementById('modalSingleEmail');
         const btnCloseSingle = document.getElementById('btnCloseSingleModal');
         const btnCancelSingle = document.getElementById('btnCancelSingleModal');
@@ -873,7 +911,7 @@
         const singleSubject = document.getElementById('singleSubject');
         const singleMessage = document.getElementById('singleMessage');
 
-        // Modal Masivo
+        // Modal Masivo (elementos estáticos fuera del contenedor)
         const modalBulk = document.getElementById('modalBulkEmail');
         const btnCloseBulk = document.getElementById('btnCloseBulkModal');
         const btnCancelBulk = document.getElementById('btnCancelBulkModal');
@@ -884,73 +922,6 @@
         const bulkTemplateSelect = document.getElementById('bulkTemplateSelect');
         const bulkSubject = document.getElementById('bulkSubject');
         const bulkMessage = document.getElementById('bulkMessage');
-
-        // Función para actualizar estado de selección
-        function updateSelectionState() {
-            const checkedBoxes = document.querySelectorAll('.user-row-checkbox:checked');
-            const count = checkedBoxes.length;
-
-            selectedCountBadge.textContent = count;
-            if (count > 0) {
-                btnOpenBulkModal.style.opacity = '1';
-                btnOpenBulkModal.style.pointerEvents = 'auto';
-                btnClearSelection.style.display = 'inline-block';
-            } else {
-                btnOpenBulkModal.style.opacity = '0.5';
-                btnOpenBulkModal.style.pointerEvents = 'none';
-                btnClearSelection.style.display = 'none';
-            }
-
-            if (selectAllCheckbox) {
-                selectAllCheckbox.checked = (count === userRowCheckboxes.length && count > 0);
-            }
-        }
-
-        // Eventos en Checkboxes individuales
-        userRowCheckboxes.forEach(cb => {
-            cb.addEventListener('change', updateSelectionState);
-        });
-
-        // Evento Checkbox Maestro (Header)
-        if (selectAllCheckbox) {
-            selectAllCheckbox.addEventListener('change', function() {
-                const isChecked = this.checked;
-                userRowCheckboxes.forEach(cb => {
-                    cb.checked = isChecked;
-                });
-                updateSelectionState();
-            });
-        }
-
-        // Botón Seleccionar Visibles
-        if (btnSelectAllVisible) {
-            btnSelectAllVisible.addEventListener('click', function() {
-                userRowCheckboxes.forEach(cb => {
-                    cb.checked = true;
-                });
-                updateSelectionState();
-            });
-        }
-
-        // Botón Seleccionar Hot Leads (3/3)
-        if (btnSelectHotLeads) {
-            btnSelectHotLeads.addEventListener('click', function() {
-                userRowCheckboxes.forEach(cb => {
-                    cb.checked = (cb.getAttribute('data-status') === 'limit_reached');
-                });
-                updateSelectionState();
-            });
-        }
-
-        // Botón Limpiar Selección
-        if (btnClearSelection) {
-            btnClearSelection.addEventListener('click', function() {
-                userRowCheckboxes.forEach(cb => {
-                    cb.checked = false;
-                });
-                updateSelectionState();
-            });
-        }
 
         // Helper para insertar variables dinámicas
         window.insertVariable = function(textareaId, variableText) {
@@ -971,58 +942,6 @@
             return emailTemplates.find(t => t.id === id);
         }
 
-        // Abrir Modal Individual
-        document.querySelectorAll('.btn-open-single-email').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                const name = this.getAttribute('data-name');
-                const email = this.getAttribute('data-email');
-                const status = this.getAttribute('data-status');
-                const views = parseInt(this.getAttribute('data-views') || '0', 10);
-
-                singleUserId.value = id;
-                singleRecipientName.textContent = name;
-                singleRecipientEmail.textContent = '(' + email + ')';
-
-                // Configurar badge según estado
-                if (status === 'limit_reached') {
-                    singleRecipientBadge.textContent = '🚨 Límite 3/3 alcanzado';
-                    singleRecipientBadge.style.background = '#fef2f2';
-                    singleRecipientBadge.style.color = '#b91c1c';
-                    singleRecipientBadge.style.border = '1px solid #fecaca';
-                    // Auto-seleccionar plantilla de Hot Lead
-                    singleTemplateSelect.value = 'hot_lead_limit';
-                } else if (views === 0) {
-                    singleRecipientBadge.textContent = '💤 0 consultas';
-                    singleRecipientBadge.style.background = '#f8fafc';
-                    singleRecipientBadge.style.color = '#64748b';
-                    singleRecipientBadge.style.border = '1px solid #e2e8f0';
-                    singleTemplateSelect.value = 'inactive_activation';
-                } else {
-                    singleRecipientBadge.textContent = views + '/3 consultas';
-                    singleRecipientBadge.style.background = '#eff6ff';
-                    singleRecipientBadge.style.color = '#1e40af';
-                    singleRecipientBadge.style.border = '1px solid #bfdbfe';
-                    singleTemplateSelect.value = 'product_update';
-                }
-
-                // Cargar contenido de la plantilla elegida
-                loadTemplateIntoForm('single');
-
-                modalSingle.style.display = 'flex';
-            });
-        });
-
-        // Cambiar plantilla en Modal Individual
-        singleTemplateSelect.addEventListener('change', function() {
-            loadTemplateIntoForm('single');
-        });
-
-        // Cambiar plantilla en Modal Masivo
-        bulkTemplateSelect.addEventListener('change', function() {
-            loadTemplateIntoForm('bulk');
-        });
-
         function loadTemplateIntoForm(type) {
             const selectEl = (type === 'single') ? singleTemplateSelect : bulkTemplateSelect;
             const subjectEl = (type === 'single') ? singleSubject : bulkSubject;
@@ -1041,57 +960,43 @@
             }
         }
 
+        // Cambiar plantilla en Modal Individual
+        if (singleTemplateSelect) {
+            singleTemplateSelect.addEventListener('change', function() {
+                loadTemplateIntoForm('single');
+            });
+        }
+
+        // Cambiar plantilla en Modal Masivo
+        if (bulkTemplateSelect) {
+            bulkTemplateSelect.addEventListener('change', function() {
+                loadTemplateIntoForm('bulk');
+            });
+        }
+
         // Cerrar Modal Individual
         function closeSingleModal() {
-            modalSingle.style.display = 'none';
+            if (modalSingle) modalSingle.style.display = 'none';
         }
         if (btnCloseSingle) btnCloseSingle.addEventListener('click', closeSingleModal);
         if (btnCancelSingle) btnCancelSingle.addEventListener('click', closeSingleModal);
-        modalSingle.addEventListener('click', function(e) {
-            if (e.target === modalSingle) closeSingleModal();
-        });
-
-        // Abrir Modal Masivo
-        if (btnOpenBulkModal) {
-            btnOpenBulkModal.addEventListener('click', function() {
-                const checkedBoxes = Array.from(document.querySelectorAll('.user-row-checkbox:checked'));
-                if (checkedBoxes.length === 0) return;
-
-                const ids = checkedBoxes.map(cb => cb.value);
-                bulkUserIdsInput.value = ids.join(',');
-
-                const count = ids.length;
-                bulkModalCountBadge.textContent = count;
-                bulkSubmitCount.textContent = count;
-
-                // Preview primeros correos
-                const emailList = checkedBoxes.map(cb => cb.getAttribute('data-email'));
-                const previewEmails = emailList.slice(0, 6).join(', ');
-                const remainder = count - 6;
-                bulkRecipientsPreview.innerHTML = '<strong>Destinatarios:</strong> ' + previewEmails + (remainder > 0 ? ' y <strong>+' + remainder + ' más</strong>.' : '.');
-
-                // Si la mayoría son limit_reached, seleccionar esa plantilla por defecto
-                const limitReachedCount = checkedBoxes.filter(cb => cb.getAttribute('data-status') === 'limit_reached').length;
-                if (limitReachedCount >= (count / 2)) {
-                    bulkTemplateSelect.value = 'hot_lead_limit';
-                } else {
-                    bulkTemplateSelect.value = 'product_update';
-                }
-                loadTemplateIntoForm('bulk');
-
-                modalBulk.style.display = 'flex';
+        if (modalSingle) {
+            modalSingle.addEventListener('click', function(e) {
+                if (e.target === modalSingle) closeSingleModal();
             });
         }
 
         // Cerrar Modal Masivo
         function closeBulkModal() {
-            modalBulk.style.display = 'none';
+            if (modalBulk) modalBulk.style.display = 'none';
         }
         if (btnCloseBulk) btnCloseBulk.addEventListener('click', closeBulkModal);
         if (btnCancelBulk) btnCancelBulk.addEventListener('click', closeBulkModal);
-        modalBulk.addEventListener('click', function(e) {
-            if (e.target === modalBulk) closeBulkModal();
-        });
+        if (modalBulk) {
+            modalBulk.addEventListener('click', function(e) {
+                if (e.target === modalBulk) closeBulkModal();
+            });
+        }
 
         // Loading feedback al enviar email individual
         const formSingleEmail = document.getElementById('formSingleEmail');
@@ -1109,7 +1014,7 @@
         const formBulkEmail = document.getElementById('formBulkEmail');
         if (formBulkEmail) {
             formBulkEmail.addEventListener('submit', function(e) {
-                const count = bulkSubmitCount.textContent;
+                const count = bulkSubmitCount ? bulkSubmitCount.textContent : '0';
                 if (!confirm('¿Estás seguro de enviar este correo a los ' + count + ' usuarios seleccionados?')) {
                     e.preventDefault();
                     return;
@@ -1121,6 +1026,290 @@
                 }
             });
         }
+
+        // --- INTERACCIONES DINÁMICAS (TABLA, FILTROS, BÚSQUEDA Y SELECCIÓN) ---
+        function initDashboardInteractions() {
+            const container = document.getElementById('analyticsDashboardContainer');
+            if (!container) return;
+
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const userRowCheckboxes = document.querySelectorAll('.user-row-checkbox');
+            const selectedCountBadge = document.getElementById('selectedCountBadge');
+            const btnOpenBulkModal = document.getElementById('btnOpenBulkModal');
+            const btnClearSelection = document.getElementById('btnClearSelection');
+            const btnSelectAllVisible = document.getElementById('btnSelectAllVisible');
+            const btnSelectHotLeads = document.getElementById('btnSelectHotLeads');
+
+            function updateSelectionState() {
+                const checkedBoxes = document.querySelectorAll('.user-row-checkbox:checked');
+                const count = checkedBoxes.length;
+
+                if (selectedCountBadge) selectedCountBadge.textContent = count;
+                if (btnOpenBulkModal) {
+                    if (count > 0) {
+                        btnOpenBulkModal.style.opacity = '1';
+                        btnOpenBulkModal.style.pointerEvents = 'auto';
+                    } else {
+                        btnOpenBulkModal.style.opacity = '0.5';
+                        btnOpenBulkModal.style.pointerEvents = 'none';
+                    }
+                }
+                if (btnClearSelection) {
+                    btnClearSelection.style.display = count > 0 ? 'inline-block' : 'none';
+                }
+
+                if (selectAllCheckbox) {
+                    const total = document.querySelectorAll('.user-row-checkbox').length;
+                    selectAllCheckbox.checked = (count === total && count > 0);
+                }
+            }
+
+            // Checkboxes individuales
+            userRowCheckboxes.forEach(cb => {
+                cb.addEventListener('change', updateSelectionState);
+            });
+
+            // Checkbox Maestro (Header)
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', function() {
+                    const isChecked = this.checked;
+                    userRowCheckboxes.forEach(cb => {
+                        cb.checked = isChecked;
+                    });
+                    updateSelectionState();
+                });
+            }
+
+            // Seleccionar Visibles
+            if (btnSelectAllVisible) {
+                btnSelectAllVisible.addEventListener('click', function() {
+                    userRowCheckboxes.forEach(cb => {
+                        cb.checked = true;
+                    });
+                    updateSelectionState();
+                });
+            }
+
+            // Seleccionar Hot Leads (3/3)
+            if (btnSelectHotLeads) {
+                btnSelectHotLeads.addEventListener('click', function() {
+                    userRowCheckboxes.forEach(cb => {
+                        cb.checked = (cb.getAttribute('data-status') === 'limit_reached');
+                    });
+                    updateSelectionState();
+                });
+            }
+
+            // Limpiar Selección
+            if (btnClearSelection) {
+                btnClearSelection.addEventListener('click', function() {
+                    userRowCheckboxes.forEach(cb => {
+                        cb.checked = false;
+                    });
+                    updateSelectionState();
+                });
+            }
+
+            // Abrir Modal Masivo desde el botón de la barra
+            if (btnOpenBulkModal) {
+                btnOpenBulkModal.addEventListener('click', function() {
+                    const checkedBoxes = Array.from(document.querySelectorAll('.user-row-checkbox:checked'));
+                    if (checkedBoxes.length === 0) return;
+
+                    const ids = checkedBoxes.map(cb => cb.value);
+                    if (bulkUserIdsInput) bulkUserIdsInput.value = ids.join(',');
+
+                    const count = ids.length;
+                    if (bulkModalCountBadge) bulkModalCountBadge.textContent = count;
+                    if (bulkSubmitCount) bulkSubmitCount.textContent = count;
+
+                    const emailList = checkedBoxes.map(cb => cb.getAttribute('data-email'));
+                    const previewEmails = emailList.slice(0, 6).join(', ');
+                    const remainder = count - 6;
+                    if (bulkRecipientsPreview) {
+                        bulkRecipientsPreview.innerHTML = '<strong>Destinatarios:</strong> ' + previewEmails + (remainder > 0 ? ' y <strong>+' + remainder + ' más</strong>.' : '.');
+                    }
+
+                    const limitReachedCount = checkedBoxes.filter(cb => cb.getAttribute('data-status') === 'limit_reached').length;
+                    if (bulkTemplateSelect) {
+                        if (limitReachedCount >= (count / 2)) {
+                            bulkTemplateSelect.value = 'hot_lead_limit';
+                        } else {
+                            bulkTemplateSelect.value = 'product_update';
+                        }
+                    }
+                    loadTemplateIntoForm('bulk');
+
+                    if (modalBulk) modalBulk.style.display = 'flex';
+                });
+            }
+
+            // Botones individuales de email
+            container.querySelectorAll('.btn-open-single-email').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const name = this.getAttribute('data-name');
+                    const email = this.getAttribute('data-email');
+                    const status = this.getAttribute('data-status');
+                    const views = parseInt(this.getAttribute('data-views') || '0', 10);
+
+                    if (singleUserId) singleUserId.value = id;
+                    if (singleRecipientName) singleRecipientName.textContent = name;
+                    if (singleRecipientEmail) singleRecipientEmail.textContent = '(' + email + ')';
+
+                    if (singleRecipientBadge) {
+                        if (status === 'limit_reached') {
+                            singleRecipientBadge.textContent = '🚨 Límite 3/3 alcanzado';
+                            singleRecipientBadge.style.background = '#fef2f2';
+                            singleRecipientBadge.style.color = '#b91c1c';
+                            singleRecipientBadge.style.border = '1px solid #fecaca';
+                            if (singleTemplateSelect) singleTemplateSelect.value = 'hot_lead_limit';
+                        } else if (views === 0) {
+                            singleRecipientBadge.textContent = '💤 0 consultas';
+                            singleRecipientBadge.style.background = '#f8fafc';
+                            singleRecipientBadge.style.color = '#64748b';
+                            singleRecipientBadge.style.border = '1px solid #e2e8f0';
+                            if (singleTemplateSelect) singleTemplateSelect.value = 'inactive_activation';
+                        } else {
+                            singleRecipientBadge.textContent = views + '/3 consultas';
+                            singleRecipientBadge.style.background = '#eff6ff';
+                            singleRecipientBadge.style.color = '#1e40af';
+                            singleRecipientBadge.style.border = '1px solid #bfdbfe';
+                            if (singleTemplateSelect) singleTemplateSelect.value = 'product_update';
+                        }
+                    }
+
+                    loadTemplateIntoForm('single');
+                    if (modalSingle) modalSingle.style.display = 'flex';
+                });
+            });
+
+            // Interceptar enlaces AJAX (píldoras de periodo, filtros de estado, reset)
+            const links = container.querySelectorAll('a.ajax-filter-link');
+            links.forEach(a => {
+                a.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    loadAnalyticsData(this.href, false, true);
+                });
+            });
+
+            // Formulario de búsqueda con submit y debounce en vivo
+            const form = container.querySelector('form.ajax-search-form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    const params = new URLSearchParams(formData);
+                    const targetUrl = this.getAttribute('action') + '?' + params.toString();
+                    loadAnalyticsData(targetUrl, false, true);
+                });
+
+                const inputQ = form.querySelector('input[name="q"]');
+                if (inputQ) {
+                    inputQ.addEventListener('input', function() {
+                        clearTimeout(searchDebounceTimer);
+                        searchDebounceTimer = setTimeout(() => {
+                            const formData = new FormData(form);
+                            const params = new URLSearchParams(formData);
+                            const targetUrl = form.getAttribute('action') + '?' + params.toString();
+                            loadAnalyticsData(targetUrl, true, true);
+                        }, 350);
+                    });
+                }
+            }
+
+            // Selector de ordenación dinámico
+            const sortSelect = container.querySelector('select.ajax-sort-select');
+            if (sortSelect) {
+                sortSelect.addEventListener('change', function() {
+                    const form = container.querySelector('form.ajax-search-form');
+                    if (form) {
+                        const formData = new FormData(form);
+                        formData.set('sort', this.value);
+                        const params = new URLSearchParams(formData);
+                        const targetUrl = form.getAttribute('action') + '?' + params.toString();
+                        loadAnalyticsData(targetUrl, false, true);
+                    }
+                });
+            }
+        }
+
+        // --- AJAX ENGINE ---
+        let ajaxAbortCtrl = null;
+        let searchDebounceTimer = null;
+
+        function loadAnalyticsData(url, isInput = false, pushState = true) {
+            const container = document.getElementById('analyticsDashboardContainer');
+            if (!container) return;
+
+            let cursorStart = null;
+            let cursorEnd = null;
+            let wasSearchActive = false;
+            const activeEl = document.activeElement;
+            if (isInput && activeEl && activeEl.name === 'q') {
+                wasSearchActive = true;
+                cursorStart = activeEl.selectionStart;
+                cursorEnd = activeEl.selectionEnd;
+            }
+
+            if (ajaxAbortCtrl) {
+                ajaxAbortCtrl.abort();
+            }
+            ajaxAbortCtrl = new AbortController();
+
+            container.style.opacity = '0.45';
+            container.style.pointerEvents = 'none';
+
+            fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                signal: ajaxAbortCtrl.signal
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Error al cargar datos');
+                return res.text();
+            })
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newContent = doc.getElementById('analyticsDashboardContainer');
+                if (newContent) {
+                    container.innerHTML = newContent.innerHTML;
+                    if (pushState && window.location.href !== url) {
+                        history.pushState(null, '', url);
+                    }
+                    initDashboardInteractions();
+
+                    if (wasSearchActive) {
+                        const newSearchInput = container.querySelector('input[name="q"]');
+                        if (newSearchInput) {
+                            newSearchInput.focus();
+                            if (cursorStart !== null && cursorEnd !== null) {
+                                newSearchInput.setSelectionRange(cursorStart, cursorEnd);
+                            }
+                        }
+                    }
+                }
+            })
+            .catch(err => {
+                if (err.name !== 'AbortError') {
+                    console.error('AJAX Risk Profile Analytics Error:', err);
+                }
+            })
+            .finally(() => {
+                container.style.opacity = '1';
+                container.style.pointerEvents = 'auto';
+            });
+        }
+
+        // Navegación atrás / adelante
+        window.addEventListener('popstate', function() {
+            loadAnalyticsData(window.location.href, false, false);
+        });
+
+        // Inicializar listeners al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            initDashboardInteractions();
+        });
     })();
     </script>
 <?= $this->endSection() ?>
