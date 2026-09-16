@@ -37,6 +37,10 @@ class UserModel extends Model
         'migration_notice_shown',
         'migration_reset_done',
         'unsuscribe',
+        // Sin esto el modelo descarta el campo en silencio y update() revienta con
+        // "There is no data to update": la casilla de alertas del perfil y el botón
+        // de activarlas desde la ficha no guardaban NADA.
+        'alerts_borme',
         'wizard_completed',
         'ai_copilot_trials',
         'risk_credits',

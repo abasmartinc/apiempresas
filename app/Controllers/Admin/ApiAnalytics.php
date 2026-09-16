@@ -89,24 +89,14 @@ class ApiAnalytics extends BaseController
         // -------------------------------------------------------------
         // 1. OBTENER LA COHORTE DE USUARIOS DE LA API
         // -------------------------------------------------------------
-        // Usuarios con intención 'api' o que hayan usado la API / tengan plan API, no administradores
-        $cohortUsersQuery = $db->query("
-            SELECT DISTINCT u.id, u.name, u.email, u.company, u.created_at, u.last_login_at, u.is_active, u.unsuscribe
-            FROM users u
-            WHERE u.is_admin = 0
-              AND (
-                  u.signup_intent = 'api'
-                  OR u.id IN (SELECT DISTINCT user_id FROM api_keys)
-                  OR u.id IN (SELECT DISTINCT user_id FROM api_usage_daily)
-                  OR u.id IN (
-                      SELECT us.user_id FROM user_subscriptions us 
-                      JOIN api_plans ap ON ap.id = us.plan_id 
-                      WHERE ap.product_type = 'api'
-                  )
-              )
-            ORDER BY u.created_at DESC
-        ");
-        $allCohortUsers = $cohortUsersQuery->getResultArray();
+        // Usuarios con signup_intent = 'api', no administradores, y excluyendo el usuario monitor interno (ID: 376)
+        $allCohortUsers = $db->table('users')
+            ->select('id, name, email, company, created_at, last_login_at, is_active, unsuscribe')
+            ->where('signup_intent', 'api')
+            ->where('is_admin', 0)
+            ->where('id !=', 376)
+            ->orderBy('created_at', 'DESC')
+            ->get()->getResultArray();
         $cohortUserIds = array_column($allCohortUsers, 'id');
         $totalApiUsers = count($allCohortUsers);
 
@@ -151,13 +141,18 @@ class ApiAnalytics extends BaseController
         // -------------------------------------------------------------
         // 3. SUSCRIPCIONES DE PAGO Y MRR
         // -------------------------------------------------------------
-        $activePaidSubs = $db->table('user_subscriptions')
-            ->select('user_subscriptions.user_id, user_subscriptions.plan_id, user_subscriptions.current_period_end, api_plans.name as plan_name, api_plans.slug as plan_slug, api_plans.price_monthly, api_plans.monthly_quota')
-            ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id')
-            ->where('user_subscriptions.status', 'active')
-            ->where('api_plans.price_monthly >', 0)
-            ->where('api_plans.product_type', 'api')
-            ->get()->getResultArray();
+        $activePaidSubs = [];
+        if (!empty($cohortUserIds)) {
+            $activePaidSubs = $db->table('user_subscriptions')
+                ->select('user_subscriptions.user_id, user_subscriptions.plan_id, user_subscriptions.current_period_end, api_plans.name as plan_name, api_plans.slug as plan_slug, api_plans.price_monthly, api_plans.monthly_quota')
+                ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id')
+                ->where('user_subscriptions.status', 'active')
+                ->where('api_plans.price_monthly >', 0)
+                ->where('api_plans.product_type', 'api')
+                ->where('user_subscriptions.user_id !=', 376)
+                ->whereIn('user_subscriptions.user_id', $cohortUserIds)
+                ->get()->getResultArray();
+        }
 
         $paidUserMap = [];
         $mrrTotal = 0.0;
@@ -263,11 +258,12 @@ class ApiAnalytics extends BaseController
 
         // Pasos del embudo de adopción
         $funnel_step1_registered = $totalApiUsers;
-        $funnel_step2_activated = 0;   // Generó API Key o hizo 1ª llamada
+        $funnel_step2_activated = 0;   // Primera llamada real realizada (>=1 llamada histórica)
         $funnel_step3_engaged = 0;     // Hizo 5+ llamadas
         $funnel_step4_high_usage = 0;  // Alcanzó o rozó el límite (>=80 peticiones)
         $funnel_step5_paid = $paidSubscribers;
 
+        $neverCalledCount = 0;
         $classifiedUsers = [];
 
         foreach ($allCohortUsers as $u) {
@@ -290,9 +286,11 @@ class ApiAnalytics extends BaseController
             $quota = $isPaid ? (int)($subData['monthly_quota'] ?? 3000) : 100;
             $usagePct = $quota > 0 ? min(100, round(($monthReqs / $quota) * 100)) : 0;
 
-            // Embudo:
-            if ($historyReqs >= 1 || $hasApiKey) {
+            // Embudo: activación real se mide por hacer al menos 1 petición a la API
+            if ($historyReqs >= 1) {
                 $funnel_step2_activated++;
+            } else {
+                $neverCalledCount++;
             }
             if ($historyReqs >= 5) {
                 $funnel_step3_engaged++;
@@ -331,10 +329,15 @@ class ApiAnalytics extends BaseController
                 $status = 'active_free';
                 $statusLabel = 'Activo Free (' . $monthReqs . '/100)';
                 $statusBadge = 'info';
+            } elseif ($historyReqs > 0) {
+                $countInactive++;
+                $status = 'inactive';
+                $statusLabel = 'Sin uso este mes (' . $historyReqs . ' hist.)';
+                $statusBadge = 'neutral';
             } else {
                 $countInactive++;
                 $status = 'inactive';
-                $statusLabel = 'Sin llamadas (0)';
+                $statusLabel = 'Sin llamadas (0 hist.)';
                 $statusBadge = 'neutral';
             }
 
@@ -483,6 +486,7 @@ class ApiAnalytics extends BaseController
                 'near_limit'    => $countNearLimit,
                 'active_free'   => $countActiveFree,
                 'inactive'      => $countInactive,
+                'never_called'  => $neverCalledCount,
                 'errors'        => $countErrors,
                 'paid'          => $countPaid,
             ],
@@ -509,6 +513,10 @@ class ApiAnalytics extends BaseController
 
         if (!$userId || empty($subject) || empty($message)) {
             return redirect()->back()->withInput()->with('error', 'Todos los campos son obligatorios.');
+        }
+
+        if ($userId === 376) {
+            return redirect()->back()->with('error', 'No se pueden enviar correos al usuario monitor interno (ID: 376).');
         }
 
         $userModel = new \App\Models\UserModel();
@@ -585,7 +593,7 @@ class ApiAnalytics extends BaseController
         }
 
         $userIds = is_array($userIdsRaw) ? $userIdsRaw : explode(',', (string)$userIdsRaw);
-        $userIds = array_values(array_filter(array_map('intval', $userIds)));
+        $userIds = array_values(array_diff(array_filter(array_map('intval', $userIds)), [376]));
 
         if (empty($userIds)) {
             return redirect()->back()->with('error', 'No se indicaron usuarios válidos para el envío.');

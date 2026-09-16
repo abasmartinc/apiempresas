@@ -69,6 +69,9 @@ $routes->get('auth/linkedin/callback', 'LinkedinAuth::callback');
 
 $routes->get('dashboard', 'Dashboard::index');
 $routes->get('profile', 'Profile::index');
+// Activar las alertas del BORME de un clic desde donde esté el usuario (va bajo
+// api/* a propósito: ahí están las exenciones de CSRF, y la ficha va cacheada).
+$routes->post('api/usuario/activar-avisos', 'Profile::activarAvisos');
 $routes->post('profile/update', 'Profile::update');
 $routes->post('profile/password', 'Profile::password');
 
@@ -526,6 +529,10 @@ $routes->get('empresa/download-premium-pdf/(:any)', 'Company::downloadPremiumPdf
 $routes->get('empresa/(:num)-(:any)', 'Company::showById/$1/$2');
 $routes->get('empresa/(:num)', 'Company::showById/$1');
 $routes->get('api/empresa/private-data/(:any)', 'Company::ajaxPrivateData/$1');
+// Único punto donde se consume cuota de perfil de riesgo desde la ficha.
+// Bajo api/* para quedar exento de CSRF (la ficha se sirve cacheada por Cloudflare).
+$routes->post('api/empresa/desbloquear-riesgo', 'Company::ajaxUnlockRisk');
+$routes->post('api/empresa/vigilar', 'Company::ajaxToggleWatch');
 $routes->get('test-pdf', 'TestPdf::index');
 
 // Fallback for broken "no disponible" links
@@ -543,6 +550,14 @@ $routes->get('perfil-de-riesgo', 'RiskProfileController::index');
 $routes->post('perfil-de-riesgo', 'RiskProfileController::index');
 $routes->get('api/perfil-de-riesgo/lookup', 'RiskProfileController::ajaxLookup');
 
+// Carga de cartera: subir un CSV de CIFs y ponerlos en vigilancia de golpe.
+// Los POST pasan por el filtro CSRF (no están bajo api/*), así que las vistas
+// llevan csrf_field().
+$routes->get('cartera', 'Cartera::index');
+$routes->post('cartera/analizar', 'Cartera::analizar');
+$routes->post('cartera/vigilar', 'Cartera::vigilar');
+$routes->post('cartera/exportar', 'Cartera::exportar');
+
 
 // Traffic Advice (Chrome prefetching)
 $routes->get('.well-known/traffic-advice', static function () {
@@ -559,7 +574,15 @@ $routes->group('api', function($routes) {
 });
 
 
+// Garantía de devolución de Solvencia Pro.
+// Tiene página propia a propósito: una garantía que el usuario no sabe ejecutar
+// convierte igual pero genera contracargos, que son peores que un reembolso.
+$routes->get('garantia', 'Garantia::index');
+$routes->post('garantia/solicitar', 'Garantia::solicitar');
+
 // Unsubscribe
+// Baja de un clic solo de las alertas del BORME (antes de la ruta genérica, que es (:any))
+$routes->get('unsubscribe/alertas/(:any)', 'Unsubscribe::alerts/$1');
 $routes->get('unsubscribe/(:any)', 'Unsubscribe::index/$1');
 $routes->post('unsubscribe/confirm', 'Unsubscribe::confirm');
 

@@ -23,6 +23,10 @@
                     <tr>
                         <td style="padding: 35px 35px 25px;">
                             <h2 style="margin: 0 0 16px; color: #0f172a; font-size: 22px; font-weight: 800;">¡Hola, {name}!</h2>
+
+                            <!-- Empresa de origen. Se rellena con el CIF que traía el registro;
+                                 si no hubiera, llega vacío y el correo sigue leyéndose bien. -->
+                            {origin_line}
                             <p style="margin: 0 0 20px; color: #475569; font-size: 15px; line-height: 1.6;">
                                 Tu cuenta ya está activa. Dispones de <strong>3 consultas de solvencia y perfil de riesgo 100% gratuitas cada mes</strong> para proteger tu negocio frente a impagos y auditar la salud financiera de cualquier cliente o proveedor en España.
                             </p>

@@ -26,7 +26,9 @@ class Billing extends BaseController
         $this->ApiRequestsModel = new ApiRequestsModel();
         $this->stripeService = new \App\Services\StripeService();
         $this->billingService = new \App\Services\BillingService();
-        helper(['form', 'url', 'pricing']); // Load pricing helper
+        // 'company' trae solvencia(): los importes de los productos de Solvencia
+        // salen de Config\Solvencia, no escritos a mano en el punto de cobro.
+        helper(['form', 'url', 'pricing', 'company']);
     }
 
     public function index()
@@ -60,6 +62,8 @@ class Billing extends BaseController
 
         // --- VISTA ESPECÍFICA PARA PERFIL DE RIESGO & SOLVENCIA PRO ---
         $intent = (string)($user->signup_intent ?? '');
+        // Siempre ''. La columna no existe en la base de datos; ver la nota de
+        // Dashboard::index. El que manda es 'signup_intent'.
         $prefProduct = (string)($user->preferred_product ?? '');
         $hasRiskPlan = false;
         if (!empty($data['plan'])) {
@@ -196,7 +200,44 @@ class Billing extends BaseController
             }
         }
 
+        // Atribución: de qué CTA salió este checkout (lo traen los formularios del
+        // paywall y del upsell en un hidden). Sin esto el tracking sabe quién pulsa
+        // pero no de dónde vienen los que acaban pagando.
+        $source = trim((string) ($postData['source'] ?? ''));
+        session()->set('checkout_source', $source);
+
+        $this->logCheckoutEvent('checkout_started', $source, [
+            'plan'   => $plan,
+            'period' => $period,
+        ], $userId);
+
         return $this->startStripeCheckout($userId, $plan, $period, $billEmail, $billName, $postData);
+    }
+
+    /**
+     * Registra un hito del checkout en tracking_events.
+     *
+     * Vive aquí y no en el cliente JS porque el retorno de Stripe no siempre pasa
+     * por una página instrumentada, y porque un evento de compra no debe depender
+     * de que el navegador llegue a ejecutar nada.
+     */
+    private function logCheckoutEvent(string $eventName, string $source, array $meta = [], ?int $userId = null): void
+    {
+        try {
+            (new \App\Models\TrackingEventModel())->insert([
+                'event_name'   => $eventName,
+                'page'         => 'billing',
+                'user_id'      => $userId ?? (int) session('user_id'),
+                'session_id'   => substr((string) session_id(), 0, 100),
+                'anonymous_id' => '',
+                'element'      => substr($source, 0, 255),
+                'metadata'     => json_encode($meta),
+                'created_at'   => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+            // La atribución nunca debe tumbar un cobro
+            log_message('error', 'logCheckoutEvent(' . $eventName . '): ' . $e->getMessage());
+        }
     }
 
     private function startStripeCheckout(int $userId, string $plan, string $period, ?string $email, ?string $name, array $postData = [])
@@ -271,8 +312,12 @@ class Billing extends BaseController
 
             if ($plan === 'risk_pack_5') {
                 $productName = 'Pack 5 Auditorías de Solvencia & Riesgo';
-                $productDesc = '5 auditorías completas de riesgo mercantil con dictámenes oficiales en PDF descargables sin caducidad.';
-                $amount = 9.90;
+                // Sin "oficiales": la fuente lo es, la conclusión es nuestra. Y
+                // este texto acaba en el recibo de Stripe del cliente.
+                $productDesc = '5 auditorías completas de riesgo mercantil, con informe en PDF descargable sin caducidad.';
+                // El importe sale de Config\Solvencia, igual que el precio que se
+                // anuncia. Estaba escrito a mano aquí.
+                $amount = ((int) solvencia('centimos.pack5', 990)) / 100;
                 $metadataPlan = 'risk_pack_5';
 
                 session()->set('checkout_context', [
@@ -315,6 +360,7 @@ class Billing extends BaseController
                         'period' => 'single',
                         'credits' => '5',
                         'target_cif' => (string) ($postData['cif'] ?? ''),
+                        'source' => (string) ($postData['source'] ?? ''),
                     ],
                 ];
 
@@ -388,7 +434,12 @@ class Billing extends BaseController
                     $planDesc = 'Acceso ilimitado al Radar de nuevas empresas.';
                 } elseif ($plan === 'risk_pro') {
                     $planName = $dbPlan->name ?? 'Solvencia Pro';
-                    $planDesc = 'Acceso ilimitado a scoring predictivo de solvencia, riesgo mercantil y dictámenes oficiales en PDF.';
+                    // "dictámenes oficiales" se quitó de todas las pantallas: la
+                    // fuente (BORME, Registro Mercantil) es oficial, la conclusión
+                    // es nuestra. Aquí seguía viva, y este texto es peor que una
+                    // vista: es la línea de concepto que Stripe imprime en el
+                    // recibo y en la factura que el cliente se guarda.
+                    $planDesc = 'Scoring de solvencia y riesgo mercantil, informes en PDF y vigilancia del BORME de tu cartera.';
                     if ($period === 'annual') {
                         $amount = isset($dbPlan->price_annual) ? (float) $dbPlan->price_annual : 290.00;
                     } else {
@@ -430,12 +481,14 @@ class Billing extends BaseController
                         'user_id' => (string) $userId,
                         'plan' => $plan,
                         'period' => $period,
+                        'source' => (string) ($postData['source'] ?? ''),
                     ],
                     'subscription_data' => [
                         'metadata' => [
                             'user_id' => (string) $userId,
                             'plan' => $plan,
                             'period' => $period,
+                            'source' => (string) ($postData['source'] ?? ''),
                         ]
                     ],
                 ];
@@ -863,6 +916,34 @@ class Billing extends BaseController
 
         $checkoutData = session('checkout_context') ?? [];
         $lastInfo = session('last_purchase_info') ?? [];
+
+        // --- ATRIBUCIÓN DE LA COMPRA ---
+        // La sesión PHP puede perderse en el salto a Stripe y de vuelta, por eso el
+        // source viaja también en los metadatos de la sesión de Stripe.
+        $attrSource = (string) (session('checkout_source') ?? '');
+        if ($attrSource === '' && $hasStripeSession) {
+            try {
+                $attrStripe = (new \Stripe\StripeClient(env('STRIPE_SECRET_KEY')))
+                    ->checkout->sessions->retrieve($stripeSessionId);
+                $attrSource = (string) ($attrStripe->metadata->source ?? '');
+                $attrPlan   = (string) ($attrStripe->metadata->plan ?? '');
+                $attrPeriod = (string) ($attrStripe->metadata->period ?? '');
+            } catch (\Throwable $e) {
+                log_message('error', '[Billing::success] atribución: ' . $e->getMessage());
+            }
+        }
+
+        // Una recarga de la página de éxito no debe contar una segunda conversión
+        $attrKey = 'checkout_logged_' . ($stripeSessionId ?: 'sim_' . date('YmdHi'));
+        if (!session()->get($attrKey)) {
+            session()->set($attrKey, true);
+            $this->logCheckoutEvent('checkout_completed', $attrSource, [
+                'plan'       => $attrPlan ?? ($lastInfo['plan'] ?? ($checkoutData['type'] ?? '')),
+                'period'     => $attrPeriod ?? ($lastInfo['period'] ?? ''),
+                'stripe_id'  => $stripeSessionId ?: null,
+            ], $userId);
+        }
+        session()->remove('checkout_source');
 
         // Fallback: Recuperar contexto desde la sesión de Stripe si la sesión de PHP se perdió en la redirección
         if (empty($checkoutData) && empty($lastInfo) && $hasStripeSession) {

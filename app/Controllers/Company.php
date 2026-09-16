@@ -49,11 +49,30 @@ class Company extends BaseController
         $slug = $this->companyModel->generateSlug($company['name']);
         if (!empty($company['cif'])) {
             $canonicalUrl = site_url($company['cif'] . ($slug ? ('-' . $slug) : ''));
-            return redirect()->to($canonicalUrl, 301);
+            return $this->canonicalRedirect($canonicalUrl);
         }
 
         // Si no tiene CIF, la URL ahora es simplemente el slug
-        return redirect()->to(site_url($slug), 301);
+        return $this->canonicalRedirect(site_url($slug));
+    }
+
+    /**
+     * Redirección canónica (301) conservando el query string.
+     *
+     * Las URLs /empresa/{id}-{slug} redirigen siempre a la canónica por CIF, y esa
+     * 301 se comía los parámetros. Entre ellos ?ver-riesgo=1, que es lo que lleva al
+     * usuario recién registrado hasta el bloque de riesgo: el flag moría en el salto
+     * y el scroll nunca llegaba a ejecutarse.
+     */
+    private function canonicalRedirect(string $url, int $code = 301)
+    {
+        $query = (string) ($this->request->getServer('QUERY_STRING') ?? '');
+
+        if ($query !== '' && strpos($url, '?') === false) {
+            $url .= '?' . $query;
+        }
+
+        return redirect()->to($url, $code);
     }
 
     /**
@@ -76,11 +95,9 @@ class Company extends BaseController
         $isEn = (service('request')->getLocale() === 'en');
 
         // Generar título y descripción
-        $rawName = $company['name'] ?? ($isEn ? 'Company' : 'Empresa');
-        $name = mb_convert_case(mb_strtolower($rawName, 'UTF-8'), MB_CASE_TITLE, 'UTF-8');
-        // Arreglar abreviaturas comunes (SL, SA, etc)
-        $name = str_replace([' S.l.', ' S.l', ' Sl', ' Sl.', ' S.L.'], ' S.L.', $name);
-        $name = str_replace([' S.a.', ' S.a', ' Sa', ' Sa.', ' S.A.'], ' S.A.', $name);
+        // La normalización vive en company_display_name() (Helpers/company_helper.php)
+        // para que los bloques servidos por AJAX muestren el nombre igual que la ficha.
+        $name = company_display_name($company['name'] ?? '', $isEn ? 'Company' : 'Empresa');
         // Actualizamos en el array para que las vistas también lo usen
         $company['name'] = $name;
 
@@ -419,9 +436,12 @@ class Company extends BaseController
         // --- END HOLDINGS LOGIC ---
 
         // --- RISK PROFILE LOGIC ---
+        // IMPORTANTE: aquí solo se LEE el estado de cuota. Renderizar la ficha nunca
+        // debe consumir una consulta: el gasto ocurre en Company::ajaxUnlockRisk(),
+        // disparado por el click explícito del usuario en el bloque de riesgo.
         $riskProfile = null;
         $userId = (int)session('user_id');
-        $riskQuota = $this->getRiskViewQuota($userId, (string)$cif);
+        $riskQuota = $this->getRiskQuotaStatus($userId, (string)$cif);
 
         if (!empty($cif)) {
             $riskRow = $db->table('company_risk_profiles')->where('cif', $cif)->get()->getRowArray();
@@ -509,7 +529,7 @@ class Company extends BaseController
         $expectedSegment = $cif . ($correctSlug ? ('-' . $correctSlug) : '');
 
         if ($segment !== $expectedSegment) {
-            return redirect()->to(site_url($expectedSegment), 301);
+            return $this->canonicalRedirect(site_url($expectedSegment));
         }
 
         // Forzar la URL canónica siempre al formato oficial: CIF-slug
@@ -523,7 +543,13 @@ class Company extends BaseController
 
         // $this->cachePage(86400); // Cache temporalmente desactivada
         
-        if (session('is_logged_in')) {
+        // OJO: la clave de sesión es 'logged_in'. Aquí ponía 'is_logged_in', que no
+        // la escribe NADIE, así que la condición era siempre falsa y TODAS las
+        // respuestas —también las de un usuario con sesión— salían marcadas como
+        // cacheables por Cloudflare durante 24 h. Es decir: el dictamen que un
+        // usuario acaba de desbloquear, o su paywall, se podía quedar en la caché
+        // y servirse al siguiente visitante anónimo.
+        if (session('logged_in') || (int) (session('user_id') ?? 0) > 0) {
             $this->response->setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate, max-age=0');
             $this->response->setHeader('Pragma', 'no-cache');
         } else {
@@ -561,7 +587,7 @@ class Company extends BaseController
             // MIGRACIÓN AUTOMÁTICA: Redirigir a URL con CIF (301)
             $correctSlug = $this->companyModel->generateSlug($company['name']);
             $canonicalUrl = site_url($company['cif'] . ($correctSlug ? ('-' . $correctSlug) : ''));
-            return redirect()->to($canonicalUrl, 301);
+            return $this->canonicalRedirect($canonicalUrl);
         }
         
         // La empresa no tiene CIF válido, verificar que el slug sea correcto
@@ -569,7 +595,7 @@ class Company extends BaseController
         
         if ($cleanSlug !== $correctSlug) {
             // Redirigir al slug correcto (301)
-            return redirect()->to(site_url($correctSlug), 301);
+            return $this->canonicalRedirect(site_url($correctSlug));
         }
         
         // Renderizar vista con canonical apuntando al slug
@@ -583,7 +609,13 @@ class Company extends BaseController
 
         // $this->cachePage(86400); // Cache temporalmente desactivada
 
-        if (session('is_logged_in')) {
+        // OJO: la clave de sesión es 'logged_in'. Aquí ponía 'is_logged_in', que no
+        // la escribe NADIE, así que la condición era siempre falsa y TODAS las
+        // respuestas —también las de un usuario con sesión— salían marcadas como
+        // cacheables por Cloudflare durante 24 h. Es decir: el dictamen que un
+        // usuario acaba de desbloquear, o su paywall, se podía quedar en la caché
+        // y servirse al siguiente visitante anónimo.
+        if (session('logged_in') || (int) (session('user_id') ?? 0) > 0) {
             $this->response->setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate, max-age=0');
             $this->response->setHeader('Pragma', 'no-cache');
         } else {
@@ -660,7 +692,7 @@ class Company extends BaseController
                     ? site_url($company['cif'] . ($correctSlug ? ('-' . $correctSlug) : ''))
                     : site_url($correctSlug);
                 
-                return redirect()->to($targetUrl, 301);
+                return $this->canonicalRedirect($targetUrl);
             }
         }
 
@@ -762,23 +794,26 @@ class Company extends BaseController
         }
 
         $targetCif = (string)($company['cif'] ?? '');
-        $riskQuota = $this->getRiskViewQuota($userId, $targetCif);
+        // Comprobación de permisos: lectura pura. Descargar el PDF nunca debe
+        // gastar una consulta de forma implícita (antes sí lo hacía).
+        $riskQuota = $this->getRiskQuotaStatus($userId, $targetCif);
 
-        // Comprobar si el usuario ya ha consultado/visto esta empresa
+        /*
+         * Quién se lleva este PDF sin pagar.
+         *
+         * Aquí había una consulta a `user_events` repitiendo a mano la regla de
+         * "¿ha desbloqueado esta empresa?" que ya vive en CompanyRiskService. Dos
+         * copias de la misma regla es como se desincronizan: la del servicio
+         * cuenta también los desbloqueos por COMPRA, y esta se había quedado solo
+         * con las consultas, así que quien pagaba su informe podía ver el dictamen
+         * y no volver a descargarlo. Ahora manda `already_unlocked`.
+         */
         $db = \Config\Database::connect();
-        $hasViewed = false;
-        if (!empty($targetCif)) {
-            $hasViewed = $db->table('user_events')
-                ->where('user_id', $userId)
-                ->where('event_type', 'view_risk_profile')
-                ->where('trigger_type', $targetCif)
-                ->countAllResults() > 0;
-        }
 
-        $canDownload = !empty($riskQuota['is_subscriber']) 
-                    || !empty($riskQuota['already_unlocked']) 
-                    || $hasViewed 
-                    || (bool)session('is_admin');
+        $canDownload = !empty($riskQuota['is_subscriber'])
+                    || !empty($riskQuota['already_unlocked'])
+                    || !empty($riskQuota['allowed'])
+                    || (bool) session('is_admin');
 
         if (!$canDownload) {
             return redirect()->to(site_url('dashboard?view=risk'))->with('error', 'Para descargar este informe en PDF debes haberlo consultado previamente o disponer de Solvencia Pro.');
@@ -814,11 +849,16 @@ class Company extends BaseController
         
         $dompdf = new Dompdf($options);
         
+        // El informe prometía "el histórico registral" y entregaba solo las conclusiones
+        // del motor. Los asientos ya se le pasaban al OTRO PDF de la ficha; a este no.
+        // La tendencia, igual: la ficha web la enseña y el documento de pago no.
         $html = view('reports/risk_pdf_report', [
             'company'         => $company,
             'riskProfile'     => $riskProfile,
             'contracts'       => $contracts,
             'subsidies'       => $subsidies,
+            'bormePosts'      => $this->bormePostsModel->getByCompanyId((int) $company['id']),
+            'riskTrend'       => $this->getRiskTrend($company, $riskProfile),
             'brandName'       => 'APIEmpresas',
             'brandColor'      => '#0f172a',
             'brandFooterText' => 'Documento confidencial generado por APIEmpresas.'
@@ -877,11 +917,16 @@ class Company extends BaseController
         
         $dompdf = new Dompdf($options);
         
+        // El informe prometía "el histórico registral" y entregaba solo las conclusiones
+        // del motor. Los asientos ya se le pasaban al OTRO PDF de la ficha; a este no.
+        // La tendencia, igual: la ficha web la enseña y el documento de pago no.
         $html = view('reports/risk_pdf_report', [
             'company'         => $company,
             'riskProfile'     => $riskProfile,
             'contracts'       => $contracts,
             'subsidies'       => $subsidies,
+            'bormePosts'      => $this->bormePostsModel->getByCompanyId((int) $company['id']),
+            'riskTrend'       => $this->getRiskTrend($company, $riskProfile),
             'brandName'       => 'APIEmpresas',
             'brandColor'      => '#0f172a',
             'brandFooterText' => 'Documento confidencial generado por APIEmpresas.'
@@ -1068,6 +1113,20 @@ class Company extends BaseController
      * AJAX POST endpoint to generate the Premium PDF and send it via email if requested.
      */
     /**
+     * ¿Este pedido es el Dossier 360º (5,90 €) o el informe de riesgo (3,90 €)?
+     *
+     * La única marca que distingue los dos productos es la etiqueta
+     * `[RISK_REPORT]` que `checkoutPremiumPdf()` mete en `footer_text`; no hay
+     * columna de tipo en `pdf_orders`. La regla estaba escrita suelta en el
+     * generador del PDF, y el aviso de cobro no la miraba siquiera: notificaba
+     * 3,90 € y "Marca Blanca" también cuando lo vendido era el Dossier.
+     */
+    private function esPedidoDossier(array $order): bool
+    {
+        return strpos((string) ($order['footer_text'] ?? ''), '[RISK_REPORT]') === false;
+    }
+
+    /**
      * AJAX POST endpoint to checkout the Premium PDF via Stripe
      */
     public function checkoutPremiumPdf()
@@ -1106,14 +1165,25 @@ class Company extends BaseController
         // Tag report type in footer_text for order reconstruction
         if ($reportType === 'risk') {
             $footerText = '[RISK_REPORT] ' . ($footerText ?: 'Documento generado por ' . $agencyName);
-            $unitAmount = 390; // 3,90 € + IVA
+            // El importe sale de Config\Solvencia, igual que el precio que anuncia
+            // la ficha. Estaba escrito a mano aquí, que es el único sitio donde
+            // equivocarse cuesta dinero: es el fallo de anunciar 3,90 € y cobrar
+            // 5,90 € sobreviviendo en el punto de cobro.
+            $unitAmount = (int) solvencia('centimos.pdf', 390); // + IVA
             $productTitle = 'Informe de Riesgo y Solvencia - ' . $company['name'];
             $productDesc = 'Dictamen de Estabilidad Societaria y Alertas BORME (PDF)';
         } else {
             $footerText = ($footerText ?: 'Documento generado por ' . $agencyName);
-            $unitAmount = 590; // 5,90 € + IVA
+            $unitAmount = (int) solvencia('centimos.dossier', 590); // + IVA
             $productTitle = 'Dossier Completo 360º - ' . $company['name'];
             $productDesc = 'Dossier Mercantil Integral, BORME y Riesgo (PDF)';
+        }
+
+        // Una configuración en blanco o a 0 no puede convertirse en un cobro de
+        // 0 €: antes de llamar a Stripe, el importe tiene que ser un número.
+        if ($unitAmount <= 0) {
+            log_message('error', '[checkoutPremiumPdf] Importe no válido para ' . $reportType . ': ' . $unitAmount);
+            return $this->response->setStatusCode(500)->setJSON(['status' => 'error', 'message' => 'No se ha podido calcular el importe. Inténtalo de nuevo en unos minutos.']);
         }
 
         // Handle Image Upload
@@ -1264,6 +1334,28 @@ class Company extends BaseController
     /**
      * Endpoint for successful payment return, generates PDF
      */
+    /**
+     * Registra un hito del PDF suelto en tracking_events, para poder comparar las
+     * tres opciones del paywall (PDF / pack / suscripción) con el mismo rasero.
+     */
+    private function logPdfCheckoutEvent(string $eventName, array $meta = []): void
+    {
+        try {
+            (new \App\Models\TrackingEventModel())->insert([
+                'event_name'   => $eventName,
+                'page'         => 'empresa/pdf',
+                'user_id'      => (int) session('user_id'),
+                'session_id'   => substr((string) session_id(), 0, 100),
+                'anonymous_id' => '',
+                'element'      => 'pdf_single',
+                'metadata'     => json_encode($meta),
+                'created_at'   => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'logPdfCheckoutEvent(' . $eventName . '): ' . $e->getMessage());
+        }
+    }
+
     public function successPremiumPdf()
     {
         $sessionId = $this->request->getGet('session_id');
@@ -1278,6 +1370,33 @@ class Company extends BaseController
 
         if (!$order) {
             return redirect()->to('/')->with('error', 'Pedido no encontrado.');
+        }
+
+        // `pdf_orders` no guarda el CIF, solo `company_id`: leerlo de $order
+        // dejaba el evento con cif=null en todas las conversiones de PDF.
+        $cifPedido = null;
+        if (!empty($order['company_id'])) {
+            // Sin select() a propósito: el modelo se comparte en la petición y
+            // un select pegado se arrastra a la siguiente consulta.
+            $empresaPedido = $this->companyModel->find((int) $order['company_id']);
+            if (is_array($empresaPedido)) {
+                $cifPedido = $empresaPedido['cif'] ?? null;
+            } elseif (is_object($empresaPedido)) {
+                $cifPedido = $empresaPedido->cif ?? null;
+            }
+        }
+
+        // Una recarga de la página de descarga no debe contar otra conversión
+        $pdfAttrKey = 'pdf_logged_' . $uuid;
+        if (!session()->get($pdfAttrKey)) {
+            session()->set($pdfAttrKey, true);
+
+            $this->logPdfCheckoutEvent('checkout_completed', [
+                'plan'      => $this->esPedidoDossier($order) ? 'risk_dossier_single' : 'risk_pdf_single',
+                'period'    => 'single',
+                'cif'       => $cifPedido,
+                'stripe_id' => $sessionId,
+            ]);
         }
 
         // Validate payment with Stripe API (to prevent URL sharing without payment)
@@ -1299,6 +1418,35 @@ class Company extends BaseController
             }
         }
 
+        /*
+         * Lo que se compra es el ACCESO a esa empresa, no un fichero.
+         *
+         * Antes, pagar entregaba el PDF y dejaba la ficha igual de bloqueada que
+         * antes de pagar; y el documento era el mismo que ya se descarga gratis
+         * quien haya consultado la empresa alguna vez, porque el modal de 3,90 €
+         * ni siquiera pide logotipo. Con el desbloqueo, el pago compra algo que no
+         * se puede tener gratis.
+         *
+         * Va aquí, después de validar el pago y fuera del `status !== 'paid'`: en
+         * modo simulador el pedido nace ya marcado como pagado, así que dentro de
+         * ese `if` no se ejecutaría nunca — justo en el modo con el que se prueba.
+         * `desbloquearPorCompra()` es idempotente, de modo que recargar no duplica.
+         *
+         * Desbloquea para quien tenga la sesión abierta al abrir esta página. Quien
+         * compra sin cuenta se lleva el PDF igual; si se registra después, la
+         * empresa no le queda desbloqueada, y eso es una mejora pendiente, no un
+         * fallo de esto.
+         */
+        $usuarioActual = (int) session('user_id');
+        if ($usuarioActual > 0 && !empty($cifPedido)) {
+            try {
+                (new \App\Services\CompanyRiskService())->desbloquearPorCompra($usuarioActual, (string) $cifPedido);
+            } catch (\Throwable $e) {
+                // Que no se caiga la entrega del PDF por esto: ya ha pagado.
+                log_message('error', '[successPremiumPdf] desbloquearPorCompra: ' . $e->getMessage());
+            }
+        }
+
         // Mark as paid if it wasn't
         if ($order['status'] !== 'paid') {
             $pdfOrderModel->update($order['id'], ['status' => 'paid']);
@@ -1306,12 +1454,20 @@ class Company extends BaseController
             // Send notification to admin
             try {
                 $emailService = new \App\Services\EmailService();
+                // El aviso decía 3,90 € y "Marca Blanca" para los dos productos,
+                // así que cada Dossier vendido se notificaba 2 € por debajo y con
+                // el nombre del otro informe. Ahora sale del pedido.
+                $esDossier = $this->esPedidoDossier($order);
+                $centimos  = (int) solvencia($esDossier ? 'centimos.dossier' : 'centimos.pdf', $esDossier ? 590 : 390);
+
                 $emailService->sendPaymentNotification([
                     'invoice_number' => 'PDF-' . strtoupper(substr($order['uuid'], 0, 8)),
                     'customer_name'  => !empty($order['agency_name']) ? $order['agency_name'] : 'Cliente',
                     'customer_email' => !empty($order['email']) ? $order['email'] : 'No especificado',
-                    'plan_name'      => 'Informe Premium PDF (Marca Blanca)',
-                    'amount'         => '3.90',
+                    'plan_name'      => $esDossier
+                        ? 'Dossier Completo 360º (Marca Blanca)'
+                        : 'Informe de Riesgo y Solvencia (PDF)',
+                    'amount'         => number_format($centimos / 100, 2, '.', ''),
                     'currency'       => 'EUR',
                     'invoice'        => 'N/A'
                 ]);
@@ -1450,18 +1606,25 @@ class Company extends BaseController
         
         $dompdf = new \Dompdf\Dompdf($options);
         
-        $isRiskReport = strpos($order['footer_text'] ?? '', '[RISK_REPORT]') !== false;
+        $isRiskReport = !$this->esPedidoDossier($order);
         $cleanFooterText = trim(str_replace('[RISK_REPORT]', '', $order['footer_text'] ?? ''));
         if (empty($cleanFooterText)) {
             $cleanFooterText = 'Documento generado por ' . ($order['agency_name'] ?: 'APIEmpresas');
         }
 
         if ($isRiskReport) {
+            // Los asientos y la tendencia, igual que en los otros dos puntos de
+            // generación. Esta rama es la del PEDIDO PAGADO: era justo la que no los
+            // recibía, así que el informe que alguien compra era el único de los tres
+            // sin el histórico registral que el texto de venta promete. El `else` de
+            // aquí al lado ya se los pasaba al PDF premium.
             $html = view('reports/risk_pdf_report', [
                 'company'         => $company,
                 'riskProfile'     => $riskProfile,
                 'contracts'       => $contracts,
                 'subsidies'       => $subsidies,
+                'bormePosts'      => $this->bormePostsModel->getByCompanyId($companyId),
+                'riskTrend'       => $this->getRiskTrend($company, $riskProfile),
                 'brandColor'      => $order['brand_color'] ?: '#0f172a',
                 'brandName'       => $order['agency_name'] ?: 'APIEmpresas',
                 'brandFooterText' => $cleanFooterText,
@@ -1563,73 +1726,341 @@ class Company extends BaseController
             $company = ['id' => 0, 'name' => 'Empresa', 'cif' => $cleanCif];
         }
 
+        $company['name'] = company_display_name(
+            $company['name'] ?? ($company['company_name'] ?? ''),
+            'Empresa'
+        );
+
         $targetCif = (string)($company['cif'] ?? $cleanCif);
-        $riskQuota = $this->getRiskViewQuota($userId, $targetCif);
 
-        if (!$riskQuota['allowed']) {
-            $paywallHtml = view('partials/company_risk_paywall', [
-                'company'   => $company,
-                'riskQuota' => $riskQuota
-            ]);
-
-            return $response->setJSON([
-                'logged_in'         => true,
-                'user_name'         => session('user_name') ?? 'Usuario',
-                'user_email'        => session('user_email') ?? '',
-                'limit_reached'     => true,
-                'risk_quota'        => $riskQuota,
-                'risk_profile_html' => $paywallHtml
-            ]);
-        }
+        // Hidratación de la ficha (cacheada en Cloudflare): SOLO lectura.
+        // Antes se llamaba aquí a getRiskViewQuota(), que consumía una consulta en
+        // cada carga de página aunque el usuario nunca bajase al bloque de riesgo.
+        $riskQuota = $this->getRiskQuotaStatus($userId, $targetCif);
 
         $contracts = [];
         $subsidies = [];
-        $riskProfile = null;
         if (!empty($targetCif)) {
             $contracts = $db->table('company_contracts')
                 ->where('company_cif', $targetCif)
                 ->orderBy('fecha_adjudicacion', 'DESC')
                 ->get()->getResultArray();
-                
+
             $subsidies = $db->table('company_subsidies')
                 ->where('company_cif', $targetCif)
                 ->orderBy('fecha_concesion', 'DESC')
                 ->get()->getResultArray();
-
-            $riskRow = $db->table('company_risk_profiles')->where('cif', $targetCif)->get()->getRowArray();
-            if ($riskRow) {
-                $riskProfile = $riskRow;
-                if (!empty($riskProfile['risk_profile'])) {
-                    $riskProfile['data'] = json_decode($riskProfile['risk_profile'], true);
-                }
-            }
         }
 
-        $riskProfileHtml = view('partials/company_risk_profile', [
-            'riskProfile' => $riskProfile,
-            'company'     => $company,
-            'contracts'   => $contracts,
-            'subsidies'   => $subsidies,
-            'riskQuota'   => $riskQuota
-        ]);
+        $riskProfile = $this->fetchRiskProfile($targetCif);
+        $block = $this->renderRiskBlock($company, $riskProfile, $riskQuota, $contracts, $subsidies);
+
+        // Estado de vigilancia. Viaja por aquí y no en el HTML de la ficha porque
+        // esa página va cacheada: el botón de la cabecera nace apagado para todo
+        // el mundo y lo enciende la hidratación, que es lo único que ve la sesión.
+        $watchService = new \App\Services\CompanyWatchService();
+        $vigilando = $userId > 0 && $watchService->isWatching($userId, $targetCif);
+        // Si el usuario tiene los avisos desactivados, vigilar no le sirve de nada:
+        // la ficha tiene que decírselo en el momento, no dejarle creer que está cubierto.
+        $avisosActivos = $userId > 0 && $watchService->alertasActivas($userId);
 
         return $response->setJSON([
             'logged_in'         => true,
             'user_name'         => session('user_name') ?? 'Usuario',
             'user_email'        => session('user_email') ?? '',
-            'limit_reached'     => false,
+            'limit_reached'     => ($block['state'] === 'paywall'),
+            'risk_state'        => $block['state'],
+            'risk_cif'          => $targetCif,
             'risk_quota'        => $riskQuota,
-            'risk_profile_html' => $riskProfileHtml
+            'is_watching'       => $vigilando,
+            // Para no invitar a un clic que va a rebotar: si ya tiene la lista
+            // llena y ESTA empresa no está dentro, la caja lo dice antes.
+            'watch_full'        => $userId > 0 && !$vigilando && !$watchService->puedeVigilarMas($userId),
+            'watch_quota'       => $userId > 0 ? $watchService->estadoCupo($userId) : null,
+            'watch_alerts_on'   => $avisosActivos,
+            'watch_email'       => (string) (session('user_email') ?? ''),
+            /*
+             * ¿Puede bajarse el informe de riesgo sin pagar?
+             *
+             * El menú "Descargar" de la ficha va en el HTML cacheado, así que nace
+             * ofreciendo la compra a todo el mundo — incluido el suscriptor y quien
+             * ya consultó esa empresa, que lo tienen gratis en la barra del dictamen
+             * dos centímetros más abajo. Ofrecerle a alguien por 3,90 € lo que ya
+             * tiene no es solo una venta perdida: es la clase de detalle que le hace
+             * dudar de todos los demás precios de la página.
+             *
+             * La misma condición que usa `company_risk_profile.php` para decidir si
+             * pinta "Descargar PDF" o "Descargar por 3,90 €".
+             */
+            'informe_gratis'    => !empty($riskQuota['is_subscriber'])
+                                || !empty($riskQuota['already_unlocked'])
+                                || !empty($riskQuota['allowed']),
+            'risk_profile_html' => $block['html']
         ]);
     }
 
     /**
-     * Calcula la cuota de consultas de perfil de riesgo para el usuario en el mes actual.
+     * Activa o desactiva la vigilancia de una empresa.
+     *
+     * POST /api/empresa/vigilar  { cif }
+     */
+    public function ajaxToggleWatch()
+    {
+        $response = $this->response->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+
+        $userId = (int) (session('user_id') ?? 0);
+        if (!session('logged_in') && $userId <= 0) {
+            return $response->setStatusCode(401)->setJSON([
+                'ok'      => false,
+                'message' => 'Debes iniciar sesión para vigilar empresas.',
+            ]);
+        }
+
+        $payload = $this->request->getJSON(true) ?: [];
+        $rawCif  = trim((string) ($payload['cif'] ?? $this->request->getPost('cif') ?? ''));
+
+        if ($rawCif === '') {
+            return $response->setStatusCode(400)->setJSON(['ok' => false, 'message' => 'Falta el CIF.']);
+        }
+
+        $servicio = new \App\Services\CompanyWatchService();
+
+        // Se comprueba el cupo ANTES de tocar nada para poder devolver un motivo.
+        // Si se dejara a toggle(), un alta rechazada por tope volvería como
+        // watching:false, indistinguible de "ha dejado de vigilarla".
+        if (!$servicio->isWatching($userId, $rawCif) && !$servicio->puedeVigilarMas($userId)) {
+            $cupo = $servicio->estadoCupo($userId);
+
+            return $response->setJSON([
+                'ok'       => false,
+                'limite'   => true,
+                'watching' => false,
+                'cupo'     => $cupo,
+                'message'  => 'Ya vigilas ' . $cupo['tope'] . ' empresas, el máximo de la cuenta gratuita. '
+                            . 'Con Pro no hay límite; si no, deja de vigilar una para hacer sitio.',
+            ]);
+        }
+
+        $watching = $servicio->toggle($userId, $rawCif);
+
+        return $response->setJSON([
+            'ok'         => true,
+            'watching'   => $watching,
+            'alerts_on'  => $servicio->alertasActivas($userId),
+            'cupo'       => $servicio->estadoCupo($userId),
+        ]);
+    }
+
+    /**
+     * Evolución del score de esta empresa. No depende del usuario, así que es
+     * cacheable; devuelve null cuando no hay histórico con el que comparar.
+     */
+    private function getRiskTrend(array $company, ?array $riskProfile): ?array
+    {
+        if (empty($riskProfile) || empty($company['cif'])) {
+            return null;
+        }
+
+        return (new \App\Services\CompanyRiskService())->getScoreTrend(
+            (string) $company['cif'],
+            (int) ($riskProfile['risk_score'] ?? 0)
+        );
+    }
+
+    /**
+     * Lee (sin consumir) el estado de cuota de perfil de riesgo del usuario.
+     */
+    private function getRiskQuotaStatus(int $userId, string $cif): array
+    {
+        $service = new \App\Services\CompanyRiskService();
+        return $service->getQuotaStatus($userId, $cif);
+    }
+
+    /**
+     * @deprecated Alias no destructivo. Usa getRiskQuotaStatus() para comprobar
+     *             y CompanyRiskService::consumeRiskView() para consumir.
      */
     private function getRiskViewQuota(int $userId, string $cif): array
     {
-        $service = new \App\Services\CompanyRiskService();
-        return $service->getRiskViewQuota($userId, $cif);
+        return $this->getRiskQuotaStatus($userId, $cif);
+    }
+
+    /**
+     * Devuelve el perfil de riesgo calculado de un CIF (o null si no existe).
+     */
+    private function fetchRiskProfile(string $cif): ?array
+    {
+        if ($cif === '') {
+            return null;
+        }
+
+        $riskRow = \Config\Database::connect()
+            ->table('company_risk_profiles')
+            ->where('cif', $cif)
+            ->get()->getRowArray();
+
+        if (!$riskRow) {
+            return null;
+        }
+
+        if (!empty($riskRow['risk_profile'])) {
+            $riskRow['data'] = json_decode($riskRow['risk_profile'], true);
+        }
+
+        return $riskRow;
+    }
+
+    /**
+     * Renderiza el bloque de riesgo que corresponde al estado del usuario.
+     *
+     * @return array{state:string, html:string}
+     */
+    private function renderRiskBlock(array $company, ?array $riskProfile, array $riskQuota, array $contracts = [], array $subsidies = []): array
+    {
+        if (empty($riskProfile)) {
+            return ['state' => 'none', 'html' => ''];
+        }
+
+        if (!empty($riskQuota['allowed'])) {
+            return [
+                'state' => 'profile',
+                'html'  => view('partials/company_risk_profile', [
+                    'riskProfile' => $riskProfile,
+                    'company'     => $company,
+                    'contracts'   => $contracts,
+                    'subsidies'   => $subsidies,
+                    'riskQuota'   => $riskQuota,
+                    'riskTrend'   => $this->getRiskTrend($company, $riskProfile),
+                ])
+            ];
+        }
+
+        if (!empty($riskQuota['can_unlock'])) {
+            return [
+                'state' => 'locked',
+                'html'  => view('partials/company_risk_locked', [
+                    'riskProfile' => $riskProfile,
+                    'company'     => $company,
+                    'riskQuota'   => $riskQuota
+                ])
+            ];
+        }
+
+        return [
+            'state' => 'paywall',
+            'html'  => view('partials/company_risk_paywall', [
+                'company'   => $company,
+                'riskQuota' => $riskQuota,
+                // El paywall no recibía el perfil, así que no podía enseñar ni el
+                // score: un registrado sin cuota veía MENOS que un anónimo.
+                'riskProfile' => $riskProfile,
+            ])
+        ];
+    }
+
+    /**
+     * Consume UNA consulta de perfil de riesgo y devuelve el bloque desbloqueado.
+     * Único punto de la ficha de empresa donde se gasta cuota: se llama desde el
+     * click explícito del usuario en "Ver dictamen de riesgo".
+     *
+     * POST /api/empresa/desbloquear-riesgo  { cif }
+     */
+    public function ajaxUnlockRisk()
+    {
+        $response = $this->response
+            ->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->setHeader('Pragma', 'no-cache');
+
+        $userId = (int)(session('user_id') ?? 0);
+        if (!session('logged_in') && $userId <= 0) {
+            return $response->setStatusCode(401)->setJSON([
+                'ok'      => false,
+                'message' => 'Debes iniciar sesión para consultar el perfil de riesgo.'
+            ]);
+        }
+
+        $throttler = service('throttler');
+        if ($throttler->check(md5($userId . '_risk_unlock'), 30, 60) === false) {
+            return $response->setStatusCode(429)->setJSON([
+                'ok'      => false,
+                'message' => 'Demasiadas consultas seguidas. Espera un momento.'
+            ]);
+        }
+
+        $payload = $this->request->getJSON(true) ?: [];
+        $rawCif  = trim((string)($payload['cif'] ?? $this->request->getPost('cif') ?? ''));
+
+        // 'passive' = el bloque entró en pantalla (lo manda el IntersectionObserver).
+        // Solo deja rastro en el historial. Cualquier otro valor es acción deliberada
+        // del usuario y sí da de alta la vigilancia.
+        $modo = (string) ($payload['mode'] ?? 'click');
+
+        $service  = new \App\Services\CompanyRiskService();
+        $cleanCif = $service->cleanCif($rawCif);
+
+        $company = $cleanCif !== '' ? $this->companyModel->where('cif', $cleanCif)->first() : null;
+        if (!$company) {
+            return $response->setStatusCode(404)->setJSON([
+                'ok'      => false,
+                'message' => 'No hemos encontrado esa empresa.'
+            ]);
+        }
+
+        $company['name'] = company_display_name(
+            $company['name'] ?? ($company['company_name'] ?? ''),
+            'Empresa'
+        );
+
+        $targetCif   = (string)($company['cif'] ?? $cleanCif);
+        $riskProfile = $this->fetchRiskProfile($targetCif);
+
+        // Nunca se cobra una consulta por una empresa sin dictamen calculado.
+        if (empty($riskProfile)) {
+            return $response->setStatusCode(404)->setJSON([
+                'ok'      => false,
+                'message' => 'Esta empresa todavía no tiene perfil de riesgo procesado.'
+            ]);
+        }
+
+        $riskQuota = $service->consumeRiskView($userId, $targetCif);
+
+        // Vigilancia: solo si el usuario pidió ver ESTA empresa. Si entrara también
+        // por la impresión, a los suscriptores —que ven el dictamen sin pulsar nada—
+        // se les llenaría la lista de empresas que nunca quisieron seguir.
+        $watchService = new \App\Services\CompanyWatchService();
+        if ($modo !== 'passive' && !empty($riskQuota['allowed'])) {
+            $watchService->watch($userId, $targetCif, 'unlock');
+        }
+
+        $db = \Config\Database::connect();
+        $contracts = $db->table('company_contracts')
+            ->where('company_cif', $targetCif)
+            ->orderBy('fecha_adjudicacion', 'DESC')
+            ->get()->getResultArray();
+        $subsidies = $db->table('company_subsidies')
+            ->where('company_cif', $targetCif)
+            ->orderBy('fecha_concesion', 'DESC')
+            ->get()->getResultArray();
+
+        $block = $this->renderRiskBlock($company, $riskProfile, $riskQuota, $contracts, $subsidies);
+
+        // El estado de vigilancia también cambia aquí (el alta automática de
+        // arriba), y el chip de la cabecera lo pintó la hidratación ANTES de que
+        // esto ocurriera: se quedaba diciendo "Vigilar empresa" con la campana
+        // tachada sobre una empresa que ya estaba en la lista.
+        $vigilando = $userId > 0 && $watchService->isWatching($userId, $targetCif);
+
+        return $response->setJSON([
+            'ok'              => !empty($riskQuota['allowed']),
+            'state'           => $block['state'],
+            'html'            => $block['html'],
+            'risk_quota'      => $riskQuota,
+            'is_watching'     => $vigilando,
+            'watch_alerts_on' => $userId > 0 && $watchService->alertasActivas($userId),
+            'watch_email'     => (string) (session('user_email') ?? ''),
+            'watch_full'      => $userId > 0 && !$vigilando && !$watchService->puedeVigilarMas($userId),
+            'watch_quota'     => $userId > 0 ? $watchService->estadoCupo($userId) : null,
+        ]);
     }
 
 }

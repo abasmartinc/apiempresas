@@ -98,8 +98,8 @@
             ],
             [
                 '@type' => 'Offer',
-                'name' => 'APIEmpresas Solvencia Pro - Consultas de Riesgo Ilimitadas',
-                'description' => 'Acceso ilimitado a scorings de riesgo comercial, cartera de seguimiento BORME y balances de todas las empresas españolas.',
+                'name' => 'APIEmpresas Solvencia Pro - Scoring y vigilancia del BORME',
+                'description' => 'Scoring de riesgo comercial, cartera de seguimiento BORME y balances de todas las empresas españolas.',
                 'price' => '29.00',
                 'priceCurrency' => 'EUR',
                 'availability' => 'https://schema.org/InStock',
@@ -281,7 +281,11 @@
                     <div class="b2b-header-wrapper"
                         style="padding: 0; margin-bottom: 24px;">
                         <div class="b2b-hero"
-                            style="position: relative; overflow: hidden; display: flex; align-items: center; gap: 32px; background: linear-gradient(135deg, #ffffff 0%, #f4f7fb 100%); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.03); border: 1px solid rgba(226, 232, 240, 0.8);">
+                            <?php /* Sin `overflow: hidden`. Lo llevaba para recortar la cinta de
+                                     esquina, pero recortaba también el desplegable de "Descargar",
+                                     que salía por debajo del borde y no se veía. Ahora el recorte
+                                     lo hace una capa propia que solo envuelve a la cinta. */ ?>
+                            style="position: relative; display: flex; align-items: center; gap: 32px; background: linear-gradient(135deg, #ffffff 0%, #f4f7fb 100%); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.03); border: 1px solid rgba(226, 232, 240, 0.8);">
                             
                             <?php
                             $constValHeader = trim($company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? '');
@@ -317,8 +321,12 @@
                             }
                             ?>
                             <?php if ($ribbonText): ?>
-                            <div style="position: absolute; top: 32px; right: -75px; width: 250px; text-align: center; background: <?= $ribbonGradient ?>; color: #fff; padding: 6px 0; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; transform: rotate(45deg); box-shadow: 0 4px 12px <?= $ribbonShadow ?>; letter-spacing: 0.5px; z-index: 10;">
-                                <?= esc($ribbonText) ?>
+                            <!-- Capa de recorte SOLO para la cinta: mismo radio que la tarjeta,
+                                 sin eventos de ratón para no tapar nada, y por debajo del menú. -->
+                            <div style="position: absolute; inset: 0; overflow: hidden; border-radius: 20px; pointer-events: none; z-index: 1;">
+                                <div style="position: absolute; top: 32px; right: -75px; width: 250px; text-align: center; background: <?= $ribbonGradient ?>; color: #fff; padding: 6px 0; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; transform: rotate(45deg); box-shadow: 0 4px 12px <?= $ribbonShadow ?>; letter-spacing: 0.5px;">
+                                    <?= esc($ribbonText) ?>
+                                </div>
                             </div>
                             <?php endif; ?>
                             
@@ -436,6 +444,41 @@
                                     </div>
                                     <?php endif; ?>
 
+                                    <style>
+                                    /* Menú de descargas de la cabecera. Un solo CTA primario:
+                                       antes competían cuatro botones de peso visual idéntico. */
+                                    /* z-index alto y contexto propio: la tarjeta tiene capas
+                                       (cinta, avatar, degradado) y el menú tiene que ir sobre todas. */
+                                    .cta-descargas { position: relative; z-index: 40; }
+                                    .cta-descargas[open] { z-index: 60; }
+                                    .cta-descargas > summary {
+                                        display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+                                        background: #2563eb; color: #ffffff; font-size: 0.9rem; font-weight: 700;
+                                        border-radius: 10px; border: 1px solid #2563eb; cursor: pointer;
+                                        list-style: none; transition: all 0.2s; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.25);
+                                    }
+                                    .cta-descargas > summary::-webkit-details-marker { display: none; }
+                                    .cta-descargas > summary:hover { background: #1d4ed8; border-color: #1d4ed8; transform: translateY(-2px); }
+                                    .cta-descargas__menu {
+                                        position: absolute; right: 0; top: calc(100% + 8px); z-index: 60;
+                                        width: 320px; max-width: 80vw; background: #ffffff; border: 1px solid #e2e8f0;
+                                        border-radius: 12px; box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.24);
+                                        padding: 6px; text-align: left;
+                                    }
+                                    .cta-descargas__menu > a,
+                                    .cta-descargas__menu > button {
+                                        display: block; width: 100%; box-sizing: border-box; text-align: left;
+                                        background: none; border: none; cursor: pointer; padding: 10px 12px;
+                                        border-radius: 9px; text-decoration: none; font-family: inherit;
+                                    }
+                                    .cta-descargas__menu > a:hover,
+                                    .cta-descargas__menu > button:hover { background: #f1f5f9; }
+                                    .cta-descargas__titulo { display: block; font-size: 0.9rem; font-weight: 800; color: #0f172a; }
+                                    .cta-descargas__sub { display: block; font-size: 0.76rem; color: #64748b; line-height: 1.4; margin-top: 2px; }
+                                    @media (max-width: 640px) {
+                                        .cta-descargas__menu { right: auto; left: 0; }
+                                    }
+                                    </style>
                                     <div style="margin-left: auto; display: flex; gap: 12px; align-items: center;">
                                         <div style="display: flex; gap: 6px;">
                                             <a href="https://www.linkedin.com/shareArticle?mini=true&url=<?= urlencode(current_url()) ?>&title=<?= urlencode('Ficha de empresa: ' . $companyName) ?>" target="_blank" rel="noopener noreferrer" class="btn-share-icon" title="Compartir en LinkedIn">
@@ -449,36 +492,81 @@
                                             </button>
                                         </div>
                                         <button type="button" onclick="openCopilotModal('<?= esc($companyCif) ?>');"
-                                            style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: #ffffff; font-size: 0.9rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.3);"
-                                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(99, 102, 241, 0.4)';"
-                                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(99, 102, 241, 0.3)';">
+                                            style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #ffffff; color: #6d28d9; font-size: 0.9rem; font-weight: 700; border: 1px solid #ddd6fe; border-radius: 10px; cursor: pointer; transition: all 0.2s;"
+                                            onmouseover="this.style.background='#f5f3ff'; this.style.borderColor='#c4b5fd';"
+                                            onmouseout="this.style.background='#ffffff'; this.style.borderColor='#ddd6fe';">
                                             ✨ Preparar llamada con IA
                                         </button>
                                         <button type="button" onclick="document.getElementById('crm-modal').style.display='flex';"
-                                            style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #0f172a; color: #ffffff; font-size: 0.9rem; font-weight: 700; text-decoration: none; border-radius: 10px; border: 1px solid #0f172a; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer;"
-                                            onmouseover="this.style.background='#1e293b'; this.style.transform='translateY(-2px)';"
-                                            onmouseout="this.style.background='#0f172a'; this.style.transform='translateY(0)';">
+                                            style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #ffffff; color: #334155; font-size: 0.9rem; font-weight: 700; text-decoration: none; border-radius: 10px; border: 1px solid #cbd5e1; transition: all 0.2s; cursor: pointer;"
+                                            onmouseover="this.style.background='#f8fafc'; this.style.borderColor='#94a3b8';"
+                                            onmouseout="this.style.background='#ffffff'; this.style.borderColor='#cbd5e1';">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><use href="#icon-2f243988"></use></svg>
                                             Enviar a CRM
                                         </button>
-                                        <a href="<?= site_url('empresa/export/' . $company['id']) ?>"
-                                            rel="nofollow"
-                                            aria-label="Descargar Informe PDF de <?= esc($companyName) ?>"
-                                            onclick="window.dataLayer = window.dataLayer || []; window.dataLayer.push({'event': 'cta_pdf_click'});"
-                                            style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #ffffff; color: #2563eb; font-size: 0.9rem; font-weight: 700; text-decoration: none; border-radius: 10px; border: 1px solid #cbd5e1; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02);"
-                                            onmouseover="this.style.background='#eff6ff'; this.style.borderColor='#93c5fd'; this.style.transform='translateY(-2px)';"
-                                            onmouseout="this.style.background='#ffffff'; this.style.borderColor='#cbd5e1'; this.style.transform='translateY(0)';">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="#icon-b92ca97e"></use></svg>
-                                            Descargar informe
-                                        </a>
-                                        <button type="button" onclick="document.getElementById('whitelabel-modal').style.display='flex'; if(window.trackEvent) trackEvent('premium_pdf_modal_opened');"
-                                            style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-size: 0.9rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);"
-                                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(16, 185, 129, 0.4)';"
-                                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(16, 185, 129, 0.3)';">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><use href="#icon-ef5631f6"></use></svg>
-                                            PDF Premium
-                                        </button>
+                                        <!-- Descargas.
+                                             Aquí había dos botones, "Descargar informe" y "PDF Premium",
+                                             que ni por el nombre ni por el icono decían en qué se
+                                             diferencian: uno es la ficha gratis y el otro un informe de
+                                             pago. Ahora es un solo menú donde cada opción dice qué es y
+                                             cuánto cuesta. Se usa <details> a propósito: no necesita JS,
+                                             así que funciona igual en la página cacheada. -->
+                                        <details class="cta-descargas">
+                                            <summary aria-label="Descargas de <?= esc($companyName) ?>">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="#icon-b92ca97e"></use></svg>
+                                                Descargar
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true" style="margin-left: 2px;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                            </summary>
+                                            <div class="cta-descargas__menu">
+                                                <a href="<?= site_url('empresa/export/' . $company['id']) ?>"
+                                                   rel="nofollow"
+                                                   onclick="window.dataLayer = window.dataLayer || []; window.dataLayer.push({'event': 'cta_pdf_click'});"
+                                                   data-track-click="company_download" data-track-element="ficha_gratis">
+                                                    <span class="cta-descargas__titulo">Ficha de la empresa</span>
+                                                    <span class="cta-descargas__sub">Datos identificativos y de contacto &bull; PDF gratis</span>
+                                                </a>
+                                                <?php
+                                                /*
+                                                 * Dos variantes del mismo hueco, porque esta página va cacheada y no
+                                                 * puede saber quién la está mirando. Nace la de pago —el visitante
+                                                 * anónimo es la mayoría— y la hidratación enseña la otra cuando el
+                                                 * usuario ya tiene derecho al informe (suscriptor, empresa ya
+                                                 * consultada o comprada). Ninguna de las dos lleva dato de sesión,
+                                                 * así que las dos son cacheables.
+                                                 *
+                                                 * El texto de pago ya no describe el contenido del informe: eso es
+                                                 * justo lo que entrega el gratuito, y prometerlo aquí hacía que los
+                                                 * 3,90 € parecieran cobrar por algo que ya se daba. Lo que compran
+                                                 * es ver la empresa entera.
+                                                 */
+                                                ?>
+                                                <a href="<?= site_url('empresa/export-risk/' . ($company['id'] ?? '')) ?>"
+                                                   rel="nofollow" hx-boost="false"
+                                                   data-descarga-informe="incluido" style="display: none;"
+                                                   data-track-click="company_download" data-track-element="dictamen_incluido">
+                                                    <span class="cta-descargas__titulo">Informe de riesgo y solvencia</span>
+                                                    <span class="cta-descargas__sub">Ya incluido para ti &bull; descargar en PDF</span>
+                                                </a>
+                                                <button type="button"
+                                                        data-descarga-informe="pago"
+                                                        onclick="if (window.openRiskPdfModal) { openRiskPdfModal(<?= (int) $company['id'] ?>, '<?= esc($companyCif) ?>'); } else { window.location.href = '<?= site_url('perfil-de-riesgo') ?>?cif=<?= urlencode($companyCif) ?>'; }"
+                                                        data-track-click="company_download" data-track-element="dictamen_riesgo">
+                                                    <span class="cta-descargas__titulo">Ver esta empresa entera</span>
+                                                    <span class="cta-descargas__sub">Dictamen completo en pantalla y en PDF &bull; <?= solvencia('precios.pdf', '3,90 €') ?> + IVA</span>
+                                                </button>
+                                                <button type="button"
+                                                        onclick="document.getElementById('whitelabel-modal').style.display='flex'; if(window.trackEvent) trackEvent('premium_pdf_modal_opened');"
+                                                        data-track-click="company_download" data-track-element="marca_blanca">
+                                                    <?php /* El precio, como en las otras dos opciones. Era la única
+                                                             sin cifra —"PDF gratis", "3,90 € + IVA" y esta en blanco—,
+                                                             y una opción sin precio al lado de dos que sí lo tienen se
+                                                             lee como la cara que se esconde. Sale de la MISMA clave
+                                                             que usa su modal, así que no pueden divergir. */ ?>
+                                                    <span class="cta-descargas__titulo">Informe de marca blanca</span>
+                                                    <span class="cta-descargas__sub">El informe completo con tu logo, para enviar a un cliente &bull; <?= solvencia('precios.dossier', '5,90 €') ?> + IVA</span>
+                                                </button>
+                                            </div>
+                                        </details>
                                     </div>
                                 </div>
 
@@ -859,7 +947,7 @@
                                     <dd class="b2b-data-value"><time datetime="<?= esc($constVal) ?>"><?= date('d/m/Y', strtotime($constVal)) ?></time></dd>
                                 </div>
                                 <?php endif; ?>
-                                <?php $objVal = trim($company['corporate_purpose'] ?? $company['objeto_social'] ?? ''); ?>
+                                <?php $objVal = company_sentence_case($company['corporate_purpose'] ?? $company['objeto_social'] ?? ''); ?>
                                 <?php if (!empty($objVal) && $objVal !== '-'): ?>
                                 <div class="b2b-data-row">
                                     <dt class="b2b-data-label">
@@ -896,7 +984,7 @@
                         <div class="b2b-card" style="margin-bottom:24px; padding: 0; overflow: hidden; position: relative;">
                             
                             <!-- HEADER -->
-                            <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start; background: #fff;">
+                            <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: flex-start; background: #fff;">
                                 <div>
                                     <h2 class="no-after-line" style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 4px 0; display: flex; align-items: center; gap: 10px; text-transform: uppercase;">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"></polyline></svg>
@@ -905,22 +993,65 @@
                                     <p style="margin: 0 0 12px 34px; font-size: 0.9rem; color: #64748b;">Análisis algorítmico basado en registros del BORME, contratos públicos y subvenciones.</p>
                                     <div style="margin-left: 34px; width: 60px; height: 3px; background: linear-gradient(90deg, #3b82f6 0%, #10b981 100%); border-radius: 2px;"></div>
                                 </div>
+
+                                <!-- VIGILAR EMPRESA
+                                     Nace oculto y neutro a propósito. Esta cabecera forma parte
+                                     del HTML que Cloudflare cachea, así que NO puede saber si
+                                     este usuario vigila la empresa: si se renderizara el estado
+                                     aquí, todos verían el del primero que pidió la página.
+                                     Lo enciende la hidratación (`is_watching` del AJAX), que es
+                                     lo único que ve la sesión real. -->
+                                <!-- Botón + nota en una sola columna, para que la promesa
+                                     cuelgue del botón y no del final de la cabecera.
+                                     La nota no es un párrafo fijo: cambia con el estado.
+                                     Apagado explica QUÉ GANAS si pulsas (que es lo que hace
+                                     que se pulse); encendido confirma A DÓNDE llega el aviso
+                                     (lo que evita el "¿se habrá guardado?" y el segundo clic
+                                     que lo deshace). El `title` del botón no valía: en móvil
+                                     no existe y en escritorio no lo lee nadie. -->
+                                <div style="flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; max-width: 100%;">
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+                                        <!-- Estado de TU cuenta (plan o consultas restantes). Igual que el
+                                             chip de vigilancia: nace oculto, porque la ficha va cacheada y
+                                             esto depende de quién mira. Lo rellena la hidratación. -->
+                                        <span id="risk-quota-pill" style="display: none; align-items: center; gap: 4px; padding: 4px 11px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; white-space: nowrap;"></span>
+                                    <button type="button"
+                                            id="risk-watch-header"
+                                            data-risk-watch
+                                            data-cif="<?= esc($companyCif, 'attr') ?>"
+                                            data-watching="0"
+                                            style="display: none; align-items: center; gap: 7px; cursor: pointer; border-radius: 999px; padding: 7px 15px; font-size: 0.78rem; font-weight: 800; transition: all 0.15s; background: #ffffff; border: 1px solid #cbd5e1; color: #475569;">
+                                        <span data-watch-icon>🔕</span>
+                                        <span data-watch-label>Vigilar empresa</span>
+                                    </button>
+                                    </div>
+
+                                    <div id="risk-watch-note"
+                                         style="display: none; max-width: 280px; text-align: right; font-size: 0.75rem; line-height: 1.4; color: #64748b;"></div>
+                                </div>
                             </div>
 
                             <div id="risk-profile-container" style="padding: 24px; position: relative; background: #fff; min-height: 260px;">
                                 <?php if (session('logged_in') || (int)(session('user_id') ?? 0) > 0): ?>
-                                    <?php if (!empty($riskQuota) && empty($riskQuota['allowed'])): ?>
-                                        <?= view('partials/company_risk_paywall', [
-                                            'company'   => $company,
-                                            'riskQuota' => $riskQuota
-                                        ]) ?>
-                                    <?php else: ?>
+                                    <?php if (!empty($riskQuota['allowed'])): ?>
                                         <?= view('partials/company_risk_profile', [
                                             'riskProfile' => $riskProfile,
                                             'company'     => $company,
                                             'contracts'   => $contracts ?? [],
                                             'subsidies'   => $subsidies ?? [],
                                             'riskQuota'   => $riskQuota ?? []
+                                        ]) ?>
+                                    <?php elseif (!empty($riskQuota['can_unlock'])): ?>
+                                        <?= view('partials/company_risk_locked', [
+                                            'riskProfile' => $riskProfile,
+                                            'company'     => $company,
+                                            'riskQuota'   => $riskQuota
+                                        ]) ?>
+                                    <?php else: ?>
+                                        <?= view('partials/company_risk_paywall', [
+                                            'company'     => $company,
+                                            'riskQuota'   => $riskQuota,
+                                            'riskProfile' => $riskProfile,
                                         ]) ?>
                                     <?php endif; ?>
                                 <?php else: ?>
@@ -931,6 +1062,7 @@
                                     ]) ?>
                                 <?php endif; ?>
                             </div>
+
                             <!-- FOOTER / DISCLAIMER -->
                             <div style="padding: 24px 32px; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; gap: 16px; align-items: center;">
                                 <div style="width: 42px; height: 42px; border-radius: 50%; background: #fff; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.03); color: #64748b;">
@@ -952,257 +1084,6 @@
                     <!-- END RISK PROFILE SECTION -->
 
 
-                    <div style="margin-bottom:24px;">
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start;">
-                            <!-- WIDGET DE VALORACIÓN SEO -->
-                            <div id="company-rating-widget"
-                                style="margin: 0; background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); border-radius: 16px; padding: 1.25rem 1rem; text-align: center; border: 1px solid rgba(255, 255, 255, 0.8);">
-                                <h3 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 0.25rem;">
-                                    ¿Te ha sido útil esta información?</h3>
-                                <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 0.75rem;">Valora la ficha de
-                                    <?= esc($companyName) ?>
-                                </p>
-
-                                <div class="rating-stars"
-                                    style="display: flex; justify-content: center; gap: 6px; margin-bottom: 0.75rem; cursor: pointer;">
-                                    <?php for ($i = 1; $i <= 5; $i++): ?>
-                                        <svg class="star-icon" data-value="<?= $i ?>" width="28" height="28"
-                                            viewBox="0 0 24 24"
-                                            fill="<?= ($i <= round($ratingAvg ?? 0)) ? '#fbbf24' : 'none' ?>"
-                                            stroke="<?= ($i <= round($ratingAvg ?? 0)) ? '#fbbf24' : '#cbd5e1' ?>"
-                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                            style="transition: all 0.2s;">
-                                            <polygon
-                                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
-                                            </polygon>
-                                        </svg>
-                                    <?php endfor; ?>
-                                </div>
-
-                                <div id="rating-stats-display"
-                                    style="font-size: 0.9rem; color: #475569; font-weight: 600;">
-                                    <?php if (isset($ratingCount) && $ratingCount > 0): ?>
-                                        Puntuación media: <span id="avg-rating-val"
-                                            style="color: #0f172a;"><?= number_format($ratingAvg, 1) ?></span>/5 (<span
-                                            id="count-rating-val"><?= $ratingCount ?></span> votos)
-                                    <?php else: ?>
-                                        Sé el primero en valorar esta empresa.
-                                    <?php endif; ?>
-                                </div>
-                                <div id="rating-message"
-                                    style="margin-top: 10px; font-size: 0.9rem; font-weight: 600; display: none;"></div>
-
-                                <div id="feedback-block" style="display: none; margin-top: 15px; text-align: left; padding-top: 15px; border-top: 1px solid #cbd5e1;">
-                                    <p id="feedback-prompt" style="font-size: 0.9rem; color: #475569; margin-bottom: 8px; font-weight: 600;"></p>
-                                    <textarea id="feedback-text" rows="3" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; resize: vertical; box-sizing: border-box;" placeholder="Escribe aquí tus comentarios..."></textarea>
-                                    <button id="submit-feedback-btn" style="margin-top: 10px; width: 100%; background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">Enviar sugerencia</button>
-                                    <div id="feedback-message" style="margin-top: 10px; font-size: 0.85rem; font-weight: 600; display: none; text-align: center;"></div>
-                                </div>
-                            </div>
-
-                            <script>
-                                document.addEventListener('DOMContentLoaded', function () {
-                                    const stars = document.querySelectorAll('.star-icon');
-                                    const widget = document.getElementById('company-rating-widget');
-                                    const msgDiv = document.getElementById('rating-message');
-                                    const avgSpan = document.getElementById('avg-rating-val');
-                                    const countSpan = document.getElementById('count-rating-val');
-                                    let hasVoted = false;
-
-                                    // Hover effects
-                                    stars.forEach(star => {
-                                        star.addEventListener('mouseenter', function () {
-                                            if (hasVoted) return;
-                                            const val = this.getAttribute('data-value');
-                                            stars.forEach(s => {
-                                                if (s.getAttribute('data-value') <= val) {
-                                                    s.style.fill = '#fcd34d'; // hover color
-                                                    s.style.stroke = '#fcd34d';
-                                                } else {
-                                                    s.style.fill = 'none';
-                                                    s.style.stroke = '#cbd5e1';
-                                                }
-                                            });
-                                        });
-
-                                        star.addEventListener('mouseleave', function () {
-                                            if (hasVoted) return;
-                                            // Reset to initial state based on PHP data is hard without keeping it in JS, 
-                                            // so we just clear hover effect unless we already voted
-                                            const currentAvg = <?= round($ratingAvg ?? 0) ?>;
-                                            stars.forEach(s => {
-                                                if (s.getAttribute('data-value') <= currentAvg) {
-                                                    s.style.fill = '#fbbf24';
-                                                    s.style.stroke = '#fbbf24';
-                                                } else {
-                                                    s.style.fill = 'none';
-                                                    s.style.stroke = '#cbd5e1';
-                                                }
-                                            });
-                                        });
-
-                                        star.addEventListener('click', function () {
-                                            if (hasVoted) return;
-                                            const val = this.getAttribute('data-value');
-                                            const companyId = <?= (int) ($company['id'] ?? 0) ?>;
-
-                                            // Lock UI
-                                            hasVoted = true;
-                                            stars.forEach(s => s.style.cursor = 'default');
-
-                                            // Send AJAX
-                                            fetch('<?= site_url('company/rate') ?>', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/x-www-form-urlencoded',
-                                                    'X-Requested-With': 'XMLHttpRequest'
-                                                },
-                                                body: new URLSearchParams({
-                                                    'company_id': companyId,
-                                                    'rating': val,
-                                                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
-                                                })
-                                            })
-                                                .then(response => response.json())
-                                                .then(data => {
-                                                    msgDiv.style.display = 'block';
-                                                    if (data.status === 'success') {
-                                                        msgDiv.style.color = '#16a34a';
-                                                        msgDiv.innerText = data.message;
-
-                                                        // Update stars visually to the given vote
-                                                        stars.forEach(s => {
-                                                            if (s.getAttribute('data-value') <= val) {
-                                                                s.style.fill = '#fbbf24';
-                                                                s.style.stroke = '#fbbf24';
-                                                            } else {
-                                                                s.style.fill = 'none';
-                                                                s.style.stroke = '#cbd5e1';
-                                                            }
-                                                        });
-
-                                                        // Update text
-                                                        let statsDisplay = document.getElementById('rating-stats-display');
-                                                        statsDisplay.innerHTML = `Puntuación media: <span id="avg-rating-val" style="color: #0f172a;">${data.new_avg}</span>/5 (<span id="count-rating-val">${data.new_count}</span> votos)`;
-
-                                                        if (val < 5) {
-                                                            const feedbackBlock = document.getElementById('feedback-block');
-                                                            const feedbackPrompt = document.getElementById('feedback-prompt');
-                                                            feedbackBlock.style.display = 'block';
-                                                            
-                                                            if (val == 4) {
-                                                                feedbackPrompt.innerText = 'Casi perfecto. ¿Qué detalle podríamos mejorar de la ficha?';
-                                                            } else if (val == 3) {
-                                                                feedbackPrompt.innerText = 'Gracias por tu valoración. ¿En qué consideras que deberíamos mejorar la ficha?';
-                                                            } else if (val == 2) {
-                                                                feedbackPrompt.innerText = 'Lamentamos no cumplir tus expectativas. ¿Qué información echas en falta o consideras incorrecta?';
-                                                            } else if (val == 1) {
-                                                                feedbackPrompt.innerText = 'Sentimos mucho tu mala experiencia. Por favor, indícanos qué errores graves has encontrado en la ficha para solucionarlos de inmediato.';
-                                                            }
-
-                                                            const submitBtn = document.getElementById('submit-feedback-btn');
-                                                            submitBtn.onclick = function() {
-                                                                const text = document.getElementById('feedback-text').value;
-                                                                const msg = document.getElementById('feedback-message');
-                                                                if (!text.trim()) {
-                                                                    msg.style.display = 'block';
-                                                                    msg.style.color = '#dc2626';
-                                                                    msg.innerText = 'Por favor, escribe un comentario.';
-                                                                    return;
-                                                                }
-
-                                                                submitBtn.disabled = true;
-                                                                submitBtn.innerText = 'Enviando...';
-                                                                submitBtn.style.opacity = '0.7';
-
-                                                                fetch('<?= site_url('company/rate_feedback') ?>', {
-                                                                    method: 'POST',
-                                                                    headers: {
-                                                                        'Content-Type': 'application/x-www-form-urlencoded',
-                                                                        'X-Requested-With': 'XMLHttpRequest'
-                                                                    },
-                                                                    body: new URLSearchParams({
-                                                                        'company_id': companyId,
-                                                                        'feedback': text,
-                                                                        '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
-                                                                    })
-                                                                })
-                                                                .then(res => res.json())
-                                                                .then(fData => {
-                                                                    msg.style.display = 'block';
-                                                                    if (fData.status === 'success') {
-                                                                        msg.style.color = '#16a34a';
-                                                                        msg.innerText = fData.message;
-                                                                        setTimeout(() => {
-                                                                            feedbackBlock.style.display = 'none';
-                                                                        }, 3000);
-                                                                    } else {
-                                                                        msg.style.color = '#dc2626';
-                                                                        msg.innerText = fData.message || 'Error al enviar sugerencia';
-                                                                        submitBtn.disabled = false;
-                                                                        submitBtn.innerText = 'Enviar sugerencia';
-                                                                        submitBtn.style.opacity = '1';
-                                                                    }
-                                                                })
-                                                                .catch(err => {
-                                                                    msg.style.display = 'block';
-                                                                    msg.style.color = '#dc2626';
-                                                                    msg.innerText = 'Error de conexión';
-                                                                    submitBtn.disabled = false;
-                                                                    submitBtn.innerText = 'Enviar sugerencia';
-                                                                    submitBtn.style.opacity = '1';
-                                                                });
-                                                            };
-                                                        }
-
-                                                    } else {
-                                                        msgDiv.style.color = '#dc2626';
-                                                        msgDiv.innerText = data.message || 'Error al procesar la valoración';
-                                                        // Re-enable voting if it wasn't a "already voted" error
-                                                        if (data.message !== 'Ya has valorado esta empresa anteriormente') {
-                                                            hasVoted = false;
-                                                        }
-                                                    }
-                                                })
-                                                .catch(err => {
-                                                    msgDiv.style.display = 'block';
-                                                    msgDiv.style.color = '#dc2626';
-                                                    msgDiv.innerText = 'Error de conexión';
-                                                    hasVoted = false;
-                                                });
-                                        });
-                                    });
-                                });
-                            </script>
-
-                            <!-- CTA LOOKALIKE (Sidebar) -->
-                            <a href="<?= site_url('encontrar-empresas-similares') ?>" rel="noopener noreferrer" style="display: block; background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); border-radius: 12px; padding: 1.5rem 1.25rem; text-decoration: none; position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.5); transition: transform 0.2s, box-shadow 0.2s;"
-                               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 30px -5px rgba(15, 23, 42, 0.6)';"
-                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px -5px rgba(15, 23, 42, 0.5)';"
-                               onclick="if(window.trackEvent) trackEvent('click_lookalike_banner', { source: 'company_sidebar' });">
-                                
-                                <!-- Decorative element -->
-                                <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(37, 99, 235, 0.2); filter: blur(30px); border-radius: 50%;"></div>
-                                
-                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.85rem; position: relative; z-index: 1;">
-                                    <span style="background: #22c55e; color: #ffffff; font-size: 0.7rem; font-weight: 800; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px; text-transform: uppercase; box-shadow: 0 2px 5px rgba(34, 197, 94, 0.3);">
-                                        ¡NUEVO!
-                                    </span>
-                                </div>
-                                
-                                <p style="color: #f8fafc; font-size: 0.95rem; line-height: 1.5; margin: 0 0 1.25rem 0; font-weight: 600; position: relative; z-index: 1;">
-                                    ¿Tienes una lista con tus mejores clientes? Súbela y nuestra IA encontrará miles de <strong>empresas gemelas</strong> por toda España.
-                                </p>
-
-                                <div style="display: flex; align-items: center; justify-content: center; width: 100%; background: linear-gradient(to right, #fde047, #f97316); color: #1e293b; font-weight: 800; font-size: 1rem; padding: 12px 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); transition: all 0.2s; position: relative; z-index: 1;">
-                                    Subir mis clientes 🧬
-                                </div>
-                            </a>
-
-
-                        </div> <!-- /reviews-banner -->
-
-                        </div> <!-- /reviews-banner-row -->
 
                     <!-- SECCIÓN DE ADMINISTRADORES Y CARGOS -->
                     <?php if (!empty($administrators)): ?>
@@ -1431,59 +1312,6 @@
                         </div>
                     <?php endif; ?>
 
-                    <!-- SECCIÓN PARA DESARROLLADORES (API Banner Nativo) -->
-                    <section id="api-dev-section" class="api-dev-section"
-                        class="reveal-on-scroll" style="margin-top: 4rem; padding: 2rem; background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);">
-                        <div class="api-dev-grid"
-                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center;">
-
-                            <!-- Columna Izquierda: Mensaje y CTA -->
-                            <div class="api-dev-info">
-                                <h3 style="display: flex; align-items: center; gap: 1rem; margin: 0 0 1rem; font-size: 1.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.025em;">
-                                    <div style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: #eff6ff; color: #3b82f6; border-radius: 12px; flex-shrink: 0;">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-7cb36ec4"></use></svg>
-                                    </div>
-                                    ¿Eres desarrollador?
-                                </h3>
-                                <p style="margin: 0 0 2rem; color: #64748b; line-height: 1.6; font-size: 1.05rem;">
-                                    Integra la información oficial de <strong><?= esc($companyName) ?></strong>
-                                    directamente
-                                    en tu software mediante nuestra API REST robusta y documentada.
-                                </p>
-                                <a href="<?= site_url('register') ?>" class="btn secondary"
-                                    style="display: inline-flex; align-items: center; padding: 0.875rem 2rem; font-weight: 700; border-radius: 12px; transition: all 0.2s; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); text-decoration: none;"
-                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(16, 185, 129, 0.4)';"
-                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)';">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 8px;"><use href="#icon-b6af18a8"></use></svg>
-                                    Obtener API Key Gratuitamente
-                                </a>
-                            </div>
-
-                            <!-- Columna Derecha: Consola / Code Snippet -->
-                            <div class="console-wrapper ai-box-glow"
-                                style="background: #0f172a; border-radius: 16px; overflow: hidden; box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.4); border: 1px solid #1e293b;">
-                                <div class="console-header"
-                                    style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #1e293b; border-bottom: 1px solid #334155;">
-                                    <div class="mac-buttons" style="display: flex; gap: 8px;">
-                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444;"></div>
-                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #f59e0b;"></div>
-                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #10b981;"></div>
-                                    </div>
-                                    <span style="font-size: 0.75rem; color: #94a3b8; font-family: monospace; font-weight: 600;">Ver respuesta JSON</span>
-                                </div>
-                                <div class="console-body"
-                                    style="padding: 1.5rem; font-family: 'Fira Code', 'Courier New', Courier, monospace; font-size: 0.85rem; color: #e2e8f0; line-height: 1.7; overflow-x: auto;">
-                                    <div style="color: #64748b; margin-bottom: 8px;"># Petición cURL para <?= esc($companyCif) ?></div>
-                                    <div style="display: flex; gap: 8px;">
-                                        <span style="color: #ec4899;">curl</span>
-                                        <span style="color: #a7f3d0; word-break: break-all;">"https://apiempresas.es/api/v1/companies?cif=<?= esc($companyCif) ?>"</span>
-                                    </div>
-                                    <div style="padding-left: 2rem; color: #fde047;">-H "Authorization: Bearer TU_API_KEY"</div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
 
                     <!-- CONTRATOS Y SUBVENCIONES SECTION -->
                     <?php if (!empty($contracts) || !empty($subsidies)): ?>
@@ -1806,12 +1634,22 @@
                                             <div class="borme-body">
                                                 <h3 class="borme-title"
                                                     style="margin-bottom: 12px; font-size: 1.1rem; line-height:1.4;">
-                                                    <?= esc($post['act_types'] ?: 'Acto Registral') ?>
+                                                    <?php
+                                                    // El BORME llega en MAYÚSCULAS. El titular del acto es
+                                                    // vocabulario fijo y sin nombres propios, así que pasa a
+                                                    // caja de frase sin riesgo.
+                                                    $actoTitulo = trim((string)($post['act_types'] ?? ''));
+                                                    echo esc(company_sentence_case($actoTitulo !== '' ? $actoTitulo : 'Acto registral'));
+                                                    ?>
                                                 </h3>
                                                 <div>
                                                     <?php
-                                                    // Format description
-                                                    $desc = $post['description'];
+                                                    // El cuerpo del asiento NO se pasa a minúsculas a propósito:
+                                                    // lleva nombres de personas ("JUAN PEREZ GARCIA") y cualquier
+                                                    // conversión automática los dejaría peor de lo que están.
+                                                    // Sí se escapa antes de resaltar las etiquetas: venía del
+                                                    // importador directo al HTML.
+                                                    $desc = esc((string)($post['description'] ?? ''));
                                                     $desc = preg_replace('/([A-ZÁÉÍÓÚÑ\s]+:)/u', '<strong>$1</strong>', $desc);
                                                     echo nl2br($desc);
                                                     ?>
@@ -1823,6 +1661,318 @@
                             </div>
                         </div>
                     <?php endif; ?>
+
+
+
+                    <!-- VALORACIÓN + LOOKALIKE: en una sola fila, fuera de la zona de conversión de riesgo. -->
+                    <div style="margin-top: 4rem; margin-bottom: 24px;">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px; align-items:stretch;">
+                            <!-- WIDGET DE VALORACIÓN SEO -->
+                            <div id="company-rating-widget"
+                                style="margin: 0; background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); border-radius: 16px; padding: 1.25rem 1rem; text-align: center; border: 1px solid rgba(255, 255, 255, 0.8);">
+                                <h3 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 0.25rem;">
+                                    ¿Te ha sido útil esta información?</h3>
+                                <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 0.75rem;">Valora la ficha de
+                                    <?= esc($companyName) ?>
+                                </p>
+
+                                <div class="rating-stars"
+                                    style="display: flex; justify-content: center; gap: 6px; margin-bottom: 0.75rem; cursor: pointer;">
+                                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                                        <svg class="star-icon" data-value="<?= $i ?>" width="28" height="28"
+                                            viewBox="0 0 24 24"
+                                            fill="<?= ($i <= round($ratingAvg ?? 0)) ? '#fbbf24' : 'none' ?>"
+                                            stroke="<?= ($i <= round($ratingAvg ?? 0)) ? '#fbbf24' : '#cbd5e1' ?>"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            style="transition: all 0.2s;">
+                                            <polygon
+                                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                                            </polygon>
+                                        </svg>
+                                    <?php endfor; ?>
+                                </div>
+
+                                <div id="rating-stats-display"
+                                    style="font-size: 0.9rem; color: #475569; font-weight: 600;">
+                                    <?php if (isset($ratingCount) && $ratingCount > 0): ?>
+                                        Puntuación media: <span id="avg-rating-val"
+                                            style="color: #0f172a;"><?= number_format($ratingAvg, 1) ?></span>/5 (<span
+                                            id="count-rating-val"><?= $ratingCount ?></span> votos)
+                                    <?php else: ?>
+                                        Sé el primero en valorar esta empresa.
+                                    <?php endif; ?>
+                                </div>
+                                <div id="rating-message"
+                                    style="margin-top: 10px; font-size: 0.9rem; font-weight: 600; display: none;"></div>
+
+                                <div id="feedback-block" style="display: none; margin-top: 15px; text-align: left; padding-top: 15px; border-top: 1px solid #cbd5e1;">
+                                    <p id="feedback-prompt" style="font-size: 0.9rem; color: #475569; margin-bottom: 8px; font-weight: 600;"></p>
+                                    <textarea id="feedback-text" rows="3" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; resize: vertical; box-sizing: border-box;" placeholder="Escribe aquí tus comentarios..."></textarea>
+                                    <button id="submit-feedback-btn" style="margin-top: 10px; width: 100%; background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">Enviar sugerencia</button>
+                                    <div id="feedback-message" style="margin-top: 10px; font-size: 0.85rem; font-weight: 600; display: none; text-align: center;"></div>
+                                </div>
+                            </div>
+
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    const stars = document.querySelectorAll('.star-icon');
+                                    const widget = document.getElementById('company-rating-widget');
+                                    const msgDiv = document.getElementById('rating-message');
+                                    const avgSpan = document.getElementById('avg-rating-val');
+                                    const countSpan = document.getElementById('count-rating-val');
+                                    let hasVoted = false;
+
+                                    // Hover effects
+                                    stars.forEach(star => {
+                                        star.addEventListener('mouseenter', function () {
+                                            if (hasVoted) return;
+                                            const val = this.getAttribute('data-value');
+                                            stars.forEach(s => {
+                                                if (s.getAttribute('data-value') <= val) {
+                                                    s.style.fill = '#fcd34d'; // hover color
+                                                    s.style.stroke = '#fcd34d';
+                                                } else {
+                                                    s.style.fill = 'none';
+                                                    s.style.stroke = '#cbd5e1';
+                                                }
+                                            });
+                                        });
+
+                                        star.addEventListener('mouseleave', function () {
+                                            if (hasVoted) return;
+                                            // Reset to initial state based on PHP data is hard without keeping it in JS, 
+                                            // so we just clear hover effect unless we already voted
+                                            const currentAvg = <?= round($ratingAvg ?? 0) ?>;
+                                            stars.forEach(s => {
+                                                if (s.getAttribute('data-value') <= currentAvg) {
+                                                    s.style.fill = '#fbbf24';
+                                                    s.style.stroke = '#fbbf24';
+                                                } else {
+                                                    s.style.fill = 'none';
+                                                    s.style.stroke = '#cbd5e1';
+                                                }
+                                            });
+                                        });
+
+                                        star.addEventListener('click', function () {
+                                            if (hasVoted) return;
+                                            const val = this.getAttribute('data-value');
+                                            const companyId = <?= (int) ($company['id'] ?? 0) ?>;
+
+                                            // Lock UI
+                                            hasVoted = true;
+                                            stars.forEach(s => s.style.cursor = 'default');
+
+                                            // Send AJAX
+                                            fetch('<?= site_url('company/rate') ?>', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                                    'X-Requested-With': 'XMLHttpRequest'
+                                                },
+                                                body: new URLSearchParams({
+                                                    'company_id': companyId,
+                                                    'rating': val,
+                                                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                                                })
+                                            })
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    msgDiv.style.display = 'block';
+                                                    if (data.status === 'success') {
+                                                        msgDiv.style.color = '#16a34a';
+                                                        msgDiv.innerText = data.message;
+
+                                                        // Update stars visually to the given vote
+                                                        stars.forEach(s => {
+                                                            if (s.getAttribute('data-value') <= val) {
+                                                                s.style.fill = '#fbbf24';
+                                                                s.style.stroke = '#fbbf24';
+                                                            } else {
+                                                                s.style.fill = 'none';
+                                                                s.style.stroke = '#cbd5e1';
+                                                            }
+                                                        });
+
+                                                        // Update text
+                                                        let statsDisplay = document.getElementById('rating-stats-display');
+                                                        statsDisplay.innerHTML = `Puntuación media: <span id="avg-rating-val" style="color: #0f172a;">${data.new_avg}</span>/5 (<span id="count-rating-val">${data.new_count}</span> votos)`;
+
+                                                        if (val < 5) {
+                                                            const feedbackBlock = document.getElementById('feedback-block');
+                                                            const feedbackPrompt = document.getElementById('feedback-prompt');
+                                                            feedbackBlock.style.display = 'block';
+                                                            
+                                                            if (val == 4) {
+                                                                feedbackPrompt.innerText = 'Casi perfecto. ¿Qué detalle podríamos mejorar de la ficha?';
+                                                            } else if (val == 3) {
+                                                                feedbackPrompt.innerText = 'Gracias por tu valoración. ¿En qué consideras que deberíamos mejorar la ficha?';
+                                                            } else if (val == 2) {
+                                                                feedbackPrompt.innerText = 'Lamentamos no cumplir tus expectativas. ¿Qué información echas en falta o consideras incorrecta?';
+                                                            } else if (val == 1) {
+                                                                feedbackPrompt.innerText = 'Sentimos mucho tu mala experiencia. Por favor, indícanos qué errores graves has encontrado en la ficha para solucionarlos de inmediato.';
+                                                            }
+
+                                                            const submitBtn = document.getElementById('submit-feedback-btn');
+                                                            submitBtn.onclick = function() {
+                                                                const text = document.getElementById('feedback-text').value;
+                                                                const msg = document.getElementById('feedback-message');
+                                                                if (!text.trim()) {
+                                                                    msg.style.display = 'block';
+                                                                    msg.style.color = '#dc2626';
+                                                                    msg.innerText = 'Por favor, escribe un comentario.';
+                                                                    return;
+                                                                }
+
+                                                                submitBtn.disabled = true;
+                                                                submitBtn.innerText = 'Enviando...';
+                                                                submitBtn.style.opacity = '0.7';
+
+                                                                fetch('<?= site_url('company/rate_feedback') ?>', {
+                                                                    method: 'POST',
+                                                                    headers: {
+                                                                        'Content-Type': 'application/x-www-form-urlencoded',
+                                                                        'X-Requested-With': 'XMLHttpRequest'
+                                                                    },
+                                                                    body: new URLSearchParams({
+                                                                        'company_id': companyId,
+                                                                        'feedback': text,
+                                                                        '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                                                                    })
+                                                                })
+                                                                .then(res => res.json())
+                                                                .then(fData => {
+                                                                    msg.style.display = 'block';
+                                                                    if (fData.status === 'success') {
+                                                                        msg.style.color = '#16a34a';
+                                                                        msg.innerText = fData.message;
+                                                                        setTimeout(() => {
+                                                                            feedbackBlock.style.display = 'none';
+                                                                        }, 3000);
+                                                                    } else {
+                                                                        msg.style.color = '#dc2626';
+                                                                        msg.innerText = fData.message || 'Error al enviar sugerencia';
+                                                                        submitBtn.disabled = false;
+                                                                        submitBtn.innerText = 'Enviar sugerencia';
+                                                                        submitBtn.style.opacity = '1';
+                                                                    }
+                                                                })
+                                                                .catch(err => {
+                                                                    msg.style.display = 'block';
+                                                                    msg.style.color = '#dc2626';
+                                                                    msg.innerText = 'Error de conexión';
+                                                                    submitBtn.disabled = false;
+                                                                    submitBtn.innerText = 'Enviar sugerencia';
+                                                                    submitBtn.style.opacity = '1';
+                                                                });
+                                                            };
+                                                        }
+
+                                                    } else {
+                                                        msgDiv.style.color = '#dc2626';
+                                                        msgDiv.innerText = data.message || 'Error al procesar la valoración';
+                                                        // Re-enable voting if it wasn't a "already voted" error
+                                                        if (data.message !== 'Ya has valorado esta empresa anteriormente') {
+                                                            hasVoted = false;
+                                                        }
+                                                    }
+                                                })
+                                                .catch(err => {
+                                                    msgDiv.style.display = 'block';
+                                                    msgDiv.style.color = '#dc2626';
+                                                    msgDiv.innerText = 'Error de conexión';
+                                                    hasVoted = false;
+                                                });
+                                        });
+                                    });
+                                });
+                            </script>
+
+
+
+
+                            <!-- CTA LOOKALIKE (Sidebar) -->
+                            <a href="<?= site_url('encontrar-empresas-similares') ?>" rel="noopener noreferrer" style="display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); border-radius: 12px; padding: 1.5rem 1.25rem; text-decoration: none; position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.5); transition: transform 0.2s, box-shadow 0.2s;"
+                               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 30px -5px rgba(15, 23, 42, 0.6)';"
+                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px -5px rgba(15, 23, 42, 0.5)';"
+                               onclick="if(window.trackEvent) trackEvent('click_lookalike_banner', { source: 'company_sidebar' });">
+                                
+                                <!-- Decorative element -->
+                                <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(37, 99, 235, 0.2); filter: blur(30px); border-radius: 50%;"></div>
+                                
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.85rem; position: relative; z-index: 1;">
+                                    <span style="background: #22c55e; color: #ffffff; font-size: 0.7rem; font-weight: 800; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px; text-transform: uppercase; box-shadow: 0 2px 5px rgba(34, 197, 94, 0.3);">
+                                        ¡NUEVO!
+                                    </span>
+                                </div>
+                                
+                                <p style="color: #f8fafc; font-size: 0.95rem; line-height: 1.5; margin: 0 0 1.25rem 0; font-weight: 600; position: relative; z-index: 1;">
+                                    ¿Tienes una lista con tus mejores clientes? Súbela y nuestra IA encontrará miles de <strong>empresas gemelas</strong> por toda España.
+                                </p>
+
+                                <div style="display: flex; align-items: center; justify-content: center; width: 100%; background: linear-gradient(to right, #fde047, #f97316); color: #1e293b; font-weight: 800; font-size: 1rem; padding: 12px 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); transition: all 0.2s; position: relative; z-index: 1;">
+                                    Subir mis clientes 🧬
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- ZONA DE OTROS PRODUCTOS: movida bajo el BORME para que la
+                         sección de riesgo tenga una sola acción primaria. -->
+                    <!-- SECCIÓN PARA DESARROLLADORES (API Banner Nativo) -->
+                    <section id="api-dev-section" class="api-dev-section"
+                        class="reveal-on-scroll" style="margin-top: 4rem; padding: 2rem; background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);">
+                        <div class="api-dev-grid"
+                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center;">
+
+                            <!-- Columna Izquierda: Mensaje y CTA -->
+                            <div class="api-dev-info">
+                                <h3 style="display: flex; align-items: center; gap: 1rem; margin: 0 0 1rem; font-size: 1.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.025em;">
+                                    <div style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: #eff6ff; color: #3b82f6; border-radius: 12px; flex-shrink: 0;">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-7cb36ec4"></use></svg>
+                                    </div>
+                                    ¿Eres desarrollador?
+                                </h3>
+                                <p style="margin: 0 0 2rem; color: #64748b; line-height: 1.6; font-size: 1.05rem;">
+                                    Integra la información oficial de <strong><?= esc($companyName) ?></strong>
+                                    directamente
+                                    en tu software mediante nuestra API REST robusta y documentada.
+                                </p>
+                                <a href="<?= site_url('register') ?>" class="btn secondary"
+                                    style="display: inline-flex; align-items: center; padding: 0.875rem 2rem; font-weight: 700; border-radius: 12px; transition: all 0.2s; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); text-decoration: none;"
+                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(16, 185, 129, 0.4)';"
+                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)';">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 8px;"><use href="#icon-b6af18a8"></use></svg>
+                                    Obtener API Key Gratuitamente
+                                </a>
+                            </div>
+
+                            <!-- Columna Derecha: Consola / Code Snippet -->
+                            <div class="console-wrapper ai-box-glow"
+                                style="background: #0f172a; border-radius: 16px; overflow: hidden; box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.4); border: 1px solid #1e293b;">
+                                <div class="console-header"
+                                    style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #1e293b; border-bottom: 1px solid #334155;">
+                                    <div class="mac-buttons" style="display: flex; gap: 8px;">
+                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444;"></div>
+                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #f59e0b;"></div>
+                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #10b981;"></div>
+                                    </div>
+                                    <span style="font-size: 0.75rem; color: #94a3b8; font-family: monospace; font-weight: 600;">Ver respuesta JSON</span>
+                                </div>
+                                <div class="console-body"
+                                    style="padding: 1.5rem; font-family: 'Fira Code', 'Courier New', Courier, monospace; font-size: 0.85rem; color: #e2e8f0; line-height: 1.7; overflow-x: auto;">
+                                    <div style="color: #64748b; margin-bottom: 8px;"># Petición cURL para <?= esc($companyCif) ?></div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <span style="color: #ec4899;">curl</span>
+                                        <span style="color: #a7f3d0; word-break: break-all;">"https://apiempresas.es/api/v1/companies?cif=<?= esc($companyCif) ?>"</span>
+                                    </div>
+                                    <div style="padding-left: 2rem; color: #fde047;">-H "Authorization: Bearer TU_API_KEY"</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
 
                     <!-- CTA PROMOCIONAL B2B (Data Paywall / Excel Export) -->
                     <aside id="descargar-excel" class="seo-cta-banner"
@@ -2311,7 +2461,7 @@
             <!-- Right Side: Personalization Form -->
             <div style="flex: 1 1 400px; padding: 40px;">
                 <h3 style="margin: 0 0 20px 0; font-size: 1.5rem; color: #0f172a; font-weight: 800;">Personalizar PDF</h3>
-                <p style="color: #475569; margin-bottom: 25px; line-height: 1.5;">Configura la Marca Blanca. Precio: <strong>3,90€ + IVA</strong></p>
+                <p style="color: #475569; margin-bottom: 25px; line-height: 1.5;">Configura la Marca Blanca. Precio: <strong><?= solvencia('precios.dossier', '5,90 €') ?> + IVA</strong></p>
 
                 <div id="whitelabel-status"></div>
 
@@ -2341,7 +2491,7 @@
                 </div>
 
                 <button type="submit" id="btn-whitelabel-submit" style="width: 100%; padding: 14px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
-                    Pagar 5,90€ + IVA y Descargar
+                    Pagar <?= solvencia('precios.dossier', '5,90 €') ?> + IVA y Descargar
                 </button>
             </form>
         </div>
@@ -2380,14 +2530,14 @@
                     } else {
                         statusArea.innerHTML = `<div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px 14px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; font-size: 0.88rem; text-align: center;">⚠️ ${data.message || 'Error'}</div>`;
                         btnSubmit.disabled = false;
-                        btnSubmit.innerHTML = 'Pagar 5,90€ + IVA y Descargar';
+                        btnSubmit.innerHTML = 'Pagar <?= solvencia('precios.dossier', '5,90 €') ?> + IVA y Descargar';
                     }
                 })
                 .catch(error => {
                     console.error(error);
                     statusArea.innerHTML = `<div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px 14px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; font-size: 0.88rem; text-align: center;">⚠️ Ocurrió un error en la conexión.</div>`;
                     btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = 'Pagar 5,90€ + IVA y Descargar';
+                    btnSubmit.innerHTML = 'Pagar <?= solvencia('precios.dossier', '5,90 €') ?> + IVA y Descargar';
                 });
             });
         }
@@ -2469,8 +2619,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const cif = '<?= esc($companyCif ?? $company['registro_mercantil'] ?? '') ?>';
     if (!cif) return;
     
-    // Usar origen actual del navegador para garantizar same-origin y envío de cookies de sesión
-    const requestUrl = window.location.origin + '<?= rtrim(site_url('/'), '/') === rtrim(base_url('/'), '/') ? '' : '' ?>/api/empresa/private-data/' + encodeURIComponent(cif) + '?_ts=' + new Date().getTime();
+    // Se usa el ORIGEN del navegador (same-origin, para que viajen las cookies de
+    // sesión) + la RUTA BASE de la instalación.
+    //
+    // Aquí había un ternario que siempre devolvía '' y la URL quedaba colgando de
+    // la raíz del dominio. En producción coincide y funciona; en una instalación
+    // en subcarpeta (localhost/apiempresas) daba 404, así que la hidratación no
+    // llegaba a ejecutarse NUNCA en local: ni el estado de vigilancia, ni la cuota
+    // real, ni el bloque de riesgo del usuario. Se veía solo lo del HTML cacheado.
+    const basePath = '<?= rtrim((string) (parse_url(site_url('/'), PHP_URL_PATH) ?: '/'), '/') ?>';
+    const requestUrl = window.location.origin + basePath + '/api/empresa/private-data/' + encodeURIComponent(cif) + '?_ts=' + new Date().getTime();
     
     fetch(requestUrl, {
         method: 'GET',
@@ -2495,10 +2653,105 @@ document.addEventListener('DOMContentLoaded', function() {
             const ctaBanner = document.getElementById('descargar-excel');
             if (ctaBanner) ctaBanner.style.display = 'none';
             
-            // Update Risk Profile container with private data (Risk Profile or Paywall)
+            // Update Risk Profile container with private data (profile / locked / paywall)
+            // Botón de vigilancia de la cabecera: el HTML cacheado lo sirve oculto
+            // y en neutro; aquí es donde por fin sabemos el estado de ESTE usuario.
+            const btnWatch = document.getElementById('risk-watch-header');
+            if (btnWatch && data.risk_state && data.risk_state !== 'none') {
+                // Se muestra con display, NO quitando un atributo `hidden`: el botón
+                // trae `display` en su style inline y un estilo inline le gana al
+                // `[hidden] { display: none }` del navegador. Con `hidden` el botón
+                // se veía igualmente desde el primer pintado, con un estado que no
+                // era el de nadie — y el primer clic partía de ahí, de modo que
+                // hacían falta dos para dejarlo en "Vigilando".
+                btnWatch.style.display = 'inline-flex';
+                // Datos que solo conoce el servidor y que la nota necesita.
+                btnWatch.dataset.alertsOn = data.watch_alerts_on ? '1' : '0';
+                btnWatch.dataset.email    = data.watch_email || '';
+                // Lista de vigilancia llena: lo sabe el servidor, así que se marca
+                // aquí para que la caja de petición avise ANTES del clic.
+                btnWatch.dataset.watchFull = data.watch_full ? '1' : '0';
+                if (data.watch_quota && !data.watch_quota.ilimitado) {
+                    btnWatch.dataset.watchTope = data.watch_quota.tope;
+                }
+                if (window.riskPintarVigilancia) {
+                    window.riskPintarVigilancia(btnWatch, !!data.is_watching);
+                }
+
+                // Plan o consultas restantes, al lado del chip de vigilancia.
+                // El pintado vive en head.php porque el desbloqueo TAMBIÉN tiene que
+                // repintarla: antes solo lo hacía la hidratación, así que después de
+                // consultar una empresa la píldora se quedaba con el número de antes
+                // y contradecía al upsell ("0 de 3" arriba, "te quedan 2" abajo).
+                if (window.riskPintarCuota) window.riskPintarCuota(data.risk_quota);
+            }
+
+            // El menú "Descargar" se sirve cacheado ofreciendo la compra del informe.
+            // Si este usuario ya tiene derecho a él, aquí es donde se entera.
+            if (window.riskMenuDescargas) window.riskMenuDescargas(!!data.informe_gratis);
+
             const riskContainer = document.getElementById('risk-profile-container');
             if (riskContainer && data.risk_profile_html) {
                 riskContainer.innerHTML = data.risk_profile_html;
+
+                // La caja de "¿quieres vigilarla?" viaja DENTRO de este HTML, así que
+                // hay que sincronizarla aquí: antes de esta línea todavía no existe
+                // en el DOM y la llamada no encontraba nada que encender.
+                if (window.riskSincronizarPeticion) window.riskSincronizarPeticion();
+
+                // Por lo mismo: el upsell de Pro viaja dentro de este HTML, y su
+                // argumento depende de si el usuario YA vigila esta empresa. El chip
+                // de la cabecera se pintó unas líneas más arriba, cuando el upsell
+                // todavía no estaba en el DOM.
+                if (window.riskPintarUpsell) window.riskPintarUpsell();
+
+                // El bloque llega por AJAX: hay que registrar sus impresiones a mano.
+                if (window.trackObserveViews) window.trackObserveViews(riskContainer);
+
+                // El dictamen ya es accesible (suscriptor o empresa ya desbloqueada):
+                // se registra la consulta en el historial solo si el bloque llega a verse.
+                // No consume cuota; el gasto real ocurre con el click de desbloqueo.
+                // Vuelta del registro con ?ver-riesgo=1: la intención ya era explícita
+                // (pulsó el CTA del teaser de esta empresa), así que se lleva la vista
+                // al bloque y, si sigue bloqueado, se abre el dictamen sin pedir un
+                // segundo click. El scroll NO depende de que haya botón: aunque el
+                // bloque llegue ya desbloqueado o en paywall, el usuario vino a verlo.
+                if (window.riskWantsAutoOpen && window.riskWantsAutoOpen()) {
+                    if (window.riskScrollToBlock) window.riskScrollToBlock();
+
+                    const autoBtn = (data.risk_state === 'locked')
+                        ? riskContainer.querySelector('[data-risk-unlock]')
+                        : null;
+
+                    if (autoBtn) {
+                        autoBtn.click();   // el handler global recoloca y limpia el flag
+                    } else if (window.riskClearAutoFlag) {
+                        window.riskClearAutoFlag();
+                    }
+                }
+
+                if (data.risk_state === 'profile' && data.risk_cif && 'IntersectionObserver' in window) {
+                    const observer = new IntersectionObserver(function (entries) {
+                        entries.forEach(function (entry) {
+                            if (!entry.isIntersecting) return;
+                            observer.disconnect();
+                            fetch('<?= site_url('api/empresa/desbloquear-riesgo') ?>', {
+                                method: 'POST',
+                                credentials: 'same-origin',
+                                cache: 'no-store',
+                                keepalive: true,
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                // 'passive': solo historial. Sin esto, a los suscriptores les entraría en
+                                // vigilancia toda empresa cuyo dictamen se les abriera al hacer scroll.
+                                body: JSON.stringify({ cif: data.risk_cif, mode: 'passive' })
+                            }).catch(function () { /* el historial es best-effort */ });
+                        });
+                    }, { threshold: 0.35 });
+                    observer.observe(riskContainer);
+                }
             }
             
             // Sync Header UI with localStorage

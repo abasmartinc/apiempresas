@@ -28,7 +28,7 @@
 
                             <h2 style="margin: 0 0 16px; color: #0f172a; font-size: 22px; font-weight: 800;">¡Bienvenido a Solvencia Pro, {name}!</h2>
                             <p style="margin: 0 0 18px; color: #475569; font-size: 15px; line-height: 1.6;">
-                                Tu suscripción a <strong>Solvencia Pro</strong> ya está operativa. A partir de este momento tienes acceso <strong>ilimitado y sin restricciones de cuota</strong> para auditar la solvencia de cualquier sociedad mercantil en España.
+                                Tu suscripción a <strong>Solvencia Pro</strong> ya está operativa. Puedes auditar la solvencia de cualquier sociedad mercantil de España y poner <strong>hasta 25 empresas bajo vigilancia</strong> del BORME.
                             </p>
 
                             <!-- Value Proposition Box -->
@@ -40,9 +40,9 @@
                                         <!-- Feature 1 -->
                                         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
                                             <tr>
-                                                <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">♾️</td>
+                                                <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">🔔</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
-                                                    <strong>Auditorías Ilimitadas:</strong> Consulta todas las empresas que necesites cada mes sin preocuparte por límites ni costes por consulta.
+                                                    <strong>Cartera vigilada:</strong> pon hasta 25 empresas en seguimiento y te escribimos el día que alguna se mueva en el Registro Mercantil.
                                                 </td>
                                             </tr>
                                         </table>
@@ -52,7 +52,7 @@
                                             <tr>
                                                 <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">📄</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
-                                                    <strong>Descarga de Informes en PDF:</strong> Genera y descarga el dictamen oficial con sello de solvencia de cada empresa.
+                                                    <strong>Descarga de Informes en PDF:</strong> Genera y descarga el informe de solvencia de cada empresa que consultes, con su puntuación, el histórico del BORME y la fecha de emisión.
                                                 </td>
                                             </tr>
                                         </table>
@@ -97,6 +97,11 @@
                                     </td>
                                 </tr>
                             </table>
+
+                            <!-- Garantía. Va en el correo de bienvenida a propósito: una
+                                 garantía que el cliente no recuerda no reduce el riesgo
+                                 percibido, y una que no sabe ejecutar acaba en contracargo. -->
+                            {guarantee_block}
                         </td>
                     </tr>
                     

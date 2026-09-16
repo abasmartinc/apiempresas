@@ -1,3 +1,8 @@
+<?php
+    // Los mismos helpers que el informe de riesgo. Este fichero no cargaba ninguno,
+    // así que no podía traducir los códigos del motor ni pesar la gravedad.
+    helper(['risk_labels', 'company']);
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -354,12 +359,19 @@
 
         /* BORME TIMELINE */
         .timeline { margin-top: 20px; padding-left: 10px; }
+        /* Ni el título de la sección huérfano al pie: arrastra consigo el primer bloque. */
+        .section-title-wrap { page-break-after: avoid; }
+        /* Un asiento no se parte entre páginas: el corte dejaba la fecha y el título
+           al final de una hoja y el detalle del acto al principio de la siguiente, que
+           en un histórico registral es justo lo que no puede pasar — quien lo lee
+           necesita ver la fecha junto a lo que ocurrió ese día. */
         .timeline-item {
             border-left: 2px solid #cbd5e1;
             padding-left: 20px;
             padding-bottom: 20px;
             position: relative;
             margin-bottom: 0;
+            page-break-inside: avoid;
         }
         .timeline-item::before {
             content: "";
@@ -661,31 +673,54 @@
                         <?php if (!empty($flags)): ?>
                             <?php foreach ($flags as $flag): ?>
                                 <?php 
-                                $sev = $flag['severity'] ?? 'low';
-                                if ($sev === 'high') {
+                                /*
+                                 * Gravedad por risk_event_severidad, NO comparando la cadena.
+                                 * El motor emite también `critical`, que aquí no entraba en
+                                 * ninguna rama y caía al `else`: una sociedad EXTINGUIDA se
+                                 * imprimía en verde y con la etiqueta POSITIVO, en el informe
+                                 * más caro de los dos.
+                                 */
+                                $sevN = risk_event_severidad($flag);
+                                if ($sevN >= 3) {
                                     $iconColor = '#ef4444'; $iconBg = '#fee2e2';
                                     $badgeColor = '#b91c1c'; $badgeBg = '#fef2f2'; $badgeBorder = '#fecaca';
                                     $sevLabel = 'ALERTA'; $iconSymbol = '!';
-                                } elseif ($sev === 'medium') {
+                                } elseif ($sevN === 2) {
                                     $iconColor = '#f59e0b'; $iconBg = '#fef3c7';
                                     $badgeColor = '#b45309'; $badgeBg = '#fffbeb'; $badgeBorder = '#fde68a';
-                                    $sevLabel = 'ATENCIÓN'; $iconSymbol = '?';
+                                    // Antes un '?' literal, que en un dictamen se lee como
+                                    // "no lo sabemos" en vez de como una advertencia.
+                                    $sevLabel = 'ATENCIÓN'; $iconSymbol = '!';
                                 } else {
-                                    $iconColor = '#22c55e'; $iconBg = '#dcfce7';
-                                    $badgeColor = '#15803d'; $badgeBg = '#f0fdf4'; $badgeBorder = '#bbf7d0';
-                                    $sevLabel = 'POSITIVO'; $iconSymbol = '✓';
+                                    /*
+                                     * LEVE, no POSITIVO. Esta lista son las incidencias que
+                                     * el motor ha encontrado EN CONTRA de la empresa: la de
+                                     * gravedad baja sigue siendo una incidencia, y pintarla
+                                     * en verde con un tick la convierte en un punto a favor.
+                                     * El verde se reserva para el caso de "sin incidencias",
+                                     * que tiene su propia tarjeta.
+                                     */
+                                    $iconColor = '#475569'; $iconBg = '#e2e8f0';
+                                    $badgeColor = '#475569'; $badgeBg = '#f8fafc'; $badgeBorder = '#e2e8f0';
+                                    $sevLabel = 'LEVE'; $iconSymbol = 'i';
                                 }
                                 ?>
                                 <table class="ies-factor-card">
                                     <tr>
                                         <td class="ies-factor-icon">
-                                            <div class="ies-factor-icon-circle" style="background-color: <?= $iconBg ?>; color: <?= $iconColor ?>;">
-                                                <?= $iconSymbol ?>
-                                            </div>
+                                            <?php /* Los tres símbolos que se usan aquí —"!" y "i"—
+                                                     existen en Helvetica. El tick en imagen ya no
+                                                     hace falta en esta lista: ninguna incidencia
+                                                     se pinta como favorable. */ ?>
+                                            <div class="ies-factor-icon-circle" style="background-color: <?= $iconBg ?>; color: <?= $iconColor ?>;"><?= $iconSymbol ?></div>
                                         </td>
                                         <td class="ies-factor-text">
                                             <div style="font-size: 9pt; font-weight: bold; color: #0f172a; margin-bottom: 2px;">
-                                                <?= esc(ucwords(strtolower(str_replace('_', ' ', $flag['code'] ?? 'EVENTO REPORTADO')))) ?>
+                                                <?php /* Antes: ucwords(strtolower(...)) sobre el código del motor, que imprimía
+                                                         "Legal State Registry Closure Tax Index Provisional" en un
+                                                         informe en español. Es el mismo arreglo que ya se hizo en
+                                                         el dictamen de riesgo y que aquí no se aplicó. */ ?>
+                                                <?= esc(risk_event_label($flag)) ?>
                                             </div>
                                             <div style="font-size: 8pt; color: #64748b;">
                                                 <?= esc($flag['description'] ?? 'Basado en histórico público') ?>
@@ -703,7 +738,7 @@
                             <table class="ies-factor-card">
                                 <tr>
                                     <td class="ies-factor-icon">
-                                        <div class="ies-factor-icon-circle" style="background-color: #dcfce7; color: #22c55e;">✓</div>
+                                        <div class="ies-factor-icon-circle" style="background-color: #16a34a;"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAYAAABV7bNHAAAE9klEQVR42u2bTYgcVRDH/693VtGYoMZAQozJISriQQkYggZPInpaxEWCoIJCQIyaSw5BiKKXHPRgQDwEJAdBQlBkEEEvQVQW9RC/UBc1QaIbBQ0i7qpxpn9e6mGlmdmdmX6TnZ7tgmZmmf5479fV9a+q1yvVVltttdVWW21jamHcJwgEm2ecK5IIIbCi7zwQgMYivzcM3srzICALIeTu7+slXS0pkzQnaTaE0Oq070rwnMw+J4EngE+BFv9bDnwDPAWstn0nVhqczcAM51vbNm9fATf7Y8cajsWddcB3BuCcQck7wDpn338FrhtrSAZmwgLvcQdnKYv7fGzHji2ghn0esQn/S+8W95325xonOJP2eaAPzykCyoHm2AVs5zkPFCbbj8XAfcrBDuME53bzmtYAcHDH/AZcUQSUVRTORAihBWyV9IakyUI5MYj9Y9t5llUQTiYpBy6X1JS0VlK7xFxyq89OhhAWLLOmkoAKhecxSTdIakkqE1ix8zWr/FQV487hAeS8W4DOLf5cZflUqCqcqDD7B5TzTsE5Ar6v0hLvPGdXCTnvlkUfqHSCGO8qcCvwd5faigGSQ4AjVYcTq/MtwC+FxK4snONWf00kiTtWLTcKWzZMOBY01wCf26RaJeHE42eBK+38WZKBLvF7lhhOrM4D8HZixTprHcaegnKjh4y1bd9vknSbpC0xsZL0YQjhy+K+CSxmyi9LuttynTJxArdNhxBmgUZsu5YNjrcA73QJjG3gLdeVayTwnijn+xLJufe+h5OM08F5yA0w5g1+i7bgconJBHI+PQQ5f67s+Ipw7uqQUC12dwDuH3QQ7rrbgb8Sy/mr8QaUUqyYagOrgR/7UA7fEH+kXzd2cr4JmEsk53Hc79sKR3k5dy7+6ADKkbtJ7ekVUpRaYBVwIrGcfw+sS9aQd3fyXZtwa4D6Jh6zbym39qufQDOxnP8O3JisxoqTMHc8VcLNPaSnF4Pk4BxKBCd3ncU7k5YRDtAq4EyhHVmmUj4Y76KH5ODsTQTHn2N38hrLAZqwVDxl3fNioXyIcKYSynnxhkwqtTmpPdaDvPc78MMFz9kGzCeW86NJ5LwHQFMJ3d4nazEfWQ+cTiznM8DFS9WO/VroomRB0geSdiSog6LF8xyVtFHSTmu2l1GY3HrIP0jaEUL4OfXrLN0AIWmrpBm3apCiHZm7pjgll2kihAVJO0MInyUumDt38I1+CCF8K+kOST8ZnHai67VtcmXgxMo8k7TL4DRSw+k1Hl0LnEwck1IF/seWtWXqFGcz8PWIQIoB/4WR6Cc7T9pgr7MtJ6R43deHKuclIK0FPlomSFHOPwEuSS3nKSGtAd67wJBirnQa2JisOh/iMsyl1oZN1RLtpY0yD2wb+RVQB+ki4M0he5Ivd6Yqs8jnis4MeG2IkOI59w6tAB0ypOhNrwzhcYtwDlV2edivTAIvDaGv0xwpOS+zCmrfn0/Q34lyfsKadxlVf3+5AOnZBG+czgGbRlbOS0CKpcl+5w15H3Datia2feTlPAGkJx2kdg9w4qN1b2WD8gBF7u5C4I3t1dwlgD6oPz72cDpAusetknSzs8CDKwZOh/ptPfCMKdMf9jj9CXwBHASuGdWYEy4EJN/pAzZIukzSvKQz8aXtYbRLKxm8Oz2KoyzlYTlguevW/55dW2211VZbbbXVVls17T8oyMSE0tREOwAAAABJRU5ErkJggg==" width="16" height="16" alt="Favorable"></div>
                                     </td>
                                     <td class="ies-factor-text">
                                         <div style="font-size: 9pt; font-weight: bold; color: #0f172a; margin-bottom: 2px;">Sin eventos de riesgo detectados</div>

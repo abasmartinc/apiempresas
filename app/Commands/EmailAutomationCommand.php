@@ -151,11 +151,16 @@ class EmailAutomationCommand extends BaseCommand
                         AND created_at >= ?
                   )
               )
+              -- Solo se excluye a quien YA tiene Solvencia: antes se excluía a cualquiera
+              -- con un plan de pago, así que un cliente de Radar o de la API —que ya
+              -- confía en ti y usa perfiles de riesgo— nunca recibía esta secuencia,
+              -- siendo el candidato más barato que tienes para venderle Solvencia.
               AND u.id NOT IN (
-                  SELECT us.user_id 
+                  SELECT us.user_id
                   FROM user_subscriptions us
+                  JOIN api_plans ap ON ap.id = us.plan_id
                   WHERE us.status = 'active'
-                    AND us.plan_id > 1
+                    AND (ap.slug = 'risk_pro' OR ap.product_type = 'risk' OR ap.product_type = 'bundle')
               )
         ", [$startOfMonth])->getResultArray();
 

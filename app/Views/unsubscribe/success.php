@@ -101,8 +101,8 @@
             </svg>
         </div>
 
-        <h1>Baja procesada con éxito</h1>
-        <p>Hemos actualizado tus preferencias. No recibirás más correos automáticos ni manuales de nuestra parte a partir de ahora.</p>
+        <h1><?= esc($title ?? '') === 'Alertas desactivadas | APIEmpresas' ? 'Alertas desactivadas' : 'Baja procesada con éxito' ?></h1>
+        <p><?= esc($message ?? 'Hemos actualizado tus preferencias. No recibirás más correos automáticos ni manuales de nuestra parte a partir de ahora.') ?></p>
 
         <a href="<?= site_url() ?>" class="btn">Volver al inicio</a>
     </div>

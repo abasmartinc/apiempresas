@@ -42,6 +42,11 @@ class Register extends BaseController
         if ($this->request->getGet('intent')) {
             session()->set('signup_intent', trim((string)$this->request->getGet('intent')));
         }
+        // CIF de la empresa que originó el registro: permite saber qué fichas
+        // convierten y personalizar el correo de bienvenida.
+        if ($this->request->getGet('cif')) {
+            session()->set('signup_cif', trim((string)$this->request->getGet('cif')));
+        }
 
         return view('auth/register', [
             'validation' => $validation,
@@ -195,7 +200,11 @@ class Register extends BaseController
                 $intent = 'radar';
             } elseif (strpos((string)$redirectUrl, 'database') !== false || strpos((string)$redirectUrl, 'listado') !== false) {
                 $intent = 'database';
-            } elseif (strpos((string)$redirectUrl, 'risk') !== false || strpos((string)$redirectUrl, 'score') !== false) {
+            } elseif (strpos((string)$redirectUrl, 'risk') !== false || strpos((string)$redirectUrl, 'riesgo') !== false || strpos((string)$redirectUrl, 'score') !== false) {
+                // 'riesgo' además de 'risk': el destino real que manda el teaser es
+                // `empresa/123-slug?ver-riesgo=1`, que no contiene ninguna de las
+                // dos palabras inglesas, así que caía en el `else` y se registraba
+                // como usuario de la API.
                 $intent = 'view_risk_profile';
             } else {
                 $intent = 'api';
@@ -203,8 +212,11 @@ class Register extends BaseController
         }
         session()->remove('signup_intent');
 
-        $prefProduct = ($intent === 'radar' || strpos((string)$redirectUrl, 'radar') !== false) ? 'radar' : 'api';
-        
+        // Aquí se calculaba un 'preferred_product' que no llegaba a ningún sitio:
+        // la columna no existe en la base de datos y el campo tampoco estaba en
+        // UserModel::$allowedFields, así que se descartaba dos veces. Quien decide
+        // qué panel ve el usuario es 'signup_intent', que sí se guarda.
+
         $host = $this->request->getServer('HTTP_HOST') ?? '';
         $lang = (strpos((string)$host, 'spaincompanyapi') !== false) ? 'en' : 'es';
 
@@ -218,7 +230,6 @@ class Register extends BaseController
             'api_access' => 1,
             'source_app' => 'apiempresas', // Default source
             'signup_intent' => $intent,
-            'preferred_product' => $prefProduct,
             'unsuscribe' => $this->request->getPost('no_marketing') ? 1 : 0,
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
@@ -266,14 +277,24 @@ class Register extends BaseController
                 'signup_intent' => $data['signup_intent'] ?? null,
             ];
 
-            // Notificación al Admin (papelo.amh@gmail.com)
-            $this->emailService->sendRegistrationAdminNotification($userData);
+            // En su propio try, por lo mismo que en quick_store: la cuenta ya existe.
+            try {
+                // Notificación al Admin (papelo.amh@gmail.com)
+                $this->emailService->sendRegistrationAdminNotification($userData);
 
-            // Correo de Bienvenida al usuario
-            if (($data['signup_intent'] ?? '') === 'view_risk_profile') {
-                $this->emailService->sendRiskWelcomeEmail($userData, (string)($redirectUrl ?? ''));
-            } elseif (($data['signup_intent'] ?? '') === 'api') {
-                $this->emailService->sendWelcomeEmail($userData);
+                // Correo de Bienvenida al usuario
+                if (($data['signup_intent'] ?? '') === 'view_risk_profile') {
+                    // El CIF sigue en sesión: logSignupOrigin() lo consume más abajo
+                    $this->emailService->sendRiskWelcomeEmail(
+                        $userData,
+                        (string)($redirectUrl ?? ''),
+                        (string)(session()->get('signup_cif') ?? '')
+                    );
+                } elseif (($data['signup_intent'] ?? '') === 'api') {
+                    $this->emailService->sendWelcomeEmail($userData);
+                }
+            } catch (\Throwable $e) {
+                log_message('error', 'Registro: fallo enviando correos al usuario ' . $user_id . ': ' . $e->getMessage());
             }
 
             // 6) Auto-Login al usuario (RE-HABILITADO para mejorar conversión)
@@ -303,6 +324,8 @@ class Register extends BaseController
             // Log successful registration
             log_activity('register', ['email' => $email], $user_id);
 
+            $this->logSignupOrigin($user_id, $intent);
+
             // 7) Redirección directa al Dashboard o URL previa
             $targetUrl = !empty($redirectUrl) ? site_url(ltrim((string)$redirectUrl, '/')) : site_url('dashboard');
 
@@ -322,20 +345,82 @@ class Register extends BaseController
         }
     }
 
+    /**
+     * Deja constancia de la empresa que originó el registro (tracking_events).
+     * Sin tocar user_events: ahí un evento 'view_risk_profile' consumiría cuota.
+     */
+    protected function logSignupOrigin(int $userId, ?string $intent = null): void
+    {
+        // La sesión es la fuente principal, pero el formulario rápido arrastra el CIF
+        // en un hidden: si la sesión se perdió por el camino, seguimos teniéndolo.
+        $cif = trim((string)(session()->get('signup_cif') ?? ''));
+        if ($cif === '') {
+            $cif = trim((string)($this->request->getPost('cif') ?? ''));
+        }
+        session()->remove('signup_cif');
+
+        if ($userId <= 0 || $cif === '') {
+            return;
+        }
+
+        try {
+            (new \App\Models\TrackingEventModel())->insert([
+                'event_name'   => 'risk_signup_origin',
+                'page'         => 'register',
+                'user_id'      => $userId,
+                'session_id'   => substr((string)session_id(), 0, 100),
+                'anonymous_id' => '',
+                'element'      => substr($cif, 0, 255),
+                'metadata'     => json_encode(['intent' => $intent, 'cif' => $cif]),
+                'created_at'   => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'logSignupOrigin: ' . $e->getMessage());
+        }
+    }
+
     public function quick()
     {
         if (session('logged_in')) {
             $redirect = $this->request->getGet('redirect') ?? 'billing/checkout';
             return redirect()->to(site_url(ltrim($redirect, '/')));
         }
+
+        $intent = trim((string)($this->request->getGet('intent') ?? ''));
+        if ($intent !== '') {
+            session()->set('signup_intent', $intent);
+        }
+
+        $cif = trim((string)($this->request->getGet('cif') ?? ''));
+        if ($cif !== '') {
+            session()->set('signup_cif', $cif);
+        }
+
         $db = \Config\Database::connect();
         $oppsCount = $db->table('companies')
             ->where('fecha_constitucion >=', date('Y-m-d'))
             ->countAllResults();
 
+        // Nombre de la empresa de origen: permite personalizar el encabezado
+        // ("Ver el perfil de riesgo de X") en vez de un genérico "último paso".
+        $companyName = '';
+        if ($cif !== '' && $intent === 'view_risk_profile') {
+            helper('company');
+            $row = (new \App\Models\CompanyModel())->where('cif', strtoupper($cif))->first();
+            if ($row) {
+                $companyName = company_short_name(company_display_name(
+                    $row['company_name'] ?? ($row['name'] ?? ''),
+                    ''
+                ));
+            }
+        }
+
         return view('auth/quick_register', [
-            'redirect' => $this->request->getGet('redirect') ?? 'billing/checkout',
-            'oppsCount' => $oppsCount
+            'redirect'    => $this->request->getGet('redirect') ?? 'billing/checkout',
+            'oppsCount'   => $oppsCount,
+            'intent'      => $intent,
+            'signupCif'   => $cif,
+            'companyName' => $companyName,
         ]);
     }
 
@@ -402,7 +487,9 @@ class Register extends BaseController
                 $intent = 'radar';
             } elseif (strpos($redirect, 'database') !== false || strpos($redirect, 'listado') !== false) {
                 $intent = 'database';
-            } elseif (strpos($redirect, 'risk') !== false || strpos($redirect, 'score') !== false) {
+            } elseif (strpos($redirect, 'risk') !== false || strpos($redirect, 'riesgo') !== false || strpos($redirect, 'score') !== false) {
+                // Ver la nota de Register::store: el destino del teaser es
+                // `empresa/123-slug?ver-riesgo=1`, sin 'risk' ni 'score'.
                 $intent = 'view_risk_profile';
             } else {
                 $intent = 'api';
@@ -410,7 +497,7 @@ class Register extends BaseController
         }
         session()->remove('signup_intent');
 
-        $prefProduct = ($intent === 'radar' || strpos($redirect, 'radar') !== false) ? 'radar' : 'api';
+        // Ver la nota de Register::store: 'preferred_product' no existe en la BD.
 
         $host = $this->request->getServer('HTTP_HOST') ?? '';
         $lang = (strpos((string)$host, 'spaincompanyapi') !== false) ? 'en' : 'es';
@@ -426,7 +513,6 @@ class Register extends BaseController
             'api_access' => 1,
             'source_app' => 'apiempresas',
             'signup_intent' => $intent,
-            'preferred_product' => $prefProduct,
             'unsuscribe' => $this->request->getPost('no_marketing') ? 1 : 0,
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
@@ -455,15 +541,39 @@ class Register extends BaseController
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
-            // Enviar Notificaciones (Admin + Usuario)
-            $this->emailService->sendRegistrationAdminNotification([
-                'user_id' => $user_id,
-                'name'    => $data['name'],
-                'email'   => $email,
-                'company' => 'N/A (Quick Register)'
-            ]);
+            // Notificaciones. En su PROPIO try: llegados aquí la cuenta, la API key
+            // y la suscripción ya existen, así que un fallo mandando un correo no
+            // puede acabar en "Error al crear la cuenta" con el usuario sin sesión
+            // y la fila ya creada — que es justo lo que pasaba.
+            try {
+                $this->emailService->sendRegistrationAdminNotification([
+                    'user_id' => $user_id,
+                    'name'    => $data['name'],
+                    'email'   => $email,
+                    'company' => 'N/A (Quick Register)'
+                ]);
 
-            $this->emailService->sendSetPasswordEmail($email, $token);
+                $this->emailService->sendSetPasswordEmail($email, $token);
+
+                // El registro rápido solo mandaba el correo de contraseña: quien viene
+                // por el perfil de riesgo debe recibir además su bienvenida de Solvencia.
+                if (($data['signup_intent'] ?? '') === 'view_risk_profile') {
+                    $this->emailService->sendRiskWelcomeEmail([
+                        'user_id'       => $user_id,
+                        'name'          => $data['name'],
+                        'email'         => $email,
+                        'signup_intent' => $data['signup_intent'],
+                    ], (string)$redirect, (string)(session()->get('signup_cif') ?? $this->request->getPost('cif') ?? ''));
+                }
+            } catch (\Throwable $e) {
+                log_message('error', 'Quick Register: fallo enviando correos al usuario ' . $user_id . ': ' . $e->getMessage());
+            }
+
+            try {
+                $this->logSignupOrigin((int)$user_id, $data['signup_intent'] ?? null);
+            } catch (\Throwable $e) {
+                log_message('error', 'Quick Register: no se pudo registrar el origen del alta ' . $user_id . ': ' . $e->getMessage());
+            }
 
             // Auto-Login
             session()->regenerate();
@@ -483,4 +593,5 @@ class Register extends BaseController
             return redirect()->back()->with('error', lang('Messages.flash_60'));
         }
     }
+
 }

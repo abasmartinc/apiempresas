@@ -285,7 +285,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <div>
                     <h3 style="margin: 0 0 4px 0; font-size: 1.15rem; color: #0f172a; font-weight: 800;">Embudo de Activación (Funnel)</h3>
-                    <p style="margin: 0; font-size: 0.85rem; color: #64748b;">Comportamiento desde el registro hasta el choque con el paywall (3 consultas) y pago</p>
+                    <p style="margin: 0; font-size: 0.85rem; color: #64748b;">Cohorte de <strong><?= esc($period_label) ?></strong>: las mismas personas en todos los pasos, desde el alta hasta el pago<?php if (($mediana_dias_pago ?? null) !== null): ?> &bull; mediana hasta pagar: <strong><?= (int) $mediana_dias_pago ?> días</strong><?php endif; ?></p>
                 </div>
             </div>
 
@@ -376,6 +376,109 @@
             <?php endif; ?>
         </div>
 
+    </div>
+
+    <!-- EVENTOS DE INTERFAZ (tracking_events)
+         Este bloque lee lo que el cliente de tracking lleva registrando y nadie
+         miraba. A diferencia del embudo de arriba, incluye a los VISITANTES
+         ANÓNIMOS: es el único sitio donde se ve si el teaser convierte. -->
+    <div class="card" style="padding: 1.75rem; margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h3 style="margin: 0 0 4px 0; font-size: 1.25rem; color: #0f172a; font-weight: 800;">Embudo de interfaz</h3>
+                <p style="margin: 0; font-size: 0.85rem; color: #64748b;">
+                    Qué se ve y qué se pulsa, anónimos incluidos &bull; <?= esc($period_label) ?>
+                </p>
+            </div>
+            <?php if (!empty($ui_events['total'])): ?>
+                <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; background: #f1f5f9; padding: 5px 11px; border-radius: 8px;">
+                    <?= number_format($ui_events['total'], 0, ',', '.') ?> eventos
+                </span>
+            <?php endif; ?>
+        </div>
+
+        <?php if (empty($ui_events['disponible'])): ?>
+            <div style="background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 14px 16px; border-radius: 10px; font-size: 0.88rem;">
+                No se ha podido leer <code>tracking_events</code>. Revisa que la tabla exista.
+            </div>
+        <?php elseif (empty($ui_events['total'])): ?>
+            <div style="background: #f8fafc; border: 1px dashed #cbd5e1; color: #64748b; padding: 20px; border-radius: 10px; font-size: 0.9rem; text-align: center;">
+                Todavía no hay eventos en este periodo. Los ratios aparecerán en cuanto haya tráfico.
+            </div>
+        <?php else: ?>
+
+            <?php
+            $tarjetas = [
+                ['Teaser (anónimos)', 'Ve el teaser → pulsa registrarse', $ui_events['teaser']['vistas'],  $ui_events['teaser']['clicks'],  $ui_events['teaser']['ctr'],  '#3b82f6'],
+                ['Bloqueo',           'Ve el bloque → pulsa ver dictamen', $ui_events['locked']['vistas'],  $ui_events['locked']['clicks'],  $ui_events['locked']['ctr'],  '#06b6d4'],
+                ['Paywall',           'Ve el paywall → pulsa una opción',  $ui_events['paywall']['vistas'], $ui_events['paywall']['clicks'], $ui_events['paywall']['ctr'], '#f43f5e'],
+                ['Upsell de Pro',     'Ve el upsell → pulsa contratar',    $ui_events['upsell']['vistas'],  $ui_events['upsell']['clicks'],  $ui_events['upsell']['ctr'],  '#10b981'],
+            ];
+            ?>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 14px; margin-bottom: 22px;">
+                <?php foreach ($tarjetas as [$titulo, $desc, $vistas, $clicks, $ctr, $color]): ?>
+                    <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px 17px; background: #ffffff;">
+                        <div style="font-size: 0.78rem; font-weight: 800; color: <?= $color ?>; text-transform: uppercase; letter-spacing: 0.4px;"><?= esc($titulo) ?></div>
+                        <div style="font-size: 1.9rem; font-weight: 900; color: #0f172a; line-height: 1.1; margin: 6px 0 2px;"><?= number_format($ctr, 1, ',', '.') ?>%</div>
+                        <div style="font-size: 0.78rem; color: #64748b; line-height: 1.4;">
+                            <?= number_format($clicks, 0, ',', '.') ?> de <?= number_format($vistas, 0, ',', '.') ?><br><?= esc($desc) ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <?php
+            $desgloses = [
+                ['Teaser: por canal de registro',  $ui_events['teaser']['por_canal']],
+                ['Paywall: opción elegida',        $ui_events['paywall']['por_opcion']],
+                ['Upsell: variante mostrada',      $ui_events['upsell']['por_variante']],
+                ['Checkout: origen',               $ui_events['checkout']['por_origen']],
+            ];
+            ?>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px;">
+                <?php foreach ($desgloses as [$titulo, $filas]): ?>
+                    <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px 17px; background: #f8fafc;">
+                        <div style="font-size: 0.82rem; font-weight: 800; color: #0f172a; margin-bottom: 10px;"><?= esc($titulo) ?></div>
+                        <?php if (empty($filas)): ?>
+                            <div style="color: #94a3b8; font-size: 0.82rem;">Sin datos.</div>
+                        <?php else: ?>
+                            <?php $maximo = max($filas); foreach ($filas as $clave => $valor): ?>
+                                <div style="margin-bottom: 8px;">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #334155; margin-bottom: 3px;">
+                                        <span style="font-weight: 600;"><?= esc($clave) ?></span>
+                                        <span style="font-weight: 800;"><?= number_format($valor, 0, ',', '.') ?></span>
+                                    </div>
+                                    <div style="height: 5px; background: #e2e8f0; border-radius: 99px; overflow: hidden;">
+                                        <div style="height: 100%; width: <?= $maximo > 0 ? max(3, round(($valor / $maximo) * 100)) : 0 ?>%; background: #2563eb;"></div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <div style="margin-top: 18px; display: flex; flex-wrap: wrap; gap: 22px; border-top: 1px solid #f1f5f9; padding-top: 16px; font-size: 0.86rem; color: #475569;">
+                <div>
+                    <strong style="color: #0f172a;">Checkout:</strong>
+                    <?= number_format($ui_events['checkout']['completados'], 0, ',', '.') ?> completados
+                    de <?= number_format($ui_events['checkout']['iniciados'], 0, ',', '.') ?> iniciados
+                    (<?= number_format($ui_events['checkout']['ratio'], 1, ',', '.') ?>%)
+                </div>
+                <?php if (!empty($ui_events['conteos']['risk_guarantee_requested'])): ?>
+                    <div>
+                        <strong style="color: #0f172a;">Garantías pedidas:</strong>
+                        <?= number_format($ui_events['conteos']['risk_guarantee_requested'], 0, ',', '.') ?>
+                    </div>
+                <?php endif; ?>
+                <?php if (!empty($ui_events['conteos']['risk_watch_toggle'])): ?>
+                    <div>
+                        <strong style="color: #0f172a;">Vigilancias conmutadas:</strong>
+                        <?= number_format($ui_events['conteos']['risk_watch_toggle'], 0, ',', '.') ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
     </div>
 
     <!-- Panel de Usuarios con Filtro de Segmentación -->
@@ -557,7 +660,7 @@
                                 <td style="padding: 14px 12px; text-align: center;">
                                     <?php if ($u['is_paid']): ?>
                                         <span class="pill" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; font-weight: 800;">
-                                             👑 Ilimitado
+                                             👑 Pro
                                         </span>
                                     <?php else: ?>
                                         <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">

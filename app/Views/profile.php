@@ -255,6 +255,25 @@
                         <input type="email" id="email" name="email" value="<?= esc($user->email) ?>" class="p-form-input" required>
                     </div>
 
+                    <!-- Preferencia de alertas del Registro Mercantil.
+                         alerts_borme es de tres estados: NULL significa "sin decidir" y
+                         hereda de unsuscribe, por eso la casilla se marca con ?? -->
+                    <div class="p-form-group" style="margin-bottom: 32px; padding: 16px 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+                        <label style="display: flex; gap: 12px; align-items: flex-start; cursor: pointer; margin: 0;">
+                            <input type="checkbox" name="alerts_borme" value="1" style="margin-top: 3px;"
+                                <?= (($user->alerts_borme ?? null) !== null
+                                        ? ((int) $user->alerts_borme === 1)
+                                        : ((int) ($user->unsuscribe ?? 0) === 0)) ? 'checked' : '' ?>>
+                            <span>
+                                <span style="display: block; font-weight: 700; color: #0f172a;">Alertas del Registro Mercantil</span>
+                                <span style="display: block; font-size: 0.88rem; color: #64748b; line-height: 1.45; margin-top: 2px;">
+                                    Avisarme cuando aparezca un acto nuevo en el BORME de alguna de las empresas que he consultado.
+                                    Es independiente de los correos con consejos y ofertas.
+                                </span>
+                            </span>
+                        </label>
+                    </div>
+
                     <button type="submit" class="btn-wow btn-wow-primary">
                         <?= lang('Profile.save_changes') ?>
                     </button>

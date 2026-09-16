@@ -23,9 +23,20 @@ class Webhook extends Controller
             return $this->response->setStatusCode(400);
         } catch (\Stripe\Exception\SignatureVerificationException $e) {
             log_message('error', '[Webhook::stripe] Invalid signature: ' . $e->getMessage());
-            // Para debug (cuidado con logs en producción)
-            log_message('debug', '[Webhook::stripe] Recibido Header: ' . $sig_header);
-            log_message('debug', '[Webhook::stripe] Usando Secret de .env: ' . $endpoint_secret);
+            /*
+             * Aquí se escribía el STRIPE_WEBHOOK_SECRET entero en el log ("cuidado
+             * con logs en producción", decía el comentario). Ese secreto firma los
+             * avisos de cobro: quien lo tenga puede fabricar un `checkout.session
+             * .completed` y darse de alta en Pro sin pagar. Y los logs se copian,
+             * se comparten y se suben a un ticket.
+             *
+             * Para diagnosticar el fallo real —que casi siempre es "el secreto del
+             * .env no es el del endpoint que está enviando"— basta con saber si hay
+             * secreto y de qué endpoint viene, sin publicar el valor.
+             */
+            log_message('debug', '[Webhook::stripe] Firma rechazada. Secreto configurado: '
+                . ($endpoint_secret ? 'sí (' . strlen((string) $endpoint_secret) . ' caracteres)' : 'NO')
+                . ' · cabecera recibida: ' . ($sig_header !== '' ? 'sí' : 'no'));
             return $this->response->setStatusCode(400);
         }
 
@@ -49,6 +60,42 @@ class Webhook extends Controller
         }
 
         return $this->response->setStatusCode(200);
+    }
+
+    /**
+     * De qué producto es un plan cuando `api_plans.product_type` viene vacío.
+     *
+     * Es un respaldo, no la fuente: lo correcto es que la columna esté rellena. Se
+     * mantiene deliberadamente corto y explícito —solo slugs que conocemos— porque
+     * lo que hay al otro lado es cancelar suscripciones, y ahí una suposición de
+     * más cuesta un cliente. Lo que no reconoce devuelve cadena vacía, y quien
+     * llama debe entenderlo como "no tocar nada".
+     */
+    private function deducirProductType(string $slug): string
+    {
+        $slug = strtolower(trim($slug));
+
+        if ($slug === '') {
+            return '';
+        }
+
+        $conocidos = [
+            'risk_pro'         => 'risk',
+            'risk_pack_5'      => 'risk',
+            'radar'            => 'radar',
+            'copiloto_ventas'  => 'copilot',
+        ];
+
+        if (isset($conocidos[$slug])) {
+            return $conocidos[$slug];
+        }
+
+        // 'pro' y 'business' son los planes históricos de la API.
+        if (in_array($slug, ['pro', 'business', 'free'], true)) {
+            return 'api';
+        }
+
+        return '';
     }
 
     private function handleCheckoutSessionCompleted($session)
@@ -212,15 +259,48 @@ class Webhook extends Controller
 
         $subscriptionModel = new UsersuscriptionsModel();
         
-        // 2. Buscar si ya tenía suscripciones activas del MISMO tipo de producto (ej: solo 'risk' o solo 'api')
-        $targetProductType = $plan->product_type ?? 'api';
-        
-        $oldSubscriptions = $subscriptionModel->select('user_subscriptions.*')
-                                              ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id')
-                                              ->where('user_subscriptions.user_id', $userId)
-                                              ->where('user_subscriptions.status', 'active')
-                                              ->where('api_plans.product_type', $targetProductType)
-                                              ->findAll();
+        /*
+         * 2. Suscripciones activas del MISMO producto, que son las que esta alta
+         *    sustituye. Las de OTRO producto no se tocan: un cliente puede pagar
+         *    la API y Solvencia a la vez.
+         *
+         *    Aquí había `$plan->product_type ?? 'api'`, y ese respaldo es una mina.
+         *    La fila `risk_pro` de `api_plans` tiene `product_type` a NULL —lo
+         *    comprobamos el 16-09—, así que dar de alta Solvencia Pro se leía como
+         *    un alta de API y **cancelaba en Stripe la suscripción de API** del
+         *    cliente: el que paga los dos productos pierde uno por comprar el otro,
+         *    y encima de forma silenciosa, porque la cancelación va en un try/catch
+         *    que solo escribe en el log.
+         *
+         *    Ahora el tipo se deduce del slug cuando la columna no lo dice, y si
+         *    aun así no se sabe, NO se cancela nada. Equivocarse dejando dos
+         *    suscripciones vivas se arregla con una consulta; equivocarse
+         *    cancelando la de otro producto se arregla pidiéndole perdón.
+         */
+        $targetProductType = strtolower(trim((string) ($plan->product_type ?? '')));
+
+        if ($targetProductType === '') {
+            $targetProductType = $this->deducirProductType((string) ($plan->slug ?? ''));
+
+            if ($targetProductType === '') {
+                log_message('error', '[Webhook::stripe] El plan ' . ($plan->slug ?? '?')
+                    . ' no declara product_type y no se puede deducir del slug: no se cancela'
+                    . ' ninguna suscripción anterior. Rellena api_plans.product_type.');
+            } else {
+                log_message('warning', '[Webhook::stripe] product_type vacío en el plan '
+                    . ($plan->slug ?? '?') . '; deducido del slug como "' . $targetProductType . '".');
+            }
+        }
+
+        $oldSubscriptions = [];
+        if ($targetProductType !== '') {
+            $oldSubscriptions = $subscriptionModel->select('user_subscriptions.*')
+                                                  ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id')
+                                                  ->where('user_subscriptions.user_id', $userId)
+                                                  ->where('user_subscriptions.status', 'active')
+                                                  ->where('api_plans.product_type', $targetProductType)
+                                                  ->findAll();
+        }
 
         foreach ($oldSubscriptions as $oldSub) {
             // Si es una suscripción de Stripe diferente a la actual, cancelarla en Stripe

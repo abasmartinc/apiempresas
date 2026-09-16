@@ -326,8 +326,8 @@
                 <div class="funnel-step">
                     <div style="width: 32px; height: 32px; border-radius: 8px; background: #10b98115; color: #10b981; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem;">2</div>
                     <div style="flex: 2; min-width: 150px;">
-                        <div style="font-weight: 700; color: #1e293b; font-size: 0.9rem;">Activación (API Key o 1ª llamada)</div>
-                        <div style="font-size: 0.75rem; color: #64748b;">Primer contacto técnico con la API</div>
+                        <div style="font-weight: 700; color: #1e293b; font-size: 0.9rem;">Activación (1ª llamada realizada)</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">Al menos 1 petición completada a la API</div>
                     </div>
                     <?php $p2 = $funnel['step1_registered'] > 0 ? round(($funnel['step2_activated'] / $funnel['step1_registered']) * 100) : 0; ?>
                     <div class="funnel-bar-wrapper">
@@ -402,11 +402,11 @@
                     <!-- Fuga 1 -->
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #ef4444; border-radius: 8px; padding: 10px 14px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <strong style="color: #0f172a; font-size: 0.85rem;">💤 Fuga en Onboarding (<?= $drop_off_no_usage ?>% inactivos)</strong>
-                            <span style="font-size: 0.75rem; font-weight: 700; color: #b91c1c;"><?= $counts['inactive'] ?> usuarios</span>
+                            <strong style="color: #0f172a; font-size: 0.85rem;">💤 Fuga en Onboarding (<?= $drop_off_no_usage ?>% sin llamadas)</strong>
+                            <span style="font-size: 0.75rem; font-weight: 700; color: #b91c1c;"><?= $counts['never_called'] ?? ($funnel['step1_registered'] - $funnel['step2_activated']) ?> usuarios</span>
                         </div>
                         <p style="margin: 4px 0 0 0; font-size: 0.78rem; color: #64748b; line-height: 1.4;">
-                            Se registraron pero no hicieron ninguna llamada. Automatiza el envío de snippets cURL o colección de Postman a las 24h.
+                            Se registraron pero nunca realizaron una sola llamada a la API. Automatiza el envío de snippets cURL o colección de Postman a las 24h.
                         </p>
                     </div>
 

@@ -11,10 +11,27 @@ class SeedEmailTemplates extends BaseCommand
     protected $group       = 'Database';
     protected $name        = 'db:seed_emails';
     protected $description = 'Seeds the email_templates table with initial data from views.';
+    protected $usage       = 'db:seed_emails [slug]';
 
     public function run(array $params)
     {
         $model = new EmailTemplateModel();
+
+        // Sin argumento reescribe TODAS las plantillas desde las vistas, lo que se lleva
+        // por delante cualquier edición hecha en el panel de admin. Con un slug concreto
+        // solo toca esa: es lo que conviene para añadir una plantilla nueva.
+        $soloSlug = trim((string) ($params[0] ?? ''));
+        if ($soloSlug !== '') {
+            CLI::write("Sembrando únicamente la plantilla '{$soloSlug}'.", 'yellow');
+        } else {
+            CLI::write('ATENCIÓN: se van a reescribir TODAS las plantillas desde las vistas.', 'red');
+            CLI::write('Las ediciones hechas desde el panel de admin se perderán.', 'red');
+            CLI::write('Para sembrar solo una: php spark db:seed_emails <slug>', 'yellow');
+            if (CLI::prompt('¿Continuar?', ['s', 'n']) !== 's') {
+                CLI::write('Cancelado.', 'green');
+                return;
+            }
+        }
 
         $templates = [
             [
@@ -30,7 +47,7 @@ class SeedEmailTemplates extends BaseCommand
                 'name'    => 'Bienvenida (Riesgo y Solvencia)',
                 'subject' => '🛡️ Tu cuenta está lista: dispones de 3 informes de riesgo gratis este mes',
                 'view'    => 'welcome_risk',
-                'vars'    => '{name}, {button_url}',
+                'vars'    => '{name}, {button_url}, {origin_line}',
                 'trigger' => 'Se envía inmediatamente a los usuarios registrados con intención de ver perfil de riesgo (view_risk_profile).'
             ],
             [
@@ -68,15 +85,15 @@ class SeedEmailTemplates extends BaseCommand
             [
                 'slug'    => 'risk_pro_welcome',
                 'name'    => 'Bienvenida Solvencia Pro (Suscripción)',
-                'subject' => '⭐ Tu suscripción Solvencia Pro está activa: consultas y PDFs ilimitados',
+                'subject' => '⭐ Tu suscripción Solvencia Pro está activa: ya puedes vigilar tu cartera',
                 'view'    => 'risk_pro_welcome',
-                'vars'    => '{name}, {button_url}',
+                'vars'    => '{name}, {button_url}, {guarantee_block}',
                 'trigger' => 'Se envía inmediatamente al suscribirse a Solvencia Pro (risk_pro).'
             ],
             [
                 'slug'    => 'risk_credits_low_upsell',
                 'name'    => 'Upsell Solvencia Pro (Créditos de Pack Bajos/Agotados)',
-                'subject' => '⚠️ Saldo de auditorías ({remaining_credits_text}): Pasa a Solvencia Pro ilimitado',
+                'subject' => '⚠️ Saldo de auditorías ({remaining_credits_text}): pásate a Solvencia Pro',
                 'view'    => 'risk_credits_low_upsell',
                 'vars'    => '{name}, {remaining_credits_text}, {credits_status_phrase}, {button_url}, {pack_url}',
                 'trigger' => 'Se envía automáticamente a compradores de packs cuando les queda <= 1 crédito para ofrecer Solvencia Pro.'
@@ -168,10 +185,22 @@ class SeedEmailTemplates extends BaseCommand
                 'view'    => 'excel_day3_urgency',
                 'vars'    => '{name}',
                 'trigger' => 'Tercer correo de la secuencia Excel (Urgencia/Venta).'
+            ],
+            [
+                'slug'    => 'borme_alert',
+                'name'    => 'Alerta de movimiento en el BORME',
+                'subject' => '🔔 {company_name} — {resumen_actos}',
+                'view'    => 'borme_alert',
+                'vars'    => '{name}, {intro}, {companies_html}, {company_name}, {resumen_actos}, {preheader}, {total_empresas}, {total_actos}, {button_url}, {button_text}, {footer_note}',
+                'trigger' => 'Lo envía el comando alerts:borme cuando aparecen actos nuevos en el BORME de empresas que el usuario tiene en vigilancia.'
             ]
         ];
 
         foreach ($templates as $t) {
+            if ($soloSlug !== '' && $t['slug'] !== $soloSlug) {
+                continue;
+            }
+
             $viewPath = APPPATH . 'Views/emails/' . $t['view'] . '.php';
             if (file_exists($viewPath)) {
                 $content = file_get_contents($viewPath);

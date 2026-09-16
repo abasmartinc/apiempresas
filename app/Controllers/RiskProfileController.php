@@ -33,7 +33,15 @@ class RiskProfileController extends BaseController
 
         if (!empty($cif)) {
             $userId = (int)(session('user_id') ?? 0);
-            $riskData = $this->riskService->getRiskData($cif, $userId);
+            // Búsqueda explícita de un CIF: aquí sí hay intención del usuario, así que
+            // se consume la consulta (y solo si la empresa tiene dictamen calculado).
+            $riskData = $this->riskService->getRiskData($cif, $userId, true);
+
+            // Ha escrito el CIF a mano: es una petición explícita sobre esa empresa,
+            // así que entra en vigilancia igual que un desbloqueo.
+            if ($userId > 0 && !empty($riskData['riskProfile']) && !empty($riskData['riskQuota']['allowed'])) {
+                (new \App\Services\CompanyWatchService())->watch($userId, (string) $riskData['cleanCif'], 'search');
+            }
         }
 
         $title = 'Perfil de Riesgo y Solvencia Mercantil de Empresas | APIEmpresas';
@@ -77,7 +85,13 @@ class RiskProfileController extends BaseController
 
         $userId = (int)(session('user_id') ?? 0);
         $isLoggedIn = session('logged_in') || $userId > 0;
-        $riskData = $this->riskService->getRiskData($cif, $userId);
+        // Búsqueda explícita de un CIF desde el buscador: se consume la consulta,
+        // pero getRiskData() solo la gasta si la empresa tiene dictamen calculado.
+        $riskData = $this->riskService->getRiskData($cif, $userId, true);
+
+        if ($userId > 0 && !empty($riskData['riskProfile']) && !empty($riskData['riskQuota']['allowed'])) {
+            (new \App\Services\CompanyWatchService())->watch($userId, (string) $riskData['cleanCif'], 'search');
+        }
 
         if (!$riskData['found']) {
             return $this->respond([
@@ -113,10 +127,19 @@ class RiskProfileController extends BaseController
                 'companyName'  => $company['name'],
                 'redirectPath' => $redirectPath
             ]);
+        } elseif (!empty($riskQuota['can_unlock'])) {
+            // Caso residual: el consumo no llegó a aplicarse (p. ej. carrera con
+            // los créditos). Se ofrece el desbloqueo explícito en lugar del paywall.
+            $html = view('partials/company_risk_locked', [
+                'riskProfile' => $riskProfile,
+                'company'     => $company,
+                'riskQuota'   => $riskQuota
+            ]);
         } elseif (!empty($riskQuota) && empty($riskQuota['allowed'])) {
             $html = view('partials/company_risk_paywall', [
-                'company'   => $company,
-                'riskQuota' => $riskQuota
+                'company'     => $company,
+                'riskQuota'   => $riskQuota,
+                'riskProfile' => $riskProfile,
             ]);
         } else {
             $html = view('partials/company_risk_profile', [
@@ -124,7 +147,15 @@ class RiskProfileController extends BaseController
                 'company'     => $company,
                 'contracts'   => $contracts,
                 'subsidies'   => $subsidies,
-                'riskQuota'   => $riskQuota
+                'riskQuota'   => $riskQuota,
+                'mostrarVigilancia' => true,
+                'riskTrend'   => (new \App\Services\CompanyRiskService())->getScoreTrend(
+                    (string) ($company['cif'] ?? ''),
+                    (int) ($riskProfile['risk_score'] ?? 0)
+                ),
+                'isWatching'  => $userId > 0
+                    && (new \App\Services\CompanyWatchService())
+                        ->isWatching($userId, (string) ($company['cif'] ?? '')),
             ]);
         }
 

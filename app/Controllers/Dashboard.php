@@ -230,6 +230,10 @@ class Dashboard extends BaseController
 
         // --- DASHBOARD ESPECÍFICO DE PERFIL DE RIESGO & SOLVENCIA ---
         $intent = (string)($user->signup_intent ?? '');
+        // OJO: 'preferred_product' NO existe como columna en la base de datos, así
+        // que esto es siempre ''. Se deja porque no molesta y porque el día que se
+        // añada la columna empieza a funcionar solo, pero no cuentes con ello:
+        // quien decide de verdad es 'signup_intent'.
         $prefProduct = (string)($user->preferred_product ?? '');
         $hasRiskPlan = false;
         if (!empty($data['plan'])) {
@@ -417,20 +421,28 @@ class Dashboard extends BaseController
         $isSubscriber = !empty($activeRiskSub);
         $planName = $isSubscriber ? ($activeRiskSub->plan_name ?? 'Solvencia Pro') : 'Plan Gratuito';
 
-        // 2. Consultas de riesgo usadas en el mes natural actual
-        $startOfMonth = date('Y-m-01 00:00:00');
-        $eventsThisMonth = $db->table('user_events')
-            ->select('trigger_type')
-            ->where('user_id', $userId)
-            ->where('event_type', 'view_risk_profile')
-            ->where('created_at >=', $startOfMonth)
-            ->groupBy('trigger_type')
-            ->get()->getResultArray();
-
-        $distinctMonthCifs = array_filter(array_map('trim', array_column($eventsThisMonth, 'trigger_type')));
-        $viewsUsed = count($distinctMonthCifs);
-        $viewsLimit = $isSubscriber ? 'unlimited' : 3;
-        $viewsRemaining = $isSubscriber ? 'Ilimitadas' : max(0, 3 - $viewsUsed);
+        /*
+         * 2. Consultas de riesgo usadas en el mes natural actual.
+         *
+         * Sale del servicio, que es quien decide la regla. Aquí había una copia
+         * literal de la consulta —"empresas con alguna vista este mes"—, así que al
+         * corregir la regla en el servicio (cuenta la PRIMERA vista, y las empresas
+         * compradas no consumen) el panel se habría quedado diciendo otro número
+         * que la ficha. Ya ha pasado tres veces en este flujo con otros textos.
+         */
+        $viewsUsed = (new \App\Services\CompanyRiskService())->consultasDelMes($userId);
+        // El 3 estaba escrito a mano aquí y en el servicio por separado.
+        helper('company');
+        $viewsLimitFree = (int) solvencia('consultasGratis', 3);
+        /*
+         * El suscriptor TAMBIÉN tiene tope: 300 al mes. Aquí seguía saliendo
+         * 'unlimited' y "Sin límite práctico", que es la frase que ya quitamos de la
+         * vista del panel. Hoy ninguna plantilla imprime estas dos variables, así que
+         * no se veía; pero es una mina puesta para el día que alguien las use.
+         */
+        $viewsLimitPro  = (int) solvencia('consultasPro', 300);
+        $viewsLimit     = $isSubscriber ? $viewsLimitPro : $viewsLimitFree;
+        $viewsRemaining = max(0, $viewsLimit - $viewsUsed);
 
         // Fecha de renovación de cuota mensual
         $nextCycleDate = date('d/m/Y', strtotime('first day of next month'));
@@ -473,7 +485,7 @@ class Dashboard extends BaseController
                 $parsedData = !empty($rr['risk_profile']) ? json_decode($rr['risk_profile'], true) : [];
                 $riskProfilesMap[strtoupper(trim($rr['cif']))] = [
                     'risk_score'   => (int)($rr['risk_score'] ?? 50),
-                    'risk_level'   => $parsedData['risk_level'] ?? ($rr['risk_score'] >= 70 ? 'ALTO' : ($rr['risk_score'] >= 30 ? 'MEDIO' : 'BAJO')),
+                    'risk_level'   => $parsedData['risk_level'] ?? risk_level_visual((int) $rr['risk_score'])[0],
                     'summary'      => $parsedData['summary_message'] ?? 'Perfil mercantil procesado.',
                     'alerts_count' => count($parsedData['canonical_events'] ?? [])
                 ];
@@ -513,6 +525,48 @@ class Dashboard extends BaseController
             ];
         }
 
+        // ---------------------------------------------------------------
+        // Vigilancia del BORME.
+        // Sin esta pantalla la lista solo crece: se entra en vigilancia al
+        // desbloquear una empresa, y un usuario que audita clientes acaba con
+        // treinta avisos que no pidió. Aquí la ve y la poda.
+        // ---------------------------------------------------------------
+        $watches = [];
+        try {
+            if ($db->tableExists('user_company_watch')) {
+                $watchRows = $db->table('user_company_watch w')
+                    ->select('w.cif, w.company_id, w.source, w.last_notified_at, w.created_at, c.company_name')
+                    ->join('companies c', 'c.id = w.company_id', 'left')
+                    ->where('w.user_id', $userId)
+                    ->where('w.active', 1)
+                    ->orderBy('w.last_notified_at IS NULL', 'ASC', false)
+                    ->orderBy('w.last_notified_at', 'DESC')
+                    ->orderBy('w.id', 'DESC')
+                    ->limit(100)
+                    ->get()->getResultArray();
+
+                foreach ($watchRows as $w) {
+                    $cifW  = strtoupper(trim((string) $w['cif']));
+                    $nameW = $w['company_name'] ?: ($companiesMap[$cifW]['company_name'] ?? ('Empresa ' . $cifW));
+                    $idW   = (int) ($w['company_id'] ?? 0);
+                    $slugW = url_title($nameW, '-', true);
+
+                    $watches[] = [
+                        'cif'              => $cifW,
+                        'company_name'     => $nameW,
+                        'url'              => $idW > 0
+                            ? site_url('empresa/' . $idW . '-' . $slugW)
+                            : site_url('perfil-de-riesgo?cif=' . urlencode($cifW)),
+                        'source'           => (string) ($w['source'] ?? 'auto'),
+                        'last_notified_at' => $w['last_notified_at'] ?? null,
+                        'created_at'       => $w['created_at'] ?? null,
+                    ];
+                }
+            }
+        } catch (\Throwable $e) {
+            log_message('error', '[Dashboard] No se pudo leer la vigilancia: ' . $e->getMessage());
+        }
+
         // Tickets contestados por administración
         $ticketModel = new \App\Models\TicketModel();
         $answeredTickets = $ticketModel->where('user_id', $userId)
@@ -529,6 +583,9 @@ class Dashboard extends BaseController
             'viewsRemaining'  => $viewsRemaining,
             'nextCycleDate'   => $nextCycleDate,
             'audits'          => $audits,
+            'watches'         => $watches,
+            'watchQuota'      => (new \App\Services\CompanyWatchService())->estadoCupo($userId),
+            'alertsBorme'     => $user->alerts_borme ?? null,
             'answeredTickets' => $answeredTickets,
             'api_key'         => $data['api_key'] ?? null,
             'initialCif'      => trim((string)$this->request->getGet('cif'))

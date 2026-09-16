@@ -178,6 +178,37 @@
                         </div>
                     </div>
                 </div>
+            <?php elseif (($intent ?? '') === 'view_risk_profile'): ?>
+                <!-- VERSION PERFIL DE RIESGO / SOLVENCIA -->
+                <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                    <div style="width: 56px; height: 56px; background: #eff6ff; color: #2563eb; border-radius: 16px; display: flex; align-items: center; justify-content: center; border: 1px solid #dbeafe;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"></polyline></svg>
+                    </div>
+                </div>
+                <h1 style="font-size: 1.7rem; font-weight: 900; color: #0f172a; margin-bottom: 12px; letter-spacing: -0.02em; line-height: 1.2;">
+                    <?php if (!empty($companyName)): ?>
+                        Ver el dictamen de riesgo de <?= esc($companyName) ?>
+                    <?php else: ?>
+                        Ver el dictamen de riesgo
+                    <?php endif; ?>
+                </h1>
+                <p style="color: #64748b; margin-bottom: 20px; line-height: 1.6; font-size: 0.95rem;">
+                    Introduce tu email y accedes al momento. Te enviamos un enlace para poner contraseña cuando quieras.
+                </p>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; margin-bottom: 28px; color: #1e3a8a; font-size: 0.85rem; font-weight: 600;">
+                    <span style="display: inline-flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        3 consultas gratis al mes
+                    </span>
+                    <span style="display: inline-flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Sin tarjeta de crédito
+                    </span>
+                    <span style="display: inline-flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Acceso instantáneo
+                    </span>
+                </div>
             <?php elseif (isset($redirect) && strpos($redirect, 'checkout_bonus') !== false): ?>
                 <!-- VERSION COMPRA BONO API -->
                 <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 24px;">
@@ -206,6 +237,8 @@
             <form action="<?= site_url('register/quick_store') ?>" method="POST">
                 <?= csrf_field() ?>
                 <input type="hidden" name="redirect" value="<?= esc($redirect ?? '') ?>">
+                <input type="hidden" name="intent" value="<?= esc($intent ?? '', 'attr') ?>">
+                <input type="hidden" name="cif" value="<?= esc($signupCif ?? '', 'attr') ?>">
                 <div class="form-group">
                     <label class="form-label">
                         <?= (isset($redirect) && strpos($redirect, 'radar') !== false) ? '' : lang('Auth.quick_reg_email_label') ?>
@@ -228,9 +261,11 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary" style="<?= (isset($redirect) && strpos($redirect, 'radar') !== false) ? 'background: #2563EB;' : '' ?>">
+                <button type="submit" class="btn-primary" data-loading="<?= (($intent ?? '') === 'view_risk_profile') ? 'Abriendo tu dictamen…' : 'Creando tu cuenta…' ?>" style="<?= (isset($redirect) && strpos($redirect, 'radar') !== false) ? 'background: #2563EB;' : '' ?>">
                     <?php 
-                        if (isset($redirect) && strpos($redirect, 'radar') !== false) {
+                        if (($intent ?? '') === 'view_risk_profile') {
+                            echo 'Ver el dictamen de riesgo →';
+                        } elseif (isset($redirect) && strpos($redirect, 'radar') !== false) {
                             echo lang('Auth.quick_reg_btn_radar');
                         } elseif (isset($redirect) && strpos($redirect, 'checkout_bonus') !== false) {
                             echo lang('Auth.quick_reg_btn_bonus');

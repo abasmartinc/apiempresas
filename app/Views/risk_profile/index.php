@@ -491,7 +491,11 @@
             <div class="rp-badge">
                 <span class="rp-badge-dot"></span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"></polyline></svg>
-                <span>Auditoría Mercantil &bull; Scoring IES Oficial</span>
+                <!-- "Scoring IES Oficial" decía que nuestra puntuación es oficial.
+                     Oficial es la FUENTE (BORME, Registro Mercantil); el IES lo
+                     calculamos nosotros. Se dice de dónde salen los datos, que es
+                     lo verificable y además el argumento más fuerte. -->
+                <span>Auditoría Mercantil &bull; Scoring IES sobre fuentes oficiales</span>
             </div>
 
             <h1 class="rp-title">
@@ -644,13 +648,7 @@
                     <!-- RISK WIDGET CARD -->
                     <div class="rp-card-main" id="risk-profile-container" style="padding: 24px; position: relative; background: #fff; min-height: 260px;">
                         <?php if ($isLoggedIn): ?>
-                            <?php if (!empty($riskQuota) && empty($riskQuota['allowed'])): ?>
-                                <!-- PAYWALL CUOTA MENSUAL ALCANZADA (3/3) -->
-                                <?= view('partials/company_risk_paywall', [
-                                    'company'   => $company,
-                                    'riskQuota' => $riskQuota
-                                ]) ?>
-                            <?php else: ?>
+                            <?php if (!empty($riskQuota['allowed'])): ?>
                                 <!-- PERFIL COMPLETO (DESBLOQUEADO / SUSCRIPCIÓN) -->
                                 <?= view('partials/company_risk_profile', [
                                     'riskProfile' => $riskProfile,
@@ -658,6 +656,20 @@
                                     'contracts'   => $contracts,
                                     'subsidies'   => $subsidies,
                                     'riskQuota'   => $riskQuota
+                                ]) ?>
+                            <?php elseif (!empty($riskQuota['can_unlock'])): ?>
+                                <!-- DESBLOQUEO EXPLÍCITO (queda cuota o créditos) -->
+                                <?= view('partials/company_risk_locked', [
+                                    'riskProfile' => $riskProfile,
+                                    'company'     => $company,
+                                    'riskQuota'   => $riskQuota
+                                ]) ?>
+                            <?php else: ?>
+                                <!-- PAYWALL CUOTA MENSUAL ALCANZADA (3/3) -->
+                                <?= view('partials/company_risk_paywall', [
+                                    'company'     => $company,
+                                    'riskQuota'   => $riskQuota,
+                                    'riskProfile' => $riskProfile,
                                 ]) ?>
                             <?php endif; ?>
                         <?php else: ?>
@@ -740,7 +752,7 @@
                     <div class="rp-brackets-grid">
                         <div class="rp-bracket-card" style="background: #f0fdf4; border-color: #bbf7d0;">
                             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                                <strong style="color: #15803d; font-size: 1.1rem;">0 - 29 &bull; RIESGO BAJO</strong>
+                                <strong style="color: #15803d; font-size: 1.1rem;">0 - <?= (int) solvencia('umbralMedio', 30) - 1 ?> &bull; RIESGO BAJO</strong>
                                 <span style="background: #dcfce7; color: #16a34a; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem;">Favorable</span>
                             </div>
                             <p style="font-size: 0.85rem; color: #166534; line-height: 1.45; margin: 0;">
@@ -750,7 +762,7 @@
 
                         <div class="rp-bracket-card" style="background: #fffbeb; border-color: #fde68a;">
                             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                                <strong style="color: #b45309; font-size: 1.1rem;">30 - 69 &bull; RIESGO MEDIO</strong>
+                                <strong style="color: #b45309; font-size: 1.1rem;"><?= (int) solvencia('umbralMedio', 30) ?> - <?= (int) solvencia('umbralAlto', 60) - 1 ?> &bull; RIESGO MEDIO</strong>
                                 <span style="background: #fef3c7; color: #d97706; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem;">Atención</span>
                             </div>
                             <p style="font-size: 0.85rem; color: #78350f; line-height: 1.45; margin: 0;">
@@ -760,7 +772,7 @@
 
                         <div class="rp-bracket-card" style="background: #fef2f2; border-color: #fecaca;">
                             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                                <strong style="color: #b91c1c; font-size: 1.1rem;">70 - 100 &bull; RIESGO ALTO</strong>
+                                <strong style="color: #b91c1c; font-size: 1.1rem;"><?= (int) solvencia('umbralAlto', 60) ?> - 100 &bull; RIESGO ALTO</strong>
                                 <span style="background: #fee2e2; color: #ef4444; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem;">Alerta Crítica</span>
                             </div>
                             <p style="font-size: 0.85rem; color: #7f1d1d; line-height: 1.45; margin: 0;">
@@ -825,17 +837,22 @@
                             <svg class="rp-faq-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </div>
                         <div class="rp-faq-answer">
-                            Todos los usuarios registrados en APIEmpresas disponen de <strong>3 consultas gratuitas de empresas distintas cada mes natural</strong> sin necesidad de tarjeta bancaria. Si necesitas consultar un mayor volumen de empresas de forma continuada, puedes suscribirte al plan <strong>Solvencia Pro</strong> (29 €/mes) o descargar informes individuales en PDF por 3,90 € + IVA.
+                            Todos los usuarios registrados en APIEmpresas disponen de <strong><?= (int) solvencia('consultasGratis', 3) ?> consultas gratuitas de empresas distintas cada mes natural</strong> sin necesidad de tarjeta bancaria. Si necesitas consultar un mayor volumen de empresas de forma continuada, puedes suscribirte al plan <strong>Solvencia Pro</strong> (<?= solvencia('precios.pro_mensual', '29 €') ?>/mes) o descargar informes individuales en PDF por <?= solvencia('precios.pdf', '3,90 €') ?> + IVA.
                         </div>
                     </div>
 
                     <div class="rp-faq-item">
                         <div class="rp-faq-question" onclick="this.parentElement.classList.toggle('active');">
-                            <span>¿Puedo descargar un informe oficial para adjuntar a mis expedientes?</span>
+                            <span>¿Puedo descargar un informe en PDF para adjuntar a mis expedientes?</span>
                             <svg class="rp-faq-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </div>
                         <div class="rp-faq-answer">
-                            Sí. Puedes emitir y descargar de inmediato un dictamen oficial en PDF con certificación de solvencia, semáforo de riesgo y detalle de eventos registrales por solo 3,90 € + IVA (o incluido ilimitadamente en tu suscripción Solvencia Pro).
+                            <!-- Decía "dictamen oficial ... con certificación de solvencia".
+                                 Una certificación de solvencia la expide un registrador o la
+                                 AEAT, no nosotros: prometerla es lo que convierte una queja
+                                 en una reclamación. Lo que sí se entrega —y se puede
+                                 sostener— es el informe fechado con los datos y su origen. -->
+                            Sí. Puedes emitir y descargar de inmediato un informe en PDF, con fecha de emisión, la puntuación de solvencia, el semáforo de riesgo y el detalle de los eventos registrales publicados en el BORME, por <?= solvencia('precios.pdf', '3,90 €') ?> + IVA, o incluido en tu suscripción Solvencia Pro.
                         </div>
                     </div>
                 </div>

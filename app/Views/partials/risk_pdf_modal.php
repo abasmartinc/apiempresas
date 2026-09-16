@@ -18,19 +18,28 @@ $compCifStr = !empty($company['cif']) ? $company['cif'] : '';
             <div id="risk-left-view-risk">
                 <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 16px;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"></polyline></svg>
-                    Dictamen Oficial (1-2 págs)
+                    Acceso a esta empresa
                 </div>
                 <h3 style="margin: 0 0 12px 0; font-size: 1.35rem; color: #ffffff; font-weight: 800; line-height: 1.25;">
-                    Informe de Riesgo y Solvencia
+                    Ver <?= esc($compNameStr) ?> entera
                 </h3>
+                <?php
+                /*
+                 * Antes esto vendía "un dictamen en PDF de 1-2 páginas", y ese PDF es
+                 * exactamente el que se descarga gratis quien haya consultado la empresa
+                 * alguna vez. Lo que de verdad se compra —y lo que no se puede tener de
+                 * otro modo sin gastar una de las consultas del mes— es abrir esta ficha
+                 * entera: en pantalla y en PDF, sin caducidad.
+                 */
+                ?>
                 <p style="color: #94a3b8; margin-bottom: 20px; line-height: 1.45; font-size: 0.88rem;">
-                    Dictamen ejecutivo de estabilidad mercantil de <strong style="color: #ffffff;"><?= esc($compNameStr) ?></strong> listo para imprimir o adjuntar:
+                    Se te abre el dictamen completo <strong style="color: #ffffff;">en la web y en PDF</strong>, y queda desbloqueada en tu cuenta para siempre:
                 </p>
 
                 <ul style="list-style: none; padding: 0; margin: 0 0 24px 0; display: flex; flex-direction: column; gap: 14px;">
                     <li style="display: flex; gap: 10px; align-items: flex-start;">
                         <span style="color: #10b981; flex-shrink: 0; margin-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
-                        <div style="font-size: 0.85rem; color: #e2e8f0; line-height: 1.35;"><strong>Índice IES (0-100)</strong> y semáforo de riesgo oficial.</div>
+                        <div style="font-size: 0.85rem; color: #e2e8f0; line-height: 1.35;"><strong>Índice IES (0-100)</strong> y semáforo de riesgo, con el peso de cada factor.</div>
                     </li>
                     <li style="display: flex; gap: 10px; align-items: flex-start;">
                         <span style="color: #10b981; flex-shrink: 0; margin-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
@@ -43,7 +52,7 @@ $compCifStr = !empty($company['cif']) ? $company['cif'] : '';
                 </ul>
 
                 <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px 14px; font-size: 0.78rem; color: #94a3b8; line-height: 1.4;">
-                    🔒 Descarga inmediata tras el pago con factura de IVA deducible.
+                    🔒 Acceso inmediato tras el pago, sin caducidad y con factura de IVA deducible. No gasta ninguna de tus consultas gratuitas del mes.
                 </div>
             </div>
 
@@ -109,11 +118,11 @@ $compCifStr = !empty($company['cif']) ? $company['cif'] : '';
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <input type="radio" name="opt_report" value="risk" checked onchange="updateRiskModalPrice(this.value);" style="accent-color: #2563eb; transform: scale(1.2);">
                             <div>
-                                <div style="font-weight: 800; color: #0f172a; font-size: 0.95rem;">Informe de Riesgo y Solvencia</div>
-                                <div style="font-size: 0.78rem; color: #64748b;">Semáforo, alertas BORME y contratos públicos</div>
+                                <div style="font-weight: 800; color: #0f172a; font-size: 0.95rem;">Acceso a esta empresa</div>
+                                <div style="font-size: 0.78rem; color: #64748b;">Dictamen completo en pantalla y en PDF</div>
                             </div>
                         </div>
-                        <span style="font-weight: 900; color: #2563eb; font-size: 1.1rem; white-space: nowrap;">3,90 € <span style="font-size: 0.75rem; font-weight: 600;">+ IVA</span></span>
+                        <span style="font-weight: 900; color: #2563eb; font-size: 1.1rem; white-space: nowrap;"><?= solvencia('precios.pdf', '3,90 €') ?> <span style="font-size: 0.75rem; font-weight: 600;">+ IVA</span></span>
                     </label>
 
                     <label id="label-opt-dossier" style="border: 1px solid #cbd5e1; background: #ffffff; border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s;">
@@ -124,7 +133,7 @@ $compCifStr = !empty($company['cif']) ? $company['cif'] : '';
                                 <div style="font-size: 0.78rem; color: #64748b;">Riesgo + Administradores + BORME + 4 págs</div>
                             </div>
                         </div>
-                        <span style="font-weight: 900; color: #0f172a; font-size: 1.1rem; white-space: nowrap;">5,90 € <span style="font-size: 0.75rem; font-weight: 600;">+ IVA</span></span>
+                        <span style="font-weight: 900; color: #0f172a; font-size: 1.1rem; white-space: nowrap;"><?= solvencia('precios.dossier', '5,90 €') ?> <span style="font-size: 0.75rem; font-weight: 600;">+ IVA</span></span>
                     </label>
                 </div>
 
@@ -134,7 +143,7 @@ $compCifStr = !empty($company['cif']) ? $company['cif'] : '';
                         ¿Consultas varias empresas al mes?
                     </div>
                     <a href="<?= site_url('billing') ?>" style="font-size: 0.78rem; font-weight: 800; color: #2563eb; text-decoration: none;" onmouseover="this.style.textDecoration='underline';" onmouseout="this.style.textDecoration='none';">
-                        Solvencia Pro Ilimitado (29€/mes) &rarr;
+                        Solvencia Pro (<?= solvencia('precios.pro_mensual', '29 €') ?>/mes) &rarr;
                     </a>
                 </div>
 
@@ -149,7 +158,7 @@ $compCifStr = !empty($company['cif']) ? $company['cif'] : '';
                 </div>
 
                 <button type="submit" id="btn-risk-modal-submit" style="width: 100%; padding: 14px 16px; background: #10b981; color: white; border: none; border-radius: 10px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35); white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
-                    <span>Pagar 3,90 € + IVA y Descargar PDF 💳</span>
+                    <span>Pagar <?= solvencia('precios.pdf', '3,90 €') ?> + IVA y Desbloquear 💳</span>
                 </button>
                 
                 <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 14px; color: #64748b; font-size: 0.78rem;">
@@ -162,6 +171,11 @@ $compCifStr = !empty($company['cif']) ? $company['cif'] : '';
 </div>
 
 <script>
+// Los precios del botón se escribían a mano en el JS. Es justo el fallo que ya
+// pasó una vez —el modal anunciaba 3,90 € y cobraba 5,90 €—, así que salen del
+// mismo sitio que el resto: Config\Solvencia.
+var RISK_PRECIO_PDF = <?= json_encode(solvencia('precios.pdf', '3,90 €')) ?>;
+var RISK_PRECIO_DOSSIER = <?= json_encode(solvencia('precios.dossier', '5,90 €')) ?>;
 window.openRiskPdfModal = function(companyId, cif) {
     if(companyId) {
         const input = document.getElementById('risk-modal-company-id');
@@ -171,6 +185,17 @@ window.openRiskPdfModal = function(companyId, cif) {
         const cifInput = document.getElementById('risk-modal-cif');
         if(cifInput) cifInput.value = cif;
     }
+    // Volver SIEMPRE al producto por defecto al abrir.
+    //
+    // El modal se monta una sola vez por página, así que conservaba lo último elegido:
+    // quien probaba el Dossier y cerraba, al volver a pulsar "Descargar" se encontraba
+    // el panel del Dossier —administradores, personalización de marca— y el precio de
+    // 5,90 €, aunque viniera del botón del informe de riesgo. Y lo arrastraba también
+    // al abrirlo para OTRA empresa.
+    const radioRiesgo = document.querySelector('#risk-pdf-modal input[name="opt_report"][value="risk"]');
+    if (radioRiesgo) { radioRiesgo.checked = true; }
+    if (window.updateRiskModalPrice) { window.updateRiskModalPrice('risk'); }
+
     const modal = document.getElementById('risk-pdf-modal');
     if(modal) {
         modal.style.display = 'flex';
@@ -195,7 +220,7 @@ window.updateRiskModalPrice = function(type) {
     if(typeInput) typeInput.value = type;
 
     if (type === 'dossier') {
-        if(submitBtn) submitBtn.innerHTML = '<span>Pagar 5,90 € + IVA y Descargar Dossier 💳</span>';
+        if(submitBtn) submitBtn.innerHTML = '<span>Pagar ' + RISK_PRECIO_DOSSIER + ' + IVA y Descargar Dossier 💳</span>';
         if(cardRisk) {
             cardRisk.style.borderColor = '#cbd5e1';
             cardRisk.style.background = '#ffffff';
@@ -207,7 +232,7 @@ window.updateRiskModalPrice = function(type) {
         if(viewRisk) viewRisk.style.display = 'none';
         if(viewDossier) viewDossier.style.display = 'block';
     } else {
-        if(submitBtn) submitBtn.innerHTML = '<span>Pagar 3,90 € + IVA y Descargar PDF 💳</span>';
+        if(submitBtn) submitBtn.innerHTML = '<span>Pagar ' + RISK_PRECIO_PDF + ' + IVA y Desbloquear 💳</span>';
         if(cardRisk) {
             cardRisk.style.borderColor = '#2563eb';
             cardRisk.style.background = '#eff6ff';
@@ -259,7 +284,11 @@ window.handleRiskPdfSubmit = function(e, formEl) {
                 </div>
             `;
             btnSubmit.disabled = false;
-            btnSubmit.innerHTML = '<span>Pagar y Descargar PDF 💳</span>';
+            // Restaurar el rótulo correcto: este respaldo estaba escrito a mano y
+            // sin precio, así que tras un error el botón decía "Pagar y Descargar
+            // PDF" aunque lo elegido fuera el Dossier.
+            var tipoActual = document.getElementById('risk-modal-report-type');
+            updateRiskModalPrice(tipoActual ? tipoActual.value : 'risk');
         }
     })
     .catch(error => {
@@ -271,7 +300,11 @@ window.handleRiskPdfSubmit = function(e, formEl) {
             </div>
         `;
         btnSubmit.disabled = false;
-        btnSubmit.innerHTML = '<span>Pagar y Descargar PDF 💳</span>';
+        // Restaurar el rótulo correcto: este respaldo estaba escrito a mano y
+            // sin precio, así que tras un error el botón decía "Pagar y Descargar
+            // PDF" aunque lo elegido fuera el Dossier.
+            var tipoActual = document.getElementById('risk-modal-report-type');
+            updateRiskModalPrice(tipoActual ? tipoActual.value : 'risk');
     });
 };
 </script>

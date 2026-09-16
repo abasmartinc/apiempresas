@@ -1,15 +1,13 @@
-<?php 
-$score = $riskProfile['risk_score'] ?? 50;
-if ($score < 30) {
-    $color = '#22c55e'; // Verde
-    $label = 'BAJO';
-} elseif ($score < 70) {
-    $color = '#f59e0b'; // Naranja
-    $label = 'MEDIO';
-} else {
-    $color = '#ef4444'; // Rojo
-    $label = 'ALTO';
-}
+<?php
+helper(['risk_labels', 'company']);
+
+$score = (int) ($riskProfile['risk_score'] ?? 50);
+// Los cortes salían de aquí a mano con 70, pero el motor etiqueta ALTO a partir
+// de 60: una empresa de 65 llevaba el texto "ALTO" pintado de naranja "MEDIO".
+[$label, , , ] = risk_level_visual($score);
+$color = $score < (int) solvencia('umbralMedio', 30)
+    ? '#22c55e'
+    : ($score < (int) solvencia('umbralAlto', 60) ? '#f59e0b' : '#ef4444');
 $riskLevelText = $riskProfile['data']['risk_level'] ?? $label;
 ?>
 <div style="display: flex; flex-wrap: wrap; gap: 32px; align-items: stretch;">
@@ -18,14 +16,34 @@ $riskLevelText = $riskProfile['data']['risk_level'] ?? $label;
     <div style="width: 280px; background: #f8fafc; border-radius: 16px; border: 1px solid #f1f5f9; padding: 22px 20px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; flex-shrink: 0; box-sizing: border-box;">
         <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 20px;">
             <h4 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin: 0; font-weight: 800; text-align: center;">Nivel de Riesgo</h4>
-            <?php if (!empty($riskQuota['is_subscriber'])): ?>
-                <span style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 3px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-                    ⭐ Solvencia Pro &bull; Ilimitado
-                </span>
-            <?php else: ?>
-                <span style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; padding: 3px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;" title="Límite mensual gratuito de 3 empresas">
-                    🟢 <?= (int)($riskQuota['views_used'] ?? 1) ?> de 3 consultas este mes
-                </span>
+
+            <?php
+            // La píldora de consultas/plan vivía aquí, dentro de la tarjeta del
+            // NIVEL DE RIESGO: es un dato de TU CUENTA metido dentro del indicador
+            // de la EMPRESA. Se ha movido a la cabecera del bloque, junto al chip
+            // de vigilancia, que es donde está el resto de tu estado.
+            ?>
+
+            <?php
+            // Botón de vigilancia, solo donde se pide.
+            // En la ficha de empresa NO se pinta aquí: esa página va cacheada y el
+            // estado se resolvería al primero que la cargase. Allí vive en la
+            // cabecera y lo enciende la hidratación. Aquí (buscador de riesgo, sin
+            // caché) el estado del servidor sí es el del usuario.
+            $watchCif = (string) ($company['cif'] ?? '');
+            $watching = !empty($isWatching);
+            ?>
+            <?php if (!empty($mostrarVigilancia) && $watchCif !== ''): ?>
+                <button type="button"
+                        data-risk-watch
+                        data-cif="<?= esc($watchCif, 'attr') ?>"
+                        data-watching="<?= $watching ? '1' : '0' ?>"
+                        title="Te avisamos por correo cuando aparezca un acto nuevo de esta empresa en el BORME"
+                        style="margin-top: 4px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border-radius: 999px; padding: 5px 12px; font-size: 0.72rem; font-weight: 800; transition: all 0.15s;
+                               background: <?= $watching ? '#ecfdf5' : '#ffffff' ?>; border: 1px solid <?= $watching ? '#a7f3d0' : '#cbd5e1' ?>; color: <?= $watching ? '#047857' : '#475569' ?>;">
+                    <span data-watch-icon><?= $watching ? '🔔' : '🔕' ?></span>
+                    <span data-watch-label><?= $watching ? 'Vigilando' : 'Vigilar empresa' ?></span>
+                </button>
             <?php endif; ?>
         </div>
         
@@ -35,19 +53,129 @@ $riskLevelText = $riskProfile['data']['risk_level'] ?? $label;
             <span style="font-size: 0.9rem; font-weight: 600; color: #94a3b8; margin-top: 2px;">de 100</span>
         </div>
         
-        <div style="text-align: center; margin-bottom: 24px;">
+        <!-- Debajo del rótulo "NIVEL DE RIESGO" de arriba ponía otra vez "Nivel de
+             riesgo": cuatro elementos para decir dos cosas. -->
+        <div style="text-align: center; margin-bottom: 20px;">
             <div style="font-size: 1.5rem; font-weight: 800; color: <?= $color ?>; text-transform: uppercase; letter-spacing: 1px; line-height: 1.2;"><?= $riskLevelText ?></div>
-            <div style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">Nivel de riesgo</div>
         </div>
 
+        <?php
+        /*
+         * El icono de esta caja era FIJO: una flecha verde hacia arriba sobre
+         * fondo verde menta, el símbolo universal de "va bien", acompañando a
+         * textos como "Advertencia: constan observaciones de riesgo moderado".
+         * Ahora sigue al nivel, igual que el resto del bloque.
+         */
+        $nivelNorm = strtoupper((string) $riskLevelText);
+        if (strpos($nivelNorm, 'ALTO') !== false) {
+            $notaFondo = '#fef2f2'; $notaTinta = '#dc2626';
+            // Triángulo de aviso.
+            $notaIcono = '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>';
+        } elseif (strpos($nivelNorm, 'MEDIO') !== false) {
+            $notaFondo = '#fffbeb'; $notaTinta = '#d97706';
+            // Círculo de información.
+            $notaIcono = '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>';
+        } else {
+            $notaFondo = '#ecfdf5'; $notaTinta = '#10b981';
+            // Escudo con visto: aquí el verde sí corresponde.
+            $notaIcono = '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline>';
+        }
+        ?>
         <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; display: flex; gap: 12px; align-items: center; width: 100%; box-sizing: border-box;">
-            <div style="background: #ecfdf5; color: #10b981; padding: 8px; border-radius: 8px; flex-shrink: 0;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+            <div style="background: <?= $notaFondo ?>; color: <?= $notaTinta ?>; padding: 8px; border-radius: 8px; flex-shrink: 0; display: flex;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><?= $notaIcono ?></svg>
             </div>
             <p style="margin: 0; font-size: 0.75rem; color: #475569; line-height: 1.4; font-weight: 500;">
                 <?= esc($riskProfile['data']['summary_message'] ?? 'Puntuación procesada correctamente.') ?>
             </p>
         </div>
+
+        <?php
+        /* ------------------------------------------------------------------
+           EVOLUCIÓN DEL SCORE
+           Un 45 estable no es lo mismo que un 45 que hace medio año era 20.
+           Sale del histórico que el motor archiva en cada recálculo, así que
+           no depende de quién mire: es cacheable sin problema.
+           Si no hay con qué comparar, no se pinta nada.
+        ------------------------------------------------------------------ */
+        $trend = $riskTrend ?? null;
+        ?>
+        <?php if (!empty($trend) && !empty($trend['puntos'])): ?>
+            <?php
+            $tDelta = (int) $trend['delta'];
+            // Subir el score es EMPEORAR: rojo arriba, verde abajo.
+            if ($tDelta > 0)      { $tColor = '#b91c1c'; $tFlecha = '▲'; $tTexto = 'ha empeorado'; }
+            elseif ($tDelta < 0)  { $tColor = '#15803d'; $tFlecha = '▼'; $tTexto = 'ha mejorado'; }
+            else                  { $tColor = '#64748b'; $tFlecha = '='; $tTexto = 'sin cambios'; }
+
+            // Mini-gráfica. Escala vertical con margen, para que una serie plana
+            // no quede pegada al borde ni una variación pequeña parezca un salto.
+            $pts   = array_map('intval', $trend['puntos']);
+            $minY  = max(0, min($pts) - 8);
+            $maxY  = min(100, max($pts) + 8);
+            if ($maxY - $minY < 12) { $maxY = min(100, $minY + 12); }
+            $anchoSvg = 236; $altoSvg = 34;
+            $n = count($pts);
+            $coords = [];
+            foreach ($pts as $i => $v) {
+                $x = $n > 1 ? ($i / ($n - 1)) * $anchoSvg : $anchoSvg / 2;
+                $y = $altoSvg - (($v - $minY) / max(1, $maxY - $minY)) * $altoSvg;
+                $coords[] = round($x, 1) . ',' . round($y, 1);
+            }
+            $linea = implode(' ', $coords);
+            $ultimo = end($coords);
+            [$ux, $uy] = array_map('floatval', explode(',', $ultimo));
+            ?>
+            <div style="width: 100%; margin-top: 16px; padding-top: 14px; border-top: 1px dashed #e2e8f0;">
+                <div style="font-size: 0.64rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.6px; text-align: center; margin-bottom: 8px;">
+                    Evolución
+                </div>
+
+                <svg viewBox="0 -4 <?= $anchoSvg ?> <?= $altoSvg + 8 ?>" width="100%" height="40" preserveAspectRatio="none" aria-hidden="true" style="display: block; overflow: visible;">
+                    <polyline points="<?= $linea ?>" fill="none" stroke="<?= $tColor ?>" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></polyline>
+                    <circle cx="<?= $ux ?>" cy="<?= $uy ?>" r="3" fill="<?= $tColor ?>"></circle>
+                </svg>
+
+                <div style="text-align: center; font-size: 0.78rem; color: #475569; line-height: 1.45; margin-top: 8px;">
+                    <?= esc(ucfirst((string) $trend['periodo'])) ?> era <strong style="color: #334155;"><?= (int) $trend['antes'] ?></strong>
+                </div>
+                <div style="text-align: center; font-size: 0.76rem; font-weight: 800; color: <?= $tColor ?>; margin-top: 2px;">
+                    <?= $tFlecha ?> <?= $tDelta === 0 ? esc($tTexto) : (abs($tDelta) . ' ' . (abs($tDelta) === 1 ? 'punto' : 'puntos') . ' — ' . esc($tTexto)) ?>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <!-- LA PETICIÓN DE VIGILANCIA
+             Aquí abajo, pegada al veredicto y llenando el hueco que dejaba la
+             columna. Es el sitio con mejor relación intención/esfuerzo: llegas
+             después de leer el score y el resumen, sin tener que bajar hasta el
+             final de la tarjeta.
+             Nace OCULTA: esta ficha va cacheada, así que el estado no puede
+             salir del servidor. La enciende la hidratación, y solo si el usuario
+             todavía NO vigila la empresa. -->
+        <?php $watchCifCol = (string) ($company['cif'] ?? ''); ?>
+        <?php if ($watchCifCol !== ''): ?>
+            <div data-risk-prompt style="display: none; width: 100%; margin-top: 16px; padding-top: 16px; border-top: 1px dashed #e2e8f0; flex-direction: column; align-items: center; gap: 8px; text-align: center;">
+                <!-- Cada frase en su línea. Antes se partía por donde caía
+                     ("...¿Y si algo / cambia mañana?") y la pregunta, que es el
+                     gancho, quedaba descoyuntada. El nowrap solo protege a la
+                     pregunta, que cabe de sobra en los 240 px útiles. -->
+                <div data-risk-prompt-nota style="font-size: 0.78rem; color: #64748b; line-height: 1.5;">
+                    Este dictamen es de hoy.<br>
+                    <strong style="color: #334155; font-weight: 700; white-space: nowrap;">¿Y si algo cambia mañana?</strong>
+                </div>
+                <button type="button"
+                        data-risk-watch
+                        data-cif="<?= esc($watchCifCol, 'attr') ?>"
+                        data-watching="0"
+                        style="width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; border-radius: 10px; padding: 10px 14px; font-size: 0.83rem; font-weight: 800; transition: all 0.15s; background: #0f172a; border: 1px solid #0f172a; color: #ffffff;"
+                        onmouseover="this.style.background='#1e293b';"
+                        onmouseout="this.style.background='#0f172a';">
+                    <span data-watch-icon>🔔</span>
+                    <span data-watch-label>Vigilar empresa</span>
+                </button>
+            </div>
+        <?php endif; ?>
     </div>
 
     <!-- RIGHT COLUMN (Factors) -->
@@ -65,7 +193,10 @@ $riskLevelText = $riskProfile['data']['risk_level'] ?? $label;
             <?php if (!empty($riskProfile['data']['canonical_events'])): ?>
                 <?php foreach ($riskProfile['data']['canonical_events'] as $flag): ?>
                     <?php 
-                    $sev = $flag['severity'] ?? 'low';
+                    // Normalizado: `critical` caia al bloque de 'low' y se pintaba en
+                    // gris una sociedad extinguida.
+                    $sevN = risk_event_severidad($flag);
+                    $sev  = $sevN >= 3 ? 'high' : ($sevN === 2 ? 'medium' : 'low');
                     if ($sev === 'high') {
                         $iconColor = '#ef4444';
                         $iconBg = '#fee2e2';
@@ -81,12 +212,30 @@ $riskLevelText = $riskProfile['data']['risk_level'] ?? $label;
                         $badgeBorder = '#fde68a';
                         $sevLabel = 'ATENCIÓN';
                     } else {
-                        $iconColor = '#22c55e';
-                        $iconBg = '#dcfce7';
-                        $badgeColor = '#15803d';
-                        $badgeBg = '#f0fdf4';
-                        $badgeBorder = '#bbf7d0';
-                        $sevLabel = 'POSITIVO';
+                        /*
+                         * LEVE, no "POSITIVO".
+                         *
+                         * Lo que se recorre aquí son los eventos que el motor ha
+                         * encontrado EN CONTRA de la empresa. Una incidencia de
+                         * gravedad baja sigue siendo una incidencia: pintarla en
+                         * verde con un tick y la palabra POSITIVO convierte un hecho
+                         * desfavorable en un punto a favor.
+                         *
+                         * Se veía en crudo con "Cuentas anuales sin depositar desde
+                         * hace 3 ejercicios ✓ POSITIVO" — y dos dedos más abajo, la
+                         * misma dimensión en rojo como FACTOR DOMINANTE. La misma
+                         * ficha decía las dos cosas.
+                         *
+                         * El caso bueno de verdad ya tiene su propia rama: cuando NO
+                         * hay eventos, se pinta "Análisis Favorable". Este bloque no
+                         * puede competir con aquel.
+                         */
+                        $iconColor = '#64748b';
+                        $iconBg = '#f1f5f9';
+                        $badgeColor = '#475569';
+                        $badgeBg = '#f8fafc';
+                        $badgeBorder = '#e2e8f0';
+                        $sevLabel = 'LEVE';
                     }
                     ?>
                     <div style="border: 1px solid #f1f5f9; border-radius: 12px; padding: 20px; display: flex; gap: 16px; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
@@ -96,11 +245,14 @@ $riskLevelText = $riskProfile['data']['risk_level'] ?? $label;
                             <?php elseif ($sev === 'medium'): ?>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
                             <?php else: ?>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                <?php /* Icono de información, no un tick: el tick dice "esto
+                                         está bien" sobre un hecho que está en la lista de
+                                         cosas que NO lo están. */ ?>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="11" x2="12" y2="16"></line><line x1="12" y1="7.5" x2="12.01" y2="7.5"></line></svg>
                             <?php endif; ?>
                         </div>
                         <div style="flex: 1;">
-                            <p style="margin: 0 0 6px 0; font-size: 1rem; font-weight: 700; color: #0f172a;"><?= esc(ucwords(strtolower(str_replace('_', ' ', $flag['code'] ?? 'EVENTO REPORTADO')))) ?></p>
+                            <p style="margin: 0 0 6px 0; font-size: 1rem; font-weight: 700; color: #0f172a;"><?= esc(risk_event_label($flag)) ?></p>
                             <p style="margin: 0; font-size: 0.9rem; color: #64748b; line-height: 1.4;"><?= esc($flag['description'] ?? 'Basado en histórico público') ?></p>
                         </div>
                         <span style="background: <?= $badgeBg ?>; color: <?= $badgeColor ?>; border: 1px solid <?= $badgeBorder ?>; padding: 6px 14px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; flex-shrink: 0;">
@@ -121,106 +273,108 @@ $riskLevelText = $riskProfile['data']['risk_level'] ?? $label;
             <?php endif; ?>
         </div>
 
-        <!-- Info Box: Cómo se calcula -->
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; display: flex; gap: 20px; align-items: center; position: relative; overflow: hidden;">
-            <div style="color: #3b82f6; flex-shrink: 0;">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-            </div>
-            <div style="flex: 1; z-index: 2;">
-                <p style="margin: 0 0 6px 0; font-size: 1rem; font-weight: 700; color: #1e293b;">¿Cómo se calcula?</p>
-                <p style="margin: 0; font-size: 0.9rem; color: #475569; line-height: 1.5;">El motor de riesgo evalúa en tiempo real 6 dimensiones clave: estado legal, cumplimiento registral (BORME y Cuentas), gobernanza, capital, volatilidad estructural y factores estabilizadores. Estos datos se consolidan en una puntuación de 0 a 100, donde 100 representa el mayor nivel de riesgo.</p>
-            </div>
-        </div>
+        <!-- DESGLOSE DEL SCORING
+             Aquí había una caja que PROMETÍA seis dimensiones y no enseñaba
+             ninguna. Las seis ya venían calculadas en el JSON del motor; ahora
+             se pintan con su valor, su tope y cuál es la dominante. -->
+        <?= view('partials/company_risk_dimensions', [
+            'riskProfile' => $riskProfile,
+            'score'       => $score,
+            // Para el aviso de confianza baja: sin la fecha real de constitución
+            // no se puede saber si la culpa es del dato o de la juventud de la
+            // empresa, y el aviso acababa diciendo las dos cosas a la vez.
+            'company'     => $company ?? [],
+        ]) ?>
 
     </div>
 </div>
 
-<!-- CTA BANNER: DESCARGAR INFORME DE RIESGO EN PDF -->
-<?php 
-$compBtnId = !empty($company['id']) ? (int)$company['id'] : 0; 
-$compNameStr = !empty($company['name']) ? $company['name'] : 'esta empresa';
+<!-- UPSELL SOLVENCIA PRO: pegado al dictamen, que es donde está el pico de intención.
+     No se renderiza para suscriptores (el propio partial hace el guard). -->
+<?= view('partials/risk_pro_upsell', [
+    'riskProfile' => $riskProfile,
+    'company'     => $company,
+    'riskQuota'   => $riskQuota ?? []
+]) ?>
+<?php
+/* ---------------------------------------------------------------------------
+   ACCIONES SECUNDARIAS
+   El dictamen en PDF y la invitación a auditar otra empresa van como barras
+   finas: por encima manda el CTA de Solvencia Pro. Antes el PDF era un banner
+   oscuro a todo ancho que pesaba más que la suscripción — y para una empresa ya
+   desbloqueada ni siquiera cuesta dinero.
+   La cuota restante ya no vive aquí: se ha absorbido en la tarjeta de Pro como
+   argumento de escasez, para no decirle "aún te queda gratis" justo después
+   de pedirle que pague.
+--------------------------------------------------------------------------- */
+$compBtnId   = !empty($company['id']) ? (int)$company['id'] : 0;
+$compNameStr = company_short_name(company_display_name($company['name'] ?? '', 'esta empresa'));
+
+$isSubscriber   = !empty($riskQuota['is_subscriber']);
+$viewsUsed      = (int)($riskQuota['views_used'] ?? 1);
+$viewsRemaining = max(0, (int) solvencia('consultasGratis', 3) - $viewsUsed);
+
+$canDownloadRiskPdf = $isSubscriber
+                   || !empty($riskQuota['already_unlocked'])
+                   || !empty($riskQuota['allowed']);
 ?>
-<div style="margin-top: 24px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 16px; padding: 24px 28px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12); border: 1px solid #334155;">
-    <div style="flex: 1; min-width: 260px;">
-        <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); color: #93c5fd; padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            Dictamen Oficial Descargable
+
+<!-- BARRA: DICTAMEN EN PDF -->
+<div style="margin-top: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 12px; min-width: 240px; flex: 1;">
+        <div style="color: #475569; flex-shrink: 0; display: flex;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
         </div>
-        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.3px;">
-            Descargar Informe Oficial de Riesgo en PDF
-        </h4>
-        <p style="margin: 0; color: #94a3b8; font-size: 0.9rem; line-height: 1.4;">
-            Obtén el dictamen ejecutivo con certificación de solvencia, semáforo de riesgo y detalle de eventos BORME listo para adjuntar a tu expediente de cliente.
-        </p>
-        <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; color: #cbd5e1; font-size: 0.8rem; font-weight: 500;">
-            <span style="display: flex; align-items: center; gap: 5px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                Descarga instantánea en 1 clic
-            </span>
-            <span style="display: flex; align-items: center; gap: 5px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                Factura deducible con IVA español
-            </span>
+        <div>
+            <div style="font-size: 0.92rem; font-weight: 800; color: #0f172a; line-height: 1.3;">
+                Dictamen de <?= esc($compNameStr) ?> en PDF
+            </div>
+            <div style="font-size: 0.78rem; color: #64748b; margin-top: 1px;">
+                <?php if ($isSubscriber): ?>
+                    Incluido en tu plan Solvencia Pro &bull; listo para tu expediente de cliente
+                <?php elseif ($canDownloadRiskPdf): ?>
+                    Ya incluido con esta consulta &bull; listo para tu expediente de cliente
+                <?php else: ?>
+                    <?php // "Certificación de solvencia" no la emitimos nosotros. ?>
+                    Puntuación de solvencia, semáforo y detalle de eventos BORME
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-        <?php 
-        $canDownloadRiskPdf = !empty($riskQuota['is_subscriber']) || !empty($riskQuota['already_unlocked']) || !empty($riskQuota['allowed']);
-        ?>
-        <?php if ($canDownloadRiskPdf): ?>
-            <a href="<?= site_url('empresa/export-risk/' . ($compBtnId > 0 ? $compBtnId : esc($company['cif'] ?? ''))) ?>" hx-boost="false" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 14px 24px; border: none; border-radius: 12px; font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); text-decoration: none;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)';">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                Descargar Informe en PDF 📥
-            </a>
-            <span style="color: #6ee7b7; font-size: 0.75rem; font-weight: 600;">
-                <?= !empty($riskQuota['is_subscriber']) ? '⭐ Incluido en tu plan Solvencia Pro' : '✓ Dictamen oficial generado para esta empresa' ?>
-            </span>
-        <?php else: ?>
-            <button type="button" onclick="openRiskPdfModal(<?= $compBtnId ?>, '<?= esc($company['cif'] ?? '') ?>');" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 14px 24px; border: none; border-radius: 12px; font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); text-decoration: none;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 129 rgba(16, 185, 129, 0.4)';">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                Descargar Informe (3,90 € + IVA)
-            </button>
-            <span style="color: #64748b; font-size: 0.75rem;">Pago seguro vía Stripe &bull; Sin permanencia</span>
-        <?php endif; ?>
-    </div>
+    <?php if ($canDownloadRiskPdf): ?>
+        <a href="<?= site_url('empresa/export-risk/' . ($compBtnId > 0 ? $compBtnId : esc($company['cif'] ?? ''))) ?>" hx-boost="false" style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; padding: 9px 16px; border-radius: 9px; font-weight: 800; font-size: 0.85rem; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.borderColor='#94a3b8'; this.style.background='#f1f5f9';" onmouseout="this.style.borderColor='#cbd5e1'; this.style.background='#ffffff';">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Descargar PDF
+        </a>
+    <?php else: ?>
+        <button type="button" onclick="openRiskPdfModal(<?= $compBtnId ?>, '<?= esc($company['cif'] ?? '') ?>');" style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; padding: 9px 16px; border-radius: 9px; font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#94a3b8'; this.style.background='#f1f5f9';" onmouseout="this.style.borderColor='#cbd5e1'; this.style.background='#ffffff';">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <?php // Lo que se compra es el acceso a la empresa, no el fichero: el
+                  // fichero es el mismo que se lleva gratis quien ya la consultó. ?>
+            Desbloquear por <?= solvencia('precios.pdf', '3,90 €') ?> + IVA
+        </button>
+    <?php endif; ?>
 </div>
-
-<?php 
-$isSubscriber = !empty($riskQuota['is_subscriber']);
-$viewsUsed = (int)($riskQuota['views_used'] ?? 1);
-$viewsRemaining = max(0, 3 - $viewsUsed);
-?>
 
 <?php if (!$isSubscriber && $viewsRemaining > 0): ?>
-    <!-- ACTIVATION CALLOUT: PROMPT TO USE REMAINING FREE AUDITS -->
-    <div style="margin-top: 24px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 2px dashed #3b82f6; border-radius: 16px; padding: 22px 26px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.06);">
-        <div style="flex: 1; min-width: 260px;">
-            <div style="display: inline-flex; align-items: center; gap: 6px; background: #2563eb; color: #ffffff; padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">
-                ⚡ Cuota Disponible (<?= $viewsUsed ?> de 3 usadas)
-            </div>
-            <h4 style="margin: 0 0 4px 0; color: #1e3a8a; font-size: 1.15rem; font-weight: 900; letter-spacing: -0.3px;">
-                Te <?= $viewsRemaining === 1 ? 'queda' : 'quedan' ?> <?= $viewsRemaining ?> <?= $viewsRemaining === 1 ? 'consulta gratuita' : 'consultas gratuitas' ?> este mes
-            </h4>
-            <p style="margin: 0; color: #334155; font-size: 0.88rem; line-height: 1.45;">
-                No dejes consultas sin utilizar. Comprueba ahora la salud crediticia y estabilidad de otro cliente, socio o proveedor:
-            </p>
-        </div>
-        
-        <div style="flex: 1; min-width: 260px; max-width: 460px;">
-            <form onsubmit="handleActivationSearch(event, this);" style="display: flex; gap: 8px; margin: 0;">
-                <input 
-                    type="text" 
-                    name="cif" 
-                    placeholder="CIF o nombre (ej. B85402030, Mercadona...)" 
-                    style="flex: 1; padding: 11px 14px; border: 1.5px solid #93c5fd; border-radius: 10px; font-size: 0.9rem; font-weight: 600; outline: none; background: #ffffff; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
-                    required
-                >
-                <button type="submit" style="background: #2563eb; color: #ffffff; border: none; padding: 11px 18px; border-radius: 10px; font-weight: 800; font-size: 0.88rem; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 10px rgba(37,99,235,0.25); transition: background 0.2s;" onmouseover="this.style.background='#1d4ed8';" onmouseout="this.style.background='#2563eb';">
-                    Auditar Gratis ➔
-                </button>
-            </form>
-        </div>
+    <!-- BARRA: AUDITAR OTRA EMPRESA (activación, sin competir con el CTA de Pro) -->
+    <div style="margin-top: 10px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 18px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+        <span style="font-size: 0.85rem; font-weight: 700; color: #334155; white-space: nowrap;">
+            Auditar otra empresa
+        </span>
+        <form onsubmit="handleActivationSearch(event, this);" style="display: flex; gap: 8px; margin: 0; flex: 1; min-width: 260px;">
+            <input
+                type="text"
+                name="cif"
+                placeholder="CIF o nombre (ej. B85402030, Mercadona...)"
+                style="flex: 1; min-width: 0; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 9px; font-size: 0.85rem; font-weight: 500; outline: none; background: #f8fafc;"
+                required
+            >
+            <button type="submit" style="background: #ffffff; color: #1d4ed8; border: 1.5px solid #bfdbfe; padding: 9px 16px; border-radius: 9px; font-weight: 800; font-size: 0.85rem; cursor: pointer; white-space: nowrap; transition: all 0.2s;" onmouseover="this.style.background='#eff6ff';" onmouseout="this.style.background='#ffffff';">
+                Consultar
+            </button>
+        </form>
     </div>
 
     <script>
@@ -230,7 +384,7 @@ $viewsRemaining = max(0, 3 - $viewsUsed);
             const input = form ? form.querySelector('input[name="cif"]') : null;
             const val = input ? input.value.trim() : '';
             if (!val) return false;
-            
+
             if (typeof window.lookupCifInDashboard === 'function') {
                 window.lookupCifInDashboard(val);
             } else {
@@ -241,5 +395,3 @@ $viewsRemaining = max(0, 3 - $viewsUsed);
     }
     </script>
 <?php endif; ?>
-
-

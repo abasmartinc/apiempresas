@@ -110,17 +110,314 @@ class EmailService
     /**
      * Send welcome email specifically for risk profile users.
      */
-    public function sendRiskWelcomeEmail(array $userData, string $redirectUrl = '')
+    public function sendRiskWelcomeEmail(array $userData, string $redirectUrl = '', string $originCif = '')
     {
         $userEmail = $userData['email'];
         $buttonUrl = !empty($redirectUrl) ? site_url(ltrim($redirectUrl, '/')) : site_url('dashboard');
 
+        // Empresa que motivó el registro. Es el primer correo que recibe y llega en el
+        // momento de máxima atención: nombrar la empresa que venía buscando convierte
+        // mucho mejor que un "bienvenido" genérico.
+        $originLine = '';
+        $originCif  = trim($originCif);
+
+        if ($originCif !== '') {
+            // Envuelto a propósito: esto es un adorno del correo. Si falla la
+            // consulta, el usuario recibe su bienvenida sin la línea de la
+            // empresa — nunca un registro roto. (La primera versión pedía una
+            // columna `name` que en `companies` se llama `company_name`, y la
+            // excepción tumbaba el alta entera.)
+            try {
+                helper('company');
+                $fila = \Config\Database::connect()->table('companies')
+                    ->select('company_name, cif')
+                    ->where('cif', strtoupper($originCif))
+                    ->get()->getRow();
+
+                if ($fila) {
+                    $nombre = company_short_name(company_display_name(
+                        $fila->company_name ?? '', ''
+                    ));
+
+                    if ($nombre !== '') {
+                        $originLine = '<div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; padding:14px 16px; margin:0 0 20px;">'
+                            . '<p style="margin:0; color:#1e3a8a; font-size:14.5px; line-height:1.5;">'
+                            . 'Tu dictamen de <strong>' . esc($nombre) . '</strong> te está esperando: '
+                            . 'ábrelo cuando quieras con el botón de abajo.</p></div>';
+                    }
+                }
+            } catch (\Throwable $e) {
+                log_message('error', '[EmailService] No se pudo resolver la empresa de origen (' . $originCif . '): ' . $e->getMessage());
+            }
+        }
+
         $templateData = [
-            'name'       => $userData['name'] ?? 'Usuario',
-            'button_url' => $buttonUrl
+            'name'        => $userData['name'] ?? 'Usuario',
+            'button_url'  => $buttonUrl,
+            'origin_line' => $originLine,
         ];
 
         return $this->sendTemplateEmail('welcome_risk', $templateData, $userEmail, ['papelo.amh@gmail.com'], [], $userData['user_id'] ?? 0);
+    }
+
+    /**
+     * Alerta de movimiento en el BORME para las empresas que el usuario vigila.
+     *
+     * El gating es la clave del producto: el gratuito ve QUÉ empresa se ha movido y
+     * cuántos actos hay, pero no cuáles. El detalle (tipo de acto y descripción) es
+     * lo que paga Solvencia Pro, y es también el motivo para volver a la ficha.
+     *
+     * @param array $empresas Salida de BormeAlertsCommand: nombre, cif, company_id, actos[]
+     */
+    public function sendBormeAlert(array $userData, array $empresas, bool $isSubscriber = false)
+    {
+        helper('company');
+
+        $totalEmpresas = count($empresas);
+        $totalActos    = array_sum(array_map(static fn ($e) => count($e['actos']), $empresas));
+        $primera       = $empresas[0] ?? null;
+
+        $filas = '';
+        /** @var array{label:string,grave:bool}|null Hecho más grave de todo el aviso: gobierna el asunto. */
+        $avisoGlobal = null;
+
+        foreach (array_slice($empresas, 0, 8) as $e) {
+            $nombre  = company_display_name($e['nombre'] ?? '', $e['cif'] ?? 'Empresa');
+            // Enlazamos por CIF a secas y dejamos que la redirección canónica resuelva
+            // el slug: fabricarlo aquí daría "georgia-s-l" donde la ficha es "georgia-sl".
+            $urlFicha = site_url(($e['cif'] ?? '') . '?ver-riesgo=1');
+            $nActos  = count($e['actos']);
+
+            // Fecha del movimiento más reciente. Al gratuito no le decimos QUÉ pasó
+            // (eso es lo que paga Pro), pero sí CUÁNDO: sin fecha el aviso es abstracto
+            // y no invita a pulsar.
+            $fechas = array_filter(array_map(static fn ($a) => trim((string) ($a['borme_date'] ?? '')), $e['actos']));
+            $ultima = $fechas ? date('d/m/Y', strtotime(max($fechas))) : '';
+
+            // Hecho destacado de la empresa: si entre los actos hay uno grave manda ese,
+            // aunque venga el último de la lista. Un concurso no puede quedar sepultado
+            // debajo de tres nombramientos solo porque se publicara antes.
+            $destacado = null;
+            foreach ($e['actos'] as $acto) {
+                $d = self::actoDestacado(
+                    trim((string) ($acto['act_types'] ?? '') . ' ' . (string) ($acto['description'] ?? ''))
+                );
+                if ($d === null) {
+                    continue;
+                }
+                if ($destacado === null || ($d['grave'] && !$destacado['grave'])) {
+                    $destacado = $d;
+                }
+            }
+            if ($destacado !== null && ($avisoGlobal === null || ($destacado['grave'] && !$avisoGlobal['grave']))) {
+                $avisoGlobal = $destacado;
+            }
+
+            $aviso = '';
+            if ($destacado !== null) {
+                $c = $destacado['grave']
+                    ? ['#fef2f2', '#fecaca', '#b91c1c']
+                    : ['#f0fdf4', '#bbf7d0', '#15803d'];
+                $aviso = '<div style="margin-top:10px; background:' . $c[0] . '; border:1px solid ' . $c[1]
+                    . '; color:' . $c[2] . '; font-size:13px; font-weight:700; padding:8px 10px; border-radius:8px;">'
+                    . ($destacado['grave'] ? '&#9888; ' : '') . esc($destacado['label']) . '</div>';
+            }
+
+            $detalle = '';
+            if ($isSubscriber) {
+                foreach (array_slice($e['actos'], 0, 4) as $acto) {
+                    $tipo = trim((string) ($acto['act_types'] ?? ''));
+                    $desc = trim((string) ($acto['description'] ?? ''));
+                    $texto = $tipo !== '' ? $tipo : $desc;
+                    if ($texto === '') {
+                        continue;
+                    }
+                    // La fecha, en formato español. La rama del gratuito ya la formatea
+                    // con date('d/m/Y'); esta la imprimía cruda —"2014-07-16"—, así que el
+                    // correo que recibe quien PAGA era el que enseñaba la fecha de la base
+                    // de datos en bruto.
+                    $fechaActo = trim((string) ($acto['borme_date'] ?? ''));
+                    $fechaActo = $fechaActo !== '' ? date('d/m/Y', strtotime($fechaActo)) : '';
+
+                    $detalle .= '<div style="font-size:13px; color:#475569; margin-top:6px; padding-left:10px; border-left:2px solid #cbd5e1;">'
+                        . esc(company_sentence_case(mb_substr($texto, 0, 160)))
+                        . ($fechaActo !== '' ? ' <span style="color:#94a3b8;">· ' . esc($fechaActo) . '</span>' : '')
+                        . '</div>';
+                }
+            } else {
+                // Al gratuito se le dice QUÉ TIPO de acto ha entrado y CUÁNDO; lo que paga
+                // Pro es el detalle (quién entra, quién sale, cuánto capital, qué cargo).
+                // Decir solo "26 actos nuevos" no permite triar el aviso: un cambio de
+                // domicilio y una declaración de concurso llegan con el mismo aspecto, y
+                // un correo que no se puede triar se deja de abrir a la tercera semana.
+                $tipos = [];
+                foreach ($e['actos'] as $acto) {
+                    foreach (preg_split('/[.;,]/u', (string) ($acto['act_types'] ?? '')) as $trozo) {
+                        $trozo = trim($trozo);
+                        if ($trozo === '' || mb_strlen($trozo) < 3) {
+                            continue;
+                        }
+                        $trozo = company_sentence_case(mb_substr($trozo, 0, 60));
+                        if (!in_array($trozo, $tipos, true)) {
+                            $tipos[] = $trozo;
+                        }
+                    }
+                }
+
+                $lineaTipos = '';
+                if ($tipos !== []) {
+                    $lineaTipos = '<div style="font-size:13px; color:#334155; margin-top:6px; padding-left:10px; border-left:2px solid #e2e8f0;">'
+                        . esc(implode(' · ', array_slice($tipos, 0, 3)))
+                        . (count($tipos) > 3 ? ' <span style="color:#94a3b8;">· y ' . (count($tipos) - 3) . ' tipo(s) más</span>' : '')
+                        . '</div>';
+                }
+
+                $detalle = $lineaTipos
+                    . '<div style="font-size:12px; color:#94a3b8; margin-top:6px; padding-left:10px;">'
+                    . ($ultima !== '' ? 'Último movimiento: <strong style="color:#475569;">' . esc($ultima) . '</strong>' : '')
+                    . '</div>';
+            }
+
+            $filas .= '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px;">'
+                . '<tr><td style="padding:14px 16px;">'
+                . '<a href="' . $urlFicha . '" style="font-size:15px; font-weight:800; color:#0f172a; text-decoration:none;">' . esc($nombre) . '</a>'
+                . ' <span style="display:inline-block; background:#eff6ff; color:#1d4ed8; font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px; margin-left:6px;">'
+                . $nActos . ' ' . ($nActos === 1 ? 'acto nuevo' : 'actos nuevos') . '</span>'
+                . $aviso
+                . $detalle
+                . '</td></tr></table>';
+        }
+
+        if ($totalEmpresas > 8) {
+            $filas .= '<p style="font-size:13px; color:#64748b; margin:4px 0 0;">y ' . ($totalEmpresas - 8)
+                . ' empresa(s) más con movimientos.</p>';
+        }
+
+        // El asunto va encabezado por el nombre de la empresa: es lo único que el
+        // destinatario reconoce de un vistazo, y si va detrás de una frase genérica
+        // el cliente de correo lo corta justo antes de llegar.
+        $nombrePrimera = company_short_name(
+            company_display_name($primera['nombre'] ?? '', $primera['cif'] ?? 'Empresa')
+        );
+
+        // La frase concuerda con el número de ACTOS, no de empresas: decir "un movimiento
+        // nuevo" encima de una etiqueta que pone "3 actos nuevos" queda descuidado.
+        if ($totalEmpresas === 1) {
+            $subjectCompany = $nombrePrimera;
+            $intro = $totalActos === 1
+                ? 'Ha aparecido un movimiento nuevo en el Registro Mercantil a nombre de una empresa que sigues.'
+                : 'Han aparecido ' . $totalActos . ' movimientos nuevos en el Registro Mercantil a nombre de una empresa que sigues.';
+        } else {
+            $subjectCompany = $nombrePrimera . ' y ' . ($totalEmpresas - 1) . ' más';
+            $intro = 'Han aparecido movimientos nuevos en el Registro Mercantil en ' . $totalEmpresas
+                . ' de las empresas que sigues.';
+        }
+
+        // El asunto es lo único que decide si el correo se abre hoy o el viernes. Cuando
+        // hay un hecho grave, ese hecho ES la noticia: "Concurso de acreedores" se abre,
+        // "26 actos nuevos en el BORME" se deja para luego. El recuento pasa a la vista
+        // previa, que es donde no estorba.
+        $resumenActos = $avisoGlobal !== null && $avisoGlobal['grave']
+            ? $avisoGlobal['label']
+            : $totalActos . ' ' . ($totalActos === 1 ? 'acto nuevo' : 'actos nuevos') . ' en el BORME';
+
+        // Fecha más reciente de todo el aviso, para el texto de vista previa
+        $todasFechas = [];
+        foreach ($empresas as $e) {
+            foreach ($e['actos'] as $a) {
+                $f = trim((string) ($a['borme_date'] ?? ''));
+                if ($f !== '') {
+                    $todasFechas[] = $f;
+                }
+            }
+        }
+        $ultimaGlobal = $todasFechas ? date('d/m/Y', strtotime(max($todasFechas))) : '';
+
+        // La vista previa lleva SIEMPRE el recuento, aunque el asunto se lo haya cedido
+        // al hecho grave: si no, el asunto dice "Concurso de acreedores" y debajo no hay
+        // ni una cifra que sitúe el aviso.
+        $preheader = $totalActos . ' ' . ($totalActos === 1 ? 'acto nuevo' : 'actos nuevos') . ' en el BORME'
+            . ($ultimaGlobal !== '' ? ', el último del ' . $ultimaGlobal : '')
+            . '. Entra para ver qué ha cambiado.';
+
+        $templateData = [
+            'name'            => $userData['name'] ?? 'Hola',
+            'intro'           => $intro,
+            'companies_html'  => $filas,
+            'company_name'    => $subjectCompany,
+            'resumen_actos'   => $resumenActos,
+            'preheader'       => $preheader,
+            'total_empresas'  => $totalEmpresas,
+            'total_actos'     => $totalActos,
+            'button_url'      => $isSubscriber
+                ? site_url('dashboard?view=risk')
+                : site_url(($primera['cif'] ?? '') . '?ver-riesgo=1'),
+            'button_text'     => $isSubscriber ? 'Ver los movimientos' : 'Ver qué ha cambiado',
+            'footer_note'     => $isSubscriber
+                ? 'Vigilancia de tu cartera incluida en el plan Solvencia Pro.'
+                : 'Con Solvencia Pro recibes el detalle de cada acto directamente en este correo.',
+        ];
+
+        return $this->sendTemplateEmail('borme_alert', $templateData, $userData['email'], [], [], $userData['user_id'] ?? 0);
+    }
+
+    /**
+     * Reconoce en el texto crudo de un acto del BORME si hay un hecho que merece
+     * destacarse, y si ese hecho es malo.
+     *
+     * Aquí no se puede consultar la taxonomía normalizada del motor: `borme_posts`
+     * guarda `act_types` como texto libre tal cual lo publica el boletín, así que la
+     * detección es por patrón, sin tildes de por medio. Devuelve null si el acto es
+     * rutinario (nombramientos, cambios de domicilio, ampliaciones...).
+     *
+     * DECISIÓN DE PRODUCTO: esto se le enseña TAMBIÉN al usuario gratuito. Un concurso
+     * de acreedores de un cliente suyo es justo el aviso por el que alguien recomienda
+     * el producto en su despacho; esconderlo detrás del muro ahorraría alguna
+     * suscripción y costaría la razón por la que se vuelve a abrir el correo. Lo que
+     * paga Pro sigue siendo el detalle: quién entra, quién sale, cuánto capital.
+     *
+     * Es pública y estática a propósito: el comando de preparación de pruebas necesita
+     * la MISMA clasificación para elegir una empresa que dispare el aviso rojo. Si
+     * cada lado tuviera su lista, la prueba dejaría de probar el correo real.
+     *
+     * @return array{label:string,grave:bool}|null
+     */
+    public static function actoDestacado(string $texto): ?array
+    {
+        $t = mb_strtolower($texto, 'UTF-8');
+        // Sin tildes: el boletín no es consistente y "disolucion" aparece de las dos formas.
+        $t = strtr($t, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u']);
+
+        // El orden importa: "conclusion del concurso" contiene "concurso", y anunciarle a
+        // alguien un concurso cuando lo que ha pasado es que ha terminado es un error caro.
+        $reglas = [
+            ['agujas' => ['conclusion del concurso', 'concurso concluido', 'fin del concurso', 'reapertura de la hoja'],
+             'label'  => 'Fin del concurso de acreedores', 'grave' => false],
+            ['agujas' => ['concurso', 'suspension de pagos'],
+             'label'  => 'Concurso de acreedores',          'grave' => true],
+            ['agujas' => ['extincion'],
+             'label'  => 'Extinción de la sociedad',        'grave' => true],
+            ['agujas' => ['liquidacion'],
+             'label'  => 'Apertura de la liquidación',      'grave' => true],
+            ['agujas' => ['disolucion'],
+             'label'  => 'Disolución de la sociedad',       'grave' => true],
+            ['agujas' => ['revocacion del nif', 'revocacion nif'],
+             'label'  => 'Revocación del NIF',              'grave' => true],
+            ['agujas' => ['indice de entidades', 'baja provisional'],
+             'label'  => 'Baja en el Índice de Entidades',  'grave' => true],
+            ['agujas' => ['cierre provisional', 'cierre de hoja', 'cierre de la hoja', 'hoja registral'],
+             'label'  => 'Cierre de la hoja registral',     'grave' => true],
+        ];
+
+        foreach ($reglas as $regla) {
+            foreach ($regla['agujas'] as $aguja) {
+                if (mb_strpos($t, $aguja) !== false) {
+                    return ['label' => $regla['label'], 'grave' => $regla['grave']];
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -397,11 +694,37 @@ class EmailService
     public function sendRiskProWelcome(array $userData): array
     {
         $templateData = [
-            'name'       => $userData['name'] ?? 'Usuario',
-            'button_url' => site_url('dashboard')
+            'name'            => $userData['name'] ?? 'Usuario',
+            'button_url'      => site_url('dashboard'),
+            'guarantee_block' => $this->guaranteeBlock(),
         ];
 
         return $this->sendTemplateEmail('risk_pro_welcome', $templateData, $userData['email'], ['papelo.amh@gmail.com'], [], $userData['user_id'] ?? 0);
+    }
+
+    /**
+     * Recuadro de la garantía para los correos. Devuelve cadena vacía si la
+     * garantía está desactivada en Config\Solvencia, para que quitarla sea un
+     * cambio de configuración y no una edición de plantillas.
+     */
+    private function guaranteeBlock(): string
+    {
+        helper('company');
+
+        if (!solvencia('garantiaActiva', true)) {
+            return '';
+        }
+
+        $dias = (int) solvencia('garantiaDias', 30);
+        $url  = site_url('garantia');
+
+        return '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 6px 0 4px;">'
+            . '<tr><td style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 16px;'
+            . 'color:#15803d;font-size:13px;line-height:1.55;text-align:center;">'
+            . '🛡️ <strong>' . $dias . ' días de garantía.</strong> Si Solvencia Pro no te ha servido, '
+            . 'te devolvemos el importe íntegro del periodo. Sin preguntas: '
+            . '<a href="' . $url . '" style="color:#15803d;font-weight:700;">pídelo aquí</a>.'
+            . '</td></tr></table>';
     }
 
     /**
@@ -441,7 +764,11 @@ class EmailService
 
         if (!$template) {
             log_message('error', "[EmailService] Plantilla no encontrada: {$slug}");
-            return ['success' => false, 'body' => ''];
+            return [
+                'success' => false,
+                'body'    => '',
+                'error'   => "la plantilla '{$slug}' no existe en email_templates (¿falta 'php spark db:seed_emails'?)",
+            ];
         }
 
         // Define which templates are purely transactional (must send even if unsubscribed)
@@ -456,10 +783,17 @@ class EmailService
             'risk_pro_welcome'
         ];
 
-        // Check if the recipient is unsubscribed
-        if (!in_array($slug, $transactionalSlugs) && $this->isUnsubscribed($to)) {
+        // Las alertas del BORME tienen consentimiento propio: quien las ha activado las
+        // recibe aunque haya rechazado el marketing, y quien las ha desactivado no las
+        // recibe aunque lo acepte.
+        if ($slug === 'borme_alert') {
+            if ($this->isAlertsUnsubscribed($to)) {
+                log_message('info', "[EmailService] Alerta BORME saltada para {$to} por preferencia del usuario");
+                return ['success' => true, 'body' => '', 'skipped' => true];
+            }
+        } elseif (!in_array($slug, $transactionalSlugs) && $this->isUnsubscribed($to)) {
             log_message('info', "[EmailService] Email comercial [{$slug}] saltado para {$to} por unsuscribe=1");
-            return ['success' => true, 'body' => '']; // Return true as if handled
+            return ['success' => true, 'body' => '', 'skipped' => true]; // Return true as if handled
         }
 
         $email = Services::email();
@@ -493,8 +827,15 @@ class EmailService
         $subject = $this->parsePlaceholders($subjectTemplate, $data);
         $body    = $this->parsePlaceholders($bodyTemplate, $data);
 
-        // Add unsubscribe link if not already present and only for commercial/marketing emails
-        if (!in_array($slug, $transactionalSlugs) && strpos($body, 'unsubscribe') === false) {
+        // Baja de un clic específica para alertas: el enlace genérico daría de baja del
+        // marketing, que no es lo mismo. Sin una salida propia no se pueden enviar.
+        if ($slug === 'borme_alert') {
+            $optOutUrl = $this->generateAlertsOptOutLink($to);
+            // "porque consultaste esta empresa" era cierto cuando la vigilancia se derivaba
+            // del historial. Ahora la crea el usuario al pulsar "Vigilar", y decirle que le
+            // escribimos por haber mirado una ficha suena a que le seguimos sin permiso.
+            $body .= "\n\n<p style='font-size:12px; color:#94a3b8; text-align:center; margin-top:30px;'>Recibes este aviso porque tienes esta empresa en vigilancia. <a href='{$optOutUrl}' style='color:#94a3b8; text-decoration:underline;'>Dejar de recibir alertas del Registro Mercantil</a>.</p>";
+        } elseif (!in_array($slug, $transactionalSlugs) && strpos($body, 'unsubscribe') === false) {
             $unsubUrl = $this->generateUnsubscribeLink($to);
             $body .= "\n\n<p style='font-size:12px; color:#94a3b8; text-align:center; margin-top:30px;'>¿No quieres recibir correos con consejos u ofertas? <a href='{$unsubUrl}' style='color:#94a3b8; text-decoration:underline;'>Date de baja de la lista aquí</a>.</p>";
         }
@@ -522,7 +863,11 @@ class EmailService
             if ($userId > 0) {
                 $this->logToDatabase($userId, $subject, $body, 'error', $error);
             }
-            return ['success' => false, 'body' => ''];
+            return [
+                'success' => false,
+                'body'    => '',
+                'error'   => 'el envío SMTP falló: ' . trim(strip_tags((string) $error)),
+            ];
         }
     }
 
@@ -557,6 +902,41 @@ class EmailService
     /**
      * Generate a secure unsubscribe link for an email address.
      */
+    /**
+     * ¿Debe bloquearse una alerta del BORME para este correo?
+     *
+     * La preferencia explícita (alerts_borme) manda sobre la baja general. Si no hay
+     * preferencia, se hereda de `unsuscribe`.
+     */
+    private function isAlertsUnsubscribed(string $email): bool
+    {
+        $db   = \Config\Database::connect();
+        $user = $db->table('users')
+                   ->select('unsuscribe, alerts_borme')
+                   ->where('email', $email)
+                   ->get()
+                   ->getRow();
+
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->alerts_borme !== null) {
+            return (int) $user->alerts_borme === 0;
+        }
+
+        return (int) ($user->unsuscribe ?? 0) === 1;
+    }
+
+    /**
+     * Enlace de baja SOLO de las alertas, de un clic y sin pantalla de confirmación.
+     */
+    public function generateAlertsOptOutLink(string $email): string
+    {
+        $hash = hash_hmac('sha256', 'alerts:' . $email, env('encryption.key', 'apiempresas-secret-key'));
+        return site_url("unsubscribe/alertas/{$hash}?email=" . urlencode($email));
+    }
+
     public function generateUnsubscribeLink(string $email): string
     {
         $hash = hash_hmac('sha256', $email, env('encryption.key', 'apiempresas-secret-key'));

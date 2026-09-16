@@ -230,6 +230,22 @@ class RiskProfileAnalytics extends BaseController
         $step3_twoOrMore = 0;
         $step4_threeOrMore = 0;
 
+        // ---------------------------------------------------------------
+        // Embudo por cohorte de alta.
+        // El embudo anterior dividía pasos del MES ACTUAL entre TODOS los
+        // registrados de la historia, y remataba con los suscriptores de hoy.
+        // Con eso el porcentaje de conversión solo podía bajar según crecía la
+        // base, midieras lo que midieras. Aquí el denominador y los numeradores
+        // son las MISMAS personas: las que se registraron en el periodo elegido,
+        // y de ellas se mira lo que han hecho desde entonces.
+        // ---------------------------------------------------------------
+        $cohorteN     = 0;   // se registraron en el periodo
+        $cohorte1     = 0;   // ...y consultaron al menos 1 empresa
+        $cohorte2     = 0;   // ...y al menos 2
+        $cohorte3     = 0;   // ...y llegaron al límite (3)
+        $cohortePago  = 0;   // ...y hoy pagan
+        $diasHastaPago = [];
+
         $classifiedUsers = [];
 
         foreach ($allCohortUsers as $u) {
@@ -285,6 +301,24 @@ class RiskProfileAnalytics extends BaseController
                 $step4_threeOrMore++;
             }
 
+            // ¿Este usuario pertenece a la cohorte del periodo elegido?
+            $altaTs = strtotime((string)($u['created_at'] ?? ''));
+            $enCohorte = ($dateFrom === null)
+                || ($altaTs && $altaTs >= strtotime($dateFrom) && $altaTs <= strtotime($dateTo));
+
+            if ($enCohorte) {
+                $cohorteN++;
+                if ($historyCount >= 1) $cohorte1++;
+                if ($historyCount >= 2) $cohorte2++;
+                if ($historyCount >= 3) $cohorte3++;
+                if ($isPaid) {
+                    $cohortePago++;
+                    if ($altaTs) {
+                        $diasHastaPago[] = max(0, (int) floor((time() - $altaTs) / 86400));
+                    }
+                }
+            }
+
             $u['month_views'] = $monthCount;
             $u['total_views'] = $totalEventViews;
             $u['is_paid'] = $isPaid;
@@ -300,15 +334,29 @@ class RiskProfileAnalytics extends BaseController
         $activationRate = $totalRiskUsers > 0 ? round(($activatedUsersCount / $totalRiskUsers) * 100, 1) : 0;
         $inactiveUsersCount = $countInactive;
 
-        // Funnel estructurado
-        $step1_registered = $totalRiskUsers;
-        $step5_paid = $paidSubscribers;
+        // Mediana de días hasta el pago dentro de la cohorte. La media la
+        // distorsiona un solo cliente antiguo; la mediana no.
+        $medianaDiasPago = null;
+        if (!empty($diasHastaPago)) {
+            sort($diasHastaPago);
+            $m = count($diasHastaPago);
+            $medianaDiasPago = $m % 2
+                ? $diasHastaPago[intdiv($m, 2)]
+                : (int) round(($diasHastaPago[$m / 2 - 1] + $diasHastaPago[$m / 2]) / 2);
+        }
+
+        // Funnel estructurado: denominador y numeradores son la misma cohorte.
+        $step1_registered = $cohorteN;
+        $step2_oneOrMore   = $cohorte1;
+        $step3_twoOrMore   = $cohorte2;
+        $step4_threeOrMore = $cohorte3;
+        $step5_paid        = $cohortePago;
 
         $funnel = [
             [
                 'step' => 1,
                 'name' => '1. Registrados',
-                'desc' => 'Cuentas con intención Solvencia',
+                'desc' => 'Altas con intención Solvencia en el periodo',
                 'count' => $step1_registered,
                 'pct_total' => 100,
                 'color' => '#3b82f6',
@@ -316,7 +364,7 @@ class RiskProfileAnalytics extends BaseController
             [
                 'step' => 2,
                 'name' => '2. Primera Consulta',
-                'desc' => 'Activados (≥ 1 empresa auditada)',
+                'desc' => 'De esas altas, las que han auditado ≥ 1 empresa',
                 'count' => $step2_oneOrMore,
                 'pct_total' => $step1_registered > 0 ? round(($step2_oneOrMore / $step1_registered) * 100, 1) : 0,
                 'color' => '#06b6d4',
@@ -324,7 +372,7 @@ class RiskProfileAnalytics extends BaseController
             [
                 'step' => 3,
                 'name' => '3. Interés Recurrente',
-                'desc' => 'Alta intención (≥ 2 empresas)',
+                'desc' => 'De esas altas, las que han auditado ≥ 2 empresas',
                 'count' => $step3_twoOrMore,
                 'pct_total' => $step1_registered > 0 ? round(($step3_twoOrMore / $step1_registered) * 100, 1) : 0,
                 'color' => '#f59e0b',
@@ -332,7 +380,7 @@ class RiskProfileAnalytics extends BaseController
             [
                 'step' => 4,
                 'name' => '4. Límite Alcanzado',
-                'desc' => 'Hot Leads (3 empresas / Paywall)',
+                'desc' => 'De esas altas, las que llegaron al límite de 3',
                 'count' => $step4_threeOrMore,
                 'pct_total' => $step1_registered > 0 ? round(($step4_threeOrMore / $step1_registered) * 100, 1) : 0,
                 'color' => '#f43f5e',
@@ -340,7 +388,7 @@ class RiskProfileAnalytics extends BaseController
             [
                 'step' => 5,
                 'name' => '5. Clientes Solvencia Pro',
-                'desc' => 'Conversión a pago (29€/mes)',
+                'desc' => 'De esas altas, las que pagan Solvencia Pro hoy',
                 'count' => $step5_paid,
                 'pct_total' => $step1_registered > 0 ? round(($step5_paid / $step1_registered) * 100, 1) : 0,
                 'color' => '#10b981',
@@ -440,8 +488,18 @@ class RiskProfileAnalytics extends BaseController
             }
         });
 
+        // -------------------------------------------------------------
+        // Eventos de interfaz (tracking_events).
+        // Todo esto se venía guardando y nadie lo leía: son los únicos números
+        // que dicen si el teaser, el bloqueo y el paywall convierten, y por qué
+        // canal. Incluye a los visitantes anónimos, que el embudo de arriba no ve.
+        // -------------------------------------------------------------
+        $ui = $this->eventosInterfaz($db, $dateFrom, $dateTo);
+
         $data = [
             'title' => 'Analítica de Perfil de Riesgo & Solvencia',
+            'ui_events' => $ui,
+            'mediana_dias_pago' => $medianaDiasPago,
             'period' => $period,
             'period_label' => $periodLabel,
             'user_status_filter' => $userStatusFilter,
@@ -649,6 +707,117 @@ class RiskProfileAnalytics extends BaseController
     /**
      * Plantillas predeterminadas de correo para Perfil de Riesgo
      */
+    /**
+     * Lee tracking_events y devuelve los ratios del embudo de interfaz.
+     *
+     * Deliberadamente tolerante: si la tabla no existe o está vacía devuelve
+     * ceros y la vista lo dice, en vez de romper el panel entero.
+     */
+    private function eventosInterfaz($db, ?string $dateFrom, ?string $dateTo): array
+    {
+        $vacio = [
+            'disponible' => false,
+            'total'      => 0,
+            'conteos'    => [],
+            'teaser'     => ['vistas' => 0, 'clicks' => 0, 'ctr' => 0.0, 'por_canal' => []],
+            'locked'     => ['vistas' => 0, 'clicks' => 0, 'ctr' => 0.0],
+            'paywall'    => ['vistas' => 0, 'clicks' => 0, 'ctr' => 0.0, 'por_opcion' => []],
+            'upsell'     => ['vistas' => 0, 'clicks' => 0, 'ctr' => 0.0, 'por_variante' => []],
+            'checkout'   => ['iniciados' => 0, 'completados' => 0, 'ratio' => 0.0, 'por_origen' => []],
+        ];
+
+        try {
+            if (!$db->tableExists('tracking_events')) {
+                return $vacio;
+            }
+
+            // Agrupado solo por event_name + element: agrupar también por
+            // `metadata` obligaría a la base a ordenar una columna de texto
+            // entera. La variante del upsell se saca aparte, más abajo.
+            $q = $db->table('tracking_events')
+                ->select('event_name, element, COUNT(*) AS n', false)
+                ->groupBy(['event_name', 'element']);
+
+            if ($dateFrom) {
+                $q->where('created_at >=', $dateFrom)->where('created_at <=', $dateTo);
+            }
+
+            $filas = $q->get()->getResultArray();
+            if (empty($filas)) {
+                return array_merge($vacio, ['disponible' => true]);
+            }
+
+            $res = $vacio;
+            $res['disponible'] = true;
+
+            $porCanal    = [];
+            $porOpcion   = [];
+            $porVariante = [];
+            $porOrigen   = [];
+
+            foreach ($filas as $f) {
+                $nombre = (string) $f['event_name'];
+                $elem   = trim((string) ($f['element'] ?? '')) ?: '(sin origen)';
+                $n      = (int) $f['n'];
+
+                $res['total'] += $n;
+                $res['conteos'][$nombre] = ($res['conteos'][$nombre] ?? 0) + $n;
+
+                switch ($nombre) {
+                    case 'risk_teaser_view':   $res['teaser']['vistas']  += $n; break;
+                    case 'risk_teaser_cta':    $res['teaser']['clicks']  += $n;
+                                               $porCanal[$elem] = ($porCanal[$elem] ?? 0) + $n; break;
+                    case 'risk_locked_view':   $res['locked']['vistas']  += $n; break;
+                    case 'risk_unlock_click':  $res['locked']['clicks']  += $n; break;
+                    case 'risk_paywall_view':  $res['paywall']['vistas'] += $n; break;
+                    case 'risk_paywall_cta':   $res['paywall']['clicks'] += $n;
+                                               $porOpcion[$elem] = ($porOpcion[$elem] ?? 0) + $n; break;
+                    case 'risk_pro_upsell_view': $res['upsell']['vistas'] += $n; break;
+                    case 'risk_pro_upsell_cta':  $res['upsell']['clicks'] += $n; break;
+                    case 'checkout_started':   $res['checkout']['iniciados'] += $n;
+                                               $porOrigen[$elem] = ($porOrigen[$elem] ?? 0) + $n; break;
+                    case 'checkout_completed': $res['checkout']['completados'] += $n; break;
+                }
+            }
+
+            // Variante del upsell: consulta acotada a ese evento, leyendo el JSON
+            // fila a fila. Son pocas filas y así no se agrupa por texto.
+            $qv = $db->table('tracking_events')
+                ->select('metadata')
+                ->where('event_name', 'risk_pro_upsell_cta')
+                ->limit(5000);
+            if ($dateFrom) {
+                $qv->where('created_at >=', $dateFrom)->where('created_at <=', $dateTo);
+            }
+            foreach ($qv->get()->getResultArray() as $fv) {
+                $meta = json_decode((string) ($fv['metadata'] ?? ''), true);
+                $v = is_array($meta) ? ($meta['variant'] ?? '(sin variante)') : '(sin variante)';
+                $porVariante[$v] = ($porVariante[$v] ?? 0) + 1;
+            }
+
+            $ratio = static fn (int $a, int $b): float => $b > 0 ? round(($a / $b) * 100, 1) : 0.0;
+
+            $res['teaser']['ctr']      = $ratio($res['teaser']['clicks'], $res['teaser']['vistas']);
+            $res['locked']['ctr']      = $ratio($res['locked']['clicks'], $res['locked']['vistas']);
+            $res['paywall']['ctr']     = $ratio($res['paywall']['clicks'], $res['paywall']['vistas']);
+            $res['upsell']['ctr']      = $ratio($res['upsell']['clicks'], $res['upsell']['vistas']);
+            $res['checkout']['ratio']  = $ratio($res['checkout']['completados'], $res['checkout']['iniciados']);
+
+            arsort($porCanal); arsort($porOpcion); arsort($porVariante); arsort($porOrigen);
+            arsort($res['conteos']);
+
+            $res['teaser']['por_canal']      = $porCanal;
+            $res['paywall']['por_opcion']    = $porOpcion;
+            $res['upsell']['por_variante']   = $porVariante;
+            $res['checkout']['por_origen']   = $porOrigen;
+
+            return $res;
+        } catch (\Throwable $e) {
+            log_message('error', '[RiskAnalytics] tracking_events ilegible: ' . $e->getMessage());
+            return $vacio;
+        }
+    }
+
     private function getEmailTemplates()
     {
         return [
@@ -656,7 +825,7 @@ class RiskProfileAnalytics extends BaseController
                 'id' => 'hot_lead_limit',
                 'name' => '🚨 Oferta Solvencia Pro (Límite 3/3 alcanzado)',
                 'subject' => '¿Necesitas auditar otra empresa este mes, {NOMBRE}?',
-                'body' => "Hola {NOMBRE},\n\nHemos visto que has consumido tus 3 consultas gratuitas de Perfil de Riesgo y Solvencia este mes en APIEmpresas.\n\nSi necesitas seguir auditando la solvencia financiera, balances y riesgo de impago de tus clientes o proveedores, el plan Solvencia Pro te permite realizar consultas ilimitadas con acceso completo a scoring crediticio y ratios financieros.\n\nPuedes acceder directamente al buscador y consultar cualquier CIF aquí:\n{SITE_URL}/perfil-de-riesgo\n\nSi tienes cualquier consulta o necesitas revisar un caso concreto, responde a este correo y te ayudamos encantados.\n\nUn saludo,\nEl equipo de APIEmpresas"
+                'body' => "Hola {NOMBRE},\n\nHemos visto que has consumido tus 3 consultas gratuitas de Perfil de Riesgo y Solvencia este mes en APIEmpresas.\n\nSi necesitas seguir auditando la solvencia financiera, balances y riesgo de impago de tus clientes o proveedores, con el plan Solvencia Pro consultas el dictamen de cualquier CIF de España y mantienes hasta 25 empresas bajo vigilancia del BORME, con aviso por correo en cuanto una se mueve.\n\nPuedes acceder directamente al buscador y consultar cualquier CIF aquí:\n{SITE_URL}/perfil-de-riesgo\n\nSi tienes cualquier consulta o necesitas revisar un caso concreto, responde a este correo y te ayudamos encantados.\n\nUn saludo,\nEl equipo de APIEmpresas"
             ],
             [
                 'id' => 'inactive_activation',

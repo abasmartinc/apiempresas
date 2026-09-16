@@ -171,6 +171,37 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?php
+helper('company');
+
+/*
+ * Los importes de esta página salen de `api_plans`, que es la MISMA fila que
+ * lee Billing::checkout() para construir la sesión de Stripe. Estaban escritos
+ * a mano (29 y 290, también dentro del objeto `prices` del JavaScript), así que
+ * si un día se cambia la tarifa en la base de datos esta pantalla anuncia un
+ * precio y la pasarela cobra otro. Es el fallo que ya ocurrió con el PDF —3,90 €
+ * anunciados, 5,90 € cobrados—, aquí con un importe diez veces mayor y en la
+ * pantalla donde el cliente da su tarjeta.
+ *
+ * Los respaldos son exactamente los mismos que usa el controlador (29 / 290),
+ * para que no haya forma de que difieran.
+ */
+$planRiesgo    = $risk_plan ?? null;
+$precioMes     = isset($planRiesgo->price_monthly) ? (float) $planRiesgo->price_monthly : 29.00;
+$precioAnio    = isset($planRiesgo->price_annual)  ? (float) $planRiesgo->price_annual  : 290.00;
+$precioPack5   = ((int) solvencia('centimos.pack5', 990)) / 100;
+
+$ahorroAnual   = max(0, ($precioMes * 12) - $precioAnio);
+$anualPorMes   = $precioAnio / 12;
+
+/** 29 → "29", 29,5 → "29,50": el titular no lleva decimales si no los necesita. */
+$eurosCorto = static function (float $n): string {
+    return floor($n) == $n
+        ? number_format($n, 0, ',', '.')
+        : number_format($n, 2, ',', '.');
+};
+$eurosLargo = static fn (float $n): string => number_format($n, 2, ',', '.');
+?>
 <div class="risk-billing-container">
 
     <?php if (!empty($is_risk_subscribed)): ?>
@@ -185,7 +216,7 @@
                 </div>
                 <div>
                     <h2 style="font-size: 1.35rem; font-weight: 900; color: #065f46; margin: 0 0 4px;">Tu suscripción a Solvencia Pro está activa</h2>
-                    <p style="font-size: 0.95rem; color: #047857; margin: 0;">Dispones de consultas ilimitadas de riesgo mercantil y descargas de dictámenes en PDF.</p>
+                    <p style="font-size: 0.95rem; color: #047857; margin: 0;">Vigilamos hasta <?= (int) solvencia('vigilanciasPro', 25) ?> empresas de tu cartera en el BORME y te avisamos de cada movimiento.</p>
                 </div>
             </div>
             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
@@ -204,7 +235,16 @@
             Análisis de Solvencia & Riesgo Mercantil
         </div>
         <h1 class="risk-billing-title">Acceso Completo a Solvencia Pro</h1>
-        <p class="risk-billing-subtitle">Audita clientes y proveedores, prevén impagos comerciales con scoring predictivo y descarga dictámenes ejecutivos oficiales en PDF sin límites.</p>
+        <?php
+        /*
+         * Decía "dictámenes ejecutivos oficiales en PDF sin límites", y es la página
+         * donde se paga. Dos problemas en una frase: "oficiales" sobre una conclusión
+         * propia, y "sin límites" cuando el plan tiene tope de 300 consultas y 25
+         * vigilancias — que es justo lo que se quitó del panel del suscriptor.
+         * Prometer ilimitado en la pantalla de cobro es la que obliga a devolver.
+         */
+        ?>
+        <p class="risk-billing-subtitle">Audita clientes y proveedores, anticípate a los impagos con el scoring de solvencia y descarga el informe en PDF de cada empresa que consultes.</p>
 
         <!-- SELECTOR MENSUAL / ANUAL -->
         <div class="period-toggle-container" style="margin-bottom: 0;">
@@ -253,7 +293,7 @@
                 </div>
 
                 <div class="risk-price-wrapper">
-                    <span class="risk-price-amount" id="displayPrice">29</span>
+                    <span class="risk-price-amount" id="displayPrice"><?= $eurosCorto($precioMes) ?></span>
                     <span class="risk-price-period">€ / <span id="displayPeriodText">mes</span></span>
                     <span class="risk-price-vat">+ IVA</span>
                 </div>
@@ -268,8 +308,17 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         </div>
                         <div>
-                            <strong style="color: #0f172a;">Consultas ilimitadas de solvencia:</strong>
-                            <span style="color: #475569;"> audita cualquier empresa, pyme o sociedad en España sin bloqueos ni límites de cuota mensual.</span>
+                            <strong style="color: #0f172a;">Vigilancia continua del Registro Mercantil:</strong>
+                            <span style="color: #475569;"> te avisamos por correo el mismo día que aparece un acto nuevo en el BORME a nombre de cualquiera de las empresas que has consultado. Dejas de tener que volver a mirarlas.</span>
+                        </div>
+                    </li>
+                    <li class="risk-feature-item">
+                        <div class="risk-feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                        <div>
+                            <strong style="color: #0f172a;">Cartera vigilada de hasta <?= (int) solvencia('vigilanciasPro', 25) ?> empresas:</strong>
+                            <span style="color: #475569;"> te avisamos por correo el día que cualquiera de ellas se mueva en el BORME, sin que tengas que volver a mirarlas.</span>
                         </div>
                     </li>
                     <li class="risk-feature-item">
@@ -286,8 +335,9 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         </div>
                         <div>
-                            <strong style="color: #0f172a;">Dictámenes ejecutivos en PDF ilimitados:</strong>
-                            <span style="color: #475569;"> informes con sello oficial de solvencia, listos para descargar y adjuntar a operaciones o comités.</span>
+                            <strong style="color: #0f172a;">Informes ejecutivos en PDF:</strong>
+                            <?php // "sello oficial de solvencia": no hay sello, y lo oficial es la fuente. ?>
+                            <span style="color: #475569;"> con la puntuación, el histórico del BORME y la fecha de emisión, listos para adjuntar a una operación o a un comité.</span>
                         </div>
                     </li>
                     <li class="risk-feature-item">
@@ -341,9 +391,17 @@
 
                         <button type="submit" class="risk-btn-submit js-loading-btn" id="btnSubmitCheckout">
                             <span style="color: #fbbf24; font-size: 1.25rem;">⚡</span>
-                            <span id="btnSubmitText">Activar Solvencia Pro — 29 € / mes</span>
+                            <span id="btnSubmitText">Activar Solvencia Pro — <?= $eurosCorto($precioMes) ?> € / mes</span>
                         </button>
                     </form>
+
+                    <?php if (solvencia('garantiaActiva', true)): ?>
+                        <div style="margin-top: 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 13px 16px; color: #15803d; font-size: 0.88rem; line-height: 1.5; text-align: center;">
+                            🛡️ <strong><?= (int) solvencia('garantiaDias', 30) ?> días de garantía.</strong>
+                            Si no te ha servido, te devolvemos el importe íntegro del periodo. Sin preguntas.
+                            <a href="<?= site_url('garantia') ?>" style="color: #15803d; font-weight: 700;">Cómo funciona</a>
+                        </div>
+                    <?php endif; ?>
 
                     <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; color: #64748b; font-size: 0.88rem; font-weight: 600;">
                         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
@@ -359,10 +417,10 @@
                         ¿Sin suscripción recurrente?
                     </div>
                     <div style="font-size: 1.08rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">
-                        Pack 5 Auditorías + PDF oficial
+                        Pack 5 Auditorías con informe en PDF
                     </div>
                     <div style="font-size: 0.84rem; color: #4338ca; line-height: 1.4;">
-                        Pago único de <strong>9,90 € + IVA</strong> (1,98 €/auditoría). Saldo permanente sin fecha de caducidad.
+                        Pago único de <strong><?= $eurosLargo($precioPack5) ?> € + IVA</strong> (<?= $eurosLargo($precioPack5 / 5) ?> €/auditoría). Saldo permanente sin fecha de caducidad.
                     </div>
                 </div>
                 <form method="post" action="<?= site_url('billing/checkout') ?>" style="margin: 0;">
@@ -370,7 +428,7 @@
                     <input type="hidden" name="plan" value="risk_pack_5" />
                     <input type="hidden" name="period" value="single" />
                     <button type="submit" style="background: #4f46e5; color: #ffffff; border: none; padding: 11px 18px; border-radius: 10px; font-weight: 800; font-size: 0.88rem; cursor: pointer; transition: background 0.2s; white-space: nowrap; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);" onmouseover="this.style.background='#4338ca';" onmouseout="this.style.background='#4f46e5';">
-                        Comprar Pack 5 (9,90 €) ⚡
+                        Comprar Pack 5 (<?= $eurosLargo($precioPack5) ?> €) ⚡
                     </button>
                 </form>
             </div>
@@ -395,17 +453,17 @@
 
                     <div class="summary-row" style="margin-bottom: 12px; font-weight: 600; color: #475569;">
                         <span>Subtotal (Base)</span>
-                        <span class="value" style="color: #0f172a; font-weight: 800;"><span id="sumSubtotal">29,00</span> €</span>
+                        <span class="value" style="color: #0f172a; font-weight: 800;"><span id="sumSubtotal"><?= $eurosLargo($precioMes) ?></span> €</span>
                     </div>
 
                     <div class="summary-row" style="margin-bottom: 24px; font-weight: 600; color: #475569;">
                         <span>IVA (21%)</span>
-                        <span class="value" style="color: #0f172a; font-weight: 800;"><span id="sumIva">6,09</span> €</span>
+                        <span class="value" style="color: #0f172a; font-weight: 800;"><span id="sumIva"><?= $eurosLargo($precioMes * 0.21) ?></span> €</span>
                     </div>
 
                     <div class="summary-row total" style="margin-top: 0; padding-top: 20px; border-top: 2px dashed #cbd5e1; align-items: center;">
                         <span style="font-size: 1.1rem; color: #0f172a; font-weight: 900;"><?= lang('Billing.total') ?></span>
-                        <span class="value" style="color: #2152ff; font-size: 1.5rem; font-weight: 900;"><span id="sumPrice">35,09</span> €</span>
+                        <span class="value" style="color: #2152ff; font-size: 1.5rem; font-weight: 900;"><span id="sumPrice"><?= $eurosLargo($precioMes * 1.21) ?></span> €</span>
                     </div>
 
                     <div style="margin-top: 24px; display: flex; align-items: flex-start; gap: 12px;">
@@ -414,7 +472,7 @@
                         </div>
                         <div>
                             <strong style="display: block; font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Activación inmediata</strong>
-                            <span style="font-size: 0.8rem; color: #64748b; line-height: 1.4; display: block;">Acceso completo e ilimitado en tu panel en cuanto se procese el pago.</span>
+                            <span style="font-size: 0.8rem; color: #64748b; line-height: 1.4; display: block;">Acceso completo en tu panel en cuanto se procese el pago.</span>
                         </div>
                     </div>
                 </div>
@@ -514,7 +572,7 @@
                 </div>
                 <div class="risk-faq-card">
                     <strong style="display: block; font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">¿Las descargas de informes PDF tienen algún límite o coste extra?</strong>
-                    <p style="margin: 0; font-size: 0.95rem; color: #475569; line-height: 1.5;">No. Todas las descargas de dictámenes en formato PDF oficial están incluidas de manera ilimitada en el plan Solvencia Pro, sin cobros por informe.</p>
+                    <p style="margin: 0; font-size: 0.95rem; color: #475569; line-height: 1.5;">No hay coste por informe: las descargas de dictámenes en PDF están incluidas en el plan Solvencia Pro. Lo que sí tiene un tope es la cartera bajo vigilancia, <?= (int) solvencia('vigilanciasPro', 25) ?> empresas a la vez.</p>
                 </div>
                 <div class="risk-faq-card">
                     <strong style="display: block; font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">¿Existe compromiso de permanencia?</strong>
@@ -547,8 +605,9 @@
     const btnSubmitText = document.getElementById('btnSubmitText');
 
     const prices = {
-        monthly: { base: 29.00, periodText: 'mes', annualNote: '&nbsp;' },
-        annual: { base: 290.00, periodText: 'año', annualNote: 'Abono anual único de 290 € (equivale a solo 24,16 € / mes — te ahorras 58 €)' }
+        // Mismos números que pinta PHP arriba, y los dos salen de api_plans.
+        monthly: { base: <?= json_encode(round($precioMes, 2)) ?>, periodText: 'mes', annualNote: '&nbsp;' },
+        annual:  { base: <?= json_encode(round($precioAnio, 2)) ?>, periodText: 'año', annualNote: <?= json_encode('Abono anual único de ' . $eurosCorto($precioAnio) . ' € (equivale a solo ' . $eurosLargo($anualPorMes) . ' € / mes' . ($ahorroAnual > 0 ? ' — te ahorras ' . $eurosCorto($ahorroAnual) . ' €' : '') . ')') ?> }
     };
 
     function setPeriod(period) {
@@ -574,9 +633,9 @@
         if (sumPrice) sumPrice.textContent = total.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
         if (btnSubmitText) {
-            btnSubmitText.textContent = isAnnual 
-                ? 'Activar Solvencia Pro — 290 € / año' 
-                : 'Activar Solvencia Pro — 29 € / mes';
+            btnSubmitText.textContent = isAnnual
+                ? <?= json_encode('Activar Solvencia Pro — ' . $eurosCorto($precioAnio) . ' € / año') ?>
+                : <?= json_encode('Activar Solvencia Pro — ' . $eurosCorto($precioMes) . ' € / mes') ?>;
         }
 
         if (window.trackEvent) {

@@ -28,6 +28,41 @@ class Profile extends BaseController
         ]);
     }
 
+    /**
+     * POST /api/usuario/activar-avisos
+     *
+     * Activa las alertas del BORME sin salir de donde esté el usuario.
+     * Existe porque el aviso "tienes los avisos desactivados" mandaba al perfil,
+     * y obligar a navegar, buscar una casilla y guardar para arreglar algo que
+     * acabas de decirle que está mal es perder por el camino a la mayoría.
+     *
+     * Pone `alerts_borme = 1` explícito: eso manda sobre `unsuscribe`, que es
+     * justo para lo que existen los tres estados (sí a las alertas aunque no
+     * quiera marketing). Es una acción deliberada del usuario, así que el
+     * consentimiento es limpio.
+     */
+    public function activarAvisos()
+    {
+        $response = $this->response->setHeader('Cache-Control', 'no-store');
+        $userId = (int) (session('user_id') ?? 0);
+
+        if ($userId <= 0) {
+            return $response->setStatusCode(401)->setJSON([
+                'ok'      => false,
+                'message' => 'Debes iniciar sesión.',
+            ]);
+        }
+
+        try {
+            $this->userModel->update($userId, ['alerts_borme' => 1]);
+        } catch (\Throwable $e) {
+            log_message('error', 'activarAvisos(' . $userId . '): ' . $e->getMessage());
+            return $response->setStatusCode(500)->setJSON(['ok' => false]);
+        }
+
+        return $response->setJSON(['ok' => true, 'alerts_on' => true]);
+    }
+
     public function update()
     {
         $userId = session('user_id');
@@ -49,11 +84,16 @@ class Profile extends BaseController
         $email = $this->request->getPost('email');
         $company = $this->request->getPost('company');
 
-        $this->userModel->update($userId, [
-            'name' => $name,
-            'email' => $email,
-            'company' => $company
-        ]);
+        // Preferencia de alertas: casilla marcada = 1, desmarcada = 0. Nunca vuelve a
+        // NULL, porque a partir de aquí el usuario ya se ha pronunciado.
+        $datos = [
+            'name'         => $name,
+            'email'        => $email,
+            'company'      => $company,
+            'alerts_borme' => $this->request->getPost('alerts_borme') ? 1 : 0,
+        ];
+
+        $this->userModel->update($userId, $datos);
 
         // Actualizar datos en sesión
         session()->set([
