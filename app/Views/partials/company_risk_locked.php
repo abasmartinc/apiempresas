@@ -51,7 +51,7 @@ if ($unlockCost === 'credit') {
     <!-- FONDO DESENFOCADO -->
     <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; filter: blur(7px); opacity: 0.4; pointer-events: none; display: flex; flex-wrap: nowrap; gap: 80px; align-items: center; justify-content: center; padding: 24px;">
         <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px 20px; text-align: center; width: 190px;">
-            <div style="font-size: 0.8rem; font-weight: bold; color: #64748b; margin-bottom: 12px;">NIVEL DE RIESGO</div>
+            <div style="font-size: 0.8rem; font-weight: bold; color: #64748b; margin-bottom: 12px;"><?= risk_titulo_indicador() ?></div>
             <div style="width: 80px; height: 75px; background: #94a3b8; border-radius: 12px; margin: 0 auto 12px auto;"></div>
             <div style="height: 14px; width: 70%; background: #cbd5e1; border-radius: 4px; margin: 0 auto;"></div>
         </div>

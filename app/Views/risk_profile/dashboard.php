@@ -218,7 +218,7 @@
                 ¡Hola, <?= esc($user->name ?: 'Usuario') ?>!
             </h1>
             <p class="risk-dash-subtitle">
-                Supervisa la estabilidad de clientes y proveedores, consulta actos BORME y previene impagos con datos oficiales.
+                Comprueba qué consta de tus clientes y proveedores, consulta sus actos del BORME y entérate el día que se publique algo nuevo.
             </p>
         </div>
 
@@ -563,7 +563,7 @@
                 <div style="width: 52px; height: 52px; border-radius: 50%; background: #eff6ff; color: #2563eb; display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 12px;">🔕</div>
                 <div style="font-weight: 800; color: #0f172a; margin-bottom: 6px;">Todavía no vigilas ninguna empresa</div>
                 <div style="color: #64748b; font-size: 0.9rem; max-width: 460px; margin: 0 auto 16px auto; line-height: 1.5;">
-                    En la ficha de cualquier empresa, pulsa «Vigilar empresa» junto al nivel de riesgo.
+                    En la ficha de cualquier empresa, pulsa «Vigilar empresa» junto a la puntuación.
                     Si ya tienes la lista hecha, súbela de una vez y te decimos cuáles tienen algo.
                 </div>
                 <!-- Aquí es donde de verdad se lee esto: quien no vigila nada es
@@ -651,7 +651,7 @@
                     <thead>
                         <tr>
                             <th>Empresa / CIF</th>
-                            <th>Nivel de Riesgo</th>
+                            <th>Gravedad</th>
                             <th>Alertas BORME</th>
                             <th>Última Consulta</th>
                             <th style="text-align: right;">Acciones</th>
@@ -667,7 +667,7 @@
                     <thead>
                         <tr>
                             <th>Empresa / CIF</th>
-                            <th>Nivel de Riesgo</th>
+                            <th>Gravedad</th>
                             <th>Alertas BORME</th>
                             <th>Última Consulta</th>
                             <th style="text-align: right;">Acciones</th>
@@ -676,16 +676,23 @@
                     <tbody id="dashAuditsTbody">
                         <?php foreach ($audits as $item): ?>
                             <?php 
-                            $lvl = strtoupper($item['risk_level'] ?? 'MEDIO');
-                            if ($lvl === 'BAJO') {
-                                $badgeClass = 'risk-score-bajo';
-                                $badgeIcon = '🟢';
-                            } elseif ($lvl === 'ALTO') {
+                            /*
+                             * Antes se leía `risk_level` del motor (BAJO/MEDIO/ALTO). Ahora el
+                             * rótulo sale del helper, que es el único sitio donde se decide qué
+                             * se le enseña al cliente; el valor del motor sigue en la base de
+                             * datos intacto para las consultas y las métricas.
+                             */
+                            $scoreFila = (int) ($item['risk_score'] ?? 50);
+                            [$etiquetaFila] = risk_level_visual($scoreFila);
+                            if ($scoreFila >= (int) solvencia('umbralAlto', 60)) {
                                 $badgeClass = 'risk-score-alto';
                                 $badgeIcon = '🔴';
-                            } else {
+                            } elseif ($scoreFila >= (int) solvencia('umbralMedio', 30)) {
                                 $badgeClass = 'risk-score-medio';
                                 $badgeIcon = '🟡';
+                            } else {
+                                $badgeClass = 'risk-score-bajo';
+                                $badgeIcon = '🟢';
                             }
                             ?>
                             <tr id="row-cif-<?= esc($item['cif']) ?>">
@@ -705,7 +712,7 @@
                                 <td>
                                     <div class="risk-score-badge <?= $badgeClass ?>">
                                         <span><?= $badgeIcon ?></span>
-                                        <span><?= esc($lvl) ?> (<?= (int)$item['risk_score'] ?>/100)</span>
+                                        <span><?= esc($etiquetaFila) ?> (<?= $scoreFila ?>/100)</span>
                                     </div>
                                 </td>
                                 <td>

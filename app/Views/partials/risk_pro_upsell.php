@@ -36,7 +36,12 @@ $upsellName = company_short_name(company_display_name($company['name'] ?? '', 'e
 // empresa de 45/MEDIO se coronaba con un "RIESGO DETECTADO" en rojo: el bloque
 // se contradecía con su propio dictamen.
 [$upsellNivel] = risk_level_visual($upsellScore);
-$upsellVariant = $upsellNivel === 'ALTO' ? 'alto' : ($upsellNivel === 'MEDIO' ? 'medio' : 'bajo');
+// Por el SCORE, no por el texto: al cambiar las etiquetas a GRAVE / A REVISAR,
+// comparar con 'ALTO' dejaba de encontrar nada y el upsell se quedaba siempre en
+// su variante más suave sin que nadie lo notara.
+$upsellVariant = $upsellScore >= (int) solvencia('umbralAlto', 60)
+    ? 'alto'
+    : ($upsellScore >= (int) solvencia('umbralMedio', 30) ? 'medio' : 'bajo');
 
 // Cuota restante: antes vivía en una caja propia justo debajo de este bloque, lo que
 // equivalía a decir "aún te queda gratis" inmediatamente después de pedir 29 €.
@@ -63,11 +68,11 @@ $upsellGancho = $upsellTotal > 0
     : '';
 
 if ($upsellVariant === 'alto') {
-    $upsellBadge   = ['bg' => '#fef2f2', 'border' => '#fecaca', 'color' => '#b91c1c', 'text' => '⚠️ Riesgo alto en esta empresa'];
+    $upsellBadge   = ['bg' => '#fef2f2', 'border' => '#fecaca', 'color' => '#b91c1c', 'text' => '⚠️ Constan incidencias graves'];
     $upsellTitle   = 'Una empresa así no se queda quieta';
     $upsellCopy    = $upsellGancho ?: 'El perfil de <strong>' . esc($upsellName) . '</strong> puede cambiar con cualquier publicación del BORME. Te avisamos por correo el día que se mueva.';
 } elseif ($upsellVariant === 'medio') {
-    $upsellBadge   = ['bg' => '#fffbeb', 'border' => '#fde68a', 'color' => '#b45309', 'text' => '🔍 Riesgo medio · conviene revisar'];
+    $upsellBadge   = ['bg' => '#fffbeb', 'border' => '#fde68a', 'color' => '#b45309', 'text' => '🔍 Constan incidencias · conviene revisar'];
     $upsellTitle   = $upsellHigh > 0
         ? 'Hay algo aquí que conviene no perder de vista'
         : 'Un semáforo en ámbar hoy puede ser rojo en seis meses';

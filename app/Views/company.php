@@ -47,11 +47,11 @@
     $faqs = [
         [
             'q' => "¿Es fiable {$companyName}?",
-            'a' => "Sí, **{$companyName}** es una sociedad registrada en España con CIF **{$companyCif}**. Su estado actual es **{$statusRaw}**, según consta en el Registro Mercantil. Puede consultar su scoring de riesgo comercial, solvencia, balance y publicaciones del BORME para verificar su fiabilidad operativa y financiera."
+            'a' => "Sí, **{$companyName}** es una sociedad registrada en España con CIF **{$companyCif}**. Su estado actual es **{$statusRaw}**, según consta en el Registro Mercantil. Puede consultar su índice de solvencia, su estado registral y sus publicaciones en el BORME."
         ],
         [
             'q' => "¿Cómo consultar la solvencia y riesgo de impago de {$companyName}?",
-            'a' => "En APIEmpresas puede obtener el **Informe de Solvencia y Riesgo Oficial de {$companyName}** (CIF {$companyCif}) en PDF. Incluye índice de riesgo (Scoring IES), límite de crédito recomendado, análisis de balance y detección de incidencias o reclamaciones societarias en el BORME."
+            'a' => "En APIEmpresas puede obtener el **Informe de Solvencia de {$companyName}** (CIF {$companyCif}) en PDF. Incluye el índice de solvencia (Scoring IES), su estado en el Registro Mercantil, el histórico de actos publicados en el BORME y las incidencias detectadas."
         ],
         [
             'q' => "¿Cuál es el teléfono y dirección de {$companyName}?",
@@ -82,15 +82,15 @@
         'logo'  => site_url('logo.png'),
         'knowsAbout' => [
             'Solvencia empresarial',
-            'Scoring de riesgo de impago',
+            'Scoring de solvencia',
             'Informes mercantiles',
             $company['cnae_label'] ?? 'Actividad empresarial'
         ],
         'makesOffer' => [
             [
                 '@type' => 'Offer',
-                'name' => 'Informe de Solvencia y Riesgo Oficial PDF - ' . $companyName,
-                'description' => 'Informe financiero oficial en PDF con scoring de riesgo de impago, balance, incidencias BORME y límite de crédito recomendado.',
+                'name' => 'Informe de Solvencia y Riesgo en PDF - ' . $companyName,
+                'description' => 'Informe en PDF con el índice de solvencia, el estado registral, el histórico de actos del BORME y las incidencias detectadas.',
                 'price' => '3.90',
                 'priceCurrency' => 'EUR',
                 'availability' => 'https://schema.org/InStock',
@@ -99,7 +99,7 @@
             [
                 '@type' => 'Offer',
                 'name' => 'APIEmpresas Solvencia Pro - Scoring y vigilancia del BORME',
-                'description' => 'Scoring de riesgo comercial, cartera de seguimiento BORME y balances de todas las empresas españolas.',
+                'description' => 'Índice de solvencia, vigilancia del BORME de tu cartera y aviso por correo el día que se publique un acto nuevo.',
                 'price' => '29.00',
                 'priceCurrency' => 'EUR',
                 'availability' => 'https://schema.org/InStock',
@@ -990,7 +990,7 @@
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"></polyline></svg>
                                         Índice de Estabilidad Societaria
                                     </h2>
-                                    <p style="margin: 0 0 12px 34px; font-size: 0.9rem; color: #64748b;">Análisis algorítmico basado en registros del BORME, contratos públicos y subvenciones.</p>
+                                    <p style="margin: 0 0 12px 34px; font-size: 0.9rem; color: #64748b;">Calculado sobre los actos publicados en el BORME y el estado registral de la empresa.</p>
                                     <div style="margin-left: 34px; width: 60px; height: 3px; background: linear-gradient(90deg, #3b82f6 0%, #10b981 100%); border-radius: 2px;"></div>
                                 </div>
 

@@ -72,7 +72,7 @@
                                             <tr>
                                                 <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">📊</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
-                                                    <strong>Balances y Finanzas Oficiales:</strong> Ventas, EBITDA, margen operativo y endeudamiento de ejercicios depositados.
+                                                    <strong>Histórico del Registro Mercantil:</strong> nombramientos, ceses, cambios de domicilio, ampliaciones de capital y cualquier otro acto publicado en el BORME.
                                                 </td>
                                             </tr>
                                         </table>

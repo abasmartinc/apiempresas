@@ -638,24 +638,29 @@
         <div class="no-break" style="margin-bottom: 20px;">
             <div class="section-title" style="margin-top: 0;">Índice de Estabilidad Societaria</div>
             <?php 
-                $score = $riskProfile['risk_score'] ?? 50;
-                if ($score < 30) {
-                    $color = '#22c55e'; // Verde
-                    $label = 'BAJO';
-                } elseif ($score < 70) {
-                    $color = '#f59e0b'; // Naranja
-                    $label = 'MEDIO';
+                /*
+                 * Este bloque traía SUS PROPIOS cortes —30 y 70— en vez de los de
+                 * Config\Solvencia (30 y 60), así que una empresa de 65 salía aquí
+                 * "MEDIO" en naranja y en la ficha en rojo. Y la etiqueta la pisaba
+                 * el `risk_level` del motor. Ahora las dos cosas salen del helper,
+                 * que es el único sitio donde se decide qué ve el cliente.
+                 */
+                $score = (int) ($riskProfile['risk_score'] ?? 50);
+                [$label] = risk_level_visual($score);
+                if ($score >= (int) solvencia('umbralAlto', 60)) {
+                    $color = '#ef4444';
+                } elseif ($score >= (int) solvencia('umbralMedio', 30)) {
+                    $color = '#f59e0b';
                 } else {
-                    $color = '#ef4444'; // Rojo
-                    $label = 'ALTO';
+                    $color = '#22c55e';
                 }
-                $riskLevelText = $riskProfile['data']['risk_level'] ?? $label;
+                $riskLevelText = $label;
             ?>
             <table class="ies-container">
                 <tr>
                     <td class="ies-score-col">
                         <div class="ies-score-box">
-                            <div style="font-size: 8.5pt; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 15px;">Nivel de Riesgo</div>
+                            <div style="font-size: 8.5pt; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 15px;"><?= risk_titulo_indicador() ?></div>
                             <div class="ies-score-badge" style="background-color: <?= $color ?>;">
                                 <?= $score ?>
                             </div>

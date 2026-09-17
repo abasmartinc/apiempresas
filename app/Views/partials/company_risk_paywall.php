@@ -77,7 +77,7 @@ $pwAFalta = $pwLimpia && $pwConf !== null && $pwConf < 60;
  */
 $pwVis      = risk_level_visual(!empty($riskProfile) ? (int) ($riskProfile['risk_score'] ?? 0) : 55);
 $pwBgScore  = !empty($riskProfile) ? (int) ($riskProfile['risk_score'] ?? 0) : 55;
-$pwBgNivel  = $riskProfile['data']['risk_level'] ?? $pwVis[0];
+$pwBgNivel  = $pwVis[0];  // El motor sigue emitiendo BAJO/MEDIO/ALTO y eso no se toca: hay consultas
 $pwBgColor  = $pwVis[1];
 ?>
 
@@ -160,7 +160,7 @@ $pwBgColor  = $pwVis[1];
     <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; filter: blur(6px); opacity: 0.45; pointer-events: none; display: flex; flex-wrap: nowrap; gap: 80px; align-items: center; justify-content: center; padding: 24px;">
         <!-- Fake Score Card -->
         <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px 20px; text-align: center; width: 190px;">
-            <div style="font-size: 0.8rem; font-weight: bold; color: #64748b; margin-bottom: 12px;">NIVEL DE RIESGO</div>
+            <div style="font-size: 0.8rem; font-weight: bold; color: #64748b; margin-bottom: 12px;"><?= risk_titulo_indicador() ?></div>
             <div style="width: 80px; height: 75px; background: <?= $pwBgColor ?>; border-radius: 12px; margin: 0 auto 12px auto; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 2rem; font-weight: 800;"><?= $pwBgScore ?></div>
             <div style="font-size: 1.1rem; font-weight: bold; color: <?= $pwBgColor ?>;"><?= esc(mb_strtoupper((string) $pwBgNivel, 'UTF-8')) ?></div>
         </div>

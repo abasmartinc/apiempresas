@@ -40,7 +40,9 @@
         $borderScore = '#fecaca';
         $label = 'ALTO';
     }
-    $riskLevelText = $riskProfile['data']['risk_level'] ?? $label;
+    // La etiqueta que se enseña sale del helper; `risk_level` del motor se queda
+    // en la base de datos para las consultas y las métricas. Ver risk_level_visual().
+    $riskLevelText = $label;
 
     // Color de acento del documento (filete de cabecera, numeración de secciones).
     // No es $brandColor: ese vale por defecto '#0f172a' porque el pedido no recoge
@@ -641,7 +643,7 @@
             <td class="score-col">
                 <div class="panel-box" style="text-align: center;">
                     <div style="font-size: 8.5pt; color: #475569; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">
-                        NIVEL DE RIESGO
+                        <?= risk_titulo_indicador() ?>
                     </div>
 
                     <!-- MODERN SCORE HERO CARD -->

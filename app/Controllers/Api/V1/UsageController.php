@@ -66,15 +66,57 @@ class UsageController extends BaseApiController
         }
 
         try {
+            $db = \Config\Database::connect('default');
             $currentMonth = date('Y-m');
 
-            // 1. Stats
-            $monthlyCount = $this->apiRequestsModel->countRequestsForMonth($currentMonth, ['user_id' => $userId]);
-            $totalCount = $this->apiRequestsModel->where('user_id', $userId)->countAllResults();
+            // 1. Get Plan Info and Limits
+            $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
+            $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
+            $walletBalance = \App\Filters\ApiKeyFilter::$apiMeta['wallet_balance'] ?? 0;
 
-            // 2. History (Recent Queried Companies)
+            $planRow = $db->table('api_plans')->select('name, monthly_quota')->where('id', (int)$planId)->get()->getRow();
+            $monthlyQuota = $planRow ? (int)$planRow->monthly_quota : get_free_plan_limit();
+            $planName = $planRow ? $planRow->name : 'Free';
+
+            // 2. Stats (Consumo facturado real desde api_usage_daily para total consistencia con ApiKeyFilter y la web)
+            if ($db->tableExists('api_usage_daily')) {
+                if ((int)$planId === 1) {
+                    $usageRow = $db->table('api_usage_daily')
+                        ->selectSum('requests_count', 'total')
+                        ->where('user_id', $userId)
+                        ->where('date >=', '2026-05-28')
+                        ->get()->getRow();
+                } else {
+                    $usageRow = $db->table('api_usage_daily')
+                        ->selectSum('requests_count', 'total')
+                        ->where('user_id', $userId)
+                        ->where('plan_id', (int)$planId)
+                        ->like('date', $currentMonth, 'after')
+                        ->get()->getRow();
+                }
+                $monthlyCount = $usageRow ? (int)$usageRow->total : 0;
+
+                $totalRow = $db->table('api_usage_daily')
+                    ->selectSum('requests_count', 'total')
+                    ->where('user_id', $userId)
+                    ->get()->getRow();
+                $totalCount = $totalRow ? (int)$totalRow->total : 0;
+            } else {
+                $monthlyCount = $this->apiRequestsModel->countRequestsForMonth($currentMonth, [
+                    'user_id'     => $userId,
+                    'status_code' => 200,
+                ]);
+                $totalCount = $this->apiRequestsModel
+                    ->where('user_id', $userId)
+                    ->where('status_code', 200)
+                    ->countAllResults();
+            }
+
+            $remainingCalls = max(0, $monthlyQuota - $monthlyCount);
+
+            // 3. History (Recent Queried Companies with query counts)
             $recentRequests = $this->apiRequestsModel
-                ->select('search_term, MAX(created_at) as last_query')
+                ->select('search_term, COUNT(*) as query_count, MAX(created_at) as last_query')
                 ->where('user_id', $userId)
                 ->where('search_term IS NOT NULL')
                 ->where('search_term !=', '')
@@ -87,41 +129,34 @@ class UsageController extends BaseApiController
                 ->limit(20)
                 ->findAll();
 
-            $cifs = array_column($recentRequests, 'search_term');
-
             $history = [];
-            foreach ($cifs as $cif) {
+            foreach ($recentRequests as $reqData) {
+                $cif        = $reqData['search_term'];
+                $queryCount = (int)($reqData['query_count'] ?? 1);
+                $lastQuery  = $reqData['last_query'] ?? null;
+
                 $details = $this->companyModel->getByCif($cif);
                 if ($details) {
-                    $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
                     if ((int)$planId === 1) {
                         $details = mask_company_data($details);
                     }
                     $details = filter_company_data($details);
-                    $details['found'] = true;
+                    $details['query_count'] = $queryCount;
+                    $details['last_query']  = $lastQuery;
+                    $details['found']       = true;
                     $history[] = $details;
                 } else {
                     $history[] = [
-                        'cif'        => $cif,
-                        'name'       => 'Empresa no encontrada',
-                        'province'   => '-',
-                        'cnae_label' => '-',
-                        'found'      => false
+                        'cif'         => $cif,
+                        'name'        => 'Empresa no encontrada',
+                        'province'    => '-',
+                        'cnae_label'  => '-',
+                        'query_count' => $queryCount,
+                        'last_query'  => $lastQuery,
+                        'found'       => false
                     ];
                 }
             }
-
-            // Get Plan Info and Limits
-            $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
-            $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
-            $walletBalance = \App\Filters\ApiKeyFilter::$apiMeta['wallet_balance'] ?? 0;
-            
-            $db = \Config\Database::connect('default');
-            $planRow = $db->table('api_plans')->select('name, monthly_quota')->where('id', (int)$planId)->get()->getRow();
-            
-            $monthlyQuota = $planRow ? (int)$planRow->monthly_quota : get_free_plan_limit();
-            $planName = $planRow ? $planRow->name : 'Free';
-            $remainingCalls = max(0, $monthlyQuota - $monthlyCount);
 
             return $this->respond([
                 'success' => true,

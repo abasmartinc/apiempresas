@@ -24,7 +24,9 @@ helper(['company', 'risk_labels']);
 
 $tiScore = (int) ($riskProfile['risk_score'] ?? 0);
 [$tiNivel, $tiColor, $tiFondo, $tiBorde] = risk_level_visual($tiScore);
-$tiNivel = $riskProfile['data']['risk_level'] ?? $tiNivel;
+// El motor sigue emitiendo BAJO/MEDIO/ALTO y eso no se toca: hay consultas
+// y métricas que dependen de esos valores. Pero lo que se ENSEÑA sale del
+// helper, que es donde vive la razón del cambio (ver risk_level_visual).
 
 $tiEventos = $riskProfile['data']['canonical_events'] ?? [];
 $tiTotal   = count($tiEventos);
@@ -79,7 +81,7 @@ $tiAFalta = $tiTotal === 0 && $tiConf !== null && $tiConf < 60;
         <div style="font-size: 0.6rem; font-weight: 800; color: <?= $tiColor ?>; opacity: 0.7; letter-spacing: 0.5px; margin-top: 2px;">/ 100</div>
     </div>
     <div style="flex: 1; min-width: 0;">
-        <div style="font-size: 1.15rem; font-weight: 900; color: <?= $tiColor ?>; line-height: 1.15;">Riesgo <?= esc(mb_strtolower($tiNivel, 'UTF-8')) ?></div>
+        <div style="font-size: 1.15rem; font-weight: 900; color: <?= $tiColor ?>; line-height: 1.15;"><?= esc(ucfirst(mb_strtolower($tiNivel, 'UTF-8'))) ?></div>
         <div style="font-size: 0.83rem; color: #475569; line-height: 1.45; margin-top: 5px;">
             <?php if ($tiTotal > 0 && $tiMotivo !== ''): ?>
                 <?= $tiTotal ?> <?= $tiTotal === 1 ? 'incidencia registrada' : 'incidencias registradas' ?>.

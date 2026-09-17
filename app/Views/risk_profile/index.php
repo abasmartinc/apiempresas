@@ -705,7 +705,7 @@
                         </div>
                         <h3 class="rp-feature-title">Índice IES (0 a 100)</h3>
                         <p class="rp-feature-desc">
-                            Algoritmo de scoring predictivo que sintetiza en una sola cifra el riesgo global de insolvencia y estabilidad de cualquier sociedad mercantil en España.
+                            Sintetiza en una sola cifra la gravedad de lo que consta publicado sobre una sociedad: concursos, cierres registrales, disoluciones y retrasos en el depósito de cuentas.
                         </p>
                     </div>
 
@@ -752,7 +752,7 @@
                     <div class="rp-brackets-grid">
                         <div class="rp-bracket-card" style="background: #f0fdf4; border-color: #bbf7d0;">
                             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                                <strong style="color: #15803d; font-size: 1.1rem;">0 - <?= (int) solvencia('umbralMedio', 30) - 1 ?> &bull; RIESGO BAJO</strong>
+                                <strong style="color: #15803d; font-size: 1.1rem;">0 - <?= (int) solvencia('umbralMedio', 30) - 1 ?> &bull; SIN INCIDENCIAS O LEVES</strong>
                                 <span style="background: #dcfce7; color: #16a34a; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem;">Favorable</span>
                             </div>
                             <p style="font-size: 0.85rem; color: #166534; line-height: 1.45; margin: 0;">
@@ -762,7 +762,7 @@
 
                         <div class="rp-bracket-card" style="background: #fffbeb; border-color: #fde68a;">
                             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                                <strong style="color: #b45309; font-size: 1.1rem;"><?= (int) solvencia('umbralMedio', 30) ?> - <?= (int) solvencia('umbralAlto', 60) - 1 ?> &bull; RIESGO MEDIO</strong>
+                                <strong style="color: #b45309; font-size: 1.1rem;"><?= (int) solvencia('umbralMedio', 30) ?> - <?= (int) solvencia('umbralAlto', 60) - 1 ?> &bull; INCIDENCIAS A REVISAR</strong>
                                 <span style="background: #fef3c7; color: #d97706; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem;">Atención</span>
                             </div>
                             <p style="font-size: 0.85rem; color: #78350f; line-height: 1.45; margin: 0;">
@@ -772,7 +772,7 @@
 
                         <div class="rp-bracket-card" style="background: #fef2f2; border-color: #fecaca;">
                             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                                <strong style="color: #b91c1c; font-size: 1.1rem;"><?= (int) solvencia('umbralAlto', 60) ?> - 100 &bull; RIESGO ALTO</strong>
+                                <strong style="color: #b91c1c; font-size: 1.1rem;"><?= (int) solvencia('umbralAlto', 60) ?> - 100 &bull; INCIDENCIAS GRAVES</strong>
                                 <span style="background: #fee2e2; color: #ef4444; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem;">Alerta Crítica</span>
                             </div>
                             <p style="font-size: 0.85rem; color: #7f1d1d; line-height: 1.45; margin: 0;">

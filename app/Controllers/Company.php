@@ -136,7 +136,7 @@ class Company extends BaseController
             if ($prov) {
                 $desc .= " en {$prov}";
             }
-            $desc .= ". Consulta su scoring de riesgo de impago, teléfono, dirección, directivos, balances y actos en el BORME.";
+            $desc .= ". Consulta su índice de solvencia, teléfono, dirección, directivos y actos en el BORME.";
         }
         
         $desc = character_limiter($desc, 160, '');

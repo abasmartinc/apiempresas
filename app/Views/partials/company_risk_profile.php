@@ -8,14 +8,14 @@ $score = (int) ($riskProfile['risk_score'] ?? 50);
 $color = $score < (int) solvencia('umbralMedio', 30)
     ? '#22c55e'
     : ($score < (int) solvencia('umbralAlto', 60) ? '#f59e0b' : '#ef4444');
-$riskLevelText = $riskProfile['data']['risk_level'] ?? $label;
+$riskLevelText = $label;  // El motor sigue emitiendo BAJO/MEDIO/ALTO y eso no se toca: hay consultas
 ?>
 <div style="display: flex; flex-wrap: wrap; gap: 32px; align-items: stretch;">
     
     <!-- LEFT COLUMN (Score) -->
     <div style="width: 280px; background: #f8fafc; border-radius: 16px; border: 1px solid #f1f5f9; padding: 22px 20px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; flex-shrink: 0; box-sizing: border-box;">
         <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 20px;">
-            <h4 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin: 0; font-weight: 800; text-align: center;">Nivel de Riesgo</h4>
+            <h4 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin: 0; font-weight: 800; text-align: center;"><?= risk_titulo_indicador() ?></h4>
 
             <?php
             // La píldora de consultas/plan vivía aquí, dentro de la tarjeta del
@@ -53,8 +53,8 @@ $riskLevelText = $riskProfile['data']['risk_level'] ?? $label;
             <span style="font-size: 0.9rem; font-weight: 600; color: #94a3b8; margin-top: 2px;">de 100</span>
         </div>
         
-        <!-- Debajo del rótulo "NIVEL DE RIESGO" de arriba ponía otra vez "Nivel de
-             riesgo": cuatro elementos para decir dos cosas. -->
+        <!-- Debajo del rótulo de arriba ponía otra vez "Nivel de riesgo": cuatro
+             elementos para decir dos cosas. -->
         <div style="text-align: center; margin-bottom: 20px;">
             <div style="font-size: 1.5rem; font-weight: 800; color: <?= $color ?>; text-transform: uppercase; letter-spacing: 1px; line-height: 1.2;"><?= $riskLevelText ?></div>
         </div>
@@ -66,12 +66,14 @@ $riskLevelText = $riskProfile['data']['risk_level'] ?? $label;
          * textos como "Advertencia: constan observaciones de riesgo moderado".
          * Ahora sigue al nivel, igual que el resto del bloque.
          */
-        $nivelNorm = strtoupper((string) $riskLevelText);
-        if (strpos($nivelNorm, 'ALTO') !== false) {
+        // Por el SCORE y no por el texto de la etiqueta: cuando las etiquetas
+        // cambiaron de ALTO/MEDIO a GRAVE/A REVISAR, un strpos('ALTO') dejaba de
+        // encontrar nada y todo se pintaba de verde sin que nadie se enterara.
+        if ($score >= (int) solvencia('umbralAlto', 60)) {
             $notaFondo = '#fef2f2'; $notaTinta = '#dc2626';
             // Triángulo de aviso.
             $notaIcono = '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>';
-        } elseif (strpos($nivelNorm, 'MEDIO') !== false) {
+        } elseif ($score >= (int) solvencia('umbralMedio', 30)) {
             $notaFondo = '#fffbeb'; $notaTinta = '#d97706';
             // Círculo de información.
             $notaIcono = '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>';

@@ -43,7 +43,9 @@ $teaserModo  = solvencia('teaserModo', 'titular') === 'opaco' ? 'opaco' : 'titul
 $teaserGratis = (int) solvencia('consultasGratis', 3);
 
 [$teaserNivel, $teaserColor, $teaserFondo, $teaserBorde] = risk_level_visual($teaserScore);
-$teaserNivel = $riskProfile['data']['risk_level'] ?? $teaserNivel;
+// El motor sigue emitiendo BAJO/MEDIO/ALTO y eso no se toca: hay consultas
+// y métricas que dependen de esos valores. Pero lo que se ENSEÑA sale del
+// helper, que es donde vive la razón del cambio (ver risk_level_visual).
 
 $companyName = company_short_name(company_display_name($companyName ?? ($company['name'] ?? ''), 'Empresa'));
 $compCif = $company['cif'] ?? '';
@@ -99,7 +101,7 @@ if (empty($redirectPath)) {
              el desenfoque no tapa un color, y esta caja no debe ser una segunda
              fuente de verdad que se contradiga con la de delante. -->
         <div style="flex-shrink: 0; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px 20px; text-align: center; width: 190px;">
-            <div style="font-size: 0.8rem; font-weight: bold; color: #64748b; margin-bottom: 12px;">NIVEL DE RIESGO</div>
+            <div style="font-size: 0.8rem; font-weight: bold; color: #64748b; margin-bottom: 12px;"><?= risk_titulo_indicador() ?></div>
             <div style="width: 80px; height: 75px; background: #94a3b8; border-radius: 12px; margin: 0 auto 12px auto;"></div>
             <div style="height: 14px; width: 70%; background: #cbd5e1; border-radius: 4px; margin: 0 auto;"></div>
         </div>
@@ -200,7 +202,7 @@ if (empty($redirectPath)) {
             <?php endif; ?>
 
             <h3 style="font-size: 1.45rem; font-weight: 900; color: #0f172a; margin: 0 0 8px 0; letter-spacing: -0.5px;">
-                Consulta el nivel de riesgo
+                Consulta qué consta de ella
             </h3>
             <p style="color: #475569; margin: 0 0 20px 0; font-size: 0.92rem; line-height: 1.5; max-width: 440px;">
                 Accede al semáforo de solvencia, alertas BORME e historial de contratación pública creando tu cuenta gratis:

@@ -62,7 +62,7 @@
                                             <tr>
                                                 <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">🛡️</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
-                                                    <strong>Scoring Predictivo de Quiebra:</strong> Algoritmo IES con semáforo de riesgo y límite de crédito comercial sugerido.
+                                                    <strong>Índice de solvencia IES:</strong> una cifra de 0 a 100 con la gravedad de lo que consta en el Registro Mercantil, y su semáforo.
                                                 </td>
                                             </tr>
                                         </table>

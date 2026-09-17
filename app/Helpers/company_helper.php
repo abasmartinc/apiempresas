@@ -391,10 +391,31 @@ if (!function_exists('solvencia')) {
 }
 
 /**
- * Nivel de riesgo a partir del score. Los cortes salen de Config\Solvencia y
- * están alineados con el motor de scoring (>=60 ALTO, >=30 MEDIO): antes cada
- * vista los repetía a mano con 70, así que una empresa de 65 salía etiquetada
- * "ALTO" por el motor y coloreada de "MEDIO" por la vista.
+ * Etiqueta y colores del semáforo a partir del score.
+ *
+ * LO QUE MIDE ESTE NÚMERO, Y POR QUÉ CAMBIÓ LA ETIQUETA (16-09-2026)
+ * -----------------------------------------------------------------
+ * Antes devolvía BAJO / MEDIO / ALTO y la ficha lo titulaba "NIVEL DE RIESGO".
+ * Eso se lee como un pronóstico: "esta empresa tiene alto riesgo de fallar".
+ *
+ * Se midió. Validación temporal sobre 50.000 empresas (corte 31-12-2023,
+ * horizonte 24 meses, `validar_motor_riesgo.py`): sobre la cartera viva el AUC
+ * salió 0,468 —0,50 es tirar una moneda— y se repitió en tres muestras. El score
+ * NO predice hechos futuros. Es más: el tramo con las cuentas más atrasadas cae
+ * la MITAD que la media, seguramente porque una sociedad dormida no se disuelve,
+ * simplemente sigue ahí.
+ *
+ * Lo que el número sí mide, y muy bien, es la GRAVEDAD DE LO QUE YA CONSTA
+ * publicado: concursos, cierres de hoja, revocaciones de NIF, disoluciones,
+ * retrasos en el depósito de cuentas. Eso es un hecho comprobable, no una
+ * probabilidad, y es lo que la etiqueta dice ahora.
+ *
+ * El cambio no toca el motor: `risk_level` sigue siendo BAJO/MEDIO/ALTO en la
+ * base de datos y en el JSON, porque hay consultas y métricas que dependen de
+ * esos valores. Esto es solo cómo se le presenta al cliente.
+ *
+ * El 0 tiene etiqueta propia: decir "LEVE" de una empresa sobre la que no consta
+ * absolutamente nada sugiere que algo hay.
  *
  * Devuelve [etiqueta, color, fondo, borde].
  */
@@ -404,14 +425,30 @@ if (!function_exists('risk_level_visual')) {
         $medio = (int) solvencia('umbralMedio', 30);
         $alto  = (int) solvencia('umbralAlto', 60);
 
+        if ($score <= 0) {
+            return ['SIN INCIDENCIAS', '#16a34a', '#f0fdf4', '#bbf7d0'];
+        }
         if ($score < $medio) {
-            return ['BAJO', '#16a34a', '#f0fdf4', '#bbf7d0'];
+            return ['LEVE', '#16a34a', '#f0fdf4', '#bbf7d0'];
         }
         if ($score < $alto) {
-            return ['MEDIO', '#b45309', '#fffbeb', '#fde68a'];
+            return ['A REVISAR', '#b45309', '#fffbeb', '#fde68a'];
         }
 
-        return ['ALTO', '#b91c1c', '#fef2f2', '#fecaca'];
+        return ['GRAVE', '#b91c1c', '#fef2f2', '#fecaca'];
+    }
+}
+
+/**
+ * El rótulo que va encima del número, en un solo sitio.
+ *
+ * Estaba escrito a mano como "NIVEL DE RIESGO" en cuatro parciales y los dos PDF.
+ * Ver `risk_level_visual()` para por qué ya no dice eso.
+ */
+if (!function_exists('risk_titulo_indicador')) {
+    function risk_titulo_indicador(): string
+    {
+        return 'GRAVEDAD DE LO QUE CONSTA';
     }
 }
 

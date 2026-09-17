@@ -244,7 +244,7 @@ $eurosLargo = static fn (float $n): string => number_format($n, 2, ',', '.');
          * Prometer ilimitado en la pantalla de cobro es la que obliga a devolver.
          */
         ?>
-        <p class="risk-billing-subtitle">Audita clientes y proveedores, anticípate a los impagos con el scoring de solvencia y descarga el informe en PDF de cada empresa que consultes.</p>
+        <p class="risk-billing-subtitle">Comprueba qué consta de tus clientes y proveedores en el Registro Mercantil, y entérate el mismo día en que se publique algo nuevo.</p>
 
         <!-- SELECTOR MENSUAL / ANUAL -->
         <div class="period-toggle-container" style="margin-bottom: 0;">
@@ -326,8 +326,19 @@ $eurosLargo = static fn (float $n): string => number_format($n, 2, ',', '.');
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         </div>
                         <div>
-                            <strong style="color: #0f172a;">Scoring predictivo de impago (0 - 100):</strong>
-                            <span style="color: #475569;"> índice de probabilidad de morosidad y semáforo de riesgo para saber si confiar o cobrar por adelantado.</span>
+                            <?php
+                            /*
+                             * Decía "scoring predictivo de impago" e "índice de probabilidad de
+                             * morosidad". La validación temporal del 16-09 (50.000 empresas,
+                             * corte 2023, horizonte 24 meses) dio AUC 0,468 sobre la cartera
+                             * viva: el score NO predice hechos futuros. Lo que sí hace, y muy
+                             * bien, es medir la gravedad de lo que ya consta publicado.
+                             * Prometer una probabilidad que no se ha medido nunca es lo mismo
+                             * que el "dictamen oficial" que ya quitamos, en la pantalla del cobro.
+                             */
+                            ?>
+                            <strong style="color: #0f172a;">Índice de solvencia IES (0 - 100):</strong>
+                            <span style="color: #475569;"> resume en una cifra la gravedad de lo que consta en el Registro Mercantil: concursos, cierres de hoja, disoluciones y retrasos en el depósito de cuentas.</span>
                         </div>
                     </li>
                     <li class="risk-feature-item">
@@ -345,8 +356,17 @@ $eurosLargo = static fn (float $n): string => number_format($n, 2, ',', '.');
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         </div>
                         <div>
-                            <strong style="color: #0f172a;">Radiografía económico-financiera:</strong>
-                            <span style="color: #475569;"> balance, facturación, endeudamiento, fondo de maniobra y evolución de resultados de los últimos 3 años.</span>
+                            <?php
+                            /*
+                             * Aquí se prometía "balance, facturación, endeudamiento, fondo de
+                             * maniobra y evolución de resultados". La aplicación NO TIENE ni un
+                             * dato financiero: ni balances, ni ventas, ni EBITDA. Ninguna cifra
+                             * de esas se calcula, se guarda ni se muestra en ninguna pantalla.
+                             * Era la promesa más gruesa de la página del cobro.
+                             */
+                            ?>
+                            <strong style="color: #0f172a;">Vigilancia diaria del BORME:</strong>
+                            <span style="color: #475569;"> hasta 25 empresas en seguimiento, y un correo el mismo día en que a una de ellas le publican algo.</span>
                         </div>
                     </li>
                     <li class="risk-feature-item">
@@ -363,8 +383,18 @@ $eurosLargo = static fn (float $n): string => number_format($n, 2, ',', '.');
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         </div>
                         <div>
-                            <strong style="color: #0f172a;">Límite de crédito comercial sugerido:</strong>
-                            <span style="color: #475569;"> recomendación calculada del importe máximo a conceder en aplazamientos de cobro.</span>
+                            <?php
+                            /*
+                             * Aquí se anunciaba un "límite de crédito comercial sugerido"
+                             * —"recomendación calculada"— que NO EXISTE: no hay una sola línea
+                             * en el motor ni en la aplicación que lo calcule. Se prometía en la
+                             * pantalla del cobro, en el correo de bienvenida de Pro y en los
+                             * datos estructurados que lee Google. Sustituido por una función
+                             * que sí está construida.
+                             */
+                            ?>
+                            <strong style="color: #0f172a;">Tu cartera de un vistazo:</strong>
+                            <span style="color: #475569;"> sube tus clientes en CSV y ve de golpe cuáles tienen incidencias, sin buscarlos uno a uno.</span>
                         </div>
                     </li>
                     <li class="risk-feature-item">
