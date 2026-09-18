@@ -183,18 +183,67 @@ $riskLevelText = $label;  // El motor sigue emitiendo BAJO/MEDIO/ALTO y eso no s
     <!-- RIGHT COLUMN (Factors) -->
     <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column;">
         
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-            <div style="background: #eff6ff; color: #3b82f6; padding: 6px; border-radius: 50%;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
-            </div>
-            <h4 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0; text-transform: uppercase;">Factores Analizados</h4>
-        </div>
-        <p style="margin: 0 0 24px 0; font-size: 0.9rem; color: #64748b;">Evaluación automática de los principales indicadores de estabilidad corporativa.</p>
-        
-        <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
-            <?php if (!empty($riskProfile['data']['canonical_events'])): ?>
-                <?php foreach ($riskProfile['data']['canonical_events'] as $flag): ?>
-                    <?php 
+        <!-- DESGLOSE DEL SCORING
+             Aquí había una caja que PROMETÍA seis dimensiones y no enseñaba
+             ninguna. Las seis ya venían calculadas en el JSON del motor; ahora
+             se pintan con su valor, su tope y cuál es la dominante. -->
+        <?= view('partials/company_risk_dimensions', [
+            'riskProfile' => $riskProfile,
+            'score'       => $score,
+            // Para el aviso de confianza baja: sin la fecha real de constitución
+            // no se puede saber si la culpa es del dato o de la juventud de la
+            // empresa, y el aviso acababa diciendo las dos cosas a la vez.
+            'company'     => $company ?? [],
+        ]) ?>
+
+        <?php
+        /*
+         * QUÉ SE HA COMPROBADO.
+         *
+         * Va DESPUÉS del desglose y no antes: quien tiene incidencias las lee
+         * arriba, y a quien no tiene ninguna —ocho de cada diez— le cierra la
+         * ficha con un trabajo hecho en vez de con un hueco.
+         */
+        ?>
+        <?= view('partials/company_risk_comprobaciones', ['riskProfile' => $riskProfile]) ?>
+
+        <?php
+        /*
+         * ACTOS QUE NO RECOGE NINGUNA COMPROBACIÓN.
+         *
+         * Aquí había un listado de TODOS los eventos del motor, y desde que
+         * existe "Qué se ha comprobado" decía las cosas dos veces con las
+         * mismas palabras: la ficha de una empresa con las cuentas sin
+         * depositar repetía la misma frase —misma descripción, mismo año— en
+         * dos cajas separadas por diez centímetros, y una tercera vez en el
+         * desglose del scoring.
+         *
+         * Borrarlo entero era lo tentador y habría sido un error: las nueve
+         * comprobaciones no cubren todos los códigos que emite el motor
+         * (CAMBIO_OBJETO_SOCIAL, CAMBIO_ADMINISTRADOR, OTROS_INFORMATIVO...),
+         * así que una empresa cuya única incidencia fuese de ésas habría
+         * enseñado nueve vistos verdes mientras el titular decía "1 incidencia
+         * registrada".
+         *
+         * Se filtra, no se borra: lo que ya cuentan las comprobaciones sale de
+         * aquí, y lo que no cabía en ninguna línea sigue saliendo. Y va DESPUÉS
+         * del bloque de comprobaciones, porque es el resto, no la cabecera.
+         */
+        $eventosSueltos = risk_eventos_sueltos($riskProfile);
+        ?>
+
+        <?php /* El contenedor va dentro del if: si no hay nada suelto no debe
+                 quedar un div vacío empujando 24px al final de la columna. */ ?>
+        <?php if (!empty($eventosSueltos)): ?>
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 22px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="background: #eff6ff; color: #3b82f6; padding: 6px; border-radius: 50%;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                    </div>
+                    <h4 style="font-size: 1rem; font-weight: 800; color: #0f172a; margin: 0; text-transform: uppercase;">Otros actos registrales</h4>
+                </div>
+                <?php foreach ($eventosSueltos as $flag): ?>
+                    <?php
                     // Normalizado: `critical` caia al bloque de 'low' y se pintaba en
                     // gris una sociedad extinguida.
                     $sevN = risk_event_severidad($flag);
@@ -228,9 +277,9 @@ $riskLevelText = $label;  // El motor sigue emitiendo BAJO/MEDIO/ALTO y eso no s
                          * misma dimensión en rojo como FACTOR DOMINANTE. La misma
                          * ficha decía las dos cosas.
                          *
-                         * El caso bueno de verdad ya tiene su propia rama: cuando NO
-                         * hay eventos, se pinta "Análisis Favorable". Este bloque no
-                         * puede competir con aquel.
+                         * El caso bueno de verdad lo cuenta ahora el bloque "Qué se
+                         * ha comprobado", que es donde cabe decir que no ha saltado
+                         * nada. Aquí solo quedan actos, y un acto leve es leve.
                          */
                         $iconColor = '#64748b';
                         $iconBg = '#f1f5f9';
@@ -262,31 +311,8 @@ $riskLevelText = $label;  // El motor sigue emitiendo BAJO/MEDIO/ALTO y eso no s
                         </span>
                     </div>
                 <?php endforeach; ?>
-            <?php else: ?>
-                <div style="border: 1px solid #f1f5f9; border-radius: 12px; padding: 20px; display: flex; gap: 16px; align-items: center;">
-                    <div style="width: 48px; height: 48px; border-radius: 50%; background: #dcfce7; color: #22c55e; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    </div>
-                    <div style="flex: 1;">
-                        <p style="margin: 0 0 6px 0; font-size: 1rem; font-weight: 700; color: #0f172a;">Análisis Favorable</p>
-                        <p style="margin: 0; font-size: 0.9rem; color: #64748b; line-height: 1.4;"><?= esc($riskProfile['data']['summary_message'] ?? 'No se han detectado eventos societarios que indiquen riesgo.') ?></p>
-                    </div>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <!-- DESGLOSE DEL SCORING
-             Aquí había una caja que PROMETÍA seis dimensiones y no enseñaba
-             ninguna. Las seis ya venían calculadas en el JSON del motor; ahora
-             se pintan con su valor, su tope y cuál es la dominante. -->
-        <?= view('partials/company_risk_dimensions', [
-            'riskProfile' => $riskProfile,
-            'score'       => $score,
-            // Para el aviso de confianza baja: sin la fecha real de constitución
-            // no se puede saber si la culpa es del dato o de la juventud de la
-            // empresa, y el aviso acababa diciendo las dos cosas a la vez.
-            'company'     => $company ?? [],
-        ]) ?>
+            </div>
+        <?php endif; ?>
 
     </div>
 </div>

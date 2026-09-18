@@ -494,10 +494,65 @@ if (!function_exists('risk_dimensions')) {
             ],
         ];
 
+        /*
+         * LA DIMENSIÓN ACTIVA TIENE QUE DECIR QUÉ HA PASADO, NO QUÉ PODRÍA.
+         *
+         * El texto de `legal_distress` es un listado de las cinco situaciones
+         * que esa dimensión vigila. Estaba bien mientras no hubiera nada debajo
+         * con qué contrastarlo; desde que existe el bloque de comprobaciones, la
+         * ficha de una sociedad extinguida decía "Situación registral 100/100 —
+         * cierre de hoja, concurso, disolución, liquidación o baja en el Índice
+         * de Entidades" y justo debajo pintaba esas CINCO cosas en verde. Lo
+         * que había disparado el 100 —la extinción— no salía en la lista.
+         *
+         * Cuando la dimensión está activa se sustituye por la ETIQUETA corta
+         * del hecho real, no por su descripción completa: la descripción ya está
+         * en las comprobaciones y repetirla entera es volver al problema que
+         * este bloque vino a quitar.
+         */
+        $etiquetaLegal = null;
+        if ((float) ($dims['legal_distress'] ?? 0) > 0) {
+            helper('risk_labels');
+
+            $mejor = null;
+            $mejorG = -1;
+            foreach (($data['canonical_events'] ?? []) as $f) {
+                if (!is_array($f)) {
+                    continue;
+                }
+                $codigo = strtoupper((string) ($f['code'] ?? ''));
+                foreach (['CONCURSO', 'DISOLUCION', 'LIQUIDACION', 'EXTIN', 'REGISTRY_CLOSURE', 'CIERRE', 'NIF_REVOCATION', 'TAX_INDEX'] as $p) {
+                    if (strpos($codigo, $p) === false) {
+                        continue;
+                    }
+                    $g = risk_event_severidad($f);
+                    if ($g > $mejorG) {
+                        $mejorG = $g;
+                        $mejor  = $f;
+                    }
+                    break;
+                }
+            }
+
+            if ($mejor !== null) {
+                $etiquetaLegal = rtrim(risk_event_label($mejor), '.') . '.';
+            } else {
+                // Sin evento, pero con estado: el estado sirve igual.
+                $estadoLegal = strtoupper((string) ($data['legal_state'] ?? ''));
+                $mapa = risk_event_labels();
+                if ($estadoLegal !== '' && isset($mapa['LEGAL_STATE_' . $estadoLegal])) {
+                    $etiquetaLegal = rtrim($mapa['LEGAL_STATE_' . $estadoLegal], '.') . '.';
+                }
+            }
+        }
+
         $salida = [];
         foreach ($meta as $clave => [$titulo, $tope, $explica]) {
             if (!array_key_exists($clave, $dims)) {
                 continue;
+            }
+            if ($clave === 'legal_distress' && $etiquetaLegal !== null) {
+                $explica = $etiquetaLegal;
             }
             $valor = (float) $dims[$clave];
             $salida[] = [
@@ -677,5 +732,375 @@ if (!function_exists('company_punto')) {
         }
 
         return $ultimo === $signo ? '' : $signo;
+    }
+}
+
+/**
+ * Las comprobaciones que se le han hecho a la empresa, con su resultado.
+ *
+ * POR QUÉ EXISTE ESTO
+ * -------------------
+ * Ocho de cada diez fichas salen con puntuación 0 (medido: 79 % de la cartera
+ * viva sobre una muestra de 50.000). Hasta ahora esas fichas enseñaban un cero
+ * y una frase, y el efecto en quien llega buscando información no es tranquilidad
+ * sino "aquí no hay nada".
+ *
+ * Pero sí hay algo: se han comprobado nueve cosas y ninguna ha saltado. Eso es
+ * un trabajo hecho y es exactamente la respuesta que necesita quien va a dar
+ * crédito. Lo único que faltaba era enseñarlo.
+ *
+ * No es una lista decorativa: cada línea se resuelve contra el perfil real. Si
+ * el motor no evaluó una dimensión —porque el perfil viene de una versión
+ * anterior— esa comprobación se marca como no disponible en vez de fingir un
+ * visto.
+ *
+ * Devuelve una lista de ['titulo', 'estado', 'detalle'] donde estado es
+ * 'ok' | 'incidencia' | 'sin_datos' | 'no_procede'.
+ *
+ *   ok          la comprobación se ha hecho y no ha saltado
+ *   incidencia  ha saltado
+ *   sin_datos   no se ha podido mirar (el motor no calculó esa dimensión)
+ *   no_procede  se ha mirado y la pregunta no aplica a esta empresa
+ */
+/**
+ * La tabla de comprobaciones, en un solo sitio.
+ *
+ * Vive fuera de risk_comprobaciones() porque hay un segundo consumidor:
+ * risk_eventos_sueltos(), que necesita saber exactamente qué códigos quedan YA
+ * cubiertos por el bloque "Qué se ha comprobado" para no repetirlos. Si los
+ * patrones estuvieran escritos dos veces, el día que se añada una comprobación
+ * nueva el acto correspondiente aparecería duplicado en la ficha, que es
+ * justamente el fallo que este cambio viene a corregir.
+ *
+ * Formato:
+ *   graves    → [título, patrones de código, estados legales (|), texto si está limpio]
+ *   numericas → [título, clave de dimensión, patrones de código, texto si está limpio]
+ */
+if (!function_exists('risk_comprobaciones_tabla')) {
+    function risk_comprobaciones_tabla(): array
+    {
+        return [
+            'graves' => [
+                ['Concurso de acreedores', ['CONCURSO'], 'CONCURSO',
+                 'No consta declaración de concurso.'],
+                ['Disolución o liquidación', ['DISOLUCION', 'LIQUIDACION'], 'DISUELTA|LIQUIDACION',
+                 'No consta disolución ni apertura de liquidación.'],
+                ['Extinción de la sociedad', ['EXTIN'], 'EXTINTA',
+                 'La sociedad no consta extinguida.'],
+                ['Cierre de hoja registral', ['REGISTRY_CLOSURE', 'CIERRE'], 'REGISTRY_CLOSURE',
+                 'La hoja registral no consta cerrada.'],
+                ['Revocación del NIF o baja en la AEAT', ['NIF_REVOCATION', 'TAX_INDEX'], 'NIF_REVOCATION|TAX_INDEX',
+                 'No consta revocación del NIF ni baja en el Índice de Entidades.'],
+            ],
+            'numericas' => [
+                ['Depósito de cuentas anuales', 'filing_compliance', ['INCUMPLIMIENTO_CUENTAS'],
+                 'Las cuentas anuales constan depositadas en plazo.'],
+                ['Estabilidad del órgano de administración', 'governance_volatility', ['ROTACION_ADMIN'],
+                 'Sin rotación anómala de administradores.'],
+                ['Capital social', 'capital_instability', ['DESCAPITALIZACION', 'REDUCCION_CAPITAL'],
+                 'Sin reducciones de capital repetidas.'],
+                ['Domicilio social', 'structural_volatility', ['CAMBIO_DOMICILIO'],
+                 'Sin cambios de domicilio repetidos.'],
+            ],
+        ];
+    }
+}
+
+/**
+ * Los eventos del motor que NINGUNA comprobación recoge.
+ *
+ * POR QUÉ HACE FALTA
+ * ------------------
+ * El bloque "Qué se ha comprobado" tiene nueve líneas fijas, y sus patrones no
+ * cubren todo lo que emite el motor: CAMBIO_OBJETO_SOCIAL, CAMBIO_ADMINISTRADOR,
+ * OTROS_INFORMATIVO y LEGAL_STATE_RECOVERED_RESOLVED se quedan fuera. Si la
+ * ficha se limitara a las nueve líneas, una empresa cuya única incidencia fuese
+ * un cambio de objeto social enseñaría nueve vistos verdes mientras el titular
+ * dice "1 incidencia registrada". La ficha se contradiría a sí misma.
+ *
+ * Así que el listado de arriba no se borra: se filtra. Lo que ya está contado
+ * abajo desaparece de ahí, y lo que no cabe en ninguna línea sigue saliendo.
+ *
+ * Se descartan además los códigos que no son una incidencia (la constitución de
+ * la sociedad, una ampliación de capital o un estado legal normal): están en la
+ * lista del motor como hechos, no como cargos, y pintarlos con su insignia de
+ * gravedad los convertiría en algo que no son.
+ */
+if (!function_exists('risk_eventos_sueltos')) {
+    function risk_eventos_sueltos(array $riskProfile): array
+    {
+        $flags = $riskProfile['data']['canonical_events'] ?? null;
+        if (!is_array($flags) || $flags === []) {
+            return [];
+        }
+
+        $tabla = risk_comprobaciones_tabla();
+
+        $cubiertos = [];
+        foreach ($tabla['graves'] as [$titulo, $patrones, $estados, $textoOk]) {
+            foreach ($patrones as $p) {
+                $cubiertos[] = $p;
+            }
+        }
+        foreach ($tabla['numericas'] as [$titulo, $clave, $patrones, $textoOk]) {
+            foreach ($patrones as $p) {
+                $cubiertos[] = $p;
+            }
+        }
+
+        // Hechos, no cargos: no tienen sitio en una lista de incidencias.
+        $noSonIncidencia = [
+            'LEGAL_STATE_NORMAL',
+            'CONSTITUCION_SOCIEDAD',
+            'AMPLIACION_CAPITAL',
+        ];
+
+        $sueltos = [];
+        foreach ($flags as $f) {
+            $codigo = strtoupper((string) ($f['code'] ?? ''));
+            if ($codigo === '' || in_array($codigo, $noSonIncidencia, true)) {
+                continue;
+            }
+
+            foreach ($cubiertos as $p) {
+                if (strpos($codigo, $p) !== false) {
+                    continue 2;
+                }
+            }
+
+            $sueltos[] = $f;
+        }
+
+        return $sueltos;
+    }
+}
+
+if (!function_exists('risk_comprobaciones')) {
+    function risk_comprobaciones(array $riskProfile): array
+    {
+        helper('risk_labels');
+
+        $data   = $riskProfile['data'] ?? [];
+        $dims   = is_array($data['dimensions'] ?? null) ? $data['dimensions'] : [];
+        $flags  = is_array($data['canonical_events'] ?? null) ? $data['canonical_events'] : [];
+        $estado = strtoupper((string) ($data['legal_state'] ?? 'NORMAL'));
+        $fuentes = is_array($data['data_sources'] ?? null) ? $data['data_sources'] : [];
+
+        /*
+         * El evento MÁS GRAVE cuyo código case con alguno de los patrones, no el
+         * primero de la lista. Con "el primero" mandaba el orden en que el motor
+         * hubiera serializado el JSON: una empresa con un concurso concluido y
+         * otro en curso podía enseñar el concluido y callarse el abierto.
+         *
+         * Devuelve [evento, cuántos han casado] para poder avisar de que hay más
+         * de un acto en el mismo apartado en vez de dejarlos invisibles.
+         */
+        $buscar = static function (array $patrones) use ($flags): array {
+            $mejor  = null;
+            $mejorG = -1;
+            $cuenta = 0;
+
+            foreach ($flags as $f) {
+                $codigo = strtoupper((string) ($f['code'] ?? ''));
+                foreach ($patrones as $p) {
+                    if (strpos($codigo, $p) === false) {
+                        continue;
+                    }
+
+                    $cuenta++;
+                    $g = risk_event_severidad($f);
+                    if ($g > $mejorG) {
+                        $mejorG = $g;
+                        $mejor  = $f;
+                    }
+                    break;
+                }
+            }
+
+            return [$mejor, $cuenta];
+        };
+
+        /** "…" + aviso de que hay más actos en el mismo apartado. */
+        $conResto = static function (string $texto, int $cuenta): string {
+            if ($cuenta <= 1) {
+                return $texto;
+            }
+
+            $mas = $cuenta - 1;
+            return $texto . ' (y ' . $mas . ($mas === 1 ? ' acto más' : ' actos más') . ' en este apartado).';
+        };
+
+        $tabla          = risk_comprobaciones_tabla();
+        $comprobaciones = [];
+
+        // --- Bloque 1: los hechos graves del Registro ---
+        foreach ($tabla['graves'] as [$titulo, $patrones, $estados, $textoOk]) {
+            [$evento, $cuantos] = $buscar($patrones);
+            $enEstado = false;
+            foreach (explode('|', $estados) as $e) {
+                if ($e !== '' && strpos($estado, $e) !== false) {
+                    $enEstado = true;
+                    break;
+                }
+            }
+
+            if ($evento || $enEstado) {
+                $comprobaciones[] = [
+                    'titulo'  => $titulo,
+                    'estado'  => 'incidencia',
+                    'detalle' => $evento
+                        ? $conResto((string) ($evento['description'] ?? risk_event_label($evento)), $cuantos)
+                        : 'Consta en el estado registral de la sociedad.',
+                ];
+            } else {
+                $comprobaciones[] = ['titulo' => $titulo, 'estado' => 'ok', 'detalle' => $textoOk];
+            }
+        }
+
+        // --- Bloque 2: las dimensiones con valor numérico ---
+        foreach ($tabla['numericas'] as [$titulo, $clave, $patrones, $textoOk]) {
+            if (!array_key_exists($clave, $dims)) {
+                // El perfil es de una versión que no calculaba esta dimensión.
+                // Fingir un visto aquí sería afirmar algo que no se ha mirado.
+                $comprobaciones[] = [
+                    'titulo' => $titulo, 'estado' => 'sin_datos',
+                    'detalle' => 'No disponible para esta empresa.',
+                ];
+                continue;
+            }
+
+            [$evento, $cuantos] = $buscar($patrones);
+            if ((float) $dims[$clave] > 0 || $evento) {
+                $comprobaciones[] = [
+                    'titulo'  => $titulo,
+                    'estado'  => 'incidencia',
+                    'detalle' => $evento
+                        ? $conResto((string) ($evento['description'] ?? risk_event_label($evento)), $cuantos)
+                        : 'Consta una incidencia en este apartado.',
+                ];
+            } else {
+                $comprobaciones[] = ['titulo' => $titulo, 'estado' => 'ok', 'detalle' => $textoOk];
+            }
+        }
+
+        // El depósito de cuentas es el único que puede no haberse podido mirar:
+        // si no consta el último ejercicio depositado, no se puede afirmar nada.
+        /*
+         * LO QUE NO PROCEDE NO SE MARCA COMO CORRECTO.
+         *
+         * En una sociedad extinguida, "Cierre de hoja registral — la hoja
+         * registral no consta cerrada" es literalmente cierto (no hay un acto de
+         * cierre en el BORME) y a la vez falso en lo que da a entender: con la
+         * extinción se cancelan los asientos (art. 396 RRM). Un visto verde ahí,
+         * al lado de la extinción en rojo, es afirmar algo que no se sostiene
+         * ante quien conoce el Registro — y ése es justo el cliente que paga.
+         *
+         * Tampoco vale la interrogación: "no se ha podido comprobar" no es lo
+         * que pasa. De ahí el cuarto estado.
+         *
+         * Se limita al cierre de hoja a propósito. "No consta disolución" en una
+         * extinguida también suena raro, pero ahí sí puede ser cierto: una
+         * sociedad absorbida en una fusión se extingue sin liquidación previa.
+         */
+        $extinguida = strpos($estado, 'EXTINTA') !== false;
+        if (!$extinguida) {
+            foreach ($comprobaciones as $c) {
+                if ($c['titulo'] === 'Extinción de la sociedad' && $c['estado'] === 'incidencia') {
+                    $extinguida = true;
+                    break;
+                }
+            }
+        }
+
+        if ($extinguida) {
+            foreach ($comprobaciones as $i => $c) {
+                if ($c['titulo'] === 'Cierre de hoja registral' && $c['estado'] === 'ok') {
+                    $comprobaciones[$i] = [
+                        'titulo'  => $c['titulo'],
+                        'estado'  => 'no_procede',
+                        'detalle' => 'La hoja se cancela con la extinción de la sociedad.',
+                    ];
+                }
+            }
+        }
+
+        if (($fuentes['accounts_status'] ?? '') === 'UNKNOWN') {
+            foreach ($comprobaciones as $i => $c) {
+                if ($c['titulo'] === 'Depósito de cuentas anuales' && $c['estado'] === 'ok') {
+                    $comprobaciones[$i] = [
+                        'titulo'  => $c['titulo'],
+                        'estado'  => 'sin_datos',
+                        'detalle' => 'No consta el último ejercicio depositado.',
+                    ];
+                }
+            }
+        }
+
+        /*
+         * Lo que importa, primero.
+         *
+         * La tabla está escrita en orden de gravedad del Registro, que es un
+         * orden lógico pero no el orden en que se lee. Con la rejilla a dos
+         * columnas, la única incidencia de una empresa podía caer cuarta en la
+         * columna derecha, rodeada de vistos verdes: lo único que el cliente
+         * necesita leer, en el sitio menos visible de todo el bloque.
+         *
+         * usort no es estable en PHP < 8.0; en 8.0+ sí lo es, así que dentro de
+         * cada grupo se conserva el orden de gravedad de la tabla.
+         */
+        /*
+         * Las no disponibles van al final, no en medio: una ficha antigua con
+         * cuatro dimensiones sin calcular abriría el bloque con cuatro
+         * interrogaciones grises, que es peor primera impresión que el propio
+         * cero que este bloque viene a arreglar. No se esconden —el pie las
+         * cuenta y siguen estando— pero no mandan.
+         */
+        $peso = ['incidencia' => 0, 'ok' => 1, 'no_procede' => 2, 'sin_datos' => 3];
+        usort(
+            $comprobaciones,
+            static fn ($a, $b) => ($peso[$a['estado']] ?? 3) <=> ($peso[$b['estado']] ?? 3)
+        );
+
+        return $comprobaciones;
+    }
+}
+
+/**
+ * Fecha del último acto del BORME procesado, para poder decir hasta dónde llegan
+ * los datos.
+ *
+ * Es global, no depende del usuario, así que es cacheable sin problema y no
+ * estropea la caché de las fichas. Una hora de TTL: el BORME se publica una vez
+ * al día, así que no hace falta más.
+ *
+ * Devuelve null si no se puede saber; quien llame debe callarse en ese caso, no
+ * inventarse una fecha.
+ */
+if (!function_exists('risk_datos_actualizados')) {
+    function risk_datos_actualizados(): ?string
+    {
+        $cache = \Config\Services::cache();
+        $clave = 'solvencia_ultimo_borme';
+
+        $valor = $cache->get($clave);
+        if ($valor !== null) {
+            return $valor === '' ? null : $valor;
+        }
+
+        try {
+            $fila = \Config\Database::connect()
+                ->table('borme_posts')
+                ->selectMax('borme_date', 'ultima')
+                ->get()->getRowArray();
+
+            $fecha = $fila['ultima'] ?? null;
+            $valor = $fecha ? date('d/m/Y', strtotime((string) $fecha)) : '';
+        } catch (\Throwable $e) {
+            log_message('error', '[risk_datos_actualizados] ' . $e->getMessage());
+            $valor = '';
+        }
+
+        $cache->save($clave, $valor, 3600);
+        return $valor === '' ? null : $valor;
     }
 }

@@ -39,56 +39,100 @@ foreach ($dims as $d) {
     }
 }
 
+/*
+ * EL COLOR LO DECIDE LA GRAVEDAD, NO EL RANKING.
+ *
+ * La barra dominante se pintaba en rojo SIEMPRE, porque "dominante" solo
+ * significa "la que más pesa de las seis" — aunque pese poco. El resultado se
+ * veía en crudo en una ficha con puntuación 5: círculo verde y etiqueta LEVE a
+ * la izquierda, y a diez centímetros una barra ROJA con la insignia FACTOR
+ * DOMINANTE por una dimensión que iba por 20 de 60. La misma pantalla decía
+ * "esto está bien" y "esto es grave".
+ *
+ * Se ata a la banda del semáforo, que es la que ya manda en el resto de la
+ * ficha (ver risk_level_visual): por debajo de A REVISAR, la dominante es la
+ * principal y se pinta en ámbar; de ahí en adelante, rojo.
+ */
+$bandaAlta = $dimScore >= (int) solvencia('umbralMedio', 30);
+
 $confianza = isset($dimData['confidence_score']) ? (int) $dimData['confidence_score'] : null;
 $calidad   = isset($dimData['data_quality_score']) ? (int) $dimData['data_quality_score'] : null;
 $conflicto = !empty($dimData['legal_evidence_conflict']);
 $modelo    = trim((string) ($dimData['model_version'] ?? ''));
+
+/*
+ * Las dimensiones a cero ocupaban lo mismo que las que explican el número:
+ * cinco filas con su barra gris para decir cinco veces "Sin incidencias",
+ * que es una línea de información. Se detalla lo que pesa y se agrupa lo
+ * limpio.
+ */
+$conPeso = [];
+$limpias = [];
+$credito = null;
+
+foreach ($dims as $d) {
+    if (!$d['suma']) {
+        $credito = $d;
+    } elseif (abs($d['valor']) > 0.01) {
+        $conPeso[] = $d;
+    } else {
+        $limpias[] = $d;
+    }
+}
+
+$enOrden = $conPeso;
+if ($credito !== null) {
+    $enOrden[] = $credito;
+}
+
+/*
+ * CUANDO NO HAY NADA QUE DESGLOSAR, ESTA CAJA ESTORBA.
+ *
+ * En el 79 % de las fichas la puntuación es 0 y ninguna dimensión pesa. Ahí
+ * esta caja se quedaba diciendo tres cosas y las tres restaban:
+ *
+ *   - "DE DÓNDE SALE EL 0" y debajo "Factores estabilizadores −15". La
+ *     aritmética no cuadra a la vista (0 − 15 no es 0) porque el crédito se
+ *     corta en el suelo y no restó nada; pintarlo con su barra verde sugiere
+ *     un margen ganado que no existe.
+ *   - Un párrafo explicando que "una única incidencia seria puede sostener un
+ *     riesgo alto": un mecanismo que aquí no opera, y que deja al lector
+ *     buscando el riesgo alto del que le hablan.
+ *   - "Sin incidencias en situación registral, depósito de cuentas..." que es
+ *     lo mismo que dicen, mejor, las nueve líneas del bloque de abajo.
+ *
+ * Lo único que sí informa en ese caso son la cobertura y la confianza. Así que
+ * cuando no hay nada que desglosar la caja se reduce a eso y el bloque de
+ * comprobaciones pasa a ser el contenido de la columna.
+ */
+$sinNada = ($dimScore <= 0 && empty($conPeso));
 ?>
 
 <div style="margin-top: 28px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 22px 24px;">
 
     <div style="display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 6px;">
         <h4 style="font-size: 1.05rem; font-weight: 900; color: #0f172a; margin: 0; text-transform: uppercase; letter-spacing: -0.2px;">
-            De dónde sale el <?= $dimScore ?>
+            <?= $sinNada ? 'Calidad del dato' : 'De dónde sale el ' . $dimScore ?>
         </h4>
         <?php if ($modelo !== ''): ?>
             <span style="font-size: 0.7rem; color: #94a3b8; font-weight: 600;">Modelo <?= esc($modelo) ?></span>
         <?php endif; ?>
     </div>
 
-    <p style="margin: 0 0 18px 0; font-size: 0.86rem; color: #64748b; line-height: 1.5;">
-        La puntuación no es la suma de las seis dimensiones: manda la más grave, y las demás
-        añaden solo una parte del margen que queda. Por eso una única incidencia seria puede
-        sostener un riesgo alto aunque el resto esté limpio.
-    </p>
+    <?php if ($sinNada): ?>
+        <p style="margin: 0; font-size: 0.86rem; color: #64748b; line-height: 1.5;">
+            No consta ningún hecho que puntúe. Lo que sigue dice hasta dónde llega la
+            información con la que se ha comprobado.
+        </p>
+    <?php else: ?>
+        <p style="margin: 0 0 18px 0; font-size: 0.86rem; color: #64748b; line-height: 1.5;">
+            La puntuación no es la suma de las seis dimensiones: manda la más grave, y las demás
+            añaden solo una parte del margen que queda. Por eso una única incidencia seria puede
+            sostener un riesgo alto aunque el resto esté limpio.
+        </p>
+    <?php endif; ?>
 
-    <?php
-    /*
-     * Las dimensiones a cero ocupaban lo mismo que las que explican el número:
-     * cinco filas con su barra gris para decir cinco veces "Sin incidencias",
-     * que es una línea de información. Se detalla lo que pesa y se agrupa lo
-     * limpio, con el detalle a un clic para quien quiera comprobarlo.
-     */
-    $conPeso  = [];
-    $limpias  = [];
-    $credito  = null;
-
-    foreach ($dims as $d) {
-        if (!$d['suma']) {
-            $credito = $d;
-        } elseif (abs($d['valor']) > 0.01) {
-            $conPeso[] = $d;
-        } else {
-            $limpias[] = $d;
-        }
-    }
-
-    $enOrden = $conPeso;
-    if ($credito !== null) {
-        $enOrden[] = $credito;
-    }
-    ?>
-
+    <?php if (!$sinNada): ?>
     <div style="display: flex; flex-direction: column; gap: 13px;">
         <?php foreach ($enOrden as $d): ?>
             <?php
@@ -99,9 +143,12 @@ $modelo    = trim((string) ($dimData['model_version'] ?? ''));
             if ($esCredito) {
                 $barra = '#16a34a';
             } elseif ($esDominante) {
-                $barra = '#b91c1c';
+                // Rojo solo si el conjunto llega a A REVISAR. Ver la nota de arriba.
+                $barra = $bandaAlta ? '#b91c1c' : '#f59e0b';
             } elseif ($activa) {
-                $barra = '#f59e0b';
+                // Si la dominante ya va en ámbar, las demás bajan un escalón para
+                // que se siga viendo cuál manda.
+                $barra = $bandaAlta ? '#f59e0b' : '#cbd5e1';
             } else {
                 $barra = '#e2e8f0';
             }
@@ -111,8 +158,11 @@ $modelo    = trim((string) ($dimData['model_version'] ?? ''));
                     <div style="font-size: 0.88rem; font-weight: 800; color: <?= $activa ? '#0f172a' : '#94a3b8' ?>;">
                         <?= esc($d['titulo']) ?>
                         <?php if ($esDominante): ?>
-                            <span style="margin-left: 6px; background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; font-size: 0.62rem; font-weight: 900; padding: 2px 7px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.4px; vertical-align: middle;">
-                                Factor dominante
+                            <?php /* "Dominante" en rojo sobre una puntuación de 5 es una
+                                     alarma por algo que la propia ficha acaba de llamar
+                                     menor. En la banda baja es la principal, y en ámbar. */ ?>
+                            <span style="margin-left: 6px; background: <?= $bandaAlta ? '#fef2f2' : '#fffbeb' ?>; border: 1px solid <?= $bandaAlta ? '#fecaca' : '#fde68a' ?>; color: <?= $bandaAlta ? '#b91c1c' : '#b45309' ?>; font-size: 0.62rem; font-weight: 900; padding: 2px 7px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.4px; vertical-align: middle;">
+                                <?= $bandaAlta ? 'Factor dominante' : 'Factor principal' ?>
                             </span>
                         <?php endif; ?>
                     </div>
@@ -146,38 +196,28 @@ $modelo    = trim((string) ($dimData['model_version'] ?? ''));
                 $limpias
             );
             ?>
-            <!-- <details>, sin JS: este bloque puede llegar por innerHTML y ahí un
-                 <script> no se ejecutaría, pero los <style> y el toggle nativo sí.
-                 `list-style:none` solo quita el triángulo en Firefox; en WebKit
-                 hace falta el pseudo-elemento, de ahí la regla. -->
-            <style>.risk-dim-limpias > summary::-webkit-details-marker { display: none; }
-                   .risk-dim-limpias[open] > summary .risk-dim-ver { display: none; }</style>
-            <details class="risk-dim-limpias" style="border-top: 1px solid #f1f5f9; padding-top: 12px;">
-                <summary style="cursor: pointer; list-style: none; font-size: 0.8rem; color: #475569; line-height: 1.45;">
-                    <strong style="color: #16a34a;">Sin incidencias</strong>
-                    en <?= esc(company_lista_natural($nombresLimpios)) ?>.
-                    <span class="risk-dim-ver" style="color: #2563eb; font-weight: 700; white-space: nowrap;">Ver detalle</span>
-                </summary>
-
-                <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 11px;">
-                    <?php foreach ($limpias as $d): ?>
-                        <div>
-                            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px;">
-                                <div style="font-size: 0.82rem; font-weight: 700; color: #94a3b8;"><?= esc($d['titulo']) ?></div>
-                                <div style="flex-shrink: 0; font-size: 0.78rem; font-weight: 800; color: #cbd5e1;">
-                                    0 <span style="color: #94a3b8; font-weight: 600;">/ <?= (int) $d['tope'] ?></span>
-                                </div>
-                            </div>
-                            <div style="height: 6px; background: #f1f5f9; border-radius: 999px;"></div>
-                            <div style="margin-top: 4px; font-size: 0.74rem; color: #a3adbb; line-height: 1.4;">
-                                <?= esc($d['explica']) ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            </details>
+            <?php
+            /*
+             * UNA LÍNEA, SIN DESPLEGABLE.
+             *
+             * Esto era un <details> que abría las dimensiones limpias con su
+             * barra a 0/tope. Tenía sentido cuando era el único sitio donde se
+             * podía comprobar que lo demás estaba limpio; desde que existe el
+             * bloque "Qué se ha comprobado", justo debajo, el "Ver detalle"
+             * lleva a una versión peor de lo que el usuario ya tiene delante:
+             * cuatro barras vacías frente a nueve líneas con su resultado.
+             *
+             * La frase sí se queda, porque aquí cumple otra función: explica
+             * por qué la puntuación no sube más, que es de lo que va esta caja.
+             */
+            ?>
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 12px; font-size: 0.8rem; color: #475569; line-height: 1.45;">
+                <strong style="color: #16a34a;">Sin incidencias</strong>
+                en <?= esc(company_lista_natural($nombresLimpios)) ?>.
+            </div>
         <?php endif; ?>
     </div>
+    <?php endif; ?>
 
     <?php if ($conflicto): ?>
         <!-- El motor marca esto cuando el estado oficial y los actos del BORME se
@@ -191,7 +231,9 @@ $modelo    = trim((string) ($dimData['model_version'] ?? ''));
     <?php endif; ?>
 
     <?php if ($confianza !== null || $calidad !== null): ?>
-        <div style="margin-top: 16px; border-top: 1px solid #f1f5f9; padding-top: 13px; display: flex; flex-wrap: wrap; gap: 22px; font-size: 0.79rem; color: #64748b;">
+        <?php /* Sin desglose encima no hay nada que separar, así que la línea
+                 divisoria sobra y la caja queda de dos líneas. */ ?>
+        <div style="margin-top: <?= $sinNada ? '14px' : '16px' ?>; <?= $sinNada ? '' : 'border-top: 1px solid #f1f5f9; padding-top: 13px;' ?> display: flex; flex-wrap: wrap; gap: 22px; font-size: 0.79rem; color: #64748b;">
             <?php if ($calidad !== null): ?>
                 <div>
                     <strong style="color: #0f172a;">Cobertura del dato:</strong> <?= $calidad ?>%

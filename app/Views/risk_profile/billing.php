@@ -563,21 +563,52 @@ $eurosLargo = static fn (float $n): string => number_format($n, 2, ',', '.');
                     </div>
                 </div>
 
-                <!-- TESTIMONIO SOLVENCIA -->
+                <?php
+                /*
+                 * Aquí había un testimonio firmado —"Marcos G. · Director Financiero"—
+                 * con cinco estrellas y una cita sobre 15.000 € y un concurso. No era
+                 * de ningún cliente. Una reseña inventada presentada como real está
+                 * prohibida en la ley de consumo española desde la trasposición de
+                 * 2021, y estaba en la pantalla del cobro, que es el peor sitio.
+                 *
+                 * Lo sustituye lo único que a estas alturas puede dar confianza de
+                 * verdad: de dónde salen los datos y hasta qué día llegan. Es
+                 * comprobable, y contesta la pregunta que se hace quien llega aquí
+                 * —"¿esto está vivo?"— mucho mejor que una cita anónima.
+                 */
+                $actualizado = risk_datos_actualizados();
+                ?>
+                <!-- DE DÓNDE SALEN LOS DATOS -->
                 <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px;">
-                    <div style="display:flex; gap: 3px; color: #fbbf24; margin-bottom: 10px;">
-                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <div style="font-size: 0.78rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">
+                        De dónde sale la información
                     </div>
-                    <p style="font-size: 0.88rem; color: #1e293b; margin: 0 0 10px; line-height: 1.5; font-style: italic;">
-                        "Detectamos a tiempo que un nuevo cliente que nos pedía 15.000€ a 60 días tenía incidencias en el BORME. Exigimos pago al contado y a los 2 meses entraron en concurso. Esta herramienta nos ha salvado la cuenta de resultados."
-                    </p>
-                    <div style="font-size: 0.8rem; color: #64748b; font-weight: 700;">
-                        Marcos G. · Director Financiero (Distribución B2B)
+
+                    <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px;">
+                        <span style="color: #2563eb; flex-shrink: 0; margin-top: 2px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"></path></svg>
+                        </span>
+                        <p style="margin: 0; font-size: 0.85rem; color: #334155; line-height: 1.5;">
+                            <strong>Boletín Oficial del Registro Mercantil</strong> y estado registral
+                            de la sociedad. Fuentes oficiales, no estimaciones.
+                        </p>
                     </div>
+
+                    <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px;">
+                        <span style="color: #2563eb; flex-shrink: 0; margin-top: 2px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 14"></polyline></svg>
+                        </span>
+                        <p style="margin: 0; font-size: 0.85rem; color: #334155; line-height: 1.5;">
+                            Se revisa <strong>todos los días</strong>. Si publican algo de una empresa
+                            que vigilas, te llega un correo ese mismo día.
+                        </p>
+                    </div>
+
+                    <?php if ($actualizado !== null): ?>
+                        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b;">
+                            📅 Último BORME procesado: <strong style="color: #0f172a;"><?= esc($actualizado) ?></strong>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
