@@ -232,14 +232,17 @@
             border-collapse: collapse;
             margin-bottom: 20px;
         }
+        /* Mismo aire que en el dictamen: sin padding vertical los paneles quedan
+           pegados a la cabecera de la sección. */
         .ies-score-col {
             width: 35%;
             vertical-align: top;
-            padding-right: 20px;
+            padding: 12px 20px 12px 14px;
         }
         .ies-factors-col {
             width: 65%;
             vertical-align: top;
+            padding: 12px 14px 12px 0;
         }
         .ies-score-box {
             background-color: #f8fafc;
@@ -669,13 +672,22 @@
                         </div>
                     </td>
                     <td class="ies-factors-col">
-                        <div style="font-size: 10pt; font-weight: bold; color: #0f172a; margin-bottom: 5px; text-transform: uppercase;">Factores Analizados</div>
-                        <div style="font-size: 8pt; color: #64748b; margin-bottom: 15px;">Evaluación automática de los principales indicadores de estabilidad corporativa.</div>
-                        
-                        <?php 
-                        $flags = $riskProfile['data']['canonical_events'] ?? $riskProfile['data']['flags'] ?? [];
+                        <div style="font-size: 10pt; font-weight: bold; color: #0f172a; margin-bottom: 9px; text-transform: uppercase;">Qué se ha comprobado</div>
+
+                        <?= view('partials/company_risk_comprobaciones_pdf', ['riskProfile' => $riskProfile]) ?>
+
+                        <?php
+                        /*
+                         * Solo los actos que ninguna comprobación recoge. Ver la nota
+                         * larga en `risk_eventos_sueltos()`: filtrar y no borrar es lo
+                         * que evita que una empresa cuya única incidencia sea un cambio
+                         * de objeto social salga con nueve vistos verdes mientras la
+                         * portada anuncia una incidencia.
+                         */
+                        $flags = risk_eventos_sueltos($riskProfile);
                         ?>
                         <?php if (!empty($flags)): ?>
+                            <div style="font-size: 9pt; font-weight: bold; color: #0f172a; text-transform: uppercase; margin: 14px 0 6px 0;">Otros actos registrales</div>
                             <?php foreach ($flags as $flag): ?>
                                 <?php 
                                 /*
@@ -739,18 +751,11 @@
                                     </tr>
                                 </table>
                             <?php endforeach; ?>
-                        <?php else: ?>
-                            <table class="ies-factor-card">
-                                <tr>
-                                    <td class="ies-factor-icon">
-                                        <div class="ies-factor-icon-circle" style="background-color: #16a34a;"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAYAAABV7bNHAAAE9klEQVR42u2bTYgcVRDH/693VtGYoMZAQozJISriQQkYggZPInpaxEWCoIJCQIyaSw5BiKKXHPRgQDwEJAdBQlBkEEEvQVQW9RC/UBc1QaIbBQ0i7qpxpn9e6mGlmdmdmX6TnZ7tgmZmmf5479fV9a+q1yvVVltttdVWW21jamHcJwgEm2ecK5IIIbCi7zwQgMYivzcM3srzICALIeTu7+slXS0pkzQnaTaE0Oq070rwnMw+J4EngE+BFv9bDnwDPAWstn0nVhqczcAM51vbNm9fATf7Y8cajsWddcB3BuCcQck7wDpn338FrhtrSAZmwgLvcQdnKYv7fGzHji2ghn0esQn/S+8W95325xonOJP2eaAPzykCyoHm2AVs5zkPFCbbj8XAfcrBDuME53bzmtYAcHDH/AZcUQSUVRTORAihBWyV9IakyUI5MYj9Y9t5llUQTiYpBy6X1JS0VlK7xFxyq89OhhAWLLOmkoAKhecxSTdIakkqE1ix8zWr/FQV487hAeS8W4DOLf5cZflUqCqcqDD7B5TzTsE5Ar6v0hLvPGdXCTnvlkUfqHSCGO8qcCvwd5faigGSQ4AjVYcTq/MtwC+FxK4snONWf00kiTtWLTcKWzZMOBY01wCf26RaJeHE42eBK+38WZKBLvF7lhhOrM4D8HZixTprHcaegnKjh4y1bd9vknSbpC0xsZL0YQjhy+K+CSxmyi9LuttynTJxArdNhxBmgUZsu5YNjrcA73QJjG3gLdeVayTwnijn+xLJufe+h5OM08F5yA0w5g1+i7bgconJBHI+PQQ5f67s+Ipw7uqQUC12dwDuH3QQ7rrbgb8Sy/mr8QaUUqyYagOrgR/7UA7fEH+kXzd2cr4JmEsk53Hc79sKR3k5dy7+6ADKkbtJ7ekVUpRaYBVwIrGcfw+sS9aQd3fyXZtwa4D6Jh6zbym39qufQDOxnP8O3JisxoqTMHc8VcLNPaSnF4Pk4BxKBCd3ncU7k5YRDtAq4EyhHVmmUj4Y76KH5ODsTQTHn2N38hrLAZqwVDxl3fNioXyIcKYSynnxhkwqtTmpPdaDvPc78MMFz9kGzCeW86NJ5LwHQFMJ3d4nazEfWQ+cTiznM8DFS9WO/VroomRB0geSdiSog6LF8xyVtFHSTmu2l1GY3HrIP0jaEUL4OfXrLN0AIWmrpBm3apCiHZm7pjgll2kihAVJO0MInyUumDt38I1+CCF8K+kOST8ZnHai67VtcmXgxMo8k7TL4DRSw+k1Hl0LnEwck1IF/seWtWXqFGcz8PWIQIoB/4WR6Cc7T9pgr7MtJ6R43deHKuclIK0FPlomSFHOPwEuSS3nKSGtAd67wJBirnQa2JisOh/iMsyl1oZN1RLtpY0yD2wb+RVQB+ki4M0he5Ivd6Yqs8jnis4MeG2IkOI59w6tAB0ypOhNrwzhcYtwDlV2edivTAIvDaGv0xwpOS+zCmrfn0/Q34lyfsKadxlVf3+5AOnZBG+czgGbRlbOS0CKpcl+5w15H3Datia2feTlPAGkJx2kdg9w4qN1b2WD8gBF7u5C4I3t1dwlgD6oPz72cDpAusetknSzs8CDKwZOh/ptPfCMKdMf9jj9CXwBHASuGdWYEy4EJN/pAzZIukzSvKQz8aXtYbRLKxm8Oz2KoyzlYTlguevW/55dW2211VZbbbXVVls17T8oyMSE0tREOwAAAABJRU5ErkJggg==" width="16" height="16" alt="Favorable"></div>
-                                    </td>
-                                    <td class="ies-factor-text">
-                                        <div style="font-size: 9pt; font-weight: bold; color: #0f172a; margin-bottom: 2px;">Sin eventos de riesgo detectados</div>
-                                        <div style="font-size: 8pt; color: #64748b;">No se han detectado eventos societarios que indiquen riesgo a corto plazo.</div>
-                                    </td>
-                                </tr>
-                            </table>
+                        <?php /* Fuera la tarjeta "Sin eventos de riesgo detectados": el
+                                 bloque de comprobaciones ya lo dice con nueve líneas, y
+                                 desde que esta lista solo trae los actos NO cubiertos el
+                                 `else` saltaría en casi todas las fichas, también en las
+                                 que sí tienen incidencias. */ ?>
                         <?php endif; ?>
                     </td>
                 </tr>

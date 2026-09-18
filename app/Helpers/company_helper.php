@@ -1079,15 +1079,27 @@ if (!function_exists('risk_comprobaciones')) {
 if (!function_exists('risk_datos_actualizados')) {
     function risk_datos_actualizados(): ?string
     {
-        $cache = \Config\Services::cache();
+        /*
+         * TODO dentro del try, no solo la consulta.
+         *
+         * La primera versión dejaba fuera `Services::cache()`, `$cache->get()` y
+         * `$cache->save()`. La función prometía devolver null si algo fallaba,
+         * pero un driver de caché caído —Redis sin responder, el directorio de
+         * caché sin permisos de escritura tras un despliegue— lanzaba desde esas
+         * líneas y se llevaba por delante la ficha entera y la generación del
+         * PDF. Un adorno del pie no puede tumbar el documento que el cliente ha
+         * pagado.
+         */
         $clave = 'solvencia_ultimo_borme';
 
-        $valor = $cache->get($clave);
-        if ($valor !== null) {
-            return $valor === '' ? null : $valor;
-        }
-
         try {
+            $cache = \Config\Services::cache();
+
+            $valor = $cache->get($clave);
+            if ($valor !== null) {
+                return $valor === '' ? null : $valor;
+            }
+
             $fila = \Config\Database::connect()
                 ->table('borme_posts')
                 ->selectMax('borme_date', 'ultima')
@@ -1095,12 +1107,68 @@ if (!function_exists('risk_datos_actualizados')) {
 
             $fecha = $fila['ultima'] ?? null;
             $valor = $fecha ? date('d/m/Y', strtotime((string) $fecha)) : '';
+
+            $cache->save($clave, $valor, 3600);
         } catch (\Throwable $e) {
             log_message('error', '[risk_datos_actualizados] ' . $e->getMessage());
-            $valor = '';
+            return null;
         }
 
-        $cache->save($clave, $valor, 3600);
         return $valor === '' ? null : $valor;
+    }
+}
+
+/**
+ * El tick verde de los PDF, como PNG embebido.
+ *
+ * NO puede ser un carácter. Helvetica —fuente core del PDF— es Latin-1 y no trae
+ * U+2713, así que Dompdf lo pinta como "?": un interrogante en verde justo donde
+ * hay que decir "esto está bien". En este montaje Dompdf tampoco resuelve DejaVu.
+ * Un PNG embebido no depende de la fuente, ni de la cascada, ni de la versión.
+ *
+ * La "!" y la "?" sí existen en Helvetica y van como texto.
+ */
+if (!function_exists('risk_pdf_tick')) {
+    function risk_pdf_tick(): string
+    {
+        return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAYAAABV7bNHAAAE9klEQVR42u2bTYgcVRDH/693VtGYoMZAQozJISriQQkYggZPInpaxEWCoIJCQIyaSw5BiKKXHPRgQDwEJAdBQlBkEEEvQVQW9RC/UBc1QaIbBQ0i7qpxpn9e6mGlmdmdmX6TnZ7tgmZmmf5479fV9a+q1yvVVltttdVWW21jamHcJwgEm2ecK5IIIbCi7zwQgMYivzcM3srzICALIeTu7+slXS0pkzQnaTaE0Oq070rwnMw+J4EngE+BFv9bDnwDPAWstn0nVhqczcAM51vbNm9fATf7Y8cajsWddcB3BuCcQck7wDpn338FrhtrSAZmwgLvcQdnKYv7fGzHji2ghn0esQn/S+8W95325xonOJP2eaAPzykCyoHm2AVs5zkPFCbbj8XAfcrBDuME53bzmtYAcHDH/AZcUQSUVRTORAihBWyV9IakyUI5MYj9Y9t5llUQTiYpBy6X1JS0VlK7xFxyq89OhhAWLLOmkoAKhecxSTdIakkqE1ix8zWr/FQV487hAeS8W4DOLf5cZflUqCqcqDD7B5TzTsE5Ar6v0hLvPGdXCTnvlkUfqHSCGO8qcCvwd5faigGSQ4AjVYcTq/MtwC+FxK4snONWf00kiTtWLTcKWzZMOBY01wCf26RaJeHE42eBK+38WZKBLvF7lhhOrM4D8HZixTprHcaegnKjh4y1bd9vknSbpC0xsZL0YQjhy+K+CSxmyi9LuttynTJxArdNhxBmgUZsu5YNjrcA73QJjG3gLdeVayTwnijn+xLJufe+h5OM08F5yA0w5g1+i7bgconJBHI+PQQ5f67s+Ipw7uqQUC12dwDuH3QQ7rrbgb8Sy/mr8QaUUqyYagOrgR/7UA7fEH+kXzd2cr4JmEsk53Hc79sKR3k5dy7+6ADKkbtJ7ekVUpRaYBVwIrGcfw+sS9aQd3fyXZtwa4D6Jh6zbym39qufQDOxnP8O3JisxoqTMHc8VcLNPaSnF4Pk4BxKBCd3ncU7k5YRDtAq4EyhHVmmUj4Y76KH5ODsTQTHn2N38hrLAZqwVDxl3fNioXyIcKYSynnxhkwqtTmpPdaDvPc78MMFz9kGzCeW86NJ5LwHQFMJ3d4nazEfWQ+cTiznM8DFS9WO/VroomRB0geSdiSog6LF8xyVtFHSTmu2l1GY3HrIP0jaEUL4OfXrLN0AIWmrpBm3apCiHZm7pjgll2kihAVJO0MInyUumDt38I1+CCF8K+kOST8ZnHai67VtcmXgxMo8k7TL4DRSw+k1Hl0LnEwck1IF/seWtWXqFGcz8PWIQIoB/4WR6Cc7T9pgr7MtJ6R43deHKuclIK0FPlomSFHOPwEuSS3nKSGtAd67wJBirnQa2JisOh/iMsyl1oZN1RLtpY0yD2wb+RVQB+ki4M0he5Ivd6Yqs8jnis4MeG2IkOI59w6tAB0ypOhNrwzhcYtwDlV2edivTAIvDaGv0xwpOS+zCmrfn0/Q34lyfsKadxlVf3+5AOnZBG+czgGbRlbOS0CKpcl+5w15H3Datia2feTlPAGkJx2kdg9w4qN1b2WD8gBF7u5C4I3t1dwlgD6oPz72cDpAusetknSzs8CDKwZOh/ptPfCMKdMf9jj9CXwBHASuGdWYEy4EJN/pAzZIukzSvKQz8aXtYbRLKxm8Oz2KoyzlYTlguevW/55dW2211VZbbbXVVls17T8oyMSE0tREOwAAAABJRU5ErkJggg==';
+    }
+}
+
+/**
+ * Tick VERDE sobre transparente, para listas largas.
+ *
+ * El de `risk_pdf_tick()` es blanco, así que obliga a un círculo verde sólido
+ * debajo para que se vea. Con una o dos tarjetas queda bien; con nueve seguidas
+ * es una columna de manchas verdes que aplasta el texto que hay al lado.
+ *
+ * Éste va suelto, sin círculo. Además está centrado de verdad en su lienzo: el
+ * blanco tiene 9 px de margen arriba y 12 abajo sobre 72, y por eso se veía
+ * siempre un poco alto.
+ */
+if (!function_exists('risk_pdf_tick_verde')) {
+    function risk_pdf_tick_verde(): string
+    {
+        return 'data:image/png;base64,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';
+    }
+}
+
+/**
+ * El isotipo de APIEmpresas para los PDF: cuadrado redondeado con el degradado
+ * azul->verde y el visto blanco, igual que el de la cabecera del sitio.
+ *
+ * Va como PNG y no como el SVG original porque Dompdf no dibuja degradados
+ * lineales ni filtros: el mismo SVG que se ve en la web saldría plano o
+ * directamente en negro. Está rasterizado desde ese SVG a 128 px con
+ * supermuestreo, así que aguanta bien a los 34 px a los que se usa.
+ *
+ * El brillo radial del original se ha dejado fuera a propósito: a ese tamaño no
+ * se aprecia y al rasterizarlo lavaba el centro, rompiendo la transición de
+ * color que es lo que identifica la marca.
+ */
+if (!function_exists('risk_pdf_logo')) {
+    function risk_pdf_logo(): string
+    {
+        return 'data:image/png;base64,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';
     }
 }

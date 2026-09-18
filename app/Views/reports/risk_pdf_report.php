@@ -9,14 +9,17 @@
     $brandName = $brandName ?? 'APIEmpresas';
     $brandFooterText = $brandFooterText ?? 'Datos que impulsan decisiones';
     
-    // Check default logo if none provided
-    if (empty($brandLogoBase64)) {
-        $baseDir = defined('FCPATH') ? FCPATH : (dirname(__DIR__, 3) . '/public/');
-        $defaultLogoFile = $baseDir . 'images/logo.png';
-        if (file_exists($defaultLogoFile)) {
-            $brandLogoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($defaultLogoFile));
-        }
-    }
+    /*
+     * Ya NO se rellena $brandLogoBase64 con public/images/logo.png.
+     *
+     * Esa variable significa "logotipo del comprador" (marca blanca). Meterle el
+     * nuestro por defecto hacía dos cosas mal: el informe de APIEmpresas salía
+     * con un logotipo distinto al de la web, y además entraba por la rama de
+     * marca blanca, así que la marca propia nunca se pintaba.
+     *
+     * Ahora la variable se queda vacía cuando no hay comprador, y la cabecera
+     * dibuja el isotipo y el logotipo de APIEmpresas (ver risk_pdf_logo).
+     */
 
     // Score & Severity config.
     // El corte de ALTO era 70 aquí y 60 en el motor: el PDF de pago podía decir
@@ -64,9 +67,18 @@
             size: A4 portrait;
         }
 
-        /* Banda fija: se repite en TODAS las páginas. Lleva la empresa además del
-           número de página porque una hoja suelta de un expediente tiene que poder
-           identificarse sin la primera. Dompdf resuelve counter(page)/counter(pages). */
+        /* Banda fija: se repite en TODAS las páginas, para que una hoja suelta de un
+           expediente pueda identificarse sin tener la primera delante.
+
+           SIN NUMERACIÓN, y es una renuncia deliberada. `counter(pages)` lo resuelve
+           Dompdf preguntándole al lienzo cuántas páginas lleva, y en este montaje
+           devuelve 0: imprimía "Página 1 de 0". Moverla al final del <body> —el
+           remedio habitual, porque un elemento fijo colocado antes del contenido se
+           pinta con el contador aún a cero— tampoco bastó. La alternativa sería
+           estamparla desde Company.php con la API del lienzo después de render(),
+           pero eso saca el pie de la plantilla y lo parte en dos sitios. Un número
+           de página equivocado es peor que ninguno en un documento que se adjunta
+           a un expediente. */
         .page-strip {
             position: fixed;
             bottom: -30px;
@@ -74,9 +86,6 @@
             right: 0;
             font-size: 6.6pt;
             color: #94a3b8;
-        }
-        .page-strip-num:after {
-            content: counter(page) " de " counter(pages);
         }
         * {
             box-sizing: border-box;
@@ -254,15 +263,23 @@
             border-collapse: collapse;
             margin-bottom: 14px;
         }
+        /* Las dos columnas no tenían ningún padding vertical, y la tabla va pegada
+           a la barra oscura de la sección (border-top: none). Resultado: el borde
+           de los paneles tocaba la barra. Los 16px del .panel-box son padding
+           INTERIOR, así que no separaban nada. El aire tiene que estar aquí. */
+        /* Y lo mismo a los lados: la columna izquierda no tenía padding-left y la
+           derecha no tenía padding-right, así que los paneles iban pegados al
+           borde de la caja de la sección. El hueco entre columnas (12 + 6) ya
+           estaba; faltaban los dos extremos. */
         .score-col {
             width: 34%;
             vertical-align: top;
-            padding-right: 12px;
+            padding: 13px 12px 13px 14px;
         }
         .factors-col {
             width: 66%;
             vertical-align: top;
-            padding-left: 6px;
+            padding: 13px 14px 13px 6px;
         }
 
         .panel-box {
@@ -492,16 +509,6 @@
 <body>
 
 <?php $pdfRef = strtoupper(substr(md5(($company['id'] ?? '1') . '-' . date('Ymd')), 0, 10)); ?>
-<table class="page-strip" cellpadding="0" cellspacing="0" style="width: 100%;">
-    <tr>
-        <td style="text-align: left;">
-            <?= esc($companyNamePdf) ?> &nbsp;&bull;&nbsp; <?= esc($company['cif'] ?? $company['nif'] ?? '') ?>
-            &nbsp;&bull;&nbsp; Ref: <?= esc($pdfRef) ?>
-        </td>
-        <td style="text-align: right;">Página <span class="page-strip-num"></span></td>
-    </tr>
-</table>
-
 
     <!-- HEADER -->
     <table class="header-table">
@@ -513,12 +520,31 @@
                         INFORMACIÓN EMPRESARIAL DE CONFIANZA
                     </div>
                 <?php else: ?>
-                    <div style="font-size: 18pt; font-weight: bold; color: #0b1c40; line-height: 1;">
-                        API<span style="color: #2563eb;">Empresas</span>
-                    </div>
-                    <div style="font-size: 6pt; color: #64748b; letter-spacing: 1.5px; margin-top: 3px; font-weight: bold; text-transform: uppercase;">
-                        INFORMACIÓN EMPRESARIAL DE CONFIANZA
-                    </div>
+                    <?php /* Tabla y no inline-block: Dompdf no alinea inline-block de
+                             forma fiable, y el isotipo se iba de línea respecto al
+                             texto. Con `vertical-align: middle` en las celdas, no. */ ?>
+                    <table cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+                        <tr>
+                            <td style="width: 42px; vertical-align: middle; padding: 0;">
+                                <img src="<?= risk_pdf_logo() ?>" width="34" height="34" alt="APIEmpresas">
+                            </td>
+                            <td style="vertical-align: middle; padding: 0 0 0 2px;">
+                                <div style="font-size: 16pt; font-weight: bold; color: #0b1c40; line-height: 1.05;">
+                                    API<span style="color: #2563eb;">Empresas</span>.es
+                                </div>
+                                <?php /* El mismo eslogan que la cabecera del sitio, y con su
+                                         misma caja: ni versalitas ni interletraje. Que el
+                                         informe y la web digan lo mismo con las mismas
+                                         palabras es parte de que parezcan la misma empresa.
+                                         (La rama de marca blanca de arriba conserva el texto
+                                         genérico: bajo el logotipo del comprador, nuestro
+                                         eslogan estaría firmando su informe.) */ ?>
+                                <div style="font-size: 7pt; color: #64748b; margin-top: 2px;">
+                                    La suite de inteligencia empresarial
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
                 <?php endif; ?>
             </td>
             <td class="info-section">
@@ -669,18 +695,37 @@
             <!-- RIGHT: FACTORS ANALYZED -->
             <td class="factors-col">
                 <div class="panel-box">
-                    <div style="font-size: 10.5pt; font-weight: bold; color: #0b1c40; text-transform: uppercase; margin-bottom: 2px;">
-                        FACTORES ANALIZADOS
-                    </div>
-                    <div style="font-size: 7.6pt; color: #64748b; margin-bottom: 12px;">
-                        Evaluación automática de los principales indicadores de estabilidad corporativa.
+                    <div style="font-size: 10.5pt; font-weight: bold; color: #0b1c40; text-transform: uppercase; margin-bottom: 7px;">
+                        QUÉ SE HA COMPROBADO
                     </div>
 
-                    <?php 
-                    $flags = $riskProfile['data']['canonical_events'] ?? $riskProfile['data']['flags'] ?? [];
+                    <?= view('partials/company_risk_comprobaciones_pdf', ['riskProfile' => $riskProfile]) ?>
+
+                    <?php
+                    /*
+                     * LOS ACTOS QUE NINGUNA COMPROBACIÓN RECOGE.
+                     *
+                     * Aquí se listaban TODOS los eventos del motor. Con el bloque de
+                     * comprobaciones justo encima, eso repetía la misma frase —misma
+                     * descripción, mismo año— dos veces en la misma columna del PDF
+                     * que el cliente adjunta a un expediente.
+                     *
+                     * Se filtra, no se borra: las nueve comprobaciones no cubren todos
+                     * los códigos que emite el motor, y sin esta lista una empresa cuya
+                     * única incidencia fuese un cambio de objeto social saldría con
+                     * nueve vistos verdes mientras la portada dice "1 incidencia".
+                     *
+                     * De paso desaparece el array_slice(..., 0, 4): truncaba en silencio
+                     * a las cuatro primeras, así que una empresa con seis actos enseñaba
+                     * cuatro y el PDF no avisaba de que faltaban dos.
+                     */
+                    $flags = risk_eventos_sueltos($riskProfile);
                     ?>
                     <?php if (!empty($flags)): ?>
-                        <?php foreach (array_slice($flags, 0, 4) as $flag): ?>
+                        <div style="font-size: 8pt; font-weight: bold; color: #0b1c40; text-transform: uppercase; margin: 12px 0 5px 0;">
+                            Otros actos registrales
+                        </div>
+                        <?php foreach ($flags as $flag): ?>
                             <?php 
                             // Mismo fallo que arrastraban las vistas: `critical` no entraba
                             // en ninguna rama y caía al bloque verde de "sin problema". En un
@@ -757,30 +802,13 @@
                                 </tr>
                             </table>
                         <?php endforeach; ?>
-                    <?php else: ?>
-                        <table class="factor-card factor-card-ok">
-                            <tr>
-                                <td style="width: 30px; text-align: center;">
-                                    <?php /* Este bloque es el caso "sin eventos" y llevaba su
-                                             PROPIO badge escrito a mano, fuera del bucle de
-                                             arriba: por eso seguía saliendo "?" cuando el del
-                                             bucle ya estaba corregido. Mismo tick en imagen y
-                                             misma estructura de tabla que allí. */ ?>
-                                    <table class="factor-icon-badge factor-icon-badge-ok" cellpadding="0" cellspacing="0">
-                                        <tr><td>
-                                            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAYAAABV7bNHAAAE9klEQVR42u2bTYgcVRDH/693VtGYoMZAQozJISriQQkYggZPInpaxEWCoIJCQIyaSw5BiKKXHPRgQDwEJAdBQlBkEEEvQVQW9RC/UBc1QaIbBQ0i7qpxpn9e6mGlmdmdmX6TnZ7tgmZmmf5479fV9a+q1yvVVltttdVWW21jamHcJwgEm2ecK5IIIbCi7zwQgMYivzcM3srzICALIeTu7+slXS0pkzQnaTaE0Oq070rwnMw+J4EngE+BFv9bDnwDPAWstn0nVhqczcAM51vbNm9fATf7Y8cajsWddcB3BuCcQck7wDpn338FrhtrSAZmwgLvcQdnKYv7fGzHji2ghn0esQn/S+8W95325xonOJP2eaAPzykCyoHm2AVs5zkPFCbbj8XAfcrBDuME53bzmtYAcHDH/AZcUQSUVRTORAihBWyV9IakyUI5MYj9Y9t5llUQTiYpBy6X1JS0VlK7xFxyq89OhhAWLLOmkoAKhecxSTdIakkqE1ix8zWr/FQV487hAeS8W4DOLf5cZflUqCqcqDD7B5TzTsE5Ar6v0hLvPGdXCTnvlkUfqHSCGO8qcCvwd5faigGSQ4AjVYcTq/MtwC+FxK4snONWf00kiTtWLTcKWzZMOBY01wCf26RaJeHE42eBK+38WZKBLvF7lhhOrM4D8HZixTprHcaegnKjh4y1bd9vknSbpC0xsZL0YQjhy+K+CSxmyi9LuttynTJxArdNhxBmgUZsu5YNjrcA73QJjG3gLdeVayTwnijn+xLJufe+h5OM08F5yA0w5g1+i7bgconJBHI+PQQ5f67s+Ipw7uqQUC12dwDuH3QQ7rrbgb8Sy/mr8QaUUqyYagOrgR/7UA7fEH+kXzd2cr4JmEsk53Hc79sKR3k5dy7+6ADKkbtJ7ekVUpRaYBVwIrGcfw+sS9aQd3fyXZtwa4D6Jh6zbym39qufQDOxnP8O3JisxoqTMHc8VcLNPaSnF4Pk4BxKBCd3ncU7k5YRDtAq4EyhHVmmUj4Y76KH5ODsTQTHn2N38hrLAZqwVDxl3fNioXyIcKYSynnxhkwqtTmpPdaDvPc78MMFz9kGzCeW86NJ5LwHQFMJ3d4nazEfWQ+cTiznM8DFS9WO/VroomRB0geSdiSog6LF8xyVtFHSTmu2l1GY3HrIP0jaEUL4OfXrLN0AIWmrpBm3apCiHZm7pjgll2kihAVJO0MInyUumDt38I1+CCF8K+kOST8ZnHai67VtcmXgxMo8k7TL4DRSw+k1Hl0LnEwck1IF/seWtWXqFGcz8PWIQIoB/4WR6Cc7T9pgr7MtJ6R43deHKuclIK0FPlomSFHOPwEuSS3nKSGtAd67wJBirnQa2JisOh/iMsyl1oZN1RLtpY0yD2wb+RVQB+ki4M0he5Ivd6Yqs8jnis4MeG2IkOI59w6tAB0ypOhNrwzhcYtwDlV2edivTAIvDaGv0xwpOS+zCmrfn0/Q34lyfsKadxlVf3+5AOnZBG+czgGbRlbOS0CKpcl+5w15H3Datia2feTlPAGkJx2kdg9w4qN1b2WD8gBF7u5C4I3t1dwlgD6oPz72cDpAusetknSzs8CDKwZOh/ptPfCMKdMf9jj9CXwBHASuGdWYEy4EJN/pAzZIukzSvKQz8aXtYbRLKxm8Oz2KoyzlYTlguevW/55dW2211VZbbbXVVls17T8oyMSE0tREOwAAAABJRU5ErkJggg==" width="18" height="18" alt="Favorable">
-                                        </td></tr>
-                                    </table>
-                                </td>
-                                <td>
-                                    <div style="font-size: 8.2pt; font-weight: bold; color: #0b1c40; margin-bottom: 1px;">Sin incidencias concursales detectadas</div>
-                                    <div style="font-size: 7.4pt; color: #475569;">No constan quiebras, disoluciones ni revocaciones publicadas en el BORME.</div>
-                                </td>
-                                <td style="width: 65px; text-align: right;">
-                                    <span class="factor-pill-badge factor-pill-badge-ok">FAVORABLE</span>
-                                </td>
-                            </tr>
-                        </table>
+                    <?php /* Aquí había una rama `else` con la tarjeta "Sin incidencias
+                             concursales detectadas · FAVORABLE". Se cae por dos motivos:
+                             el bloque de comprobaciones de arriba ya lo dice, y mejor
+                             (nueve líneas en vez de una frase); y desde que esta lista
+                             solo trae los actos NO cubiertos, el `else` saltaría en casi
+                             todas las fichas —incluidas las que sí tienen incidencias—
+                             estampando un FAVORABLE verde sobre una empresa en concurso. */ ?>
                     <?php endif; ?>
 
                     <!-- Institutional solvency -->
@@ -809,6 +837,18 @@
          En un informe que se cobra, la cifra tiene que poder auditarse. -->
     <?php
     $dimsPdf = risk_dimensions($riskProfile['data'] ?? []);
+
+    /*
+     * El color y la etiqueta salen de la BANDA, no del ranking.
+     *
+     * "Dominante" solo quiere decir "la que más pesa de las seis", aunque pese
+     * poco. Pintada siempre en rojo, un informe con puntuación 5 llevaba el
+     * indicador en verde y etiqueta LEVE en la portada, y en la página siguiente
+     * una barra ROJA con "(factor dominante)" por una dimensión que iba por 20
+     * de 60. El mismo documento decía las dos cosas. Igual que en la ficha.
+     */
+    $bandaAltaPdf = $score >= $umbralMedioPdf;   // el mismo umbral que ya usa la portada
+
     $dominantePdf = null;
     $maxPdf = 0.0;
     foreach ($dimsPdf as $dPdf) {
@@ -819,6 +859,27 @@
     }
     ?>
     <?php if (!empty($dimsPdf)): ?>
+    <?php
+    /*
+     * TÍTULO Y CUERPO, JUNTOS O EN LA PÁGINA SIGUIENTE, PERO NUNCA SEPARADOS.
+     *
+     * Desde que la sección 01 lleva las nueve comprobaciones ocupa casi la hoja
+     * entera, y esta barra caía al pie de la primera página con su contenido
+     * arrancando en la segunda: un encabezado huérfano, el mismo defecto que ya
+     * se corrigió en el histórico.
+     *
+     * Dompdf NO implementa `page-break-after: avoid`, así que no se puede pedir
+     * "no cortes después del título". Lo que sí respeta es `page-break-inside`
+     * sobre una tabla, de modo que las dos van dentro de una envoltura: si caben
+     * se quedan donde están y si no, bajan LAS DOS a la página siguiente.
+     *
+     * Un salto duro habría sido más simple y peor: mandaría esta sección a una
+     * hoja propia siempre, dejándola medio vacía y empujando el histórico —que
+     * ya abre página por su cuenta— a una tercera.
+     */
+    ?>
+    <table style="width: 100%; border-collapse: collapse; page-break-inside: avoid;" cellpadding="0" cellspacing="0">
+        <tr><td style="padding: 0;">
     <table class="sec-bar" cellpadding="0" cellspacing="0">
         <tr>
             <td style="width: 26px;"><span class="sec-num">02</span></td>
@@ -841,11 +902,15 @@
                     <?php foreach ($dimsPdf as $dPdf): ?>
                         <?php
                         $activaPdf = abs($dPdf['valor']) > 0.01;
-                        $colorPdf  = !$dPdf['suma'] ? '#16a34a' : (($dPdf['clave'] === $dominantePdf) ? '#b91c1c' : ($activaPdf ? '#b45309' : '#94a3b8'));
+                        $colorPdf  = !$dPdf['suma']
+                            ? '#16a34a'
+                            : (($dPdf['clave'] === $dominantePdf)
+                                ? ($bandaAltaPdf ? '#b91c1c' : '#b45309')
+                                : ($activaPdf ? ($bandaAltaPdf ? '#b45309' : '#94a3b8') : '#94a3b8'));
                         ?>
                         <tr>
                             <td style="padding: 2px 0; font-size: 7.4pt; color: #0b1c40; width: 44%;">
-                                <?= esc($dPdf['titulo']) ?><?php if ($dPdf['clave'] === $dominantePdf): ?> <span style="color: #b91c1c; font-weight: bold;">(factor dominante)</span><?php endif; ?>
+                                <?= esc($dPdf['titulo']) ?><?php if ($dPdf['clave'] === $dominantePdf): ?> <span style="color: <?= $bandaAltaPdf ? '#b91c1c' : '#b45309' ?>; font-weight: bold;">(<?= $bandaAltaPdf ? 'factor dominante' : 'factor principal' ?>)</span><?php endif; ?>
                             </td>
                             <td style="padding: 2px 0; width: 40%;">
                                 <table style="width: 100%; border-collapse: collapse; background: #eef2f7;">
@@ -941,6 +1006,8 @@
             </td>
         </tr>
     </table>
+        </td></tr>
+    </table>
     <?php endif; ?>
 
     <?php
@@ -964,11 +1031,17 @@
     $pdfRestante = max(0, count($pdfHist) - $pdfMaxHist);
     ?>
     <?php if (!empty($pdfHist)): ?>
-    <?php /* El histórico abre PÁGINA NUEVA. Antes el título quedaba al final de la
-             primera y la tabla arrancaba en la segunda, que es el peor de los casos:
-             un encabezado huérfano. Al ser una relación larga y de consulta, tener su
-             propia hoja además la hace utilizable por separado. */ ?>
-    <table class="sec-bar" cellpadding="0" cellspacing="0" style="page-break-before: always;">
+    <?php /* El histórico ya NO abre página a la fuerza: con el salto duro, el
+             desglose y el histórico ocupaban dos hojas donde caben en una.
+
+             Ojo con lo que esto NO garantiza. La relación puede llegar a 25
+             filas, más alta que una página, así que no se puede meter en una
+             envoltura con `page-break-inside: avoid` como se hizo con el
+             desglose: Dompdf la desbordaría. Cada fila sí evita partirse por la
+             mitad, pero si en alguna empresa la barra "03" cae justo al pie de
+             una hoja, el encabezado se quedará huérfano otra vez. Si pasa, la
+             salida es devolverle el salto duro solo a ese caso, no a todos. */ ?>
+    <table class="sec-bar" cellpadding="0" cellspacing="0">
         <tr>
             <td style="width: 26px;"><span class="sec-num">03</span></td>
             <td><span class="sec-name">Histórico registral (BORME)</span></td>
@@ -1051,6 +1124,27 @@
             </td>
         </tr>
     </table>
+
+<?php
+/*
+ * LA BANDA VA AL FINAL DEL BODY.
+ *
+ * Al ser `position: fixed`, el sitio que ocupe en el HTML no cambia dónde se
+ * dibuja: sigue apareciendo abajo en TODAS las páginas. Se quedó aquí al
+ * intentar arreglar el contador de páginas (ver la nota del CSS); el contador
+ * se ha quitado, pero este es igualmente el sitio correcto para un elemento
+ * fijo, porque se compone con el documento ya maquetado.
+ */
+?>
+<table class="page-strip" cellpadding="0" cellspacing="0" style="width: 100%;">
+    <tr>
+        <td style="text-align: left;">
+            <?= esc($companyNamePdf) ?> &nbsp;&bull;&nbsp; <?= esc($company['cif'] ?? $company['nif'] ?? '') ?>
+            &nbsp;&bull;&nbsp; Ref: <?= esc($pdfRef) ?>
+        </td>
+        <td style="text-align: right;"><?= esc(date('d/m/Y')) ?></td>
+    </tr>
+</table>
 
 </body>
 </html>
