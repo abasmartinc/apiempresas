@@ -30,19 +30,28 @@ $nSin    = count(array_filter($comprobaciones, static fn ($c) => $c['estado'] ==
 $nNoProc = count(array_filter($comprobaciones, static fn ($c) => $c['estado'] === 'no_procede'));
 $total   = count($comprobaciones);
 $fechaBorme = risk_datos_actualizados();
+$origen     = risk_comprobaciones_origen($riskProfile ?? []);
 ?>
 
 <?php /* El respiro que se perdió al quitar el subtítulo del panel: sin él las
          tarjetas quedaban pegadas a la barra oscura de la sección. */ ?>
 <div style="font-size: 7.6pt; color: #64748b; margin: 2px 0 13px 0; line-height: 1.35;">
     <?php if ($nInc === 0): ?>
-        <?= $total ?> comprobaciones contra el Registro Mercantil.
+        <?= $total ?> comprobaciones<?= $origen === null ? ' contra el Registro Mercantil' : ' registrales' ?>.
         <strong style="color: #15803d;">Ninguna ha saltado.</strong>
     <?php else: ?>
         <?= $total ?> comprobaciones ·
         <strong style="color: #b91c1c;"><?= $nInc ?> con incidencia</strong><?php if ($nOk > 0): ?> · <?= $nOk ?> sin nada que señalar<?php endif; ?>
     <?php endif; ?>
 </div>
+
+<?php if ($origen !== null): ?>
+    <?php /* Igual que en la ficha: con 0 asientos, los vistos verdes necesitan
+             decir contra qué se han resuelto. */ ?>
+    <div style="font-size: 7.1pt; color: #64748b; background-color: #f8fafc; border: 1px solid #eef2f7; border-radius: 5px; padding: 6px 8px; margin-bottom: 8px; line-height: 1.35;">
+        <?= esc($origen) ?>
+    </div>
+<?php endif; ?>
 
 <?php foreach ($comprobaciones as $c): ?>
     <?php

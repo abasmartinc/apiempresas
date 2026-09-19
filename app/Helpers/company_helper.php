@@ -875,6 +875,44 @@ if (!function_exists('risk_eventos_sueltos')) {
     }
 }
 
+/**
+ * De dónde salen las comprobaciones registrales de esta empresa.
+ *
+ * Devuelve null cuando no hay nada que matizar —hay asientos en el BORME y el
+ * bloque puede decir lo que dice— y una frase corta cuando sí lo hay.
+ *
+ * Existe porque la cabecera del bloque promete "comprobaciones contra el
+ * Registro Mercantil", y en una empresa sin un solo asiento publicado esa
+ * promesa no se cumple aunque las comprobaciones sigan siendo válidas: se están
+ * resolviendo contra el estado oficial de la sociedad, que es otra fuente. Decir
+ * cuál se ha usado cuesta una línea; que el cliente lo descubra por su cuenta
+ * cuesta la credibilidad del resto de la ficha.
+ */
+if (!function_exists('risk_comprobaciones_origen')) {
+    function risk_comprobaciones_origen(array $riskProfile): ?string
+    {
+        $fuentes = $riskProfile['data']['data_sources'] ?? null;
+        if (!is_array($fuentes)) {
+            return null;
+        }
+
+        $sinBorme   = ($fuentes['borme_status'] ?? '') === 'CHECKED_NO_RECORDS';
+        $sinOficial = ($fuentes['official_status'] ?? 'KNOWN') === 'UNKNOWN';
+
+        if (!$sinBorme) {
+            return null;
+        }
+
+        if ($sinOficial) {
+            return 'Esta empresa no tiene asientos publicados en el BORME ni consta su estado oficial, '
+                 . 'así que las comprobaciones registrales no han podido resolverse.';
+        }
+
+        return 'Esta empresa no tiene asientos publicados en el BORME. Las comprobaciones registrales '
+             . 'se resuelven contra el estado oficial de la sociedad.';
+    }
+}
+
 if (!function_exists('risk_comprobaciones')) {
     function risk_comprobaciones(array $riskProfile): array
     {
@@ -934,6 +972,32 @@ if (!function_exists('risk_comprobaciones')) {
         $comprobaciones = [];
 
         // --- Bloque 1: los hechos graves del Registro ---
+        /*
+         * ¿EN QUÉ SE APOYAN LAS CINCO COMPROBACIONES REGISTRALES?
+         *
+         * Se resuelven contra dos fuentes distintas: los actos publicados en el
+         * BORME y el estado oficial de la sociedad. Normalmente están las dos y
+         * no hay que pensarlo. El caso feo es cuando falta alguna.
+         *
+         * Visto en producción con B82759481 (Edironda S.L.): **0 asientos en el
+         * BORME**, y la ficha anunciaba "9 comprobaciones contra el Registro
+         * Mercantil" con ocho vistos verdes. "No consta declaración de concurso"
+         * se lee como "hemos mirado y está limpio", y en el BORME no se había
+         * mirado nada: no había nada que mirar. Eso es ausencia de información
+         * presentada como información, que es justo lo que este bloque no puede
+         * permitirse si quiere valer para dar crédito.
+         *
+         * Ahí seguían estando ganadas, porque el estado oficial decía ACTIVA. Lo
+         * que fallaba era el marco: la frase daba a entender una fuente que no
+         * se había usado. Se arregla diciéndolo (ver risk_comprobaciones_origen).
+         *
+         * Cuando NO hay ninguna de las dos, no hay nada que decir: esas cinco
+         * líneas pasan a "no se ha podido comprobar".
+         */
+        $conBorme   = ($fuentes['borme_status'] ?? '') !== 'CHECKED_NO_RECORDS';
+        $conOficial = ($fuentes['official_status'] ?? 'KNOWN') !== 'UNKNOWN';
+        $sinFuente  = !$conBorme && !$conOficial;
+
         foreach ($tabla['graves'] as [$titulo, $patrones, $estados, $textoOk]) {
             [$evento, $cuantos] = $buscar($patrones);
             $enEstado = false;
@@ -951,6 +1015,14 @@ if (!function_exists('risk_comprobaciones')) {
                     'detalle' => $evento
                         ? $conResto((string) ($evento['description'] ?? risk_event_label($evento)), $cuantos)
                         : 'Consta en el estado registral de la sociedad.',
+                ];
+            } elseif ($sinFuente) {
+                // Ni asientos ni estado oficial: un visto verde aquí sería
+                // afirmar algo que no se ha comprobado contra nada.
+                $comprobaciones[] = [
+                    'titulo'  => $titulo,
+                    'estado'  => 'sin_datos',
+                    'detalle' => 'Sin asientos en el BORME ni estado oficial con el que comprobarlo.',
                 ];
             } else {
                 $comprobaciones[] = ['titulo' => $titulo, 'estado' => 'ok', 'detalle' => $textoOk];

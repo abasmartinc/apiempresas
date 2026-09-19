@@ -25,6 +25,7 @@ $nSin    = count(array_filter($comprobaciones, static fn ($c) => $c['estado'] ==
 $nNoProc = count(array_filter($comprobaciones, static fn ($c) => $c['estado'] === 'no_procede'));
 $total   = count($comprobaciones);
 $actual  = risk_datos_actualizados();
+$origen  = risk_comprobaciones_origen($riskProfile ?? []);
 ?>
 
 <div style="margin-top: 22px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden;">
@@ -35,7 +36,7 @@ $actual  = risk_datos_actualizados();
         </h3>
         <span style="font-size: 0.82rem; color: #64748b;">
             <?php if ($nInc === 0): ?>
-                <?= $total ?> comprobaciones contra el Registro Mercantil.
+                <?= $total ?> comprobaciones<?= $origen === null ? ' contra el Registro Mercantil' : ' registrales' ?>.
                 <strong style="color: #15803d;">Ninguna ha saltado.</strong>
             <?php else: ?>
                 <?= $total ?> comprobaciones ·
@@ -44,6 +45,14 @@ $actual  = risk_datos_actualizados();
             <?php endif; ?>
         </span>
     </div>
+
+    <?php if ($origen !== null): ?>
+        <?php /* Sin esta línea, ocho vistos verdes sobre una empresa sin un solo
+                 asiento en el BORME se leen como "hemos mirado y está limpio". */ ?>
+        <div style="padding: 11px 22px; background: #f8fafc; border-bottom: 1px solid #f1f5f9; font-size: 0.78rem; color: #64748b; line-height: 1.45;">
+            <?= esc($origen) ?>
+        </div>
+    <?php endif; ?>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 0;">
         <?php foreach ($comprobaciones as $i => $c): ?>
