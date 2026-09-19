@@ -151,7 +151,11 @@ class RiskProfileController extends BaseController
                 'mostrarVigilancia' => true,
                 'riskTrend'   => (new \App\Services\CompanyRiskService())->getScoreTrend(
                     (string) ($company['cif'] ?? ''),
-                    (int) ($riskProfile['risk_score'] ?? 0)
+                    (int) ($riskProfile['risk_score'] ?? 0),
+                    24,
+                    25,
+                    // Solo se comparan puntos del mismo modelo. Ver getScoreTrend().
+                    (string) ($riskProfile['data']['model_version'] ?? '')
                 ),
                 'isWatching'  => $userId > 0
                     && (new \App\Services\CompanyWatchService())

@@ -60,12 +60,42 @@ class CompanyRiskService
      * Devuelve null si no hay con qué comparar: sin histórico, o con un histórico
      * tan reciente que la comparación no diría nada ("hace 3 días era 45").
      *
+     * SOLO SE COMPARAN PUNTOS DEL MISMO MODELO
+     * ----------------------------------------
+     * Y esto no es un detalle: sin ello, la noche que se cambia de motor TODO el
+     * catálogo archiva su perfil viejo a la vez, y al día siguiente cada ficha
+     * anuncia un salto con su flecha roja y la frase "ha empeorado". Medido en un
+     * caso real al pasar de 2.0.0 a 3.0.0: una empresa con tres ejercicios sin
+     * depositar pasaba de 5 a 32 sin que en el BORME constara un solo acto nuevo.
+     * Eso no es una evolución, son dos reglas distintas midiendo lo mismo, y el
+     * cliente que vaya a comprobarlo no encuentra nada que lo explique.
+     *
+     * Consecuencia aceptada: tras un cambio de motor la gráfica desaparece hasta
+     * que haya dos ejecuciones del nuevo. Es correcto — hasta entonces no hay
+     * ninguna evolución real que enseñar.
+     *
+     * @param string|null $modelo Versión del modelo del perfil vigente. Sin ella
+     *                            no se puede saber qué es comparable, así que no
+     *                            se pinta nada.
+     *
      * @return array{antes:int,ahora:int,delta:int,dias:int,periodo:string,puntos:array}|null
      */
-    public function getScoreTrend(string $cif, int $ahora, int $mesesMax = 24, int $diasMinimos = 25): ?array
-    {
+    public function getScoreTrend(
+        string $cif,
+        int $ahora,
+        int $mesesMax = 24,
+        int $diasMinimos = 25,
+        ?string $modelo = null
+    ): ?array {
         $cleanCif = $this->cleanCif($cif);
         if ($cleanCif === '') {
+            return null;
+        }
+
+        $modelo = trim((string) $modelo);
+        if ($modelo === '') {
+            // Perfil anterior a que el motor sellara la versión: no hay forma de
+            // saber con qué regla se calculó, así que tampoco de compararlo.
             return null;
         }
 
@@ -80,6 +110,7 @@ class CompanyRiskService
             $filas = $db->table('company_risk_profiles_history')
                 ->select('risk_score, calculated_at')
                 ->where('cif', $cleanCif)
+                ->where('model_version', $modelo)   // ver la nota de arriba
                 ->where('calculated_at >=', $desde)
                 ->orderBy('calculated_at', 'ASC')
                 ->limit(200)

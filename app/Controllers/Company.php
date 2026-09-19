@@ -1861,9 +1861,17 @@ class Company extends BaseController
             return null;
         }
 
+        /*
+         * La versión del modelo viaja hasta el servicio a propósito: la gráfica
+         * solo puede comparar puntos calculados con la MISMA regla. Ver la nota
+         * en CompanyRiskService::getScoreTrend().
+         */
         return (new \App\Services\CompanyRiskService())->getScoreTrend(
             (string) $company['cif'],
-            (int) ($riskProfile['risk_score'] ?? 0)
+            (int) ($riskProfile['risk_score'] ?? 0),
+            24,
+            25,
+            (string) ($riskProfile['data']['model_version'] ?? '')
         );
     }
 

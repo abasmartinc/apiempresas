@@ -273,14 +273,19 @@ class SolvenciaCasosCommand extends BaseCommand
     }
 
     /**
-     * Empresas con más de un perfil archivado: son las únicas en las que la ficha
-     * puede pintar la evolución del score, porque getScoreTrend() compara contra el
-     * histórico. Con el motor recién estrenado no habrá ninguna.
+     * Empresas con más de un perfil archivado DEL MISMO MODELO: son las únicas en
+     * las que la ficha puede pintar la evolución, porque getScoreTrend() solo
+     * compara puntos calculados con la misma regla.
+     *
+     * El agrupado lleva `model_version` a propósito. Sin él, esta pantalla decía
+     * que la evolución iba a salir en empresas donde no sale: tras un cambio de
+     * motor todas tienen dos perfiles archivados, pero de modelos distintos, y
+     * comparar un 5 de la 2.0.0 con un 32 de la 3.0.0 no es una evolución.
      */
     private function tendencia(int $limite): void
     {
         CLI::write('TENDENCIA DEL SCORE (evolución en la ficha y en el PDF)', 'yellow');
-        CLI::write('  Necesita 2+ perfiles archivados del mismo CIF con 25 días entre ellos.', 'dark_gray');
+        CLI::write('  Necesita 2+ perfiles archivados del mismo CIF, MISMO MODELO, con 25 días entre ellos.', 'dark_gray');
 
         if (!$this->db->tableExists('company_risk_profiles_history')) {
             CLI::write('  (no existe company_risk_profiles_history: la evolución no puede salir nunca)');
@@ -289,26 +294,28 @@ class SolvenciaCasosCommand extends BaseCommand
         }
 
         $filas = $this->db->query("
-            SELECT h.cif, COUNT(*) AS puntos, MIN(h.calculated_at) AS desde, MAX(h.calculated_at) AS hasta,
+            SELECT h.cif, h.model_version, COUNT(*) AS puntos,
+                   MIN(h.calculated_at) AS desde, MAX(h.calculated_at) AS hasta,
                    c.company_name
             FROM company_risk_profiles_history h
             LEFT JOIN companies c ON c.cif = h.cif
-            GROUP BY h.cif, c.company_name
+            GROUP BY h.cif, h.model_version, c.company_name
             HAVING COUNT(*) > 1
             ORDER BY puntos DESC
             LIMIT ?
         ", [$limite])->getResultArray();
 
         if ($filas === []) {
-            CLI::write('  (ninguna: el motor aún no ha archivado dos versiones de ningún perfil)');
+            CLI::write('  (ninguna: no hay dos perfiles archivados del mismo modelo para ningún CIF)');
             CLI::write('');
             return;
         }
 
         foreach ($filas as $f) {
-            CLI::write(sprintf('  %-11s  %2d puntos  de %s a %s  %s',
-                $f['cif'], (int) $f['puntos'], substr((string) $f['desde'], 0, 10),
-                substr((string) $f['hasta'], 0, 10), mb_substr((string) $f['company_name'], 0, 34)));
+            CLI::write(sprintf('  %-11s  modelo %-8s  %2d puntos  de %s a %s  %s',
+                $f['cif'], (string) $f['model_version'], (int) $f['puntos'],
+                substr((string) $f['desde'], 0, 10),
+                substr((string) $f['hasta'], 0, 10), mb_substr((string) $f['company_name'], 0, 30)));
         }
         CLI::write('');
     }
