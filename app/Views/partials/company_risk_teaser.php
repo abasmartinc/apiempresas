@@ -274,6 +274,12 @@ if (empty($redirectPath)) {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; color: #64748b;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                 <span style="white-space: nowrap;">Descargar ahora</span>
             </button>
+            <div style="margin-top: 10px; text-align: center;">
+                <a href="<?= site_url('ejemplo/informe-riesgo') ?>?t=<?= time() ?>" target="_blank" rel="noopener" style="font-size: 0.77rem; color: #64748b; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; transition: color 0.15s;" onmouseover="this.style.color='#2563eb'; this.style.textDecoration='underline';" onmouseout="this.style.color='#64748b'; this.style.textDecoration='none';">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <span>Ver informe de ejemplo en PDF</span>
+                </a>
+            </div>
         </div>
     </div>
 </div>

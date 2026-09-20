@@ -51,8 +51,16 @@ $compCifStr = !empty($company['cif']) ? $company['cif'] : '';
                     </li>
                 </ul>
 
-                <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px 14px; font-size: 0.78rem; color: #94a3b8; line-height: 1.4;">
+                <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px 14px; font-size: 0.78rem; color: #94a3b8; line-height: 1.4; margin-bottom: 16px;">
                     🔒 Acceso inmediato tras el pago, sin caducidad y con factura de IVA deducible. No gasta ninguna de tus consultas gratuitas del mes.
+                </div>
+
+                <div>
+                    <a href="<?= site_url('ejemplo/informe-riesgo') ?>?t=<?= time() ?>" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 7px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); color: #93c5fd; padding: 8px 14px; border-radius: 9px; font-size: 0.8rem; font-weight: 700; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='rgba(59,130,246,0.2)'; this.style.borderColor='rgba(59,130,246,0.45)';" onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.borderColor='rgba(255,255,255,0.18)';">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>Ver informe de ejemplo (PDF)</span>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    </a>
                 </div>
             </div>
 
@@ -92,8 +100,16 @@ $compCifStr = !empty($company['cif']) ? $company['cif'] : '';
                     </li>
                 </ul>
 
-                <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 10px 12px; font-size: 0.78rem; color: #94a3b8; line-height: 1.35;">
+                <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 10px 12px; font-size: 0.78rem; color: #94a3b8; line-height: 1.35; margin-bottom: 16px;">
                     ⭐ Incluye personalización de marca, logotipo y pie de página.
+                </div>
+
+                <div>
+                    <a href="<?= site_url('ejemplo/dossier-360') ?>?t=<?= time() ?>" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 7px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); color: #93c5fd; padding: 8px 14px; border-radius: 9px; font-size: 0.8rem; font-weight: 700; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='rgba(59,130,246,0.2)'; this.style.borderColor='rgba(59,130,246,0.45)';" onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.borderColor='rgba(255,255,255,0.18)';">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>Ver muestra del Dossier (4 págs PDF)</span>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    </a>
                 </div>
             </div>
 
@@ -119,7 +135,12 @@ $compCifStr = !empty($company['cif']) ? $company['cif'] : '';
                             <input type="radio" name="opt_report" value="risk" checked onchange="updateRiskModalPrice(this.value);" style="accent-color: #2563eb; transform: scale(1.2);">
                             <div>
                                 <div style="font-weight: 800; color: #0f172a; font-size: 0.95rem;">Acceso a esta empresa</div>
-                                <div style="font-size: 0.78rem; color: #64748b;">Dictamen completo en pantalla y en PDF</div>
+                                <div style="font-size: 0.78rem; color: #64748b; margin-top: 2px;">
+                                    Dictamen completo en pantalla y en PDF
+                                </div>
+                                <div style="margin-top: 3px;">
+                                    <a href="<?= site_url('ejemplo/informe-riesgo') ?>?t=<?= time() ?>" target="_blank" rel="noopener" onclick="event.stopPropagation();" style="color: #2563eb; font-size: 0.77rem; font-weight: 700; text-decoration: underline;">Ver muestra</a>
+                                </div>
                             </div>
                         </div>
                         <span style="font-weight: 900; color: #2563eb; font-size: 1.1rem; white-space: nowrap;"><?= solvencia('precios.pdf', '3,90 €') ?> <span style="font-size: 0.75rem; font-weight: 600;">+ IVA</span></span>
@@ -130,7 +151,12 @@ $compCifStr = !empty($company['cif']) ? $company['cif'] : '';
                             <input type="radio" name="opt_report" value="dossier" onchange="updateRiskModalPrice(this.value);" style="accent-color: #2563eb; transform: scale(1.2);">
                             <div>
                                 <div style="font-weight: 800; color: #0f172a; font-size: 0.95rem;">Dossier Integral 360º <span style="background: #ecfdf5; color: #059669; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">Todo incluido</span></div>
-                                <div style="font-size: 0.78rem; color: #64748b;">Riesgo + Administradores + BORME + 4 págs</div>
+                                <div style="font-size: 0.78rem; color: #64748b; margin-top: 2px;">
+                                    Riesgo + Administradores + BORME (4 págs)
+                                </div>
+                                <div style="margin-top: 3px;">
+                                    <a href="<?= site_url('ejemplo/dossier-360') ?>?t=<?= time() ?>" target="_blank" rel="noopener" onclick="event.stopPropagation();" style="color: #2563eb; font-size: 0.77rem; font-weight: 700; text-decoration: underline;">Ver muestra</a>
+                                </div>
                             </div>
                         </div>
                         <span style="font-weight: 900; color: #0f172a; font-size: 1.1rem; white-space: nowrap;"><?= solvencia('precios.dossier', '5,90 €') ?> <span style="font-size: 0.75rem; font-weight: 600;">+ IVA</span></span>

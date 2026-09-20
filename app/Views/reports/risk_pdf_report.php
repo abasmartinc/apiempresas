@@ -990,6 +990,8 @@
             </td>
         </tr>
     </table>
+        </td></tr>
+    </table>
     <?php else: ?>
     <table class="bottom-card">
         <tr>
@@ -1005,8 +1007,6 @@
                 </div>
             </td>
         </tr>
-    </table>
-        </td></tr>
     </table>
     <?php endif; ?>
 
@@ -1031,16 +1031,7 @@
     $pdfRestante = max(0, count($pdfHist) - $pdfMaxHist);
     ?>
     <?php if (!empty($pdfHist)): ?>
-    <?php /* El histórico ya NO abre página a la fuerza: con el salto duro, el
-             desglose y el histórico ocupaban dos hojas donde caben en una.
-
-             Ojo con lo que esto NO garantiza. La relación puede llegar a 25
-             filas, más alta que una página, así que no se puede meter en una
-             envoltura con `page-break-inside: avoid` como se hizo con el
-             desglose: Dompdf la desbordaría. Cada fila sí evita partirse por la
-             mitad, pero si en alguna empresa la barra "03" cae justo al pie de
-             una hoja, el encabezado se quedará huérfano otra vez. Si pasa, la
-             salida es devolverle el salto duro solo a ese caso, no a todos. */ ?>
+    <div style="page-break-before: always;">
     <table class="sec-bar" cellpadding="0" cellspacing="0">
         <tr>
             <td style="width: 26px;"><span class="sec-num">03</span></td>
@@ -1094,6 +1085,7 @@
             </td>
         </tr>
     </table>
+    </div>
     <?php endif; ?>
 
     <!-- LEGAL NOTICE -->

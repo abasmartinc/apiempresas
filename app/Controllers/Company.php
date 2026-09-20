@@ -945,6 +945,48 @@ class Company extends BaseController
     }
 
     /**
+     * Muestra el PDF de ejemplo del Dictamen de Riesgo
+     */
+    public function sampleRiskPdf()
+    {
+        $path = FCPATH . 'ejemplos/ejemplo-informe-riesgo-solvencia.pdf';
+        if (!file_exists($path) || $this->request->getGet('rebuild')) {
+            command('samples:generate');
+        }
+        if (!file_exists($path)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Muestra no encontrada');
+        }
+        return $this->response->setHeader('Content-Type', 'application/pdf')
+                              ->setHeader('Content-Disposition', 'inline; filename="dictamen-riesgo-muestra.pdf"')
+                              ->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0')
+                              ->setHeader('Pragma', 'no-cache')
+                              ->setHeader('Expires', 'Thu, 01 Jan 1970 00:00:00 GMT')
+                              ->setHeader('X-Robots-Tag', 'noindex, nofollow')
+                              ->setBody(file_get_contents($path));
+    }
+
+    /**
+     * Muestra el PDF de ejemplo del Dossier 360
+     */
+    public function sampleDossierPdf()
+    {
+        $path = FCPATH . 'ejemplos/ejemplo-dossier-integral-360.pdf';
+        if (!file_exists($path) || $this->request->getGet('rebuild')) {
+            command('samples:generate');
+        }
+        if (!file_exists($path)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Muestra no encontrada');
+        }
+        return $this->response->setHeader('Content-Type', 'application/pdf')
+                              ->setHeader('Content-Disposition', 'inline; filename="dossier-360-muestra.pdf"')
+                              ->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0')
+                              ->setHeader('Pragma', 'no-cache')
+                              ->setHeader('Expires', 'Thu, 01 Jan 1970 00:00:00 GMT')
+                              ->setHeader('X-Robots-Tag', 'noindex, nofollow')
+                              ->setBody(file_get_contents($path));
+    }
+
+    /**
      * Endpoint AJAX para guardar la valoración de una empresa
      */
     public function submitRating()
