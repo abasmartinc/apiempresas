@@ -117,7 +117,7 @@ $vigilanciasPro = (int) solvencia('vigilanciasPro', 25);
                              avisa de las que no caben. -->
                         <form method="post" action="<?= site_url('cartera/vigilar') ?>" style="margin: 0;">
                             <?= csrf_field() ?>
-                            <input type="hidden" name="origen" value="pro_success">
+                            <input type="hidden" name="origen" value="alta_pro">
                             <div class="activa-lista">
                                 <?php foreach ($consultadas as $i => $e): ?>
                                     <label>

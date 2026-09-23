@@ -917,7 +917,7 @@ class RiskProfileAnalytics extends BaseController
             'manual'      => 'Botón «Vigilar empresa» de la ficha',
             'cartera'     => 'Carga de cartera (CSV)',
             'onboarding'  => 'Guía del panel',
-            'pro_success' => 'Página de éxito de Pro',
+            'alta_pro'    => 'Página de éxito de Pro',
             'unlock'      => 'Automática al desbloquear un dictamen',
             'search'      => 'Automática al buscar un CIF',
             'auto'        => 'Relleno inicial (histórico)',
@@ -925,7 +925,7 @@ class RiskProfileAnalytics extends BaseController
 
         foreach ($filas as &$f) {
             $f['etiqueta'] = $nombres[$f['source'] ?? ''] ?? ('Otro: ' . ($f['source'] ?? '—'));
-            $f['elegida']  = in_array($f['source'], ['teaser', 'manual', 'cartera', 'onboarding', 'pro_success'], true);
+            $f['elegida']  = in_array($f['source'], ['teaser', 'manual', 'cartera', 'onboarding', 'alta_pro'], true);
         }
 
         return $filas;

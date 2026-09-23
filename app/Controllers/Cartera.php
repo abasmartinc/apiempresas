@@ -187,7 +187,7 @@ class Cartera extends BaseController
         // distinguirlas, todo contaba como 'cartera' (y la guía daba por subida una
         // cartera que nadie había subido).
         $origen = (string) ($this->request->getPost('origen') ?? 'cartera');
-        if (!in_array($origen, ['cartera', 'onboarding', 'pro_success'], true)) {
+        if (!in_array($origen, ['cartera', 'onboarding', 'alta_pro'], true)) {
             $origen = 'cartera';
         }
 
