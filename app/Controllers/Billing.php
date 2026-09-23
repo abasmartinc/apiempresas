@@ -101,6 +101,12 @@ class Billing extends BaseController
                 $isSubscribed = true;
             }
         }
+        // $data['plan'] puede ser el plan gratuito de la API que se crea con cada alta,
+        // y entonces un suscriptor de Solvencia salía como "no suscrito". La fuente de
+        // verdad es la misma que usa el resto de Solvencia.
+        if (!$isSubscribed && !empty($user->id)) {
+            $isSubscribed = (new \App\Services\CompanyWatchService())->esSuscriptor((int) $user->id);
+        }
         $data['is_risk_subscribed'] = $isSubscribed;
 
         return $this->renderView('risk_profile/billing', $data);
@@ -210,6 +216,20 @@ class Billing extends BaseController
         }
         if (!in_array($pm, ['stripe', 'paypal'], true)) {
             $pm = 'stripe';
+        }
+
+        // Nada impedía contratar Solvencia Pro dos veces: la página de pago enseñaba
+        // "tu plan está activo" y el formulario debajo, y el panel, la ficha o un correo
+        // antiguo también llevan aquí. Una segunda suscripción es un cobro doble y una
+        // devolución segura. Quien la tiene (también cancelada con días por delante)
+        // gestiona cambios y reactivaciones desde el portal de Stripe.
+        if ($plan === 'risk_pro' && $userId > 0
+            && (new \App\Services\CompanyWatchService())->esSuscriptor($userId)) {
+            session()->remove('pending_checkout');
+            return redirect()->to(site_url('billing?view=risk'))->with(
+                'error',
+                'Ya tienes Solvencia Pro en tu cuenta, así que no te lo volvemos a cobrar. Para pasar a anual, reactivarlo o darte de baja, usa «Gestionar suscripción».'
+            );
         }
 
         // Datos opcionales de facturación (solo para pre-rellenar)

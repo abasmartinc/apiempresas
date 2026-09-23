@@ -265,14 +265,19 @@ class CompanyWatchService
     /**
      * Invierte el estado y devuelve el resultante.
      */
-    public function toggle(int $userId, string $cif): bool
+    /**
+     * @param string $source de dónde sale el alta ('manual' el botón de la ficha,
+     *                       'teaser' la vuelta de "Avísame si cambia"): es lo que deja
+     *                       medir qué entrada funciona.
+     */
+    public function toggle(int $userId, string $cif, string $source = 'manual'): bool
     {
         if ($this->isWatching($userId, $cif)) {
             $this->unwatch($userId, $cif);
             return false;
         }
 
-        $this->watch($userId, $cif, 'manual');
+        $this->watch($userId, $cif, $source);
         return $this->isWatching($userId, $cif);
     }
 }

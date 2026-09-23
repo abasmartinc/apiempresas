@@ -47,7 +47,9 @@
     $faqs = [
         [
             'q' => "¿Es fiable {$companyName}?",
-            'a' => "Sí, **{$companyName}** es una sociedad registrada en España con CIF **{$companyCif}**. Su estado actual es **{$statusRaw}**, según consta en el Registro Mercantil. Puede consultar su índice de solvencia, su estado registral y sus publicaciones en el BORME."
+            // Empezaba por "Sí," para TODAS las empresas, también las extinguidas o en
+            // concurso: Google lo enseña como respuesta directa a "¿es fiable X?".
+            'a' => "**{$companyName}** es una sociedad registrada en España con CIF **{$companyCif}**. Su estado actual es **{$statusRaw}**, según consta en el Registro Mercantil. Para valorar si es fiable como cliente o proveedor, consulte su índice de solvencia y los actos publicados en el BORME."
         ],
         [
             'q' => "¿Cómo consultar la solvencia y riesgo de impago de {$companyName}?",
@@ -376,6 +378,45 @@
                                 <h1 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.25; letter-spacing: -0.01em; text-wrap: balance;">
                                     <?= esc($company['name'] ?? '-') ?><?php if (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-'): ?> - CIF <?= esc($companyCif) ?><?php endif; ?>
                                 </h1>
+
+                                <?php
+                                /*
+                                 * RESUMEN DE RIESGO ARRIBA.
+                                 *
+                                 * El bloque de riesgo vive debajo de los datos generales y
+                                 * mucha gente no llega a verlo. Esta etiqueta lo adelanta y
+                                 * lleva hasta él. Enseña lo mismo que el teaser ya enseña
+                                 * gratis a un anónimo (nivel e incidencias), nunca el detalle,
+                                 * y no depende de quién mira: se puede cachear.
+                                 * En modo 'opaco' no adelanta el resultado.
+                                 */
+                                if (!empty($riskProfile)):
+                                    helper(['company', 'risk_labels']);
+                                    $rcScore = (int) ($riskProfile['risk_score'] ?? 0);
+                                    $rcEventos = count($riskProfile['data']['canonical_events'] ?? []);
+                                    $rcConf = isset($riskProfile['data']['confidence_score']) ? (int) $riskProfile['data']['confidence_score'] : null;
+                                    $rcOpaco = solvencia('teaserModo', 'titular') === 'opaco';
+                                    [$rcNivel, $rcColor, $rcFondo, $rcBorde] = risk_level_visual($rcScore);
+
+                                    if ($rcOpaco || ($rcEventos === 0 && $rcConf !== null && $rcConf < 60)) {
+                                        // Sin adelantar el resultado, o con un cero que no significa "limpia".
+                                        [$rcColor, $rcFondo, $rcBorde] = ['#1d4ed8', '#eff6ff', '#bfdbfe'];
+                                        $rcTexto = 'Perfil de riesgo disponible';
+                                    } elseif ($rcEventos === 0) {
+                                        $rcTexto = esc(ucfirst(mb_strtolower($rcNivel, 'UTF-8'))) . ' · sin incidencias en el BORME';
+                                    } else {
+                                        $rcTexto = esc(ucfirst(mb_strtolower($rcNivel, 'UTF-8'))) . ' · ' . $rcEventos
+                                            . ($rcEventos === 1 ? ' incidencia registrada' : ' incidencias registradas');
+                                    }
+                                ?>
+                                    <a href="#perfil-de-riesgo" data-track-click="ficha_chip_riesgo"
+                                       onclick="var d=document.getElementById('perfil-de-riesgo'); if(d&&d.scrollIntoView){event.preventDefault(); d.scrollIntoView({behavior:'smooth', block:'start'});}"
+                                       style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: -6px 0 16px 0; padding: 6px 12px; border-radius: 999px; background: <?= $rcFondo ?>; border: 1px solid <?= $rcBorde ?>; color: <?= $rcColor ?>; font-size: 0.85rem; font-weight: 800; text-decoration: none;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                        <span><?= $rcTexto ?></span>
+                                        <span style="font-weight: 700; opacity: 0.85; text-decoration: underline;"><?= $rcEventos > 0 && !$rcOpaco ? 'ver por qué' : 'ver el análisis' ?> ↓</span>
+                                    </a>
+                                <?php endif; ?>
 
                                 <?php if (!empty($company['ai_pitch'])): ?>
                                 <p style="font-size: 1.05rem; color: #475569; margin: 0 0 16px 0; line-height: 1.4; text-wrap: balance; font-weight: 500;">
@@ -981,7 +1022,7 @@
 
                     <!-- RISK PROFILE SECTION -->
                     <?php if (!empty($riskProfile)): ?>
-                        <div class="b2b-card" style="margin-bottom:24px; padding: 0; overflow: hidden; position: relative;">
+                        <div id="perfil-de-riesgo" class="b2b-card" style="margin-bottom:24px; padding: 0; overflow: hidden; position: relative; scroll-margin-top: 90px;">
                             
                             <!-- HEADER -->
                             <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: flex-start; background: #fff;">
@@ -2431,7 +2472,7 @@
                         <span style="color: #34d399; background: rgba(16, 185, 129, 0.2); padding: 8px; border-radius: 10px; display: inline-flex;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#icon-4d8be45b"></use></svg></span>
                         <div>
                             <strong style="color: #ffffff; display: block; margin-bottom: 4px; font-size: 1rem;">Índice de Estabilidad Societaria</strong>
-                            <span style="color: #94a3b8; font-size: 0.9rem; line-height: 1.4; display: block;">Análisis avanzado del riesgo de cierre o disolución basado en históricos mercantiles y societarios.</span>
+                            <span style="color: #94a3b8; font-size: 0.9rem; line-height: 1.4; display: block;">Gravedad de lo que consta en el Registro Mercantil: concursos, disoluciones, cierres de hoja y cuentas sin depositar.</span>
                         </div>
                     </li>
                     <li style="display: flex; gap: 12px; align-items: flex-start;">
@@ -2692,6 +2733,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         history.replaceState(null, '', window.location.pathname + (restoVig ? '?' + restoVig : '') + window.location.hash);
 
                         if (!data.is_watching) {
+                            btnWatch.dataset.origen = 'teaser';   // para medir esta entrada
                             btnWatch.click();
                         }
                         btnWatch.scrollIntoView({ behavior: 'smooth', block: 'center' });

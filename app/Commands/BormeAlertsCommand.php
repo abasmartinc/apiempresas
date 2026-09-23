@@ -266,6 +266,42 @@ class BormeAlertsCommand extends BaseCommand
     }
 
     /**
+     * El tope de vigilancias TAMBIÉN al enviar, no solo al dar de alta.
+     *
+     * `watch()` rechaza altas por encima del tope, pero nada miraba el tope al
+     * enviar: un suscriptor que llegó a 25 y se daba de baja conservaba las 25
+     * recibiendo avisos gratis — justo lo que había dejado de pagar.
+     *
+     * No se borra nada: el usuario sigue viendo toda su lista en el panel (en rojo,
+     * "25 de 5") y puede elegir cuáles quita. Solo se avisa de las N más recientes,
+     * el mismo criterio que usa el relleno inicial (recortarAlCupo).
+     */
+    private function limitarAlTope(array $watches): array
+    {
+        $servicio = new \App\Services\CompanyWatchService();
+        $porUsuario = [];
+        foreach ($watches as $w) {
+            $porUsuario[(int) $w['user_id']][] = $w;
+        }
+
+        $salida = [];
+        foreach ($porUsuario as $uid => $lista) {
+            $tope = (int) ($servicio->estadoCupo($uid)['tope'] ?? 0);
+
+            if ($tope <= 0 || count($lista) <= $tope) {
+                array_push($salida, ...$lista);
+                continue;
+            }
+
+            usort($lista, static fn ($a, $b) => (int) $b['watch_id'] <=> (int) $a['watch_id']);
+            array_push($salida, ...array_slice($lista, 0, $tope));
+            CLI::write("  - Usuario {$uid}: vigila " . count($lista) . " y su plan permite {$tope}; se avisa de las {$tope} más recientes.", 'yellow');
+        }
+
+        return $salida;
+    }
+
+    /**
      * Deja fuera del relleno lo que no cabe en el cupo gratuito de cada usuario.
      *
      * @param array<int,array<string,mixed>> $pendientes
@@ -346,7 +382,7 @@ class BormeAlertsCommand extends BaseCommand
             $builder->where('u.is_admin', 0);
         }
 
-        $watches = $builder->get()->getResultArray();
+        $watches = $this->limitarAlTope($builder->get()->getResultArray());
         if (empty($watches)) {
             // Sin esto el comando se calla y no hay forma de saber si no hay vigilancias,
             // si las hay pero el usuario está descartado, o si simplemente no hay actos.

@@ -163,6 +163,10 @@ class EmailAutomationCommand extends BaseCommand
                   WHERE us.status = 'active'
                     AND (ap.slug = 'risk_pro' OR ap.product_type = 'risk' OR ap.product_type = 'bundle')
               )
+              -- Quien tiene créditos de un pack comprado no está limitado por las 3
+              -- gratuitas: le llegaban \"límite 3/3 alcanzado\" y \"te quedan X gratis\"
+              -- justo después de pagar. Su secuencia es la del pack.
+              AND COALESCE(u.risk_credits, 0) = 0
         ", [$startOfMonth])->getResultArray();
 
         CLI::write("  - Candidatos de Riesgo / Freemium detectados: " . count($riskCandidates));
@@ -311,12 +315,15 @@ class EmailAutomationCommand extends BaseCommand
                   SELECT user_id FROM user_events 
                   WHERE event_type = 'purchase_risk_pack'
               )
+              -- Misma definición de \"ya tiene Solvencia\" que el resto de la secuencia:
+              -- antes solo miraba el slug risk_pro y a un cliente con bundle se le
+              -- ofrecía pasar a Pro teniéndolo ya.
               AND u.id NOT IN (
-                  SELECT us.user_id 
+                  SELECT us.user_id
                   FROM user_subscriptions us
                   JOIN api_plans ap ON ap.id = us.plan_id
-                  WHERE us.status = 'active'
-                    AND ap.slug = 'risk_pro'
+                  WHERE (us.status = 'active' OR (us.status = 'canceled' AND us.current_period_end > NOW()))
+                    AND (ap.slug = 'risk_pro' OR ap.product_type IN ('risk', 'bundle'))
               )
         ")->getResultArray();
 
@@ -325,6 +332,26 @@ class EmailAutomationCommand extends BaseCommand
         foreach ($packBuyers as $user) {
             $userId = (int)$user['id'];
             $remainingCredits = (int)($user['risk_credits'] ?? 0);
+
+            /*
+             * UNA vez por pack comprado. Antes se repetía cada 30 días para siempre a
+             * cualquiera que alguna vez compró un pack: a los seis meses seguía
+             * recibiendo "te queda 1 crédito". Solo se envía si no se ha enviado ya
+             * después de su última compra.
+             */
+            $ultimaCompra = $db->table('user_events')
+                ->selectMax('created_at', 'ultima')
+                ->where('user_id', $userId)
+                ->where('event_type', 'purchase_risk_pack')
+                ->get()->getRowArray()['ultima'] ?? null;
+            $yaTrasCompra = $ultimaCompra && $db->table('user_email_automation')
+                ->where('user_id', $userId)
+                ->where('email_type', 'risk_credits_low_upsell')
+                ->where('sent_at >=', $ultimaCompra)
+                ->countAllResults() > 0;
+            if ($yaTrasCompra) {
+                continue;
+            }
 
             if (!$this->automationModel->wasSentRecently($userId, 'risk_credits_low_upsell', 30)) {
                 CLI::write("  -> Enviando 'risk_credits_low_upsell' a {$user['email']} (Créditos: {$remainingCredits})...");

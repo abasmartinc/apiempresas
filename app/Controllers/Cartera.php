@@ -183,6 +183,14 @@ class Cartera extends BaseController
         $servicio = new CompanyWatchService();
         $riesgo   = new CompanyRiskService();
 
+        // Este mismo alta lo usan la guía del panel y la página de éxito de Pro. Sin
+        // distinguirlas, todo contaba como 'cartera' (y la guía daba por subida una
+        // cartera que nadie había subido).
+        $origen = (string) ($this->request->getPost('origen') ?? 'cartera');
+        if (!in_array($origen, ['cartera', 'onboarding', 'pro_success'], true)) {
+            $origen = 'cartera';
+        }
+
         $altas = 0;
         $yaEstaban = 0;
         $sinSitio = 0;     // no caben en el cupo
@@ -210,7 +218,7 @@ class Cartera extends BaseController
                 continue;   // sin tocar la base de datos: ya sabemos que no cabe
             }
 
-            if ($servicio->watch($userId, $cif, 'cartera')) {
+            if ($servicio->watch($userId, $cif, $origen)) {
                 $altas++;
                 $huecos--;
             } else {

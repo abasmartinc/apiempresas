@@ -993,9 +993,10 @@ document.addEventListener('DOMContentLoaded', function() {
             credentials: 'same-origin',
             cache: 'no-store',
             headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-            body: JSON.stringify({ cif: btn.dataset.cif || '' })
+            // `origen` lo pone la vuelta de "Avísame si cambia"; un clic normal es 'manual'.
+            body: JSON.stringify({ cif: btn.dataset.cif || '', source: btn.dataset.origen || 'manual' })
         })
-        .then(function (r) { return r.json(); })
+        .then(function (r) { delete btn.dataset.origen; return r.json(); })
         .then(function (data) {
             // Tope de vigilancias: no es un fallo, es una respuesta del producto.
             if (data && data.limite) {

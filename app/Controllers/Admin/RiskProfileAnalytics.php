@@ -560,6 +560,7 @@ class RiskProfileAnalytics extends BaseController
         $data = [
             'title' => 'Analítica de Perfil de Riesgo & Solvencia',
             'ui_events' => $ui,
+            'vigilancias_origen' => $this->vigilanciasPorOrigen($db ?? \Config\Database::connect(), $dateFrom, $dateTo),
             'mediana_dias_pago' => $medianaDiasPago,
             'period' => $period,
             'period_label' => $periodLabel,
@@ -879,6 +880,55 @@ class RiskProfileAnalytics extends BaseController
             log_message('error', '[RiskAnalytics] tracking_events ilegible: ' . $e->getMessage());
             return $vacio;
         }
+    }
+
+    /**
+     * Vigilancias creadas en el periodo, por origen.
+     *
+     * Responde a "¿la gente ELIGE vigilar o solo hereda altas automáticas?", y a
+     * cuál de las entradas funciona ("Avísame si cambia", el botón de la ficha, la
+     * cartera, la guía del panel, la página de éxito de Pro).
+     *
+     * Ojo: `created_at` es la PRIMERA alta. Una empresa que se deja de vigilar y se
+     * vuelve a vigilar conserva su fila y su fecha, pero `watch()` le pone el origen
+     * de la última alta.
+     */
+    private function vigilanciasPorOrigen($db, ?string $dateFrom, ?string $dateTo): array
+    {
+        try {
+            if (!$db->tableExists('user_company_watch')) {
+                return [];
+            }
+            $q = $db->table('user_company_watch w')
+                ->select('w.source, COUNT(*) AS total, SUM(w.active = 1) AS activas, COUNT(DISTINCT w.user_id) AS usuarios', false)
+                ->join('users u', 'u.id = w.user_id')
+                ->where('u.is_admin', 0);
+            if ($dateFrom) { $q->where('w.created_at >=', $dateFrom); }
+            if ($dateTo)   { $q->where('w.created_at <=', $dateTo); }
+
+            $filas = $q->groupBy('w.source')->orderBy('total', 'DESC')->get()->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', '[RiskProfileAnalytics] vigilanciasPorOrigen: ' . $e->getMessage());
+            return [];
+        }
+
+        $nombres = [
+            'teaser'      => '«Avísame si cambia» (ficha pública)',
+            'manual'      => 'Botón «Vigilar empresa» de la ficha',
+            'cartera'     => 'Carga de cartera (CSV)',
+            'onboarding'  => 'Guía del panel',
+            'pro_success' => 'Página de éxito de Pro',
+            'unlock'      => 'Automática al desbloquear un dictamen',
+            'search'      => 'Automática al buscar un CIF',
+            'auto'        => 'Relleno inicial (histórico)',
+        ];
+
+        foreach ($filas as &$f) {
+            $f['etiqueta'] = $nombres[$f['source'] ?? ''] ?? ('Otro: ' . ($f['source'] ?? '—'));
+            $f['elegida']  = in_array($f['source'], ['teaser', 'manual', 'cartera', 'onboarding', 'pro_success'], true);
+        }
+
+        return $filas;
     }
 
     private function getEmailTemplates()

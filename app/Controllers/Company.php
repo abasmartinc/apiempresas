@@ -1878,12 +1878,22 @@ class Company extends BaseController
                 'limite'   => true,
                 'watching' => false,
                 'cupo'     => $cupo,
-                'message'  => 'Ya vigilas ' . $cupo['tope'] . ' empresas, el máximo de la cuenta gratuita. '
-                            . 'Con Pro no hay límite; si no, deja de vigilar una para hacer sitio.',
+                // Decía "Con Pro no hay límite" (Pro tiene tope) y "máximo de la cuenta
+                // gratuita" también a quien ya es Pro.
+                'message'  => !empty($cupo['es_pro'])
+                    ? 'Ya vigilas ' . $cupo['tope'] . ' empresas, el máximo de Solvencia Pro. Deja de vigilar una para hacer sitio.'
+                    : 'Ya vigilas ' . $cupo['tope'] . ' empresas, el máximo del plan gratuito. Con Solvencia Pro son '
+                      . (int) solvencia('vigilanciasPro', 25) . '; si no, deja de vigilar una para hacer sitio.',
             ]);
         }
 
-        $watching = $servicio->toggle($userId, $rawCif);
+        // Origen del alta, solo de una lista cerrada (llega del navegador).
+        $origen = (string) ($payload['source'] ?? 'manual');
+        if (!in_array($origen, ['manual', 'teaser'], true)) {
+            $origen = 'manual';
+        }
+
+        $watching = $servicio->toggle($userId, $rawCif, $origen);
 
         return $response->setJSON([
             'ok'         => true,

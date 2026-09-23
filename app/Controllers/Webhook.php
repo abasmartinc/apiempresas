@@ -694,9 +694,32 @@ class Webhook extends Controller
         $stripeSubscriptionId = $subscription->id;
         $subscriptionModel = new UsersuscriptionsModel();
         
+        /*
+         * `customer.subscription.deleted` llega cuando la suscripción YA ha terminado:
+         * al final del periodo en una baja normal, al momento en una cancelación
+         * inmediata, o cuando Stripe se rinde con una tarjeta que no paga.
+         *
+         * Antes solo se ponía status = canceled y se dejaba current_period_end como
+         * estaba. Pero todo el producto trata "canceled con periodo por delante" como
+         * suscriptor (la baja normal conserva el acceso hasta el final), así que en
+         * los dos últimos casos el cliente seguía teniendo Solvencia Pro hasta un mes
+         * sin pagar. Se cierra el periodo en el momento real de fin.
+         */
+        $fin = !empty($subscription->ended_at) ? (int) $subscription->ended_at : time();
+        $ahora = date('Y-m-d H:i:s', min($fin, time()));
+
         $subscriptionModel->where('stripe_subscription_id', $stripeSubscriptionId)
                          ->set(['status' => 'canceled', 'canceled_at' => date('Y-m-d H:i:s')])
                          ->update();
+
+        // Solo se ACORTA: si por lo que sea la fecha guardada ya es anterior, se respeta.
+        \Config\Database::connect()->table('user_subscriptions')
+            ->where('stripe_subscription_id', $stripeSubscriptionId)
+            ->groupStart()
+                ->where('current_period_end IS NULL')
+                ->orWhere('current_period_end >', $ahora)
+            ->groupEnd()
+            ->update(['current_period_end' => $ahora]);
                          
         log_message('info', "[Webhook::stripe] Subscription canceled: {$stripeSubscriptionId}");
     }

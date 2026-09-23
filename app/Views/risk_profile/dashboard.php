@@ -247,14 +247,12 @@
                     ⭐ Solvencia Pro Activo
                 </span>
             <?php else: ?>
-                <form method="post" action="<?= site_url('billing/checkout') ?>" style="margin: 0;">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="plan" value="risk_pro">
-                    <input type="hidden" name="period" value="monthly">
-                    <button type="submit" style="background: #2563eb; color: #ffffff; border: none; padding: 9px 18px; border-radius: 10px; font-size: 0.85rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(37,99,235,0.25);" onmouseover="this.style.background='#1d4ed8';" onmouseout="this.style.background='#2563eb';">
-                        Activar Solvencia Pro (<?= solvencia('precios.pro_mensual', '29 €') ?>) ⭐
-                    </button>
-                </form>
+                <?php /* Iba directo al cobro mensual: sin opción anual y sin ver la garantía.
+                         La página de pago tiene las dos cosas. */ ?>
+                <a href="<?= site_url('billing?view=risk&plan=risk_pro') ?>" data-track-click="dash_hero_pro"
+                   style="background: #2563eb; color: #ffffff; border: none; padding: 9px 18px; border-radius: 10px; font-size: 0.85rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(37,99,235,0.25);" onmouseover="this.style.background='#1d4ed8';" onmouseout="this.style.background='#2563eb';">
+                    Activar Solvencia Pro (<?= solvencia('precios.pro_mensual', '29 €') ?>) ⭐
+                </a>
             <?php endif; ?>
         </div>
     </div>
@@ -315,6 +313,7 @@
                         <form method="post" action="<?= site_url('cartera/vigilar') ?>" style="margin: 0;">
                             <?= csrf_field() ?>
                             <input type="hidden" name="cifs[]" value="<?= esc($ppPrimera['cif'], 'attr') ?>">
+                            <input type="hidden" name="origen" value="onboarding">
                             <button type="submit" data-track-click="onboarding_vigilar" data-loading="Poniendo en vigilancia…"
                                     style="width: 100%; background: #2563eb; color: #fff; border: 0; border-radius: 9px; padding: 9px 12px; font-size: 0.82rem; font-weight: 800; cursor: pointer; text-align: left;">
                                 🔔 Vigilar <?= esc(company_short_name(company_display_name($ppPrimera['company_name'], $ppPrimera['cif']))) ?>
@@ -930,7 +929,7 @@
                 <!-- MRR: SOLVENCIA PRO -->
                 <div style="background: #ffffff; border: 2px solid #2563eb; border-radius: 16px; padding: 20px; text-align: center; width: 230px; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.12); display: flex; flex-direction: column; justify-content: space-between; position: relative;">
                     <div style="position: absolute; top: -11px; left: 50%; transform: translateX(-50%); background: #2563eb; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2px 10px; border-radius: 999px; text-transform: uppercase; white-space: nowrap;">
-                        ⭐ TARIFA PLANA
+                        ⭐ RECOMENDADO
                     </div>
                     <div>
                         <div style="font-size: 0.74rem; font-weight: 800; color: #1d4ed8; text-transform: uppercase; margin-top: 4px;">Solvencia Pro</div>
@@ -947,6 +946,19 @@
                             Activar Pro ⭐
                         </button>
                     </form>
+                    <?php /* Solo mensual y sin garantía a la vista: el resto de la web ofrece
+                             las dos cosas y aquí se perdían. */ ?>
+                    <form method="post" action="<?= site_url('billing/checkout') ?>" style="margin: 8px 0 0;">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="plan" value="risk_pro">
+                        <input type="hidden" name="period" value="annual">
+                        <button type="submit" style="background: none; border: none; padding: 0; color: #2563eb; font-size: 0.76rem; font-weight: 700; cursor: pointer; text-decoration: underline;">
+                            o anual: <?= solvencia('precios.pro_anual', '290 €') ?> + IVA (ahorras <?= solvencia('precios.pro_anual_ahorro', '58 €') ?>)
+                        </button>
+                    </form>
+                    <?php if (solvencia('garantiaActiva', true)): ?>
+                        <div style="margin-top: 8px; font-size: 0.72rem; color: #047857;">🛡️ <?= (int) solvencia('garantiaDias', 30) ?> días de garantía</div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

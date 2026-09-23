@@ -481,6 +481,51 @@
         <?php endif; ?>
     </div>
 
+    <!-- VIGILANCIAS POR ORIGEN -->
+    <div class="card" style="padding: 1.75rem; margin-bottom: 1.5rem;">
+        <div style="margin-bottom: 1rem;">
+            <h3 style="margin: 0 0 4px 0; font-size: 1.25rem; color: #0f172a; font-weight: 800;">Vigilancias por origen</h3>
+            <p style="margin: 0; font-size: 0.85rem; color: #64748b;">
+                De dónde salen las empresas vigiladas (sin administradores) &bull; <?= esc($period_label) ?>.
+                «Elegida» = el usuario pulsó algo; el resto son altas automáticas.
+            </p>
+        </div>
+        <?php if (empty($vigilancias_origen)): ?>
+            <p style="margin: 0; font-size: 0.9rem; color: #94a3b8;">Sin vigilancias nuevas en este periodo.</p>
+        <?php else: ?>
+            <?php $vigTotal = array_sum(array_map('intval', array_column($vigilancias_origen, 'total'))); ?>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+                    <thead>
+                        <tr style="text-align: left; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.4px;">
+                            <th style="padding: 8px 10px;">Origen</th>
+                            <th style="padding: 8px 10px; text-align: right;">Altas</th>
+                            <th style="padding: 8px 10px; text-align: right;">%</th>
+                            <th style="padding: 8px 10px; text-align: right;">Siguen activas</th>
+                            <th style="padding: 8px 10px; text-align: right;">Usuarios</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($vigilancias_origen as $vo): ?>
+                            <tr style="border-top: 1px solid #f1f5f9;">
+                                <td style="padding: 9px 10px; color: #0f172a; font-weight: 600;">
+                                    <?= esc($vo['etiqueta']) ?>
+                                    <?php if (!empty($vo['elegida'])): ?>
+                                        <span style="font-size: 0.68rem; font-weight: 800; color: #047857; background: #ecfdf5; border-radius: 999px; padding: 1px 7px; margin-left: 4px;">ELEGIDA</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td style="padding: 9px 10px; text-align: right; font-weight: 800;"><?= number_format((int) $vo['total'], 0, ',', '.') ?></td>
+                                <td style="padding: 9px 10px; text-align: right; color: #64748b;"><?= $vigTotal > 0 ? number_format(100 * (int) $vo['total'] / $vigTotal, 0, ',', '.') . ' %' : '—' ?></td>
+                                <td style="padding: 9px 10px; text-align: right;"><?= number_format((int) $vo['activas'], 0, ',', '.') ?></td>
+                                <td style="padding: 9px 10px; text-align: right;"><?= number_format((int) $vo['usuarios'], 0, ',', '.') ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </div>
+
     <!-- Panel de Usuarios con Filtro de Segmentación -->
     <div class="card" style="padding: 1.75rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">

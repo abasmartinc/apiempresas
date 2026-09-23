@@ -169,9 +169,9 @@ class EmailService
     /**
      * Alerta de movimiento en el BORME para las empresas que el usuario vigila.
      *
-     * El gating es la clave del producto: el gratuito ve QUÉ empresa se ha movido y
-     * cuántos actos hay, pero no cuáles. El detalle (tipo de acto y descripción) es
-     * lo que paga Solvencia Pro, y es también el motivo para volver a la ficha.
+     * El gratuito ve qué empresa se ha movido, el TIPO de acto (lo grave, en rojo) y
+     * la fecha del último movimiento, más un bloque de Solvencia Pro. El detalle de
+     * cada acto (quién entra, quién sale, qué capital) es lo que paga Pro.
      *
      * @param array $empresas Salida de BormeAlertsCommand: nombre, cif, company_id, actos[]
      */
@@ -299,6 +299,35 @@ class EmailService
                 . ' empresa(s) más con movimientos.</p>';
         }
 
+        /*
+         * BLOQUE DE PRO PARA EL GRATUITO.
+         *
+         * Este correo es el momento de más disposición a pagar de todo el producto: la
+         * vigilancia acaba de demostrar que funciona, con una empresa suya. Hasta ahora
+         * la única invitación era una línea gris al pie. Se dice lo que añade Pro sobre
+         * lo que ya tiene (el detalle de cada acto y 25 empresas en vez de 5), el
+         * precio y la garantía. Lo que el gratuito ya recibe (el tipo de acto, lo grave
+         * en rojo) no cambia.
+         */
+        if (!$isSubscriber) {
+            $vigGratis = (int) solvencia('vigilanciasGratis', 5);
+            $vigPro    = (int) solvencia('vigilanciasPro', 25);
+            $garantia  = solvencia('garantiaActiva', true)
+                ? ' · ' . (int) solvencia('garantiaDias', 30) . ' días de garantía'
+                : '';
+
+            $filas .= '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:18px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px;">'
+                . '<tr><td style="padding:16px 18px;">'
+                . '<div style="font-size:15px; font-weight:800; color:#1e3a8a; margin-bottom:6px;">Con Solvencia Pro, el detalle en este mismo correo</div>'
+                . '<div style="font-size:13.5px; color:#1e40af; line-height:1.55; margin-bottom:12px;">'
+                . 'Quién entra y quién sale, qué capital y qué cargo, con la fecha de cada acto, sin tener que entrar a buscarlo. '
+                . 'Y vigilas hasta <strong>' . $vigPro . ' empresas</strong> en vez de ' . $vigGratis . '.'
+                . '</div>'
+                . '<a href="' . site_url('billing?view=risk&plan=risk_pro') . '" style="display:inline-block; background:#2563eb; color:#ffffff; font-size:14px; font-weight:700; padding:10px 18px; border-radius:9px; text-decoration:none;">Ver Solvencia Pro</a>'
+                . '<span style="font-size:12px; color:#3b82f6; margin-left:10px;">' . esc(solvencia('precios.pro_mensual', '29 €')) . '/mes + IVA · sin permanencia' . $garantia . '</span>'
+                . '</td></tr></table>';
+        }
+
         // El asunto va encabezado por el nombre de la empresa: es lo único que el
         // destinatario reconoce de un vistazo, y si va detrás de una frase genérica
         // el cliente de correo lo corta justo antes de llegar.
@@ -361,7 +390,8 @@ class EmailService
             'button_text'     => $isSubscriber ? 'Ver los movimientos' : 'Ver qué ha cambiado',
             'footer_note'     => $isSubscriber
                 ? 'Vigilancia de tu cartera incluida en el plan Solvencia Pro.'
-                : 'Con Solvencia Pro recibes el detalle de cada acto directamente en este correo.',
+                // Al gratuito ya se lo cuenta el bloque de Pro de arriba; repetirlo aquí sobra.
+                : '',
         ];
 
         return $this->sendTemplateEmail('borme_alert', $templateData, $userData['email'], [], [], $userData['user_id'] ?? 0);

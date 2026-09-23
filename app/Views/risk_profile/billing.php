@@ -301,15 +301,17 @@ $eurosLargo = static fn (float $n): string => number_format($n, 2, ',', '.');
                     &nbsp;
                 </div>
 
-                <!-- CARACTERÍSTICAS EXCLUSIVAS DE SOLVENCIA -->
+                <!-- CARACTERÍSTICAS EXCLUSIVAS DE SOLVENCIA.
+                     La vigilancia salía CUATRO veces con otras palabras (y una prometía
+                     "embargos", que el BORME no publica). Una línea por ventaja real. -->
                 <ul class="risk-feature-list">
                     <li class="risk-feature-item">
                         <div class="risk-feature-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         </div>
                         <div>
-                            <strong style="color: #0f172a;">Vigilancia continua del Registro Mercantil:</strong>
-                            <span style="color: #475569;"> te avisamos por correo el mismo día que aparece un acto nuevo en el BORME a nombre de cualquiera de las empresas que has consultado. Dejas de tener que volver a mirarlas.</span>
+                            <strong style="color: #0f172a;">Vigilancia de hasta <?= (int) solvencia('vigilanciasPro', 25) ?> empresas:</strong>
+                            <span style="color: #475569;"> te escribimos el mismo día que el BORME publica algo de ellas: un concurso, una disolución, un cese de administrador o un cierre de hoja registral.</span>
                         </div>
                     </li>
                     <li class="risk-feature-item">
@@ -317,8 +319,8 @@ $eurosLargo = static fn (float $n): string => number_format($n, 2, ',', '.');
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         </div>
                         <div>
-                            <strong style="color: #0f172a;">Cartera vigilada de hasta <?= (int) solvencia('vigilanciasPro', 25) ?> empresas:</strong>
-                            <span style="color: #475569;"> te avisamos por correo el día que cualquiera de ellas se mueva en el BORME, sin que tengas que volver a mirarlas.</span>
+                            <strong style="color: #0f172a;">El detalle de cada acto en el aviso:</strong>
+                            <span style="color: #475569;"> qué se ha publicado y cuándo, sin tener que entrar a buscarlo. El plan gratuito solo avisa de que hay algo.</span>
                         </div>
                     </li>
                     <li class="risk-feature-item">
@@ -326,17 +328,15 @@ $eurosLargo = static fn (float $n): string => number_format($n, 2, ',', '.');
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         </div>
                         <div>
-                            <?php
-                            /*
-                             * Decía "scoring predictivo de impago" e "índice de probabilidad de
-                             * morosidad". La validación temporal del 16-09 (50.000 empresas,
-                             * corte 2023, horizonte 24 meses) dio AUC 0,468 sobre la cartera
-                             * viva: el score NO predice hechos futuros. Lo que sí hace, y muy
-                             * bien, es medir la gravedad de lo que ya consta publicado.
-                             * Prometer una probabilidad que no se ha medido nunca es lo mismo
-                             * que el "dictamen oficial" que ya quitamos, en la pantalla del cobro.
-                             */
-                            ?>
+                            <strong style="color: #0f172a;"><?= (int) solvencia('consultasPro', 300) ?> consultas al mes:</strong>
+                            <span style="color: #475569;"> el dictamen completo de cualquier empresa de España, con cada acto del BORME y su fecha.</span>
+                        </div>
+                    </li>
+                    <li class="risk-feature-item">
+                        <div class="risk-feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                        <div>
                             <strong style="color: #0f172a;">Índice de solvencia IES (0 - 100):</strong>
                             <span style="color: #475569;"> resume en una cifra la gravedad de lo que consta en el Registro Mercantil: concursos, cierres de hoja, disoluciones y retrasos en el depósito de cuentas.</span>
                         </div>
@@ -346,55 +346,17 @@ $eurosLargo = static fn (float $n): string => number_format($n, 2, ',', '.');
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         </div>
                         <div>
-                            <strong style="color: #0f172a;">Informes ejecutivos en PDF:</strong>
-                            <?php // "sello oficial de solvencia": no hay sello, y lo oficial es la fuente. ?>
-                            <span style="color: #475569;"> con la puntuación, el histórico del BORME y la fecha de emisión, listos para adjuntar a una operación o a un comité.</span>
-                        </div>
-                    </li>
-                    <li class="risk-feature-item">
-                        <div class="risk-feature-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        </div>
-                        <div>
-                            <?php
-                            /*
-                             * Aquí se prometía "balance, facturación, endeudamiento, fondo de
-                             * maniobra y evolución de resultados". La aplicación NO TIENE ni un
-                             * dato financiero: ni balances, ni ventas, ni EBITDA. Ninguna cifra
-                             * de esas se calcula, se guarda ni se muestra en ninguna pantalla.
-                             * Era la promesa más gruesa de la página del cobro.
-                             */
-                            ?>
-                            <strong style="color: #0f172a;">Vigilancia diaria del BORME:</strong>
-                            <span style="color: #475569;"> hasta 25 empresas en seguimiento, y un correo el mismo día en que a una de ellas le publican algo.</span>
-                        </div>
-                    </li>
-                    <li class="risk-feature-item">
-                        <div class="risk-feature-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        </div>
-                        <div>
-                            <strong style="color: #0f172a;">Vigilancia y alertas BORME:</strong>
-                            <span style="color: #475569;"> detección inmediata de concursos de acreedores, embargos, disoluciones y cambios de administradores.</span>
-                        </div>
-                    </li>
-                    <li class="risk-feature-item">
-                        <div class="risk-feature-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        </div>
-                        <div>
-                            <?php
-                            /*
-                             * Aquí se anunciaba un "límite de crédito comercial sugerido"
-                             * —"recomendación calculada"— que NO EXISTE: no hay una sola línea
-                             * en el motor ni en la aplicación que lo calcule. Se prometía en la
-                             * pantalla del cobro, en el correo de bienvenida de Pro y en los
-                             * datos estructurados que lee Google. Sustituido por una función
-                             * que sí está construida.
-                             */
-                            ?>
                             <strong style="color: #0f172a;">Tu cartera de un vistazo:</strong>
-                            <span style="color: #475569;"> sube tus clientes en CSV y ve de golpe cuáles tienen incidencias, sin buscarlos uno a uno.</span>
+                            <span style="color: #475569;"> sube tus clientes en CSV, míralos ordenados por riesgo con su puntuación y descárgalo en Excel.</span>
+                        </div>
+                    </li>
+                    <li class="risk-feature-item">
+                        <div class="risk-feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                        <div>
+                            <strong style="color: #0f172a;">Informes en PDF:</strong>
+                            <span style="color: #475569;"> con la puntuación, el histórico del BORME y la fecha de emisión, listos para adjuntar a un expediente.</span>
                         </div>
                     </li>
                     <li class="risk-feature-item">
@@ -403,12 +365,21 @@ $eurosLargo = static fn (float $n): string => number_format($n, 2, ',', '.');
                         </div>
                         <div>
                             <strong style="color: #0f172a;">Sin permanencia:</strong>
-                            <span style="color: #475569;"> cancela tu suscripción en 1 solo clic desde tu panel cuando lo decidas.</span>
+                            <span style="color: #475569;"> cancelas en un clic desde tu panel cuando quieras.</span>
                         </div>
                     </li>
                 </ul>
 
-                <!-- FORMULARIO DE CHECKOUT DIRECTO STRIPE -->
+                <!-- FORMULARIO DE CHECKOUT DIRECTO STRIPE.
+                     Un suscriptor veía "tu plan está activo" y, debajo, este mismo
+                     formulario: nada le impedía pagar una segunda suscripción. Ahora no se
+                     pinta (y Billing::checkout lo rechaza igualmente). -->
+                <?php if (!empty($is_risk_subscribed)): ?>
+                    <div style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; border-radius: 12px; padding: 14px 16px; font-size: 0.9rem; font-weight: 700; text-align: center;">
+                        ✓ Ya tienes Solvencia Pro. Para cambiar de mensual a anual o darte de baja,
+                        <a href="<?= site_url('billing/portal') ?>" style="color: #047857; text-decoration: underline;">gestiona tu suscripción</a>.
+                    </div>
+                <?php else: ?>
                 <div style="border-top: 1px solid #f1f5f9; padding-top: 28px; margin-top: 28px;">
                     <form id="riskCheckoutForm" method="post" action="<?= site_url('billing/checkout') ?>">
                         <?= csrf_field() ?>
@@ -438,6 +409,7 @@ $eurosLargo = static fn (float $n): string => number_format($n, 2, ',', '.');
                         Pago seguro cifrado SSL vía Stripe · Activación inmediata
                     </div>
                 </div>
+                <?php endif; ?>
             </div>
 
             <!-- ALTERNATIVA SIN SUSCRIPCIÓN: PACK 5 AUDITORÍAS (TRIPWIRE) -->
@@ -558,9 +530,9 @@ $eurosLargo = static fn (float $n): string => number_format($n, 2, ',', '.');
                     <div style="border: 1px solid #e2e8f0; border-radius: 6px; width: 48px; height: 30px; display: flex; align-items: center; justify-content: center; background: #fff;">
                         <span style="font-family: Arial, sans-serif; font-weight: 800; color: #016fd0; font-size: 10px;">AMEX</span>
                     </div>
-                    <div style="border: 1px solid #e2e8f0; border-radius: 6px; width: 48px; height: 30px; display: flex; align-items: center; justify-content: center; background: #fff;">
-                        <span style="font-family: Arial, sans-serif; font-style: italic; font-weight: 800; color: #003087; font-size: 11px;">PayPal</span>
-                    </div>
+                    <?php /* Aquí iba el logo de PayPal, y PayPal no se puede usar: el pago va
+                             siempre por Stripe. Anunciar un medio de pago que no existe es de lo
+                             que más enfada en la pantalla del cobro. */ ?>
                 </div>
 
                 <?php
