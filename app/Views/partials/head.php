@@ -636,7 +636,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var URL_PERFIL   = '<?= site_url('profile') ?>';
     var URL_ACTIVAR  = '<?= site_url('api/usuario/activar-avisos') ?>';
-    var URL_PRO      = '<?= site_url('planes/pro') ?>';
+    // Solvencia Pro, no el plan Pro de la API (planes/pro, 19 €): el aviso de lista
+    // de vigilancia llena mandaba al producto equivocado.
+    var URL_PRO      = '<?= site_url('billing?view=risk&plan=risk_pro') ?>';
     <?php helper('company'); ?>
     var CUOTA_GRATIS = <?= (int) solvencia('consultasGratis', 3) ?>;
 

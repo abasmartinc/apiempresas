@@ -82,6 +82,17 @@ class Solvencia extends BaseConfig
      */
     public int $consultasPro = 300;
 
+    /**
+     * Carga de cartera: de cuántas empresas ve el NIVEL un usuario gratuito.
+     *
+     * Antes el gratuito veía la puntuación de las 2.000 filas y se la podía
+     * descargar en CSV: el tope de 3 consultas al mes y el CSV de 14 € no
+     * servían de nada. Ahora ve el nivel (sin puntuación) de las N con más
+     * riesgo —que es justo lo que le demuestra el valor— y el resto aparece sin
+     * dato, con la salida a Pro. La puntuación y la exportación son de Pro.
+     */
+    public int $carteraNivelesGratis = 25;
+
     // -------------------------------------------------------------------
     // Cortes del nivel de riesgo
     // -------------------------------------------------------------------

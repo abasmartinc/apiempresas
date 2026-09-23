@@ -100,6 +100,46 @@ class Cartera extends BaseController
         $cifsEncontrados = array_column($encontradas, 'cif');
         $noEncontrados   = array_values(array_diff($lectura['cifs'], $cifsEncontrados));
 
+        // El recuento de "tienen algo" se hace sobre TODAS, antes de ocultar nada:
+        // "37 de tus clientes tienen algo registrado y ves 25" es el mejor argumento
+        // de venta de toda la pantalla, y no revela de cuáles se trata.
+        $conRiesgo = 0;
+        foreach ($encontradas as $e) {
+            if ($e['score'] !== null && $e['score'] >= (int) solvencia('umbralMedio', 30)) {
+                $conRiesgo++;
+            }
+        }
+
+        $esPro   = $this->tienePro($userId);
+        $gratis  = max(0, (int) solvencia('carteraNivelesGratis', 25));
+        $ocultas = 0;
+
+        foreach ($encontradas as $i => &$e) {
+            $e['visual'] = $e['score'] !== null ? risk_level_visual((int) $e['score']) : null;
+            $e['oculta'] = false;
+
+            if (!$esPro) {
+                // La puntuación NO sale del servidor para un gratuito: esconderla solo
+                // en la vista dejaría el número en el HTML.
+                $e['score'] = null;
+                if ($i >= $gratis) {
+                    $e['visual'] = null;
+                    $e['oculta'] = true;
+                    $ocultas++;
+                }
+            }
+        }
+        unset($e);
+
+        if ($ocultas > 0) {
+            // Las ocultas, por nombre y no por riesgo: en el orden de riesgo su
+            // posición ya diría cómo de mal está cada una.
+            $visibles = array_values(array_filter($encontradas, static fn ($e) => !$e['oculta']));
+            $resto    = array_values(array_filter($encontradas, static fn ($e) => $e['oculta']));
+            usort($resto, static fn ($a, $b) => strcmp((string) $a['nombre'], (string) $b['nombre']));
+            $encontradas = array_merge($visibles, $resto);
+        }
+
         return $this->renderView('risk_profile/cartera_resultado', [
             'title'         => 'Tu cartera analizada | APIEmpresas',
             'empresas'      => $encontradas,
@@ -108,7 +148,20 @@ class Cartera extends BaseController
             'descartados'   => $lectura['descartados'],
             'truncado'      => $lectura['truncado'],
             'cupo'          => (new CompanyWatchService())->estadoCupo($userId),
+            'esPro'         => $esPro,
+            'conRiesgo'     => $conRiesgo,
+            'ocultas'       => $ocultas,
+            'nivelesGratis' => $gratis,
         ]);
+    }
+
+    /**
+     * ¿Ve la cartera completa (puntuación, todas las filas, exportar)?
+     * Solvencia Pro, o un administrador para poder probarlo.
+     */
+    private function tienePro(int $userId): bool
+    {
+        return (bool) session('is_admin') || (new CompanyWatchService())->esSuscriptor($userId);
     }
 
     /**
@@ -207,6 +260,15 @@ class Cartera extends BaseController
         }
 
         $userId = (int) session('user_id');
+
+        // Exportar es de Pro. Antes cualquier registrado gratuito se descargaba la
+        // puntuación de hasta 2.000 empresas por envío, y la lista llega por POST,
+        // así que ni siquiera hacía falta subir un fichero.
+        if (!$this->tienePro($userId)) {
+            return redirect()->to(site_url('billing?view=risk&plan=risk_pro'))
+                ->with('error', 'Descargar la cartera en CSV, con la puntuación de cada empresa, está incluido en Solvencia Pro.');
+        }
+
         $riesgo = new CompanyRiskService();
 
         $brutos = (string) ($this->request->getPost('lista') ?? '');

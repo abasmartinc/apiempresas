@@ -16,7 +16,7 @@
                     <tr>
                         <td align="center" style="background: linear-gradient(135deg, #2152FF 0%, #10B981 100%); padding: 28px 20px;">
                             <h1 style="margin: 0; color: #ffffff; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">APIEmpresas.es</h1>
-                            <p style="margin: 6px 0 0; color: rgba(255,255,255,0.92); font-size: 14px; font-weight: 500;">Informes de Solvencia, Riesgo y Datos Mercantiles Oficiales</p>
+                            <p style="margin: 6px 0 0; color: rgba(255,255,255,0.92); font-size: 14px; font-weight: 500;">Solvencia y vigilancia del Registro Mercantil</p>
                         </td>
                     </tr>
                     
@@ -32,7 +32,7 @@
                                 Te informamos de que {credits_status_phrase} de tu pack de auditorías de solvencia mercantil.
                             </p>
                             <p style="margin: 0 0 22px; color: #475569; font-size: 15px; line-height: 1.6;">
-                                Si tienes previsto analizar más clientes o proveedores este mes para prevenir impagos y comprobar su scoring oficial, te interesará dar el salto a <strong>Solvencia Pro</strong>:
+                                Si tienes previsto analizar más clientes o proveedores este mes antes de venderles a crédito, te interesará dar el salto a <strong>Solvencia Pro</strong>:
                             </p>
 
                             <!-- Featured Upgrade Card -->
@@ -40,26 +40,26 @@
                                 <tr>
                                     <td style="padding: 24px;">
                                         <span style="background: #2563eb; color: #ffffff; font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.05em;">RECOMENDADO</span>
-                                        <h3 style="margin: 10px 0 4px; color: #0f172a; font-size: 18px; font-weight: 800;">Solvencia Pro (Tarifa Plana Ilimitada)</h3>
+                                        <h3 style="margin: 10px 0 4px; color: #0f172a; font-size: 18px; font-weight: 800;">Solvencia Pro</h3>
                                         <div style="font-size: 24px; font-weight: 900; color: #1d4ed8; margin-bottom: 12px;">29 € <span style="font-size: 13px; color: #64748b; font-weight: 600;">/ mes</span></div>
                                         
                                         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 16px;">
                                             <tr>
                                                 <td width="22" valign="top" style="color: #2563eb; font-weight: 800; font-size: 14px;">✓</td>
                                                 <td style="color: #334155; font-size: 13.5px; line-height: 1.4; padding-bottom: 6px;">
-                                                    <strong>Consultas y auditorías 100% ilimitadas</strong> de cualquier empresa de España.
+                                                    <strong>300 consultas al mes</strong> de cualquier empresa de España, sin ir recargando packs.
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td width="22" valign="top" style="color: #2563eb; font-weight: 800; font-size: 14px;">✓</td>
                                                 <td style="color: #334155; font-size: 13.5px; line-height: 1.4; padding-bottom: 6px;">
-                                                    <strong>Descarga de dictámenes oficiales en PDF</strong> con sello de solvencia.
+                                                    <strong>Vigilancia de hasta 25 empresas:</strong> te escribimos el día que el BORME publique algo de ellas.
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td width="22" valign="top" style="color: #2563eb; font-weight: 800; font-size: 14px;">✓</td>
                                                 <td style="color: #334155; font-size: 13.5px; line-height: 1.4; padding-bottom: 6px;">
-                                                    <strong>Sin permanencia:</strong> Úsalo los meses que tengas operaciones y cancela en 1 clic cuando quieras.
+                                                    <strong>Sin permanencia:</strong> Úsalo los meses que tengas operaciones y cancela en 1 clic cuando quieras. 30 días de garantía.
                                                 </td>
                                             </tr>
                                         </table>
@@ -68,7 +68,7 @@
                                             <tr>
                                                 <td align="center">
                                                     <a href="{button_url}" target="_blank" style="display: block; text-align: center; background: #2563eb; color: #ffffff !important; padding: 13px 24px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 14px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);">
-                                                        ⚡ Pasar a Solvencia Pro (29 € / mes)
+                                                        ⚡ Pasar a Solvencia Pro (29 €/mes + IVA)
                                                     </a>
                                                 </td>
                                             </tr>
@@ -89,7 +89,7 @@
                     <tr>
                         <td style="padding: 0 35px 30px;">
                             <p style="margin: 0; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 12px; text-align: center; line-height: 1.5;">
-                                APIEmpresas.es te ayuda a prevenir impagos y auditar a tus clientes antes de conceder crédito comercial.<br>
+                                APIEmpresas.es te dice qué consta en el Registro Mercantil de tus clientes y te avisa cuando cambia.<br>
                                 &copy; APIEmpresas España.
                             </p>
                         </td>

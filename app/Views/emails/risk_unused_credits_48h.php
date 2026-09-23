@@ -37,7 +37,7 @@
                                             <tr>
                                                 <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">🛡️</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
-                                                    <strong>Semáforo de solvencia y scoring:</strong> Prevé impagos, concurso de acreedores o retrasos habituales.
+                                                    <strong>Índice de gravedad y semáforo:</strong> lo que consta en el Registro Mercantil y cuánto pesa, de 0 a 100.
                                                 </td>
                                             </tr>
                                         </table>
@@ -46,7 +46,7 @@
                                             <tr>
                                                 <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">💶</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
-                                                    <strong>Límite de crédito comercial:</strong> Conoce el importe máximo seguro para aplazar pagos a ese cliente.
+                                                    <strong>Cuentas anuales:</strong> si las deposita o lleva ejercicios sin hacerlo.
                                                 </td>
                                             </tr>
                                         </table>
@@ -55,7 +55,7 @@
                                             <tr>
                                                 <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">📑</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
-                                                    <strong>Actos mercantiles recientes:</strong> Embargos, cambios de administradores y publicaciones en el BORME.
+                                                    <strong>Actos mercantiles recientes:</strong> Concursos, disoluciones, cambios de administradores y publicaciones en el BORME.
                                                 </td>
                                             </tr>
                                         </table>

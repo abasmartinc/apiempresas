@@ -43,8 +43,14 @@
 
         <div style="margin-top: 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 13px 16px; font-size: 0.85rem; color: #1e3a8a; line-height: 1.5;">
             <strong>Subir la cartera no gasta consultas.</strong>
-            Verás el nombre, el CIF y la puntuación de cada empresa sin consumir nada; el dictamen
-            completo de una empresa concreta sigue siendo una consulta aparte.
+            <?php if (!empty($cupo['es_pro']) || session('is_admin')): ?>
+                Verás la puntuación de cada empresa ordenada por riesgo y podrás descargarla en CSV; el
+                dictamen completo de una empresa concreta sigue siendo una consulta aparte.
+            <?php else: ?>
+                Te decimos el nivel de riesgo de las <?= (int) solvencia('carteraNivelesGratis', 25) ?> empresas
+                con más riesgo de tu lista, sin consumir nada. Con Solvencia Pro ves la puntuación de todas y
+                la descargas en CSV.
+            <?php endif; ?>
         </div>
 
         <div style="margin-top: 14px; font-size: 0.83rem; color: #64748b; line-height: 1.55;">

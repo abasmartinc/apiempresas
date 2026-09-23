@@ -53,7 +53,7 @@ class SeedEmailTemplates extends BaseCommand
             [
                 'slug'    => 'risk_unused_credits_48h',
                 'name'    => 'Recordatorio Créditos de Riesgo (24h-72h)',
-                'subject' => '🛡️ Tienes {remaining_credits} consultas de solvencia gratuitas disponibles este mes',
+                'subject' => '🛡️ Consultas de solvencia gratis que aún puedes usar este mes: {remaining_credits}',
                 'view'    => 'risk_unused_credits_48h',
                 'vars'    => '{name}, {remaining_credits}, {button_url}',
                 'trigger' => 'Se envía a usuarios de riesgo tras 24h-72h del registro si aún les quedan créditos gratuitos sin consumir.'
@@ -69,7 +69,7 @@ class SeedEmailTemplates extends BaseCommand
             [
                 'slug'    => 'risk_paywall_abandoned',
                 'name'    => 'Paywall de Riesgo Alcanzado (Límite 3/3)',
-                'subject' => '⚠️ Desbloquea el dictamen de solvencia oficial de {company_name}',
+                'subject' => 'Has usado tus 3 consultas de este mes: cómo seguir revisando clientes',
                 'view'    => 'risk_paywall_abandoned',
                 'vars'    => '{name}, {company_name}, {button_url}, {pdf_url}',
                 'trigger' => 'Se envía 2h tras agotar las 3 consultas gratuitas de riesgo al intentar auditar una empresa.'
@@ -93,7 +93,7 @@ class SeedEmailTemplates extends BaseCommand
             [
                 'slug'    => 'risk_credits_low_upsell',
                 'name'    => 'Upsell Solvencia Pro (Créditos de Pack Bajos/Agotados)',
-                'subject' => '⚠️ Saldo de auditorías ({remaining_credits_text}): pásate a Solvencia Pro',
+                'subject' => 'Saldo de auditorías ({remaining_credits_text}): Solvencia Pro vigila tu cartera por ti',
                 'view'    => 'risk_credits_low_upsell',
                 'vars'    => '{name}, {remaining_credits_text}, {credits_status_phrase}, {button_url}, {pack_url}',
                 'trigger' => 'Se envía automáticamente a compradores de packs cuando les queda <= 1 crédito para ofrecer Solvencia Pro.'

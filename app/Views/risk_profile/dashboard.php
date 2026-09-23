@@ -539,14 +539,14 @@
                     <a href="<?= site_url('tickets/create') ?>" style="color: #9a3412; font-weight: 700;">Si necesitas más, escríbenos</a>.
                 <?php else: ?>
                     Para añadir otra, deja de vigilar una de abajo, o
-                    <a href="<?= site_url('planes/pro') ?>" style="color: #9a3412; font-weight: 700;">pasa a Pro y vigila hasta <?= (int) solvencia('vigilanciasPro', 25) ?></a>.
+                    <a href="<?= site_url('billing?view=risk&plan=risk_pro') ?>" style="color: #9a3412; font-weight: 700;">pasa a Pro y vigila hasta <?= (int) solvencia('vigilanciasPro', 25) ?></a>.
                 <?php endif; ?>
             </div>
         <?php elseif (!empty($watches) && (int) $cupoV['quedan'] === 1): ?>
             <div style="margin-top: 16px; background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; padding: 11px 15px; border-radius: 11px; font-size: 0.85rem; line-height: 1.5;">
                 Te queda <strong>1 hueco</strong> de los <?= (int) $cupoV['tope'] ?><?= $vEsPro ? ' de tu plan' : ' de la cuenta gratuita' ?>.
                 <?php if (!$vEsPro): ?>
-                    <a href="<?= site_url('planes/pro') ?>" style="color: #2563eb; font-weight: 700;">Con Pro son <?= (int) solvencia('vigilanciasPro', 25) ?></a>.
+                    <a href="<?= site_url('billing?view=risk&plan=risk_pro') ?>" style="color: #2563eb; font-weight: 700;">Con Pro son <?= (int) solvencia('vigilanciasPro', 25) ?></a>.
                 <?php endif; ?>
             </div>
         <?php endif; ?>

@@ -12,7 +12,7 @@
             <div class="kicker">SUSCRIPCIÓN CONFIRMADA</div>
 
             <div class="title-row">
-                <h1>Plan Solvencia Pro activado.<br>Consultas y dictámenes ilimitados.</h1>
+                <h1>Solvencia Pro activado.<br>Ya vigilamos el BORME por ti.</h1>
                 <span class="status-badge">
                     <span class="status-ic" aria-hidden="true"></span>
                     Confirmado
@@ -20,16 +20,19 @@
             </div>
 
             <p class="sub">
-                Hemos confirmado tu pago y tu plan <strong>Solvencia Pro</strong> ya está activo. Ya puedes consultar el scoring de estabilidad societaria, semáforo de riesgo y alertas BORME de cualquier empresa en España sin límites ni bloqueos.
+                Hemos confirmado tu pago y tu plan <strong>Solvencia Pro</strong> ya está activo. Puedes poner <strong>hasta <?= (int) solvencia('vigilanciasPro', 25) ?> empresas en vigilancia</strong> —te escribimos el día que el BORME publique algo de ellas— y consultar el dictamen de <?= (int) solvencia('consultasPro', 300) ?> empresas al mes.
+                <?php if (solvencia('garantiaActiva', true)): ?>
+                    Tienes <?= (int) solvencia('garantiaDias', 30) ?> días de garantía: si no te sirve, te devolvemos el dinero.
+                <?php endif; ?>
             </p>
 
             <div class="hero-actions">
-                <a class="btn btn_primary" href="<?= site_url('dashboard') ?>" style="background: #2563eb; border-color: #2563eb; padding: 14px 28px; font-weight: 800; font-size: 1rem;">Ir a mi Panel de Solvencia</a>
+                <a class="btn btn_primary" href="<?= site_url('dashboard?view=risk') ?>" style="background: #2563eb; border-color: #2563eb; padding: 14px 28px; font-weight: 800; font-size: 1rem;">Ir a mi Panel de Solvencia</a>
             </div>
 
             <div class="hero-note">
                 <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                Te enviaremos la factura oficial al email de tu cuenta. Recuerda que puedes cambiar o cancelar tu suscripción en cualquier momento sin permanencia.
+                Te enviaremos la factura al email de tu cuenta. Recuerda que puedes cambiar o cancelar tu suscripción en cualquier momento sin permanencia.
             </div>
         </div>
 

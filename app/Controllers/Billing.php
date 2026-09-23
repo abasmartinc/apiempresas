@@ -215,6 +215,33 @@ class Billing extends BaseController
     }
 
     /**
+     * URL de la ficha de una empresa a partir de su CIF.
+     *
+     * La ruta pública es `empresa/{id}-{slug}`; `empresa/{CIF}` no existe y
+     * devolvía 404 (el botón "Auditar {CIF}" tras comprar el pack y la vuelta
+     * al cancelar el pago). Si no se encuentra, al panel de riesgo.
+     *
+     * @param bool $verRiesgo añade ?ver-riesgo=1 para que el dictamen se abra solo.
+     */
+    private function urlFichaPorCif(string $cif, bool $verRiesgo = false): string
+    {
+        $cif = strtoupper(trim($cif));
+        if ($cif !== '') {
+            $fila = \Config\Database::connect()->table('companies')
+                ->select('id, company_name')
+                ->where('cif', $cif)
+                ->get(1)->getRow();
+            if ($fila) {
+                helper('url');
+                $url = site_url('empresa/' . (int) $fila->id . '-' . url_title((string) ($fila->company_name ?: 'empresa'), '-', true));
+                return $verRiesgo ? $url . '?ver-riesgo=1' : $url;
+            }
+        }
+
+        return site_url('dashboard?view=risk' . ($cif !== '' ? '&cif=' . rawurlencode($cif) : ''));
+    }
+
+    /**
      * Registra un hito del checkout en tracking_events.
      *
      * Vive aquí y no en el cliente JS porque el retorno de Stripe no siempre pasa
@@ -305,9 +332,8 @@ class Billing extends BaseController
             } elseif ($plan === 'lookalike_single') {
                 $cancelUrl = site_url('encontrar-empresas-similares');
             } elseif ($plan === 'risk_pack_5') {
-                $cancelUrl = !empty($postData['cif']) 
-                    ? site_url('empresa/' . rawurlencode($postData['cif'])) 
-                    : site_url('dashboard?view=risk');
+                // `empresa/{CIF}` no es una ruta (solo `empresa/{id}-{slug}`): daba 404.
+                $cancelUrl = $this->urlFichaPorCif((string) ($postData['cif'] ?? ''));
             }
 
             if ($plan === 'risk_pack_5') {
@@ -964,29 +990,69 @@ class Billing extends BaseController
             }
         }
 
-        // 1.4 Risk Pack 5 Success (Tripwire product: 5 auditorías de solvencia sin suscripción)
-        $isRiskPack = ($checkoutData['type'] ?? '') === 'risk_pack_5' 
-            || (isset($stripeSession) && ($stripeSession->metadata->plan ?? '') === 'risk_pack_5');
+        // 1.4 Pack de consultas de Solvencia.
+        //
+        // ESTA PÁGINA NO ABONA NADA POR SU CUENTA. Antes sumaba los créditos con
+        // solo tener en la sesión el contexto del checkout, que se guarda ANTES de
+        // ir a Stripe: cancelar el pago y abrir /billing/success daba 5 créditos
+        // gratis, repetible cada hora. Y una compra real sumaba 10, porque el
+        // webhook también abonaba.
+        //
+        // Ahora: se le pregunta a Stripe por la sesión de pago y, solo si está
+        // cobrada, se llama al mismo punto que el webhook (RiskPackService), que
+        // abona una única vez por sesión. Así, si el usuario vuelve antes de que
+        // llegue el webhook, ya ve sus créditos, y cuando el webhook llegue no
+        // suma nada.
+        $packStripe = null;
+        if ($hasStripeSession) {
+            $packStripe = $stripeSession ?? null;
+            if (!$packStripe) {
+                try {
+                    $packStripe = (new \Stripe\StripeClient(env('STRIPE_SECRET_KEY')))
+                        ->checkout->sessions->retrieve($stripeSessionId);
+                } catch (\Throwable $e) {
+                    log_message('error', '[Billing::success] No se pudo consultar la sesión ' . $stripeSessionId . ': ' . $e->getMessage());
+                }
+            }
+        }
+        $packEnStripe = $packStripe && ($packStripe->metadata->plan ?? '') === 'risk_pack_5';
+
+        $isRiskPack = ($checkoutData['type'] ?? '') === 'risk_pack_5' || $packEnStripe;
 
         if ($isRiskPack) {
-            $credits = (int)($checkoutData['credits'] ?? ($stripeSession->metadata->credits ?? 5));
-            if ($credits <= 0) {
-                $credits = 5;
+            $pagado = false;
+
+            if ($packEnStripe) {
+                if (($packStripe->payment_status ?? '') === 'paid') {
+                    $pagado = true;
+                    // Al comprador de ESA sesión, no a quien tenga la sesión PHP abierta.
+                    $comprador = (int) ($packStripe->client_reference_id ?? $packStripe->metadata->user_id ?? 0);
+                    (new \App\Services\RiskPackService())->abonar(
+                        (string) $packStripe->id,
+                        $comprador,
+                        (int) ($packStripe->metadata->credits ?? 5),
+                        (string) ($packStripe->metadata->target_cif ?? ''),
+                        isset($packStripe->amount_total) ? (int) $packStripe->amount_total : null
+                    );
+                }
+            } elseif (env('BILLING_MODE') === 'simulator' && session('risk_pack_sim_ref')) {
+                // En el simulador el abono ya lo ha hecho BillingSimulator; aquí solo
+                // se enseña la confirmación, una vez.
+                $pagado = true;
+                session()->remove('risk_pack_sim_ref');
             }
 
-            if ($userId > 0) {
-                $db = \Config\Database::connect();
-                $sessionKey = 'risk_pack_credited_' . ($stripeSessionId ?: 'sim_' . date('YmdH'));
-                if (!session()->get($sessionKey)) {
-                    $db->table('users')
-                        ->where('id', $userId)
-                        ->set('risk_credits', 'risk_credits + ' . $credits, false)
-                        ->update();
-                    session()->set($sessionKey, true);
+            if (!$pagado) {
+                session()->remove('checkout_context');
+                return redirect()->to(site_url('dashboard?view=risk'))->with(
+                    'error',
+                    'No nos consta el pago del pack. Si lo has completado, las consultas aparecerán en tu cuenta en unos minutos; si lo cancelaste, no se te ha cobrado nada.'
+                );
+            }
 
-                    $userEventsModel = new \App\Models\UserEventsModel();
-                    $userEventsModel->logEvent($userId, 'purchase_risk_pack', (string)$credits);
-                }
+            $credits = (int) ($packStripe->metadata->credits ?? ($checkoutData['credits'] ?? 5));
+            if ($credits <= 0) {
+                $credits = 5;
             }
 
             $userRow = $userId > 0 ? (new \App\Models\UserModel())->find($userId) : null;
@@ -995,10 +1061,15 @@ class Billing extends BaseController
             $data = [
                 'credits_bought' => $credits,
                 'total_credits'  => $totalCredits,
-                'price'          => 9.90,
+                // Base imponible cobrada de verdad (la vista suma el IVA encima, así que
+                // es amount_subtotal y no amount_total); si no, el precio del config.
+                'price'          => isset($packStripe->amount_subtotal)
+                    ? ((int) $packStripe->amount_subtotal) / 100
+                    : ((int) solvencia('centimos.pack5', 990)) / 100,
                 'order_ref'      => 'RISK-' . date('Ymd') . '-' . rand(1000, 9999),
-                'target_cif'     => $checkoutData['target_cif'] ?? ($stripeSession->metadata->target_cif ?? ''),
+                'target_cif'     => (string) ($packStripe->metadata->target_cif ?? ($checkoutData['target_cif'] ?? '')),
             ];
+            $data['target_url'] = $this->urlFichaPorCif($data['target_cif'], true);
             session()->remove('checkout_context');
             return $this->renderView('billing/success_risk_pack', $data);
         }

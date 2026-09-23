@@ -16,7 +16,7 @@
                     <tr>
                         <td align="center" style="background: linear-gradient(135deg, #2152FF 0%, #10B981 100%); padding: 28px 20px;">
                             <h1 style="margin: 0; color: #ffffff; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">APIEmpresas.es</h1>
-                            <p style="margin: 6px 0 0; color: rgba(255,255,255,0.92); font-size: 14px; font-weight: 500;">Informes de Solvencia, Riesgo y Datos Mercantiles Oficiales</p>
+                            <p style="margin: 6px 0 0; color: rgba(255,255,255,0.92); font-size: 14px; font-weight: 500;">Solvencia y vigilancia del Registro Mercantil</p>
                         </td>
                     </tr>
                     
@@ -32,7 +32,7 @@
                                 Vemos que recientemente consultaste el perfil de solvencia y riesgo de <strong>{company_name}</strong> en APIEmpresas.
                             </p>
                             <p style="margin: 0 0 20px; color: #475569; font-size: 15px; line-height: 1.6;">
-                                Conocer el scoring predictivo de impago, los actos mercantiles del BORME y la capacidad de crédito recomendada es el paso fundamental para <strong>proteger tu tesorería antes de conceder pagos aplazados o firmar contratos</strong>.
+                                Saber qué consta en el Registro Mercantil de un cliente —concursos, disoluciones, cuentas sin depositar, cambios de administrador— es el primer paso para <strong>proteger tu tesorería antes de conceder pagos aplazados o firmar contratos</strong>.
                             </p>
                             
                             <!-- Remaining Credits Callout -->
@@ -47,9 +47,9 @@
                                             Tus créditos mensuales no son acumulables para el mes siguiente. Te recomendamos aprovecharlos hoy mismo para auditar:
                                         </p>
                                         <ul style="margin: 10px 0 0; padding-left: 20px; color: #166534; font-size: 13.5px; line-height: 1.6;">
-                                            <li><strong>Tu cliente con mayor riesgo de impago:</strong> verifica si tiene anotaciones de embargo o preconcurso.</li>
-                                            <li><strong>Un nuevo proveedor clave:</strong> asegúrate de que no tenga problemas de suministro antes de pagar anticipos.</li>
-                                            <li><strong>Tu propia sociedad o competencia directa:</strong> comprueba qué calificación económico-financiera tienes asignada.</li>
+                                            <li><strong>Tu cliente con mayor riesgo de impago:</strong> comprueba si consta un concurso, una disolución o cuentas sin depositar.</li>
+                                            <li><strong>Un nuevo proveedor clave:</strong> comprueba que está al día en el Registro antes de pagarle anticipos.</li>
+                                            <li><strong>Tu propia sociedad o competencia directa:</strong> mira lo que ve de ti un cliente que te investigue.</li>
                                         </ul>
                                     </td>
                                 </tr>
@@ -67,7 +67,7 @@
                             </table>
 
                             <p style="margin: 20px 0 0; color: #64748b; font-size: 13px; text-align: center;">
-                                Solo necesitas introducir el CIF o razón social en tu panel para generar el informe oficial al instante.
+                                Solo necesitas introducir el CIF o razón social en tu panel para ver su dictamen al instante.
                             </p>
                         </td>
                     </tr>

@@ -15,7 +15,7 @@
                     <tr>
                         <td align="center" style="background: linear-gradient(135deg, #2152FF 0%, #10B981 100%); padding: 28px 20px;">
                             <h1 style="margin: 0; color: #ffffff; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">APIEmpresas.es</h1>
-                            <p style="margin: 6px 0 0; color: rgba(255,255,255,0.92); font-size: 14px; font-weight: 500;">Informes de Solvencia, Riesgo y Datos Mercantiles Oficiales</p>
+                            <p style="margin: 6px 0 0; color: rgba(255,255,255,0.92); font-size: 14px; font-weight: 500;">Solvencia y vigilancia del Registro Mercantil</p>
                         </td>
                     </tr>
                     
@@ -28,7 +28,7 @@
                                  si no hubiera, llega vacío y el correo sigue leyéndose bien. -->
                             {origin_line}
                             <p style="margin: 0 0 20px; color: #475569; font-size: 15px; line-height: 1.6;">
-                                Tu cuenta ya está activa. Dispones de <strong>3 consultas de solvencia y perfil de riesgo 100% gratuitas cada mes</strong> para proteger tu negocio frente a impagos y auditar la salud financiera de cualquier cliente o proveedor en España.
+                                Tu cuenta ya está activa. Dispones de <strong>3 consultas de solvencia y perfil de riesgo 100% gratuitas cada mes</strong> para revisar lo que consta en el Registro Mercantil de cualquier cliente o proveedor en España antes de venderle a crédito.
                             </p>
                             
                             <!-- Value Proposition Box -->
@@ -42,7 +42,7 @@
                                             <tr>
                                                 <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">🛡️</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
-                                                    <strong>Semáforo y Scoring de Quiebra:</strong> Probabilidad estadística de retrasos en pagos o concurso de acreedores.
+                                                    <strong>Índice de gravedad y semáforo:</strong> de 0 a 100, cuánto pesa lo que consta de esa empresa en el Registro Mercantil.
                                                 </td>
                                             </tr>
                                         </table>
@@ -52,7 +52,7 @@
                                             <tr>
                                                 <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">💶</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
-                                                    <strong>Crédito Comercial Recomendado:</strong> Cuantía máxima sugerida para aplazar pagos con tranquilidad.
+                                                    <strong>Vigilancia gratis de 5 empresas:</strong> te escribimos el día que el BORME publique algo de ellas.
                                                 </td>
                                             </tr>
                                         </table>

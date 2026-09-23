@@ -16,7 +16,7 @@
                     <tr>
                         <td align="center" style="background: linear-gradient(135deg, #2152FF 0%, #10B981 100%); padding: 28px 20px;">
                             <h1 style="margin: 0; color: #ffffff; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">APIEmpresas.es</h1>
-                            <p style="margin: 6px 0 0; color: rgba(255,255,255,0.92); font-size: 14px; font-weight: 500;">Informes de Solvencia, Riesgo y Datos Mercantiles Oficiales</p>
+                            <p style="margin: 6px 0 0; color: rgba(255,255,255,0.92); font-size: 14px; font-weight: 500;">Solvencia y vigilancia del Registro Mercantil</p>
                         </td>
                     </tr>
                     
@@ -32,7 +32,7 @@
                                 Vemos que has alcanzado el límite mensual de 3 consultas gratuitas mientras analizabas a <strong>{company_name}</strong>.
                             </p>
                             <p style="margin: 0 0 20px; color: #475569; font-size: 15px; line-height: 1.6;">
-                                Si necesitas comprobar el dictamen oficial con scoring predictivo de impago, límite de crédito sugerido e incidencias del BORME para cerrar una operación comercial o evaluar solvencia, tienes dos opciones disponibles al instante:
+                                Si necesitas revisar más clientes o proveedores antes de que se renueven el mes que viene, tienes dos opciones:
                             </p>
 
                             <!-- Options Table -->
@@ -43,14 +43,14 @@
                                         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #eff6ff; border: 2px solid #2563eb; border-radius: 14px; height: 100%;">
                                             <tr>
                                                 <td style="padding: 20px 18px;">
-                                                    <span style="background: #2563eb; color: #ffffff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 999px; text-transform: uppercase;">MÁS ELEGIDO</span>
+                                                    <span style="background: #2563eb; color: #ffffff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 999px; text-transform: uppercase;">RECOMENDADO</span>
                                                     <h3 style="margin: 8px 0 4px; color: #0f172a; font-size: 16px; font-weight: 800;">Solvencia Pro</h3>
                                                     <div style="font-size: 22px; font-weight: 900; color: #1d4ed8; margin-bottom: 8px;">29 € <span style="font-size: 12px; color: #64748b; font-weight: 600;">/ mes</span></div>
                                                     <p style="margin: 0 0 12px; color: #475569; font-size: 12.5px; line-height: 1.4;">
-                                                        <strong>Consultas y dictámenes PDF 100% ilimitados</strong> de cualquier CIF en España. Cancela en 1 clic cuando quieras.
+                                                        <strong>Vigila hasta 25 empresas</strong> y te escribimos el día que el BORME publique algo de ellas. 300 consultas al mes, sin permanencia y con 30 días de garantía. O 290 €/año: dos meses gratis.
                                                     </p>
                                                     <a href="{button_url}" target="_blank" style="display: block; text-align: center; background: #2563eb; color: #ffffff !important; padding: 10px 14px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 13px;">
-                                                        ⚡ Activar Ilimitado
+                                                        ⚡ Activar Solvencia Pro
                                                     </a>
                                                 </td>
                                             </tr>
@@ -65,7 +65,7 @@
                                                     <h3 style="margin: 8px 0 4px; color: #0f172a; font-size: 16px; font-weight: 800;">Informe en PDF</h3>
                                                     <div style="font-size: 22px; font-weight: 900; color: #059669; margin-bottom: 8px;">3,90 € <span style="font-size: 12px; color: #64748b; font-weight: 600;">+ IVA</span></div>
                                                     <p style="margin: 0 0 12px; color: #475569; font-size: 12.5px; line-height: 1.4;">
-                                                        Descarga única del dictamen oficial con sello de auditoría de esta empresa en formato PDF.
+                                                        El dictamen de una empresa concreta, en pantalla y en PDF, con cada acto del BORME y su fecha. Pago único.
                                                     </p>
                                                     <a href="{pdf_url}" target="_blank" style="display: block; text-align: center; background: #10b981; color: #ffffff !important; padding: 10px 14px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 13px;">
                                                         📄 Descargar PDF
@@ -80,7 +80,7 @@
                             <!-- Price Anchoring Note -->
                             <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px;">
                                 <p style="margin: 0; color: #475569; font-size: 13px; line-height: 1.5;">
-                                    💡 <strong>Un 85% más económico:</strong> Frente a proveedores tradicionales que cobran entre 25 € y 35 € por cada informe individual, en APIEmpresas accedes a datos oficiales sin permanencia ni cobros abusivos.
+                                    💡 <strong>Sale a cuenta desde la segunda empresa del mes:</strong> un informe suelto en un proveedor tradicional cuesta entre 20 y 44 €. Y con Pro no es una foto de un día: te avisamos si algo cambia.
                                 </p>
                             </div>
                         </td>
@@ -90,7 +90,7 @@
                     <tr>
                         <td style="padding: 0 35px 30px;">
                             <p style="margin: 0; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 12px; text-align: center; line-height: 1.5;">
-                                Factura oficial deducible generada al instante con IVA desglosado.<br>
+                                Factura deducible generada al instante con IVA desglosado.<br>
                                 &copy; <?= date('Y') ?> APIEmpresas España.
                             </p>
                         </td>

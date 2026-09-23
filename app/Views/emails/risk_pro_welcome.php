@@ -72,7 +72,7 @@
                                             <tr>
                                                 <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">📑</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
-                                                    <strong>BORME en Tiempo Real:</strong> Seguimiento de nombramientos, revocaciones, embargos y concurso de acreedores.
+                                                    <strong>BORME cada día:</strong> Seguimiento de nombramientos, revocaciones, disoluciones y concurso de acreedores.
                                                 </td>
                                             </tr>
                                         </table>
@@ -109,7 +109,7 @@
                     <tr>
                         <td style="padding: 0 35px 30px;">
                             <p style="margin: 0; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 12px; text-align: center; line-height: 1.5;">
-                                Tu factura mensual con IVA desglosado se genera automáticamente y puedes descargarla en la sección Facturación de tu cuenta.<br><br>
+                                Tu factura con IVA desglosado se genera automáticamente y puedes descargarla en la sección Facturación de tu cuenta.<br><br>
                                 &copy; APIEmpresas España.
                             </p>
                         </td>

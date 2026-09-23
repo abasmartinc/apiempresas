@@ -15,7 +15,7 @@
                     <tr>
                         <td align="center" style="background: linear-gradient(135deg, #2152FF 0%, #10B981 100%); padding: 28px 20px;">
                             <h1 style="margin: 0; color: #ffffff; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">APIEmpresas.es</h1>
-                            <p style="margin: 6px 0 0; color: rgba(255,255,255,0.92); font-size: 14px; font-weight: 500;">Informes de Solvencia, Riesgo y Datos Mercantiles Oficiales</p>
+                            <p style="margin: 6px 0 0; color: rgba(255,255,255,0.92); font-size: 14px; font-weight: 500;">Solvencia y vigilancia del Registro Mercantil</p>
                         </td>
                     </tr>
                     
@@ -49,7 +49,7 @@
                                             <tr>
                                                 <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">🛡️</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
-                                                    <strong>Scoring Predictivo de Quiebra:</strong> Probabilidad estadística de insolvencia y retrasos en pagos.
+                                                    <strong>Índice de gravedad (0-100):</strong> cuánto pesa lo que consta de esa empresa en el Registro Mercantil, con su semáforo.
                                                 </td>
                                             </tr>
                                         </table>
@@ -59,7 +59,7 @@
                                             <tr>
                                                 <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">💶</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
-                                                    <strong>Límite de Crédito Recomendado:</strong> Importe máximo aconsejado para aplazar facturas de forma segura.
+                                                    <strong>Cada acto con su fecha:</strong> concursos, disoluciones, cuentas sin depositar o ceses, y el peso de cada uno en la puntuación.
                                                 </td>
                                             </tr>
                                         </table>
@@ -79,7 +79,7 @@
                                             <tr>
                                                 <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">📊</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
-                                                    <strong>Balances Oficiales:</strong> Cifra de ventas, EBITDA, ratios de endeudamiento y fondos propios.
+                                                    <strong>Dictamen en PDF:</strong> listo para adjuntar al expediente del cliente, con la fecha de emisión.
                                                 </td>
                                             </tr>
                                         </table>
@@ -104,7 +104,7 @@
                     <tr>
                         <td style="padding: 0 35px 30px;">
                             <p style="margin: 0; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 12px; text-align: center; line-height: 1.5;">
-                                Tu factura oficial con desglose de IVA ya está disponible en tu panel de facturación.<br>
+                                Tu factura con desglose de IVA ya está disponible en tu panel de facturación.<br>
                                 Si tienes alguna duda con el análisis de un informe, responde directamente a este email.<br><br>
                                 &copy; APIEmpresas España.
                             </p>
