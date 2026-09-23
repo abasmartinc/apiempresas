@@ -207,7 +207,21 @@
 
 <?= $this->section('content') ?>
 <div class="container risk-dash">
-    
+
+    <?php
+    // Mensajes de vuelta de otras pantallas (vigilar desde la cartera o desde la
+    // página de éxito de Pro, pago no confirmado...). Se mandaban con ->with() pero
+    // este panel no los pintaba: el usuario pulsaba "Vigilar las marcadas" y no
+    // recibía ninguna confirmación.
+    ?>
+    <?php foreach (['success' => ['#ecfdf5', '#a7f3d0', '#047857'], 'error' => ['#fef2f2', '#fecaca', '#b91c1c']] as $tipoFlash => [$fFondo, $fBorde, $fTinta]): ?>
+        <?php if (session()->getFlashdata($tipoFlash)): ?>
+            <div role="status" style="background: <?= $fFondo ?>; border: 1px solid <?= $fBorde ?>; color: <?= $fTinta ?>; border-radius: 12px; padding: 13px 16px; font-size: 0.9rem; font-weight: 600; line-height: 1.5; margin: 0 0 18px;">
+                <?= esc(session()->getFlashdata($tipoFlash)) ?>
+            </div>
+        <?php endif; ?>
+    <?php endforeach; ?>
+
     <!-- HEADER HERO -->
     <div class="risk-dash-hero">
         <div>
@@ -244,6 +258,110 @@
             <?php endif; ?>
         </div>
     </div>
+
+    <?php
+    /*
+     * PRIMEROS PASOS.
+     *
+     * El panel recibía al recién llegado con un saludo y un buscador. Lo que hace
+     * que Solvencia valga algo es la vigilancia —el día que llega un aviso—, y nada
+     * aquí le llevaba a ella: podía irse sin vigilar ni una empresa, sin subir sus
+     * clientes y con los avisos desactivados, y no volver nunca.
+     *
+     * Tres pasos que se marcan solos con el estado real y la guía desaparece
+     * cuando están los tres. Vale igual para gratuitos y para Pro.
+     */
+    $ppVigilaAlguna = !empty($watches);
+    $ppSubioCartera = false;
+    foreach (($watches ?? []) as $ppW) {
+        if (($ppW['source'] ?? '') === 'cartera') { $ppSubioCartera = true; break; }
+    }
+    // Misma regla que el envío (BormeAlertsCommand): 1, o sin decidir y sin baja del marketing.
+    $ppPref = $user->alerts_borme ?? null;
+    $ppAvisos = $ppPref !== null && $ppPref !== ''
+        ? ((int) $ppPref === 1)
+        : ((int) ($user->unsuscribe ?? 0) === 0);
+
+    // La primera empresa consultada que aún no vigila: el paso 1 es un clic.
+    $ppVigiladas = array_flip(array_column($watches ?? [], 'cif'));
+    $ppPrimera = null;
+    foreach (($audits ?? []) as $ppA) {
+        if (!empty($ppA['company_id']) && !isset($ppVigiladas[$ppA['cif']])) { $ppPrimera = $ppA; break; }
+    }
+
+    $ppHechos = (int) $ppVigilaAlguna + (int) $ppSubioCartera + (int) $ppAvisos;
+    ?>
+    <?php if ($ppHechos < 3): ?>
+        <div id="primeros-pasos" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px 22px; margin-bottom: 24px; box-shadow: 0 4px 16px -8px rgba(15,23,42,0.1);">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px;">
+                <div>
+                    <div style="font-size: 1.05rem; font-weight: 900; color: #0f172a;">Deja tu vigilancia funcionando</div>
+                    <div style="font-size: 0.85rem; color: #64748b; margin-top: 2px;">Te avisamos por correo el día que el BORME publique algo de tus clientes.</div>
+                </div>
+                <div style="font-size: 0.8rem; font-weight: 800; color: #2563eb;"><?= $ppHechos ?> de 3 hechos</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+
+                <!-- 1. Vigilar una empresa -->
+                <div style="border: 1px solid <?= $ppVigilaAlguna ? '#a7f3d0' : '#e2e8f0' ?>; background: <?= $ppVigilaAlguna ? '#f0fdf4' : '#f8fafc' ?>; border-radius: 12px; padding: 14px;">
+                    <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">
+                        <?= $ppVigilaAlguna ? '✓' : '1.' ?> Vigila una empresa
+                    </div>
+                    <?php if ($ppVigilaAlguna): ?>
+                        <div style="font-size: 0.8rem; color: #047857;">Ya vigilas <?= count($watches) ?> <?= count($watches) === 1 ? 'empresa' : 'empresas' ?>.</div>
+                    <?php elseif ($ppPrimera): ?>
+                        <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">Empieza por la que ya consultaste.</div>
+                        <form method="post" action="<?= site_url('cartera/vigilar') ?>" style="margin: 0;">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="cifs[]" value="<?= esc($ppPrimera['cif'], 'attr') ?>">
+                            <button type="submit" data-track-click="onboarding_vigilar" data-loading="Poniendo en vigilancia…"
+                                    style="width: 100%; background: #2563eb; color: #fff; border: 0; border-radius: 9px; padding: 9px 12px; font-size: 0.82rem; font-weight: 800; cursor: pointer; text-align: left;">
+                                🔔 Vigilar <?= esc(company_short_name(company_display_name($ppPrimera['company_name'], $ppPrimera['cif']))) ?>
+                            </button>
+                        </form>
+                    <?php else: ?>
+                        <div style="font-size: 0.8rem; color: #64748b;">Busca un cliente abajo y pulsa «Vigilar empresa» en su ficha.</div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- 2. Subir la cartera -->
+                <div style="border: 1px solid <?= $ppSubioCartera ? '#a7f3d0' : '#e2e8f0' ?>; background: <?= $ppSubioCartera ? '#f0fdf4' : '#f8fafc' ?>; border-radius: 12px; padding: 14px;">
+                    <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">
+                        <?= $ppSubioCartera ? '✓' : '2.' ?> Sube tu lista de clientes
+                    </div>
+                    <?php if ($ppSubioCartera): ?>
+                        <div style="font-size: 0.8rem; color: #047857;">Cartera subida.</div>
+                    <?php else: ?>
+                        <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">Un CSV de tu Excel o tu programa de facturación. Te los ordenamos por riesgo.</div>
+                        <a href="<?= site_url('cartera') ?>" data-track-click="onboarding_cartera"
+                           style="display: block; background: #ffffff; border: 1.5px solid #cbd5e1; color: #0f172a; border-radius: 9px; padding: 8px 12px; font-size: 0.82rem; font-weight: 800; text-decoration: none;">
+                            Subir mi cartera →
+                        </a>
+                    <?php endif; ?>
+                </div>
+
+                <!-- 3. Avisos por correo -->
+                <div id="pp-avisos" style="border: 1px solid <?= $ppAvisos ? '#a7f3d0' : '#fed7aa' ?>; background: <?= $ppAvisos ? '#f0fdf4' : '#fff7ed' ?>; border-radius: 12px; padding: 14px;">
+                    <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">
+                        <?= $ppAvisos ? '✓' : '3.' ?> Recibe los avisos
+                    </div>
+                    <?php if ($ppAvisos): ?>
+                        <div style="font-size: 0.8rem; color: #047857;">Llegarán a <?= esc($user->email ?? '') ?>.</div>
+                    <?php else: ?>
+                        <div style="font-size: 0.8rem; color: #9a3412; margin-bottom: 10px;">Los tienes desactivados: sin ellos no podemos avisarte de nada.</div>
+                        <!-- onclick en línea y no un <script> aparte: este panel puede
+                             llegar por hx-boost y así no depende de que se ejecute. -->
+                        <button type="button" data-track-click="onboarding_avisos"
+                                onclick="var b=this;b.disabled=true;b.textContent='Activando…';var d=new URLSearchParams();d.append('<?= csrf_token() ?>','<?= csrf_hash() ?>');fetch('<?= site_url('api/usuario/activar-avisos') ?>',{method:'POST',headers:{'X-Requested-With':'XMLHttpRequest'},body:d,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(j){if(!j||!j.ok)throw 0;var c=document.getElementById('pp-avisos');c.style.background='#f0fdf4';c.style.borderColor='#a7f3d0';b.outerHTML='<div style=&quot;font-size:0.8rem;color:#047857;font-weight:700;&quot;>✓ Avisos activados</div>';}).catch(function(){b.disabled=false;b.textContent='No se pudo: inténtalo de nuevo';});"
+                                style="width: 100%; background: #ea580c; color: #fff; border: 0; border-radius: 9px; padding: 9px 12px; font-size: 0.82rem; font-weight: 800; cursor: pointer;">
+                            Activar los avisos
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <!-- TICKETS RESPONDIDOS SI LOS HAY -->
     <?php if (!empty($answeredTickets)): ?>
@@ -682,9 +800,14 @@
                              * se le enseña al cliente; el valor del motor sigue en la base de
                              * datos intacto para las consultas y las métricas.
                              */
-                            $scoreFila = (int) ($item['risk_score'] ?? 50);
+                            // Sin perfil calculado, "Sin calcular": antes salía un 50/MEDIO inventado.
+                            $sinCalcular = $item['risk_score'] === null;
+                            $scoreFila = (int) ($item['risk_score'] ?? 0);
                             [$etiquetaFila] = risk_level_visual($scoreFila);
-                            if ($scoreFila >= (int) solvencia('umbralAlto', 60)) {
+                            if ($sinCalcular) {
+                                $badgeClass = '';
+                                $badgeIcon = '⚪';
+                            } elseif ($scoreFila >= (int) solvencia('umbralAlto', 60)) {
                                 $badgeClass = 'risk-score-alto';
                                 $badgeIcon = '🔴';
                             } elseif ($scoreFila >= (int) solvencia('umbralMedio', 30)) {
@@ -710,13 +833,15 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="risk-score-badge <?= $badgeClass ?>">
+                                    <div class="risk-score-badge <?= $badgeClass ?>"<?= $sinCalcular ? ' style="background:#f1f5f9;color:#64748b;border-color:#e2e8f0;"' : '' ?>>
                                         <span><?= $badgeIcon ?></span>
-                                        <span><?= esc($etiquetaFila) ?> (<?= $scoreFila ?>/100)</span>
+                                        <span><?= $sinCalcular ? 'Sin calcular' : esc($etiquetaFila) . ' (' . $scoreFila . '/100)' ?></span>
                                     </div>
                                 </td>
                                 <td>
-                                    <?php if ($item['alerts_count'] > 0): ?>
+                                    <?php if ($item['alerts_count'] === null): ?>
+                                        <span style="color: #94a3b8; font-size: 0.82rem;">—</span>
+                                    <?php elseif ($item['alerts_count'] > 0): ?>
                                         <span style="color: #b91c1c; font-weight: 700; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 4px;">
                                             ⚠️ <?= $item['alerts_count'] ?> <?= $item['alerts_count'] === 1 ? 'incidencia' : 'incidencias' ?>
                                         </span>

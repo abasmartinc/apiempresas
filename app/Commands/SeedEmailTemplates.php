@@ -139,6 +139,15 @@ class SeedEmailTemplates extends BaseCommand
                 'trigger' => 'Se envía cuando alguien introduce en el registro rápido un email que ya tiene cuenta. El enlace caduca y solo sirve una vez.'
             ],
             [
+                'slug'    => 'risk_generic',
+                'name'    => 'Solvencia: plantilla común',
+                // El asunto lo pone cada envío (EmailService::sendRiskGeneric).
+                'subject' => '{asunto}',
+                'view'    => 'risk_generic',
+                'vars'    => '{asunto}, {preheader}, {name}, {content}, {button_text}, {button_url}',
+                'trigger' => 'Correos de Solvencia sin diseño propio: lista de vigilancia llena, resumen mensual de la cartera, pago sin terminar, consultas renovadas y comparativa de precio.'
+            ],
+            [
                 'slug'    => 'automation_generic',
                 'name'    => 'Plantilla Genérica de Automatización',
                 'subject' => 'Notificación APIEmpresas.es',

@@ -411,7 +411,9 @@ class BormeAlertsCommand extends BaseCommand
             if (!isset($porUsuario[$userId])) {
                 $porUsuario[$userId] = [
                     'email'    => $w['email'],
-                    'name'     => $w['name'] ?: 'Hola',
+                    // Sin nombre, la parte del email antes de la @: con 'Hola' de respaldo el
+                    // correo empezaba "Hola, Hola:".
+                    'name'     => $w['name'] ?: explode('@', (string) $w['email'])[0],
                     'empresas' => [],
                 ];
             }

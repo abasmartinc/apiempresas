@@ -113,7 +113,13 @@ class EmailService
     public function sendRiskWelcomeEmail(array $userData, string $redirectUrl = '', string $originCif = '')
     {
         $userEmail = $userData['email'];
-        $buttonUrl = !empty($redirectUrl) ? site_url(ltrim($redirectUrl, '/')) : site_url('dashboard');
+        $redirectUrl = ltrim(trim($redirectUrl), '/');
+        // Un destino de pago (billing/checkout) no sirve como botón de un correo:
+        // abierto más tarde, sin la compra pendiente en la sesión, no lleva a nada útil.
+        if ($redirectUrl === '' || str_starts_with($redirectUrl, 'billing')) {
+            $redirectUrl = 'dashboard?view=risk';
+        }
+        $buttonUrl = site_url($redirectUrl);
 
         // Empresa que motivó el registro. Es el primer correo que recibe y llega en el
         // momento de máxima atención: nombrar la empresa que venía buscando convierte
@@ -644,31 +650,187 @@ class EmailService
     }
 
     /**
-     * TRIGGER: risk_educational_savings_48h
+     * Correo de Solvencia con la plantilla común `risk_generic`.
+     *
+     * $contenidoHtml es HTML ya construido: quien llama escapa lo que venga de datos
+     * (nombres de empresa, etc.).
      */
-    public function sendRiskEducationalSavings(array $userData): array
+    public function sendRiskGeneric(array $userData, string $asunto, string $contenidoHtml, string $botonTexto, string $botonUrl, string $preheader = ''): array
     {
-        $templateData = [
-            'name'        => $userData['name'] ?? 'Usuario',
-            'content'     => "La mayoría de empresas pagan entre 25 € y 35 € por cada informe mercantil en proveedores tradicionales, además de cuotas fijas o permanencias anuales.<br><br>En <b>APIEmpresas</b> hemos cambiado las reglas del sector:<br><br>✅ <b>Solvencia Pro por 29 € / mes:</b> Tarifa plana para auditar todas las empresas que quieras en España sin límites.<br>✅ <b>Sin ataduras:</b> Activa tu suscripción cuando tengas auditorías y cancélala en 1 clic cuando termines.<br>✅ <b>Datos oficiales y en tiempo real:</b> Semáforo de riesgo, scoring IES, incidencias BORME y contratación pública.<br><br>Protege tu negocio de impagos y toma mejores decisiones hoy mismo:",
-            'button_text' => 'Ver Ventajas de Solvencia Pro',
-            'button_url'  => site_url('billing?plan=risk_pro')
-        ];
-        return $this->sendTemplateEmail('automation_generic', $templateData, $userData['email'], ['papelo.amh@gmail.com']);
+        $nombre = trim((string) ($userData['name'] ?? ''));
+        if ($nombre === '' && !empty($userData['email'])) {
+            $nombre = explode('@', (string) $userData['email'])[0];
+        }
+
+        return $this->sendTemplateEmail('risk_generic', [
+            'asunto'      => $asunto,
+            'preheader'   => $preheader,
+            'name'        => esc($nombre),
+            'content'     => $contenidoHtml,
+            'button_text' => esc($botonTexto),
+            'button_url'  => $botonUrl,
+        ], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
+    }
+
+    /** Párrafo de correo con el estilo de la plantilla. */
+    private function p(string $html): string
+    {
+        return '<p style="margin: 0 0 14px;">' . $html . '</p>';
     }
 
     /**
-     * TRIGGER: risk_monthly_renewal
+     * TRIGGER: risk_educational_savings_48h — 48 h después de agotar las 3 consultas.
+     *
+     * Decía "tarifa plana sin límites", "25-35 €" y "protege tu negocio de impagos":
+     * las tres cosas se habían quitado del resto del producto (topes de 300 y 25,
+     * ancla real de 20-44 € y el score no predice). Usaba además la plantilla de la
+     * API, con asunto "Notificación APIEmpresas.es".
      */
-    public function sendRiskMonthlyRenewal(array $userData): array
+    public function sendRiskEducationalSavings(array $userData): array
     {
-        $templateData = [
-            'name'        => $userData['name'] ?? 'Usuario',
-            'content'     => "Te recordamos que se renuevan tus <b>3 consultas de solvencia y riesgo gratuitas</b> en tu cuenta de APIEmpresas.<br><br>Ya puedes volver a buscar cualquier empresa en España para evaluar su estabilidad societaria, semáforo de riesgo y actos mercantiles del BORME.<br><br>Entra a tu panel y revisa tus próximos clientes o proveedores:",
-            'button_text' => 'Auditar Empresas en mi Panel',
-            'button_url'  => site_url('dashboard')
-        ];
-        return $this->sendTemplateEmail('automation_generic', $templateData, $userData['email'], ['papelo.amh@gmail.com']);
+        helper('company');   // solvencia()
+        $vig = (int) solvencia('vigilanciasPro', 25);
+        $contenido = $this->p('Un informe suelto de una empresa cuesta entre 20 y 44 € en un proveedor tradicional, y es una foto del día en que lo pides.')
+            . $this->p('Con <strong>Solvencia Pro</strong> (29 €/mes + IVA) vigilas hasta <strong>' . $vig . ' empresas</strong> y te escribimos el día que el BORME publique algo de ellas: un concurso, una disolución, un cese de administrador o un cierre de hoja registral. Incluye ' . (int) solvencia('consultasPro', 300) . ' consultas al mes.')
+            . $this->p('Sin permanencia y con ' . (int) solvencia('garantiaDias', 30) . ' días de garantía: si no te sirve, te devolvemos el dinero. Si lo pagas anual, 290 € (dos meses gratis).');
+
+        return $this->sendRiskGeneric(
+            $userData,
+            'Un informe es una foto. Solvencia Pro te avisa cuando cambia',
+            $contenido,
+            'Ver Solvencia Pro',
+            site_url('billing?view=risk&plan=risk_pro'),
+            'Vigila hasta ' . $vig . ' clientes por 29 €/mes y entérate el día que el BORME publique algo.'
+        );
+    }
+
+    /**
+     * TRIGGER: risk_monthly_renewal — días 1 a 3: "ya tienes tus consultas".
+     *
+     * Antes salía los días 28-31 diciendo "se renuevan" (todavía no se podían usar)
+     * y con la plantilla de la API. Ahora sale cuando ya están disponibles.
+     *
+     * @param bool $agotoElMesPasado si gastó las gratuitas el mes anterior
+     */
+    public function sendRiskMonthlyRenewal(array $userData, bool $agotoElMesPasado = false): array
+    {
+        helper('company');   // solvencia()
+        $gratis = (int) solvencia('consultasGratis', 3);
+        $contenido = $this->p('Ya tienes de nuevo <strong>' . $gratis . ' consultas gratuitas</strong> de solvencia este mes: el dictamen completo de cualquier empresa de España, con cada acto del BORME y su fecha.');
+        if ($agotoElMesPasado) {
+            $contenido .= $this->p('El mes pasado las gastaste todas. Si revisas clientes a menudo, con Solvencia Pro tienes ' . (int) solvencia('consultasPro', 300) . ' al mes y vigilamos hasta ' . (int) solvencia('vigilanciasPro', 25) . ' empresas por ti. <a href="' . site_url('billing?view=risk&plan=risk_pro') . '" style="color:#2563eb;font-weight:700;">Ver Solvencia Pro</a>.');
+        }
+
+        return $this->sendRiskGeneric(
+            $userData,
+            'Ya tienes tus ' . $gratis . ' consultas de solvencia de este mes',
+            $contenido,
+            'Consultar una empresa',
+            site_url('dashboard?view=risk'),
+            'Ya puedes revisar ' . $gratis . ' empresas más este mes.'
+        );
+    }
+
+    /**
+     * TRIGGER: risk_watch_full — el gratuito ha llenado su lista de vigilancia.
+     *
+     * Config\Solvencia lo llama "un upsell mucho mejor que el paywall": para entonces
+     * ya ha visto avisos y sabe lo que se lleva. No había ningún correo en ese momento.
+     *
+     * @param list<string> $empresas nombres de las que vigila
+     */
+    public function sendRiskWatchFull(array $userData, array $empresas): array
+    {
+        helper('company');   // solvencia()
+        $tope = (int) solvencia('vigilanciasGratis', 5);
+        $pro  = (int) solvencia('vigilanciasPro', 25);
+
+        $lista = '';
+        foreach (array_slice($empresas, 0, 5) as $n) {
+            $lista .= '<li style="margin: 0 0 4px;">' . esc($n) . '</li>';
+        }
+
+        $contenido = $this->p('Tu lista de vigilancia está llena: vigilas <strong>' . $tope . ' de ' . $tope . '</strong> empresas.')
+            . ($lista !== '' ? '<ul style="margin: 0 0 14px; padding-left: 20px; color: #334155;">' . $lista . '</ul>' : '')
+            . $this->p('Para vigilar otra tienes que quitar una. Con <strong>Solvencia Pro</strong> vigilas hasta <strong>' . $pro . '</strong> y ves el detalle de cada acto en el aviso, por 29 €/mes + IVA, sin permanencia y con ' . (int) solvencia('garantiaDias', 30) . ' días de garantía.');
+
+        return $this->sendRiskGeneric(
+            $userData,
+            'Tu lista de vigilancia está llena (' . $tope . ' de ' . $tope . ')',
+            $contenido,
+            'Vigilar hasta ' . $pro . ' empresas',
+            site_url('billing?view=risk&plan=risk_pro'),
+            'Para vigilar otra empresa tienes que quitar una.'
+        );
+    }
+
+    /**
+     * TRIGGER: risk_checkout_abandoned — empezó a pagar Solvencia Pro y no terminó.
+     *
+     * El antiguo "paywall_abandoned" no era esto (saltaba al gastar las 3 consultas).
+     * Aquí sí es un pago que se quedó a medias; lo más útil es ofrecer ayuda, porque
+     * una parte son tarjetas rechazadas o dudas, no falta de interés.
+     */
+    public function sendRiskCheckoutAbandoned(array $userData, string $periodo = 'monthly'): array
+    {
+        helper('company');   // solvencia()
+        $anual = $periodo === 'annual';
+        $contenido = $this->p('Empezaste a activar <strong>Solvencia Pro</strong>' . ($anual ? ' en su modalidad anual' : '') . ' y el pago no llegó a completarse.')
+            . $this->p('Si fue un problema con la tarjeta o tienes alguna duda sobre el plan, responde a este correo y te ayudamos. Si prefieres retomarlo, el botón te lleva de vuelta.')
+            . $this->p('Recuerda: sin permanencia y con ' . (int) solvencia('garantiaDias', 30) . ' días de garantía.');
+
+        return $this->sendRiskGeneric(
+            $userData,
+            'Tu activación de Solvencia Pro se quedó a medias',
+            $contenido,
+            'Retomar la activación',
+            site_url('billing?view=risk&plan=risk_pro'),
+            '¿Hubo algún problema con el pago? Te ayudamos.'
+        );
+    }
+
+    /**
+     * TRIGGER: risk_cartera_resumen — días 1 a 3, a quien vigila alguna empresa.
+     *
+     * La mayoría de los meses no pasa nada, y quien vigila (o paga) y no recibe
+     * ningún correo concluye que no sirve. Este resumen es la prueba de que se
+     * está vigilando, pase algo o no.
+     *
+     * @param list<array{nombre:string,actos:int}> $conActos empresas con actos el mes pasado
+     */
+    public function sendRiskCarteraResumen(array $userData, string $mes, int $vigiladas, array $conActos, bool $esPro): array
+    {
+        helper('company');   // solvencia()
+        $totalActos = array_sum(array_column($conActos, 'actos'));
+
+        $contenido = $this->p('En ' . $mes . ' revisamos cada día el BORME de las <strong>' . $vigiladas . ' ' . ($vigiladas === 1 ? 'empresa' : 'empresas') . '</strong> que vigilas.');
+
+        if (empty($conActos)) {
+            $asunto = 'Tu cartera en ' . $mes . ': sin novedades en el BORME';
+            $contenido .= $this->p('<strong>No se publicó nada sobre ninguna.</strong> Seguimos mirando cada día y te escribimos en cuanto aparezca algo.');
+        } else {
+            $asunto = 'Tu cartera en ' . $mes . ': ' . $totalActos . ' ' . ($totalActos === 1 ? 'acto publicado' : 'actos publicados');
+            $lista = '';
+            foreach (array_slice($conActos, 0, 8) as $e) {
+                $lista .= '<li style="margin: 0 0 4px;">' . esc($e['nombre']) . ' — ' . (int) $e['actos'] . ' ' . ((int) $e['actos'] === 1 ? 'acto' : 'actos') . '</li>';
+            }
+            $contenido .= $this->p('Se publicaron actos de <strong>' . count($conActos) . ' ' . (count($conActos) === 1 ? 'empresa' : 'empresas') . '</strong>:')
+                . '<ul style="margin: 0 0 14px; padding-left: 20px; color: #334155;">' . $lista . '</ul>'
+                . $this->p('Tienes el detalle en su ficha.');
+        }
+
+        if (!$esPro) {
+            $contenido .= $this->p('<span style="color:#64748b;font-size:14px;">Vigilas ' . $vigiladas . ' de ' . (int) solvencia('vigilanciasGratis', 5) . ' empresas con el plan gratuito. Con Solvencia Pro, hasta ' . (int) solvencia('vigilanciasPro', 25) . '.</span>');
+        }
+
+        return $this->sendRiskGeneric(
+            $userData,
+            $asunto,
+            $contenido,
+            'Ver mi vigilancia',
+            site_url('dashboard?view=risk'),
+            empty($conActos) ? 'Ninguna de tus empresas vigiladas se movió en ' . $mes . '.' : $totalActos . ' actos nuevos en tus empresas vigiladas.'
+        );
     }
 
     /**

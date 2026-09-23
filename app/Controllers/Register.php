@@ -415,12 +415,24 @@ class Register extends BaseController
             }
         }
 
+        $redirect = (string) ($this->request->getGet('redirect') ?? 'billing/checkout');
+
+        // ¿Viene de pulsar "Activar Solvencia Pro" o "Comprar pack" sin cuenta?
+        // Entonces la pantalla habla de activar el plan, no de "ver el dictamen".
+        $pendiente = session('pending_checkout');
+        $compraSolvencia = $intent === 'view_risk_profile'
+            && str_starts_with(ltrim($redirect, '/'), 'billing/checkout')
+            && is_array($pendiente)
+            ? (string) ($pendiente['plan'] ?? '')
+            : '';
+
         return view('auth/quick_register', [
-            'redirect'    => $this->request->getGet('redirect') ?? 'billing/checkout',
-            'oppsCount'   => $oppsCount,
-            'intent'      => $intent,
-            'signupCif'   => $cif,
-            'companyName' => $companyName,
+            'redirect'        => $redirect,
+            'oppsCount'       => $oppsCount,
+            'intent'          => $intent,
+            'signupCif'       => $cif,
+            'companyName'     => $companyName,
+            'compraSolvencia' => in_array($compraSolvencia, ['risk_pro', 'risk_pack_5'], true) ? $compraSolvencia : '',
         ]);
     }
 

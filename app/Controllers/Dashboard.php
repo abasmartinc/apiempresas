@@ -496,11 +496,14 @@ class Dashboard extends BaseController
         foreach ($rawHistory as $h) {
             $cleanCif = strtoupper(trim($h['cif']));
             $comp = $companiesMap[$cleanCif] ?? null;
+            // Sin perfil calculado se decía "50 / MEDIO · Sin incidencias": un dato
+            // inventado presentado como resultado. Ahora va a null y la vista pinta
+            // "Sin calcular".
             $risk = $riskProfilesMap[$cleanCif] ?? [
-                'risk_score'   => 50,
-                'risk_level'   => 'MEDIO',
-                'summary'      => 'Evaluación algorítmica procesada.',
-                'alerts_count' => 0
+                'risk_score'   => null,
+                'risk_level'   => '',
+                'summary'      => '',
+                'alerts_count' => null
             ];
 
             $compId = (int)($comp['id'] ?? 0);

@@ -121,15 +121,43 @@ class Billing extends BaseController
                 return redirect()->to(site_url('register/quick'));
             }
 
-            $queryString = $params ? '?' . http_build_query($params) : '';
-            return redirect()->to(site_url('checkout/radar-export' . $queryString));
+            /*
+             * VUELTA DEL REGISTRO CON UNA COMPRA DE SOLVENCIA PENDIENTE.
+             *
+             * Quien pulsaba "Activar Solvencia Pro" sin cuenta se registraba y volvía
+             * aquí por GET, y esta rama lo mandaba SIEMPRE a checkout/radar-export:
+             * otro producto. Ahora, si hay una compra de Solvencia guardada (y es
+             * reciente), se sigue con ella hasta Stripe sin que tenga que volver a
+             * pulsar nada. Se guardó en su propio POST, que ya pasó el CSRF.
+             */
+            $pendiente = session('pending_checkout');
+            $esSolvenciaPendiente = is_array($pendiente)
+                && in_array($pendiente['plan'] ?? '', ['risk_pro', 'risk_pack_5'], true)
+                && (time() - (int) ($pendiente['_ts'] ?? 0)) < 3600;
+
+            if (!$esSolvenciaPendiente) {
+                if (is_array($pendiente) && in_array($pendiente['plan'] ?? '', ['risk_pro', 'risk_pack_5'], true)) {
+                    session()->remove('pending_checkout');   // caducada
+                }
+                if (empty($params)) {
+                    // Sin nada que reanudar: a la facturación, que ya sabe si es de
+                    // Solvencia o de la API. No a la exportación del Radar.
+                    return redirect()->to(site_url('billing'));
+                }
+                $queryString = '?' . http_build_query($params);
+                return redirect()->to(site_url('checkout/radar-export' . $queryString));
+            }
+            // Sigue abajo: sin 'plan' en la petición, se toma de pending_checkout.
         }
 
         $session = session();
         $lastCheckout = $session->get('last_checkout_time');
         $currentTime = time();
+        // Reanudar tras el registro no es un doble clic: con Google el alta dura
+        // menos de 10 s y el antirrebote de abajo devolvía un error al volver.
+        $reanudando = $this->request->getMethod() === 'get';
 
-        if ($lastCheckout && ($currentTime - $lastCheckout) < 10) { // 10 seconds limit
+        if (!$reanudando && $lastCheckout && ($currentTime - $lastCheckout) < 10) { // 10 seconds limit
             return redirect()->back()->with('error', lang('Messages.flash_4'));
         }
         $session->set('last_checkout_time', $currentTime);
@@ -142,7 +170,20 @@ class Billing extends BaseController
                 $userId = 0; // Guest User
             } else {
                 // Subscription mode and credit packs require login
+                $postData['_ts'] = time();
                 session()->set('pending_checkout', $postData);
+
+                // Solvencia: al registro con la intención de riesgo y de vuelta aquí,
+                // que reanuda la compra (ver la rama GET). Sin esto el alta se
+                // clasificaba como 'api' y acababa en la exportación del Radar.
+                if (in_array($postData['plan'] ?? '', ['risk_pro', 'risk_pack_5'], true)) {
+                    return redirect()->to(site_url('register/quick') . '?' . http_build_query(array_filter([
+                        'intent'   => 'view_risk_profile',
+                        'cif'      => (string) ($postData['cif'] ?? ''),
+                        'redirect' => 'billing/checkout',
+                    ])));
+                }
+
                 return redirect()->to(site_url('register/quick'));
             }
         } else {
@@ -239,6 +280,99 @@ class Billing extends BaseController
         }
 
         return site_url('dashboard?view=risk' . ($cif !== '' ? '&cif=' . rawurlencode($cif) : ''));
+    }
+
+    /**
+     * Empresas que el usuario ya ha consultado y todavía no vigila, las más
+     * recientes primero. Es el primer paso de la página de éxito de Pro: lo que
+     * acaba de comprar es la vigilancia, y ya sabemos qué empresas le importan.
+     *
+     * Los CIF se cruzan en PHP y no con un JOIN: `user_events.trigger_type`,
+     * `companies.cif` y `user_company_watch.cif` no comparten collation.
+     *
+     * @return list<array{cif:string,nombre:string}>
+     */
+    private function empresasConsultadasSinVigilar(int $userId, int $limite = 25): array
+    {
+        if ($userId <= 0) {
+            return [];
+        }
+
+        try {
+            $db = \Config\Database::connect();
+
+            $filas = $db->table('user_events')
+                ->select('UPPER(TRIM(trigger_type)) AS cif, MAX(created_at) AS ultima', false)
+                ->where('user_id', $userId)
+                ->whereIn('event_type', ['view_risk_profile', 'purchase_risk_pdf'])
+                ->where('trigger_type IS NOT NULL')
+                ->where("trigger_type != ''")
+                ->groupBy('UPPER(TRIM(trigger_type))', false)
+                ->orderBy('ultima', 'DESC')
+                ->limit(200)
+                ->get()->getResultArray();
+
+            $cifs = array_values(array_unique(array_filter(array_map(
+                static fn ($f) => strtoupper(trim((string) $f['cif'])),
+                $filas
+            ))));
+            if (empty($cifs)) {
+                return [];
+            }
+
+            $vigiladas = [];
+            foreach ($db->table('user_company_watch')->select('cif')
+                         ->where('user_id', $userId)->where('active', 1)
+                         ->get()->getResultArray() as $w) {
+                $vigiladas[strtoupper(trim((string) $w['cif']))] = true;
+            }
+
+            $pendientes = array_values(array_filter($cifs, static fn ($c) => !isset($vigiladas[$c])));
+            if (empty($pendientes)) {
+                return [];
+            }
+
+            $nombres = [];
+            foreach ($db->table('companies')->select('cif, company_name')
+                         ->whereIn('cif', array_slice($pendientes, 0, 200))
+                         ->get()->getResultArray() as $c) {
+                $nombres[strtoupper(trim((string) $c['cif']))] = (string) $c['company_name'];
+            }
+
+            helper('company');
+            $salida = [];
+            foreach ($pendientes as $cif) {
+                if (!isset($nombres[$cif])) {
+                    continue;   // sin empresa no se puede vigilar
+                }
+                $salida[] = [
+                    'cif'    => $cif,
+                    'nombre' => company_display_name($nombres[$cif], $cif),
+                ];
+                if (count($salida) >= $limite) {
+                    break;
+                }
+            }
+
+            return $salida;
+        } catch (\Throwable $e) {
+            log_message('error', '[Billing] empresasConsultadasSinVigilar(' . $userId . '): ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * ¿Le van a llegar las alertas del BORME? Misma regla que BormeAlertsCommand:
+     * alerts_borme = 1, o sin decidir (NULL) y sin baja del marketing.
+     */
+    private function avisosActivos(object $user): bool
+    {
+        $pref = $user->alerts_borme ?? null;
+        if ($pref !== null) {
+            return (int) $pref === 1;
+        }
+
+        return (int) ($user->unsuscribe ?? 0) === 0;
     }
 
     /**
@@ -537,13 +671,23 @@ class Billing extends BaseController
                 }
             }
 
+            // Sin campo de código promocional a propósito: un campo vacío en el pago
+            // hace que el comprador se vaya a buscar códigos. Si algún día hay una
+            // campaña real (asesorías, recuperación), se activa aquí con
+            // $sessionParams['allow_promotion_codes'] = true para los planes que toque.
+
             $session = $this->stripeService->createCheckoutSession($sessionParams);
 
             return redirect()->to($session->url);
 
         } catch (\Throwable $e) {
-            log_message('error', '[Billing::startStripeCheckout] ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Error de Stripe: ' . $e->getMessage());
+            log_message('error', '[Billing::startStripeCheckout] plan=' . $plan . ' user=' . $userId . ' · ' . $e->getMessage());
+            // El texto de Stripe va al log, no a la pantalla: llega en inglés, habla de
+            // parámetros internos y, en la página donde se paga, asusta más que ayuda.
+            return redirect()->back()->with(
+                'error',
+                'No hemos podido abrir la pasarela de pago. Vuelve a intentarlo en un momento; si sigue fallando, escríbenos a soporte@apiempresas.es y lo resolvemos.'
+            );
         }
     }
 
@@ -1185,21 +1329,53 @@ class Billing extends BaseController
             return $this->renderView('billing/success_radar', $data);
         }
 
-        // 3. Solvencia Pro Success (Risk Plan)
-        if ($subscription && (($subscription->plan_slug ?? '') === 'risk_pro' || ($subscription->product_type ?? '') === 'risk')) {
-            $isAnnual = false;
-            if (!empty($subscription->current_period_start) && !empty($subscription->current_period_end)) {
-                $days = (strtotime((string)$subscription->current_period_end) - strtotime((string)$subscription->current_period_start)) / 86400;
-                if ($days > 40) {
-                    $isAnnual = true;
+        // 3. Solvencia Pro.
+        //
+        // Dos formas de saber que acaba de contratar:
+        //  - Stripe dice que ESTA sesión de pago es de risk_pro y está completa. No
+        //    depende del webhook: antes, si el usuario volvía antes de que llegara, la
+        //    suscripción aún no estaba en la BD y se le mandaba al panel sin
+        //    confirmación, donde seguía viendo "Activar Solvencia Pro".
+        //  - O la BD ya tiene la suscripción (el caso de siempre, sin sesión de Stripe).
+        $proEnStripe = isset($packStripe) && $packStripe
+            && ($packStripe->metadata->plan ?? '') === 'risk_pro'
+            && ($packStripe->status ?? '') === 'complete';
+        //    Si la sesión de Stripe es claramente de OTRO producto, no se secuestra.
+        $sesionDeOtroPlan = isset($packStripe) && $packStripe
+            && ($packStripe->metadata->plan ?? '') !== ''
+            && ($packStripe->metadata->plan ?? '') !== 'risk_pro';
+        $proEnBd = !$sesionDeOtroPlan && $subscription
+            && (($subscription->plan_slug ?? '') === 'risk_pro' || ($subscription->product_type ?? '') === 'risk');
+
+        if ($proEnStripe || $proEnBd) {
+            if ($proEnStripe) {
+                $isAnnual = ($packStripe->metadata->period ?? '') === 'annual';
+                $basePrice = isset($packStripe->amount_subtotal)
+                    ? ((int) $packStripe->amount_subtotal) / 100
+                    : ($isAnnual ? 290 : 29);
+                $orderRef = 'SUB-' . strtoupper(substr((string) $packStripe->id, -8));
+            } else {
+                $isAnnual = false;
+                if (!empty($subscription->current_period_start) && !empty($subscription->current_period_end)) {
+                    $days = (strtotime((string)$subscription->current_period_end) - strtotime((string)$subscription->current_period_start)) / 86400;
+                    $isAnnual = $days > 40;
                 }
+                $basePrice = $isAnnual ? ($subscription->price_annual ?? '290') : ($subscription->price_monthly ?? '29');
+                $orderRef  = 'SUB-' . str_pad((string) ($subscription->id ?? '0'), 6, '0', STR_PAD_LEFT);
             }
+
+            $userRow = $userId > 0 ? $this->userModel->find($userId) : null;
+
             $data = [
-                'plan_name' => $subscription->plan_name ?? 'Solvencia Pro',
-                'base_price' => $isAnnual ? ($subscription->price_annual ?? '290') : ($subscription->price_monthly ?? '29'),
-                'period_name' => $isAnnual ? 'Anual' : 'Mensual',
-                'payment_method' => 'Tarjeta (Stripe)',
-                'order_ref' => 'SUB-' . str_pad($subscription->id ?? '0', 6, '0', STR_PAD_LEFT),
+                'plan_name'      => 'Solvencia Pro',
+                'base_price'     => $basePrice,
+                'period_name'    => $isAnnual ? 'Anual' : 'Mensual',
+                'payment_method' => 'Stripe',
+                'order_ref'      => $orderRef,
+                // Los tres pasos de activación
+                'consultadas'    => $this->empresasConsultadasSinVigilar($userId),
+                'user_email'     => (string) ($userRow->email ?? ''),
+                'avisos_activos' => $userRow ? $this->avisosActivos($userRow) : true,
             ];
             return $this->renderView('billing/success_risk', $data);
         }
