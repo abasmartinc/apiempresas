@@ -450,26 +450,39 @@ class Register extends BaseController
         $user = $this->userModel->where('email', $email)->where('source_app', 'apiempresas')->first();
 
         if ($user) {
-            // Autologin para usuarios existentes (Zero Friction) excepto admins
+            /*
+             * EL EMAIL YA TIENE CUENTA: NUNCA SE ABRE SESIÓN DESDE AQUÍ.
+             *
+             * Antes se hacía "autologin" para no poner fricción, y el resultado era
+             * que cualquiera entraba en la cuenta de otra persona escribiendo su
+             * email: sus facturas, sus vigilancias, su suscripción. Ahora se le manda
+             * un enlace de un solo uso a SU buzón (App\Services\LoginLinkService) y
+             * se le enseña la pantalla de "revisa tu correo", con Google y la
+             * contraseña como alternativas.
+             */
+            $redirect = \App\Services\LoginLinkService::limpiarDestino(
+                (string) ($this->request->getPost('redirect') ?: 'dashboard')
+            ) ?: 'dashboard';
+
+            // Los administradores entran siempre con contraseña (y Turnstile).
             if (($user->is_admin ?? 0) == 1) {
-                return redirect()->to(site_url('enter?redirect=billing/checkout'))
+                return redirect()->to(site_url('enter') . '?redirect=' . urlencode($redirect))
                     ->with('info', lang('Messages.flash_59'))
                     ->with('prefill_email', $email);
             }
 
-            // Auto-Login
-            session()->regenerate();
-            session()->set([
-                'user_id' => $user->id,
-                'user_email' => $user->email,
-                'user_name' => $user->name,
-                'logged_in' => true,
+            $estado = 'error';
+            if (!isset($user->is_active) || (int) $user->is_active === 1) {
+                $estado = (new \App\Services\LoginLinkService())->enviar($user, $redirect);
+            }
+
+            return view('auth/login_link_sent', [
+                'email'    => $email,
+                'estado'   => $estado,
+                'redirect' => $redirect,
+                'intent'   => (string) ($this->request->getPost('intent') ?? ''),
+                'cif'      => (string) ($this->request->getPost('cif') ?? ''),
             ]);
-
-            $this->userModel->update($user->id, ['last_login_at' => date('Y-m-d H:i:s')]);
-
-            $redirect = $this->request->getPost('redirect') ?: 'billing/checkout';
-            return redirect()->to(site_url(ltrim($redirect, '/')));
         }
 
         // Create new user (Quick)

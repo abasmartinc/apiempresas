@@ -44,6 +44,11 @@ class UserModel extends Model
         'wizard_completed',
         'ai_copilot_trials',
         'risk_credits',
+        // Enlace de acceso de un solo uso (App\Services\LoginLinkService).
+        'login_token_hash',
+        'login_token_expires',
+        'login_token_redirect',
+        'login_token_sent_at',
     ];
 
     protected $useTimestamps = false;

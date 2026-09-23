@@ -150,6 +150,27 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?php
+/**
+ * Constructor de URLs del panel. Cada enlace montaba su query string a mano, así que
+ * añadir un filtro obligaba a tocarlos todos y los de periodo se comían la búsqueda.
+ * Se le pasan solo los parámetros que cambian; el resto del estado se conserva.
+ */
+$analyticsUrl = function (array $overrides = []) use ($period, $user_status_filter, $search, $sort, $contact_filter, $plan_filter) {
+    $params = array_merge([
+        'period'        => $period,
+        'status_filter' => $user_status_filter,
+        'q'             => $search,
+        'sort'          => $sort,
+        'contact'       => $contact_filter,
+        'plan'          => $plan_filter,
+    ], $overrides);
+
+    $params = array_filter($params, fn($v) => $v !== '' && $v !== null);
+
+    return site_url('admin/api-analytics?' . http_build_query($params));
+};
+?>
     <!-- Header -->
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
         <div>
@@ -181,28 +202,36 @@
     <?php endif; ?>
 
     <div id="analyticsDashboardContainer" style="position: relative; transition: opacity 0.2s ease;">
+        <?php /*
+            El historial de contacto viaja DENTRO del contenedor que refresca el AJAX.
+            Un <script> inyectado por innerHTML no se ejecuta, pero uno de tipo
+            application/json sí se puede leer con textContent: así el mapa se
+            actualiza en cada filtrado en vez de quedarse con el del primer pintado.
+        */ ?>
+        <script type="application/json" id="contactInfoData"><?= json_encode($contact_info, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
+
         <!-- Selector de Periodo -->
         <div class="card" style="margin-bottom: 2rem; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
             <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <span style="font-size: 0.85rem; font-weight: 700; color: #475569; margin-right: 6px;">📅 Periodo de análisis:</span>
                 
-                <a href="<?= site_url('admin/api-analytics?period=this_month&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" 
+                <a href="<?= $analyticsUrl(['period' => 'this_month']) ?>" 
                    class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'this_month' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
                    Este mes
                 </a>
-                <a href="<?= site_url('admin/api-analytics?period=last_month&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" 
+                <a href="<?= $analyticsUrl(['period' => 'last_month']) ?>" 
                    class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'last_month' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
                    Mes anterior
                 </a>
-                <a href="<?= site_url('admin/api-analytics?period=last_30d&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" 
+                <a href="<?= $analyticsUrl(['period' => 'last_30d']) ?>" 
                    class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'last_30d' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
                    Últimos 30 días
                 </a>
-                <a href="<?= site_url('admin/api-analytics?period=this_year&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" 
+                <a href="<?= $analyticsUrl(['period' => 'this_year']) ?>" 
                    class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'this_year' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
                    Año <?= date('Y') ?>
                 </a>
-                <a href="<?= site_url('admin/api-analytics?period=all&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" 
+                <a href="<?= $analyticsUrl(['period' => 'all']) ?>" 
                    class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'all' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
                    Todo el histórico
                 </a>
@@ -469,7 +498,9 @@
             <form action="<?= site_url('admin/api-analytics') ?>" method="get" class="ajax-search-form" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <input type="hidden" name="period" value="<?= esc($period) ?>">
                 <input type="hidden" name="status_filter" value="<?= esc($user_status_filter) ?>">
-                
+                <input type="hidden" name="contact" value="<?= esc($contact_filter) ?>">
+                <input type="hidden" name="plan" value="<?= esc($plan_filter) ?>">
+
                 <div style="display: flex; align-items: center; gap: 6px;">
                     <span style="font-size: 0.8rem; font-weight: 700; color: #475569;">Ordenar:</span>
                     <select name="sort" class="ajax-sort-select" style="padding: 7px 10px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.82rem; background: white; color: #0f172a; font-weight: 700; cursor: pointer;">
@@ -480,6 +511,8 @@
                         <option value="date_asc" <?= $sort === 'date_asc' ? 'selected' : '' ?>>⏳ Más antiguos (Alta)</option>
                         <option value="errors_desc" <?= $sort === 'errors_desc' ? 'selected' : '' ?>>⚠️ Con más errores (400)</option>
                         <option value="name_asc" <?= $sort === 'name_asc' ? 'selected' : '' ?>>🔤 Nombre (A - Z)</option>
+                        <option value="email_asc" <?= $sort === 'email_asc' ? 'selected' : '' ?>>✉️ Sin contactar / contacto más antiguo</option>
+                        <option value="email_desc" <?= $sort === 'email_desc' ? 'selected' : '' ?>>📨 Contactados más recientemente</option>
                     </select>
                 </div>
 
@@ -488,7 +521,7 @@
                            style="padding: 7px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.82rem; width: 200px;">
                     <button type="submit" class="btn primary" style="padding: 7px 12px; font-size: 0.82rem;">Buscar</button>
                     <?php if ($search !== ''): ?>
-                        <a href="<?= site_url('admin/api-analytics?period=' . $period . '&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" class="btn ghost ajax-filter-link" style="padding: 5px 8px;">🔄</a>
+                        <a href="<?= $analyticsUrl(['q' => '']) ?>" class="btn ghost ajax-filter-link" style="padding: 5px 8px;">🔄</a>
                     <?php endif; ?>
                 </div>
             </form>
@@ -496,34 +529,81 @@
 
         <!-- Filtros Rápidos (Pills) -->
         <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9;">
-            <a href="<?= site_url('admin/api-analytics?period=' . $period . '&status_filter=all&q=' . urlencode($search) . '&sort=' . $sort) ?>" 
+            <a href="<?= $analyticsUrl(['status_filter' => 'all']) ?>" 
                class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 12px; font-weight: 700; border-radius: 8px; <?= $user_status_filter === 'all' ? 'background: #0f172a; color: white;' : 'background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;' ?>">
-                Todos (<?= $counts['all'] ?>)
+                Todos (<?= $pill_counts['status']['all'] ?>)
             </a>
-            <a href="<?= site_url('admin/api-analytics?period=' . $period . '&status_filter=limit_reached&q=' . urlencode($search) . '&sort=' . $sort) ?>" 
+            <a href="<?= $analyticsUrl(['status_filter' => 'limit_reached']) ?>" 
                class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 12px; font-weight: 700; border-radius: 8px; <?= $user_status_filter === 'limit_reached' ? 'background: #dc2626; color: white;' : 'background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5;' ?>">
-                🔥 Límite Agotado (<?= $counts['limit_reached'] ?>)
+                🔥 Límite Agotado (<?= $pill_counts['status']['limit_reached'] ?>)
             </a>
-            <a href="<?= site_url('admin/api-analytics?period=' . $period . '&status_filter=near_limit&q=' . urlencode($search) . '&sort=' . $sort) ?>" 
+            <a href="<?= $analyticsUrl(['status_filter' => 'near_limit']) ?>" 
                class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 12px; font-weight: 700; border-radius: 8px; <?= $user_status_filter === 'near_limit' ? 'background: #d97706; color: white;' : 'background: #fef3c7; color: #b45309; border: 1px solid #fcd34d;' ?>">
-                ⚠️ Cerca del Límite (<?= $counts['near_limit'] ?>)
+                ⚠️ Cerca del Límite (<?= $pill_counts['status']['near_limit'] ?>)
             </a>
-            <a href="<?= site_url('admin/api-analytics?period=' . $period . '&status_filter=active_free&q=' . urlencode($search) . '&sort=' . $sort) ?>" 
+            <a href="<?= $analyticsUrl(['status_filter' => 'active_free']) ?>" 
                class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 12px; font-weight: 700; border-radius: 8px; <?= $user_status_filter === 'active_free' ? 'background: #0284c7; color: white;' : 'background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;' ?>">
-                ⚡ Activos Free (<?= $counts['active_free'] ?>)
+                ⚡ Activos Free (<?= $pill_counts['status']['active_free'] ?>)
             </a>
-            <a href="<?= site_url('admin/api-analytics?period=' . $period . '&status_filter=inactive&q=' . urlencode($search) . '&sort=' . $sort) ?>" 
+            <a href="<?= $analyticsUrl(['status_filter' => 'inactive']) ?>" 
                class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 12px; font-weight: 700; border-radius: 8px; <?= $user_status_filter === 'inactive' ? 'background: #64748b; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
-                💤 Inactivos (<?= $counts['inactive'] ?>)
+                💤 Inactivos (<?= $pill_counts['status']['inactive'] ?>)
             </a>
-            <a href="<?= site_url('admin/api-analytics?period=' . $period . '&status_filter=errors&q=' . urlencode($search) . '&sort=' . $sort) ?>" 
+            <a href="<?= $analyticsUrl(['status_filter' => 'errors']) ?>" 
                class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 12px; font-weight: 700; border-radius: 8px; <?= $user_status_filter === 'errors' ? 'background: #9333ea; color: white;' : 'background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe;' ?>">
-                ❌ Con Errores 400 (<?= $counts['errors'] ?>)
+                ❌ Con Errores 400 (<?= $pill_counts['status']['errors'] ?>)
             </a>
-            <a href="<?= site_url('admin/api-analytics?period=' . $period . '&status_filter=paid&q=' . urlencode($search) . '&sort=' . $sort) ?>" 
+            <a href="<?= $analyticsUrl(['status_filter' => 'paid']) ?>" 
                class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 12px; font-weight: 700; border-radius: 8px; <?= $user_status_filter === 'paid' ? 'background: #059669; color: white;' : 'background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;' ?>">
-                💎 Clientes de Pago (<?= $counts['paid'] ?>)
+                💎 Clientes de Pago (<?= $pill_counts['status']['paid'] ?>)
             </a>
+        </div>
+
+        <!-- Filtro por Plan (Free / planes de pago de la API, leídos de api_plans) -->
+        <?php
+            $planPillBase = 'text-decoration: none; padding: 6px 12px; font-weight: 700; border-radius: 8px; font-size: 0.82rem; ';
+            $planPillOff  = 'background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;';
+        ?>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9;">
+            <span style="font-size: 0.8rem; font-weight: 700; color: #475569;">🏷️ Plan:</span>
+            <a href="<?= $analyticsUrl(['plan' => 'all']) ?>"
+               class="pill ajax-filter-link" style="<?= $planPillBase ?><?= $plan_filter === 'all' ? 'background: #0f172a; color: white;' : $planPillOff ?>">
+                Todos (<?= $pill_counts['plan']['all'] ?>)
+            </a>
+            <a href="<?= $analyticsUrl(['plan' => 'free']) ?>"
+               class="pill ajax-filter-link" style="<?= $planPillBase ?><?= $plan_filter === 'free' ? 'background: #0284c7; color: white;' : 'background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;' ?>">
+                🆓 Free (<?= $pill_counts['plan']['free'] ?>)
+            </a>
+            <?php foreach ($api_paid_plans as $planSlug => $planName): ?>
+                <a href="<?= $analyticsUrl(['plan' => $planSlug]) ?>"
+                   class="pill ajax-filter-link" style="<?= $planPillBase ?><?= $plan_filter === $planSlug ? 'background: #059669; color: white;' : 'background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;' ?>">
+                    💎 <?= esc($planName) ?> (<?= $pill_counts['plan'][$planSlug] ?? 0 ?>)
+                </a>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- Filtros de Contacto por Correo (se combinan con los de arriba) -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9;">
+            <span style="font-size: 0.8rem; font-weight: 700; color: #475569;">✉️ Contacto:</span>
+            <a href="<?= $analyticsUrl(['contact' => 'all']) ?>"
+               class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 12px; font-weight: 700; border-radius: 8px; font-size: 0.82rem; <?= $contact_filter === 'all' ? 'background: #0f172a; color: white;' : 'background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;' ?>">
+                Indiferente (<?= $pill_counts['contact']['all'] ?>)
+            </a>
+            <a href="<?= $analyticsUrl(['contact' => 'never']) ?>"
+               class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 12px; font-weight: 700; border-radius: 8px; font-size: 0.82rem; <?= $contact_filter === 'never' ? 'background: #0d9488; color: white;' : 'background: #ccfbf1; color: #0f766e; border: 1px solid #5eead4;' ?>">
+                🆕 Sin contactar (<?= $pill_counts['contact']['never'] ?>)
+            </a>
+            <a href="<?= $analyticsUrl(['contact' => 'contacted']) ?>"
+               class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 12px; font-weight: 700; border-radius: 8px; font-size: 0.82rem; <?= $contact_filter === 'contacted' ? 'background: #4f46e5; color: white;' : 'background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe;' ?>">
+                📨 Ya contactados (<?= $pill_counts['contact']['contacted'] ?>)
+            </a>
+            <a href="<?= $analyticsUrl(['contact' => 'recent']) ?>"
+               class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 12px; font-weight: 700; border-radius: 8px; font-size: 0.82rem; <?= $contact_filter === 'recent' ? 'background: #b45309; color: white;' : 'background: #fffbeb; color: #b45309; border: 1px solid #fde68a;' ?>">
+                🕐 Contactados hace ≤ 7 días (<?= $pill_counts['contact']['recent'] ?>)
+            </a>
+            <span style="font-size: 0.75rem; color: #94a3b8;">
+                Los números de cada fila tienen en cuenta los filtros activos de las demás. Se cuenta el histórico completo de envíos, no el periodo seleccionado arriba. Los correos de bienvenida no cuentan como contacto. No se muestran los usuarios que han pedido no recibir correos.
+            </span>
         </div>
 
         <!-- Barra de Acciones Masivas -->
@@ -548,7 +628,7 @@
                             <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this);">
                         </th>
                         <th style="padding: 10px 12px;">
-                            <a href="<?= site_url('admin/api-analytics?period=' . $period . '&status_filter=' . $user_status_filter . '&q=' . urlencode($search) . '&sort=' . ($sort === 'name_asc' ? 'date_desc' : 'name_asc')) ?>" 
+                            <a href="<?= $analyticsUrl(['sort' => ($sort === 'name_asc' ? 'date_desc' : 'name_asc')]) ?>" 
                                class="ajax-filter-link" 
                                style="text-decoration: none; color: <?= $sort === 'name_asc' ? '#2563eb' : 'inherit' ?>; display: inline-flex; align-items: center; gap: 4px;"
                                title="Clic para ordenar por nombre">
@@ -558,7 +638,7 @@
                         </th>
                         <th style="padding: 10px 12px;">Plan & Estado</th>
                         <th style="padding: 10px 12px;">
-                            <a href="<?= site_url('admin/api-analytics?period=' . $period . '&status_filter=' . $user_status_filter . '&q=' . urlencode($search) . '&sort=' . ($sort === 'usage_desc' ? 'usage_asc' : 'usage_desc')) ?>" 
+                            <a href="<?= $analyticsUrl(['sort' => ($sort === 'usage_desc' ? 'usage_asc' : 'usage_desc')]) ?>" 
                                class="ajax-filter-link" 
                                style="text-decoration: none; color: <?= in_array($sort, ['usage_desc', 'usage_asc']) ? '#2563eb' : 'inherit' ?>; display: inline-flex; align-items: center; gap: 4px; font-weight: 800;"
                                title="Clic para alternar orden de consumo">
@@ -573,7 +653,7 @@
                             </a>
                         </th>
                         <th style="padding: 10px 12px;">
-                            <a href="<?= site_url('admin/api-analytics?period=' . $period . '&status_filter=' . $user_status_filter . '&q=' . urlencode($search) . '&sort=' . ($sort === 'errors_desc' ? 'usage_desc' : 'errors_desc')) ?>" 
+                            <a href="<?= $analyticsUrl(['sort' => ($sort === 'errors_desc' ? 'usage_desc' : 'errors_desc')]) ?>" 
                                class="ajax-filter-link" 
                                style="text-decoration: none; color: <?= $sort === 'errors_desc' ? '#2563eb' : 'inherit' ?>; display: inline-flex; align-items: center; gap: 4px;"
                                title="Clic para ordenar por errores técnicos">
@@ -582,7 +662,7 @@
                             </a>
                         </th>
                         <th style="padding: 10px 12px;">
-                            <a href="<?= site_url('admin/api-analytics?period=' . $period . '&status_filter=' . $user_status_filter . '&q=' . urlencode($search) . '&sort=' . ($sort === 'date_desc' ? 'date_asc' : 'date_desc')) ?>" 
+                            <a href="<?= $analyticsUrl(['sort' => ($sort === 'date_desc' ? 'date_asc' : 'date_desc')]) ?>" 
                                class="ajax-filter-link" 
                                style="text-decoration: none; color: <?= in_array($sort, ['date_desc', 'date_asc']) ? '#2563eb' : 'inherit' ?>; display: inline-flex; align-items: center; gap: 4px;"
                                title="Clic para ordenar por fecha">
@@ -594,13 +674,28 @@
                                 <?php endif; ?>
                             </a>
                         </th>
+                        <th style="padding: 10px 12px;">
+                            <a href="<?= $analyticsUrl(['sort' => $sort === 'email_asc' ? 'email_desc' : 'email_asc']) ?>"
+                               class="ajax-filter-link"
+                               style="text-decoration: none; color: <?= in_array($sort, ['email_asc', 'email_desc']) ? '#2563eb' : 'inherit' ?>; display: inline-flex; align-items: center; gap: 4px;"
+                               title="Clic para ordenar por último correo enviado">
+                                <span>Contacto</span>
+                                <?php if ($sort === 'email_desc'): ?>
+                                    <span style="font-size: 0.85rem;">▼</span>
+                                <?php elseif ($sort === 'email_asc'): ?>
+                                    <span style="font-size: 0.85rem;">▲</span>
+                                <?php else: ?>
+                                    <span style="color: #94a3b8; font-size: 0.75rem;">⇅</span>
+                                <?php endif; ?>
+                            </a>
+                        </th>
                         <th style="padding: 10px 12px; text-align: right;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($users)): ?>
                         <tr>
-                            <td colspan="7" style="padding: 3rem; text-align: center; color: #94a3b8;">
+                            <td colspan="8" style="padding: 3rem; text-align: center; color: #94a3b8;">
                                 No se encontraron desarrolladores que coincidan con los filtros aplicados.
                             </td>
                         </tr>
@@ -676,9 +771,59 @@
                                         <span style="font-size: 0.72rem; color: #94a3b8;">Alta: <?= date('d/m/Y', strtotime($u['created_at'])) ?></span>
                                     <?php endif; ?>
                                 </td>
+                                <!-- Contacto por correo: qué se le ha enviado ya -->
+                                <td style="padding: 12px; font-size: 0.8rem; min-width: 170px;">
+                                    <?php if ($row['is_unsubscribed']): ?>
+                                        <div style="color: #b91c1c; font-weight: 700; font-size: 0.75rem;">🚫 Baja voluntaria</div>
+                                    <?php endif; ?>
+
+                                    <?php if ($row['emails_sent'] === 0): ?>
+                                        <span style="display: inline-block; padding: 2px 8px; border-radius: 99px; background: #ccfbf1; color: #0f766e; font-size: 0.72rem; font-weight: 800;">
+                                            Sin contactar
+                                        </span>
+                                    <?php else: ?>
+                                        <?php
+                                        // Semáforo por antigüedad: reciente = riesgo de repetir
+                                        $d = $row['days_since_email'];
+                                        if ($d !== null && $d <= 7) {
+                                            $chipBg = '#fee2e2'; $chipFg = '#b91c1c';
+                                        } elseif ($d !== null && $d <= 30) {
+                                            $chipBg = '#fef3c7'; $chipFg = '#b45309';
+                                        } else {
+                                            $chipBg = '#f1f5f9'; $chipFg = '#475569';
+                                        }
+                                        ?>
+                                        <span style="display: inline-block; padding: 2px 8px; border-radius: 99px; background: <?= $chipBg ?>; color: <?= $chipFg ?>; font-size: 0.72rem; font-weight: 800;">
+                                            <?= $row['emails_sent'] ?> enviado<?= $row['emails_sent'] === 1 ? '' : 's' ?>
+                                            <?php if ($d !== null): ?>
+                                                · hace <?= $d === 0 ? 'hoy' : $d . ' d' ?>
+                                            <?php endif; ?>
+                                        </span>
+                                        <div style="font-weight: 600; color: #1e293b; margin-top: 4px;">
+                                            <?= date('d/m/Y H:i', strtotime($row['last_email_at'])) ?>
+                                        </div>
+                                        <?php if (!empty($row['last_email_subject'])): ?>
+                                            <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;"
+                                                 title="<?= esc($row['last_email_subject']) ?>">
+                                                «<?= esc(mb_strimwidth($row['last_email_subject'], 0, 42, '…')) ?>»
+                                            </div>
+                                        <?php endif; ?>
+                                        <div style="font-size: 0.72rem; margin-top: 2px; color: <?= $row['emails_opened'] > 0 ? '#047857' : '#94a3b8' ?>;">
+                                            <?= $row['emails_opened'] > 0
+                                                ? '👁️ Abierto (' . $row['emails_opened'] . ')'
+                                                : 'Sin aperturas registradas' ?>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if ($row['emails_failed'] > 0): ?>
+                                        <div style="font-size: 0.72rem; color: #b91c1c; margin-top: 2px;">
+                                            ⚠️ <?= $row['emails_failed'] ?> envío(s) fallido(s)
+                                        </div>
+                                    <?php endif; ?>
+                                </td>
                                 <td style="padding: 12px; text-align: right;">
-                                    <button type="button" 
-                                            onclick="openSingleEmailModal(<?= $u['id'] ?>, '<?= esc($u['name'], 'js') ?>', '<?= esc($u['email'], 'js') ?>', '<?= esc($row['status'], 'js') ?>');" 
+                                    <button type="button"
+                                            onclick="openSingleEmailModal(<?= $u['id'] ?>, '<?= esc($u['name'], 'js') ?>', '<?= esc($u['email'], 'js') ?>', '<?= esc($row['status'], 'js') ?>');"
                                             class="btn ghost" 
                                             style="padding: 6px 10px; font-size: 0.8rem; border-radius: 6px;"
                                             title="Enviar correo a este desarrollador">
@@ -714,6 +859,21 @@
                         <input type="text" id="modalSingleUserDisplay" readonly style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: #f1f5f9; font-size: 0.85rem; color: #334155;">
                     </div>
 
+                    <!-- Historial de contacto: se pinta desde CONTACT_INFO, antes de enviar -->
+                    <div id="modalSingleHistory" style="display: none; border-radius: 10px; padding: 12px 14px; font-size: 0.82rem; line-height: 1.5;"></div>
+
+                    <!-- Aviso de asunto repetido. Solo se ve cuando el asunto del formulario
+                         coincide con uno ya enviado; el envío queda bloqueado hasta confirmar. -->
+                    <div id="modalSingleDupWarning" style="display: none; background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 12px 14px;">
+                        <div style="font-size: 0.82rem; color: #991b1b; font-weight: 700; margin-bottom: 8px;">
+                            ⚠️ <span id="modalSingleDupText"></span>
+                        </div>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #7f1d1d; font-weight: 700; cursor: pointer;">
+                            <input type="checkbox" name="allow_duplicate" value="1" id="modalSingleAllowDup" onchange="refreshSingleSubmitState();">
+                            Enviar de todas formas (sé que lo estoy repitiendo)
+                        </label>
+                    </div>
+
                     <div>
                         <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Cargar Plantilla Predeterminada</label>
                         <select id="modalSingleTemplateSelect" onchange="applySingleTemplate(this.value);" style="width: 100%; padding: 8px 12px; border: 1.5px solid #2563eb; border-radius: 8px; font-size: 0.85rem; background: #eff6ff; color: #1e40af; font-weight: 600;">
@@ -726,7 +886,7 @@
 
                     <div>
                         <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Asunto del Correo <span style="color: red;">*</span></label>
-                        <input type="text" name="subject" id="modalSingleSubject" required placeholder="Ej: ¿Necesitas ampliar tu cuota de la API?" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;">
+                        <input type="text" name="subject" id="modalSingleSubject" required oninput="refreshSingleDuplicateWarning();" placeholder="Ej: ¿Necesitas ampliar tu cuota de la API?" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;">
                     </div>
 
                     <div>
@@ -737,7 +897,7 @@
 
                 <div style="padding: 16px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: flex-end; gap: 10px;">
                     <button type="button" onclick="closeSingleEmailModal();" class="btn ghost">Cancelar</button>
-                    <button type="submit" class="btn primary">Enviar Correo Directo 🚀</button>
+                    <button type="submit" id="modalSingleSubmit" class="btn primary">Enviar Correo Directo 🚀</button>
                 </div>
             </form>
         </div>
@@ -763,6 +923,22 @@
                         Los usuarios dados de baja de marketing no recibirán correos comerciales.
                     </div>
 
+                    <!-- Cuántos de los seleccionados ya han recibido algo -->
+                    <div id="modalBulkHistory" style="display: none; border-radius: 10px; padding: 12px 14px; font-size: 0.82rem; line-height: 1.5;"></div>
+
+                    <div id="modalBulkDupWarning" style="display: none; background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 12px 14px;">
+                        <div style="font-size: 0.82rem; color: #991b1b; font-weight: 700; margin-bottom: 8px;">
+                            ⚠️ <span id="modalBulkDupText"></span>
+                        </div>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #7f1d1d; font-weight: 700; cursor: pointer;">
+                            <input type="checkbox" name="allow_duplicate" value="1" id="modalBulkAllowDup">
+                            Enviar también a los que ya lo recibieron
+                        </label>
+                        <div style="font-size: 0.75rem; color: #7f1d1d; margin-top: 6px;">
+                            Si lo dejas sin marcar, esos destinatarios se omiten y el resto de la campaña sale igual.
+                        </div>
+                    </div>
+
                     <div>
                         <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Cargar Plantilla Predeterminada</label>
                         <select id="modalBulkTemplateSelect" onchange="applyBulkTemplate(this.value);" style="width: 100%; padding: 8px 12px; border: 1.5px solid #2563eb; border-radius: 8px; font-size: 0.85rem; background: #eff6ff; color: #1e40af; font-weight: 600;">
@@ -775,7 +951,7 @@
 
                     <div>
                         <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Asunto del Correo <span style="color: red;">*</span></label>
-                        <input type="text" name="subject" id="modalBulkSubject" required placeholder="Asunto del correo masivo..." style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;">
+                        <input type="text" name="subject" id="modalBulkSubject" required oninput="refreshBulkDuplicateWarning();" placeholder="Asunto del correo masivo..." style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;">
                     </div>
 
                     <div>
@@ -795,12 +971,121 @@
     <!-- Scripts de Interacción -->
     <script>
         const API_TEMPLATES = <?= json_encode($email_templates) ?>;
+        const DUP_WINDOW_DAYS = <?= (int)$duplicate_window_days ?>;
+
+        // Historial de contacto por usuario. Es lo que permite avisar ANTES de enviar;
+        // el servidor vuelve a comprobarlo por su cuenta y es quien manda.
+        let CONTACT_INFO = {};
+
+        function reloadContactInfo() {
+            const node = document.getElementById('contactInfoData');
+            if (!node) return;
+            try {
+                CONTACT_INFO = JSON.parse(node.textContent) || {};
+            } catch (e) {
+                console.error('No se pudo leer el historial de contacto:', e);
+            }
+        }
+        reloadContactInfo();
+
+        let singleModalUserId = null;
+
+        function contactInfoFor(userId) {
+            return CONTACT_INFO[String(userId)] || null;
+        }
+
+        // Pinta el historial del destinatario en el modal individual
+        function renderSingleHistory(userId) {
+            const box = document.getElementById('modalSingleHistory');
+            const info = contactInfoFor(userId);
+
+            if (!info) {
+                box.style.display = 'none';
+                return;
+            }
+
+            if (info.unsubscribed) {
+                box.style.background = '#fef2f2';
+                box.style.border = '1.5px solid #fca5a5';
+                box.style.color = '#991b1b';
+                box.innerHTML = '🚫 <strong>Este usuario se dio de baja de las comunicaciones.</strong> '
+                              + 'El envío será rechazado.';
+                box.style.display = 'block';
+                return;
+            }
+
+            if (!info.sent) {
+                box.style.background = '#f0fdfa';
+                box.style.border = '1.5px solid #5eead4';
+                box.style.color = '#0f766e';
+                box.innerHTML = '🆕 <strong>Nunca se le ha enviado ningún correo</strong> desde este panel.';
+                box.style.display = 'block';
+                return;
+            }
+
+            const reciente = info.days_since !== null && info.days_since <= 7;
+            box.style.background = reciente ? '#fffbeb' : '#f8fafc';
+            box.style.border = '1.5px solid ' + (reciente ? '#fde68a' : '#e2e8f0');
+            box.style.color = reciente ? '#92400e' : '#334155';
+
+            let cuando = info.days_since === 0 ? 'hoy'
+                       : (info.days_since === 1 ? 'ayer' : 'hace ' + info.days_since + ' días');
+
+            box.innerHTML = '📨 Ya ha recibido <strong>' + info.sent + ' correo(s)</strong>. '
+                + 'El último, ' + cuando + ' (' + info.last_at + ')'
+                + (info.last_subject ? ': «<strong>' + escapeHtml(info.last_subject) + '</strong>»' : '')
+                + '. ' + (info.opened > 0 ? '👁️ Lo abrió.' : 'Sin aperturas registradas.');
+            box.style.display = 'block';
+        }
+
+        // Aviso de asunto repetido en el modal individual
+        function refreshSingleDuplicateWarning() {
+            const warn = document.getElementById('modalSingleDupWarning');
+            const info = contactInfoFor(singleModalUserId);
+            const subject = (document.getElementById('modalSingleSubject').value || '').trim();
+
+            let sentOn = null;
+            if (info && info.recent_subjects && subject !== '') {
+                sentOn = info.recent_subjects[subject] || null;
+            }
+
+            if (sentOn) {
+                document.getElementById('modalSingleDupText').textContent =
+                    'Ya se le envió este mismo asunto el ' + sentOn
+                    + '. Se bloquea el envío para no repetirlo.';
+                warn.style.display = 'block';
+            } else {
+                warn.style.display = 'none';
+                document.getElementById('modalSingleAllowDup').checked = false;
+            }
+
+            refreshSingleSubmitState();
+        }
+
+        function refreshSingleSubmitState() {
+            const warnVisible = document.getElementById('modalSingleDupWarning').style.display === 'block';
+            const allowed = document.getElementById('modalSingleAllowDup').checked;
+            const btn = document.getElementById('modalSingleSubmit');
+            const block = warnVisible && !allowed;
+
+            btn.disabled = block;
+            btn.style.opacity = block ? '0.5' : '1';
+            btn.style.cursor = block ? 'not-allowed' : 'pointer';
+            btn.title = block ? 'Marca «Enviar de todas formas» para repetir este asunto' : '';
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
 
         // Modales
         function openSingleEmailModal(userId, name, email, status) {
+            singleModalUserId = userId;
             document.getElementById('modalSingleUserId').value = userId;
             document.getElementById('modalSingleUserDisplay').value = name + ' (' + email + ')';
-            
+
             // Auto-seleccionar plantilla según estado
             let defaultTpl = 'api_near_limit';
             if (status === 'limit_reached') defaultTpl = 'api_limit_upgrade';
@@ -810,6 +1095,9 @@
             const select = document.getElementById('modalSingleTemplateSelect');
             select.value = defaultTpl;
             applySingleTemplate(defaultTpl);
+
+            renderSingleHistory(userId);
+            refreshSingleDuplicateWarning();
 
             document.getElementById('singleEmailModal').style.display = 'flex';
         }
@@ -824,6 +1112,8 @@
                 document.getElementById('modalSingleSubject').value = tpl.subject;
                 document.getElementById('modalSingleMessage').value = tpl.body;
             }
+            // Cambiar de plantilla cambia el asunto, así que hay que revisar el aviso
+            refreshSingleDuplicateWarning();
         }
 
         function openBulkEmailModal() {
@@ -843,7 +1133,94 @@
                 applyBulkTemplate(select.value);
             }
 
+            renderBulkHistory(userIds);
+            refreshBulkDuplicateWarning();
+
             document.getElementById('bulkEmailModal').style.display = 'flex';
+        }
+
+        function selectedUserIds() {
+            const raw = document.getElementById('modalBulkUserIds').value || '';
+            return raw.split(',').filter(v => v !== '');
+        }
+
+        // Resumen de contacto de los seleccionados
+        function renderBulkHistory(userIds) {
+            const box = document.getElementById('modalBulkHistory');
+            let contactados = 0, nuevos = 0, bajas = 0;
+
+            userIds.forEach(id => {
+                const info = contactInfoFor(id);
+                if (!info) { nuevos++; return; }
+                if (info.unsubscribed) bajas++;
+                if (info.sent > 0) contactados++; else nuevos++;
+            });
+
+            const hayContactados = contactados > 0;
+            box.style.background = hayContactados ? '#fffbeb' : '#f0fdfa';
+            box.style.border = '1.5px solid ' + (hayContactados ? '#fde68a' : '#5eead4');
+            box.style.color = hayContactados ? '#92400e' : '#0f766e';
+
+            let html = '<strong>' + nuevos + '</strong> sin contactar nunca · '
+                     + '<strong>' + contactados + '</strong> ya han recibido algún correo';
+            if (bajas > 0) {
+                html += ' · <strong>' + bajas + '</strong> de baja (se omitirán)';
+            }
+            if (hayContactados) {
+                html += '<div style="margin-top:8px;">'
+                      + '<button type="button" onclick="deselectAlreadyContacted();" '
+                      + 'style="background:#fff;border:1.5px solid #d97706;color:#b45309;font-weight:700;'
+                      + 'font-size:0.78rem;padding:5px 10px;border-radius:8px;cursor:pointer;">'
+                      + 'Quitar de la selección a los ya contactados</button></div>';
+            }
+
+            box.innerHTML = html;
+            box.style.display = 'block';
+        }
+
+        // Deja seleccionados solo a los que nunca han recibido nada
+        function deselectAlreadyContacted() {
+            document.querySelectorAll('.user-select-checkbox:checked').forEach(cb => {
+                const info = contactInfoFor(cb.value);
+                if (info && info.sent > 0) cb.checked = false;
+            });
+            updateSelectedCount();
+
+            const ids = Array.from(document.querySelectorAll('.user-select-checkbox:checked')).map(cb => cb.value);
+            if (ids.length === 0) {
+                alert('No queda ningún desarrollador sin contactar en la selección. Se cierra el envío.');
+                closeBulkEmailModal();
+                return;
+            }
+
+            document.getElementById('modalBulkUserIds').value = ids.join(',');
+            document.getElementById('modalBulkRecipientsCount').textContent = ids.length;
+            renderBulkHistory(ids);
+            refreshBulkDuplicateWarning();
+        }
+
+        // Aviso de asunto repetido en la campaña masiva
+        function refreshBulkDuplicateWarning() {
+            const warn = document.getElementById('modalBulkDupWarning');
+            const subject = (document.getElementById('modalBulkSubject').value || '').trim();
+
+            let repetidos = 0;
+            if (subject !== '') {
+                selectedUserIds().forEach(id => {
+                    const info = contactInfoFor(id);
+                    if (info && info.recent_subjects && info.recent_subjects[subject]) repetidos++;
+                });
+            }
+
+            if (repetidos > 0) {
+                document.getElementById('modalBulkDupText').textContent =
+                    repetidos + ' de los seleccionados ya recibieron este mismo asunto en los últimos '
+                    + DUP_WINDOW_DAYS + ' días.';
+                warn.style.display = 'block';
+            } else {
+                warn.style.display = 'none';
+                document.getElementById('modalBulkAllowDup').checked = false;
+            }
         }
 
         function closeBulkEmailModal() {
@@ -856,6 +1233,7 @@
                 document.getElementById('modalBulkSubject').value = tpl.subject;
                 document.getElementById('modalBulkMessage').value = tpl.body;
             }
+            refreshBulkDuplicateWarning();
         }
 
         // Selección múltiple
@@ -925,6 +1303,7 @@
                     if (pushState && window.location.href !== url) {
                         history.pushState(null, '', url);
                     }
+                    reloadContactInfo();
                     initDashboardInteractions();
                     updateSelectedCount();
 

@@ -439,6 +439,20 @@ class EmailService
     }
 
     /**
+     * Enlace de acceso de un solo uso (ver App\Services\LoginLinkService).
+     *
+     * Transaccional: se envía aunque el usuario haya rechazado el marketing, porque
+     * sin él no puede entrar en su propia cuenta.
+     */
+    public function sendLoginLinkEmail(string $userEmail, string $loginUrl, int $minutos, int $userId = 0)
+    {
+        return $this->sendTemplateEmail('login_link', [
+            'login_url' => $loginUrl,
+            'minutos'   => $minutos,
+        ], $userEmail, [], [], $userId);
+    }
+
+    /**
      * Send a quick start prompt email (5 min after register).
      */
     public function sendQuickStartPrompt(array $userData)
@@ -777,6 +791,7 @@ class EmailService
             'user_invoice',
             'admin_registration',
             'set_password',
+            'login_link',
             'welcome_email',
             'welcome_risk',
             'risk_pack_welcome',

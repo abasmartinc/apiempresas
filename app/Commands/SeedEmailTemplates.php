@@ -131,6 +131,14 @@ class SeedEmailTemplates extends BaseCommand
                 'trigger' => 'Se envía en registros rápidos para que el usuario configure su contraseña por primera vez.'
             ],
             [
+                'slug'    => 'login_link',
+                'name'    => 'Enlace de acceso (un solo uso)',
+                'subject' => 'Tu enlace para entrar en APIEmpresas',
+                'view'    => 'login_link',
+                'vars'    => '{login_url}, {minutos}',
+                'trigger' => 'Se envía cuando alguien introduce en el registro rápido un email que ya tiene cuenta. El enlace caduca y solo sirve una vez.'
+            ],
+            [
                 'slug'    => 'automation_generic',
                 'name'    => 'Plantilla Genérica de Automatización',
                 'subject' => 'Notificación APIEmpresas.es',

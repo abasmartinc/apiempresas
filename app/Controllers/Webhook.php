@@ -46,6 +46,16 @@ class Webhook extends Controller
                 $session = $event->data->object;
                 $this->handleCheckoutSessionCompleted($session);
                 break;
+            // Pagos que no se confirman al momento (domiciliación SEPA, por ejemplo):
+            // `completed` llega con payment_status 'unpaid' y el cobro real se
+            // confirma aquí. Hoy solo lo usa el pack; el resto de productos siguen
+            // resolviéndose en `completed` como hasta ahora.
+            case 'checkout.session.async_payment_succeeded':
+                $session = $event->data->object;
+                if ((($session->metadata->plan ?? '') === 'risk_pack_5') && ($session->mode ?? '') === 'payment') {
+                    $this->abonarPackRiesgo($session);
+                }
+                break;
             case 'invoice.paid':
                 $invoice = $event->data->object;
                 $this->handleInvoicePaid($invoice);
@@ -96,6 +106,32 @@ class Webhook extends Controller
         }
 
         return '';
+    }
+
+    /**
+     * Abona el pack de consultas si Stripe lo da por cobrado. Idempotente.
+     *
+     * `$userId` lo pasa handleCheckoutSessionCompleted cuando ya lo ha resuelto
+     * (incluido el alta de un invitado); si no, se toma de la propia sesión.
+     */
+    private function abonarPackRiesgo($session, int $userId = 0): void
+    {
+        if (($session->payment_status ?? '') !== 'paid') {
+            log_message('info', '[Webhook::stripe] Pack de riesgo ' . ($session->id ?? '?') . ' aún sin cobrar (' . ($session->payment_status ?? '?') . '); no se abona.');
+            return;
+        }
+
+        if ($userId <= 0) {
+            $userId = (int) ($session->client_reference_id ?? $session->metadata->user_id ?? 0);
+        }
+
+        (new \App\Services\RiskPackService())->abonar(
+            (string) ($session->id ?? ''),
+            $userId,
+            (int) ($session->metadata->credits ?? 5),
+            (string) ($session->metadata->target_cif ?? ''),
+            isset($session->amount_total) ? (int) $session->amount_total : null
+        );
     }
 
     private function handleCheckoutSessionCompleted($session)
@@ -177,34 +213,9 @@ class Webhook extends Controller
 
             // RISK PACK (TRIPWIRE: PACK AUDITORIAS DE SOLVENCIA)
             if ($planSlug === 'risk_pack_5' || strpos((string)$planSlug, 'risk_pack_') === 0) {
-                $credits = (int) ($session->metadata->credits ?? 5);
-                if ($credits <= 0) {
-                    $credits = 5;
-                }
-                if ($userId > 0) {
-                    $db = \Config\Database::connect();
-                    $db->table('users')
-                        ->where('id', $userId)
-                        ->set('risk_credits', 'risk_credits + ' . $credits, false)
-                        ->update();
-
-                    $userEventsModel = new \App\Models\UserEventsModel();
-                    $userEventsModel->logEvent($userId, 'purchase_risk_pack', (string)$credits);
-
-                    // Enviar email transaccional de bienvenida y confirmación de créditos
-                    $userRow = (new \App\Models\UserModel())->find($userId);
-                    if ($userRow) {
-                        $emailService = new \App\Services\EmailService();
-                        $targetCif = $session->metadata->target_cif ?? '';
-                        $emailService->sendRiskPackWelcome([
-                            'name'    => $userRow->name,
-                            'email'   => $userRow->email,
-                            'user_id' => $userRow->id
-                        ], $credits, $targetCif);
-                    }
-
-                    log_message('info', "[Webhook::stripe] Added {$credits} risk_credits and sent welcome email to user {$userId} from {$planSlug}");
-                }
+                // Solo si está cobrado, y una sola vez por sesión de pago aunque Stripe
+                // reintente el aviso (ver App\Services\RiskPackService).
+                $this->abonarPackRiesgo($session, (int) $userId);
             }
 
             // EXPORT JOBS

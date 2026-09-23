@@ -8,6 +8,12 @@ use Config\Database;
 class ApiAnalytics extends BaseController
 {
     /**
+     * Ventana (en días) dentro de la cual se considera que un correo con el
+     * MISMO asunto para el MISMO usuario es un duplicado y hay que confirmarlo.
+     */
+    const DUPLICATE_WINDOW_DAYS = 30;
+
+    /**
      * Dashboard analítico de Negocio para la API y Desarrolladores
      */
     public function index()
@@ -21,8 +27,17 @@ class ApiAnalytics extends BaseController
         // Filtro de periodo
         $period = $this->request->getGet('period') ?? 'this_month';
         $userStatusFilter = $this->request->getGet('status_filter') ?? 'all';
+        if (!in_array($userStatusFilter, ['all', 'limit_reached', 'near_limit', 'active_free', 'inactive', 'errors', 'paid'], true)) {
+            $userStatusFilter = 'all';
+        }
         $search = trim($this->request->getGet('q') ?? '');
         $sort = $this->request->getGet('sort') ?? 'usage_desc';
+
+        // Filtro de contacto por correo: all | never | contacted | recent (últimos 7 días)
+        $contactFilter = $this->request->getGet('contact') ?? 'all';
+        if (!in_array($contactFilter, ['all', 'never', 'contacted', 'recent'], true)) {
+            $contactFilter = 'all';
+        }
 
         // Rango de fechas según periodo
         $startOfMonth = date('Y-m-01 00:00:00');
@@ -161,6 +176,37 @@ class ApiAnalytics extends BaseController
             $mrrTotal += (float)($sub['price_monthly'] ?? 0.0);
         }
         $paidSubscribers = count($paidUserMap);
+
+        // Planes de pago de la API para el filtro "Plan" del listado (slug => nombre).
+        // Se leen de api_plans para que un plan nuevo aparezca sin tocar código.
+        $apiPaidPlans = [];
+        try {
+            $planRows = $db->table('api_plans')
+                ->select('slug, name, price_monthly')
+                ->where('product_type', 'api')
+                ->where('price_monthly >', 0)
+                ->orderBy('price_monthly', 'ASC')
+                ->get()->getResultArray();
+            foreach ($planRows as $p) {
+                if (!empty($p['slug']) && !isset($apiPaidPlans[$p['slug']])) {
+                    $apiPaidPlans[$p['slug']] = $p['name'] ?: $p['slug'];
+                }
+            }
+        } catch (\Throwable $e) {
+            log_message('error', '[ApiAnalytics] No se pudieron leer los planes: ' . $e->getMessage());
+        }
+        // Por si hay suscriptores de un plan que la consulta anterior no devolvió
+        foreach ($paidUserMap as $sub) {
+            if (!empty($sub['plan_slug']) && !isset($apiPaidPlans[$sub['plan_slug']])) {
+                $apiPaidPlans[$sub['plan_slug']] = $sub['plan_name'] ?: $sub['plan_slug'];
+            }
+        }
+
+        // Filtro por plan: all | free | <slug de un plan de pago>
+        $planFilter = (string)($this->request->getGet('plan') ?? 'all');
+        if ($planFilter !== 'all' && $planFilter !== 'free' && !isset($apiPaidPlans[$planFilter])) {
+            $planFilter = 'all';
+        }
         $conversionRate = $totalApiUsers > 0 ? round(($paidSubscribers / $totalApiUsers) * 100, 1) : 0;
 
         // -------------------------------------------------------------
@@ -247,6 +293,14 @@ class ApiAnalytics extends BaseController
         arsort($topEndpointsMap);
 
         // -------------------------------------------------------------
+        // 4.5 HISTORIAL DE CORREOS ENVIADOS (email_logs)
+        // -------------------------------------------------------------
+        // Se lee SIEMPRE sobre todo el histórico, no sobre el periodo del panel:
+        // la pregunta que responde esta columna es "¿ya le escribí?", y la respuesta
+        // no debe cambiar porque el admin haya elegido "este mes" en el filtro.
+        $emailStatsByUser = $this->getEmailStatsByUser($db, $cohortUserIds);
+
+        // -------------------------------------------------------------
         // 5. CLASIFICACIÓN DE CADA USUARIO Y EMBUDO DE ADOPCIÓN (FUNNEL)
         // -------------------------------------------------------------
         $countLimitReached = 0;
@@ -255,6 +309,8 @@ class ApiAnalytics extends BaseController
         $countInactive = 0;
         $countErrors = 0;
         $countPaid = 0;
+        $countContacted = 0;
+        $countNeverContacted = 0;
 
         // Pasos del embudo de adopción
         $funnel_step1_registered = $totalApiUsers;
@@ -344,10 +400,31 @@ class ApiAnalytics extends BaseController
             // Endpoints ordenados de este usuario
             $userTopEndpoints = array_slice($stats['endpoints'], 0, 3, true);
 
+            // Historial de contacto por correo
+            $mail = $emailStatsByUser[$uId] ?? [
+                'sent_count'     => 0,
+                'failed_count'   => 0,
+                'last_sent_at'   => null,
+                'last_subject'   => null,
+                'last_opened_at' => null,
+                'opened_count'   => 0,
+                'subjects'       => []
+            ];
+            $daysSinceEmail = $mail['last_sent_at']
+                ? (int)floor((time() - strtotime($mail['last_sent_at'])) / 86400)
+                : null;
+
+            if ($mail['sent_count'] > 0) {
+                $countContacted++;
+            } else {
+                $countNeverContacted++;
+            }
+
             $classifiedUsers[] = [
                 'user'             => $u,
                 'is_paid'          => $isPaid,
                 'plan_name'        => $isPaid ? ($subData['plan_name'] ?? 'Pro') : 'Free (100)',
+                'plan_slug'        => $isPaid ? (string)($subData['plan_slug'] ?? '') : 'free',
                 'plan_price'       => $isPaid ? (float)($subData['price_monthly'] ?? 19.0) : 0.0,
                 'quota'            => $quota,
                 'month_requests'   => $monthReqs,
@@ -361,37 +438,108 @@ class ApiAnalytics extends BaseController
                 'user_endpoints'   => $userTopEndpoints,
                 'status'           => $status,
                 'status_label'     => $statusLabel,
-                'status_badge'     => $statusBadge
+                'status_badge'     => $statusBadge,
+                // Contacto por correo
+                'emails_sent'      => $mail['sent_count'],
+                'emails_failed'    => $mail['failed_count'],
+                'emails_opened'    => $mail['opened_count'],
+                'last_email_at'    => $mail['last_sent_at'],
+                'last_email_subject' => $mail['last_subject'],
+                'last_email_opened_at' => $mail['last_opened_at'],
+                'days_since_email' => $daysSinceEmail,
+                'is_unsubscribed'  => (int)($u['unsuscribe'] ?? 0) === 1
             ];
         }
 
         // -------------------------------------------------------------
         // 6. FILTRADO Y BÚSQUEDA DE LA TABLA
         // -------------------------------------------------------------
-        $filteredUsers = array_filter($classifiedUsers, function($row) use ($userStatusFilter, $search) {
-            // Filtro por estado
-            if ($userStatusFilter !== 'all') {
-                if ($userStatusFilter === 'limit_reached' && $row['status'] !== 'limit_reached') return false;
-                if ($userStatusFilter === 'near_limit' && $row['status'] !== 'near_limit') return false;
-                if ($userStatusFilter === 'active_free' && $row['status'] !== 'active_free') return false;
-                if ($userStatusFilter === 'inactive' && $row['status'] !== 'inactive') return false;
-                if ($userStatusFilter === 'errors' && $row['status'] !== 'errors') return false;
-                if ($userStatusFilter === 'paid' && $row['status'] !== 'paid') return false;
+        // Filtro de contacto por correo (independiente del estado de consumo:
+        // la combinación útil es justamente "límite agotado" + "sin contactar")
+        $matchesContact = function(array $row, string $filter): bool {
+            if ($filter === 'never')     return $row['emails_sent'] === 0;
+            if ($filter === 'contacted') return $row['emails_sent'] > 0;
+            if ($filter === 'recent') {
+                return $row['emails_sent'] > 0
+                    && $row['days_since_email'] !== null
+                    && $row['days_since_email'] <= 7;
             }
+            return true; // 'all'
+        };
 
-            // Filtro de búsqueda
-            if ($search !== '') {
-                $needle = mb_strtolower($search);
-                $u = $row['user'];
-                $matchName    = strpos(mb_strtolower($u['name'] ?? ''), $needle) !== false;
-                $matchEmail   = strpos(mb_strtolower($u['email'] ?? ''), $needle) !== false;
-                $matchCompany = strpos(mb_strtolower($u['company'] ?? ''), $needle) !== false;
-                $matchEndp    = strpos(mb_strtolower($row['last_endpoint'] ?? ''), $needle) !== false;
-                return $matchName || $matchEmail || $matchCompany || $matchEndp;
-            }
+        // Filtro por estado de consumo
+        $matchesStatus = function(array $row, string $filter): bool {
+            return $filter === 'all' || $row['status'] === $filter;
+        };
 
-            return true;
+        // Filtro de búsqueda
+        $needle = mb_strtolower($search);
+        $matchesSearch = function(array $row) use ($search, $needle): bool {
+            if ($search === '') return true;
+            $u = $row['user'];
+            return strpos(mb_strtolower($u['name'] ?? ''), $needle) !== false
+                || strpos(mb_strtolower($u['email'] ?? ''), $needle) !== false
+                || strpos(mb_strtolower($u['company'] ?? ''), $needle) !== false
+                || strpos(mb_strtolower($row['last_endpoint'] ?? ''), $needle) !== false;
+        };
+
+        // Quien ha pedido no recibir correos no aparece en el listado ni en los
+        // chips: no se le puede escribir, así que solo estorba. Los KPIs y el
+        // embudo siguen usando $classifiedUsers completo.
+        $listableUsers = array_filter($classifiedUsers, fn($row) => !$row['is_unsubscribed']);
+
+        // Filtro por plan: Free o un plan de pago concreto (Pro, Business...)
+        $matchesPlan = function(array $row, string $filter): bool {
+            return $filter === 'all' || $row['plan_slug'] === $filter;
+        };
+
+        $filteredUsers = array_filter($listableUsers, function($row) use ($userStatusFilter, $contactFilter, $planFilter, $matchesContact, $matchesStatus, $matchesPlan, $matchesSearch) {
+            return $matchesContact($row, $contactFilter)
+                && $matchesStatus($row, $userStatusFilter)
+                && $matchesPlan($row, $planFilter)
+                && $matchesSearch($row);
         });
+
+        // -------------------------------------------------------------
+        // 6.0 CONTADORES DE LOS CHIPS (FACETADOS)
+        // -------------------------------------------------------------
+        // Cada fila de chips cuenta aplicando los filtros activos de las OTRAS
+        // filas (y la búsqueda), para que el número del chip coincida con lo que
+        // aparece en el listado al pulsarlo. Los contadores globales de
+        // $counts se mantienen para los KPIs de la cabecera.
+        $pillCounts = [
+            'status'  => ['all' => 0, 'limit_reached' => 0, 'near_limit' => 0, 'active_free' => 0,
+                          'inactive' => 0, 'errors' => 0, 'paid' => 0],
+            'contact' => ['all' => 0, 'never' => 0, 'contacted' => 0, 'recent' => 0],
+            'plan'    => array_merge(['all' => 0, 'free' => 0], array_fill_keys(array_keys($apiPaidPlans), 0)),
+        ];
+        foreach ($listableUsers as $row) {
+            if (!$matchesSearch($row)) continue;
+
+            $okContact = $matchesContact($row, $contactFilter);
+            $okStatus  = $matchesStatus($row, $userStatusFilter);
+            $okPlan    = $matchesPlan($row, $planFilter);
+
+            if ($okContact && $okPlan) {
+                $pillCounts['status']['all']++;
+                if (isset($pillCounts['status'][$row['status']])) {
+                    $pillCounts['status'][$row['status']]++;
+                }
+            }
+
+            if ($okStatus && $okPlan) {
+                foreach (array_keys($pillCounts['contact']) as $cf) {
+                    if ($matchesContact($row, $cf)) $pillCounts['contact'][$cf]++;
+                }
+            }
+
+            if ($okContact && $okStatus) {
+                $pillCounts['plan']['all']++;
+                if (isset($pillCounts['plan'][$row['plan_slug']])) {
+                    $pillCounts['plan'][$row['plan_slug']]++;
+                }
+            }
+        }
 
         // -------------------------------------------------------------
         // 6.1 ORDENACIÓN DEL LISTADO (POR CONSUMO, FECHA, ERRORES, ETC.)
@@ -427,6 +575,21 @@ class ApiAnalytics extends BaseController
                     }
                     return $b['recent_errors'] <=> $a['recent_errors'];
 
+                case 'email_asc':
+                    // Los que llevan más tiempo sin recibir nada, primero;
+                    // los que nunca han recibido nada van por delante de todos.
+                    $aNever = $a['emails_sent'] === 0;
+                    $bNever = $b['emails_sent'] === 0;
+                    if ($aNever !== $bNever) return $aNever ? -1 : 1;
+                    if ($aNever && $bNever) {
+                        return $b['month_requests'] <=> $a['month_requests'];
+                    }
+                    return strcmp($a['last_email_at'] ?? '', $b['last_email_at'] ?? '');
+
+                case 'email_desc':
+                    // Contactados más recientemente primero (para revisar lo que acabas de mandar)
+                    return strcmp($b['last_email_at'] ?? '', $a['last_email_at'] ?? '');
+
                 case 'usage_desc':
                 default:
                     if ($a['month_requests'] === $b['month_requests']) {
@@ -459,6 +622,9 @@ class ApiAnalytics extends BaseController
             'period'                => $period,
             'period_label'          => $periodLabel,
             'user_status_filter'    => $userStatusFilter,
+            'contact_filter'        => $contactFilter,
+            'plan_filter'           => $planFilter,
+            'api_paid_plans'        => $apiPaidPlans,
             'search'                => $search,
             'sort'                  => $sort,
             'total_api_users'       => $totalApiUsers,
@@ -489,10 +655,18 @@ class ApiAnalytics extends BaseController
                 'never_called'  => $neverCalledCount,
                 'errors'        => $countErrors,
                 'paid'          => $countPaid,
+                'contacted'     => $countContacted,
+                'never_contacted' => $countNeverContacted,
             ],
+            // Contadores de los chips, cruzados con el filtro de la otra fila
+            'pill_counts'           => $pillCounts,
             'users'                 => $filteredUsers,
             'top_endpoints'         => array_slice($topEndpointsMap, 0, 5, true),
-            'email_templates'       => $this->getEmailTemplates()
+            'email_templates'       => $this->getEmailTemplates(),
+            // Mapa id => historial de contacto, para que el modal pueda avisar
+            // ANTES de enviar en vez de después
+            'contact_info'          => $this->buildContactInfo($classifiedUsers, $emailStatsByUser),
+            'duplicate_window_days' => self::DUPLICATE_WINDOW_DAYS
         ];
 
         return $this->renderView('admin/api_analytics', $data);
@@ -524,6 +698,23 @@ class ApiAnalytics extends BaseController
 
         if (!$user) {
             return redirect()->back()->with('error', 'Usuario no encontrado.');
+        }
+
+        // Baja voluntaria: parada en seco, no hay confirmación que la salte.
+        // El envío masivo ya lo respetaba; el individual no, y era el mismo dato.
+        if ((int)($user->unsuscribe ?? 0) === 1) {
+            return redirect()->back()->with('error',
+                esc($user->email) . ' se dio de baja de las comunicaciones. No se ha enviado nada.');
+        }
+
+        // Duplicado: mismo asunto, mismo usuario, dentro de la ventana.
+        $allowDuplicate = (int)$this->request->getPost('allow_duplicate') === 1;
+        $previousSend = $this->findRecentDuplicate((int)$user->id, $subject);
+        if ($previousSend !== null && !$allowDuplicate) {
+            return redirect()->back()->withInput()->with('error',
+                'No se ha enviado: ' . esc($user->email) . ' ya recibió un correo con este mismo asunto el '
+                . date('d/m/Y H:i', strtotime($previousSend))
+                . '. Si quieres mandarlo otra vez, marca «Enviar de todas formas» en el formulario.');
         }
 
         $emailService = \Config\Services::email();
@@ -610,13 +801,27 @@ class ApiAnalytics extends BaseController
         $emailLogModel = new \App\Models\EmailLogModel();
         $emailHelper = new \App\Services\EmailService();
 
+        $allowDuplicate = (int)$this->request->getPost('allow_duplicate') === 1;
+
         $sentCount = 0;
         $errorCount = 0;
         $skippedCount = 0;
+        $duplicateCount = 0;
+        $duplicateEmails = [];
 
         foreach ($users as $user) {
             if ((int)($user->unsuscribe ?? 0) === 1) {
                 $skippedCount++;
+                continue;
+            }
+
+            // A diferencia del envío individual, aquí un duplicado no tumba la
+            // campaña entera: se salta ese destinatario y se informa al final.
+            if (!$allowDuplicate && $this->findRecentDuplicate((int)$user->id, $subject) !== null) {
+                $duplicateCount++;
+                if (count($duplicateEmails) < 10) {
+                    $duplicateEmails[] = $user->email;
+                }
                 continue;
             }
 
@@ -666,12 +871,102 @@ class ApiAnalytics extends BaseController
         if ($skippedCount > 0) {
             $msg .= " ({$skippedCount} omitido(s) por baja voluntaria).";
         }
+        if ($duplicateCount > 0) {
+            $msg .= " {$duplicateCount} omitido(s) por haber recibido ya este mismo asunto"
+                  . " en los últimos " . self::DUPLICATE_WINDOW_DAYS . " días";
+            if (!empty($duplicateEmails)) {
+                $msg .= ' (' . esc(implode(', ', $duplicateEmails))
+                      . ($duplicateCount > count($duplicateEmails) ? ', …' : '') . ')';
+            }
+            $msg .= '.';
+        }
         if ($errorCount > 0) {
             $msg .= " {$errorCount} fallaron.";
             return redirect()->back()->with('message', $msg)->with('error', "Hubo {$errorCount} envíos con error. Revisa el log de emails.");
         }
 
         return redirect()->back()->with('message', $msg);
+    }
+
+    /**
+     * Historial de correos por usuario, leído de `email_logs`.
+     *
+     * Devuelve un mapa user_id => [sent_count, failed_count, opened_count,
+     * last_sent_at, last_subject, last_opened_at, subjects, history].
+     * Ver App\Libraries\EmailContactHistory.
+     *
+     * `subjects` guarda, por asunto, la fecha del último envío correcto: es lo que
+     * permite avisar de un duplicado exacto sin volver a consultar la base de datos.
+     */
+    private function getEmailStatsByUser($db, array $userIds): array
+    {
+        // Reglas de qué cuenta como contacto (fallidos, bienvenidas, aviso al
+        // admin) compartidas con el panel de Solvencia.
+        return (new \App\Libraries\EmailContactHistory())->forUsers($db, $userIds);
+    }
+
+    /**
+     * Resumen de contacto por usuario para el JavaScript de los modales.
+     */
+    private function buildContactInfo(array $classifiedUsers, array $emailStatsByUser): array
+    {
+        $windowStart = strtotime('-' . self::DUPLICATE_WINDOW_DAYS . ' days');
+
+        $info = [];
+        foreach ($classifiedUsers as $row) {
+            $uid = (int)$row['user']['id'];
+
+            // Asuntos ya enviados DENTRO de la ventana: es la misma condición que
+            // aplica el servidor, para que el aviso no prometa algo distinto.
+            $recentSubjects = [];
+            foreach (($emailStatsByUser[$uid]['subjects'] ?? []) as $subject => $sentAt) {
+                if (strtotime($sentAt) >= $windowStart) {
+                    $recentSubjects[$subject] = date('d/m/Y', strtotime($sentAt));
+                }
+            }
+
+            $info[$uid] = [
+                'recent_subjects' => $recentSubjects,
+                'sent'         => $row['emails_sent'],
+                'opened'       => $row['emails_opened'],
+                'last_at'      => $row['last_email_at']
+                    ? date('d/m/Y H:i', strtotime($row['last_email_at']))
+                    : null,
+                'last_subject' => $row['last_email_subject'],
+                'days_since'   => $row['days_since_email'],
+                'unsubscribed' => $row['is_unsubscribed'],
+                'name'         => $row['user']['name'] ?: ('Desarrollador #' . $uid)
+            ];
+        }
+        return $info;
+    }
+
+    /**
+     * ¿Ya recibió este usuario un correo con este mismo asunto hace poco?
+     *
+     * Devuelve la fecha del envío previo, o null si no hay duplicado. La
+     * comprobación vive aquí, en el servidor, y no solo en el aviso del modal:
+     * un límite comprobado únicamente en la interfaz no es un límite.
+     */
+    private function findRecentDuplicate(int $userId, string $subject): ?string
+    {
+        $subject = trim($subject);
+        if ($subject === '') {
+            return null;
+        }
+
+        $since = date('Y-m-d H:i:s', strtotime('-' . self::DUPLICATE_WINDOW_DAYS . ' days'));
+
+        $row = Database::connect()->table('email_logs')
+            ->select('created_at')
+            ->where('user_id', $userId)
+            ->where('status', 'success')
+            ->where('subject', $subject)
+            ->where('created_at >=', $since)
+            ->orderBy('created_at', 'DESC')
+            ->get(1)->getRowArray();
+
+        return $row['created_at'] ?? null;
     }
 
     /**

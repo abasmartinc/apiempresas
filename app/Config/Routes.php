@@ -39,6 +39,12 @@ $routes->post('forgot-password', 'Login::sendResetLink');
 $routes->get('reset-password/(:any)', 'Login::resetPassword/$1');
 $routes->post('reset-password', 'Login::updatePassword');
 
+// Enlace de acceso de un solo uso (App\Services\LoginLinkService).
+// El GET solo enseña el botón; el POST consume el token (los antivirus de correo
+// abren los enlaces y lo gastarían).
+$routes->get('acceso/(:segment)', 'Login::enlace/$1');
+$routes->post('acceso', 'Login::entrarConEnlace');
+
 // Copilot Pro Landing
 $routes->get('copilot-pro', 'CopilotLandingController::index');
 

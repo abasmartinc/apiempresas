@@ -23,6 +23,15 @@ class RiskProfileAnalytics extends BaseController
         $userStatusFilter = $this->request->getGet('status_filter') ?? 'all';
         $search = trim($this->request->getGet('q') ?? '');
         $sort = $this->request->getGet('sort') ?? 'usage_desc';
+        if (!in_array($userStatusFilter, ['all', 'limit_reached', 'active_free', 'inactive', 'paid'], true)) {
+            $userStatusFilter = 'all';
+        }
+
+        // Filtro de contacto por correo: all | never | contacted | recent (últimos 7 días)
+        $contactFilter = $this->request->getGet('contact') ?? 'all';
+        if (!in_array($contactFilter, ['all', 'never', 'contacted', 'recent'], true)) {
+            $contactFilter = 'all';
+        }
 
         // Rango de fechas según periodo
         $startOfMonth = date('Y-m-01 00:00:00');
@@ -91,7 +100,7 @@ class RiskProfileAnalytics extends BaseController
         // -------------------------------------------------------------
         // Usuarios con intención 'view_risk_profile', excluyendo cuentas de administración
         $allCohortUsers = $db->table('users')
-            ->select('id, name, email, company, created_at, last_login_at, is_active')
+            ->select('id, name, email, company, created_at, last_login_at, is_active, unsuscribe')
             ->where('signup_intent', 'view_risk_profile')
             ->where('is_admin', 0)
             ->orderBy('created_at', 'DESC')
@@ -248,6 +257,10 @@ class RiskProfileAnalytics extends BaseController
 
         $classifiedUsers = [];
 
+        // Historial de correos (sin bienvenidas ni envíos fallidos), el mismo
+        // criterio que el panel de la API.
+        $emailStatsByUser = (new \App\Libraries\EmailContactHistory())->forUsers($db, $cohortUserIds);
+
         foreach ($allCohortUsers as $u) {
             $uId = (int)$u['id'];
             $monthCount = isset($monthDistinctCifsByUser[$uId]) ? count($monthDistinctCifsByUser[$uId]) : 0;
@@ -325,6 +338,19 @@ class RiskProfileAnalytics extends BaseController
             $u['status_type'] = $statusType;
             $u['last_view'] = $lastView;
             $u['history'] = array_slice($userHistory, 0, 8);
+
+            // Contacto por correo
+            $mail = $emailStatsByUser[$uId] ?? null;
+            $u['emails_sent']        = $mail['sent_count'] ?? 0;
+            $u['emails_failed']      = $mail['failed_count'] ?? 0;
+            $u['emails_opened']      = $mail['opened_count'] ?? 0;
+            $u['last_email_at']      = $mail['last_sent_at'] ?? null;
+            $u['last_email_subject'] = $mail['last_subject'] ?? null;
+            $u['email_history']      = $mail['history'] ?? [];
+            $u['days_since_email']   = !empty($mail['last_sent_at'])
+                ? (int)floor((time() - strtotime($mail['last_sent_at'])) / 86400)
+                : null;
+            $u['is_unsubscribed']    = (int)($u['unsuscribe'] ?? 0) === 1;
 
             $classifiedUsers[] = $u;
         }
@@ -432,20 +458,55 @@ class RiskProfileAnalytics extends BaseController
         // -------------------------------------------------------------
         // 4. FILTRADO PARA LA TABLA DE USUARIOS
         // -------------------------------------------------------------
-        $filteredUsers = $classifiedUsers;
-        if ($search !== '') {
-            $searchLower = mb_strtolower($search);
-            $filteredUsers = array_values(array_filter($filteredUsers, function($u) use ($searchLower) {
-                return (strpos(mb_strtolower($u['name'] ?? ''), $searchLower) !== false) ||
-                       (strpos(mb_strtolower($u['email'] ?? ''), $searchLower) !== false) ||
-                       (strpos(mb_strtolower($u['company'] ?? ''), $searchLower) !== false);
-            }));
-        }
+        $matchesContact = function(array $u, string $filter): bool {
+            if ($filter === 'never')     return $u['emails_sent'] === 0;
+            if ($filter === 'contacted') return $u['emails_sent'] > 0;
+            if ($filter === 'recent') {
+                return $u['emails_sent'] > 0
+                    && $u['days_since_email'] !== null
+                    && $u['days_since_email'] <= 7;
+            }
+            return true; // 'all'
+        };
+        $matchesStatus = fn(array $u, string $filter): bool => $filter === 'all' || $u['status_type'] === $filter;
 
-        if ($userStatusFilter !== 'all') {
-            $filteredUsers = array_values(array_filter($filteredUsers, function($u) use ($userStatusFilter) {
-                return $u['status_type'] === $userStatusFilter;
-            }));
+        $searchLower = mb_strtolower($search);
+        $matchesSearch = function(array $u) use ($search, $searchLower): bool {
+            if ($search === '') return true;
+            return (strpos(mb_strtolower($u['name'] ?? ''), $searchLower) !== false) ||
+                   (strpos(mb_strtolower($u['email'] ?? ''), $searchLower) !== false) ||
+                   (strpos(mb_strtolower($u['company'] ?? ''), $searchLower) !== false);
+        };
+
+        // Quien ha pedido no recibir correos no aparece en el listado ni en los
+        // chips. Los KPIs y el embudo siguen usando $classifiedUsers completo.
+        $listableUsers = array_filter($classifiedUsers, fn($u) => !$u['is_unsubscribed']);
+
+        $filteredUsers = array_values(array_filter($listableUsers, function($u) use ($userStatusFilter, $contactFilter, $matchesContact, $matchesStatus, $matchesSearch) {
+            return $matchesStatus($u, $userStatusFilter)
+                && $matchesContact($u, $contactFilter)
+                && $matchesSearch($u);
+        }));
+
+        // Contadores de los chips: cada fila cuenta con el filtro activo de la
+        // otra (y la búsqueda), para que el número coincida con el listado.
+        $pillCounts = [
+            'status'  => ['all' => 0, 'limit_reached' => 0, 'active_free' => 0, 'inactive' => 0, 'paid' => 0],
+            'contact' => ['all' => 0, 'never' => 0, 'contacted' => 0, 'recent' => 0],
+        ];
+        foreach ($listableUsers as $u) {
+            if (!$matchesSearch($u)) continue;
+            if ($matchesContact($u, $contactFilter)) {
+                $pillCounts['status']['all']++;
+                if (isset($pillCounts['status'][$u['status_type']])) {
+                    $pillCounts['status'][$u['status_type']]++;
+                }
+            }
+            if ($matchesStatus($u, $userStatusFilter)) {
+                foreach (array_keys($pillCounts['contact']) as $cf) {
+                    if ($matchesContact($u, $cf)) $pillCounts['contact'][$cf]++;
+                }
+            }
         }
 
         // -------------------------------------------------------------
@@ -503,6 +564,8 @@ class RiskProfileAnalytics extends BaseController
             'period' => $period,
             'period_label' => $periodLabel,
             'user_status_filter' => $userStatusFilter,
+            'contact_filter' => $contactFilter,
+            'pill_counts' => $pillCounts,
             'search' => $search,
             'sort' => $sort,
             'stats' => [

@@ -171,23 +171,23 @@
             <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <span style="font-size: 0.85rem; font-weight: 700; color: #475569; margin-right: 6px;">📅 Periodo de análisis:</span>
                 
-                <a href="<?= site_url('admin/risk-profile?period=this_month&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" 
+                <a href="<?= site_url('admin/risk-profile?period=this_month&status_filter=' . $user_status_filter . '&sort=' . $sort . '&contact=' . urlencode($contact_filter)) ?>" 
                    class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'this_month' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
                    Este mes
                 </a>
-                <a href="<?= site_url('admin/risk-profile?period=last_month&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" 
+                <a href="<?= site_url('admin/risk-profile?period=last_month&status_filter=' . $user_status_filter . '&sort=' . $sort . '&contact=' . urlencode($contact_filter)) ?>" 
                    class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'last_month' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
                    Mes anterior
                 </a>
-                <a href="<?= site_url('admin/risk-profile?period=last_30d&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" 
+                <a href="<?= site_url('admin/risk-profile?period=last_30d&status_filter=' . $user_status_filter . '&sort=' . $sort . '&contact=' . urlencode($contact_filter)) ?>" 
                    class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'last_30d' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
                    Últimos 30 días
                 </a>
-                <a href="<?= site_url('admin/risk-profile?period=this_year&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" 
+                <a href="<?= site_url('admin/risk-profile?period=this_year&status_filter=' . $user_status_filter . '&sort=' . $sort . '&contact=' . urlencode($contact_filter)) ?>" 
                    class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'this_year' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
                    Año <?= date('Y') ?>
                 </a>
-                <a href="<?= site_url('admin/risk-profile?period=all&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" 
+                <a href="<?= site_url('admin/risk-profile?period=all&status_filter=' . $user_status_filter . '&sort=' . $sort . '&contact=' . urlencode($contact_filter)) ?>" 
                    class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $period === 'all' ? 'background: #2563eb; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
                    Todo el histórico
                 </a>
@@ -493,6 +493,7 @@
             <form action="<?= site_url('admin/risk-profile') ?>" method="get" class="ajax-search-form" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <input type="hidden" name="period" value="<?= esc($period) ?>">
                 <input type="hidden" name="status_filter" value="<?= esc($user_status_filter) ?>">
+                <input type="hidden" name="contact" value="<?= esc($contact_filter) ?>">
                 
                 <div style="display: flex; align-items: center; gap: 6px;">
                     <span style="font-size: 0.8rem; font-weight: 700; color: #475569;">Ordenar:</span>
@@ -510,7 +511,7 @@
                     <input type="text" name="q" value="<?= esc($search) ?>" placeholder="Buscar usuario..." class="input" style="padding: 6px 12px; font-size: 0.82rem; width: 180px;">
                     <button type="submit" class="btn primary" style="padding: 6px 14px; font-size: 0.82rem;">Buscar</button>
                     <?php if (!empty($search)): ?>
-                        <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=' . $user_status_filter . '&sort=' . $sort) ?>" class="btn ghost ajax-filter-link" style="padding: 5px 8px;">🔄</a>
+                        <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=' . $user_status_filter . '&sort=' . $sort . '&contact=' . urlencode($contact_filter)) ?>" class="btn ghost ajax-filter-link" style="padding: 5px 8px;">🔄</a>
                     <?php endif; ?>
                 </div>
             </form>
@@ -521,34 +522,62 @@
             <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin-right: 4px;">Segmento:</span>
 
             <!-- Todos -->
-            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=all&q=' . urlencode($search) . '&sort=' . $sort) ?>" 
+            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=all&q=' . urlencode($search) . '&sort=' . $sort . '&contact=' . urlencode($contact_filter)) ?>" 
                class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 13px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $user_status_filter === 'all' ? 'background: #0f172a; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
-               Todos (<?= $stats['total_users'] ?>)
+               Todos (<?= $pill_counts['status']['all'] ?>)
             </a>
 
             <!-- Hot Leads: En el límite 3/3 -->
-            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=limit_reached&q=' . urlencode($search) . '&sort=' . $sort) ?>" 
+            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=limit_reached&q=' . urlencode($search) . '&sort=' . $sort . '&contact=' . urlencode($contact_filter)) ?>" 
                class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 13px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $user_status_filter === 'limit_reached' ? 'background: #dc2626; color: white;' : 'background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;' ?>">
-               🚨 En el Límite 3/3 (Hot Leads) (<?= $stats['count_limit_reached'] ?>)
+               🚨 En el Límite 3/3 (Hot Leads) (<?= $pill_counts['status']['limit_reached'] ?>)
             </a>
 
             <!-- Activos 1-2 -->
-            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=active_free&q=' . urlencode($search) . '&sort=' . $sort) ?>" 
+            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=active_free&q=' . urlencode($search) . '&sort=' . $sort . '&contact=' . urlencode($contact_filter)) ?>" 
                class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 13px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $user_status_filter === 'active_free' ? 'background: #d97706; color: white;' : 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' ?>">
-               ⚡ Activos Free (1-2) (<?= $stats['count_active_free'] ?>)
+               ⚡ Activos Free (1-2) (<?= $pill_counts['status']['active_free'] ?>)
             </a>
 
             <!-- Inactivos 0 -->
-            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=inactive&q=' . urlencode($search) . '&sort=' . $sort) ?>" 
+            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=inactive&q=' . urlencode($search) . '&sort=' . $sort . '&contact=' . urlencode($contact_filter)) ?>" 
                class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 13px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $user_status_filter === 'inactive' ? 'background: #64748b; color: white;' : 'background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0;' ?>">
-               💤 Sin consultas (0) (<?= $stats['count_inactive'] ?>)
+               💤 Sin consultas (0) (<?= $pill_counts['status']['inactive'] ?>)
             </a>
 
             <!-- Suscriptores de Pago -->
-            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=paid&q=' . urlencode($search) . '&sort=' . $sort) ?>" 
+            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=paid&q=' . urlencode($search) . '&sort=' . $sort . '&contact=' . urlencode($contact_filter)) ?>" 
                class="pill ajax-filter-link" style="text-decoration: none; padding: 6px 13px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; <?= $user_status_filter === 'paid' ? 'background: #059669; color: white;' : 'background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0;' ?>">
-               👑 Solvencia Pro (Pago) (<?= $stats['count_paid'] ?>)
+               👑 Solvencia Pro (Pago) (<?= $pill_counts['status']['paid'] ?>)
             </a>
+        </div>
+
+        <!-- Filtros de Contacto por Correo (se combinan con el segmento) -->
+        <?php
+            $riskContactUrl = fn(string $c) => site_url('admin/risk-profile?period=' . $period . '&status_filter=' . $user_status_filter . '&q=' . urlencode($search) . '&sort=' . $sort . '&contact=' . $c);
+            $rcBase = 'text-decoration: none; padding: 6px 13px; font-size: 0.8rem; font-weight: 700; border-radius: 99px; transition: all 0.2s; ';
+        ?>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid #f1f5f9; align-items: center;">
+            <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin-right: 4px;">✉️ Contacto:</span>
+            <a href="<?= $riskContactUrl('all') ?>" class="pill ajax-filter-link"
+               style="<?= $rcBase ?><?= $contact_filter === 'all' ? 'background: #0f172a; color: white;' : 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;' ?>">
+                Indiferente (<?= $pill_counts['contact']['all'] ?>)
+            </a>
+            <a href="<?= $riskContactUrl('never') ?>" class="pill ajax-filter-link"
+               style="<?= $rcBase ?><?= $contact_filter === 'never' ? 'background: #0d9488; color: white;' : 'background: #ccfbf1; color: #0f766e; border: 1px solid #5eead4;' ?>">
+                🆕 Sin contactar (<?= $pill_counts['contact']['never'] ?>)
+            </a>
+            <a href="<?= $riskContactUrl('contacted') ?>" class="pill ajax-filter-link"
+               style="<?= $rcBase ?><?= $contact_filter === 'contacted' ? 'background: #4f46e5; color: white;' : 'background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe;' ?>">
+                📨 Ya contactados (<?= $pill_counts['contact']['contacted'] ?>)
+            </a>
+            <a href="<?= $riskContactUrl('recent') ?>" class="pill ajax-filter-link"
+               style="<?= $rcBase ?><?= $contact_filter === 'recent' ? 'background: #b45309; color: white;' : 'background: #fffbeb; color: #b45309; border: 1px solid #fde68a;' ?>">
+                🕐 Contactados hace ≤ 7 días (<?= $pill_counts['contact']['recent'] ?>)
+            </a>
+            <span style="font-size: 0.75rem; color: #94a3b8;">
+                Los números de cada fila tienen en cuenta el filtro activo de la otra. Se cuenta el histórico completo de envíos. Los correos de bienvenida no cuentan como contacto. No se muestran los usuarios que han pedido no recibir correos.
+            </span>
         </div>
 
         <!-- Barra de Acciones Masivas (Email & Selección) -->
@@ -590,7 +619,7 @@
                             <input type="checkbox" id="selectAllCheckbox" title="Seleccionar todos" style="cursor: pointer; width: 16px; height: 16px; accent-color: #2563eb;">
                         </th>
                         <th style="padding: 12px;">
-                            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=' . $user_status_filter . '&q=' . urlencode($search) . '&sort=' . ($sort === 'name_asc' ? 'date_desc' : 'name_asc')) ?>" 
+                            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=' . $user_status_filter . '&q=' . urlencode($search) . '&sort=' . ($sort === 'name_asc' ? 'date_desc' : 'name_asc') . '&contact=' . urlencode($contact_filter)) ?>" 
                                class="ajax-filter-link" 
                                style="text-decoration: none; color: <?= $sort === 'name_asc' ? '#2563eb' : 'inherit' ?>; display: inline-flex; align-items: center; gap: 4px; font-weight: 700;"
                                title="Ordenar por nombre">
@@ -599,7 +628,7 @@
                             </a>
                         </th>
                         <th style="padding: 12px; text-align: center;">
-                            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=' . $user_status_filter . '&q=' . urlencode($search) . '&sort=' . ($sort === 'usage_desc' ? 'usage_asc' : 'usage_desc')) ?>" 
+                            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=' . $user_status_filter . '&q=' . urlencode($search) . '&sort=' . ($sort === 'usage_desc' ? 'usage_asc' : 'usage_desc') . '&contact=' . urlencode($contact_filter)) ?>" 
                                class="ajax-filter-link" 
                                style="text-decoration: none; color: <?= in_array($sort, ['usage_desc', 'usage_asc']) ? '#2563eb' : 'inherit' ?>; display: inline-flex; align-items: center; justify-content: center; gap: 4px; font-weight: 800;"
                                title="Clic para alternar orden de consumo">
@@ -614,7 +643,7 @@
                             </a>
                         </th>
                         <th style="padding: 12px; text-align: center;">
-                            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=' . $user_status_filter . '&q=' . urlencode($search) . '&sort=' . ($sort === 'history_desc' ? 'usage_desc' : 'history_desc')) ?>" 
+                            <a href="<?= site_url('admin/risk-profile?period=' . $period . '&status_filter=' . $user_status_filter . '&q=' . urlencode($search) . '&sort=' . ($sort === 'history_desc' ? 'usage_desc' : 'history_desc') . '&contact=' . urlencode($contact_filter)) ?>" 
                                class="ajax-filter-link" 
                                style="text-decoration: none; color: <?= $sort === 'history_desc' ? '#2563eb' : 'inherit' ?>; display: inline-flex; align-items: center; justify-content: center; gap: 4px; font-weight: 700;"
                                title="Ordenar por consultas históricas">
@@ -624,13 +653,14 @@
                         </th>
                         <th style="padding: 12px; font-weight: 700;">Última Empresa Auditada</th>
                         <th style="padding: 12px; font-weight: 700;">Estado Plan</th>
+                        <th style="padding: 12px; font-weight: 700;">Contacto</th>
                         <th style="padding: 12px; font-weight: 700; text-align: right;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($users)): ?>
                         <tr>
-                            <td colspan="7" style="text-align: center; padding: 40px; color: #94a3b8;">
+                            <td colspan="8" style="text-align: center; padding: 40px; color: #94a3b8;">
                                 No se encontraron usuarios en este segmento o con estos criterios.
                             </td>
                         </tr>
@@ -716,6 +746,72 @@
                                         <span class="pill" style="background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; font-weight: 600;">
                                             Inactivo (0)
                                         </span>
+                                    <?php endif; ?>
+                                </td>
+
+                                <!-- Contacto por correo: registro de lo que se le ha enviado -->
+                                <td style="padding: 14px 12px; font-size: 0.8rem; min-width: 190px;">
+                                    <?php if ($u['emails_sent'] === 0): ?>
+                                        <span style="display: inline-block; padding: 2px 8px; border-radius: 99px; background: #ccfbf1; color: #0f766e; font-size: 0.72rem; font-weight: 800;">
+                                            Sin contactar
+                                        </span>
+                                    <?php else: ?>
+                                        <?php
+                                        // Semáforo por antigüedad: reciente = riesgo de repetir
+                                        $d = $u['days_since_email'];
+                                        if ($d !== null && $d <= 7) {
+                                            $chipBg = '#fee2e2'; $chipFg = '#b91c1c';
+                                        } elseif ($d !== null && $d <= 30) {
+                                            $chipBg = '#fef3c7'; $chipFg = '#b45309';
+                                        } else {
+                                            $chipBg = '#f1f5f9'; $chipFg = '#475569';
+                                        }
+                                        ?>
+                                        <span style="display: inline-block; padding: 2px 8px; border-radius: 99px; background: <?= $chipBg ?>; color: <?= $chipFg ?>; font-size: 0.72rem; font-weight: 800;">
+                                            <?= $u['emails_sent'] ?> enviado<?= $u['emails_sent'] === 1 ? '' : 's' ?>
+                                            <?php if ($d !== null): ?>
+                                                · <?= $d === 0 ? 'hoy' : 'hace ' . $d . ' d' ?>
+                                            <?php endif; ?>
+                                        </span>
+                                        <div style="font-weight: 600; color: #1e293b; margin-top: 4px;">
+                                            <?= date('d/m/Y H:i', strtotime($u['last_email_at'])) ?>
+                                        </div>
+                                        <?php if (!empty($u['last_email_subject'])): ?>
+                                            <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;" title="<?= esc($u['last_email_subject']) ?>">
+                                                «<?= esc(mb_strimwidth($u['last_email_subject'], 0, 42, '…')) ?>»
+                                            </div>
+                                        <?php endif; ?>
+                                        <div style="font-size: 0.72rem; margin-top: 2px; color: <?= $u['emails_opened'] > 0 ? '#047857' : '#94a3b8' ?>;">
+                                            <?= $u['emails_opened'] > 0 ? '👁️ Abierto (' . $u['emails_opened'] . ')' : 'Sin aperturas registradas' ?>
+                                        </div>
+
+                                        <?php if (count($u['email_history']) > 0): ?>
+                                            <details style="position: relative; display: inline-block; margin-top: 4px;">
+                                                <summary style="cursor: pointer; font-size: 0.72rem; font-weight: 700; color: #2563eb;">
+                                                    Ver registro (<?= count($u['email_history']) ?><?= $u['emails_sent'] > count($u['email_history']) ? ' de ' . $u['emails_sent'] : '' ?>)
+                                                </summary>
+                                                <div style="position: absolute; left: 0; z-index: 50; background: white; border-radius: 12px; padding: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid #e2e8f0; min-width: 300px; text-align: left; margin-top: 6px;">
+                                                    <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 8px; text-transform: uppercase;">Correos enviados:</div>
+                                                    <?php foreach ($u['email_history'] as $em): ?>
+                                                        <div style="padding: 5px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.78rem;">
+                                                            <div style="font-weight: 600; color: #1e293b;"><?= esc($em['subject'] ?: '(sin asunto)') ?></div>
+                                                            <div style="color: #64748b; font-size: 0.7rem; display: flex; justify-content: space-between; gap: 10px;">
+                                                                <span><?= date('d/m/Y H:i', strtotime($em['sent_at'])) ?></span>
+                                                                <span style="color: <?= !empty($em['opened_at']) ? '#047857' : '#94a3b8' ?>;">
+                                                                    <?= !empty($em['opened_at']) ? '👁️ Abierto ' . date('d/m H:i', strtotime($em['opened_at'])) : 'No abierto' ?>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </details>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+
+                                    <?php if ($u['emails_failed'] > 0): ?>
+                                        <div style="font-size: 0.72rem; color: #b91c1c; margin-top: 2px;">
+                                            ⚠️ <?= $u['emails_failed'] ?> envío(s) fallido(s)
+                                        </div>
                                     <?php endif; ?>
                                 </td>
 

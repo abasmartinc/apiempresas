@@ -290,4 +290,63 @@ class Login extends BaseController
 
         return redirect()->to(site_url('enter'))->with('message', lang('Messages.flash_46'));
     }
+
+    /**
+     * GET acceso/{token}: pantalla con el botón "Entrar".
+     *
+     * NO consume el token. Los antivirus de correo abren los enlaces para
+     * analizarlos; si esta petición gastara el enlace, el usuario real se
+     * encontraría "caducado" al pulsarlo. El acceso se hace en el POST.
+     */
+    public function enlace($token = '')
+    {
+        $service = new \App\Services\LoginLinkService();
+        $user    = $service->buscar((string) $token);
+
+        if (!$user) {
+            return view('auth/login_link_confirm', ['valido' => false, 'token' => '', 'email' => '']);
+        }
+
+        return view('auth/login_link_confirm', [
+            'valido' => true,
+            'token'  => (string) $token,
+            'email'  => (string) $user->email,
+        ]);
+    }
+
+    /**
+     * POST acceso: consume el token y abre sesión.
+     */
+    public function entrarConEnlace()
+    {
+        $service = new \App\Services\LoginLinkService();
+        $user    = $service->consumir((string) $this->request->getPost('token'));
+
+        if (!$user) {
+            return view('auth/login_link_confirm', ['valido' => false, 'token' => '', 'email' => '']);
+        }
+
+        // Las mismas claves de sesión que el login con contraseña (authenticate).
+        session()->regenerate();
+        session()->set([
+            'user_id'           => $user->id,
+            'user_email'        => $user->email,
+            'user_name'         => $user->name ?? '',
+            'is_admin'          => $user->is_admin ?? 0,
+            'preferred_product' => $user->preferred_product ?? 'api',
+            'lang'              => $user->lang ?? 'es',
+            'logged_in'         => true,
+        ]);
+
+        log_activity('login_link');
+
+        $destino = \App\Services\LoginLinkService::limpiarDestino((string) ($user->login_token_redirect ?? ''));
+        if ($destino === '') {
+            $destino = 'dashboard';
+        }
+
+        session()->set('intended_product', strpos($destino, 'radar') !== false ? 'radar' : 'api');
+
+        return redirect()->to(site_url($destino));
+    }
 }

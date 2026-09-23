@@ -26,28 +26,19 @@ class BillingSimulator
         ];
 
         if ($planSlug === 'risk_pack_5' || strpos($planSlug, 'risk_pack_') === 0) {
-            if ($userId > 0) {
-                $db = \Config\Database::connect();
-                $db->table('users')
-                    ->where('id', $userId)
-                    ->set('risk_credits', 'risk_credits + 5', false)
-                    ->update();
+            // Mismo punto de abono que el webhook real. La referencia es única por
+            // compra simulada; la página de éxito ya NO abona (antes lo hacía y en
+            // local cada pack sumaba 10).
+            $ref = 'sim_' . bin2hex(random_bytes(12));
+            session()->set('risk_pack_sim_ref', $ref);
 
-                $userEventsModel = new \App\Models\UserEventsModel();
-                $userEventsModel->logEvent($userId, 'purchase_risk_pack', '5');
-
-                $userRow = (new \App\Models\UserModel())->find($userId);
-                if ($userRow) {
-                    $emailService = new \App\Services\EmailService();
-                    $emailService->sendRiskPackWelcome([
-                        'name'    => $userRow->name,
-                        'email'   => $userRow->email,
-                        'user_id' => $userRow->id
-                    ], 5);
-                }
-            }
-            log_message('info', "[Simulator] Added 5 risk_credits to user {$userId}");
-            return true;
+            return (new \App\Services\RiskPackService())->abonar(
+                $ref,
+                $userId,
+                5,
+                (string) ((session('checkout_context')['target_cif'] ?? '') ?: ''),
+                (int) solvencia('centimos.pack5', 990)
+            );
         }
 
         if ($period === 'single') {
