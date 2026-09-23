@@ -2678,6 +2678,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.riskPintarVigilancia(btnWatch, !!data.is_watching);
                 }
 
+                // Vuelta del registro desde "Avísame si cambia" (?vigilar=1): la
+                // intención era explícita, así que se pone en vigilancia sin pedir
+                // otro clic. Se hace con el MISMO botón y el mismo endpoint que el
+                // clic manual, para que valgan las mismas reglas (tope de 5, aviso
+                // de lista llena, avisos desactivados). Si ya la vigilaba no se
+                // toca: el endpoint alterna, y pulsar aquí la quitaría.
+                try {
+                    const qsVig = new URLSearchParams(window.location.search);
+                    if (qsVig.get('vigilar') === '1') {
+                        qsVig.delete('vigilar');
+                        const restoVig = qsVig.toString();
+                        history.replaceState(null, '', window.location.pathname + (restoVig ? '?' + restoVig : '') + window.location.hash);
+
+                        if (!data.is_watching) {
+                            btnWatch.click();
+                        }
+                        btnWatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        if (window.trackEvent) window.trackEvent('risk_watch_from_teaser', { cif: btnWatch.dataset.cif || '' }, 'ficha');
+                    }
+                } catch (errVig) { /* sin URLSearchParams: se queda para el clic manual */ }
+
                 // Plan o consultas restantes, al lado del chip de vigilancia.
                 // El pintado vive en head.php porque el desbloqueo TAMBIÉN tiene que
                 // repintarla: antes solo lo hacía la hidratación, así que después de

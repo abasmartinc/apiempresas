@@ -86,6 +86,13 @@ if (empty($redirectPath)) {
     // así que no se le pide un segundo click para desbloquear.
     $redirectPath = 'empresa/' . $compId . '-' . $slugVal . '?ver-riesgo=1';
 }
+
+// "Avísame si cambia": mismo destino, pero con vigilar=1 en vez de ver-riesgo=1.
+// Al volver, la ficha pone la empresa en vigilancia (no gasta consulta) en lugar
+// de abrir el dictamen (que sí la gasta).
+$redirectVigilar = strpos($redirectPath, 'ver-riesgo=1') !== false
+    ? str_replace('ver-riesgo=1', 'vigilar=1', $redirectPath)
+    : $redirectPath . (strpos($redirectPath, '?') !== false ? '&' : '?') . 'vigilar=1';
 ?>
 <div style="padding: 28px 20px; position: relative; display: flex; align-items: center; justify-content: center; min-height: 460px; overflow: hidden; background: #f8fafc; margin: -24px; margin-bottom: 0;">
 
@@ -236,6 +243,29 @@ if (empty($redirectPath)) {
              con el icono flotando encima de la frase. -->
         <div style="margin-top: 12px; color: #64748b; font-size: 0.78rem; font-weight: 500; line-height: 1.5; text-wrap: pretty;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 5px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Sin tarjeta &bull; <strong style="color: #334155; font-weight: 700;"><?= $teaserGratis ?> consultas gratis al mes</strong> &bull; <span style="white-space: nowrap;">Acceso instantáneo</span>
+        </div>
+
+        <!-- "AVÍSAME SI CAMBIA".
+             El 90 % de este tráfico mira una empresa y no vuelve: ni va a gastar tres
+             consultas ni va a volver el mes que viene. Lo único que le trae de vuelta
+             es un motivo concreto, y el mejor que tenemos es el correo del día que esa
+             empresa aparece en el BORME. Registrarse "para que me avisen" crea un
+             vínculo que "para ver el dictamen" no crea, y no gasta ninguna consulta.
+             Peso visual intermedio: más que el PDF, menos que el registro. -->
+        <div style="width: 100%; margin-top: 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; padding: 14px 16px; box-sizing: border-box; text-align: left; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 200px;">
+                <div style="font-size: 0.9rem; font-weight: 900; color: #14532d;">¿Solo quieres saber si se mueve?</div>
+                <div style="font-size: 0.8rem; color: #166534; line-height: 1.45; margin-top: 2px;">
+                    Te avisamos gratis por correo el día que el BORME publique algo de
+                    <strong><?= esc($companyName) ?></strong>. Sin gastar consultas.
+                </div>
+            </div>
+            <a href="<?= site_url('register/quick') ?>?intent=view_risk_profile&cif=<?= urlencode($compCif) ?>&redirect=<?= urlencode($redirectVigilar) ?>"
+               data-track-click="risk_teaser_cta" data-track-element="watch" data-track-meta="<?= $teaserTrackMeta ?>"
+               style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; background: #15803d; color: #ffffff; border-radius: 11px; padding: 10px 16px; font-size: 0.86rem; font-weight: 800; text-decoration: none; white-space: nowrap;"
+               onmouseover="this.style.background='#166534';" onmouseout="this.style.background='#15803d';">
+                🔔 Avísame si cambia
+            </a>
         </div>
 
         <!-- EL PDF SUELTO.

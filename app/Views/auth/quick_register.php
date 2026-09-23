@@ -185,8 +185,15 @@
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"></polyline></svg>
                     </div>
                 </div>
+                <?php
+                // Viene de "Avísame si cambia" en la ficha: la pantalla habla de
+                // vigilar, no de ver el dictamen (que además gastaría una consulta).
+                $vieneAVigilar = empty($compraSolvencia) && str_contains((string) ($redirect ?? ''), 'vigilar=1');
+                ?>
                 <h1 style="font-size: 1.7rem; font-weight: 900; color: #0f172a; margin-bottom: 12px; letter-spacing: -0.02em; line-height: 1.2;">
-                    <?php if (($compraSolvencia ?? '') === 'risk_pro'): ?>
+                    <?php if ($vieneAVigilar): ?>
+                        Te avisamos si <?= !empty($companyName) ? esc($companyName) : 'esta empresa' ?> cambia
+                    <?php elseif (($compraSolvencia ?? '') === 'risk_pro'): ?>
                         Crea tu cuenta para activar Solvencia Pro
                     <?php elseif (($compraSolvencia ?? '') === 'risk_pack_5'): ?>
                         Crea tu cuenta para comprar el pack
@@ -197,7 +204,10 @@
                     <?php endif; ?>
                 </h1>
                 <p style="color: #64748b; margin-bottom: 20px; line-height: 1.6; font-size: 0.95rem;">
-                    <?php if (!empty($compraSolvencia)): ?>
+                    <?php if ($vieneAVigilar): ?>
+                        Crea tu cuenta gratis y la ponemos en vigilancia: te escribimos el día que el BORME publique
+                        algo de ella. Sin tarjeta y sin gastar ninguna consulta.
+                    <?php elseif (!empty($compraSolvencia)): ?>
                         Es solo tu email: al continuar vas directamente al pago seguro con Stripe. Las consultas y
                         vigilancias quedan en tu cuenta.
                     <?php else: ?>
@@ -287,10 +297,12 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary" data-loading="<?= !empty($compraSolvencia) ? 'Abriendo el pago…' : ((($intent ?? '') === 'view_risk_profile') ? 'Abriendo tu dictamen…' : 'Creando tu cuenta…') ?>" style="<?= (isset($redirect) && strpos($redirect, 'radar') !== false) ? 'background: #2563EB;' : '' ?>">
+                <button type="submit" class="btn-primary" data-loading="<?= !empty($compraSolvencia) ? 'Abriendo el pago…' : (!empty($vieneAVigilar) ? 'Creando tu cuenta…' : ((($intent ?? '') === 'view_risk_profile') ? 'Abriendo tu dictamen…' : 'Creando tu cuenta…')) ?>" style="<?= (isset($redirect) && strpos($redirect, 'radar') !== false) ? 'background: #2563EB;' : '' ?>">
                     <?php 
                         if (!empty($compraSolvencia)) {
                             echo 'Continuar al pago →';
+                        } elseif (!empty($vieneAVigilar)) {
+                            echo 'Avisarme si cambia →';
                         } elseif (($intent ?? '') === 'view_risk_profile') {
                             echo 'Ver el dictamen de riesgo →';
                         } elseif (isset($redirect) && strpos($redirect, 'radar') !== false) {
