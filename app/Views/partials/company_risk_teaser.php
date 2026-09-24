@@ -94,7 +94,7 @@ $redirectVigilar = strpos($redirectPath, 'ver-riesgo=1') !== false
     ? str_replace('ver-riesgo=1', 'vigilar=1', $redirectPath)
     : $redirectPath . (strpos($redirectPath, '?') !== false ? '&' : '?') . 'vigilar=1';
 ?>
-<div style="padding: 28px 20px; position: relative; display: flex; align-items: center; justify-content: center; min-height: 460px; overflow: hidden; background: #f8fafc; margin: -24px; margin-bottom: 0;">
+<div style="padding: 28px 20px; position: relative; display: flex; align-items: center; justify-content: center; min-height: 380px; overflow: hidden; background: #f8fafc; margin: -24px; margin-bottom: 0;">
 
     <!-- FONDO DESENFOCADO: el desglose que se compra con el registro -->
     <!-- `space-between` y no `center`: centrado, todo el contenido falso quedaba
@@ -137,27 +137,81 @@ $redirectVigilar = strpos($redirectPath, 'ver-riesgo=1') !== false
          detrás", que es justo lo que tienen que decir. -->
     <div style="position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 62% 58% at 50% 50%, rgba(248, 250, 252, 0) 0%, rgba(248, 250, 252, 0.25) 62%, rgba(248, 250, 252, 0.9) 100%);"></div>
 
-    <!-- TARJETA DE CONVERSIÓN -->
-    <div data-track-view="risk_teaser_view" data-track-meta="<?= $teaserTrackMeta ?>" style="position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; max-width: 540px; background: #ffffff; padding: 32px 26px; border-radius: 20px; box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(15, 23, 42, 0.04); border: 1px solid #e2e8f0; box-sizing: border-box;">
+    <!-- TARJETA DE CONVERSIÓN — DOS COLUMNAS.
+         Antes era una columna de ~430 px dentro de un contenedor de ~940: medía
+         unos 700 px de alto y, al bajar desde el chip de la cabecera, el PDF y el
+         "Avísame" quedaban por debajo del pliegue en un portátil de 1366×768.
+         Ahora:
+           - Izquierda: el resultado y el registro (la acción principal, en azul).
+           - Derecha: las dos salidas de bajo compromiso, en un panel gris para
+             que no le roben peso al registro. El PDF va primero porque es el único
+             producto que encaja con quien mira una empresa y no vuelve.
+         Por debajo de 780 px se apila en una columna, en el mismo orden.
+         Los estilos van en clases `rt-` y no en línea porque el :hover y el
+         apilado responsive no se pueden hacer con atributos style. -->
+    <style>
+        .rt-card{position:relative;z-index:10;width:100%;max-width:900px;background:#fff;border:1px solid #e2e8f0;border-radius:20px;box-shadow:0 24px 48px -12px rgba(15,23,42,.14),0 0 0 1px rgba(15,23,42,.03);display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);overflow:hidden;box-sizing:border-box;text-align:left}
+        .rt-main{padding:28px 28px 24px;display:flex;flex-direction:column;min-width:0}
+        .rt-side{padding:24px;background:#f8fafc;border-left:1px solid #eef2f7;display:flex;flex-direction:column;gap:12px;min-width:0}
+        .rt-h{font-size:1.3rem;font-weight:900;color:#0f172a;margin:0 0 8px;letter-spacing:-.4px;line-height:1.25;text-wrap:balance}
+        .rt-p{color:#475569;margin:0 0 20px;font-size:.9rem;line-height:1.55;text-wrap:pretty}
+        .rt-ctas{display:flex;flex-direction:column;gap:10px;margin-top:auto}
+        .rt-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;box-sizing:border-box;padding:12px 18px;border-radius:12px;font-size:.93rem;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s,transform .15s,box-shadow .15s;white-space:nowrap}
+        .rt-btn--google{background:#fff;color:#1e293b;border:1.5px solid #cbd5e1;font-weight:700;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+        .rt-btn--google:hover{background:#f8fafc;border-color:#94a3b8}
+        .rt-btn--primary{background:#2563eb;color:#fff;border:1.5px solid #2563eb;font-weight:800;box-shadow:0 4px 12px rgba(37,99,235,.22)}
+        .rt-btn--primary:hover{background:#1d4ed8;border-color:#1d4ed8;transform:translateY(-1px)}
+        .rt-pill{font-size:.7rem;font-weight:700;color:#64748b;background:#f1f5f9;border-radius:999px;padding:2px 8px}
+        .rt-trust{margin-top:12px;color:#64748b;font-size:.77rem;font-weight:500;line-height:1.5;text-align:center;text-wrap:pretty}
+        .rt-eyebrow{font-size:.68rem;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:#94a3b8;margin:0 0 2px}
+        .rt-opt{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;box-sizing:border-box}
+        .rt-opt__head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+        .rt-opt__icon{flex-shrink:0;width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+        .rt-opt__title{font-size:.93rem;font-weight:800;color:#0f172a;line-height:1.2}
+        .rt-opt__meta{font-size:.72rem;font-weight:600;color:#64748b;margin-top:1px}
+        .rt-opt__price{margin-left:auto;text-align:right;white-space:nowrap;line-height:1.1}
+        .rt-opt__text{margin:0 0 12px;font-size:.8rem;color:#64748b;line-height:1.45}
+        .rt-btn--sm{padding:10px 14px;font-size:.86rem;font-weight:800;border-radius:10px}
+        .rt-btn--ghost{background:#fff;color:#1e293b;border:1.5px solid #cbd5e1}
+        .rt-btn--ghost:hover{background:#f8fafc;border-color:#94a3b8}
+        .rt-btn--soft-green{background:#dcfce7;color:#14532d;border:1.5px solid #86efac}
+        .rt-btn--soft-green:hover{background:#bbf7d0;border-color:#4ade80}
+        .rt-link{font-size:.76rem;color:#64748b;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:5px;margin-top:10px}
+        .rt-link:hover{color:#2563eb;text-decoration:underline}
+        @media (max-width:780px){
+            .rt-card{grid-template-columns:1fr;max-width:540px}
+            .rt-main{padding:24px 20px 20px}
+            .rt-side{padding:20px;border-left:0;border-top:1px solid #eef2f7}
+        }
+        @media (max-width:480px){
+            .rt-main{padding:20px 16px 18px}
+            .rt-side{padding:16px}
+            .rt-opt{padding:14px}
+            .rt-btn{white-space:normal;padding:12px 14px;font-size:.9rem;gap:8px}
+            .rt-pill{display:none}
+        }
+    </style>
+
+    <div class="rt-card" data-track-view="risk_teaser_view" data-track-meta="<?= $teaserTrackMeta ?>">
+
+        <!-- ============ IZQUIERDA: resultado + registro ============ -->
+        <div class="rt-main">
 
         <?php if ($teaserModo === 'titular'): ?>
 
             <!-- RESULTADO: score + nivel + motivo. Todo lo demás se registra.
                  El bloque vive en su propio parcial porque el paywall del
                  registrado sin cuota tiene que enseñar exactamente lo mismo. -->
-            <?= view('partials/company_risk_titular', ['riskProfile' => $riskProfile]) ?>
+            <?= view('partials/company_risk_titular', ['riskProfile' => $riskProfile, 'tiMargen' => '18px']) ?>
 
-            <!-- text-wrap: balance reparte las líneas en vez de dejar un colgajo
-                 de tres palabras en la segunda. Donde no esté soportado, cae al
-                 comportamiento de siempre. -->
-            <h3 style="font-size: 1.35rem; font-weight: 900; color: #0f172a; margin: 0 0 8px 0; letter-spacing: -0.5px; line-height: 1.25; max-width: 26ch; text-wrap: balance;">
+            <h3 class="rt-h">
                 <?php if ($teaserTotalAlerts > 0): ?>
                     Ya sabes que hay algo. Falta saber qué es y si sigue abierto
                 <?php else: ?>
                     Hoy está limpia. La pregunta es qué pasa a partir de hoy
                 <?php endif; ?>
             </h3>
-            <p style="color: #475569; margin: 0 0 22px 0; font-size: 0.92rem; line-height: 1.55; max-width: 44ch; text-wrap: pretty;">
+            <p class="rt-p">
                 <?php if ($teaserTotalAlerts > 0): ?>
                     Accede al dictamen completo de <strong><?= esc($companyName) ?></strong>:
                     cada acto con su fecha, su gravedad y qué significa para tu riesgo de cobro.
@@ -171,7 +225,7 @@ $redirectVigilar = strpos($redirectPath, 'ver-riesgo=1') !== false
 
             <!-- MODO OPACO: no se adelanta nada del resultado -->
             <?php if ($teaserHighAlerts > 0): ?>
-                <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 14px; padding: 14px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; text-align: left; width: 100%; box-sizing: border-box;">
+                <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; display: flex; align-items: center; gap: 12px;">
                     <div style="background: #fee2e2; color: #ef4444; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; font-weight: 800;">⚠️</div>
                     <div>
                         <div style="font-weight: 800; color: #991b1b; font-size: 0.92rem; line-height: 1.3;">
@@ -183,7 +237,7 @@ $redirectVigilar = strpos($redirectPath, 'ver-riesgo=1') !== false
                     </div>
                 </div>
             <?php elseif ($teaserTotalAlerts > 0): ?>
-                <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 14px; padding: 14px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; text-align: left; width: 100%; box-sizing: border-box;">
+                <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; display: flex; align-items: center; gap: 12px;">
                     <div style="background: #fef3c7; color: #d97706; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; font-weight: 800;">🔍</div>
                     <div>
                         <div style="font-weight: 800; color: #92400e; font-size: 0.92rem; line-height: 1.3;">
@@ -195,7 +249,7 @@ $redirectVigilar = strpos($redirectPath, 'ver-riesgo=1') !== false
                     </div>
                 </div>
             <?php else: ?>
-                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; padding: 14px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; text-align: left; width: 100%; box-sizing: border-box;">
+                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; display: flex; align-items: center; gap: 12px;">
                     <div style="background: #dcfce7; color: #16a34a; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; font-weight: 800;">🛡️</div>
                     <div>
                         <div style="font-weight: 800; color: #166534; font-size: 0.92rem; line-height: 1.3;">
@@ -208,106 +262,97 @@ $redirectVigilar = strpos($redirectPath, 'ver-riesgo=1') !== false
                 </div>
             <?php endif; ?>
 
-            <h3 style="font-size: 1.45rem; font-weight: 900; color: #0f172a; margin: 0 0 8px 0; letter-spacing: -0.5px;">
-                Consulta qué consta de ella
-            </h3>
-            <p style="color: #475569; margin: 0 0 20px 0; font-size: 0.92rem; line-height: 1.5; max-width: 440px;">
-                Accede al semáforo de solvencia, alertas BORME e historial de contratación pública creando tu cuenta gratis:
+            <h3 class="rt-h">Consulta qué consta de ella</h3>
+            <p class="rt-p">
+                Accede al semáforo de solvencia, alertas BORME e historial de contratación pública creando tu cuenta gratis.
             </p>
 
         <?php endif; ?>
 
-        <!-- CTAs de registro.
-             Las etiquetas se quedaron cortas a propósito: antes decían
-             "Ver el dictamen completo con email (3 consultas gratis/mes)", que
-             se partía en dos líneas y repetía palabra por palabra lo que ya dice
-             la línea de confianza de debajo. Un botón no tiene que explicar las
-             condiciones, solo nombrar lo que pasa al pulsarlo. -->
-        <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
-            <a href="<?= site_url('auth/google') ?>?intent=view_risk_profile&cif=<?= urlencode($compCif) ?>&redirect=<?= urlencode($redirectPath) ?>" data-track-click="risk_teaser_cta" data-track-element="google" data-track-meta="<?= $teaserTrackMeta ?>" style="background: #ffffff; color: #1e293b; border: 1.5px solid #cbd5e1; padding: 13px 20px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; box-sizing: border-box; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.03);" onmouseover="this.style.background='#f8fafc'; this.style.borderColor='#94a3b8';" onmouseout="this.style.background='#ffffff'; this.style.borderColor='#cbd5e1';">
-                <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-                <span style="white-space: nowrap;">Continuar con Google</span>
-                <span style="font-size: 0.72rem; font-weight: 700; color: #64748b; background: #f1f5f9; border-radius: 999px; padding: 2px 8px; white-space: nowrap;">1 clic</span>
-            </a>
+            <!-- CTAs de registro. Etiquetas cortas a propósito: un botón nombra lo
+                 que pasa al pulsarlo; las condiciones van una sola vez, debajo. -->
+            <div class="rt-ctas">
+                <a class="rt-btn rt-btn--google" href="<?= site_url('auth/google') ?>?intent=view_risk_profile&cif=<?= urlencode($compCif) ?>&redirect=<?= urlencode($redirectPath) ?>" data-track-click="risk_teaser_cta" data-track-element="google" data-track-meta="<?= $teaserTrackMeta ?>">
+                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                    <span>Continuar con Google</span>
+                    <span class="rt-pill">1 clic</span>
+                </a>
 
-            <a href="<?= site_url('register/quick') ?>?intent=view_risk_profile&cif=<?= urlencode($compCif) ?>&redirect=<?= urlencode($redirectPath) ?>" data-track-click="risk_teaser_cta" data-track-element="email" data-track-meta="<?= $teaserTrackMeta ?>" style="background: #2563eb; color: #fff; padding: 13px 20px; border-radius: 12px; font-weight: 800; text-decoration: none; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);" onmouseover="this.style.background='#1d4ed8'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#2563eb'; this.style.transform='translateY(0)';">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                <span style="white-space: nowrap;"><?= $teaserModo === 'titular' ? 'Ver el dictamen completo' : 'Continuar con email' ?></span>
-            </a>
+                <a class="rt-btn rt-btn--primary" href="<?= site_url('register/quick') ?>?intent=view_risk_profile&cif=<?= urlencode($compCif) ?>&redirect=<?= urlencode($redirectPath) ?>" data-track-click="risk_teaser_cta" data-track-element="email" data-track-meta="<?= $teaserTrackMeta ?>">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    <span><?= $teaserModo === 'titular' ? 'Ver el dictamen completo' : 'Continuar con email' ?></span>
+                </a>
+            </div>
+
+            <!-- Candado INLINE dentro del texto: como hermano flex, en contenedor
+                 estrecho se iba solo a su propia línea. -->
+            <div class="rt-trust">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Sin tarjeta &middot; <strong style="color: #334155; font-weight: 700;"><?= $teaserGratis ?> consultas gratis al mes</strong> &middot; <span style="white-space: nowrap;">Acceso instantáneo</span>
+            </div>
         </div>
 
-        <!-- Las condiciones van aquí, pegadas al botón, y solo una vez: es donde
-             se leen justo antes de decidir, y así las etiquetas caben en una línea. -->
-        <!-- El candado va INLINE dentro del texto, no como hermano flex: en un
-             contenedor estrecho el `flex-wrap` lo mandaba solo a su propia línea,
-             con el icono flotando encima de la frase. -->
-        <div style="margin-top: 12px; color: #64748b; font-size: 0.78rem; font-weight: 500; line-height: 1.5; text-wrap: pretty;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 5px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Sin tarjeta &bull; <strong style="color: #334155; font-weight: 700;"><?= $teaserGratis ?> consultas gratis al mes</strong> &bull; <span style="white-space: nowrap;">Acceso instantáneo</span>
-        </div>
+        <!-- ============ DERECHA: salidas de bajo compromiso ============ -->
+        <div class="rt-side">
+            <div class="rt-eyebrow">Otras opciones</div>
 
-        <!-- "AVÍSAME SI CAMBIA".
-             El 90 % de este tráfico mira una empresa y no vuelve: ni va a gastar tres
-             consultas ni va a volver el mes que viene. Lo único que le trae de vuelta
-             es un motivo concreto, y el mejor que tenemos es el correo del día que esa
-             empresa aparece en el BORME. Registrarse "para que me avisen" crea un
-             vínculo que "para ver el dictamen" no crea, y no gasta ninguna consulta.
-             Peso visual intermedio: más que el PDF, menos que el registro. -->
-        <div style="width: 100%; margin-top: 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; padding: 14px 16px; box-sizing: border-box; text-align: left; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
-            <div style="flex: 1; min-width: 200px;">
-                <div style="font-size: 0.9rem; font-weight: 900; color: #14532d;">¿Solo quieres saber si se mueve?</div>
-                <div style="font-size: 0.8rem; color: #166534; line-height: 1.45; margin-top: 2px;">
-                    Te avisamos gratis por correo el día que el BORME publique algo de
-                    <strong><?= esc($companyName) ?></strong>. Sin gastar consultas.
+            <!-- EL PDF SUELTO. El 90 % de este tráfico viene de Google, mira UNA
+                 empresa y no vuelve: para esa persona el PDF es el único producto
+                 que encaja. Precio delante y caja propia: el precio hace de ancla
+                 para el "gratis" de la izquierda. Botón blanco con borde, el de
+                 MENOS peso de la tarjeta: jerarquía = registrarse (azul sólido) >
+                 vigilar (verde suave) > comprar suelto. Arriba por el ancla, no
+                 por importancia. (Iba en negro y le robaba el foco al azul.) -->
+            <div class="rt-opt">
+                <div class="rt-opt__head">
+                    <div class="rt-opt__icon" style="background: #f1f5f9; color: #334155;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+                    </div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div class="rt-opt__title">Dictamen en PDF</div>
+                        <div class="rt-opt__meta">Sin cuenta · pago único</div>
+                    </div>
+                    <div class="rt-opt__price">
+                        <div style="font-size: 1.15rem; font-weight: 900; color: #0f172a;"><?= solvencia('precios.pdf', '3,90 €') ?></div>
+                        <div style="font-size: 0.68rem; font-weight: 600; color: #94a3b8;">+ IVA</div>
+                    </div>
+                </div>
+                <!-- Sin "sello": al lado de "histórico registral" se lee como una
+                     certificación del Registro, que es otro producto. La fecha sí. -->
+                <p class="rt-opt__text">
+                    El histórico registral de <strong style="color: #334155;"><?= esc($companyName) ?></strong> con su puntuación y fecha de emisión, listo para adjuntar a un expediente.
+                </p>
+                <button type="button" class="rt-btn rt-btn--sm rt-btn--ghost" onclick="openRiskPdfModal(<?= $compId ?>, '<?= esc($compCif) ?>');" data-track-click="risk_teaser_cta" data-track-element="pdf" data-track-meta="<?= $teaserTrackMeta ?>">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Descargar ahora</span>
+                </button>
+                <div style="text-align: center;">
+                    <a class="rt-link" href="<?= site_url('ejemplo/informe-riesgo') ?>?t=<?= time() ?>" target="_blank" rel="noopener">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>Ver informe de ejemplo</span>
+                    </a>
                 </div>
             </div>
-            <a href="<?= site_url('register/quick') ?>?intent=view_risk_profile&cif=<?= urlencode($compCif) ?>&redirect=<?= urlencode($redirectVigilar) ?>"
-               data-track-click="risk_teaser_cta" data-track-element="watch" data-track-meta="<?= $teaserTrackMeta ?>"
-               style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; background: #15803d; color: #ffffff; border-radius: 11px; padding: 10px 16px; font-size: 0.86rem; font-weight: 800; text-decoration: none; white-space: nowrap;"
-               onmouseover="this.style.background='#166534';" onmouseout="this.style.background='#15803d';">
-                🔔 Avísame si cambia
-            </a>
-        </div>
 
-        <!-- EL PDF SUELTO.
-             Estaba aquí abajo, detrás de un "¿prefieres no registrarte?", como
-             premio de consolación. Pero el 90 % de este tráfico viene de Google,
-             mira UNA empresa y no vuelve: para esa persona el registro no es el
-             plan A —no va a gastar tres consultas ni va a volver el mes que
-             viene—, y el PDF es literalmente el único producto que le encaja.
-             Así que deja de pedir perdón por existir: caja propia, lo que se
-             lleva por escrito, y el precio delante.
-             Sigue siendo secundario en peso visual: fondo gris, sin azul y sin
-             sombra, para no robarle el clic a quien sí iba a registrarse. -->
-        <div style="display: flex; align-items: center; gap: 12px; width: 100%; margin: 22px 0 12px 0;">
-            <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
-            <span style="font-size: 0.7rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.6px; white-space: nowrap;">O sin crear cuenta</span>
-            <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
-        </div>
-
-        <div style="width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; box-sizing: border-box; text-align: left;">
-            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px;">
-                <span style="font-size: 0.95rem; font-weight: 900; color: #0f172a;">Dictamen en PDF</span>
-                <span style="white-space: nowrap;">
-                    <span style="font-size: 1.15rem; font-weight: 900; color: #0f172a;"><?= solvencia('precios.pdf', '3,90 €') ?></span>
-                    <span style="font-size: 0.72rem; font-weight: 600; color: #94a3b8;">+ IVA</span>
-                </span>
-            </div>
-            <p style="margin: 0 0 12px 0; font-size: 0.8rem; color: #64748b; line-height: 1.45;">
-                El histórico registral de <strong style="color: #334155;"><?= esc($companyName) ?></strong> con su puntuación,
-                <!-- "con fecha y sello" es de la misma familia que los "dictamen oficial"
-                     que quitamos: al lado de "histórico registral", un sello se lee como
-                     una certificación del Registro, que es otro producto y de pago. La
-                     fecha sí es un hecho comprobable y se queda. -->
-                con la fecha de emisión, listo para adjuntar a un expediente. Pago único, sin cuenta y sin suscripción.
-            </p>
-            <button type="button" onclick="openRiskPdfModal(<?= $compId ?>, '<?= esc($compCif) ?>');" data-track-click="risk_teaser_cta" data-track-element="pdf" data-track-meta="<?= $teaserTrackMeta ?>" style="width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 9px; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 11px; padding: 11px 18px; color: #0f172a; font-size: 0.88rem; font-weight: 800; cursor: pointer; transition: all 0.15s; box-sizing: border-box;" onmouseover="this.style.borderColor='#64748b'; this.style.background='#f1f5f9';" onmouseout="this.style.borderColor='#cbd5e1'; this.style.background='#ffffff';">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; color: #64748b;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                <span style="white-space: nowrap;">Descargar ahora</span>
-            </button>
-            <div style="margin-top: 10px; text-align: center;">
-                <a href="<?= site_url('ejemplo/informe-riesgo') ?>?t=<?= time() ?>" target="_blank" rel="noopener" style="font-size: 0.77rem; color: #64748b; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; transition: color 0.15s;" onmouseover="this.style.color='#2563eb'; this.style.textDecoration='underline';" onmouseout="this.style.color='#64748b'; this.style.textDecoration='none';">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    <span>Ver informe de ejemplo en PDF</span>
+            <!-- "AVÍSAME SI CAMBIA". Lo único que trae de vuelta a quien mira una
+                 empresa y se va es el correo del día que esa empresa sale en el
+                 BORME. No gasta consultas. Registrarse "para que me avisen" crea
+                 un vínculo que "para ver el dictamen" no crea, y lleva a Solvencia Pro.
+                 Segundo en peso: verde suave, sin llegar al sólido del azul. -->
+            <div class="rt-opt">
+                <div class="rt-opt__head">
+                    <div class="rt-opt__icon" style="background: #f0fdf4; color: #15803d;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    </div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div class="rt-opt__title">Avísame si cambia</div>
+                        <div class="rt-opt__meta">Gratis · no gasta consultas</div>
+                    </div>
+                </div>
+                <p class="rt-opt__text">
+                    Te escribimos el día que el BORME publique algo de <strong style="color: #334155;"><?= esc($companyName) ?></strong>.
+                </p>
+                <a class="rt-btn rt-btn--sm rt-btn--soft-green" href="<?= site_url('register/quick') ?>?intent=view_risk_profile&cif=<?= urlencode($compCif) ?>&redirect=<?= urlencode($redirectVigilar) ?>" data-track-click="risk_teaser_cta" data-track-element="watch" data-track-meta="<?= $teaserTrackMeta ?>">
+                    <span>Activar aviso gratis</span>
                 </a>
             </div>
         </div>

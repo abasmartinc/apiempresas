@@ -24,7 +24,7 @@
             <h1>¡Enhorabuena, <?= esc($name) ?>!</h1>
         </div>
         <div class="content">
-            <h2>Acabas de realizar tu primera consulta exitosa ⚡</h2>
+            <h2>¡Enhorabuena, <?= esc($name) ?>! Acabas de realizar tu primera consulta ⚡</h2>
             <p>Es el primer paso para una integración potente. Ya has comprobado lo sencillo que es obtener datos mercantiles estructurados y fiables.</p>
             
             <div class="alert-box">

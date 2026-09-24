@@ -352,6 +352,45 @@
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-c0454e9a"></use></svg>
                                         Datos oficiales Reg. Mercantil
                                     </div>
+
+                                    <?php
+                                    /*
+                                     * RESUMEN DE RIESGO ARRIBA.
+                                     *
+                                     * El bloque de riesgo vive debajo de los datos generales y
+                                     * mucha gente no llega a verlo. Esta etiqueta lo adelanta y
+                                     * lleva hasta él. Enseña lo mismo que el teaser ya enseña
+                                     * gratis a un anónimo (nivel e incidencias), nunca el detalle,
+                                     * y no depende de quién mira: se puede cachear.
+                                     * En modo 'opaco' no adelanta el resultado.
+                                     */
+                                    if (!empty($riskProfile)):
+                                        helper(['company', 'risk_labels']);
+                                        $rcScore = (int) ($riskProfile['risk_score'] ?? 0);
+                                        $rcEventos = count($riskProfile['data']['canonical_events'] ?? []);
+                                        $rcConf = isset($riskProfile['data']['confidence_score']) ? (int) $riskProfile['data']['confidence_score'] : null;
+                                        $rcOpaco = solvencia('teaserModo', 'titular') === 'opaco';
+                                        [$rcNivel, $rcColor, $rcFondo, $rcBorde] = risk_level_visual($rcScore);
+
+                                        if ($rcOpaco || ($rcEventos === 0 && $rcConf !== null && $rcConf < 60)) {
+                                            // Sin adelantar el resultado, o con un cero que no significa "limpia".
+                                            [$rcColor, $rcFondo, $rcBorde] = ['#1d4ed8', '#eff6ff', '#bfdbfe'];
+                                            $rcTexto = 'Perfil de riesgo disponible';
+                                        } elseif ($rcEventos === 0) {
+                                            $rcTexto = esc(ucfirst(mb_strtolower($rcNivel, 'UTF-8'))) . ' · sin incidencias en el BORME';
+                                        } else {
+                                            $rcTexto = esc(ucfirst(mb_strtolower($rcNivel, 'UTF-8'))) . ' · ' . $rcEventos
+                                                . ($rcEventos === 1 ? ' incidencia registrada' : ' incidencias registradas');
+                                        }
+                                    ?>
+                                        <a href="#perfil-de-riesgo" data-track-click="ficha_chip_riesgo"
+                                           onclick="var d=document.getElementById('perfil-de-riesgo'); if(d&&d.scrollIntoView){event.preventDefault(); d.scrollIntoView({behavior:'smooth', block:'start'});}"
+                                           style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; background: <?= $rcFondo ?>; border: 1px solid <?= $rcBorde ?>; color: <?= $rcColor ?>; font-size: 0.75rem; font-weight: 800; line-height: 1.3; text-decoration: none;">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                            <span><?= $rcTexto ?></span>
+                                            <span style="font-weight: 700; opacity: 0.85; text-decoration: underline;"><?= $rcEventos > 0 && !$rcOpaco ? 'ver por qué' : 'ver el análisis' ?> ↓</span>
+                                        </a>
+                                    <?php endif; ?>
                                     
                                     <?php if (!empty($holdingData)): ?>
                                     <a href="<?= site_url('grupos-empresariales/' . esc($holdingData['slug'])) ?>" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #f8fafc; padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; border: 1px solid #334155; letter-spacing: 0.5px; text-transform: uppercase; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 6px rgba(15, 23, 42, 0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
@@ -378,45 +417,6 @@
                                 <h1 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.25; letter-spacing: -0.01em; text-wrap: balance;">
                                     <?= esc($company['name'] ?? '-') ?><?php if (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-'): ?> - CIF <?= esc($companyCif) ?><?php endif; ?>
                                 </h1>
-
-                                <?php
-                                /*
-                                 * RESUMEN DE RIESGO ARRIBA.
-                                 *
-                                 * El bloque de riesgo vive debajo de los datos generales y
-                                 * mucha gente no llega a verlo. Esta etiqueta lo adelanta y
-                                 * lleva hasta él. Enseña lo mismo que el teaser ya enseña
-                                 * gratis a un anónimo (nivel e incidencias), nunca el detalle,
-                                 * y no depende de quién mira: se puede cachear.
-                                 * En modo 'opaco' no adelanta el resultado.
-                                 */
-                                if (!empty($riskProfile)):
-                                    helper(['company', 'risk_labels']);
-                                    $rcScore = (int) ($riskProfile['risk_score'] ?? 0);
-                                    $rcEventos = count($riskProfile['data']['canonical_events'] ?? []);
-                                    $rcConf = isset($riskProfile['data']['confidence_score']) ? (int) $riskProfile['data']['confidence_score'] : null;
-                                    $rcOpaco = solvencia('teaserModo', 'titular') === 'opaco';
-                                    [$rcNivel, $rcColor, $rcFondo, $rcBorde] = risk_level_visual($rcScore);
-
-                                    if ($rcOpaco || ($rcEventos === 0 && $rcConf !== null && $rcConf < 60)) {
-                                        // Sin adelantar el resultado, o con un cero que no significa "limpia".
-                                        [$rcColor, $rcFondo, $rcBorde] = ['#1d4ed8', '#eff6ff', '#bfdbfe'];
-                                        $rcTexto = 'Perfil de riesgo disponible';
-                                    } elseif ($rcEventos === 0) {
-                                        $rcTexto = esc(ucfirst(mb_strtolower($rcNivel, 'UTF-8'))) . ' · sin incidencias en el BORME';
-                                    } else {
-                                        $rcTexto = esc(ucfirst(mb_strtolower($rcNivel, 'UTF-8'))) . ' · ' . $rcEventos
-                                            . ($rcEventos === 1 ? ' incidencia registrada' : ' incidencias registradas');
-                                    }
-                                ?>
-                                    <a href="#perfil-de-riesgo" data-track-click="ficha_chip_riesgo"
-                                       onclick="var d=document.getElementById('perfil-de-riesgo'); if(d&&d.scrollIntoView){event.preventDefault(); d.scrollIntoView({behavior:'smooth', block:'start'});}"
-                                       style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: -6px 0 16px 0; padding: 6px 12px; border-radius: 999px; background: <?= $rcFondo ?>; border: 1px solid <?= $rcBorde ?>; color: <?= $rcColor ?>; font-size: 0.85rem; font-weight: 800; text-decoration: none;">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                        <span><?= $rcTexto ?></span>
-                                        <span style="font-weight: 700; opacity: 0.85; text-decoration: underline;"><?= $rcEventos > 0 && !$rcOpaco ? 'ver por qué' : 'ver el análisis' ?> ↓</span>
-                                    </a>
-                                <?php endif; ?>
 
                                 <?php if (!empty($company['ai_pitch'])): ?>
                                 <p style="font-size: 1.05rem; color: #475569; margin: 0 0 16px 0; line-height: 1.4; text-wrap: balance; font-weight: 500;">

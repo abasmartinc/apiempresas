@@ -102,7 +102,11 @@ class EmailService
         }
 
         $userEmail = $userData['email'];
-        $templateData = ['name' => $userData['name'] ?? 'Usuario'];
+        helper('api');   // get_free_plan_limit()
+        $templateData = [
+            'name'       => $userData['name'] ?? 'Usuario',
+            'free_limit' => get_free_plan_limit(),
+        ];
 
         return $this->sendTemplateEmail('welcome_email', $templateData, $userEmail, ['papelo.amh@gmail.com'], [], $userData['user_id'] ?? 0);
     }
@@ -1030,6 +1034,14 @@ class EmailService
         // Determine correct subject and body based on language
         $subjectTemplate = ($userLang === 'en' && !empty($template->subject_en)) ? $template->subject_en : $template->subject;
         $bodyTemplate = ($userLang === 'en' && !empty($template->body_en)) ? $template->body_en : $template->body;
+
+        // Valores comunes que el seed deja como marcadores ({year}, {date}...). Lo que
+        // mande quien llama tiene prioridad.
+        $data += [
+            'year'     => date('Y'),
+            'date'     => date('d/m/Y'),
+            'datetime' => date('Y-m-d H:i:s'),
+        ];
 
         $subject = $this->parsePlaceholders($subjectTemplate, $data);
         $body    = $this->parsePlaceholders($bodyTemplate, $data);

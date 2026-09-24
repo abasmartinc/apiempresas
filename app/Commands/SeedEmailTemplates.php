@@ -13,6 +13,14 @@ class SeedEmailTemplates extends BaseCommand
     protected $description = 'Seeds the email_templates table with initial data from views.';
     protected $usage       = 'db:seed_emails [slug]';
 
+    /**
+     * Dominio de los enlaces de las plantillas.
+     *
+     * Fijo a propósito: el seed se lanza desde la consola local, donde site_url()
+     * devolvería la URL de Laragon, y la plantilla acaba en la BD de producción.
+     */
+    private const BASE_URL = 'https://apiempresas.es';
+
     public function run(array $params)
     {
         $model = new EmailTemplateModel();
@@ -250,6 +258,33 @@ class SeedEmailTemplates extends BaseCommand
                     <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0; font-size: 14px; font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif;">Datos oficiales para desarrolladores</p>
                 </div>';
 
+                // 0. Expresiones PHP que no son variables sueltas.
+                //
+                // Antes el paso 4 borraba cualquier etiqueta PHP que no estuviera en el
+                // mapa, y eso dejó en producción botones con href="" (entre ellos el de
+                // "Establecer mi contraseña"), la fecha de la factura en blanco y
+                // "incluye  consultas gratuitas" sin la cifra. Ahora se traducen aquí, y
+                // lo que quede sin traducir para el seed de esa plantilla (paso 4).
+                $content = str_replace(
+                    [
+                        "<?= site_url('reset-password/' . \$token) ?>",
+                        '<?= $freeLimit ?>',
+                        "<?= date('Y') ?>",
+                        "<?= date('d/m/Y') ?>",
+                        "<?= date('Y-m-d H:i:s') ?>",
+                        "<?= esc(\$company ?: 'No especificada') ?>",
+                    ],
+                    ['{reset_url}', '{free_limit}', '{year}', '{date}', '{datetime}', '{company}'],
+                    $content
+                );
+
+                // site_url('ruta') / base_url('ruta') -> URL absoluta de producción
+                $content = preg_replace_callback(
+                    '/<\?=\s*(?:site_url|base_url)\(\s*[\'"]([^\'"]*)[\'"]\s*\)\s*\?>/',
+                    static fn ($m) => self::BASE_URL . '/' . ltrim($m[1], '/'),
+                    $content
+                );
+
                 // 1. Limpiar variables complejas y formateadas primero
                 $content = preg_replace('/<\?= number_format\(\$amount,.*?\?>/i', '{amount}', $content);
                 $content = preg_replace('/<\?= esc\(\$invoice->invoice_number\)\s*\?>/i', '{invoice_number}', $content);
@@ -284,8 +319,20 @@ class SeedEmailTemplates extends BaseCommand
                 $content = preg_replace($p3, $newHeaderDiv, $content);
                 $content = preg_replace($p4, $newHeaderDiv, $content);
 
-                // 4. Limpieza de tags PHP residuales (por si acaso)
-                $content = preg_replace('/<\?=.*? \?>/i', '', $content);
+                // 4. Si queda PHP sin traducir, NO se escribe: borrarlo en silencio es
+                //    lo que dejaba enlaces vacíos. Hay que añadir la traducción arriba.
+                if (preg_match_all('/<\?.*?\?>/s', $content, $restos)) {
+                    CLI::error("NO se actualiza '{$t['slug']}': quedan expresiones PHP sin traducir:");
+                    foreach (array_unique($restos[0]) as $resto) {
+                        CLI::write('   ' . $resto, 'red');
+                    }
+                    continue;
+                }
+
+                // Aviso (no bloquea) si algún enlace ha quedado vacío
+                if (preg_match('/href=["\']\s*["\']/', $content)) {
+                    CLI::write("AVISO: '{$t['slug']}' tiene algún href vacío. Revísalo.", 'yellow');
+                }
 
                 $data = [
                     'slug'        => $t['slug'],
