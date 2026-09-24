@@ -826,8 +826,10 @@ class EmailAutomationCommand extends BaseCommand
                  OR (us.status = 'canceled' AND us.current_period_end > NOW())
               )
               AND u.is_admin = 0
+              -- El usuario del monitor de estado no es un cliente: no se le avisa
+              AND u.id <> ?
             ORDER BY us.id DESC
-        ")->getResultArray();
+        ", [\App\Filters\ApiKeyFilter::MONITOR_USER_ID])->getResultArray();
 
         $clientes = [];
         foreach ($filas as $f) {
@@ -903,6 +905,8 @@ class EmailAutomationCommand extends BaseCommand
                 $this->recordTracking($uid, 'email_sent_' . $tipo);
                 $enviados++;
                 CLI::write("     [SENT] {$tipo} OK", 'yellow');
+            } else {
+                CLI::write('     [FAIL] ' . $tipo . ': ' . ($res['error'] ?? $res['message'] ?? 'sin detalle'), 'red');
             }
         }
 
@@ -1010,6 +1014,7 @@ class EmailAutomationCommand extends BaseCommand
             ->get()->getResultArray(), 'user_id')));
 
         $usuarios = $this->usuariosElegibles(array_keys($porUsuario));
+        $enviados = 0;
 
         foreach ($porUsuario as $uid => $intento) {
             if (isset($conPlan[$uid]) || !isset($usuarios[$uid])) {
@@ -1027,12 +1032,19 @@ class EmailAutomationCommand extends BaseCommand
 
             $meta = json_decode((string) $intento['metadata'], true) ?: [];
             CLI::write("  -> Enviando 'api_checkout_abandoned' a {$usuarios[$uid]['email']}...");
-            $this->registrarEnvio($uid, 'api_checkout_abandoned', $this->emailService->sendApiCheckoutAbandoned(
+            $res = $this->emailService->sendApiCheckoutAbandoned(
                 $usuarios[$uid] + ['user_id' => $uid],
                 (string) ($meta['plan'] ?? 'pro'),
                 (string) ($meta['period'] ?? 'monthly')
-            ));
+            );
+            $this->registrarEnvio($uid, 'api_checkout_abandoned', $res);
+            if (!empty($res['success']) && empty($res['skipped'])) {
+                $enviados++;
+            }
         }
+
+        CLI::write('  - Pagos sin terminar: ' . count($porUsuario) . ' usuario(s); correos enviados: ' . $enviados
+            . ' (el resto ya pagó, ya tenía plan, no admite correos o ya lo recibió).');
     }
 
     protected function recordTracking(int $userId, string $eventName)
