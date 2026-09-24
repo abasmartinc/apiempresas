@@ -107,7 +107,9 @@ class QuickUnlock extends BaseController
         return $this->response->setJSON([
             'status' => 'success',
             'api_key' => $keyValue,
-            'redirect' => site_url('documentation?key=' . $keyValue)
+            // Sin la clave en la URL: quedaba en el historial del navegador y en los
+            // logs. La documentación no la usaba; el usuario ya tiene sesión y la ve en su panel.
+            'redirect' => site_url('documentation')
         ]);
     }
 }
