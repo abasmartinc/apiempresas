@@ -92,6 +92,15 @@ class WebhookController extends BaseApiController
             return $this->fail($this->validator->getErrors());
         }
 
+        // Solo HTTPS a hosts públicos: impide registrar URLs internas (localhost,
+        // IPs privadas, metadatos del servidor) a las que luego llamaría nuestro
+        // servidor. Mismo formato que el error de validación de arriba.
+        $json = $this->request->getJSON(true);
+        $url  = (string) ((is_array($json) ? ($json['url'] ?? null) : null) ?? $this->request->getVar('url') ?? '');
+        if (!\App\Services\SafeUrlValidator::isSafeUrl($url)) {
+            return $this->fail(['url' => 'La URL debe ser HTTPS (puerto 443) y apuntar a un servidor público.']);
+        }
+
         $userId = (int)\App\Filters\ApiKeyFilter::$apiMeta['user_id'];
         $id = $this->webhookService->create($userId, $this->request->getJSON(true));
 

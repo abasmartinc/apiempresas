@@ -498,7 +498,15 @@ Accept: application/json</code></pre>
                         </tbody>
                     </table>
 
-
+                    <h4>Datos en el plan Free</h4>
+                    <p>En el plan Free (sin saldo de bono) la respuesta tiene la misma estructura, con estos recortes:</p>
+                    <ul>
+                        <li><code>address</code> llega con el texto <code>*** [ACTUALIZA A PRO PARA VER LA DIRECCION ]</code>.</li>
+                        <li><code>corporate_purpose</code> se corta a 100 caracteres cuando es más largo.</li>
+                        <li><code>lat</code> y <code>lng</code> no se incluyen.</li>
+                        <li>Se añade el objeto <code>upsell_opportunities</code>. Si tu código necesita saber si la respuesta está recortada, comprueba si existe ese campo.</li>
+                    </ul>
+                    <p>Con un plan Pro o Business, o con saldo de bono, recibes los datos completos sin cambiar nada en tu código.</p>
                 </section>
 
                 <!-- SEARCH -->
@@ -526,12 +534,25 @@ Accept: application/json</code></pre>
                                 <td>string</td>
                                 <td><strong>Requerido.</strong> El nombre o parte del nombre a buscar. (Alias: <code>q</code>)</td>
                             </tr>
+                            <tr>
+                                <td><code>multiple</code></td>
+                                <td>boolean</td>
+                                <td>Opcional. Sin él (o con <code>false</code>) devuelve en <code>data</code> <strong>un solo objeto</strong>: la empresa que mejor coincide. Con <code>true</code> devuelve una <strong>lista</strong> en <code>data</code> y la paginación en <code>meta</code> (el ejemplo de abajo).</td>
+                            </tr>
+                            <tr>
+                                <td><code>limit</code></td>
+                                <td>integer</td>
+                                <td>Opcional, solo con <code>multiple=true</code>. Resultados por página (por defecto 20, máximo 100).</td>
+                            </tr>
+                            <tr>
+                                <td><code>page</code> / <code>cursor</code></td>
+                                <td>integer / string</td>
+                                <td>Opcional, solo con <code>multiple=true</code>. Página a pedir, o el <code>meta.next_cursor</code> de la respuesta anterior (ver <a href="#paginacion">Paginación</a>).</td>
+                            </tr>
                         </tbody>
                     </table>
 
-                    </table>
-
-                    <h4>Respuesta de éxito (200 OK)</h4>
+                    <h4>Respuesta de éxito con <code>multiple=true</code> (200 OK)</h4>
                     <pre><code class="language-json">{
   "success": true,
   "data": [
@@ -970,7 +991,7 @@ Accept: application/json</code></pre>
                         </thead>
                         <tbody>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">event</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Tipo de evento suscrito (ej: `company.updated`, `radar.new`).</td></tr>
-                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">url</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">URL de tu servidor donde enviaremos el payload (POST).</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">url</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">URL de tu servidor donde enviaremos el payload (POST). Debe ser HTTPS (puerto 443) y pública.</td></tr>
                         </tbody>
                     </table>
                 </section>
@@ -1316,8 +1337,8 @@ console.log(empresa.name);</code></pre>
                             <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0;"><code class="language-python" style="color: #e2e8f0;">from apiempresas import ApiEmpresas
 
 api = ApiEmpresas('tu_api_key')
-respuesta = api.companies.get('A15075062')
-print(respuesta['data']['name'])</code></pre>
+empresa = api.companies.get('A15075062')
+print(empresa['name'])</code></pre>
                         </div>
                     </div>
                 </section>

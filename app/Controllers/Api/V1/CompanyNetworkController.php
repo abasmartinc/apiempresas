@@ -45,7 +45,7 @@ class CompanyNetworkController extends BaseApiController
         }
 
         // Verify API Key and Permissions
-        $apiKey = $this->request->getHeaderLine('X-API-KEY');
+        $apiKey = $this->apiKeyFromRequest();
         if (empty($apiKey)) {
             return $this->failUnauthorized('API Key no proporcionada');
         }

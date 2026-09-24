@@ -32,4 +32,12 @@ class ApiException extends Exception
     {
         return $this->rawData;
     }
+
+    /**
+     * Identificador estable del error (getCode() es el código HTTP) (QUOTA_EXCEEDED, TOO_MANY_REQUESTS, API_KEY_INVALID...).
+     */
+    public function getApiCode(): ?string
+    {
+        return isset($this->rawData['code']) && is_string($this->rawData['code']) ? $this->rawData['code'] : null;
+    }
 }

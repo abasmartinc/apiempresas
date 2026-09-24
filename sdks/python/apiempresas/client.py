@@ -2,6 +2,24 @@ import requests
 from .exceptions import ApiError
 from .resources.companies import Companies
 
+SDK_VERSION = '1.1.0'
+
+
+def _extract_error_message(data):
+    """Según el error, la API pone el texto en message, detail, error o messages."""
+    if not isinstance(data, dict):
+        return None
+    for key in ('message', 'detail', 'error'):
+        value = data.get(key)
+        if isinstance(value, str) and value:
+            return value
+    messages = data.get('messages')
+    if isinstance(messages, dict) and messages:
+        first = next(iter(messages.values()))
+        if isinstance(first, str) and first:
+            return first
+    return None
+
 class ApiEmpresas:
     """
     Cliente principal para interactuar con la API de APIEmpresas.es
@@ -19,6 +37,7 @@ class ApiEmpresas:
         self.session.headers.update({
             'X-API-KEY': self.api_key,
             'Accept': 'application/json',
+            'User-Agent': f'apiempresas-python/{SDK_VERSION}',
         })
         
         # Inicializar recursos
@@ -52,7 +71,7 @@ class ApiEmpresas:
             error_code = None
             
             if decoded_data and isinstance(decoded_data, dict):
-                message = decoded_data.get('message', message)
+                message = _extract_error_message(decoded_data) or message
                 error_code = decoded_data.get('error')
             else:
                 message = response.text

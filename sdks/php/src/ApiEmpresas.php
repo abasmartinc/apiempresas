@@ -7,6 +7,9 @@ use ApiEmpresas\Resources\Companies;
 
 class ApiEmpresas
 {
+    /** Versión del SDK, enviada en el User-Agent. */
+    public const VERSION = '1.1.0';
+
     private string $apiKey;
     private string $baseUrl;
     private int $timeout;
@@ -56,6 +59,7 @@ class ApiEmpresas
         $headers = [
             'X-API-KEY: ' . $this->apiKey,
             'Accept: application/json',
+            'User-Agent: apiempresas-php/' . self::VERSION,
         ];
 
         if ($method !== 'GET') {
@@ -91,8 +95,9 @@ class ApiEmpresas
             $errorCode = null;
             
             if ($isJson && is_array($decodedData)) {
-                $message = $decodedData['message'] ?? $message;
-                $errorCode = $decodedData['error'] ?? null;
+                // Según el error, la API pone el texto en message, detail, error o messages.
+                $message = self::extractErrorMessage($decodedData) ?? $message;
+                $errorCode = isset($decodedData['error']) && is_scalar($decodedData['error']) ? (string) $decodedData['error'] : null;
             } else {
                 $message = $response; // Fallback si devuelve HTML
             }
@@ -101,5 +106,24 @@ class ApiEmpresas
         }
 
         return $isJson ? $decodedData : ['raw' => $response];
+    }
+
+    private static function extractErrorMessage(array $data): ?string
+    {
+        foreach (['message', 'detail'] as $key) {
+            if (isset($data[$key]) && is_string($data[$key]) && $data[$key] !== '') {
+                return $data[$key];
+            }
+        }
+        if (isset($data['error']) && is_string($data['error']) && $data['error'] !== '') {
+            return $data['error'];
+        }
+        if (isset($data['messages']) && is_array($data['messages'])) {
+            $first = reset($data['messages']);
+            if (is_string($first) && $first !== '') {
+                return $first;
+            }
+        }
+        return null;
     }
 }

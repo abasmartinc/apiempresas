@@ -60,4 +60,21 @@ class BaseApiController extends ResourceController
 
         return parent::respond($data, $statusCode, $message);
     }
+
+    /**
+     * API Key de la petición: cabecera X-API-KEY o, si no viene, Authorization: Bearer.
+     * Es lo mismo que acepta ApiKeyFilter; algunos controladores solo miraban X-API-KEY.
+     */
+    protected function apiKeyFromRequest(): string
+    {
+        $apiKey = trim((string) $this->request->getHeaderLine('X-API-KEY'));
+        if ($apiKey === '') {
+            $auth = trim((string) $this->request->getHeaderLine('Authorization'));
+            if (stripos($auth, 'Bearer ') === 0) {
+                $apiKey = trim(substr($auth, 7));
+            }
+        }
+
+        return $apiKey;
+    }
 }

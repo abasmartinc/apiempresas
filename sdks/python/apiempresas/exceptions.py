@@ -7,3 +7,5 @@ class ApiError(Exception):
         self.status = status
         self.error_code = error_code
         self.raw_data = raw_data
+        # Identificador estable del error (QUOTA_EXCEEDED, TOO_MANY_REQUESTS, API_KEY_INVALID...)
+        self.code = raw_data.get('code') if isinstance(raw_data, dict) else None

@@ -5,7 +5,7 @@ export interface ApiEmpresasOptions {
   apiKey: string;
   /**
    * Base URL de la API. Por defecto es https://apiempresas.es/api/v1
-   * Puedes sobreescribirla para apuntar al sandbox: https://apiempresas.es/api/sandbox/v1
+   * Puedes sobreescribirla para apuntar al sandbox (gratis, datos simulados, misma API Key): https://apiempresas.es/api/sandbox/v1
    */
   baseURL?: string;
   /**
@@ -33,6 +33,16 @@ export interface Company {
   address?: string;
   status?: string;
   score?: number;
+  cnae_2025?: string;
+  cnae_2025_label?: string;
+  corporate_purpose?: string;
+  capital_social_raw?: string;
+  lat?: number;
+  lng?: number;
+  /** Solo con get(cif, { admin: true }) en Pro/Business. */
+  administrators?: Array<{ name: string; position: string; [key: string]: any }>;
+  /** Solo en el plan Free: indica que la respuesta viene recortada. */
+  upsell_opportunities?: { campos_ocultos: string[]; mensaje: string };
 }
 
 export interface BatchRequest {
