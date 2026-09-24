@@ -110,10 +110,23 @@ class EmailAutomationCommand extends BaseCommand
             }
         }
 
-        // 4. TRIGGER: no_requests_15min
+        // 4. SECUENCIA SIN NINGUNA LLAMADA: 15 min, día 1 y día 3.
+        //
+        // Antes solo existía el aviso de los 15 minutos: quien no llamaba entonces no
+        // volvía a saber de nosotros. Cada paso tiene ventana de edad (y no solo un
+        // mínimo) para que al desplegar no le lleguen a toda la base antigua de golpe.
         if ($totalRequests === 0) {
-            $diffSeconds = time() - strtotime($createdAt);
-            if ($diffSeconds >= 900) { // 15 minutos
+            $edad = time() - strtotime($createdAt);
+
+            if ($edad >= 3 * 86400 && $edad < 7 * 86400) {          // día 3 a 7
+                $this->checkAndSend($user, 'no_requests_day3', 'email_sent_no_usage_day3');
+                return;
+            }
+            if ($edad >= 86400 && $edad < 3 * 86400) {              // día 1 a 3
+                $this->checkAndSend($user, 'no_requests_day1', 'email_sent_no_usage_day1');
+                return;
+            }
+            if ($edad >= 900) {                                     // 15 minutos
                 $this->checkAndSend($user, 'no_requests_15min', 'email_sent_no_usage');
                 return;
             }
@@ -384,6 +397,12 @@ class EmailAutomationCommand extends BaseCommand
             case 'no_requests_15min':
                 $result = $this->emailService->sendNoUsage15Min($user);
                 break;
+            case 'no_requests_day1':
+                $result = $this->emailService->sendQuickStartPrompt($user);
+                break;
+            case 'no_requests_day3':
+                $result = $this->emailService->sendInactivityReminder($user);
+                break;
             case 'one_request_inactive_1h':
                 $result = $this->emailService->sendOneUsageInactive1H($user);
                 break;
@@ -409,10 +428,16 @@ class EmailAutomationCommand extends BaseCommand
         }
     }
 
+    /**
+     * Consultas del cupo Free, contadas IGUAL que ApiKeyFilter: de por vida, pero
+     * desde el 28-05-2026. Antes sumaba todo el histórico, y alguien con uso anterior
+     * a esa fecha recibía "has agotado tus consultas" teniendo aún cupo.
+     */
     protected function getTotalRequests(int $userId): int
     {
         $res = $this->usageModel->selectSum('requests_count')
             ->where('user_id', $userId)
+            ->where('date >=', '2026-05-28')
             ->get()->getRowArray();
         return (int)($res['requests_count'] ?? 0);
     }

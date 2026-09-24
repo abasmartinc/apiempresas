@@ -171,15 +171,17 @@ class SeedEmailTemplates extends BaseCommand
                 'subject' => 'Configura tu integración con APIEmpresas en 1 minuto 🚀',
                 'view'    => 'quick_start',
                 'vars'    => '{name}',
-                'trigger' => 'Se dispara automáticamente 5 minutos después del registro si el usuario no ha hecho nada.'
+                'trigger' => 'Día 1 sin ninguna llamada a la API (entre 1 y 3 días después del alta). Lo envía email:automation (no_requests_day1).'
             ],
             [
                 'slug'    => 'inactivity_reminder',
                 'name'    => 'Recordatorio de Inactividad',
-                'subject' => '[Tech Report] Hoy hay {count} nuevas empresas (Tu API Key sigue inactiva) 📉',
+                // Antes: "[Tech Report] Hoy hay {count} nuevas empresas…", con un recuento
+                // de constituciones de hoy que casi siempre era 0.
+                'subject' => '¿Algo te ha frenado con la API?',
                 'view'    => 'inactivity_reminder',
-                'vars'    => '{name}, {count}',
-                'trigger' => 'Se envía tras 24 horas sin actividad para incentivar el uso de la API.'
+                'vars'    => '{name}',
+                'trigger' => 'Día 3 sin ninguna llamada a la API (entre 3 y 7 días después del alta): ofrece ayuda con la integración. Lo envía email:automation (no_requests_day3).'
             ],
             [
                 'slug'    => 'first_request_success',

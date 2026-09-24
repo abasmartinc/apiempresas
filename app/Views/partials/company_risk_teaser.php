@@ -47,6 +47,10 @@ $teaserGratis = (int) solvencia('consultasGratis', 3);
 // y métricas que dependen de esos valores. Pero lo que se ENSEÑA sale del
 // helper, que es donde vive la razón del cambio (ver risk_level_visual).
 
+// Estado registral efectivo: cambia el titular y decide si "Avísame si cambia"
+// tiene sentido (en una extinguida no va a cambiar nada).
+$teaserEstado = company_estado_registral($company ?? [], $riskProfile ?? null);
+
 $companyName = company_short_name(company_display_name($companyName ?? ($company['name'] ?? ''), 'Empresa'));
 $compCif = $company['cif'] ?? '';
 $compId  = (int)($company['id'] ?? 0);
@@ -205,14 +209,25 @@ $redirectVigilar = strpos($redirectPath, 'ver-riesgo=1') !== false
             <?= view('partials/company_risk_titular', ['riskProfile' => $riskProfile, 'tiMargen' => '18px']) ?>
 
             <h3 class="rt-h">
-                <?php if ($teaserTotalAlerts > 0): ?>
+                <?php if ($teaserEstado['clave'] === 'extinguida'): ?>
+                    Ya no existe. El dictamen cuenta cómo llegó hasta aquí
+                <?php elseif ($teaserEstado['clave'] === 'concurso'): ?>
+                    Está en concurso. Falta saber en qué punto y qué más consta
+                <?php elseif ($teaserEstado['cerrada']): ?>
+                    Está en proceso de cierre. Falta saber en qué punto
+                <?php elseif ($teaserEstado['clave'] === 'hoja_cerrada'): ?>
+                    Tiene la hoja registral cerrada. Falta saber por qué
+                <?php elseif ($teaserTotalAlerts > 0): ?>
                     Ya sabes que hay algo. Falta saber qué es y si sigue abierto
                 <?php else: ?>
                     Hoy está limpia. La pregunta es qué pasa a partir de hoy
                 <?php endif; ?>
             </h3>
             <p class="rt-p">
-                <?php if ($teaserTotalAlerts > 0): ?>
+                <?php if ($teaserEstado['cerrada']): ?>
+                    Si tienes una factura pendiente o un expediente abierto con <strong><?= esc($companyName) ?></strong>,
+                    el dictamen completo ordena lo que consta, con la gravedad de cada acto y lo que supone para un acreedor.
+                <?php elseif ($teaserTotalAlerts > 0): ?>
                     Accede al dictamen completo de <strong><?= esc($companyName) ?></strong>:
                     cada acto con su fecha, su gravedad y qué significa para tu riesgo de cobro.
                 <?php else: ?>
@@ -333,6 +348,7 @@ $redirectVigilar = strpos($redirectPath, 'ver-riesgo=1') !== false
                 </div>
             </div>
 
+            <?php if (!$teaserEstado['definitiva']): ?>
             <!-- "AVÍSAME SI CAMBIA". Lo único que trae de vuelta a quien mira una
                  empresa y se va es el correo del día que esa empresa sale en el
                  BORME. No gasta consultas. Registrarse "para que me avisen" crea
@@ -355,6 +371,7 @@ $redirectVigilar = strpos($redirectPath, 'ver-riesgo=1') !== false
                     <span>Activar aviso gratis</span>
                 </a>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>

@@ -497,25 +497,18 @@ class EmailService
      */
     public function sendQuickStartPrompt(array $userData)
     {
-        return $this->sendTemplateEmail('quick_start', ['name' => $userData['name'] ?? 'Usuario'], $userData['email'], ['papelo.amh@gmail.com']);
+        return $this->sendTemplateEmail('quick_start', ['name' => $userData['name'] ?? 'Usuario'], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
     }
 
     /**
-     * Send an inactivity reminder email (24h without requests).
+     * Día 3 sin ninguna llamada: ofrecer ayuda con la integración.
+     *
+     * Antes contaba las empresas con fecha de constitución de HOY, que casi siempre
+     * son 0 (el BORME publica con días de retraso): "Hoy hay 0 nuevas empresas".
      */
     public function sendInactivityReminder(array $userData)
     {
-        $db = \Config\Database::connect();
-        $today = date('Y-m-d');
-        $newCompaniesCount = $db->table('companies')
-                                ->where('fecha_constitucion >=', $today)
-                                ->countAllResults();
-
-        $templateData = [
-            'name'  => $userData['name'] ?? 'Usuario',
-            'count' => $newCompaniesCount
-        ];
-        return $this->sendTemplateEmail('inactivity_reminder', $templateData, $userData['email'], ['papelo.amh@gmail.com']);
+        return $this->sendTemplateEmail('inactivity_reminder', ['name' => $userData['name'] ?? 'Usuario'], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
     }
 
     /**

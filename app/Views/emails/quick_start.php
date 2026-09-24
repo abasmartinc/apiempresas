@@ -30,24 +30,24 @@
             
             <div style="background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                 <code style="color: #38bdf8; font-family: 'Fira Code', monospace; font-size: 13px; word-break: break-all;">
-                    curl -X GET "https://apiempresas.es/api/v1/companies?cif=B12345678" \<br>
+                    curl -X GET "https://apiempresas.es/api/v1/companies?cif=A15075062" \<br>
                     &nbsp;&nbsp;-H "X-API-KEY: TU_CLAVE_API"
                 </code>
             </div>
 
-            <p>Y esta es la respuesta que obtendrás al validar un CIF con tu <strong>Plan Free</strong>:</p>
+            <p>Es un CIF real (Inditex), así que la primera prueba te devuelve datos de verdad. Esta es la respuesta con tu <strong>Plan Free</strong>:</p>
 
             <pre style="background: #0f172a; color: #e2e8f0; padding: 20px; border-radius: 8px; font-family: 'Fira Code', monospace; font-size: 13px; line-height: 1.5; overflow-x: auto;">{
   "success": true,
   "data": {
-    "name": "TECH FLOW SOLUTIONS SL",
-    "cif": "B12345678",
+    "name": "INDUSTRIA DE DISENO TEXTIL SA",
+    "cif": "A15075062",
     "status": "ACTIVA",
-    "founded": "2024-03-12",
-    "province": "MADRID",
-    "cnae": "6201",
+    "founded": "1985-06-12",
+    "province": "A CORUÑA",
+    "cnae": "4642",
     "address": "*** [ACTUALIZA A PRO PARA VER LA DIRECCION ]",
-    "corporate_purpose": "La prestacion de servicios de consultoria informatica..."
+    "corporate_purpose": "COMERCIO AL POR MAYOR Y MENOR DE TODA CLASE DE PRENDAS DE VESTIR."
   }
 }</pre>
 

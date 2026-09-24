@@ -15,6 +15,12 @@
     $isActive = strtoupper($statusRaw) === 'ACTIVA';
     $statusClass = $isActive ? 'company-status company-status--active' : 'company-status company-status--inactive';
 
+    // Estado registral EFECTIVO (motor + status). Manda sobre todo lo que sigue:
+    // cinta, chip de estado, texto de presentación, FAQ y botones comerciales.
+    // Ver company_estado_registral() en Helpers/company_helper.php.
+    helper(['company', 'risk_labels']);
+    $estadoReg = company_estado_registral($company, $riskProfile ?? null);
+
     $cnaeFull = (!empty($company['cnae']) && !empty($company['cnae_label']))
         ? ($company['cnae'] . ' · ' . $company['cnae_label'])
         : ($company['cnae_label'] ?? ($company['cnae'] ?? '-'));
@@ -32,7 +38,6 @@
 
     // Phone logic
     $phone = $company['phone'] ?? $company['phone_mobile'] ?? null;
-    $phoneHtml = $phone ? "**{$phone}**" : "el teléfono de {$companyName} en nuestro informe";
 
     $adminNames = [];
     if (!empty($administrators)) {
@@ -40,16 +45,42 @@
             $adminNames[] = $adm['name'];
         }
     }
-    $adminResponse = !empty($adminNames)
-        ? "Entre los administradores y cargos actuales de **{$companyName}** se encuentran: **" . implode(', ', $adminNames) . "**. Puede consultar el listado completo y sus funciones en la sección de Cargos Directivos de esta misma ficha."
-        : "Para conocer a los administradores y cargos de la empresa, consulte la sección específica de **Cargos Directivos** en este perfil.";
+    // La sección "Cargos Directivos" solo se pinta si hay administradores: sin
+    // ellos, la FAQ mandaba a una sección que no existe en la página.
+    if (!empty($adminNames)) {
+        $adminResponse = ($estadoReg['cerrada']
+                ? "Los últimos administradores y cargos que constan de **{$companyName}** son: **"
+                : "Entre los administradores y cargos actuales de **{$companyName}** se encuentran: **")
+            . implode(', ', $adminNames) . "**. Puede consultar el listado completo en la sección de Cargos Directivos de esta misma ficha. ";
+    } else {
+        $adminResponse = '';
+    }
+
+    // Respuestas que dependen del estado. Google enseña estas FAQ como respuesta
+    // directa, así que no pueden describir como viva una empresa que no lo está.
+    if ($estadoReg['incidencia']) {
+        $faqFiable = "**{$companyName}** (CIF **{$companyCif}**) {$estadoReg['frase']}. "
+            . ($estadoReg['cerrada']
+                ? "Ya no desarrolla actividad mercantil con normalidad, así que no conviene contratar con ella ni venderle a crédito. "
+                : "Antes de contratar con ella o venderle a crédito, conviene revisarlo con detalle. ")
+            . "En esta ficha puede consultar su índice de estabilidad societaria y los actos publicados en el BORME.";
+    } else {
+        $faqFiable = "**{$companyName}** es una sociedad registrada en España con CIF **{$companyCif}**. Su estado actual es **{$statusRaw}**, según consta en el Registro Mercantil. Para valorar si es fiable como cliente o proveedor, consulte su índice de estabilidad societaria y los actos publicados en el BORME.";
+    }
+
+    if ($estadoReg['cerrada']) {
+        $faqContacto = "El último domicilio social que consta de **{$companyName}** es **{$companyAddr}**. La sociedad {$estadoReg['frase']}, así que es probable que ya no atienda en esa dirección ni en sus antiguos teléfonos.";
+    } else {
+        $faqContacto = "La empresa tiene su domicilio social en **{$companyAddr}**."
+            . ($phone ? " Su teléfono de contacto es **{$phone}**." : " No consta un teléfono de contacto público.");
+    }
 
     $faqs = [
         [
             'q' => "¿Es fiable {$companyName}?",
             // Empezaba por "Sí," para TODAS las empresas, también las extinguidas o en
             // concurso: Google lo enseña como respuesta directa a "¿es fiable X?".
-            'a' => "**{$companyName}** es una sociedad registrada en España con CIF **{$companyCif}**. Su estado actual es **{$statusRaw}**, según consta en el Registro Mercantil. Para valorar si es fiable como cliente o proveedor, consulte su índice de solvencia y los actos publicados en el BORME."
+            'a' => $faqFiable
         ],
         [
             'q' => "¿Cómo consultar la solvencia y riesgo de impago de {$companyName}?",
@@ -57,16 +88,18 @@
         ],
         [
             'q' => "¿Cuál es el teléfono y dirección de {$companyName}?",
-            'a' => "La empresa tiene su domicilio social en **{$companyAddr}**. Para contactar, puede llamar al {$phoneHtml} o visitar su delegación más cercana en {$companyProv}."
+            'a' => $faqContacto
         ],
         [
             'q' => "¿Quiénes son los administradores de {$companyName}?",
-            'a' => "{$adminResponse} Adicionalmente, en la sección de **Actos del BORME** puede revisar el histórico oficial de nombramientos, ceses y dimisiones desde su constitución."
+            'a' => "{$adminResponse}En la sección de **Actos del BORME** puede revisar el histórico oficial de nombramientos, ceses y dimisiones desde su constitución."
         ]
     ];
 
-    // Sobrescribir con FAQs de IA si existen
-    if (!empty($company['ai_faqs'])) {
+    // Sobrescribir con FAQs de IA si existen.
+    // Salvo con un estado adverso: se generaron sin mirar el estado y hablan de la
+    // empresa como si operara con normalidad.
+    if (!empty($company['ai_faqs']) && !$estadoReg['incidencia']) {
         $aiFaqsDecoded = json_decode($company['ai_faqs'], true);
         if (json_last_error() === JSON_ERROR_NONE && !empty($aiFaqsDecoded) && is_array($aiFaqsDecoded)) {
             $faqs = $aiFaqsDecoded;
@@ -295,7 +328,18 @@
                             $ribbonGradient = '';
                             $ribbonShadow = '';
                             
-                            if (!empty($constValHeader) && $timestamp = strtotime($constValHeader)) {
+                            if ($estadoReg['incidencia']) {
+                                // Con un estado adverso, la cinta dice el estado y no la edad:
+                                // "Veterana (+10a)" en una extinguida se lee como solidez.
+                                $ribbonText = $estadoReg['etiqueta'];
+                                if ($estadoReg['cerrada']) {
+                                    $ribbonGradient = 'linear-gradient(135deg, #64748b 0%, #334155 100%)';
+                                    $ribbonShadow = 'rgba(51, 65, 85, 0.35)';
+                                } else {
+                                    $ribbonGradient = 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)';
+                                    $ribbonShadow = 'rgba(185, 28, 28, 0.35)';
+                                }
+                            } elseif (!empty($constValHeader) && $timestamp = strtotime($constValHeader)) {
                                 $ageInDays = (time() - $timestamp) / (60 * 60 * 24);
                                 $ageInYears = $ageInDays / 365.25;
                                 
@@ -372,7 +416,13 @@
                                         $rcOpaco = solvencia('teaserModo', 'titular') === 'opaco';
                                         [$rcNivel, $rcColor, $rcFondo, $rcBorde] = risk_level_visual($rcScore);
 
-                                        if ($rcOpaco || ($rcEventos === 0 && $rcConf !== null && $rcConf < 60)) {
+                                        if (!$rcOpaco && $estadoReg['incidencia']) {
+                                            // El estado registral va primero: "A revisar" de una
+                                            // sociedad extinguida se queda muy corto.
+                                            [$rcColor, $rcFondo, $rcBorde] = [$estadoReg['color'], $estadoReg['fondo'], $estadoReg['borde']];
+                                            $rcTexto = esc($estadoReg['titulo'])
+                                                . ($rcEventos > 0 ? ' · ' . $rcEventos . ($rcEventos === 1 ? ' incidencia' : ' incidencias') : '');
+                                        } elseif ($rcOpaco || ($rcEventos === 0 && $rcConf !== null && $rcConf < 60)) {
                                             // Sin adelantar el resultado, o con un cero que no significa "limpia".
                                             [$rcColor, $rcFondo, $rcBorde] = ['#1d4ed8', '#eff6ff', '#bfdbfe'];
                                             $rcTexto = 'Perfil de riesgo disponible';
@@ -465,7 +515,14 @@
                                     </div>
                                     <?php endif; ?>
                                     
-                                    <?php if (!empty($statusRaw)): ?>
+                                    <?php if ($estadoReg['incidencia']): ?>
+                                    <!-- Estado efectivo, no el literal de la tabla: "Disolución" en una
+                                         sociedad que ya consta extinguida decía menos de lo que hay. -->
+                                    <div title="<?= esc($estadoReg['titulo'], 'attr') ?>" style="margin: 0; display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; background: <?= $estadoReg['fondo'] ?>; border: 1px solid <?= $estadoReg['borde'] ?>; color: <?= $estadoReg['color'] ?>; font-weight: 700;">
+                                        <span style="display: inline-flex; width: 8px; height: 8px; border-radius: 50%; background: <?= $estadoReg['color'] ?>;"></span>
+                                        <span><?= esc($estadoReg['etiqueta']) ?></span>
+                                    </div>
+                                    <?php elseif (!empty($statusRaw)): ?>
                                     <div class="<?= str_replace('company-status', 'b2b-status', esc($statusClass)) ?>" style="margin: 0; display: flex; align-items: center; gap: 6px;">
                                         <?php if ($isActive): ?>
                                             <span style="position: relative; display: flex; width: 8px; height: 8px;">
@@ -532,6 +589,9 @@
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-51786dbf"></use></svg>
                                             </button>
                                         </div>
+                                        <?php if (!$estadoReg['cerrada']): ?>
+                                        <?php /* Fuera en una empresa que ya no opera: preparar una llamada
+                                                 comercial o mandarla al CRM no tiene sentido. */ ?>
                                         <button type="button" onclick="openCopilotModal('<?= esc($companyCif) ?>');"
                                             style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #ffffff; color: #6d28d9; font-size: 0.9rem; font-weight: 700; border: 1px solid #ddd6fe; border-radius: 10px; cursor: pointer; transition: all 0.2s;"
                                             onmouseover="this.style.background='#f5f3ff'; this.style.borderColor='#c4b5fd';"
@@ -545,6 +605,7 @@
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><use href="#icon-2f243988"></use></svg>
                                             Enviar a CRM
                                         </button>
+                                        <?php endif; ?>
                                         <!-- Descargas.
                                              Aquí había dos botones, "Descargar informe" y "PDF Premium",
                                              que ni por el nombre ni por el icono decían en qué se
@@ -644,7 +705,32 @@
 
     <!-- Texto SEO -->
     <div style="padding:18px 24px; line-height:1.7; color:#334155; font-size:1rem;">
-        <?php if (!empty($company['ai_seo_text'])): ?>
+        <?php if ($estadoReg['incidencia']): ?>
+            <?php
+            /*
+             * Con un estado adverso, ni el texto de IA ni las diez plantillas de abajo
+             * sirven: todas hablan de "sólida implantación", "operando activamente" o
+             * "obligaciones al día". Aquí va un texto sobrio con lo que consta.
+             */
+            $epProv = !empty($provinceUrl) ? '<a href="' . esc($provinceUrl) . '" style="color:inherit;font-weight:700;">' . esc($companyProv) . '</a>' : '<strong>' . esc($companyProv) . '</strong>';
+            $epCif  = (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-') ? ' (CIF <strong>' . esc($companyCif) . '</strong>)' : '';
+            $epAnio = '';
+            $epFund = trim((string) ($company['founded'] ?? $company['incorporation_date'] ?? ''));
+            if ($epFund !== '' && $epFund !== '0000-00-00' && $epFund !== '-' && preg_match('/^\d{4}/', $epFund)) {
+                $epAnio = substr($epFund, 0, 4);
+            }
+            ?>
+            <p>
+                <strong><?= esc($companyName) ?></strong><?= $epCif ?> es una sociedad
+                <?= $epAnio ? 'constituida en ' . esc($epAnio) . ' ' : '' ?>con domicilio social registrado en <?= $epProv ?>.
+                Según los datos del Registro Mercantil, <strong><?= esc($estadoReg['frase']) ?></strong><?= $estadoReg['cerrada'] ? ', por lo que ya no desarrolla actividad mercantil con normalidad' : '' ?>.
+                <?php if ($estadoReg['cerrada']): ?>
+                    En esta ficha puede consultar su histórico de actos publicados en el BORME, sus últimos administradores conocidos y su índice de estabilidad societaria.
+                <?php else: ?>
+                    Antes de contratar con ella o venderle a crédito, conviene revisar su histórico de actos publicados en el BORME y su índice de estabilidad societaria.
+                <?php endif; ?>
+            </p>
+        <?php elseif (!empty($company['ai_seo_text'])): ?>
             <?= nl2br(strip_tags($company['ai_seo_text'], '<strong><em><b><i><br><a><ul><li><ol><p>')) ?>
         <?php else: ?>
             <div id="fallback-seo-text">

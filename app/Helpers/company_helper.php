@@ -440,6 +440,136 @@ if (!function_exists('risk_level_visual')) {
 }
 
 /**
+ * Estado registral EFECTIVO de una empresa: el que tiene que mandar en la ficha.
+ *
+ * POR QUÉ EXISTE (24-09-2026)
+ * ---------------------------
+ * `companies.status` se queda a menudo en un paso intermedio. Caso real: Disi
+ * Asesoría Internacional S.L. (B97354518) tenía status "Disolución" y en el BORME
+ * de noviembre de 2014 consta su extinción. La ficha la trataba como viva: cinta
+ * "Veterana (+10a)", un texto de "sólida implantación", "Preparar llamada con IA",
+ * una FAQ que invitaba a llamarla y a "visitar su delegación", y el paywall
+ * preguntando "si sigue abierto". Cada pieza miraba el estado por su cuenta, y
+ * casi todas solo distinguían ACTIVA / no ACTIVA.
+ *
+ * Fuentes, y gana la MÁS GRAVE de las dos:
+ *  1. El motor: los `LEGAL_STATE_*` de `canonical_events` (LegalDistressStateGraph)
+ *     y el acto `EXTINCION_SOCIEDAD`, que es terminal.
+ *  2. `companies.status`, por texto.
+ * No se usa CONCURSO_ACREEDORES suelto: puede estar ya concluido. Para eso está
+ * LEGAL_STATE_CONCURSO_ACTIVO.
+ *
+ * Devuelve:
+ *  - clave:      extinguida | concurso | liquidacion | disuelta | hoja_cerrada | activa | desconocido
+ *  - etiqueta:   corta, para chips ("Extinguida")
+ *  - titulo:     larga ("Sociedad extinguida")
+ *  - frase:      para meter en una oración ("consta como extinguida en el Registro Mercantil")
+ *  - incidencia: hay un estado adverso → nada de textos que hablen de solidez
+ *  - cerrada:    ya no opera (extinguida, disuelta, en liquidación) → fuera CTAs comerciales
+ *  - definitiva: no puede cambiar (extinguida) → no tiene sentido "avísame si cambia"
+ *  - color, fondo, borde
+ */
+if (!function_exists('company_estado_registral')) {
+    function company_estado_registral(array $company, ?array $riskProfile = null): array
+    {
+        $estados = [
+            'extinguida'   => ['peso' => 100, 'etiqueta' => 'Extinguida',        'titulo' => 'Sociedad extinguida',
+                               'frase' => 'consta como extinguida en el Registro Mercantil',
+                               'cerrada' => true,  'definitiva' => true,  'colores' => ['#334155', '#f1f5f9', '#cbd5e1']],
+            'concurso'     => ['peso' => 95,  'etiqueta' => 'En concurso',       'titulo' => 'Concurso de acreedores en curso',
+                               'frase' => 'tiene un concurso de acreedores en curso',
+                               'cerrada' => false, 'definitiva' => false, 'colores' => ['#b91c1c', '#fef2f2', '#fecaca']],
+            'liquidacion'  => ['peso' => 90,  'etiqueta' => 'En liquidación',    'titulo' => 'Sociedad en liquidación',
+                               'frase' => 'está en fase de liquidación',
+                               'cerrada' => true,  'definitiva' => false, 'colores' => ['#b91c1c', '#fef2f2', '#fecaca']],
+            'disuelta'     => ['peso' => 85,  'etiqueta' => 'Disuelta',          'titulo' => 'Sociedad disuelta',
+                               'frase' => 'consta como disuelta en el Registro Mercantil',
+                               'cerrada' => true,  'definitiva' => false, 'colores' => ['#b91c1c', '#fef2f2', '#fecaca']],
+            'hoja_cerrada' => ['peso' => 80,  'etiqueta' => 'Hoja cerrada',      'titulo' => 'Hoja registral cerrada',
+                               'frase' => 'tiene la hoja registral cerrada',
+                               'cerrada' => false, 'definitiva' => false, 'colores' => ['#b91c1c', '#fef2f2', '#fecaca']],
+        ];
+
+        $statusRaw = trim((string) ($company['status'] ?? ''));
+        $candidatas = [];
+
+        // 1. El motor.
+        foreach (($riskProfile['data']['canonical_events'] ?? []) as $ev) {
+            $code = strtoupper(trim((string) ($ev['code'] ?? '')));
+            if ($code === '') {
+                continue;
+            }
+            if ($code === 'LEGAL_STATE_EXTINTA' || $code === 'EXTINCION_SOCIEDAD') {
+                $candidatas[] = 'extinguida';
+            } elseif ($code === 'LEGAL_STATE_CONCURSO_ACTIVO') {
+                $candidatas[] = 'concurso';
+            } elseif ($code === 'LEGAL_STATE_LIQUIDACION') {
+                $candidatas[] = 'liquidacion';
+            } elseif ($code === 'LEGAL_STATE_DISUELTA') {
+                $candidatas[] = 'disuelta';
+            } elseif (strpos($code, 'LEGAL_STATE_REGISTRY_CLOSURE') === 0) {
+                $candidatas[] = 'hoja_cerrada';
+            }
+        }
+
+        // 2. El status de la tabla, por texto y sin tildes.
+        $s = strtolower(strtr($statusRaw, ['Á' => 'a', 'É' => 'e', 'Í' => 'i', 'Ó' => 'o', 'Ú' => 'u',
+                                           'á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u']));
+        if ($s !== '') {
+            if (strpos($s, 'extingu') !== false || strpos($s, 'extincion') !== false) {
+                $candidatas[] = 'extinguida';
+            } elseif (strpos($s, 'concurso') !== false && strpos($s, 'conclu') === false) {
+                $candidatas[] = 'concurso';
+            } elseif (strpos($s, 'liquidac') !== false) {
+                $candidatas[] = 'liquidacion';
+            } elseif (strpos($s, 'disol') !== false || strpos($s, 'disuel') !== false) {
+                $candidatas[] = 'disuelta';
+            } elseif (strpos($s, 'cierre') !== false || strpos($s, 'revoca') !== false || strpos($s, 'baja') !== false) {
+                $candidatas[] = 'hoja_cerrada';
+            }
+        }
+
+        $clave = null;
+        foreach ($candidatas as $c) {
+            if ($clave === null || $estados[$c]['peso'] > $estados[$clave]['peso']) {
+                $clave = $c;
+            }
+        }
+
+        if ($clave !== null) {
+            $e = $estados[$clave];
+            return [
+                'clave'      => $clave,
+                'etiqueta'   => $e['etiqueta'],
+                'titulo'     => $e['titulo'],
+                'frase'      => $e['frase'],
+                'incidencia' => true,
+                'cerrada'    => $e['cerrada'],
+                'definitiva' => $e['definitiva'],
+                'color'      => $e['colores'][0],
+                'fondo'      => $e['colores'][1],
+                'borde'      => $e['colores'][2],
+            ];
+        }
+
+        $activa = strtoupper($statusRaw) === 'ACTIVA';
+
+        return [
+            'clave'      => $activa ? 'activa' : 'desconocido',
+            'etiqueta'   => $statusRaw,
+            'titulo'     => $statusRaw,
+            'frase'      => $activa ? 'consta como activa en el Registro Mercantil' : '',
+            'incidencia' => false,
+            'cerrada'    => false,
+            'definitiva' => false,
+            'color'      => '#15803d',
+            'fondo'      => '#f0fdf4',
+            'borde'      => '#bbf7d0',
+        ];
+    }
+}
+
+/**
  * El rótulo que va encima del número, en un solo sitio.
  *
  * Estaba escrito a mano como "NIVEL DE RIESGO" en cuatro parciales y los dos PDF.
