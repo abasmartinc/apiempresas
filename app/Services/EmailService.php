@@ -74,21 +74,89 @@ class EmailService
     /**
      * Helper to log email to DB
      */
-    private function logToDatabase($userId, $subject, $message, $status, $error = null)
+    private function logToDatabase($userId, $subject, $message, $status, $error = null, ?string $trackingCode = null, ?string $slug = null)
     {
         try {
-            $logModel = new \App\Models\EmailLogModel();
-            $logModel->insert([
+            $fila = [
                 'user_id'       => $userId,
                 'subject'       => $subject,
                 'message'       => substr($message, 0, 1000), // Evitar logs gigantes
                 'status'        => $status,
                 'error_message' => $error,
+                'tracking_code' => $trackingCode,
                 'created_at'    => date('Y-m-d H:i:s')
-            ]);
+            ];
+            // La plantilla solo se guarda si existe la columna (ver email_logs.template_slug)
+            if ($slug !== null && self::logsTienenSlug()) {
+                $fila['template_slug'] = $slug;
+            }
+            // Directo al query builder: EmailLogModel no tiene template_slug en allowedFields
+            \Config\Database::connect()->table('email_logs')->insert($fila);
         } catch (\Throwable $e) {
             log_message('error', "[EmailService] Error al guardar log en BD: " . $e->getMessage());
         }
+    }
+
+    /** ¿Tiene email_logs la columna template_slug? (se consulta una vez por proceso) */
+    private static function logsTienenSlug(): bool
+    {
+        static $tiene = null;
+        if ($tiene === null) {
+            try {
+                $tiene = in_array('template_slug', \Config\Database::connect()->getFieldNames('email_logs'), true);
+            } catch (\Throwable $e) {
+                $tiene = false;
+            }
+        }
+        return $tiene;
+    }
+
+    /**
+     * Plantillas cuyos enlaces NO se envuelven para medir clics: avisos internos y
+     * enlaces con token de un solo uso (entrar, poner contraseña).
+     */
+    private const SIN_SEGUIMIENTO = [
+        'payment_notification', 'admin_registration', 'login_link', 'set_password', 'reset_password',
+    ];
+
+    /**
+     * Envuelve los enlaces a nuestra web para medir clics y atribuir compras.
+     *
+     * Cada enlace pasa por /e/c/{código} (EmailTracking::click), que marca el clic en
+     * email_logs, guarda en sesión de qué correo viene y redirige al destino con
+     * ?source=email_{plantilla}. Billing usa ese source en checkout_started y
+     * checkout_completed. No se tocan: bajas, enlaces con token, ni webs externas
+     * (la factura de Stripe, por ejemplo).
+     */
+    private function trackLinks(string $body, string $slug, string $code): string
+    {
+        $bases = array_unique(array_filter([
+            rtrim(site_url(), '/'),
+            'https://apiempresas.es',
+            'https://www.apiempresas.es',
+        ]));
+        $patronBases = implode('|', array_map(static fn ($b) => preg_quote($b, '#'), $bases));
+        $clic = rtrim(site_url(), '/') . '/e/c/' . $code . '?t=';
+
+        return preg_replace_callback(
+            '#href=(["\'])((?:' . $patronBases . ')(?:/[^"\']*)?)\1#i',
+            static function ($m) use ($slug, $clic) {
+                $destino = html_entity_decode($m[2], ENT_QUOTES | ENT_HTML5);
+                if (preg_match('#/(unsubscribe|e/c/|e/o/|reset-password|acceso/)#i', $destino)) {
+                    return $m[0];
+                }
+                if (!preg_match('/[?&]source=/', $destino)) {
+                    $ancla = '';
+                    if (($p = strpos($destino, '#')) !== false) {
+                        $ancla   = substr($destino, $p);
+                        $destino = substr($destino, 0, $p);
+                    }
+                    $destino .= (str_contains($destino, '?') ? '&' : '?') . 'source=email_' . $slug . $ancla;
+                }
+                return 'href=' . $m[1] . $clic . rawurlencode($destino) . $m[1];
+            },
+            $body
+        );
     }
 
     /**
@@ -550,9 +618,12 @@ class EmailService
      * fijo "Notificación APIEmpresas.es" y los siete avisos llegaban iguales. Pasa
      * además el user_id, para que el envío quede en email_logs (antes no quedaba).
      */
-    private function sendApiAutomation(array $userData, string $asunto, string $preheader, string $contenidoHtml, string $botonTexto, string $botonUrl): array
+    private function sendApiAutomation(array $userData, string $asunto, string $preheader, string $contenidoHtml, string $botonTexto, string $botonUrl, string $tipo = ''): array
     {
         return $this->sendTemplateEmail('automation_generic', [
+            // Los siete avisos comparten plantilla: el tipo distingue cada uno en
+            // email_logs, en el source del enlace y en el informe.
+            '_log_slug'   => $tipo,
             'subject'     => $asunto,
             'preheader'   => $preheader,
             'name'        => $userData['name'] ?? 'Usuario',
@@ -570,6 +641,61 @@ class EmailService
     }
 
     /**
+     * Datos del plan Pro de la API (id 2) para los textos: nombre, cupo y precio.
+     * price_monthly está en euros (Webhook lo compara con amount_subtotal / 100).
+     */
+    private function planPro(): array
+    {
+        static $pro = null;
+        if ($pro === null) {
+            $pro = ['name' => 'Pro', 'monthly_quota' => 3000, 'price_monthly' => null];
+            try {
+                $fila = \Config\Database::connect()->table('api_plans')
+                    ->select('name, monthly_quota, price_monthly')->where('id', 2)
+                    ->get()->getRowArray();
+                if ($fila) {
+                    $pro = array_merge($pro, array_filter($fila, static fn ($v) => $v !== null && $v !== ''));
+                }
+            } catch (\Throwable $e) {
+                // Sin BD, los textos salen sin precio
+            }
+        }
+        return $pro;
+    }
+
+    /** "3.000 consultas cada mes por 19 €/mes + IVA", o sin precio si no se conoce. */
+    private function lineaPro(): string
+    {
+        $pro    = $this->planPro();
+        $precio = (float) ($pro['price_monthly'] ?? 0);
+        return number_format((int) $pro['monthly_quota'], 0, ',', '.') . ' consultas cada mes'
+            . ($precio > 0 ? ' por <strong>' . rtrim(rtrim(number_format($precio, 2, ',', '.'), '0'), ',') . ' €/mes + IVA</strong>, sin permanencia' : ', sin permanencia');
+    }
+
+    /** "Cuesta 19 €/mes + IVA, sin permanencia." (sin precio si no se conoce) */
+    private function precioPro(): string
+    {
+        $precio = (float) ($this->planPro()['price_monthly'] ?? 0);
+        return $precio > 0
+            ? 'Cuesta <strong>' . rtrim(rtrim(number_format($precio, 2, ',', '.'), '0'), ',') . ' €/mes + IVA</strong>, sin permanencia.'
+            : 'Sin permanencia.';
+    }
+
+    /** Lo que desbloquea Pro, comprobado en el código (CompaniesByCif, PlanAccessService). */
+    private function ventajasPro(): string
+    {
+        $li = static fn (string $h) => '<li style="margin:0 0 6px;">' . $h . '</li>';
+        $c  = static fn (string $t) => '<code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:13px;">' . $t . '</code>';
+        $cupo = number_format((int) $this->planPro()['monthly_quota'], 0, ',', '.');
+        return '<ul style="margin:0 0 14px; padding-left:20px;">'
+            . $li('<strong>' . $cupo . ' consultas cada mes</strong>, que se renuevan el día 1. El Free son ' . $this->freeLimit() . ' en total y no se renuevan.')
+            . $li('<strong>La respuesta completa</strong>: dirección, objeto social íntegro y coordenadas.')
+            . $li('<strong>Administradores y cargos</strong> de cada empresa, añadiendo ' . $c('&amp;admin=true') . '.')
+            . $li('<strong>Scoring y señales de actividad</strong>: ' . $c('/api/v1/companies/score') . ' y ' . $c('/api/v1/companies/signals') . '.')
+            . '</ul>';
+    }
+
+    /**
      * TRIGGER: no_requests_15min
      */
     public function sendNoUsage15Min(array $userData)
@@ -582,7 +708,8 @@ class EmailService
             'Pega tu API Key en este curl y tendrás los datos de una empresa real en segundos.',
             'He visto que todavía no has lanzado tu primera validación técnica.<br><br>Para que no pierdas tiempo con la documentación, aquí tienes tu endpoint listo:<br><br><code style="background:#f1f5f9; padding:10px; display:block; border-radius:5px;">GET /api/v1/companies?cif=A15075062</code><br><br>No olvides incluir tu <b>X-API-KEY</b> en los headers. Si necesitas un ejemplo en un lenguaje específico, responde a este correo.',
             'Ver mi API Key',
-            base_url('dashboard')
+            base_url('dashboard'),
+            'no_requests_15min'
         );
     }
 
@@ -595,9 +722,10 @@ class EmailService
             $userData,
             'Tu primera consulta ha funcionado. Esto es lo siguiente',
             'Lo que añade el Plan Pro a la respuesta que acabas de recibir.',
-            'Has realizado tu primera validación con éxito. ¡Buen comienzo!<br><br>Ahora que ya has probado la base, queremos enseñarte cómo llevar tu automatización al siguiente nivel. El <b>Plan Pro</b> desbloquea capas de datos inteligentes que no están disponibles en la versión Free:<br><br>• <b>Scoring de Propensión:</b> Identifica empresas con alta probabilidad de compra.<br>• <b>Señales de Crecimiento:</b> Detecta eventos del BORME en tiempo real.<br>• <b>Insights Tecnológicos:</b> Descubre el stack técnico de tus clientes.',
-            'Ver capacidades del Plan Pro',
-            base_url('billing')
+            'Tu primera consulta a la API ha funcionado. Lo que has recibido son datos reales, con dos recortes del plan Free: la dirección llega enmascarada y el objeto social, cortado.<br><br>Cuando tu integración vaya a producción, el <b>Plan Pro</b> te da:' . $this->ventajasPro() . $this->precioPro() . ' No cambias ni tu API Key ni tu código.',
+            'Ver el Plan Pro',
+            base_url('billing'),
+            'one_request_inactive_1h'
         );
     }
 
@@ -610,9 +738,10 @@ class EmailService
             $userData,
             'Ya has consultado 5 empresas: esto es lo que no estás viendo',
             'La dirección completa y el objeto social íntegro, sin asteriscos.',
-            'Ya has validado tus primeras empresas. ¡Genial!<br><br>Como habrás notado, en el Plan Free enmascaramos campos clave como la <b>dirección completa, el objeto social detallado y los cargos societarios</b>.<br><br>Pásate a Pro para desbloquear el 100% del payload y automatizar tu flujo de datos sin "asteriscos".',
+            'Ya llevas 5 empresas consultadas. En tus respuestas habrás visto la dirección como <code>*** [ACTUALIZA A PRO PARA VER LA DIRECCION ]</code> y el objeto social cortado a 100 caracteres.<br><br>Con el <b>Plan Pro</b> recibes el dato completo en la misma llamada, sin cambiar tu código, y además puedes pedir los administradores y cargos de cada empresa con <code>&amp;admin=true</code>.<br><br>Son ' . $this->lineaPro() . '.',
             'Desbloquear datos Pro',
-            base_url('billing')
+            base_url('billing'),
+            'reached_5_requests'
         );
     }
 
@@ -627,9 +756,10 @@ class EmailService
             $userData,
             'Has usado el 80 % de tus ' . $limite . ' consultas gratuitas',
             'Cuando llegues a ' . $limite . ', la API dejará de responder. Así lo evitas.',
-            'Has alcanzado las 80 consultas. Tu bono garantizado de ' . $limite . ' está cerca de agotarse.<br><br>Para evitar que tu integración se detenga por falta de cuota, te recomendamos activar el Plan Pro hoy mismo.<br><br><b>¿Qué obtendrás al activar Pro?</b><br>• Hasta 3.000 consultas mensuales.<br>• Datos enriquecidos sin enmascarar.<br>• Soporte técnico prioritario.',
-            'Evitar cortes de servicio',
-            base_url('billing')
+            'Has alcanzado las 80 consultas de tus ' . $limite . ' gratuitas. Cuando llegues a ' . $limite . ', la API responderá con error 429 y tu integración se parará.<br><br>Para que no pase, el <b>Plan Pro</b>:' . $this->ventajasPro() . $this->precioPro() . '<br><br>¿Solo necesitas unas pocas consultas más? Un <b>bono de créditos</b>, sin suscripción y también con los datos completos: <a href="' . site_url('crear-bono-api') . '" style="color:#2563eb;font-weight:700;">crear bono</a>.',
+            'Evitar el corte: ver Plan Pro',
+            base_url('billing'),
+            'reached_80_requests'
         );
     }
 
@@ -646,7 +776,8 @@ class EmailService
             'El error 400 viene de enviar texto pegado al CIF. Así se corrige.',
             "Nuestro sistema automatizado de monitoreo ha detectado una alta tasa de errores en tus peticiones de hoy (<b>{$errorCount} consultas rechazadas con código 400 - Bad Request</b>).<br><br>Este error ocurre cuando el parámetro <code>cif</code> no tiene el formato correcto de un identificador fiscal español. El problema más habitual es enviar texto adicional pegado al CIF al parsearlo desde un documento externo.<br><br><b>Ejemplos de peticiones incorrectas detectadas:</b><br><code style=\"background:#f1f5f9; padding:6px 10px; display:inline-block; border-radius:4px; margin:4px 0;\">❌ /api/v1/companies?cif=A08649477ELADJUDICATARIO</code><br><code style=\"background:#f1f5f9; padding:6px 10px; display:inline-block; border-radius:4px; margin:4px 0;\">❌ /api/v1/companies?cif=ADJUDICATARIO</code><br><br><b>El formato correcto es únicamente el identificador limpio:</b><br><code style=\"background:#dcfce7; padding:6px 10px; display:inline-block; border-radius:4px; margin:4px 0;\">✅ /api/v1/companies?cif=A08649477</code><br><br>Para que este error técnico no penalice tu prueba, <b>hemos devuelto automáticamente las {$errorCount} consultas rechazadas</b> a tu cuenta. Puedes verificarlo en tu dashboard.<br><br>Si tienes alguna duda sobre cómo extraer correctamente los identificadores de tus documentos, responde a este correo y te echamos un cable.",
             'Ver mi dashboard',
-            base_url('dashboard')
+            base_url('dashboard'),
+            'bad_request_help'
         );
     }
 
@@ -661,9 +792,10 @@ class EmailService
             $userData,
             'Has agotado tus ' . $limite . ' consultas gratuitas: tu integración está parada',
             'Actívala de nuevo en un minuto con el Plan Pro, sin cambiar tu código.',
-            'Has agotado tu bono de ' . $limite . ' consultas gratuitas.<br><br>Tu integración ha dejado de recibir datos oficiales hasta que actives un Plan Pro o Business.<br><br><b>Activa Pro ahora para reanudar el servicio instantáneamente:</b>',
-            'Reanudar servicio (Plan Pro)',
-            base_url('billing')
+            'Has agotado tus ' . $limite . ' consultas gratuitas. Desde ahora la API responde con error 429 y tu integración no recibe datos.<br><br>Tienes dos formas de reanudarla hoy mismo, sin cambiar tu código:<br><br>• <b>Plan Pro</b>: ' . $this->lineaPro() . ', con la respuesta completa.<br>• <b>Bono de créditos</b>, si solo necesitas unas pocas más, sin suscripción: <a href="' . site_url('crear-bono-api') . '" style="color:#2563eb;font-weight:700;">crear bono</a>.',
+            'Reanudar con el Plan Pro',
+            base_url('billing'),
+            'reached_100_percent_quota'
         );
     }
 
@@ -678,8 +810,283 @@ class EmailService
             'Resumen de actividad de tu cuenta de APIEmpresas.',
             "Aquí tienes el resumen de actividad de tu cuenta en los últimos 30 días:<br><br>• <b>Consultas a la API realizadas:</b> {$usage}<br><br>Si tu consumo sigue aumentando y necesitas asegurar disponibilidad, mayor tasa de peticiones y datos mercantiles completos sin restricciones, te recomendamos revisar nuestros planes:",
             'Ver Planes y Facturación',
-            site_url('billing')
+            site_url('billing'),
+            'monthly_report'
         );
+    }
+
+    /**
+     * Aviso de cupo a un cliente de PAGO de la API (80 % o 100 % del mes).
+     *
+     * Antes no existía: al agotar sus consultas recibía un 429 sin aviso previo. Es
+     * a la vez el aviso que evita una baja ("dejó de funcionar") y la venta más fácil
+     * (un plan mayor o un bono de créditos).
+     *
+     * @param array      $plan      fila de api_plans del plan actual (name, monthly_quota)
+     * @param array|null $siguiente siguiente plan de la API con más cupo, si hay
+     */
+    public function sendPaidQuotaWarning(array $userData, array $plan, int $usadas, int $umbral, int $saldoMonedero, ?array $siguiente = null): array
+    {
+        $cupo     = (int) $plan['monthly_quota'];
+        $nombre   = trim((string) ($plan['name'] ?? 'tu plan'));
+        $n        = static fn (int $x) => number_format($x, 0, ',', '.');
+        $meses    = [1 => 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
+                     'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        $renueva  = '1 de ' . $meses[(int) date('n', strtotime('first day of next month'))];
+        $urlPlan  = site_url('billing');
+        $urlBono  = site_url('crear-bono-api');
+
+        // Qué pasa al llegar al 100 %, según tenga o no saldo en el monedero
+        $alLlegar = $saldoMonedero > 0
+            ? 'se empezará a cobrar de tu monedero (saldo actual: <strong>' . $n($saldoMonedero) . ' créditos</strong>)'
+            : 'la API devolverá error <strong>429</strong> hasta el ' . $renueva . ', cuando se renueva tu cupo';
+
+        $opciones = '';
+        if ($siguiente) {
+            $opciones .= '<li style="margin:0 0 6px;"><strong>Pasar a ' . esc($siguiente['name']) . '</strong>: '
+                . $n((int) $siguiente['monthly_quota']) . ' consultas al mes. El cambio es inmediato y no tocas tu código.</li>';
+        }
+        $opciones .= '<li style="margin:0 0 6px;"><strong>Comprar un bono de créditos</strong> para cubrir este mes sin cambiar de plan: '
+            . '<a href="' . $urlBono . '" style="color:#2563eb;font-weight:700;">crear bono</a>.</li>';
+        if (!$siguiente) {
+            // Business es el plan más alto: si el volumen es estable, plan a medida
+            $opciones .= '<li style="margin:0 0 6px;"><strong>Un plan a medida</strong> si vas a necesitar más de '
+                . $n($cupo) . ' consultas al mes de forma estable: responde a este correo con tu volumen y te lo preparamos.</li>';
+        }
+        $lista = '<ul style="margin:0 0 14px; padding-left:20px;">' . $opciones . '</ul>';
+
+        if ($umbral >= 100) {
+            $estado = $saldoMonedero > 0
+                ? 'Tu integración sigue funcionando, pero ahora cada consulta se descuenta de tu monedero (saldo: <strong>' . $n($saldoMonedero) . ' créditos</strong>).'
+                : 'Desde ahora <strong>la API devuelve error 429</strong> a tus peticiones hasta el ' . $renueva . '.';
+
+            $asunto    = $saldoMonedero > 0
+                ? 'Has agotado las ' . $n($cupo) . ' consultas de tu plan: ya estás gastando saldo del monedero'
+                : 'Has agotado las ' . $n($cupo) . ' consultas de tu plan: tu integración está parada';
+            $preheader = $saldoMonedero > 0
+                ? 'Las consultas se cobran ahora de tu monedero. Así evitas quedarte sin saldo.'
+                : 'Tu cupo se renueva el ' . $renueva . '. Puedes reactivarla hoy mismo.';
+            $contenido = $this->p('Has usado las <strong>' . $n($cupo) . ' consultas</strong> de tu plan ' . esc($nombre) . ' de este mes.')
+                . $this->p($estado)
+                . $this->p($saldoMonedero > 0 ? 'Para no depender del saldo:' : 'Para reanudar sin esperar:') . $lista;
+            $boton = $siguiente ? 'Pasar a ' . $siguiente['name'] : 'Comprar un bono de créditos';
+        } else {
+            // Ritmo de consumo: a qué día del mes llegaría al 100 % si sigue igual
+            $diaHoy    = max(1, (int) date('j'));
+            $diasMes   = (int) date('t');
+            $porDia    = $usadas / $diaHoy;
+            $diaTope   = $porDia > 0 ? (int) ceil($cupo / $porDia) : 0;
+            $prevision = ($diaTope > $diaHoy && $diaTope <= $diasMes)
+                ? ' Al ritmo actual, lo agotarás hacia el <strong>' . $diaTope . ' de ' . $meses[(int) date('n')] . '</strong>.'
+                : '';
+
+            $asunto    = 'Has usado el ' . $umbral . ' % de las consultas de tu plan este mes';
+            $preheader = $n($usadas) . ' de ' . $n($cupo) . ' consultas. Así evitas que tu integración se pare.';
+            $contenido = $this->p('Llevas <strong>' . $n($usadas) . ' de ' . $n($cupo) . '</strong> consultas de tu plan ' . esc($nombre) . ' este mes.' . $prevision)
+                . $this->p('Cuando llegues al 100 %, ' . $alLlegar . '. Si esperas más volumen, tienes dos opciones:')
+                . $lista;
+            $boton = $siguiente ? 'Pasar a ' . $siguiente['name'] : 'Comprar un bono de créditos';
+        }
+
+        return $this->sendTemplateEmail('quota_warning', [
+            'subject'     => $asunto,
+            'preheader'   => $preheader,
+            // Sin nombre, la parte local del correo: "Hola Hola," queda descuidado.
+            'name'        => esc(trim((string) ($userData['name'] ?? '')) ?: explode('@', (string) $userData['email'])[0]),
+            'content'     => $contenido,
+            'button_text' => esc($boton),
+            'button_url'  => $siguiente ? $urlPlan : $urlBono,
+        ], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
+    }
+
+    /**
+     * Cobro de una renovación rechazado (webhook `invoice.payment_failed`).
+     *
+     * @param array $pago plan_name, product_type, amount, currency, attempt,
+     *                    next_attempt (timestamp o null si era el último), pay_url
+     */
+    public function sendPaymentFailed(array $userData, array $pago): array
+    {
+        $meses  = [1 => 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
+                   'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        $plan   = trim((string) ($pago['plan_name'] ?? '')) ?: 'tu suscripción';
+        $moneda = ($pago['currency'] ?? 'EUR') === 'EUR' ? '€' : (string) $pago['currency'];
+        $importe = number_format((float) ($pago['amount'] ?? 0), 2, ',', '.') . ' ' . $moneda;
+        $ultimo = empty($pago['next_attempt']);
+        $fecha  = $ultimo ? '' : (int) date('j', $pago['next_attempt']) . ' de ' . $meses[(int) date('n', $pago['next_attempt'])];
+        $urlPagar  = trim((string) ($pago['pay_url'] ?? ''));
+        $urlPortal = site_url('billing/portal');
+
+        helper('company');   // solvencia()
+
+        // Qué pierde si no se completa, según el producto
+        $pierde = match ($pago['product_type'] ?? '') {
+            'api'   => 'tu cuenta pasará al plan gratuito de la API y tu integración podría dejar de responder',
+            'risk'  => 'perderás Solvencia Pro y dejarás de recibir los avisos de las empresas que vigilas por encima de las ' . (int) solvencia('vigilanciasGratis', 5) . ' del plan gratuito',
+            default => 'perderás las ventajas de tu plan',
+        };
+
+        $contenido = $this->p('No hemos podido cobrar la renovación de tu plan <strong>' . esc($plan) . '</strong> (' . $importe . ').')
+            . $this->p('Suele ser una tarjeta caducada, sin saldo o un cargo que el banco ha bloqueado por seguridad.')
+            . ($ultimo
+                ? $this->p('<strong>Era el último reintento automático.</strong> Si no se completa el pago, el plan se cancelará: ' . $pierde . '.')
+                : $this->p('Volveremos a intentarlo el <strong>' . $fecha . '</strong>. Mientras tanto tu plan sigue activo. Si no se completa, se cancelará: ' . $pierde . '.'))
+            . $this->p($urlPagar !== ''
+                ? 'Puedes pagar ahora con otra tarjeta con el botón de abajo, sin iniciar sesión.'
+                : 'Entra con el botón de abajo y actualiza tu tarjeta.')
+            . $this->p('<span style="font-size:14px;color:#64748b;">Para cambiar la tarjeta de los próximos cobros, entra en <a href="' . $urlPortal . '" style="color:#2563eb;">tu panel de facturación</a>. Si crees que es un error, responde a este correo.</span>');
+
+        return $this->sendTemplateEmail('payment_failed', [
+            'subject'     => $ultimo
+                ? 'Último aviso: tu plan ' . $plan . ' se cancelará si no se completa el pago'
+                : 'No hemos podido cobrar tu plan ' . $plan . ': actualiza tu forma de pago',
+            'preheader'   => $ultimo
+                ? 'Era el último reintento. Paga la factura para no perder el plan.'
+                : 'Lo intentaremos de nuevo el ' . $fecha . '. Mientras tanto tu plan sigue activo.',
+            'name'        => esc(trim((string) ($userData['name'] ?? '')) ?: explode('@', (string) $userData['email'])[0]),
+            'content'     => $contenido,
+            'button_text' => $urlPagar !== '' ? 'Pagar la factura (' . $importe . ')' : 'Actualizar forma de pago',
+            'button_url'  => $urlPagar !== '' ? $urlPagar : $urlPortal,
+        ], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
+    }
+
+    /**
+     * Bienvenida al contratar un plan de pago de la API (Pro = 2, Business = 3).
+     *
+     * Antes solo llegaba la factura. Lo que se cuenta aquí está comprobado en el
+     * código: el desenmascarado (mask_company_data solo se aplica al plan 1), los
+     * administradores con ?admin=true, la matriz de PlanAccessService y el cupo por
+     * mes natural de ApiKeyFilter.
+     *
+     * @param array $plan id, name, monthly_quota
+     */
+    public function sendApiPlanWelcome(array $userData, array $plan): array
+    {
+        $n       = static fn (int $x) => number_format($x, 0, ',', '.');
+        $nombre  = trim((string) ($plan['name'] ?? '')) ?: 'de pago';
+        $cupo    = (int) ($plan['monthly_quota'] ?? 0);
+        $business = (int) ($plan['id'] ?? 0) === 3;
+        $li = static fn (string $h) => '<li style="margin:0 0 8px;">' . $h . '</li>';
+        $c  = static fn (string $t) => '<code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:13px;">' . $t . '</code>';
+
+        $cambios = $li('<strong>Datos sin enmascarar</strong>: dirección completa, objeto social íntegro y coordenadas (lat/lng).')
+            . $li('<strong>Administradores y cargos</strong>: añade ' . $c('&amp;admin=true') . ' a ' . $c('/api/v1/companies') . '.')
+            . $li('<strong>Scoring y señales</strong>: ' . $c('/api/v1/companies/score') . ' y ' . $c('/api/v1/companies/signals') . '.');
+        if ($business) {
+            $cambios .= $li('<strong>Webhooks</strong> (' . $c('/api/v1/webhooks') . '), <strong>contratos públicos</strong> (' . $c('/api/v1/companies/contracts') . ') y <strong>perfil de riesgo</strong> (' . $c('/api/v1/companies/risk-profile') . ').')
+                . $li('<strong>Insights y mensajes con IA</strong> completos: ' . $c('/api/v1/companies/insights') . ' y ' . $c('/api/v1/companies/contact-prep') . '.');
+        }
+
+        $contenido = $this->p('Ya tienes activo el plan <strong>' . esc($nombre) . '</strong>. No tienes que cambiar nada: tu API Key y tu código siguen igual, y desde la próxima llamada las respuestas llegan completas.')
+            . $this->p('<strong>Lo que cambia:</strong>')
+            . '<ul style="margin:0 0 16px; padding-left:20px;">' . $cambios . '</ul>'
+            . $this->p('<strong>' . $n($cupo) . ' consultas al mes</strong>, que se renuevan el día 1 de cada mes. Lo que te queda viene en la cabecera ' . $c('X-Quota-Remaining') . ' de cada respuesta y en ' . $c('/api/v1/usage') . ', que no gasta cupo. Te avisaremos por correo al llegar al 80 % y al 100 %.')
+            . $this->p('<span style="font-size:14px;color:#64748b;">La factura te llega en un correo aparte. Si necesitas ayuda con la integración, responde a este correo.</span>');
+
+        return $this->sendTemplateEmail('api_plan_welcome', [
+            'subject'     => 'Tu plan ' . $nombre . ' de la API ya está activo: ' . $n($cupo) . ' consultas al mes',
+            'preheader'   => 'No tienes que cambiar tu API Key ni tu código. Esto es lo que cambia en tus respuestas.',
+            'name'        => esc(trim((string) ($userData['name'] ?? '')) ?: explode('@', (string) $userData['email'])[0]),
+            'content'     => $contenido,
+            'button_text' => 'Ir a mi panel',
+            'button_url'  => site_url('dashboard'),
+        ], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
+    }
+
+    /** "24 de octubre" a partir de una fecha de la BD. */
+    private function fechaLarga(?string $fecha): string
+    {
+        $meses = [1 => 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
+                  'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        $t = $fecha ? strtotime($fecha) : false;
+        return $t ? (int) date('j', $t) . ' de ' . $meses[(int) date('n', $t)] : '';
+    }
+
+    /**
+     * Confirmación al cliente de que ha cancelado un plan de pago.
+     *
+     * Antes solo se avisaba al admin. Dice hasta cuándo conserva el plan, qué pasa
+     * después y, según el motivo que marcó, una salida que no sea irse del todo.
+     * No se ofrece "reactivar desde el portal de Stripe": el webhook no atiende
+     * customer.subscription.updated y la BD seguiría diciendo "cancelada".
+     *
+     * @param array  $plan   name, product_type
+     * @param string $motivo clave de Billing::cancel_subscription (too_expensive, low_usage...)
+     */
+    public function sendSubscriptionCanceled(array $userData, array $plan, ?string $accesoHasta, string $motivo = ''): array
+    {
+        helper('company');   // solvencia()
+        $nombre = trim((string) ($plan['name'] ?? '')) ?: 'de pago';
+        $tipo   = (string) ($plan['product_type'] ?? '');
+        $fecha  = $this->fechaLarga($accesoHasta);
+        $bono   = site_url('crear-bono-api');
+
+        $despues = match ($tipo) {
+            'api'   => 'A partir de entonces tu cuenta pasa al plan gratuito de la API. Tu API Key sigue siendo la misma, pero las respuestas vuelven a llegar con campos enmascarados y dejas de tener cupo mensual.',
+            'risk'  => 'A partir de entonces pasas al plan gratuito de Solvencia: ' . (int) solvencia('consultasGratis', 3) . ' consultas al mes y ' . (int) solvencia('vigilanciasGratis', 5) . ' empresas vigiladas.',
+            default => 'A partir de entonces tu cuenta pasa al plan gratuito.',
+        };
+
+        $extra = '';
+        if ($tipo === 'api' && in_array($motivo, ['too_expensive', 'low_usage'], true)) {
+            $extra = 'Si no llegabas a gastar el cupo del mes, un <strong>bono de créditos</strong> te permite pagar solo lo que consultas, sin suscripción: <a href="' . $bono . '" style="color:#2563eb;font-weight:700;">crear bono</a>.';
+        } elseif (in_array($motivo, ['technical_issues', 'missing_features'], true)) {
+            $extra = 'Nos ayudaría mucho saber qué falló o qué echaste en falta. Responde a este correo: lo lee una persona.';
+        } elseif ($motivo === 'temporary_pause') {
+            $extra = 'Tu cuenta y tu historial se quedan como están. Cuando quieras volver, contratas de nuevo y sigues donde lo dejaste.';
+        }
+
+        $contenido = $this->p('Confirmamos la cancelación de tu plan <strong>' . esc($nombre) . '</strong>. No se te volverá a cobrar'
+                . ($fecha !== '' ? ' y mantienes todo lo que incluye hasta el <strong>' . $fecha . '</strong>.' : '.'))
+            . $this->p($despues)
+            . ($extra !== '' ? $this->p($extra) : '')
+            . $this->p('<span style="font-size:14px;color:#64748b;">¿Ha sido un error o has cambiado de idea? Responde a este correo'
+                . ($fecha !== '' ? ' antes del ' . $fecha : '') . ' y lo dejamos como estaba.</span>');
+
+        return $this->sendTemplateEmail('subscription_canceled', [
+            'subject'     => 'Hemos cancelado tu plan ' . $nombre . ($fecha !== '' ? ': tienes acceso hasta el ' . $fecha : ''),
+            'preheader'   => 'No se te volverá a cobrar. Esto es lo que pasa a partir de esa fecha.',
+            'name'        => esc(trim((string) ($userData['name'] ?? '')) ?: explode('@', (string) $userData['email'])[0]),
+            'content'     => $contenido,
+            'button_text' => 'Ver mi cuenta',
+            'button_url'  => site_url('billing'),
+        ], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
+    }
+
+    /**
+     * Recuperación: 30 días después de que termine un Pro/Business de la API cancelado.
+     *
+     * Sin descuento, porque no hay cupones configurados en Stripe. Se adapta al motivo
+     * de la baja si se guardó.
+     */
+    public function sendApiWinback(array $userData, array $plan, string $motivo = ''): array
+    {
+        $nombre = trim((string) ($plan['name'] ?? '')) ?: 'de pago';
+        $bono   = site_url('crear-bono-api');
+
+        $porMotivo = match ($motivo) {
+            'too_expensive', 'low_usage'
+                => 'Si lo dejaste por precio o porque no gastabas el cupo del mes, un <strong>bono de créditos</strong> te permite pagar solo lo que consultas, sin suscripción: <a href="' . $bono . '" style="color:#2563eb;font-weight:700;">crear bono</a>.',
+            'technical_issues', 'missing_features'
+                => 'Si lo dejaste por algo que no funcionaba o que echabas en falta, cuéntanoslo respondiendo a este correo. Si ya está resuelto te lo diremos, y si no, nos ayudas a priorizarlo.',
+            'switched_solution'
+                => 'Si ahora usas otra solución y hay algo que no te convence, responde a este correo y te decimos si lo cubrimos.',
+            default
+                => 'Si nos cuentas en una línea por qué lo dejaste, respondiendo a este correo, nos ayudas mucho.',
+        };
+
+        $contenido = $this->p('Hace un mes que terminó tu plan <strong>' . esc($nombre) . '</strong> de la API.')
+            . $this->p('Tu cuenta y tu API Key siguen activas, así que para volver basta con activar el plan: no tienes que cambiar nada en tu integración.')
+            . $this->p($porMotivo);
+
+        return $this->sendTemplateEmail('api_winback', [
+            'subject'     => 'Tu API Key sigue activa: vuelve al plan ' . $nombre . ' cuando quieras',
+            'preheader'   => 'Mismo código, misma clave. Y si el plan se te quedaba grande, hay bonos sin suscripción.',
+            'name'        => esc(trim((string) ($userData['name'] ?? '')) ?: explode('@', (string) $userData['email'])[0]),
+            'content'     => $contenido,
+            'button_text' => 'Ver planes',
+            'button_url'  => site_url('billing'),
+        ], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
     }
 
     /**
@@ -721,7 +1128,7 @@ class EmailService
      * $contenidoHtml es HTML ya construido: quien llama escapa lo que venga de datos
      * (nombres de empresa, etc.).
      */
-    public function sendRiskGeneric(array $userData, string $asunto, string $contenidoHtml, string $botonTexto, string $botonUrl, string $preheader = ''): array
+    public function sendRiskGeneric(array $userData, string $asunto, string $contenidoHtml, string $botonTexto, string $botonUrl, string $preheader = '', string $tipo = ''): array
     {
         $nombre = trim((string) ($userData['name'] ?? ''));
         if ($nombre === '' && !empty($userData['email'])) {
@@ -729,6 +1136,7 @@ class EmailService
         }
 
         return $this->sendTemplateEmail('risk_generic', [
+            '_log_slug'   => $tipo,
             'asunto'      => $asunto,
             'preheader'   => $preheader,
             'name'        => esc($nombre),
@@ -766,7 +1174,8 @@ class EmailService
             $contenido,
             'Ver Solvencia Pro',
             site_url('billing?view=risk&plan=risk_pro'),
-            'Vigila hasta ' . $vig . ' clientes por 29 €/mes y entérate el día que el BORME publique algo.'
+            'Vigila hasta ' . $vig . ' clientes por 29 €/mes y entérate el día que el BORME publique algo.',
+            'risk_educational_savings_48h'
         );
     }
 
@@ -793,7 +1202,8 @@ class EmailService
             $contenido,
             'Consultar una empresa',
             site_url('dashboard?view=risk'),
-            'Ya puedes revisar ' . $gratis . ' empresas más este mes.'
+            'Ya puedes revisar ' . $gratis . ' empresas más este mes.',
+            'risk_monthly_renewal'
         );
     }
 
@@ -826,7 +1236,8 @@ class EmailService
             $contenido,
             'Vigilar hasta ' . $pro . ' empresas',
             site_url('billing?view=risk&plan=risk_pro'),
-            'Para vigilar otra empresa tienes que quitar una.'
+            'Para vigilar otra empresa tienes que quitar una.',
+            'risk_watch_full'
         );
     }
 
@@ -851,7 +1262,8 @@ class EmailService
             $contenido,
             'Retomar la activación',
             site_url('billing?view=risk&plan=risk_pro'),
-            '¿Hubo algún problema con el pago? Te ayudamos.'
+            '¿Hubo algún problema con el pago? Te ayudamos.',
+            'risk_checkout_abandoned'
         );
     }
 
@@ -895,7 +1307,8 @@ class EmailService
             $contenido,
             'Ver mi vigilancia',
             site_url('dashboard?view=risk'),
-            empty($conActos) ? 'Ninguna de tus empresas vigiladas se movió en ' . $mes . '.' : $totalActos . ' actos nuevos en tus empresas vigiladas.'
+            empty($conActos) ? 'Ninguna de tus empresas vigiladas se movió en ' . $mes . '.' : $totalActos . ' actos nuevos en tus empresas vigiladas.',
+            'risk_cartera_resumen'
         );
     }
 
@@ -1013,6 +1426,11 @@ class EmailService
             ];
         }
 
+        // Nombre con el que se registra el envío (email_logs, source del enlace). Por
+        // defecto la plantilla; las plantillas compartidas pasan el tipo de aviso.
+        $logSlug = !empty($data['_log_slug']) ? (string) $data['_log_slug'] : $slug;
+        unset($data['_log_slug']);
+
         // Define which templates are purely transactional (must send even if unsubscribed)
         $transactionalSlugs = [
             'payment_notification',
@@ -1023,7 +1441,15 @@ class EmailService
             'welcome_email',
             'welcome_risk',
             'risk_pack_welcome',
-            'risk_pro_welcome'
+            'risk_pro_welcome',
+            // Aviso de servicio a clientes de pago: su integración se va a parar.
+            'quota_warning',
+            // Cobro de renovación rechazado: sin él, el cliente pierde el plan sin saber por qué.
+            'payment_failed',
+            // Bienvenida al contratar Pro o Business de la API (antes solo llegaba la factura)
+            'api_plan_welcome',
+            // Confirmación de una acción del propio cliente
+            'subscription_canceled',
         ];
 
         // Las alertas del BORME tienen consentimiento propio: quien las ha activado las
@@ -1057,9 +1483,13 @@ class EmailService
         } else {
             // Try to find by email
             $db = \Config\Database::connect();
-            $user = $db->table('users')->select('lang')->where('email', $to)->get()->getRow();
+            $user = $db->table('users')->select('id, lang')->where('email', $to)->get()->getRow();
             if ($user && !empty($user->lang)) {
                 $userLang = $user->lang;
+            }
+            // Para dejar el envío en email_logs aunque quien llama no pase el id
+            if ($user) {
+                $userId = (int) $user->id;
             }
         }
 
@@ -1084,6 +1514,13 @@ class EmailService
             $subject = 'APIEmpresas.es';
         }
         $body = str_replace('{preheader}', '', $body);
+
+        // Medición de clics (antes de añadir los pies de baja, que no se envuelven)
+        $trackingCode = null;
+        if (!in_array($slug, self::SIN_SEGUIMIENTO, true) && $userId > 0) {
+            $trackingCode = bin2hex(random_bytes(16));
+            $body = $this->trackLinks($body, $logSlug, $trackingCode);
+        }
 
         // Baja de un clic específica para alertas: el enlace genérico daría de baja del
         // marketing, que no es lo mismo. Sin una salida propia no se pueden enviar.
@@ -1112,14 +1549,14 @@ class EmailService
         if ($email->send()) {
             log_message('info', "[EmailService] Email [{$slug}] enviado a {$to}");
             if ($userId > 0) {
-                $this->logToDatabase($userId, $subject, $body, 'success');
+                $this->logToDatabase($userId, $subject, $body, 'success', null, $trackingCode, $logSlug);
             }
             return ['success' => true, 'body' => $body];
         } else {
             $error = $email->printDebugger(['headers']);
             log_message('error', "[EmailService] Error al enviar [{$slug}] a {$to}: " . $error);
             if ($userId > 0) {
-                $this->logToDatabase($userId, $subject, $body, 'error', $error);
+                $this->logToDatabase($userId, $subject, $body, 'error', $error, $trackingCode, $logSlug);
             }
             return [
                 'success' => false,

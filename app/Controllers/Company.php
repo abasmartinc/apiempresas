@@ -101,6 +101,21 @@ class Company extends BaseController
         // Actualizamos en el array para que las vistas también lo usen
         $company['name'] = $name;
 
+        // CNAE no creíble (un 9900 "organismos extraterritoriales" en una S.L.):
+        // se vacía AQUÍ, antes de que lo usen las relacionadas, el bloque del CSV,
+        // los enlaces de sector y la vista. "No consta" es mejor que un dato falso
+        // del que cuelgan otros bloques. Ver company_cnae_fiable().
+        helper('company');
+        $cnaeDescartado = false;
+        if (!company_cnae_fiable($company)) {
+            $cnaeDescartado = true;
+            foreach (['cnae', 'cnae_code', 'cnae_label', 'cnae_2025', 'cnae_2025_label'] as $k) {
+                if (array_key_exists($k, $company)) {
+                    $company[$k] = null;
+                }
+            }
+        }
+
         $cif  = $company['cif'] ?? $company['nif'] ?? '';
         
         // Robust check for province
@@ -248,7 +263,9 @@ class Company extends BaseController
         $cnaeCodeStr = substr($company['cnae_code'] ?? $company['cnae'] ?? '', 0, 4);
         $cnaeUrlParam = urlencode($cnaeCodeStr);
         $provUrlParam = urlencode($companyProv);
-        $sectorName = $company['cnae_label'] ?? 'este sector';
+        // Sin CNAE (o con uno descartado) el listado es de la provincia entera, y la
+        // vista tiene que decirlo así, no "del sector este sector".
+        $sectorName = !empty($company['cnae_label']) ? $company['cnae_label'] : 'todos los sectores';
         
         // $db is already connected above
         
@@ -457,6 +474,8 @@ class Company extends BaseController
         return [
             'companyName'      => $name,
             'company'          => $company,
+            // La vista lo usa para descartar textos de IA escritos con ese CNAE malo.
+            'cnaeDescartado'   => $cnaeDescartado,
             'riskProfile'      => $riskProfile,
             'riskQuota'        => $riskQuota,
             'holdingData'      => $holdingData ?? null,
@@ -1023,6 +1042,98 @@ class Company extends BaseController
             'message' => '¡Gracias por tu valoración!',
             'new_avg' => round($stats['avg'], 1),
             'new_count' => $stats['count']
+        ]);
+    }
+
+    /**
+     * "¿Son correctos estos datos?" — aviso de datos de la ficha (24-09-2026).
+     *
+     * Sustituye a las estrellas de "¿Te ha sido útil?", que mezclaban utilidad con
+     * exactitud y no decían QUÉ dato fallaba. Reaprovecha company_ratings sin
+     * migración: Sí = rating 5, No = rating 1, y el detalle en `feedback` con un
+     * prefijo fijo para poder filtrarlo:
+     *
+     *   [DATOS] Correctos
+     *   [DATOS] Campo: actividad | Correcto: Asesoría fiscal | Email: x@y.com
+     *
+     * Una respuesta por IP y empresa: si vuelve a contestar, se actualiza (puede
+     * pasar de Sí a No al fijarse mejor). Tope de 30 avisos por IP y hora contra
+     * el spam, y un campo trampa (`web`) que los bots rellenan y las personas no.
+     * Sin CSRF, igual que company/rate: la ficha va cacheada en Cloudflare y el
+     * token del HTML no sería el de la sesión de quien la mira.
+     */
+    public function submitDataFeedback()
+    {
+        $request = service('request');
+        if (!$request->isAJAX()) {
+            return $this->response->setStatusCode(403)->setJSON(['status' => 'error', 'message' => 'Acceso denegado']);
+        }
+
+        $en = $request->getPost('lang') === 'en';
+        $t  = static fn (string $es, string $enTxt) => $en ? $enTxt : $es;
+
+        // Campo trampa: si viene relleno, se responde como si todo hubiera ido bien.
+        if (trim((string) $request->getPost('web')) !== '') {
+            return $this->response->setJSON(['status' => 'success', 'message' => $t('¡Gracias!', 'Thank you!')]);
+        }
+
+        $companyId = (int) $request->getPost('company_id');
+        $correcto  = (string) $request->getPost('correcto') === '1';
+        $campo     = (string) $request->getPost('campo');
+        $valor     = trim(strip_tags((string) $request->getPost('valor')));
+        $email     = trim((string) $request->getPost('email'));
+        $ip        = $request->getIPAddress();
+
+        $campos = ['direccion', 'telefono', 'actividad', 'estado', 'administradores', 'otro'];
+
+        if ($companyId <= 0) {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => $t('Datos inválidos', 'Invalid data')]);
+        }
+        if (!$correcto && !in_array($campo, $campos, true)) {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => $t('Indica qué dato no es correcto.', 'Please tell us which item is wrong.')]);
+        }
+        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => $t('Ese email no parece válido.', 'That email does not look valid.')]);
+        }
+
+        $ratingModel = new CompanyRatingModel();
+
+        $recientes = $ratingModel->where('ip_address', $ip)
+            ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-1 hour')))
+            ->countAllResults();
+        if ($recientes >= 30) {
+            return $this->response->setStatusCode(429)->setJSON(['status' => 'error', 'message' => $t('Demasiados avisos seguidos. Inténtalo más tarde.', 'Too many reports in a row. Please try again later.')]);
+        }
+
+        // Sin separadores sueltos dentro de los valores, para que el formato se pueda leer.
+        $limpio = static fn (string $v, int $max) => mb_substr(str_replace(['|', "\r", "\n"], ['/', ' ', ' '], $v), 0, $max);
+
+        $feedback = $correcto
+            ? '[DATOS] Correctos'
+            : '[DATOS] Campo: ' . $campo
+                . ($valor !== '' ? ' | Correcto: ' . $limpio($valor, 500) : '')
+                . ($email !== '' ? ' | Email: ' . $limpio($email, 190) : '');
+
+        $fila = [
+            'company_id' => $companyId,
+            'rating'     => $correcto ? 5 : 1,
+            'feedback'   => $feedback,
+            'ip_address' => $ip,
+            'created_at' => date('Y-m-d H:i:s'),
+        ];
+
+        $previa = $ratingModel->where('company_id', $companyId)->where('ip_address', $ip)->first();
+        if ($previa) {
+            $ratingModel->update($previa['id'], $fila);
+        } else {
+            $ratingModel->insert($fila);
+        }
+
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => $correcto
+                ? $t('¡Gracias! Nos ayuda saberlo.', 'Thank you! That helps us.')
+                : $t('Gracias por avisar. Lo revisamos y lo corregimos si procede.', 'Thanks for letting us know. We will review it and fix it if needed.'),
         ]);
     }
 

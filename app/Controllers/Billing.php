@@ -265,6 +265,11 @@ class Billing extends BaseController
         // paywall y del upsell en un hidden). Sin esto el tracking sabe quién pulsa
         // pero no de dónde vienen los que acaban pagando.
         $source = trim((string) ($postData['source'] ?? ''));
+        // Si llegó desde un correo (EmailTracking::click) y el formulario no trae otro
+        // origen, la compra se atribuye a ese correo.
+        if ($source === '' && session('email_source')) {
+            $source = (string) session('email_source');
+        }
         session()->set('checkout_source', $source);
 
         $this->logCheckoutEvent('checkout_started', $source, [
@@ -1664,6 +1669,9 @@ class Billing extends BaseController
 
         $this->sendSubscriptionCancellationEmail($userId, $plan, $reasonOptions[$cancellationReason], $cancellationFeedback);
 
+        // Confirmación al propio cliente (antes solo se avisaba al admin)
+        $this->sendCancellationConfirmationToUser($userId, $plan, $cancellationReason);
+
         if ($this->request->isAJAX() || $this->request->getPost('ajax')) {
             return $this->response->setJSON([
                 'status' => 'success',
@@ -1672,6 +1680,38 @@ class Billing extends BaseController
         }
 
         return redirect()->to(site_url('billing'))->with('message', lang('Messages.flash_20'));
+    }
+
+    /**
+     * Correo al cliente confirmando su baja. Nunca rompe la cancelación: si falla,
+     * solo queda en el log.
+     */
+    private function sendCancellationConfirmationToUser(int $userId, object $plan, string $reasonKey): void
+    {
+        try {
+            $user = $this->userModel->find($userId);
+            if (!$user || empty($user->email)) {
+                return;
+            }
+
+            // Con sub_id concreto, $plan viene sin los datos del plan: se leen aquí
+            $planRow = \Config\Database::connect()->table('api_plans')
+                ->select('id, name, product_type')
+                ->where('id', (int) ($plan->plan_id ?? 0))
+                ->get()->getRowArray() ?: [];
+
+            (new \App\Services\EmailService())->sendSubscriptionCanceled(
+                ['id' => $userId, 'email' => $user->email, 'name' => $user->name ?? ''],
+                [
+                    'name'         => $planRow['name'] ?? ($plan->plan_name ?? ''),
+                    'product_type' => $planRow['product_type'] ?? ($plan->product_type ?? ''),
+                ],
+                !empty($plan->current_period_end) ? (string) $plan->current_period_end : null,
+                $reasonKey
+            );
+        } catch (\Throwable $e) {
+            log_message('error', '[Billing::sendCancellationConfirmationToUser] ' . $e->getMessage());
+        }
     }
 
     private function sendSubscriptionCancellationEmail(int $userId, object $plan, string $reasonLabel, string $feedback): void

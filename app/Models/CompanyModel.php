@@ -419,6 +419,20 @@ class CompanyModel extends Model
         return ($pct * 0.75) + ($levScore * 0.25);
     }
 
+    /**
+     * Empresas relacionadas, de más a menos cercana.
+     *
+     * Orden (24-09-2026):
+     *   1. Mismo CNAE y misma provincia.
+     *   2. Mismo CNAE en el resto de España.
+     *   3. Misma provincia, cualquier sector.
+     *
+     * Antes el paso 1 no existía: con CNAE se buscaba en toda España ordenando por
+     * id, así que a una asesoría de Valencia le salían asesorías de cualquier sitio
+     * y casi nunca una de su provincia, que es lo primero que busca quien compara.
+     *
+     * Sin CNAE (o con uno descartado por company_cnae_fiable) se va directo al 3.
+     */
     public function getRelated(?string $cnae, ?string $province, string $excludeCif, int $limit = 20): array
     {
         $cnae = trim((string) $cnae);
@@ -428,44 +442,49 @@ class CompanyModel extends Model
             return [];
         }
 
-        $builder = $this->builder();
-        $builder->select(implode(', ', $this->selectFields));
-        $builder->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
-        $builder->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
-        $builder->where('companies.cif !=', $excludeCif);
+        // Alicante está guardada con los dos nombres en registro_mercantil.
+        $provincias = ($province !== '' && strcasecmp($province, 'Alicante') === 0)
+            ? ['Alicante', 'Alicante/Alacant']
+            : ($province !== '' ? [$province] : []);
 
-        // Prioridad: Mismo CNAE
+        $results = [];
+        $vistos  = [$excludeCif];
+
+        $pedir = function (?string $conCnae, array $enProvincias, int $cuantos) use (&$vistos): array {
+            if ($cuantos <= 0) {
+                return [];
+            }
+            $builder = $this->builder();
+            $builder->select(implode(', ', $this->selectFields));
+            $builder->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
+            $builder->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
+            $builder->whereNotIn('companies.cif', $vistos);
+            if ($conCnae !== null) {
+                $builder->where('companies.cnae_code', $conCnae);
+            }
+            if (!empty($enProvincias)) {
+                $builder->whereIn('companies.registro_mercantil', $enProvincias);
+            }
+            $builder->orderBy('companies.id', 'DESC');
+            $builder->limit($cuantos);
+
+            $filas = $builder->get()->getResultArray();
+            foreach ($filas as $f) {
+                if (!empty($f['cif'])) {
+                    $vistos[] = $f['cif'];
+                }
+            }
+            return $filas;
+        };
+
+        if ($cnae !== '' && !empty($provincias)) {
+            $results = array_merge($results, $pedir($cnae, $provincias, $limit));
+        }
         if ($cnae !== '') {
-            $builder->where('companies.cnae_code', $cnae);
+            $results = array_merge($results, $pedir($cnae, [], $limit - count($results)));
         }
-        // Si no hay CNAE, usar provincia
-        elseif ($province !== '') {
-            $builder->where('companies.registro_mercantil', $province);
-        }
-
-        $builder->orderBy('id', 'DESC');
-        $builder->limit($limit);
-
-        $results = $builder->get()->getResultArray();
-
-        // Si no encontramos suficientes por CNAE, rellenar con Provincia (si tenemos provincia)
-        if (count($results) < $limit && $cnae !== '' && $province !== '') {
-            $needed = $limit - count($results);
-
-            // Nota: selectFields NO incluye ID por defecto, así que mejor excluimos por CIF que sí está
-            $excludeCifs = array_column($results, 'cif');
-            $excludeCifs[] = $excludeCif;
-
-            $builder2 = $this->builder();
-            $builder2->select(implode(', ', $this->selectFields));
-            $builder2->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
-            $builder2->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
-            $builder2->whereNotIn('companies.cif', $excludeCifs);
-            $builder2->where('companies.registro_mercantil', $province);
-            $builder2->limit($needed);
-
-            $more = $builder2->get()->getResultArray();
-            $results = array_merge($results, $more);
+        if (!empty($provincias)) {
+            $results = array_merge($results, $pedir(null, $provincias, $limit - count($results)));
         }
 
         return $results;

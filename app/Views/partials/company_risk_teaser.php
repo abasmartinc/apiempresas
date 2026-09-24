@@ -41,6 +41,7 @@ foreach ($teaserEvents as $ev) {
 $teaserScore = (int)($riskProfile['risk_score'] ?? 50);
 $teaserModo  = solvencia('teaserModo', 'titular') === 'opaco' ? 'opaco' : 'titular';
 $teaserGratis = (int) solvencia('consultasGratis', 3);
+$teaserChecks = risk_num_comprobaciones();
 
 [$teaserNivel, $teaserColor, $teaserFondo, $teaserBorde] = risk_level_visual($teaserScore);
 // El motor sigue emitiendo BAJO/MEDIO/ALTO y eso no se toca: hay consultas
@@ -218,21 +219,31 @@ $redirectVigilar = strpos($redirectPath, 'ver-riesgo=1') !== false
                 <?php elseif ($teaserEstado['clave'] === 'hoja_cerrada'): ?>
                     Tiene la hoja registral cerrada. Falta saber por qué
                 <?php elseif ($teaserTotalAlerts > 0): ?>
-                    Ya sabes que hay algo. Falta saber qué es y si sigue abierto
+                    <?php /* No "qué es": el motivo principal ya sale arriba, y los actos,
+                             gratis más abajo. Lo que falta, y se compra, es cuánto pesa. */ ?>
+                    Ya sabes que hay algo. Falta saber cuánto pesa
                 <?php else: ?>
                     Hoy está limpia. La pregunta es qué pasa a partir de hoy
                 <?php endif; ?>
             </h3>
+            <!-- QUÉ SE COMPRA. Los actos del BORME, con su fecha y su texto, están
+                 GRATIS en esta misma ficha, un poco más abajo. Prometer "cada acto con
+                 su fecha" era vender lo que se regala: quien bajaba veía que el candado
+                 no guardaba nada. Lo que solo está en el dictamen es la LECTURA: de
+                 dónde sale la puntuación, factor por factor, y las comprobaciones
+                 registrales con su resultado. Por eso el texto lo dice así. -->
             <p class="rt-p">
                 <?php if ($teaserEstado['cerrada']): ?>
                     Si tienes una factura pendiente o un expediente abierto con <strong><?= esc($companyName) ?></strong>,
-                    el dictamen completo ordena lo que consta, con la gravedad de cada acto y lo que supone para un acreedor.
+                    el dictamen reúne las <?= $teaserChecks ?> comprobaciones registrales con su resultado y de dónde sale
+                    la puntuación, en un documento que puedes adjuntar.
                 <?php elseif ($teaserTotalAlerts > 0): ?>
-                    Accede al dictamen completo de <strong><?= esc($companyName) ?></strong>:
-                    cada acto con su fecha, su gravedad y qué significa para tu riesgo de cobro.
+                    Los actos están más abajo, en el BORME. El dictamen de <strong><?= esc($companyName) ?></strong>
+                    te dice cuáles pesan: de dónde sale la puntuación, factor por factor, y las
+                    <?= $teaserChecks ?> comprobaciones registrales con su resultado.
                 <?php else: ?>
-                    Accede al dictamen completo de <strong><?= esc($companyName) ?></strong>:
-                    el histórico registral, los factores que sostienen la puntuación y el aviso si algo cambia.
+                    El dictamen de <strong><?= esc($companyName) ?></strong> enseña las <?= $teaserChecks ?> comprobaciones
+                    hechas contra el Registro Mercantil, con su resultado, y hasta dónde llega la información con la que se han hecho.
                 <?php endif; ?>
             </p>
 
@@ -334,7 +345,7 @@ $redirectVigilar = strpos($redirectPath, 'ver-riesgo=1') !== false
                 <!-- Sin "sello": al lado de "histórico registral" se lee como una
                      certificación del Registro, que es otro producto. La fecha sí. -->
                 <p class="rt-opt__text">
-                    El histórico registral de <strong style="color: #334155;"><?= esc($companyName) ?></strong> con su puntuación y fecha de emisión, listo para adjuntar a un expediente.
+                    El dictamen completo de <strong style="color: #334155;"><?= esc($companyName) ?></strong>, con fecha de emisión, listo para adjuntar a un expediente.
                 </p>
                 <button type="button" class="rt-btn rt-btn--sm rt-btn--ghost" onclick="openRiskPdfModal(<?= $compId ?>, '<?= esc($compCif) ?>');" data-track-click="risk_teaser_cta" data-track-element="pdf" data-track-meta="<?= $teaserTrackMeta ?>">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>

@@ -57,8 +57,23 @@ class EmailTracking extends Controller
             session()->set('email_tracking_code', $code);
         }
 
-        $url = $this->request->getGet('t') ?: site_url('enter');
-        
+        $url = (string) ($this->request->getGet('t') ?: site_url('enter'));
+
+        // Solo se redirige a nuestra propia web. Antes cualquier ?t= valía: un enlace
+        // /e/c/x?t=https://otra-web servía para mandar a alguien fuera con nuestro dominio.
+        $host    = strtolower((string) parse_url($url, PHP_URL_HOST));
+        $propios = array_filter([strtolower((string) parse_url(site_url(), PHP_URL_HOST)), 'apiempresas.es', 'www.apiempresas.es']);
+        if ($host !== '' && !in_array($host, $propios, true)) {
+            $url = site_url('enter');
+        }
+
+        // De qué correo viene: Billing lo usa como source del checkout si el
+        // formulario no trae otro, para atribuir la compra al correo.
+        parse_str((string) parse_url($url, PHP_URL_QUERY), $q);
+        if (!empty($q['source']) && str_starts_with((string) $q['source'], 'email_')) {
+            session()->set('email_source', substr((string) $q['source'], 0, 100));
+        }
+
         return redirect()->to($url);
     }
 }

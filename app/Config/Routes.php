@@ -371,6 +371,9 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('activity-logs/user/(:num)', 'Admin\ActivityLogs::user/$1');
     $routes->get('activity-logs/export', 'Admin\ActivityLogs::export');
 
+    // Avisos de datos de la ficha ("¿Son correctos estos datos?")
+    $routes->get('avisos-datos', 'Admin\DataFeedback::index');
+
     // Email Templates
     $routes->get('email-templates', 'Admin\EmailTemplates::index');
     $routes->get('email-templates/edit/(:num)', 'Admin\EmailTemplates::edit/$1');
@@ -522,6 +525,7 @@ $routes->addRedirect('directorio/ultimas-empresas-registradas/(:num)', 'empresas
 // Company Rating
 $routes->post('company/rate', 'Company::submitRating');
 $routes->post('company/rate_feedback', 'Company::submitRatingFeedback');
+$routes->post('company/data-feedback', 'Company::submitDataFeedback'); // "¿Son correctos estos datos?"
 
 $routes->get('empresa/export/(:num)', 'Company::exportPdf/$1');
 $routes->get('empresa/export-risk/(:segment)', 'Company::exportRiskPdf/$1');

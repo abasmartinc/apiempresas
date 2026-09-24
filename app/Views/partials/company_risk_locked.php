@@ -148,8 +148,10 @@ if ($unlockCost === 'credit') {
             Ya sabes cuánto. Falta saber por qué
         </h3>
         <p style="color: #475569; margin: 0 0 20px 0; font-size: 0.92rem; line-height: 1.5; max-width: 440px;">
-            El dictamen abre cada acto con su fecha y su gravedad, el peso de cada factor en la
-            puntuación y el historial de contratación pública.
+            <?php /* Ni "cada acto con su fecha" (está gratis en el BORME de la ficha) ni
+                     "contratación pública" (el dictamen no la trae). Solo lo que se desbloquea. */ ?>
+            El dictamen te dice cuáles de los actos del BORME pesan: la gravedad de cada uno, de dónde
+            sale la puntuación, factor por factor, y las <?= risk_num_comprobaciones() ?> comprobaciones registrales con su resultado.
         </p>
 
         <button type="button"

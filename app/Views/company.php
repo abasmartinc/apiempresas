@@ -96,10 +96,30 @@
         ]
     ];
 
+    /*
+     * Textos de IA escritos con un CNAE que luego se descartó (ver company_cnae_fiable).
+     * Caso real: Camcomtur Georgia S.L., con 9900, tenía un texto de presentación que la
+     * situaba "en el sector de actividades de organizaciones y organismos
+     * extraterritoriales". Limpiar el CNAE no limpia lo que ya se generó a partir de él,
+     * así que si el texto lo menciona, se usa la plantilla y las FAQ por defecto.
+     */
+    $cnaeDescartado = $cnaeDescartado ?? false;
+    $iaConCnaeMalo = static function ($texto) use ($cnaeDescartado): bool {
+        if (empty($cnaeDescartado) || !is_string($texto) || $texto === '') {
+            return false;
+        }
+        return (bool) preg_match('/extraterritorial|9900/iu', $texto);
+    };
+    foreach (['ai_seo_text', 'ai_pitch'] as $iaCampo) {
+        if ($iaConCnaeMalo($company[$iaCampo] ?? '')) {
+            $company[$iaCampo] = '';
+        }
+    }
+
     // Sobrescribir con FAQs de IA si existen.
     // Salvo con un estado adverso: se generaron sin mirar el estado y hablan de la
     // empresa como si operara con normalidad.
-    if (!empty($company['ai_faqs']) && !$estadoReg['incidencia']) {
+    if (!empty($company['ai_faqs']) && !$estadoReg['incidencia'] && !$iaConCnaeMalo((string) $company['ai_faqs'])) {
         $aiFaqsDecoded = json_decode($company['ai_faqs'], true);
         if (json_last_error() === JSON_ERROR_NONE && !empty($aiFaqsDecoded) && is_array($aiFaqsDecoded)) {
             $faqs = $aiFaqsDecoded;
@@ -179,7 +199,11 @@
         }
     }
 
-    if (!empty($ratingCount) && $ratingCount > 0) {
+    // Sin aggregateRating: la nota venía de "¿Te ha sido útil esta información?", es
+    // decir, valoraba la FICHA, y aquí se declaraba como valoración de la EMPRESA.
+    // Además el widget ya no existe. Se deja el bloque desactivado por si se recupera
+    // con una pregunta que sí valore a la empresa.
+    if (false && !empty($ratingCount) && $ratingCount > 0) {
         $organizationSchema['aggregateRating'] = [
             '@type' => 'AggregateRating',
             'ratingValue' => round($ratingAvg, 1),
@@ -258,10 +282,14 @@
             '@id' => ($canonical ?? current_url()) . '#localbusiness',
             'name' => $companyName,
             'address' => !empty($addressData) ? $addressData : null,
+            // The map uses lat/lng as they come (lat_num / lng_num in CompanyModel) and
+            // lands on the right street; the schema swapped them, which put every
+            // company in the Indian Ocean. Guarded by range in case old rows are swapped:
+            // Spain's latitudes are 27–44 and its longitudes -19–5.
             'geo' => [
                 '@type' => 'GeoCoordinates',
-                'latitude' => $company['lng'],
-                'longitude' => $company['lat']
+                'latitude'  => ((float) $company['lat'] >= 26 && (float) $company['lat'] <= 45) ? (float) $company['lat'] : (float) $company['lng'],
+                'longitude' => ((float) $company['lat'] >= 26 && (float) $company['lat'] <= 45) ? (float) $company['lng'] : (float) $company['lat'],
             ],
             'url' => $canonical ?? current_url()
         ];
@@ -557,6 +585,11 @@
                                     }
                                     .cta-descargas > summary::-webkit-details-marker { display: none; }
                                     .cta-descargas > summary:hover { background: #1d4ed8; border-color: #1d4ed8; transform: translateY(-2px); }
+                                    /* "Más": mismo menú, en secundario. IA y CRM se usan poco y
+                                       competían en la cabecera con la única acción principal. */
+                                    .cta-descargas.cta-mas > summary { background: #ffffff; color: #334155; border-color: #cbd5e1; box-shadow: none; }
+                                    .cta-descargas.cta-mas > summary:hover { background: #f8fafc; border-color: #94a3b8; transform: none; }
+                                    .cta-descargas.cta-mas .cta-descargas__menu { width: 260px; }
                                     .cta-descargas__menu {
                                         position: absolute; right: 0; top: calc(100% + 8px); z-index: 60;
                                         width: 320px; max-width: 80vw; background: #ffffff; border: 1px solid #e2e8f0;
@@ -592,19 +625,24 @@
                                         <?php if (!$estadoReg['cerrada']): ?>
                                         <?php /* Fuera en una empresa que ya no opera: preparar una llamada
                                                  comercial o mandarla al CRM no tiene sentido. */ ?>
-                                        <button type="button" onclick="openCopilotModal('<?= esc($companyCif) ?>');"
-                                            style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #ffffff; color: #6d28d9; font-size: 0.9rem; font-weight: 700; border: 1px solid #ddd6fe; border-radius: 10px; cursor: pointer; transition: all 0.2s;"
-                                            onmouseover="this.style.background='#f5f3ff'; this.style.borderColor='#c4b5fd';"
-                                            onmouseout="this.style.background='#ffffff'; this.style.borderColor='#ddd6fe';">
-                                            ✨ Preparar llamada con IA
-                                        </button>
-                                        <button type="button" onclick="document.getElementById('crm-modal').style.display='flex';"
-                                            style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #ffffff; color: #334155; font-size: 0.9rem; font-weight: 700; text-decoration: none; border-radius: 10px; border: 1px solid #cbd5e1; transition: all 0.2s; cursor: pointer;"
-                                            onmouseover="this.style.background='#f8fafc'; this.style.borderColor='#94a3b8';"
-                                            onmouseout="this.style.background='#ffffff'; this.style.borderColor='#cbd5e1';">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><use href="#icon-2f243988"></use></svg>
-                                            Enviar a CRM
-                                        </button>
+                                        <details class="cta-descargas cta-mas">
+                                            <summary aria-label="Más acciones">
+                                                Más
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                            </summary>
+                                            <div class="cta-descargas__menu">
+                                                <button type="button" onclick="this.closest('details').removeAttribute('open'); openCopilotModal('<?= esc($companyCif) ?>');"
+                                                        data-track-click="company_more" data-track-element="copilot">
+                                                    <span class="cta-descargas__titulo">✨ Preparar llamada con IA</span>
+                                                    <span class="cta-descargas__sub">Guion y puntos clave antes de contactar</span>
+                                                </button>
+                                                <button type="button" onclick="this.closest('details').removeAttribute('open'); document.getElementById('crm-modal').style.display='flex';"
+                                                        data-track-click="company_more" data-track-element="crm">
+                                                    <span class="cta-descargas__titulo">Enviar a CRM</span>
+                                                    <span class="cta-descargas__sub">Añadir esta empresa a tu CRM</span>
+                                                </button>
+                                            </div>
+                                        </details>
                                         <?php endif; ?>
                                         <!-- Descargas.
                                              Aquí había dos botones, "Descargar informe" y "PDF Premium",
@@ -697,14 +735,14 @@
 <div class="seo-summary-card" style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; margin-bottom:24px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
 
     <!-- Título -->
-    <div style="padding:18px 24px 14px 24px; border-bottom:1px solid #f1f5f9;">
-        <h2 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:0; line-height:1.3;">
+    <div style="padding:18px 24px 0 24px;">
+        <h2 style="font-size:1.05rem; font-weight:800; color:#0f172a; margin:0; line-height:1.3;">
             Información General y de Contacto de <?= esc($companyName) ?>
         </h2>
     </div>
 
     <!-- Texto SEO -->
-    <div style="padding:18px 24px; line-height:1.7; color:#334155; font-size:1rem;">
+    <div style="padding:8px 24px 18px 24px; line-height:1.65; color:#334155; font-size:0.98rem;">
         <?php if ($estadoReg['incidencia']): ?>
             <?php
             /*
@@ -750,7 +788,7 @@
                 $cnaeText = '';
                 if (!empty($company['cnae_label']) && strtolower(trim($company['cnae_label'])) !== 'desconocido') {
                     $cnaeText = strtolower(trim($company['cnae_label']));
-                } elseif (!empty($sectorName) && strtolower(trim($sectorName)) !== 'este sector') {
+                } elseif (!empty($sectorName) && !in_array(strtolower(trim($sectorName)), ['este sector', 'todos los sectores'], true)) {
                     $cnaeText = strtolower(trim($sectorName));
                 }
                 
@@ -798,32 +836,10 @@
         <?php endif; ?>
     </div>
 
-    <!-- Footer: badges izq · share dcha -->
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:12px 24px;border-top:1px solid #f1f5f9;background:#f8fafc;border-radius:0 0 16px 16px;">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <span class="badge-demo badge-verified">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><use href="#icon-295390ab"></use></svg>
-                Datos Verificados
-            </span>
-            <span class="badge-demo badge-official">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><use href="#icon-f57c0d27"></use></svg>
-                Fuente Oficial
-            </span>
-        </div>
-        <div class="share-buttons" style="display:flex;gap:8px;align-items:center;">
-            <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?= urlencode($canonical) ?>"
-                target="_blank" rel="noopener noreferrer nofollow"
-                class="share-btn share-linkedin" title="Compartir en LinkedIn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><use href="#icon-7434dd57"></use></svg>
-            </a>
-            <a href="https://api.whatsapp.com/send?text=<?= urlencode("Mira esta empresa: " . $canonical) ?>"
-                target="_blank" rel="noopener noreferrer nofollow"
-                class="share-btn share-whatsapp" title="Compartir en WhatsApp">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><use href="#icon-f0dba875"></use></svg>
-            </a>
-        </div>
-    </div>
-
+    <?php /* Aquí iba un pie con "Datos Verificados" / "Fuente Oficial" y dos botones de
+             compartir. Repetía la etiqueta "Datos oficiales Reg. Mercantil" y los tres
+             botones de compartir de la cabecera, y "Verificados" es mucho decir de datos
+             que a veces traen un CNAE por defecto. Eran unos 60 px sin información nueva. */ ?>
 </div>
                         <nav class="b2b-tabs" aria-label="Índice de contenidos"
                             style="border: none; box-shadow: none; background: transparent; padding-left: 0; padding-right: 0;">
@@ -873,15 +889,10 @@
                                             Relacionadas
                                         </a></li>
                                 <?php endif; ?>
-                                <div id="nav-descargar-csv"><li><a href="#descargar-excel">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-b92ca97e"></use></svg>
-                                            Descargar CSV
-                                        </a></li></div>
                                 <li><a href="#api-dev-section">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-7cb36ec4"></use></svg>
-                                        Desarrolladores
+                                        API
                                     </a></li>
                             </ul>
                         </nav>
@@ -1074,7 +1085,8 @@
                                     <dd class="b2b-data-value"><time datetime="<?= esc($constVal) ?>"><?= date('d/m/Y', strtotime($constVal)) ?></time></dd>
                                 </div>
                                 <?php endif; ?>
-                                <?php $objVal = company_sentence_case($company['corporate_purpose'] ?? $company['objeto_social'] ?? ''); ?>
+                                <?php // Sin el "CNAE 9900 - ..." copiado como objeto social: eso es el CNAE otra vez. ?>
+                                <?php $objVal = company_sentence_case(company_objeto_social_real($company)); ?>
                                 <?php if (!empty($objVal) && $objVal !== '-'): ?>
                                 <div class="b2b-data-row">
                                     <dt class="b2b-data-label">
@@ -1091,6 +1103,7 @@
                                 </div>
                                 <?php endif; ?>
                             </dl>
+                            <?= view('partials/company_data_check', ['companyId' => (int) ($company['id'] ?? 0), 'lang' => 'es']) ?>
                         </section>
 
                         <?php if ((!empty($company['lat']) && !empty($company['lng'])) || !empty($company['address'])): ?>
@@ -1105,6 +1118,67 @@
                             </div>
                         <?php endif; ?>
                     </div> <!-- /b2b-grid-2col -->
+
+                    <?php
+                    /*
+                     * FRANJA DE LA API (24-09-2026)
+                     * La API es el producto principal. Estaba a media página, en un bloque
+                     * grande con botón verde, después del BORME. Ahora va aquí: justo
+                     * después de la tabla de datos, que es cuando quien la mira piensa
+                     * "esto lo quiero en mi software". Compacta para no empujar el bloque
+                     * de riesgo, que es lo que busca la mayoría de quien llega de Google.
+                     * Conserva id="api-dev-section": lo usan la pestaña "API", el enlace
+                     * "(Consultar vía API)" del CIF y el aviso que salta al copiar el CIF.
+                     */
+                    $apiCif = (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-') ? $companyCif : 'B12345678';
+                    $apiJson = [
+                        'cif'      => $apiCif,
+                        'name'     => $companyName,
+                        'province' => $companyProv,
+                    ];
+                    ?>
+                    <style>
+                        .api-strip{margin:0 0 24px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:24px;align-items:center;background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:22px 24px;box-shadow:0 2px 8px rgba(15,23,42,.04);scroll-margin-top:90px}
+                        .api-strip__eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:#2563eb;background:#eff6ff;border:1px solid #bfdbfe;border-radius:999px;padding:3px 10px;margin-bottom:10px}
+                        .api-strip__title{font-size:1.2rem;font-weight:800;color:#0f172a;margin:0 0 6px;letter-spacing:-.2px}
+                        .api-strip__text{font-size:.9rem;color:#475569;line-height:1.5;margin:0 0 14px}
+                        .api-strip__actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+                        .api-strip__btn{display:inline-flex;align-items:center;gap:8px;background:#2563eb;color:#fff;border-radius:10px;padding:10px 18px;font-weight:800;font-size:.9rem;text-decoration:none;box-shadow:0 4px 12px rgba(37,99,235,.22);transition:background .15s}
+                        .api-strip__btn:hover{background:#1d4ed8}
+                        .api-strip__link{font-size:.85rem;font-weight:700;color:#334155;text-decoration:none}
+                        .api-strip__link:hover{color:#2563eb;text-decoration:underline}
+                        .api-strip__code{background:#0f172a;border-radius:14px;padding:14px 16px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.78rem;line-height:1.6;color:#e2e8f0;overflow-x:auto;min-width:0}
+                        .api-strip__code .c-verb{color:#6ee7b7;font-weight:700}
+                        .api-strip__code .c-url{color:#e2e8f0}
+                        .api-strip__code .c-dim{color:#64748b}
+                        .api-strip__code pre{margin:6px 0 0;padding:0;background:transparent;border:0;color:#cbd5e1;white-space:pre;font:inherit}
+                        @media (max-width:820px){.api-strip{grid-template-columns:1fr;padding:18px}}
+                    </style>
+                    <section id="api-dev-section" class="api-strip" aria-labelledby="api-strip-title">
+                        <div>
+                            <span class="api-strip__eyebrow">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="#icon-7cb36ec4"></use></svg>
+                                API REST
+                            </span>
+                            <h2 id="api-strip-title" class="api-strip__title">Estos datos, en tu software</h2>
+                            <p class="api-strip__text">
+                                Consulta <strong><?= esc($companyName) ?></strong> y cualquier empresa española por CIF con una sola llamada:
+                                datos registrales, actos del BORME y perfil de riesgo, en JSON.
+                            </p>
+                            <div class="api-strip__actions">
+                                <a class="api-strip__btn" href="<?= site_url('register') ?>" data-track-click="company_api" data-track-element="api_key">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="#icon-b6af18a8"></use></svg>
+                                    Obtener API key gratis
+                                </a>
+                                <a class="api-strip__link" href="<?= site_url('documentation') ?>" data-track-click="company_api" data-track-element="docs">Ver documentación →</a>
+                            </div>
+                        </div>
+                        <div class="api-strip__code" aria-label="Ejemplo de llamada a la API">
+                            <div><span class="c-verb">GET</span> <span class="c-url">/api/v1/companies?cif=<?= esc($apiCif) ?></span></div>
+                            <div class="c-dim">Authorization: Bearer TU_API_KEY</div>
+<pre><?= esc(json_encode($apiJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) ?></pre>
+                        </div>
+                    </section>
 
                     <!-- RISK PROFILE SECTION -->
                     <?php if (!empty($riskProfile)): ?>
@@ -1610,6 +1684,13 @@
                                     elseif (strpos($t, 'unipersonalidad') !== false) $t = 'Unipersonalidad';
                                     elseif (strpos($t, 'cuentas') !== false) $t = 'Cuentas Anuales';
                                     elseif (strpos($t, 'socio unico') !== false) $t = 'Socio Único';
+                                    // Sin estas cuatro, una disolución o una extinción caían en
+                                    // "Otros Actos", que se llevaba el 60 % de la barra justo en las
+                                    // empresas donde más importa saber qué pasó.
+                                    elseif (strpos($t, 'extinci') !== false) $t = 'Extinción';
+                                    elseif (strpos($t, 'disoluci') !== false) $t = 'Disolución';
+                                    elseif (strpos($t, 'liquidac') !== false) $t = 'Liquidación';
+                                    elseif (strpos($t, 'concurs') !== false) $t = 'Concurso';
                                     else $t = 'Otros Actos';
                                     
                                     if (!isset($actCounts[$t])) $actCounts[$t] = 0;
@@ -1632,10 +1713,23 @@
                             }
                             
                             $monthsEs = ['01'=>'Ene','02'=>'Feb','03'=>'Mar','04'=>'Abr','05'=>'May','06'=>'Jun','07'=>'Jul','08'=>'Ago','09'=>'Sep','10'=>'Oct','11'=>'Nov','12'=>'Dic'];
+
+                            /*
+                             * CUÁNDO MERECE LA PENA UN GRÁFICO.
+                             * Con dos publicaciones, "Evolución de actividad" eran dos barras de
+                             * altura 1 separadas por años, y la lista de debajo ya lo decía mejor.
+                             * La evolución necesita al menos 6 publicaciones en 3 meses distintos;
+                             * la distribución, al menos 4 actos de 2 tipos. Por debajo, solo la
+                             * lista, que es donde está la información.
+                             */
+                            $verEvolucion    = count($bormePosts) >= 6 && count($bormeTimeline) >= 3;
+                            $verDistribucion = $totalActs >= 4 && count($actCounts) >= 2;
+                            $verResumenIa    = !empty($company['ai_borme_summary']);
                             ?>
 
+                            <?php if ($verResumenIa || $verEvolucion || $verDistribucion): ?>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
-                                <?php if (!empty($company['ai_borme_summary'])): ?>
+                                <?php if ($verResumenIa): ?>
                                     <div class="ai-box-glow" style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
                                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: #0f172a; font-weight: 800; font-size: 1.05rem;">
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-ca9ebed9"></use></svg>
@@ -1647,7 +1741,7 @@
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if (!empty($bormeTimeline)): ?>
+                                <?php if ($verEvolucion): ?>
                                     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
                                         <h3 style="font-size: 0.9rem; font-weight: 700; color: #64748b; margin-top: 0; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Evolución de Actividad</h3>
                                         
@@ -1693,7 +1787,7 @@
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if (!empty($topActs)): ?>
+                                <?php if ($verDistribucion): ?>
                                     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
                                         <h3 style="font-size: 0.9rem; font-weight: 700; color: #64748b; margin-top: 0; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Distribución de Actos</h3>
                                         <div style="display: flex; flex-direction: column; gap: 14px;">
@@ -1714,6 +1808,7 @@
                                     </div>
                                 <?php endif; ?>
                             </div>
+                            <?php endif; ?>
 
                             <div class="borme-timeline">
                                 <?php foreach ($bormePosts as $post):
@@ -1791,361 +1886,10 @@
 
 
 
-                    <!-- VALORACIÓN + LOOKALIKE: en una sola fila, fuera de la zona de conversión de riesgo. -->
-                    <div style="margin-top: 4rem; margin-bottom: 24px;">
-                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px; align-items:stretch;">
-                            <!-- WIDGET DE VALORACIÓN SEO -->
-                            <div id="company-rating-widget"
-                                style="margin: 0; background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); border-radius: 16px; padding: 1.25rem 1rem; text-align: center; border: 1px solid rgba(255, 255, 255, 0.8);">
-                                <h3 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 0.25rem;">
-                                    ¿Te ha sido útil esta información?</h3>
-                                <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 0.75rem;">Valora la ficha de
-                                    <?= esc($companyName) ?>
-                                </p>
-
-                                <div class="rating-stars"
-                                    style="display: flex; justify-content: center; gap: 6px; margin-bottom: 0.75rem; cursor: pointer;">
-                                    <?php for ($i = 1; $i <= 5; $i++): ?>
-                                        <svg class="star-icon" data-value="<?= $i ?>" width="28" height="28"
-                                            viewBox="0 0 24 24"
-                                            fill="<?= ($i <= round($ratingAvg ?? 0)) ? '#fbbf24' : 'none' ?>"
-                                            stroke="<?= ($i <= round($ratingAvg ?? 0)) ? '#fbbf24' : '#cbd5e1' ?>"
-                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                            style="transition: all 0.2s;">
-                                            <polygon
-                                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
-                                            </polygon>
-                                        </svg>
-                                    <?php endfor; ?>
-                                </div>
-
-                                <div id="rating-stats-display"
-                                    style="font-size: 0.9rem; color: #475569; font-weight: 600;">
-                                    <?php if (isset($ratingCount) && $ratingCount > 0): ?>
-                                        Puntuación media: <span id="avg-rating-val"
-                                            style="color: #0f172a;"><?= number_format($ratingAvg, 1) ?></span>/5 (<span
-                                            id="count-rating-val"><?= $ratingCount ?></span> votos)
-                                    <?php else: ?>
-                                        Sé el primero en valorar esta empresa.
-                                    <?php endif; ?>
-                                </div>
-                                <div id="rating-message"
-                                    style="margin-top: 10px; font-size: 0.9rem; font-weight: 600; display: none;"></div>
-
-                                <div id="feedback-block" style="display: none; margin-top: 15px; text-align: left; padding-top: 15px; border-top: 1px solid #cbd5e1;">
-                                    <p id="feedback-prompt" style="font-size: 0.9rem; color: #475569; margin-bottom: 8px; font-weight: 600;"></p>
-                                    <textarea id="feedback-text" rows="3" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; resize: vertical; box-sizing: border-box;" placeholder="Escribe aquí tus comentarios..."></textarea>
-                                    <button id="submit-feedback-btn" style="margin-top: 10px; width: 100%; background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">Enviar sugerencia</button>
-                                    <div id="feedback-message" style="margin-top: 10px; font-size: 0.85rem; font-weight: 600; display: none; text-align: center;"></div>
-                                </div>
-                            </div>
-
-                            <script>
-                                document.addEventListener('DOMContentLoaded', function () {
-                                    const stars = document.querySelectorAll('.star-icon');
-                                    const widget = document.getElementById('company-rating-widget');
-                                    const msgDiv = document.getElementById('rating-message');
-                                    const avgSpan = document.getElementById('avg-rating-val');
-                                    const countSpan = document.getElementById('count-rating-val');
-                                    let hasVoted = false;
-
-                                    // Hover effects
-                                    stars.forEach(star => {
-                                        star.addEventListener('mouseenter', function () {
-                                            if (hasVoted) return;
-                                            const val = this.getAttribute('data-value');
-                                            stars.forEach(s => {
-                                                if (s.getAttribute('data-value') <= val) {
-                                                    s.style.fill = '#fcd34d'; // hover color
-                                                    s.style.stroke = '#fcd34d';
-                                                } else {
-                                                    s.style.fill = 'none';
-                                                    s.style.stroke = '#cbd5e1';
-                                                }
-                                            });
-                                        });
-
-                                        star.addEventListener('mouseleave', function () {
-                                            if (hasVoted) return;
-                                            // Reset to initial state based on PHP data is hard without keeping it in JS, 
-                                            // so we just clear hover effect unless we already voted
-                                            const currentAvg = <?= round($ratingAvg ?? 0) ?>;
-                                            stars.forEach(s => {
-                                                if (s.getAttribute('data-value') <= currentAvg) {
-                                                    s.style.fill = '#fbbf24';
-                                                    s.style.stroke = '#fbbf24';
-                                                } else {
-                                                    s.style.fill = 'none';
-                                                    s.style.stroke = '#cbd5e1';
-                                                }
-                                            });
-                                        });
-
-                                        star.addEventListener('click', function () {
-                                            if (hasVoted) return;
-                                            const val = this.getAttribute('data-value');
-                                            const companyId = <?= (int) ($company['id'] ?? 0) ?>;
-
-                                            // Lock UI
-                                            hasVoted = true;
-                                            stars.forEach(s => s.style.cursor = 'default');
-
-                                            // Send AJAX
-                                            fetch('<?= site_url('company/rate') ?>', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/x-www-form-urlencoded',
-                                                    'X-Requested-With': 'XMLHttpRequest'
-                                                },
-                                                body: new URLSearchParams({
-                                                    'company_id': companyId,
-                                                    'rating': val,
-                                                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
-                                                })
-                                            })
-                                                .then(response => response.json())
-                                                .then(data => {
-                                                    msgDiv.style.display = 'block';
-                                                    if (data.status === 'success') {
-                                                        msgDiv.style.color = '#16a34a';
-                                                        msgDiv.innerText = data.message;
-
-                                                        // Update stars visually to the given vote
-                                                        stars.forEach(s => {
-                                                            if (s.getAttribute('data-value') <= val) {
-                                                                s.style.fill = '#fbbf24';
-                                                                s.style.stroke = '#fbbf24';
-                                                            } else {
-                                                                s.style.fill = 'none';
-                                                                s.style.stroke = '#cbd5e1';
-                                                            }
-                                                        });
-
-                                                        // Update text
-                                                        let statsDisplay = document.getElementById('rating-stats-display');
-                                                        statsDisplay.innerHTML = `Puntuación media: <span id="avg-rating-val" style="color: #0f172a;">${data.new_avg}</span>/5 (<span id="count-rating-val">${data.new_count}</span> votos)`;
-
-                                                        if (val < 5) {
-                                                            const feedbackBlock = document.getElementById('feedback-block');
-                                                            const feedbackPrompt = document.getElementById('feedback-prompt');
-                                                            feedbackBlock.style.display = 'block';
-                                                            
-                                                            if (val == 4) {
-                                                                feedbackPrompt.innerText = 'Casi perfecto. ¿Qué detalle podríamos mejorar de la ficha?';
-                                                            } else if (val == 3) {
-                                                                feedbackPrompt.innerText = 'Gracias por tu valoración. ¿En qué consideras que deberíamos mejorar la ficha?';
-                                                            } else if (val == 2) {
-                                                                feedbackPrompt.innerText = 'Lamentamos no cumplir tus expectativas. ¿Qué información echas en falta o consideras incorrecta?';
-                                                            } else if (val == 1) {
-                                                                feedbackPrompt.innerText = 'Sentimos mucho tu mala experiencia. Por favor, indícanos qué errores graves has encontrado en la ficha para solucionarlos de inmediato.';
-                                                            }
-
-                                                            const submitBtn = document.getElementById('submit-feedback-btn');
-                                                            submitBtn.onclick = function() {
-                                                                const text = document.getElementById('feedback-text').value;
-                                                                const msg = document.getElementById('feedback-message');
-                                                                if (!text.trim()) {
-                                                                    msg.style.display = 'block';
-                                                                    msg.style.color = '#dc2626';
-                                                                    msg.innerText = 'Por favor, escribe un comentario.';
-                                                                    return;
-                                                                }
-
-                                                                submitBtn.disabled = true;
-                                                                submitBtn.innerText = 'Enviando...';
-                                                                submitBtn.style.opacity = '0.7';
-
-                                                                fetch('<?= site_url('company/rate_feedback') ?>', {
-                                                                    method: 'POST',
-                                                                    headers: {
-                                                                        'Content-Type': 'application/x-www-form-urlencoded',
-                                                                        'X-Requested-With': 'XMLHttpRequest'
-                                                                    },
-                                                                    body: new URLSearchParams({
-                                                                        'company_id': companyId,
-                                                                        'feedback': text,
-                                                                        '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
-                                                                    })
-                                                                })
-                                                                .then(res => res.json())
-                                                                .then(fData => {
-                                                                    msg.style.display = 'block';
-                                                                    if (fData.status === 'success') {
-                                                                        msg.style.color = '#16a34a';
-                                                                        msg.innerText = fData.message;
-                                                                        setTimeout(() => {
-                                                                            feedbackBlock.style.display = 'none';
-                                                                        }, 3000);
-                                                                    } else {
-                                                                        msg.style.color = '#dc2626';
-                                                                        msg.innerText = fData.message || 'Error al enviar sugerencia';
-                                                                        submitBtn.disabled = false;
-                                                                        submitBtn.innerText = 'Enviar sugerencia';
-                                                                        submitBtn.style.opacity = '1';
-                                                                    }
-                                                                })
-                                                                .catch(err => {
-                                                                    msg.style.display = 'block';
-                                                                    msg.style.color = '#dc2626';
-                                                                    msg.innerText = 'Error de conexión';
-                                                                    submitBtn.disabled = false;
-                                                                    submitBtn.innerText = 'Enviar sugerencia';
-                                                                    submitBtn.style.opacity = '1';
-                                                                });
-                                                            };
-                                                        }
-
-                                                    } else {
-                                                        msgDiv.style.color = '#dc2626';
-                                                        msgDiv.innerText = data.message || 'Error al procesar la valoración';
-                                                        // Re-enable voting if it wasn't a "already voted" error
-                                                        if (data.message !== 'Ya has valorado esta empresa anteriormente') {
-                                                            hasVoted = false;
-                                                        }
-                                                    }
-                                                })
-                                                .catch(err => {
-                                                    msgDiv.style.display = 'block';
-                                                    msgDiv.style.color = '#dc2626';
-                                                    msgDiv.innerText = 'Error de conexión';
-                                                    hasVoted = false;
-                                                });
-                                        });
-                                    });
-                                });
-                            </script>
-
-
-
-
-                            <!-- CTA LOOKALIKE (Sidebar) -->
-                            <a href="<?= site_url('encontrar-empresas-similares') ?>" rel="noopener noreferrer" style="display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); border-radius: 12px; padding: 1.5rem 1.25rem; text-decoration: none; position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.5); transition: transform 0.2s, box-shadow 0.2s;"
-                               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 30px -5px rgba(15, 23, 42, 0.6)';"
-                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px -5px rgba(15, 23, 42, 0.5)';"
-                               onclick="if(window.trackEvent) trackEvent('click_lookalike_banner', { source: 'company_sidebar' });">
-                                
-                                <!-- Decorative element -->
-                                <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(37, 99, 235, 0.2); filter: blur(30px); border-radius: 50%;"></div>
-                                
-                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.85rem; position: relative; z-index: 1;">
-                                    <span style="background: #22c55e; color: #ffffff; font-size: 0.7rem; font-weight: 800; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px; text-transform: uppercase; box-shadow: 0 2px 5px rgba(34, 197, 94, 0.3);">
-                                        ¡NUEVO!
-                                    </span>
-                                </div>
-                                
-                                <p style="color: #f8fafc; font-size: 0.95rem; line-height: 1.5; margin: 0 0 1.25rem 0; font-weight: 600; position: relative; z-index: 1;">
-                                    ¿Tienes una lista con tus mejores clientes? Súbela y nuestra IA encontrará miles de <strong>empresas gemelas</strong> por toda España.
-                                </p>
-
-                                <div style="display: flex; align-items: center; justify-content: center; width: 100%; background: linear-gradient(to right, #fde047, #f97316); color: #1e293b; font-weight: 800; font-size: 1rem; padding: 12px 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); transition: all 0.2s; position: relative; z-index: 1;">
-                                    Subir mis clientes 🧬
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- ZONA DE OTROS PRODUCTOS: movida bajo el BORME para que la
-                         sección de riesgo tenga una sola acción primaria. -->
-                    <!-- SECCIÓN PARA DESARROLLADORES (API Banner Nativo) -->
-                    <section id="api-dev-section" class="api-dev-section"
-                        class="reveal-on-scroll" style="margin-top: 4rem; padding: 2rem; background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);">
-                        <div class="api-dev-grid"
-                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center;">
-
-                            <!-- Columna Izquierda: Mensaje y CTA -->
-                            <div class="api-dev-info">
-                                <h3 style="display: flex; align-items: center; gap: 1rem; margin: 0 0 1rem; font-size: 1.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.025em;">
-                                    <div style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: #eff6ff; color: #3b82f6; border-radius: 12px; flex-shrink: 0;">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-7cb36ec4"></use></svg>
-                                    </div>
-                                    ¿Eres desarrollador?
-                                </h3>
-                                <p style="margin: 0 0 2rem; color: #64748b; line-height: 1.6; font-size: 1.05rem;">
-                                    Integra la información oficial de <strong><?= esc($companyName) ?></strong>
-                                    directamente
-                                    en tu software mediante nuestra API REST robusta y documentada.
-                                </p>
-                                <a href="<?= site_url('register') ?>" class="btn secondary"
-                                    style="display: inline-flex; align-items: center; padding: 0.875rem 2rem; font-weight: 700; border-radius: 12px; transition: all 0.2s; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); text-decoration: none;"
-                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(16, 185, 129, 0.4)';"
-                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)';">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 8px;"><use href="#icon-b6af18a8"></use></svg>
-                                    Obtener API Key Gratuitamente
-                                </a>
-                            </div>
-
-                            <!-- Columna Derecha: Consola / Code Snippet -->
-                            <div class="console-wrapper ai-box-glow"
-                                style="background: #0f172a; border-radius: 16px; overflow: hidden; box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.4); border: 1px solid #1e293b;">
-                                <div class="console-header"
-                                    style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #1e293b; border-bottom: 1px solid #334155;">
-                                    <div class="mac-buttons" style="display: flex; gap: 8px;">
-                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444;"></div>
-                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #f59e0b;"></div>
-                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #10b981;"></div>
-                                    </div>
-                                    <span style="font-size: 0.75rem; color: #94a3b8; font-family: monospace; font-weight: 600;">Ver respuesta JSON</span>
-                                </div>
-                                <div class="console-body"
-                                    style="padding: 1.5rem; font-family: 'Fira Code', 'Courier New', Courier, monospace; font-size: 0.85rem; color: #e2e8f0; line-height: 1.7; overflow-x: auto;">
-                                    <div style="color: #64748b; margin-bottom: 8px;"># Petición cURL para <?= esc($companyCif) ?></div>
-                                    <div style="display: flex; gap: 8px;">
-                                        <span style="color: #ec4899;">curl</span>
-                                        <span style="color: #a7f3d0; word-break: break-all;">"https://apiempresas.es/api/v1/companies?cif=<?= esc($companyCif) ?>"</span>
-                                    </div>
-                                    <div style="padding-left: 2rem; color: #fde047;">-H "Authorization: Bearer TU_API_KEY"</div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-
-                    <!-- CTA PROMOCIONAL B2B (Data Paywall / Excel Export) -->
-                    <aside id="descargar-excel" class="seo-cta-banner"
-                            style="margin-top: 3rem; background: linear-gradient(135deg, #ffffff 0%, #f4f7fb 100%); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 20px; padding: 3.5rem 2rem; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 10px 40px -10px rgba(37, 99, 235, 0.1), 0 1px 3px rgba(0,0,0,0.03); position: relative; overflow: hidden;">
-                            
-                            <!-- Decorative background elements -->
-                            <div style="position: absolute; top: -50%; left: -10%; width: 50%; height: 200%; background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 60%); transform: rotate(30deg); pointer-events: none;"></div>
-                            <div style="position: absolute; bottom: -50%; right: -10%; width: 50%; height: 200%; background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 60%); transform: rotate(-30deg); pointer-events: none;"></div>
-
-                            <div
-                                style="position: relative; z-index: 1; background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; padding: 6px 16px; border-radius: 99px; font-size: 0.8rem; font-weight: 800; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.1em; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 10px rgba(59, 130, 246, 0.1);">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-b92ca97e"></use></svg>
-                                Base de Datos B2B
-                            </div>
-                            
-                            <div role="heading" aria-level="2" style="position: relative; z-index: 1; font-size: 1.8rem; font-weight: 800; color: #0f172a; margin-bottom: 1.2rem; line-height: 1.3; max-width: 800px; text-wrap: balance;">
-                                ¿Buscas clientes similares a <?= esc($companyName) ?>?
-                            </div>
-                            
-                            <p style="position: relative; z-index: 1; color: #475569; font-size: 1.1rem; max-width: 700px; margin: 0 auto 2rem; line-height: 1.6; font-weight: 400;">
-                                Descarga ahora mismo el listado completo en CSV con información financiera y de contacto de 
-                                <strong style="color: #0f172a; font-weight: 700;"><?= $countFormatted ?> empresas</strong> del sector <strong style="color: #0f172a; font-weight: 700;"><?= esc(trim(explode('INFORME', $sectorName)[0])) ?></strong> en <strong style="color: #0f172a; font-weight: 700;"><?= esc(!empty($targetProv) ? $targetProv : ($company['province'] ?? $company['registro_mercantil'] ?? 'España')) ?></strong>. 
-                                Ideal para acelerar tus campañas de marketing y dotar a tu equipo de ventas de leads cualificados.
-                            </p>
-                            
-                            <a href="<?= $radarCheckoutUrl ?>" rel="nofollow"
-                                onclick="window.dataLayer = window.dataLayer || []; window.dataLayer.push({'event': 'cta_excel_click'});"
-                                style="position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 12px; background: #2563eb; color: #ffffff; padding: 14px 32px; border-radius: 12px; font-weight: 800; font-size: 1.15rem; text-decoration: none; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3); transition: all 0.3s; cursor: pointer;"
-                                onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 15px 30px -5px rgba(37, 99, 235, 0.4), 0 8px 10px -6px rgba(37, 99, 235, 0.3)';"
-                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(37, 99, 235, 0.3)';">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-6b651f08"></use></svg>
-                                Descargar CSV completo por <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= $priceStr ?>€ <span style="font-size:0.85em; opacity:0.85; font-weight:600;">+ IVA</span>
-                            </a>
-                            
-                            <div style="position: relative; z-index: 1; margin-top: 2rem; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px; color: #64748b; font-size: 0.9rem; font-weight: 500;">
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-4d8be45b"></use></svg> Descarga Inmediata
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-4d8be45b"></use></svg> Formato CSV (Delimitado por comas)
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-4d8be45b"></use></svg> Datos Verificados
-                                </div>
-                            </div>
-                        </aside>
+                    <?php /* Aquí iban las estrellas de "¿Te ha sido útil esta información?" y la
+                             caja oscura de "Subir mis clientes". Las estrellas se quitaron: en un
+                             registro mercantil, "Sé el primero en valorar" solo dice que la ficha
+                             está vacía. "Clientes gemelos" pasa a la franja "Más herramientas". */ ?>
 
                     <!-- FAQ Section HTML -->
                     <!-- FAQ Section HTML -->
@@ -2262,6 +2006,66 @@
 
 
                     <?php
+                    /*
+                     * MÁS HERRAMIENTAS (24-09-2026)
+                     * Sustituye a tres bloques grandes, cada uno con su estilo y su color:
+                     * el CSV a todo ancho, el banner oscuro de Radar PRO y la caja de
+                     * "Subir mis clientes". Se usan poco desde la ficha, así que van juntos,
+                     * iguales y en segundo plano. La tarjeta del CSV conserva
+                     * id="descargar-excel": el script de sesión la oculta a los registrados.
+                     */
+                    $ctaSinSector = in_array(trim((string) ($sectorName ?? '')), ['', 'todos los sectores', 'este sector'], true);
+                    $ctaProv = !empty($targetProv) ? $targetProv : ($company['province'] ?? $company['registro_mercantil'] ?? 'España');
+                    ?>
+                    <style>
+                        .tools-strip{margin:0 0 3rem}
+                        .tools-strip__title{font-size:1rem;font-weight:800;color:#0f172a;margin:0 0 12px}
+                        .tools-strip__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+                        .tool-card{display:flex;flex-direction:column;gap:6px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;text-decoration:none;transition:border-color .15s,box-shadow .15s}
+                        .tool-card:hover{border-color:#bfdbfe;box-shadow:0 6px 16px -8px rgba(15,23,42,.18)}
+                        .tool-card__head{display:flex;align-items:center;gap:10px}
+                        .tool-card__icon{flex-shrink:0;width:30px;height:30px;border-radius:8px;background:#f1f5f9;color:#334155;display:flex;align-items:center;justify-content:center}
+                        .tool-card__name{font-size:.92rem;font-weight:800;color:#0f172a}
+                        .tool-card__text{font-size:.8rem;color:#64748b;line-height:1.45;margin:0;flex:1}
+                        .tool-card__cta{font-size:.82rem;font-weight:800;color:#2563eb;margin-top:4px}
+                    </style>
+                    <section class="tools-strip" aria-labelledby="tools-strip-title">
+                        <h3 id="tools-strip-title" class="tools-strip__title">Más herramientas</h3>
+                        <div class="tools-strip__grid">
+                            <a id="descargar-excel" class="tool-card" href="<?= $radarCheckoutUrl ?>" rel="nofollow"
+                               onclick="window.dataLayer = window.dataLayer || []; window.dataLayer.push({'event': 'cta_excel_click'});"
+                               data-track-click="company_tools" data-track-element="csv">
+                                <span class="tool-card__head">
+                                    <span class="tool-card__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><use href="#icon-6b651f08"></use></svg></span>
+                                    <span class="tool-card__name">Listado en CSV</span>
+                                </span>
+                                <span class="tool-card__text">
+                                    <?= $countFormatted ?> empresas<?= $ctaSinSector ? '' : ' de ' . esc(trim(explode('INFORME', $sectorName)[0])) ?> en <?= esc($ctaProv) ?>, con datos de contacto.
+                                </span>
+                                <span class="tool-card__cta">Descargar por <?= $priceStr ?> € + IVA →</span>
+                            </a>
+                            <a class="tool-card" href="<?= site_url('radar') ?>" data-track-click="company_tools" data-track-element="radar">
+                                <span class="tool-card__head">
+                                    <span class="tool-card__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><use href="#icon-1ba97933"></use></svg></span>
+                                    <span class="tool-card__name">Radar de empresas nuevas</span>
+                                </span>
+                                <span class="tool-card__text">Las sociedades que se constituyen en tu sector y provincia, el día que salen en el BORME.</span>
+                                <span class="tool-card__cta">Ver Radar →</span>
+                            </a>
+                            <a class="tool-card" href="<?= site_url('encontrar-empresas-similares') ?>"
+                               onclick="if(window.trackEvent) trackEvent('click_lookalike_banner', { source: 'company_tools' });"
+                               data-track-click="company_tools" data-track-element="lookalike">
+                                <span class="tool-card__head">
+                                    <span class="tool-card__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><circle cx="16" cy="9.5" r="2.6"/><path d="M3.5 19c.6-3 3-5 5.5-5s4.9 2 5.5 5"/><path d="M14.5 14.6c.5-.2 1-.3 1.5-.3 2 0 3.7 1.5 4.2 3.8"/></svg></span>
+                                    <span class="tool-card__name">Clientes gemelos</span>
+                                </span>
+                                <span class="tool-card__text">Sube tus mejores clientes y encuentra empresas parecidas por toda España.</span>
+                                <span class="tool-card__cta">Probar →</span>
+                            </a>
+                        </div>
+                    </section>
+
+                    <?php
                     // --- SEO SILO INTERNAL LINKS ---
                     $seoProv = $company['province'] ?? $company['registro_mercantil'] ?? '';
                     $secoProvStr = !empty($seoProv) ? ucfirst(strtolower($seoProv)) : '';
@@ -2351,29 +2155,6 @@
 
 
 
-                    <!-- RADAR PRO CTA -->
-                    <div class="dash-cta-card"
-                        style="margin-top: 5rem; display: grid; grid-template-columns: 1fr auto; gap: 30px; align-items: center;">
-                        <div>
-                            <h3>
-                                <div class="dash-cta-icon">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2.5"><use href="#icon-1ba97933"></use></svg>
-                                </div>
-                                ¿Te interesa recibir leads como <?= esc($company['name'] ?? 'esta') ?>?
-                            </h3>
-                            <p style="margin-bottom: 0;">
-                                Monitorizamos el <strong>BORME</strong> en tiempo real. Configura tu Radar para recibir
-                                alertas de nuevas empresas en tu sector y provincia antes que nadie.
-                            </p>
-                        </div>
-                        <div style="min-width: 200px;">
-                            <a href="<?= site_url() ?>radar" class="btn">
-                                Activar Radar PRO →
-                            </a>
-                        </div>
-                    </div>
-
                 </div>
         </section>
     </main>
@@ -2405,11 +2186,17 @@
                         mapLoaded = true;
 
                         const hasCoords = <?= (!empty($company['lat']) && !empty($company['lng'])) ? 'true' : 'false' ?>;
+                        // CARTO exige API key en sus basemaps desde septiembre de 2026: sin ella
+                        // cada tesela sale con una marca de agua "API KEY REQUIRED". La clave va
+                        // en .env (CARTO_BASEMAPS_KEY, gratis en carto.com/basemaps/apikey). Sin
+                        // clave, se usa el mapa incrustado de Google con las coordenadas, que no
+                        // la necesita, en vez de enseñar un mapa roto.
+                        const cartoKey = "<?= esc(trim((string) getenv('CARTO_BASEMAPS_KEY')), 'js') ?>";
                         const companyName = "<?= esc($company['name'] ?? $company['nombre'] ?? 'Empresa', 'js') ?>";
                         const rawAddress = "<?= esc($company['address'] ?? '', 'js') ?>";
                         const province = "<?= esc($company['province'] ?? $company['provincia'] ?? '', 'js') ?>";
 
-                        if (hasCoords) {
+                        if (hasCoords && cartoKey) {
                             if (typeof L === 'undefined') {
                                 const script = document.createElement('script');
                                 script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
@@ -2420,6 +2207,9 @@
                             }
                         } else {
                             const fullAddress = `${rawAddress}, ${province}, España`;
+                            const mapQuery = hasCoords
+                                ? `<?= (float) ($company['lat'] ?? 0) ?>,<?= (float) ($company['lng'] ?? 0) ?>`
+                                : fullAddress;
                             const iframe = document.createElement('iframe');
                             iframe.width = "100%";
                             iframe.height = "100%";
@@ -2427,7 +2217,7 @@
                             iframe.style.border = "0";
                             iframe.style.borderRadius = "12px";
                             iframe.loading = "lazy";
-                            iframe.src = `https://maps.google.com/maps?q=${encodeURIComponent(fullAddress)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+                            iframe.src = `https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&t=&z=${hasCoords ? 16 : 15}&ie=UTF8&iwloc=&output=embed`;
                             mapContainer.innerHTML = '';
                             mapContainer.appendChild(iframe);
                         }
@@ -2442,7 +2232,7 @@
                             zoomControl: true
                         }).setView([lat, lng], 16);
 
-                        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=' + encodeURIComponent("<?= esc(trim((string) getenv('CARTO_BASEMAPS_KEY')), 'js') ?>"), {
                             attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
                             subdomains: 'abcd',
                             maxZoom: 20
@@ -2722,7 +2512,11 @@
                 }
             }
             
-            if (shouldShow) {
+            // Desactivado (24-09-2026): un modal que salta a los 12 s para "Clientes
+            // gemelos", un producto que apenas se usa, interrumpía justo a quien estaba
+            // leyendo el bloque de riesgo o la API. Clientes gemelos sigue en la franja
+            // "Más herramientas". Para reactivarlo, quitar `false &&`.
+            if (false && shouldShow) {
                 setTimeout(() => {
                     const modal = document.getElementById(modalId);
                     if (modal) {

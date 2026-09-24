@@ -3,48 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estás cerca del límite</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #1e293b; margin: 0; padding: 0; background-color: #f8fafc; }
-        .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .header { background: #b91c1c; padding: 30px 20px; text-align: center; color: white; }
-        .header h1 { margin: 0; font-size: 24px; font-weight: 700; }
-        .content { padding: 40px 30px; }
-        .content h2 { color: #0f172a; font-size: 22px; margin-top: 0; }
-        .content p { margin-bottom: 20px; color: #475569; }
-        .warning-box { background: #fef2f2; border: 1px solid #fee2e2; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #ef4444; }
-        .cta-container { text-align: center; margin-top: 35px; }
-        .btn { display: inline-block; background-color: #ef4444; color: white !important; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; }
-        .footer { background: #f8fafc; padding: 20px; text-align: center; font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
-    </style>
+    <title><?= esc($subject) ?></title>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>⚠️ Atención: Límite de consumo</h1>
-        </div>
-        <div class="content">
-            <h2>Hola, <?= esc($name) ?>.</h2>
-            <p>Te informamos de que has superado el <strong><?= esc($percent) ?>%</strong> de tu límite de consultas en APIEmpresas.</p>
-            
-            <div class="warning-box">
-                <strong>¿Qué significa esto?</strong>
-                <p style="margin: 10px 0 0; font-size: 14px;">Si tu consumo continúa al ritmo actual, es muy probable que tu integración se detenga al alcanzar el 100%. Esto podría afectar al funcionamiento de tu aplicación o servicio.</p>
-            </div>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333;">
+    <!-- Preheader: la línea que el cliente de correo enseña junto al asunto -->
+    <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all; font-size: 1px; line-height: 1px; color: #f4f7f6;"><?= esc($preheader) ?></div>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f7f6; padding: 20px;">
+        <tr>
+            <td align="center">
+                <table width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #2152FF 0%, #10B981 100%); padding: 30px; text-align: center; color: #ffffff;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 800; letter-spacing: -1px;">APIEmpresas.es</h1>
+                            <p style="margin: 5px 0 0; color: rgba(255,255,255,0.9); font-size: 14px; font-weight: 500;">Datos oficiales para desarrolladores</p>
+                        </td>
+                    </tr>
 
-            <p>Para garantizar la continuidad de tu servicio y eliminar estas limitaciones, te recomendamos subir al plan Pro de inmediato.</p>
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px; line-height: 1.6;">
+                            <h2 style="margin-top: 0; color: #1a1a1a; font-size: 22px;">Hola <?= esc($name) ?>,</h2>
+                            <div style="font-size: 16px; color: #4b5563;">
+                                <?= $content ?>
+                            </div>
 
-            <div class="cta-container">
-                <a href="<?= site_url('billing') ?>" class="btn">Actualizar a Plan PRO</a>
-            </div>
-            
-            <p style="margin-top: 30px; font-size: 14px; color: #64748b;">
-                Evita interrupciones inesperadas. El cambio a Pro es instantáneo.
-            </p>
-        </div>
-        <div class="footer">
-            <p>&copy; <?= date('Y') ?> APIEmpresas - Servicio de datos mercantiles de alta disponibilidad.</p>
-        </div>
-    </div>
+                            <!-- CTA Button -->
+                            <table border="0" cellspacing="0" cellpadding="0" style="margin: 30px 0 10px;">
+                                <tr>
+                                    <td align="center" bgcolor="#2563eb" style="border-radius: 8px;">
+                                        <a href="<?= $button_url ?>" target="_blank" style="display: inline-block; padding: 14px 28px; font-size: 16px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 8px;">
+                                            <?= esc($button_text) ?>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+
+                            <p style="font-size: 14px; color: #9ca3af; margin-bottom: 0;">
+                                ¿Dudas sobre qué plan te conviene? Responde a este correo con tu volumen previsto y te lo decimos.<br><br>
+                                <strong>El equipo de APIEmpresas.es</strong>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #9ca3af;">
+                            &copy; <?= date('Y') ?> APIEmpresas.es<br>
+                            Aviso de servicio sobre el consumo de tu plan.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>

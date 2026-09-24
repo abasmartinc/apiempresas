@@ -216,6 +216,48 @@ class SeedEmailTemplates extends BaseCommand
                 'trigger' => 'Tercer correo de la secuencia Excel (Urgencia/Venta).'
             ],
             [
+                'slug'    => 'quota_warning',
+                'name'    => 'Aviso de cupo (clientes de pago de la API)',
+                // El asunto lo pone cada envío (80 % o 100 %).
+                'subject' => '{subject}',
+                'view'    => 'quota_warning',
+                'vars'    => '{subject}, {preheader}, {name}, {content}, {button_text}, {button_url}',
+                'trigger' => 'Lo envía email:automation a clientes de un plan de pago de la API al llegar al 80 % y al 100 % de su cupo del mes. Una vez por umbral y mes. Es aviso de servicio: se envía aunque el usuario haya rechazado el marketing.'
+            ],
+            [
+                'slug'    => 'payment_failed',
+                'name'    => 'Cobro de renovación rechazado',
+                // El asunto lo pone cada envío (aviso normal o último reintento).
+                'subject' => '{subject}',
+                'view'    => 'payment_failed',
+                'vars'    => '{subject}, {preheader}, {name}, {content}, {button_text}, {button_url}',
+                'trigger' => 'Lo envía el webhook de Stripe (invoice.payment_failed) en cada intento de cobro fallido de una suscripción, como mucho uno cada 2 días. Transaccional.'
+            ],
+            [
+                'slug'    => 'api_plan_welcome',
+                'name'    => 'Bienvenida plan de pago de la API (Pro / Business)',
+                'subject' => '{subject}',
+                'view'    => 'api_plan_welcome',
+                'vars'    => '{subject}, {preheader}, {name}, {content}, {button_text}, {button_url}',
+                'trigger' => 'Lo envía el webhook de Stripe al activar una suscripción a Pro (2) o Business (3) de la API. Transaccional.'
+            ],
+            [
+                'slug'    => 'subscription_canceled',
+                'name'    => 'Confirmación de cancelación (al cliente)',
+                'subject' => '{subject}',
+                'view'    => 'subscription_generic',
+                'vars'    => '{subject}, {preheader}, {name}, {content}, {button_text}, {button_url}',
+                'trigger' => 'Lo envía Billing::cancel_subscription cuando el cliente cancela un plan de pago: hasta cuándo tiene acceso, qué pierde y una salida según el motivo que marcó. Transaccional.'
+            ],
+            [
+                'slug'    => 'api_winback',
+                'name'    => 'Recuperación 30 días después de dejar Pro/Business de la API',
+                'subject' => '{subject}',
+                'view'    => 'subscription_generic',
+                'vars'    => '{subject}, {preheader}, {name}, {content}, {button_text}, {button_url}',
+                'trigger' => 'Lo envía email:automation entre 30 y 37 días después de que termine un plan Pro o Business cancelado, si no ha vuelto a contratar. Una vez al año como mucho. Comercial: respeta la baja.'
+            ],
+            [
                 'slug'    => 'borme_alert',
                 'name'    => 'Alerta de movimiento en el BORME',
                 'subject' => '🔔 {company_name} — {resumen_actos}',

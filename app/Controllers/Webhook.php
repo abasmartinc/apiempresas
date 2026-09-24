@@ -60,6 +60,13 @@ class Webhook extends Controller
                 $invoice = $event->data->object;
                 $this->handleInvoicePaid($invoice);
                 break;
+            // Cobro de renovación rechazado. Stripe reintenta varias veces y manda este
+            // evento en cada intento fallido; antes no se escuchaba y el cliente no se
+            // enteraba hasta que la suscripción se cancelaba.
+            case 'invoice.payment_failed':
+                $invoice = $event->data->object;
+                $this->handleInvoicePaymentFailed($invoice);
+                break;
             case 'customer.subscription.deleted':
                 $subscription = $event->data->object;
                 $this->handleSubscriptionDeleted($subscription);
@@ -363,6 +370,29 @@ class Webhook extends Controller
                     'email'   => $userRow->email,
                     'user_id' => $userRow->id
                 ]);
+            }
+        }
+
+        // Bienvenida a los planes de pago de la API: Pro (2) y Business (3).
+        // Guardado contra reenvíos del mismo evento: una por plan y día.
+        if (in_array((int) $plan->id, [2, 3], true)) {
+            try {
+                $automation = new \App\Models\EmailAutomationModel();
+                $tipo = 'api_plan_welcome_' . (int) $plan->id;
+                if (!$automation->wasSentRecently($userId, $tipo, 1)) {
+                    $userRow = (new \App\Models\UserModel())->find($userId);
+                    if ($userRow) {
+                        $res = (new \App\Services\EmailService())->sendApiPlanWelcome(
+                            ['id' => $userRow->id, 'email' => $userRow->email, 'name' => $userRow->name],
+                            ['id' => (int) $plan->id, 'name' => $plan->name, 'monthly_quota' => (int) $plan->monthly_quota]
+                        );
+                        if (!empty($res['success'])) {
+                            $automation->markAsSent($userId, $tipo, $res['body'] ?? '');
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                log_message('error', '[Webhook::stripe] Bienvenida API: ' . $e->getMessage());
             }
         }
 
@@ -686,6 +716,73 @@ class Webhook extends Controller
                 ]);
                 log_message('info', "[Webhook::stripe] Enqueued massive export job for {$billingEmail} ({$exportType}, {$totalCount} records)");
             }
+        }
+    }
+
+    /**
+     * Cobro de una renovación rechazado: avisar al cliente con el enlace para pagar.
+     *
+     * Solo facturas de suscripción (los pagos sueltos fallan dentro del checkout,
+     * delante del usuario). El enlace principal es la factura alojada de Stripe
+     * (`hosted_invoice_url`), donde se paga con otra tarjeta sin iniciar sesión.
+     */
+    private function handleInvoicePaymentFailed($invoice): void
+    {
+        try {
+            // Según la versión de la API de Stripe, la suscripción viene en un sitio u otro
+            $stripeSubscriptionId = $invoice->subscription
+                ?? ($invoice->parent->subscription_details->subscription ?? null);
+            if (!$stripeSubscriptionId) {
+                return;
+            }
+
+            $db  = \Config\Database::connect();
+            $sub = $db->table('user_subscriptions us')
+                ->select('us.user_id, ap.name AS plan_name, ap.slug AS plan_slug, ap.product_type')
+                ->join('api_plans ap', 'ap.id = us.plan_id', 'left')
+                ->where('us.stripe_subscription_id', $stripeSubscriptionId)
+                ->orderBy('us.id', 'DESC')
+                ->get()->getRowArray();
+
+            $userId = (int) ($sub['user_id'] ?? 0);
+            if (!$userId && !empty($invoice->customer)) {
+                $u = $db->table('users')->select('id')->where('stripe_customer_id', $invoice->customer)->get()->getRowArray();
+                $userId = (int) ($u['id'] ?? 0);
+            }
+            if (!$userId) {
+                log_message('error', "[Webhook::paymentFailed] Sin usuario para la factura {$invoice->id} ({$stripeSubscriptionId})");
+                return;
+            }
+
+            // Stripe puede reenviar el mismo evento: como mucho un correo cada 2 días
+            $automation = new \App\Models\EmailAutomationModel();
+            if ($automation->wasSentRecently($userId, 'payment_failed', 2)) {
+                return;
+            }
+
+            $user = $db->table('users')->select('id, email, name')->where('id', $userId)->get()->getRowArray();
+            if (!$user) {
+                return;
+            }
+
+            $res = (new \App\Services\EmailService())->sendPaymentFailed($user, [
+                'plan_name'    => (string) ($sub['plan_name'] ?? ''),
+                'product_type' => (string) ($sub['product_type'] ?? ''),
+                'amount'       => ((int) ($invoice->amount_due ?? 0)) / 100,
+                'currency'     => strtoupper((string) ($invoice->currency ?? 'eur')),
+                'attempt'      => (int) ($invoice->attempt_count ?? 1),
+                'next_attempt' => !empty($invoice->next_payment_attempt) ? (int) $invoice->next_payment_attempt : null,
+                'pay_url'      => (string) ($invoice->hosted_invoice_url ?? ''),
+            ]);
+
+            if (!empty($res['success']) && empty($res['skipped'])) {
+                $automation->markAsSent($userId, 'payment_failed', $res['body'] ?? '');
+            }
+
+            log_message('info', "[Webhook::paymentFailed] Aviso de cobro fallido a {$user['email']} (intento " . ($invoice->attempt_count ?? '?') . ')');
+        } catch (\Throwable $e) {
+            // Nunca devolver error a Stripe por un correo: reintentaría el evento
+            log_message('error', '[Webhook::paymentFailed] ' . $e->getMessage());
         }
     }
 

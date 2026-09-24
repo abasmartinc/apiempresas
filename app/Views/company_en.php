@@ -89,8 +89,28 @@
 
                 <?php
                 $statusRaw = (string) ($company['status'] ?? '');
-                $isActive = strtoupper($statusRaw) === 'ACTIVE';
+                // La tabla guarda "ACTIVA": comparar con "ACTIVE" hacía que el punto verde
+                // de empresa activa no saliera nunca en la versión inglesa.
+                $isActive = in_array(strtoupper(trim($statusRaw)), ['ACTIVA', 'ACTIVE'], true);
                 $statusClass = $isActive ? 'company-status company-status--active' : 'company-status company-status--inactive';
+
+                /*
+                 * Estado registral EFECTIVO (motor + status), como en la ficha en español.
+                 * company_estado_registral() devuelve los textos en español; aquí se
+                 * traducen por clave. Ver Helpers/company_helper.php.
+                 */
+                helper(['company', 'risk_labels']);
+                $estadoReg = company_estado_registral($company, $riskProfile ?? null);
+                $estadoEnMap = [
+                    'extinguida'   => ['Struck off',       'Company struck off',                  'is recorded as struck off (extinguished) in the Spanish Mercantile Registry'],
+                    'concurso'     => ['In insolvency',    'Insolvency proceedings in progress',  'is in ongoing insolvency proceedings (concurso de acreedores)'],
+                    'liquidacion'  => ['In liquidation',   'Company in liquidation',              'is in the liquidation phase'],
+                    'disuelta'     => ['Dissolved',        'Company dissolved',                   'is recorded as dissolved in the Spanish Mercantile Registry'],
+                    'hoja_cerrada' => ['Registry closed',  'Registry sheet closed',               'has its registry sheet closed in the Mercantile Registry'],
+                ];
+                if (isset($estadoEnMap[$estadoReg['clave']])) {
+                    [$estadoReg['etiqueta'], $estadoReg['titulo'], $estadoReg['frase']] = $estadoEnMap[$estadoReg['clave']];
+                }
 
                 $cnaeFull = (!empty($company['cnae']) && !empty($company['cnae_label']))
                     ? ($company['cnae'] . ' · ' . $company['cnae_label'])
@@ -99,20 +119,14 @@
                 $jsonForCode = ['success' => true, 'data' => $company];
                 $jsonPretty = json_encode($jsonForCode, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
-                // --- AUTO-GENERATED FAQS ---
-                $companyName = $company['name'] ?? 'Esta empresa';
+                $companyName = $company['name'] ?? 'This company';
                 $companyCif = $company['cif'] ?? $company['nif'] ?? 'Unknown';
-                $companyProv = $company['province'] ?? $company['provincia'] ?? 'España';
+                $companyProv = $company['province'] ?? $company['provincia'] ?? 'Spain';
 
-                // Address inteligente: si hay domicilio, úsalo. Si no, provincia.
-                $rawAddr = $company['address'] ?? $company['address'] ?? '';
-                $companyAddr = $rawAddr ? "{$rawAddr}, {$companyProv}" : "{$companyProv}, España";
+                $rawAddr = $company['address'] ?? '';
+                $companyAddr = $rawAddr ? "{$rawAddr}, {$companyProv}" : "{$companyProv}, Spain";
 
-                $companyAct = $company['cnae_label'] ?? 'su actividad registrada';
-
-                // Phone logic
                 $phone = $company['phone'] ?? $company['phone_mobile'] ?? null;
-                $phoneHtml = $phone ? "**{$phone}**" : "el teléfono de {$companyName} en nuestro informe";
 
                 $adminNames = [];
                 if (!empty($administrators)) {
@@ -120,32 +134,45 @@
                         $adminNames[] = $adm['name'];
                     }
                 }
-                $adminResponse = !empty($adminNames)
-                    ? "Entre los administradores y cargos actuales de **{$companyName}** se encuentran: **" . implode(', ', $adminNames) . "**. Puede consultar el listado completo y sus funciones en la sección de Directors of esta misma ficha."
-                    : "Para conocer a los administradores y cargos de la empresa, consulte la sección específica de **Cargos Directivos** en este perfil.";
+
+                /*
+                 * FAQ EN INGLÉS Y SEGÚN EL ESTADO (24-09-2026)
+                 * Antes estaban en español en una página en inglés, la primera empezaba
+                 * por "Sí, … es fiable" para TODAS las empresas (también las extinguidas),
+                 * invitaba a "visitar su delegación" y no se pintaban en la página: solo
+                 * iban en el JSON-LD, y Google exige que el FAQPage se vea en pantalla.
+                 * Las ai_faqs no se usan aquí: están en español.
+                 */
+                if ($estadoReg['incidencia']) {
+                    $faqReliable = "{$companyName} (CIF {$companyCif}) {$estadoReg['frase']}. "
+                        . ($estadoReg['cerrada']
+                            ? "It no longer trades normally, so it is not advisable to contract with it or extend it credit. "
+                            : "Review this carefully before contracting with it or extending it credit. ")
+                        . "This page shows its official acts published in the BORME.";
+                } else {
+                    $faqReliable = "{$companyName} is a company registered in Spain with CIF {$companyCif}"
+                        . ($statusRaw !== '' ? ", and its registry status is " . ($isActive ? 'active' : $statusRaw) : '')
+                        . ". To assess it as a customer or supplier, review the official acts published in the BORME on this page.";
+                }
+
+                if ($estadoReg['cerrada']) {
+                    $faqContact = "The last registered office on record for {$companyName} is {$companyAddr}. The company {$estadoReg['frase']}, so it is unlikely to be reachable at that address or its former phone numbers.";
+                } else {
+                    $faqContact = "The registered office of {$companyName} is {$companyAddr}."
+                        . ($phone ? " Its contact phone number is {$phone}." : " No public contact phone number is on record.");
+                }
+
+                $faqDirectors = (!empty($adminNames)
+                        ? ($estadoReg['cerrada'] ? "The last directors on record for {$companyName} are: " : "Current directors and officers of {$companyName} include: ")
+                          . implode(', ', $adminNames) . ". The full list is in the Directors section of this page. "
+                        : '')
+                    . "The BORME section of this page lists the official history of appointments, dismissals and resignations.";
 
                 $faqs = [
-                    [
-                        'q' => "¿Es fiable {$companyName}?",
-                        'a' => "Sí, **{$companyName}** es una sociedad registrada en España con CIF **{$companyCif}**. Su estado actual es **{$statusRaw}**, según consta en el Registro Mercantil. Puede consultar sus cuentas anuales, informes y actos del BORME para verificar su solvencia."
-                    ],
-                    [
-                        'q' => "¿Cuál es el teléfono y dirección de {$companyName}?",
-                        'a' => "La empresa tiene su domicilio social en **{$companyAddr}**. Para contactar, puede llamar al {$phoneHtml} o visitar su delegación más cercana en {$companyProv}."
-                    ],
-                    [
-                        'q' => "¿Quiénes son los administradores de {$companyName}?",
-                        'a' => "{$adminResponse} Adicionalmente, en la sección de **Actos del BORME** puede revisar el histórico oficial de nombramientos, ceses y dimisiones desde su constitución."
-                    ]
+                    ['q' => "Is {$companyName} a reliable company?", 'a' => $faqReliable],
+                    ['q' => "What are the address and phone number of {$companyName}?", 'a' => $faqContact],
+                    ['q' => "Who are the directors of {$companyName}?", 'a' => $faqDirectors],
                 ];
-
-                // Sobrescribir con FAQs de IA si existen
-                if (!empty($company['ai_faqs'])) {
-                    $aiFaqsDecoded = json_decode($company['ai_faqs'], true);
-                    if (json_last_error() === JSON_ERROR_NONE && !empty($aiFaqsDecoded) && is_array($aiFaqsDecoded)) {
-                        $faqs = $aiFaqsDecoded;
-                    }
-                }
 
                 // Schema.org Data
                 $organizationSchema = [
@@ -176,7 +203,9 @@
                     }
                 }
 
-                if (!empty($ratingCount) && $ratingCount > 0) {
+                // Sin aggregateRating: la nota valoraba la FICHA ("¿Te ha sido útil?"),
+                // no la empresa, y el widget ya no existe. Desactivado, no borrado.
+                if (false && !empty($ratingCount) && $ratingCount > 0) {
                     $organizationSchema['aggregateRating'] = [
                         "@type" => "AggregateRating",
                         "ratingValue" => round($ratingAvg, 1),
@@ -202,8 +231,10 @@
                             ],
                             "geo" => [
                                 "@type" => "GeoCoordinates",
-                                "latitude" => $company['lng'], // Coords están invertidas en DB
-                                "longitude" => $company['lat']
+                                // Not swapped any more: CompanyModel aliases lat_num/lng_num correctly
+                                // (the map lands on the right street). Range guard for old rows.
+                                "latitude"  => ((float) $company['lat'] >= 26 && (float) $company['lat'] <= 45) ? (float) $company['lat'] : (float) $company['lng'],
+                                "longitude" => ((float) $company['lat'] >= 26 && (float) $company['lat'] <= 45) ? (float) $company['lng'] : (float) $company['lat']
                             ],
                             "url" => $canonical
                         ] : null,
@@ -254,7 +285,7 @@
                     ]
                 ];
 
-                if (isset($ratingCount) && $ratingCount > 0) {
+                if (false && isset($ratingCount) && $ratingCount > 0) {
                     foreach ($schemaOrg['@graph'] as &$node) {
                         if ($node && in_array($node['@type'], ['Organization', 'LocalBusiness'])) {
                             $node['aggregateRating'] = [
@@ -282,7 +313,18 @@
                             $ribbonGradient = '';
                             $ribbonShadow = '';
                             
-                            if (!empty($constValHeader) && $timestamp = strtotime($constValHeader)) {
+                            if ($estadoReg['incidencia']) {
+                                // With an adverse state the ribbon shows the state, not the age:
+                                // "Veteran (+10y)" on a struck-off company reads as solidity.
+                                $ribbonText = $estadoReg['etiqueta'];
+                                if ($estadoReg['cerrada']) {
+                                    $ribbonGradient = 'linear-gradient(135deg, #64748b 0%, #334155 100%)';
+                                    $ribbonShadow = 'rgba(51, 65, 85, 0.35)';
+                                } else {
+                                    $ribbonGradient = 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)';
+                                    $ribbonShadow = 'rgba(185, 28, 28, 0.35)';
+                                }
+                            } elseif (!empty($constValHeader) && $timestamp = strtotime($constValHeader)) {
                                 $ageInDays = (time() - $timestamp) / (60 * 60 * 24);
                                 $ageInYears = $ageInDays / 365.25;
                                 
@@ -432,7 +474,12 @@
                                     </div>
                                     <?php endif; ?>
                                     
-                                    <?php if (!empty($statusRaw)): ?>
+                                    <?php if ($estadoReg['incidencia']): ?>
+                                    <div title="<?= esc($estadoReg['titulo'], 'attr') ?>" style="margin: 0; display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; background: <?= $estadoReg['fondo'] ?>; border: 1px solid <?= $estadoReg['borde'] ?>; color: <?= $estadoReg['color'] ?>; font-weight: 700;">
+                                        <span style="display: inline-flex; width: 8px; height: 8px; border-radius: 50%; background: <?= $estadoReg['color'] ?>;"></span>
+                                        <span><?= esc($estadoReg['etiqueta']) ?></span>
+                                    </div>
+                                    <?php elseif (!empty($statusRaw)): ?>
                                     <div class="<?= str_replace('company-status', 'b2b-status', esc($statusClass)) ?>" style="margin: 0; display: flex; align-items: center; gap: 6px;">
                                         <?php if ($isActive): ?>
                                             <span style="position: relative; display: flex; width: 8px; height: 8px;">
@@ -463,20 +510,21 @@
 
                                     <div style="margin-left: auto; display: flex; gap: 12px; align-items: center;">
                                         <div style="display: flex; gap: 6px;">
-                                            <a href="https://www.linkedin.com/shareArticle?mini=true&url=<?= urlencode(current_url()) ?>&title=<?= urlencode('Ficha de empresa: ' . $companyName) ?>" target="_blank" rel="noopener noreferrer" class="btn-share-icon" title="Compartir en LinkedIn">
+                                            <a href="https://www.linkedin.com/shareArticle?mini=true&url=<?= urlencode(current_url()) ?>&title=<?= urlencode('Company profile: ' . $companyName) ?>" target="_blank" rel="noopener noreferrer" class="btn-share-icon" title="Share on LinkedIn">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
                                             </a>
-                                            <a href="https://api.whatsapp.com/send?text=<?= urlencode('Mira esta empresa: ' . $companyName . ' - ' . current_url()) ?>" target="_blank" rel="noopener noreferrer" class="btn-share-icon" title="Compartir por WhatsApp">
+                                            <a href="https://api.whatsapp.com/send?text=<?= urlencode('Check this company: ' . $companyName . ' - ' . current_url()) ?>" target="_blank" rel="noopener noreferrer" class="btn-share-icon" title="Share on WhatsApp">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                                             </a>
-                                            <button onclick="navigator.clipboard.writeText('<?= current_url() ?>'); alert('Enlace copiado al portapapeles');" class="btn-share-icon" title="Copiar enlace" style="cursor: pointer;">
+                                            <button onclick="navigator.clipboard.writeText('<?= current_url() ?>'); alert('Link copied to clipboard');" class="btn-share-icon" title="Copy link" style="cursor: pointer;">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
                                             </button>
                                         </div>
+                                        <?php if (!$estadoReg['cerrada']): /* no CRM for a company that no longer trades */ ?>
                                         <button type="button" onclick="document.getElementById('crm-modal').style.display='flex';"
-                                            style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #0f172a; color: #ffffff; font-size: 0.9rem; font-weight: 700; text-decoration: none; border-radius: 10px; border: 1px solid #0f172a; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer;"
-                                            onmouseover="this.style.background='#1e293b'; this.style.transform='translateY(-2px)';"
-                                            onmouseout="this.style.background='#0f172a'; this.style.transform='translateY(0)';">
+                                            style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #ffffff; color: #334155; font-size: 0.9rem; font-weight: 700; text-decoration: none; border-radius: 10px; border: 1px solid #cbd5e1; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer;"
+                                            onmouseover="this.style.background='#f8fafc';"
+                                            onmouseout="this.style.background='#ffffff';">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
                                                 <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
@@ -484,13 +532,14 @@
                                             </svg>
                                             Send to CRM
                                         </button>
+                                        <?php endif; ?>
                                         <a href="<?= site_url('empresa/export/' . $company['id']) ?>"
                                             rel="nofollow"
-                                            aria-label="Descargar Informe PDF de <?= esc($companyName) ?>"
+                                            aria-label="Download PDF report for <?= esc($companyName) ?>"
                                             onclick="window.dataLayer = window.dataLayer || []; window.dataLayer.push({'event': 'cta_pdf_click'});"
-                                            style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #ffffff; color: #2563eb; font-size: 0.9rem; font-weight: 700; text-decoration: none; border-radius: 10px; border: 1px solid #cbd5e1; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02);"
-                                            onmouseover="this.style.background='#eff6ff'; this.style.borderColor='#93c5fd'; this.style.transform='translateY(-2px)';"
-                                            onmouseout="this.style.background='#ffffff'; this.style.borderColor='#cbd5e1'; this.style.transform='translateY(0)';">
+                                            style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #2563eb; color: #ffffff; font-size: 0.9rem; font-weight: 700; text-decoration: none; border-radius: 10px; border: 1px solid #2563eb; transition: all 0.2s; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.25);"
+                                            onmouseover="this.style.background='#1d4ed8'; this.style.borderColor='#1d4ed8';"
+                                            onmouseout="this.style.background='#2563eb'; this.style.borderColor='#2563eb';">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                                 stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -579,24 +628,13 @@
                                             Related Companies
                                         </a></li>
                                 <?php endif; ?>
-                                <?php if (!session('logged_in')): ?>
-                                    <li><a href="#descargar-excel">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                                <polyline points="7 10 12 15 17 10"></polyline>
-                                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                                            </svg>
-                                            Download CSV
-                                        </a></li>
-                                <?php endif; ?>
                                 <li><a href="#api-dev-section">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <polyline points="16 18 22 12 16 6"></polyline>
                                             <polyline points="8 6 2 12 8 18"></polyline>
                                         </svg>
-                                        Developers
+                                        API
                                     </a></li>
                             </ul>
                         </nav>
@@ -825,7 +863,7 @@
                                     <dd class="b2b-data-value"><time datetime="<?= esc($constVal) ?>"><?= date('d/m/Y', strtotime($constVal)) ?></time></dd>
                                 </div>
                                 <?php endif; ?>
-                                <?php $objVal = trim($company['corporate_purpose'] ?? $company['objeto_social'] ?? ''); ?>
+                                <?php $objVal = trim(company_objeto_social_real($company)); // not the CNAE text copied again ?>
                                 <?php if (!empty($objVal) && $objVal !== '-'): ?>
                                 <div class="b2b-data-row">
                                     <dt class="b2b-data-label">
@@ -848,6 +886,7 @@
                                 </div>
                                 <?php endif; ?>
                             </dl>
+                            <?= view('partials/company_data_check', ['companyId' => (int) ($company['id'] ?? 0), 'lang' => 'en']) ?>
                         </section>
 
                         <?php if ((!empty($company['lat']) && !empty($company['lng'])) || !empty($company['address'])): ?>
@@ -866,305 +905,78 @@
                         <?php endif; ?>
                     </div> <!-- /b2b-grid-2col -->
 
-                    <div class="b2b-grid-aside">
-                        <div style="display:flex; flex-wrap: wrap; gap:24px; order: 2; grid-column: 1 / -1; width: 100%;">
-                            <!-- WIDGET DE VALORACIÓN SEO -->
-                            <div id="company-rating-widget"
-                                style="margin: 0; background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); border-radius: 16px; padding: 1.25rem 1rem; text-align: center; border: 1px solid rgba(255, 255, 255, 0.8);">
-                                <h3 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 0.25rem;">
-                                    Was this information useful?</h3>
-                                <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 0.75rem;">Rate the profile of
-                                    <?= esc($companyName) ?>
-                                </p>
+                    <?php
+                    /*
+                     * ABOUT + API (24-09-2026)
+                     * Here were: a star rating widget in Spanish ("¿Te ha sido útil…?",
+                     * "Enviar sugerencia"), the Vértice banner and a "General information"
+                     * card that only held two badges and share buttons (the AI text is
+                     * Spanish and was hidden). Now: a short factual paragraph in English,
+                     * state-aware, and the API strip — the main product — right after the
+                     * data table. Vértice moves to "More tools".
+                     */
+                    $abFund = trim((string) ($company['founded'] ?? $company['incorporation_date'] ?? $company['fecha_constitucion'] ?? ''));
+                    $abYear = preg_match('/^\d{4}/', $abFund) && $abFund !== '0000-00-00' ? substr($abFund, 0, 4) : '';
+                    $abCif  = (!empty($companyCif) && $companyCif !== 'Unknown' && $companyCif !== '-') ? " (CIF <strong>" . esc($companyCif) . "</strong>)" : '';
+                    $apiCif = $abCif !== '' ? $companyCif : 'B12345678';
+                    $apiJson = ['cif' => $apiCif, 'name' => $companyName, 'province' => $companyProv];
+                    ?>
+                    <section class="b2b-card" style="margin: 0 0 24px; padding: 18px 24px;">
+                        <h2 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 8px;">General information about <?= esc($companyName) ?></h2>
+                        <p style="margin: 0; color: #334155; line-height: 1.65; font-size: 0.98rem;">
+                            <strong><?= esc($companyName) ?></strong><?= $abCif ?> is a Spanish company<?= $abYear ? ' incorporated in ' . esc($abYear) : '' ?>
+                            with its registered office in <strong><?= esc($companyProv) ?></strong>.
+                            <?php if ($estadoReg['incidencia']): ?>
+                                According to the Mercantile Registry, it <strong><?= esc($estadoReg['frase']) ?></strong><?= $estadoReg['cerrada'] ? ' and no longer trades normally' : '' ?>.
+                            <?php elseif ($isActive): ?>
+                                According to the Mercantile Registry, it is an active company.
+                            <?php endif; ?>
+                            This page gathers its official registry data and the acts published in the BORME (Spain's Official Gazette of the Mercantile Registry).
+                        </p>
+                    </section>
 
-                                <div class="rating-stars"
-                                    style="display: flex; justify-content: center; gap: 6px; margin-bottom: 0.75rem; cursor: pointer;">
-                                    <?php for ($i = 1; $i <= 5; $i++): ?>
-                                        <svg class="star-icon" data-value="<?= $i ?>" width="28" height="28"
-                                            viewBox="0 0 24 24"
-                                            fill="<?= ($i <= round($ratingAvg ?? 0)) ? '#fbbf24' : 'none' ?>"
-                                            stroke="<?= ($i <= round($ratingAvg ?? 0)) ? '#fbbf24' : '#cbd5e1' ?>"
-                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                            style="transition: all 0.2s;">
-                                            <polygon
-                                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
-                                            </polygon>
-                                        </svg>
-                                    <?php endfor; ?>
-                                </div>
-
-                                <div id="rating-stats-display"
-                                    style="font-size: 0.9rem; color: #475569; font-weight: 600;">
-                                    <?php if (isset($ratingCount) && $ratingCount > 0): ?>
-                                        Puntuación media: <span id="avg-rating-val"
-                                            style="color: #0f172a;"><?= number_format($ratingAvg, 1) ?></span>/5 (<span
-                                            id="count-rating-val"><?= $ratingCount ?></span> votos)
-                                    <?php else: ?>
-                                        Be the first to rate this company.
-                                    <?php endif; ?>
-                                </div>
-                                <div id="rating-message"
-                                    style="margin-top: 10px; font-size: 0.9rem; font-weight: 600; display: none;"></div>
-
-                                <div id="feedback-block" style="display: none; margin-top: 15px; text-align: left; padding-top: 15px; border-top: 1px solid #cbd5e1;">
-                                    <p id="feedback-prompt" style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px; font-weight: 600;"></p>
-                                    <textarea id="feedback-text" rows="3" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; resize: vertical; box-sizing: border-box;" placeholder="Escribe aquí tus comentarios..."></textarea>
-                                    <button id="submit-feedback-btn" style="margin-top: 10px; width: 100%; background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">Enviar sugerencia</button>
-                                    <div id="feedback-message" style="margin-top: 10px; font-size: 0.85rem; font-weight: 600; display: none; text-align: center;"></div>
-                                </div>
-                            </div>
-
-                            <script>
-                                document.addEventListener('DOMContentLoaded', function () {
-                                    const stars = document.querySelectorAll('.star-icon');
-                                    const widget = document.getElementById('company-rating-widget');
-                                    const msgDiv = document.getElementById('rating-message');
-                                    const avgSpan = document.getElementById('avg-rating-val');
-                                    const countSpan = document.getElementById('count-rating-val');
-                                    let hasVoted = false;
-
-                                    // Hover effects
-                                    stars.forEach(star => {
-                                        star.addEventListener('mouseenter', function () {
-                                            if (hasVoted) return;
-                                            const val = this.getAttribute('data-value');
-                                            stars.forEach(s => {
-                                                if (s.getAttribute('data-value') <= val) {
-                                                    s.style.fill = '#fcd34d'; // hover color
-                                                    s.style.stroke = '#fcd34d';
-                                                } else {
-                                                    s.style.fill = 'none';
-                                                    s.style.stroke = '#cbd5e1';
-                                                }
-                                            });
-                                        });
-
-                                        star.addEventListener('mouseleave', function () {
-                                            if (hasVoted) return;
-                                            // Reset to initial state based on PHP data is hard without keeping it in JS, 
-                                            // so we just clear hover effect unless we already voted
-                                            const currentAvg = <?= round($ratingAvg ?? 0) ?>;
-                                            stars.forEach(s => {
-                                                if (s.getAttribute('data-value') <= currentAvg) {
-                                                    s.style.fill = '#fbbf24';
-                                                    s.style.stroke = '#fbbf24';
-                                                } else {
-                                                    s.style.fill = 'none';
-                                                    s.style.stroke = '#cbd5e1';
-                                                }
-                                            });
-                                        });
-
-                                        star.addEventListener('click', function () {
-                                            if (hasVoted) return;
-                                            const val = this.getAttribute('data-value');
-                                            const companyId = <?= (int) ($company['id'] ?? 0) ?>;
-
-                                            // Lock UI
-                                            hasVoted = true;
-                                            stars.forEach(s => s.style.cursor = 'default');
-
-                                            // Send AJAX
-                                            fetch('<?= site_url('company/rate') ?>', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/x-www-form-urlencoded',
-                                                    'X-Requested-With': 'XMLHttpRequest'
-                                                },
-                                                body: new URLSearchParams({
-                                                    'company_id': companyId,
-                                                    'rating': val,
-                                                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
-                                                })
-                                            })
-                                                .then(response => response.json())
-                                                .then(data => {
-                                                    msgDiv.style.display = 'block';
-                                                    if (data.status === 'success') {
-                                                        msgDiv.style.color = '#16a34a';
-                                                        msgDiv.innerText = data.message;
-
-                                                        // Update stars visually to the given vote
-                                                        stars.forEach(s => {
-                                                            if (s.getAttribute('data-value') <= val) {
-                                                                s.style.fill = '#fbbf24';
-                                                                s.style.stroke = '#fbbf24';
-                                                            } else {
-                                                                s.style.fill = 'none';
-                                                                s.style.stroke = '#cbd5e1';
-                                                            }
-                                                        });
-
-                                                        // Update text
-                                                        let statsDisplay = document.getElementById('rating-stats-display');
-                                                        statsDisplay.innerHTML = `Puntuación media: <span id="avg-rating-val" style="color: #0f172a;">${data.new_avg}</span>/5 (<span id="count-rating-val">${data.new_count}</span> votos)`;
-
-                                                        if (val < 5) {
-                                                            const feedbackBlock = document.getElementById('feedback-block');
-                                                            const feedbackPrompt = document.getElementById('feedback-prompt');
-                                                            feedbackBlock.style.display = 'block';
-                                                            
-                                                            if (val == 4) {
-                                                                feedbackPrompt.innerText = 'Casi perfecto. ¿Qué detalle podríamos mejorar de la ficha?';
-                                                            } else if (val == 3) {
-                                                                feedbackPrompt.innerText = 'Gracias por tu valoración. ¿En qué consideras que deberíamos mejorar la ficha?';
-                                                            } else if (val == 2) {
-                                                                feedbackPrompt.innerText = 'Lamentamos no cumplir tus expectativas. ¿Qué información echas en falta o consideras incorrecta?';
-                                                            } else if (val == 1) {
-                                                                feedbackPrompt.innerText = 'Sentimos mucho tu mala experiencia. Por favor, indícanos qué errores graves has encontrado en la ficha para solucionarlos de inmediato.';
-                                                            }
-
-                                                            const submitBtn = document.getElementById('submit-feedback-btn');
-                                                            submitBtn.onclick = function() {
-                                                                const text = document.getElementById('feedback-text').value;
-                                                                const msg = document.getElementById('feedback-message');
-                                                                if (!text.trim()) {
-                                                                    msg.style.display = 'block';
-                                                                    msg.style.color = '#dc2626';
-                                                                    msg.innerText = 'Por favor, escribe un comentario.';
-                                                                    return;
-                                                                }
-
-                                                                submitBtn.disabled = true;
-                                                                submitBtn.innerText = 'Enviando...';
-                                                                submitBtn.style.opacity = '0.7';
-
-                                                                fetch('<?= site_url('company/rate_feedback') ?>', {
-                                                                    method: 'POST',
-                                                                    headers: {
-                                                                        'Content-Type': 'application/x-www-form-urlencoded',
-                                                                        'X-Requested-With': 'XMLHttpRequest'
-                                                                    },
-                                                                    body: new URLSearchParams({
-                                                                        'company_id': companyId,
-                                                                        'feedback': text,
-                                                                        '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
-                                                                    })
-                                                                })
-                                                                .then(res => res.json())
-                                                                .then(fData => {
-                                                                    msg.style.display = 'block';
-                                                                    if (fData.status === 'success') {
-                                                                        msg.style.color = '#16a34a';
-                                                                        msg.innerText = fData.message;
-                                                                        setTimeout(() => {
-                                                                            feedbackBlock.style.display = 'none';
-                                                                        }, 3000);
-                                                                    } else {
-                                                                        msg.style.color = '#dc2626';
-                                                                        msg.innerText = fData.message || 'Error al enviar sugerencia';
-                                                                        submitBtn.disabled = false;
-                                                                        submitBtn.innerText = 'Enviar sugerencia';
-                                                                        submitBtn.style.opacity = '1';
-                                                                    }
-                                                                })
-                                                                .catch(err => {
-                                                                    msg.style.display = 'block';
-                                                                    msg.style.color = '#dc2626';
-                                                                    msg.innerText = 'Error de conexión';
-                                                                    submitBtn.disabled = false;
-                                                                    submitBtn.innerText = 'Enviar sugerencia';
-                                                                    submitBtn.style.opacity = '1';
-                                                                });
-                                                            };
-                                                        }
-
-                                                    } else {
-                                                        msgDiv.style.color = '#dc2626';
-                                                        msgDiv.innerText = data.message || 'Error al procesar la valoración';
-                                                        // Re-enable voting if it wasn't a "already voted" error
-                                                        if (data.message !== 'Ya has valorado esta empresa anteriormente') {
-                                                            hasVoted = false;
-                                                        }
-                                                    }
-                                                })
-                                                .catch(err => {
-                                                    msgDiv.style.display = 'block';
-                                                    msgDiv.style.color = '#dc2626';
-                                                    msgDiv.innerText = 'Error de conexión';
-                                                    hasVoted = false;
-                                                });
-                                        });
-                                    });
-                                });
-                            </script>
-
-                            <!-- CTA VERTICE (Sidebar) -->
-                            <a href="https://vertice.apiempresas.es" target="_blank" rel="noopener noreferrer" style="flex: 1 1 320px; display: block; background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); border-radius: 12px; padding: 1.5rem 1.25rem; text-decoration: none; position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.5); transition: transform 0.2s, box-shadow 0.2s;"
-                               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 30px -5px rgba(15, 23, 42, 0.6)';"
-                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px -5px rgba(15, 23, 42, 0.5)';"
-                               onclick="if(window.trackEvent) trackEvent('click_vertice_banner', { source: 'company_sidebar' });">
-                                
-                                <!-- Decorative element -->
-                                <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(249, 115, 22, 0.2); filter: blur(30px); border-radius: 50%;"></div>
-                                
-                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.85rem; position: relative; z-index: 1;">
-                                    <span style="background: #22c55e; color: #ffffff; font-size: 0.7rem; font-weight: 800; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px; text-transform: uppercase; box-shadow: 0 2px 5px rgba(34, 197, 94, 0.3);">
-                                        NEW!
-                                    </span>
-                                </div>
-                                
-                                <p style="color: #f8fafc; font-size: 1rem; line-height: 1.5; margin: 0 0 1.25rem 0; font-weight: 600; position: relative; z-index: 1;">
-                                    Don't gamble when opening a store. Analyze the viability of any municipality with AI.
-                                </p>
-
-                                <div style="display: flex; align-items: center; justify-content: center; width: 100%; background: linear-gradient(to right, #f97316, #ea580c); color: #ffffff; font-weight: 700; font-size: 1rem; padding: 12px 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); transition: all 0.2s; position: relative; z-index: 1;">
-                                    Try Vértice for free 🚀
-                                </div>
-                            </a>
-
-
-                        </div> <!-- /left col of aside -->
-
-                        <div class="company-seo-block b2b-card" style="display: none; height: 100%; margin-top: 0; order: 1;">
-                            <h2 class="company-seo-title" style="font-size: 1.3rem; margin: 0 0 1rem 0;">General and Contact Information for <?= esc($companyName) ?>
-                            </h2>
-                            <!-- AI SEO Text Block Hidden for English Version -->
-
-                            <div class="company-share-row">
-                                <span class="badge-demo badge-verified">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2">
-                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                        <polyline points="22 4 12 14.01 9 11.01" />
-                                    </svg>
-                                    Verified Data
-                                </span>
-                                <span class="badge-demo badge-official">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2">
-                                        <circle cx="12" cy="12" r="10" />
-                                        <line x1="2" y1="12" x2="22" y2="12" />
-                                        <path
-                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                                    </svg>
-                                    Official Source
-                                </span>
-
-                                <div class="share-buttons" style="display: flex; gap: 8px; align-items: center;">
-                                    <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?= urlencode($canonical) ?>"
-                                        target="_blank" rel="noopener noreferrer nofollow"
-                                        class="share-btn share-linkedin" title="Compartir en LinkedIn">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"
-                                            aria-hidden="true">
-                                            <path
-                                                d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-                                        </svg>
-                                    </a>
-                                    <a href="https://api.whatsapp.com/send?text=<?= urlencode("Mira esta empresa: " . $canonical) ?>"
-                                        target="_blank" rel="noopener noreferrer nofollow"
-                                        class="share-btn share-whatsapp" title="Compartir en WhatsApp">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"
-                                            aria-hidden="true">
-                                            <path
-                                                d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
-                                        </svg>
-                                    </a>
-
-                                </div>
+                    <style>
+                        .api-strip{margin:0 0 24px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:24px;align-items:center;background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:22px 24px;box-shadow:0 2px 8px rgba(15,23,42,.04);scroll-margin-top:90px}
+                        .api-strip__eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:#2563eb;background:#eff6ff;border:1px solid #bfdbfe;border-radius:999px;padding:3px 10px;margin-bottom:10px}
+                        .api-strip__title{font-size:1.2rem;font-weight:800;color:#0f172a;margin:0 0 6px;letter-spacing:-.2px}
+                        .api-strip__text{font-size:.9rem;color:#475569;line-height:1.5;margin:0 0 14px}
+                        .api-strip__actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+                        .api-strip__btn{display:inline-flex;align-items:center;gap:8px;background:#2563eb;color:#fff;border-radius:10px;padding:10px 18px;font-weight:800;font-size:.9rem;text-decoration:none;box-shadow:0 4px 12px rgba(37,99,235,.22);transition:background .15s}
+                        .api-strip__btn:hover{background:#1d4ed8}
+                        .api-strip__link{font-size:.85rem;font-weight:700;color:#334155;text-decoration:none}
+                        .api-strip__link:hover{color:#2563eb;text-decoration:underline}
+                        .api-strip__code{background:#0f172a;border-radius:14px;padding:14px 16px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.78rem;line-height:1.6;color:#e2e8f0;overflow-x:auto;min-width:0}
+                        .api-strip__code .c-verb{color:#6ee7b7;font-weight:700}
+                        .api-strip__code .c-dim{color:#64748b}
+                        .api-strip__code pre{margin:6px 0 0;padding:0;background:transparent;border:0;color:#cbd5e1;white-space:pre;font:inherit}
+                        @media (max-width:820px){.api-strip{grid-template-columns:1fr;padding:18px}}
+                    </style>
+                    <section id="api-dev-section" class="api-strip" aria-labelledby="api-strip-title">
+                        <div>
+                            <span class="api-strip__eyebrow">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                                REST API
+                            </span>
+                            <h2 id="api-strip-title" class="api-strip__title">This data, in your software</h2>
+                            <p class="api-strip__text">
+                                Look up <strong><?= esc($companyName) ?></strong> and any Spanish company by CIF with a single call:
+                                registry data, BORME acts and risk profile, as JSON.
+                            </p>
+                            <div class="api-strip__actions">
+                                <a class="api-strip__btn" href="<?= site_url('register') ?>" data-track-click="company_api" data-track-element="api_key">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4.5"></circle><path d="M21 2l-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"></path></svg>
+                                    Get a free API key
+                                </a>
+                                <a class="api-strip__link" href="<?= site_url('docs') ?>" data-track-click="company_api" data-track-element="docs">Read the docs →</a>
                             </div>
                         </div>
-                    </div> <!-- /b2b-grid-aside -->
+                        <div class="api-strip__code" aria-label="API request example">
+                            <div><span class="c-verb">GET</span> /api/v1/companies?cif=<?= esc($apiCif) ?></div>
+                            <div class="c-dim">Authorization: Bearer YOUR_API_KEY</div>
+<pre><?= esc(json_encode($apiJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) ?></pre>
+                        </div>
+                    </section>
+
 
                     <!-- SECCIÓN DE ADMINISTRADORES Y CARGOS -->
                     <?php if (!empty($administrators)): ?>
@@ -1236,64 +1048,6 @@
                             </div>
                         </div>
                     <?php endif; ?>
-
-                    <!-- SECCIÓN PARA DESARROLLADORES (API Banner Nativo) -->
-                    <section id="api-dev-section" class="api-dev-section"
-                        class="reveal-on-scroll" style="margin-top: 4rem; padding: 2rem; background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);">
-                        <div class="api-dev-grid"
-                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center;">
-
-                            <!-- Columna Izquierda: Mensaje y CTA -->
-                            <div class="api-dev-info">
-                                <h3 style="display: flex; align-items: center; gap: 1rem; margin: 0 0 1rem; font-size: 1.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.025em;">
-                                    <div style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: #eff6ff; color: #3b82f6; border-radius: 12px; flex-shrink: 0;">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="16 18 22 12 16 6"></polyline>
-                                            <polyline points="8 6 2 12 8 18"></polyline>
-                                        </svg>
-                                    </div>
-                                    Are you a developer?
-                                </h3>
-                                <p style="margin: 0 0 2rem; color: #64748b; line-height: 1.6; font-size: 1.05rem;">
-                                    Integrate the official information of <strong><?= esc($companyName) ?></strong>
-                                    directly into your software using our robust and documented REST API.
-                                </p>
-                                <a href="<?= site_url('register') ?>" class="btn secondary"
-                                    style="display: inline-flex; align-items: center; padding: 0.875rem 2rem; font-weight: 700; border-radius: 12px; transition: all 0.2s; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); text-decoration: none;"
-                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(16, 185, 129, 0.4)';"
-                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)';">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 8px;">
-                                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
-                                    </svg>
-                                    Get API Key for Free
-                                </a>
-                            </div>
-
-                            <!-- Columna Derecha: Consola / Code Snippet -->
-                            <div class="console-wrapper ai-box-glow"
-                                style="background: #0f172a; border-radius: 16px; overflow: hidden; box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.4); border: 1px solid #1e293b;">
-                                <div class="console-header"
-                                    style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #1e293b; border-bottom: 1px solid #334155;">
-                                    <div class="mac-buttons" style="display: flex; gap: 8px;">
-                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444;"></div>
-                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #f59e0b;"></div>
-                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #10b981;"></div>
-                                    </div>
-                                    <span style="font-size: 0.75rem; color: #94a3b8; font-family: monospace; font-weight: 600;">View JSON response</span>
-                                </div>
-                                <div class="console-body"
-                                    style="padding: 1.5rem; font-family: 'Fira Code', 'Courier New', Courier, monospace; font-size: 0.85rem; color: #e2e8f0; line-height: 1.7; overflow-x: auto;">
-                                    <div style="color: #64748b; margin-bottom: 8px;"># cURL request for <?= esc($companyCif) ?></div>
-                                    <div style="display: flex; gap: 8px;">
-                                        <span style="color: #ec4899;">curl</span>
-                                        <span style="color: #a7f3d0; word-break: break-all;">"https://spaincompanyapi.com/api/v1/companies?cif=<?= esc($companyCif) ?>"</span>
-                                    </div>
-                                    <div style="padding-left: 2rem; color: #fde047;">-H "Authorization: Bearer YOUR_API_KEY"</div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
 
                     <!-- CONTRATOS Y SUBVENCIONES SECTION -->
                     <?php if (!empty($contracts) || !empty($subsidies)): ?>
@@ -1475,14 +1229,20 @@
                                     // Normalize some common types for better grouping
                                     if (strpos($t, 'nombramiento') !== false) $t = 'Appointments';
                                     elseif (strpos($t, 'cese') !== false || strpos($t, 'dimision') !== false || strpos($t, 'revocacion') !== false) $t = 'Dismissals/Resignations';
-                                    elseif (strpos($t, 'capital') !== false) $t = 'Modific. de Capital';
-                                    elseif (strpos($t, 'domicilio') !== false) $t = 'Cambio de Domicilio';
-                                    elseif (strpos($t, 'estatutos') !== false || strpos($t, 'objeto social') !== false) $t = 'Modific. Estatutos';
+                                    elseif (strpos($t, 'capital') !== false) $t = 'Capital changes';
+                                    elseif (strpos($t, 'domicilio') !== false) $t = 'Change of address';
+                                    elseif (strpos($t, 'estatutos') !== false || strpos($t, 'objeto social') !== false) $t = 'Bylaws amendments';
                                     elseif (strpos($t, 'constitucion') !== false) $t = 'Incorporation';
-                                    elseif (strpos($t, 'unipersonalidad') !== false) $t = 'Unipersonalidad';
-                                    elseif (strpos($t, 'cuentas') !== false) $t = 'Cuentas Anuales';
-                                    elseif (strpos($t, 'socio unico') !== false) $t = 'Socio Único';
-                                    else $t = 'Otros Actos';
+                                    elseif (strpos($t, 'unipersonalidad') !== false) $t = 'Single-member status';
+                                    elseif (strpos($t, 'cuentas') !== false) $t = 'Annual accounts';
+                                    elseif (strpos($t, 'socio unico') !== false) $t = 'Sole shareholder';
+                                    // Without these four, a dissolution or a striking-off fell into
+                                    // "Other acts", exactly where it matters most to name them.
+                                    elseif (strpos($t, 'extinci') !== false) $t = 'Striking-off';
+                                    elseif (strpos($t, 'disoluci') !== false) $t = 'Dissolution';
+                                    elseif (strpos($t, 'liquidac') !== false) $t = 'Liquidation';
+                                    elseif (strpos($t, 'concurs') !== false) $t = 'Insolvency';
+                                    else $t = 'Other acts';
                                     
                                     if (!isset($actCounts[$t])) $actCounts[$t] = 0;
                                     $actCounts[$t]++;
@@ -1503,9 +1263,16 @@
                                 if ($data['count'] > $maxActsTimeline) $maxActsTimeline = $data['count'];
                             }
                             
-                            $monthsEs = ['01'=>'Ene','02'=>'Feb','03'=>'Mar','04'=>'Abr','05'=>'May','06'=>'Jun','07'=>'Jul','08'=>'Ago','09'=>'Sep','10'=>'Oct','11'=>'Nov','12'=>'Dic'];
+                            // English month labels (the variable keeps its old name to avoid touching the chart markup).
+                            $monthsEs = ['01'=>'Jan','02'=>'Feb','03'=>'Mar','04'=>'Apr','05'=>'May','06'=>'Jun','07'=>'Jul','08'=>'Aug','09'=>'Sep','10'=>'Oct','11'=>'Nov','12'=>'Dec'];
+
+                            // Charts only when they say something: 2 bars of height 1 years apart
+                            // say less than the list below. Same thresholds as the Spanish page.
+                            $verEvolucion    = count($bormePosts) >= 6 && count($bormeTimeline) >= 3;
+                            $verDistribucion = $totalActs >= 4 && count($actCounts) >= 2;
                             ?>
 
+                            <?php if ($verEvolucion || $verDistribucion): ?>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
                                 <?php if (false && !empty($company['ai_borme_summary'])): ?>
                                     <div class="ai-box-glow" style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
@@ -1522,7 +1289,7 @@
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if (!empty($bormeTimeline)): ?>
+                                <?php if ($verEvolucion): ?>
                                     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
                                         <h3 style="font-size: 0.9rem; font-weight: 700; color: #64748b; margin-top: 0; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Activity Evolution</h3>
                                         
@@ -1568,7 +1335,7 @@
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if (!empty($topActs)): ?>
+                                <?php if ($verDistribucion): ?>
                                     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
                                         <h3 style="font-size: 0.9rem; font-weight: 700; color: #64748b; margin-top: 0; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Acts Distribution</h3>
                                         <div style="display: flex; flex-direction: column; gap: 14px;">
@@ -1589,6 +1356,7 @@
                                     </div>
                                 <?php endif; ?>
                             </div>
+                            <?php endif; ?>
 
                             <?php 
                             $bormeDict = [
@@ -1707,64 +1475,28 @@
                         </div>
                     <?php endif; ?>
 
-                    <!-- CTA PROMOCIONAL B2B (Data Paywall / Excel Export) -->
-                    <?php if (!session('logged_in')): ?>
-                        <aside id="descargar-excel" class="seo-cta-banner"
-                            style="margin-top: 3rem; background: linear-gradient(135deg, #ffffff 0%, #f4f7fb 100%); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 20px; padding: 3.5rem 2rem; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 10px 40px -10px rgba(37, 99, 235, 0.1), 0 1px 3px rgba(0,0,0,0.03); position: relative; overflow: hidden;">
-                            
-                            <!-- Decorative background elements -->
-                            <div style="position: absolute; top: -50%; left: -10%; width: 50%; height: 200%; background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 60%); transform: rotate(30deg); pointer-events: none;"></div>
-                            <div style="position: absolute; bottom: -50%; right: -10%; width: 50%; height: 200%; background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 60%); transform: rotate(-30deg); pointer-events: none;"></div>
-
-                            <div
-                                style="position: relative; z-index: 1; background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; padding: 6px 16px; border-radius: 99px; font-size: 0.8rem; font-weight: 800; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.1em; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 10px rgba(59, 130, 246, 0.1);">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="7 10 12 15 17 10"></polyline>
-                                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                                </svg>
-                                B2B Database
-                            </div>
-                            
-                            <div role="heading" aria-level="2" style="position: relative; z-index: 1; font-size: 1.8rem; font-weight: 800; color: #0f172a; margin-bottom: 1.2rem; line-height: 1.3; max-width: 800px; text-wrap: balance;">
-                                Are you looking for customers similar to <?= esc($companyName) ?>?
-                            </div>
-                            
-                            <p style="position: relative; z-index: 1; color: #475569; font-size: 1.1rem; max-width: 700px; margin: 0 auto 2rem; line-height: 1.6; font-weight: 400;">
-                                Download the complete CSV list with financial and contact info for 
-                                <strong style="color: #0f172a; font-weight: 700;"><?= $countFormatted ?> companies</strong> in the sector <strong style="color: #0f172a; font-weight: 700;"><?= esc(trim(explode('INFORME', $sectorName)[0])) ?></strong> in <strong style="color: #0f172a; font-weight: 700;"><?= esc(!empty($targetProv) ? $targetProv : ($company['province'] ?? $company['registro_mercantil'] ?? 'all Spain')) ?></strong>. 
-                                Ideal to accelerate your marketing campaigns and provide qualified leads to your sales team.
-                            </p>
-                            
-                            <a href="<?= $radarCheckoutUrl ?>" rel="nofollow"
-                                onclick="window.dataLayer = window.dataLayer || []; window.dataLayer.push({'event': 'cta_excel_click'});"
-                                style="position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 12px; background: #2563eb; color: #ffffff; padding: 14px 32px; border-radius: 12px; font-weight: 800; font-size: 1.15rem; text-decoration: none; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3); transition: all 0.3s; cursor: pointer;"
-                                onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 15px 30px -5px rgba(37, 99, 235, 0.4), 0 8px 10px -6px rgba(37, 99, 235, 0.3)';"
-                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(37, 99, 235, 0.3)';">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                    <path d="M8 13h2"></path>
-                                    <path d="M8 17h2"></path>
-                                    <path d="M14 13h2"></path>
-                                    <path d="M14 17h2"></path>
-                                </svg>
-                                Download complete CSV for <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= $priceStr ?>€ <span style="font-size:0.85em; opacity:0.85; font-weight:600;">+ VAT</span>
-                            </a>
-                            
-                            <div style="position: relative; z-index: 1; margin-top: 2rem; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px; color: #64748b; font-size: 0.9rem; font-weight: 500;">
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Instant Download
+                    <?php
+                    /*
+                     * VISIBLE FAQ (24-09-2026). The FAQPage JSON-LD was emitted but the
+                     * questions were never shown, and the "FAQs" tab pointed to an anchor
+                     * that did not exist. Google requires FAQ structured data to match
+                     * visible content.
+                     */
+                    ?>
+                    <section id="preguntas-frecuentes" style="margin-top: 3rem; scroll-margin-top: 90px;">
+                        <h3 style="display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: 800; margin: 0 0 1.25rem; color: var(--b2b-text);">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--b2b-primary);" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            Frequently asked questions
+                        </h3>
+                        <div style="display: flex; flex-direction: column; gap: 18px;">
+                            <?php foreach ($faqs as $faq): ?>
+                                <div style="border-left: 3px solid #e2e8f0; padding-left: 16px;">
+                                    <h4 style="margin: 0 0 6px; font-size: 1rem; font-weight: 700; color: #0f172a;"><?= esc($faq['q']) ?></h4>
+                                    <p style="margin: 0; color: #475569; line-height: 1.6; font-size: 0.95rem;"><?= esc($faq['a']) ?></p>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> CSV Format (Comma separated)
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Verified Data
-                                </div>
-                            </div>
-                        </aside>
-                    <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
+                    </section>
 
                     <!-- Related Companies (Full Width Grid) -->
                     <div style="margin-top: 3rem; margin-bottom: 2rem;">
@@ -1830,6 +1562,66 @@
                     </div>
 
 
+                    <?php
+                    /*
+                     * MORE TOOLS (24-09-2026). Replaces the full-width CSV banner and the
+                     * Vértice banner: secondary products, same style, one row. The CSV card
+                     * keeps id="descargar-excel" and stays hidden for logged-in users, as
+                     * before.
+                     */
+                    $ctaSinSector = in_array(trim((string) ($sectorName ?? '')), ['', 'todos los sectores', 'este sector'], true);
+                    $ctaProv = !empty($targetProv) ? ($targetProv === 'toda España' ? 'Spain' : $targetProv) : ($company['province'] ?? $company['registro_mercantil'] ?? 'Spain');
+                    ?>
+                    <style>
+                        .tools-strip{margin:1rem 0 3rem}
+                        .tools-strip__title{font-size:1rem;font-weight:800;color:#0f172a;margin:0 0 12px}
+                        .tools-strip__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+                        .tool-card{display:flex;flex-direction:column;gap:6px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;text-decoration:none;transition:border-color .15s,box-shadow .15s}
+                        .tool-card:hover{border-color:#bfdbfe;box-shadow:0 6px 16px -8px rgba(15,23,42,.18)}
+                        .tool-card__head{display:flex;align-items:center;gap:10px}
+                        .tool-card__icon{flex-shrink:0;width:30px;height:30px;border-radius:8px;background:#f1f5f9;color:#334155;display:flex;align-items:center;justify-content:center}
+                        .tool-card__name{font-size:.92rem;font-weight:800;color:#0f172a}
+                        .tool-card__text{font-size:.8rem;color:#64748b;line-height:1.45;margin:0;flex:1}
+                        .tool-card__cta{font-size:.82rem;font-weight:800;color:#2563eb;margin-top:4px}
+                    </style>
+                    <section class="tools-strip" aria-labelledby="tools-strip-title">
+                        <h3 id="tools-strip-title" class="tools-strip__title">More tools</h3>
+                        <div class="tools-strip__grid">
+                            <?php if (!session('logged_in')): ?>
+                            <a id="descargar-excel" class="tool-card" href="<?= $radarCheckoutUrl ?>" rel="nofollow"
+                               onclick="window.dataLayer = window.dataLayer || []; window.dataLayer.push({'event': 'cta_excel_click'});"
+                               data-track-click="company_tools" data-track-element="csv">
+                                <span class="tool-card__head">
+                                    <span class="tool-card__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span>
+                                    <span class="tool-card__name">Company list as CSV</span>
+                                </span>
+                                <span class="tool-card__text">
+                                    <?= $countFormatted ?> companies<?= $ctaSinSector ? '' : ' in the sector ' . esc(trim(explode('INFORME', $sectorName)[0])) ?> in <?= esc($ctaProv) ?>, with contact details.
+                                </span>
+                                <span class="tool-card__cta">Download for <?= $priceStr ?> € + VAT →</span>
+                            </a>
+                            <?php endif; ?>
+                            <a class="tool-card" href="https://vertice.apiempresas.es" target="_blank" rel="noopener noreferrer"
+                               onclick="if(window.trackEvent) trackEvent('click_vertice_banner', { source: 'company_tools' });"
+                               data-track-click="company_tools" data-track-element="vertice">
+                                <span class="tool-card__head">
+                                    <span class="tool-card__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></span>
+                                    <span class="tool-card__name">Vértice</span>
+                                </span>
+                                <span class="tool-card__text">Analyse the viability of any Spanish municipality with AI before opening a store.</span>
+                                <span class="tool-card__cta">Try it for free →</span>
+                            </a>
+                            <a class="tool-card" href="<?= site_url('spanish-company-data-api') ?>" data-track-click="company_tools" data-track-element="api_pricing">
+                                <span class="tool-card__head">
+                                    <span class="tool-card__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg></span>
+                                    <span class="tool-card__name">API plans and pricing</span>
+                                </span>
+                                <span class="tool-card__text">Bulk lookups, BORME acts and risk data for every Spanish company, with a free tier.</span>
+                                <span class="tool-card__cta">See plans →</span>
+                            </a>
+                        </div>
+                    </section>
+
                     <!-- Schema.org JSON-LD -->
                     <script type="application/ld+json">
                     <?= json_encode($schemaOrg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
@@ -1866,9 +1658,9 @@
                                 toast.innerHTML = `
                                 <div style="background: #3b82f6; width: 8px; height: 8px; border-radius: 50%;"></div>
                                 <div style="font-size: 0.9rem;">
-                                    ¿Copiando datos manualmente? <b>Usa nuestra API</b> y ahorra tiempo.
+                                    Copying data by hand? <b>Use our API</b> and save time.
                                 </div>
-                                <a href="#api-dev-section" class="btn-toast">Ver API</a>
+                                <a href="#api-dev-section" class="btn-toast">See the API</a>
                             `;
                                 document.body.appendChild(toast);
 
@@ -1921,11 +1713,17 @@
                         mapLoaded = true;
 
                         const hasCoords = <?= (!empty($company['lat']) && !empty($company['lng'])) ? 'true' : 'false' ?>;
+                        // CARTO exige API key en sus basemaps desde septiembre de 2026: sin ella
+                        // cada tesela sale con una marca de agua "API KEY REQUIRED". La clave va
+                        // en .env (CARTO_BASEMAPS_KEY, gratis en carto.com/basemaps/apikey). Sin
+                        // clave, se usa el mapa incrustado de Google con las coordenadas, que no
+                        // la necesita, en vez de enseñar un mapa roto.
+                        const cartoKey = "<?= esc(trim((string) getenv('CARTO_BASEMAPS_KEY')), 'js') ?>";
                         const companyName = "<?= esc($company['name'] ?? $company['nombre'] ?? 'Empresa', 'js') ?>";
                         const rawAddress = "<?= esc($company['address'] ?? '', 'js') ?>";
                         const province = "<?= esc($company['province'] ?? $company['provincia'] ?? '', 'js') ?>";
 
-                        if (hasCoords) {
+                        if (hasCoords && cartoKey) {
                             if (typeof L === 'undefined') {
                                 const script = document.createElement('script');
                                 script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
@@ -1936,6 +1734,9 @@
                             }
                         } else {
                             const fullAddress = `${rawAddress}, ${province}, España`;
+                            const mapQuery = hasCoords
+                                ? `<?= (float) ($company['lat'] ?? 0) ?>,<?= (float) ($company['lng'] ?? 0) ?>`
+                                : fullAddress;
                             const iframe = document.createElement('iframe');
                             iframe.width = "100%";
                             iframe.height = "100%";
@@ -1943,7 +1744,7 @@
                             iframe.style.border = "0";
                             iframe.style.borderRadius = "12px";
                             iframe.loading = "lazy";
-                            iframe.src = `https://maps.google.com/maps?q=${encodeURIComponent(fullAddress)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+                            iframe.src = `https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&t=&z=${hasCoords ? 16 : 15}&ie=UTF8&iwloc=&output=embed`;
                             mapContainer.innerHTML = '';
                             mapContainer.appendChild(iframe);
                         }
@@ -1958,7 +1759,7 @@
                             zoomControl: true
                         }).setView([lat, lng], 16);
 
-                        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=' + encodeURIComponent("<?= esc(trim((string) getenv('CARTO_BASEMAPS_KEY')), 'js') ?>"), {
                             attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
                             subdomains: 'abcd',
                             maxZoom: 20

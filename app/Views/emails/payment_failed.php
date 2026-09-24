@@ -19,7 +19,7 @@
                             <p style="margin: 5px 0 0; color: rgba(255,255,255,0.9); font-size: 14px; font-weight: 500;">Datos oficiales para desarrolladores</p>
                         </td>
                     </tr>
-                    
+
                     <!-- Content -->
                     <tr>
                         <td style="padding: 40px; line-height: 1.6;">
@@ -27,9 +27,9 @@
                             <div style="font-size: 16px; color: #4b5563;">
                                 <?= $content ?>
                             </div>
-                            
+
                             <!-- CTA Button -->
-                            <table border="0" cellspacing="0" cellpadding="0" style="margin: 35px 0;">
+                            <table border="0" cellspacing="0" cellpadding="0" style="margin: 30px 0 10px;">
                                 <tr>
                                     <td align="center" bgcolor="#2563eb" style="border-radius: 8px;">
                                         <a href="<?= $button_url ?>" target="_blank" style="display: inline-block; padding: 14px 28px; font-size: 16px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 8px;">
@@ -38,21 +38,21 @@
                                     </td>
                                 </tr>
                             </table>
-                            
+
                             <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-                            
+
                             <p style="font-size: 14px; color: #9ca3af; margin-bottom: 0;">
-                                Atentamente,<br>
+                                
                                 <strong>El equipo de APIEmpresas.es</strong>
                             </p>
                         </td>
                     </tr>
-                    
+
                     <!-- Footer -->
                     <tr>
                         <td style="background-color: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #9ca3af;">
-                            &copy; <?= date('Y') ?> APIEmpresas.es. Todos los derechos reservados.<br>
-                            Estás recibiendo este email porque te registraste en nuestra plataforma.
+                            &copy; <?= date('Y') ?> APIEmpresas.es<br>
+                            Aviso sobre el cobro de tu suscripción.
                         </td>
                     </tr>
                 </table>

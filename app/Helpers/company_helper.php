@@ -570,6 +570,71 @@ if (!function_exists('company_estado_registral')) {
 }
 
 /**
+ * ¿Nos podemos fiar del CNAE de esta empresa?
+ *
+ * POR QUÉ EXISTE (24-09-2026)
+ * ---------------------------
+ * El 9900 ("Actividades de organizaciones y organismos extraterritoriales") es el
+ * código de embajadas, consulados y organismos internacionales. Pero aparece en
+ * sociedades mercantiles corrientes —Disi Asesoría Internacional S.L., B97354518—,
+ * seguramente como valor por defecto de alguna carga. Y de ese código cuelga
+ * media ficha: "Empresas relacionadas" salía llena de embajadas y juzgados, el
+ * bloque del CSV ofrecía "102 empresas del sector organismos extraterritoriales",
+ * y el texto de presentación hablaba de su "especialización" en eso.
+ *
+ * Regla: un 9900 solo es creíble en entidades que pueden serlo de verdad. Por la
+ * letra del CIF: N (entidades extranjeras), Q (organismos públicos), S (órganos de
+ * la Administración del Estado) y W (establecimientos de no residentes). Una A, B,
+ * F, G... es una sociedad, cooperativa o asociación española: ahí el 9900 es un
+ * error. Sin CIF, se mira el nombre.
+ *
+ * Cuando devuelve false, el controlador vacía el CNAE antes de pintar: es mejor
+ * "no consta" que un dato falso del que dependen otros bloques.
+ */
+if (!function_exists('company_cnae_fiable')) {
+    function company_cnae_fiable(array $company): bool
+    {
+        $code = preg_replace('/\D/', '', (string) ($company['cnae_code'] ?? $company['cnae'] ?? ''));
+        if ($code === '' || strpos($code, '99') !== 0) {
+            return true; // Solo se cuestiona el 99xx. El resto, tal cual.
+        }
+
+        $cif = strtoupper(trim((string) ($company['cif'] ?? $company['nif'] ?? '')));
+        if ($cif !== '' && ctype_alpha($cif[0])) {
+            return in_array($cif[0], ['N', 'Q', 'S', 'W'], true);
+        }
+
+        $nombre = mb_strtoupper((string) ($company['name'] ?? $company['company_name'] ?? ''), 'UTF-8');
+        return (bool) preg_match('/EMBAJADA|CONSULADO|ORGANIZACI[OÓ]N INTERNACIONAL|ORGANISMO INTERNACIONAL|NACIONES UNIDAS|UNI[OÓ]N EUROPEA|\bOTAN\b|\bNATO\b/u', $nombre);
+    }
+}
+
+/**
+ * Objeto social de verdad, o '' si lo que hay es el texto del CNAE copiado.
+ *
+ * Muchas fichas traen como objeto social "CNAE 9900 - Actividades de ...": no es
+ * el objeto social de los estatutos, es el CNAE otra vez, y la tabla lo enseñaba
+ * tres veces (CNAE 2009, CNAE 2025 y "objeto social").
+ */
+if (!function_exists('company_objeto_social_real')) {
+    function company_objeto_social_real(array $company): string
+    {
+        $obj = trim((string) ($company['corporate_purpose'] ?? $company['objeto_social'] ?? ''));
+        if ($obj === '' || $obj === '-') {
+            return '';
+        }
+        if (preg_match('/^\s*CNAE\b/iu', $obj)) {
+            return '';
+        }
+        $label = trim((string) ($company['cnae_label'] ?? ''));
+        if ($label !== '' && mb_strtolower($obj, 'UTF-8') === mb_strtolower($label, 'UTF-8')) {
+            return '';
+        }
+        return $obj;
+    }
+}
+
+/**
  * El rótulo que va encima del número, en un solo sitio.
  *
  * Estaba escrito a mano como "NIVEL DE RIESGO" en cuatro parciales y los dos PDF.
@@ -933,6 +998,19 @@ if (!function_exists('risk_comprobaciones_tabla')) {
                  'Sin cambios de domicilio repetidos.'],
             ],
         ];
+    }
+}
+
+/**
+ * Cuántas comprobaciones hace el bloque "Qué se ha comprobado". Para los textos
+ * de venta: se nombra el número real, y si se añade una comprobación a la tabla
+ * los textos se actualizan solos.
+ */
+if (!function_exists('risk_num_comprobaciones')) {
+    function risk_num_comprobaciones(): int
+    {
+        $t = risk_comprobaciones_tabla();
+        return count($t['graves'] ?? []) + count($t['numericas'] ?? []);
     }
 }
 

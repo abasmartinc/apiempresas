@@ -37,7 +37,7 @@ class EmailAutomationCommand extends BaseCommand
         // =========================================================================
         // BLOQUE 1: USUARIOS DE LA API (Solo usuarios con signup_intent = 'api')
         // =========================================================================
-        CLI::write('📡 [1/3] Procesando automatizaciones de API...', 'cyan');
+        CLI::write('📡 [1/5] Procesando automatizaciones de API...', 'cyan');
         
         $apiUsers = $db->table('users')
             ->select('users.*, user_subscriptions.plan_id')
@@ -59,7 +59,7 @@ class EmailAutomationCommand extends BaseCommand
         // =========================================================================
         // BLOQUE 2: FLUJO DE RIESGO, PAYWALL Y UPSELL PACKS
         // =========================================================================
-        CLI::write('🛡️ [2/3] Procesando automatizaciones de Riesgo y Solvencia...', 'cyan');
+        CLI::write('🛡️ [2/5] Procesando automatizaciones de Riesgo y Solvencia...', 'cyan');
         $this->processRiskPaywallTriggers();
         $this->processRiskPackUpsellTriggers();
         $this->processSolvenciaCiclo();
@@ -67,8 +67,20 @@ class EmailAutomationCommand extends BaseCommand
         // =========================================================================
         // BLOQUE 3: USUARIOS CON ALTA TASA DE ERRORES 400 EN API
         // =========================================================================
-        CLI::write('🔍 [3/3] Detectando usuarios con errores 400 en peticiones...', 'cyan');
+        CLI::write('🔍 [3/5] Detectando usuarios con errores 400 en peticiones...', 'cyan');
         $this->processBadRequestUsers();
+
+        // =========================================================================
+        // BLOQUE 4: CLIENTES DE PAGO DE LA API CERCA DEL CUPO DEL MES
+        // =========================================================================
+        CLI::write('💳 [4/5] Revisando el cupo mensual de los clientes de pago de la API...', 'cyan');
+        $this->processPaidApiQuota();
+
+        // =========================================================================
+        // BLOQUE 5: RECUPERACIÓN DE QUIEN DEJÓ PRO O BUSINESS HACE UN MES
+        // =========================================================================
+        CLI::write('↩️  [5/5] Recuperación de bajas de planes de pago de la API...', 'cyan');
+        $this->processApiWinback();
 
         CLI::write('✅ Proceso de automatización finalizado con éxito.', 'green');
     }
@@ -759,6 +771,177 @@ class EmailAutomationCommand extends BaseCommand
             CLI::write("  -> Enviando 'risk_monthly_renewal' a {$u['email']}...");
             $this->registrarEnvio($uid, 'risk_monthly_renewal',
                 $this->emailService->sendRiskMonthlyRenewal($u + ['user_id' => $uid], $usadas[$uid] >= $gratis));
+        }
+    }
+
+    /**
+     * Aviso al 80 % y al 100 % del cupo del mes a los clientes de PAGO de la API.
+     *
+     * Antes no había nada: al agotar sus consultas recibían un 429 sin aviso. Se
+     * cuenta igual que ApiKeyFilter (uso del mes natural con ese plan) y se envía como
+     * mucho una vez por umbral y mes. Es aviso de servicio, así que no mira la baja
+     * del marketing.
+     */
+    protected function processPaidApiQuota(): void
+    {
+        $db       = \Config\Database::connect();
+        $mes      = date('Y-m');
+        $desdeMes = date('Y-m-01 00:00:00');
+
+        // Misma suscripción que elige ApiKeyFilter: la activa más reciente de la API
+        $filas = $db->query("
+            SELECT u.id, u.email, u.name,
+                   us.id AS sub_id, us.plan_id,
+                   ap.name AS plan_name, ap.monthly_quota, ap.product_type,
+                   COALESCE(uw.balance, 0) AS wallet
+            FROM user_subscriptions us
+            JOIN users u      ON u.id = us.user_id
+            JOIN api_plans ap ON ap.id = us.plan_id
+            LEFT JOIN user_wallets uw ON uw.user_id = u.id
+            WHERE us.plan_id IN (2, 3)          -- Pro y Business: los dos planes de pago de la API
+              AND ap.monthly_quota > 0
+              -- Igual que ApiKeyFilter: la cancelada conserva el plan hasta fin de periodo
+              AND (
+                    (us.status = 'active' AND (us.current_period_end IS NULL OR us.current_period_end > NOW()))
+                 OR (us.status = 'canceled' AND us.current_period_end > NOW())
+              )
+              AND u.is_admin = 0
+            ORDER BY us.id DESC
+        ")->getResultArray();
+
+        $clientes = [];
+        foreach ($filas as $f) {
+            $clientes[(int) $f['id']] ??= $f;   // la primera es la de id más alto
+        }
+        if (empty($clientes)) {
+            CLI::write('  - Sin clientes de pago de la API.', 'dark_gray');
+            return;
+        }
+
+        // Uso del mes por usuario y plan, de una consulta
+        $uso = [];
+        foreach ($db->table('api_usage_daily')
+                    ->select('user_id, plan_id, SUM(requests_count) AS n')
+                    ->whereIn('user_id', array_keys($clientes))
+                    ->like('date', $mes, 'after')
+                    ->groupBy(['user_id', 'plan_id'])
+                    ->get()->getResultArray() as $u) {
+            $uso[(int) $u['user_id'] . ':' . (int) $u['plan_id']] = (int) $u['n'];
+        }
+
+        $siguientes = [];
+        $enviados   = 0;
+
+        foreach ($clientes as $uid => $c) {
+            $cupo   = (int) $c['monthly_quota'];
+            $usadas = $uso[$uid . ':' . (int) $c['plan_id']] ?? 0;
+            $pct    = $cupo > 0 ? ($usadas / $cupo) * 100 : 0;
+
+            if ($pct < 80) {
+                continue;
+            }
+            $umbral = $pct >= 100 ? 100 : 80;
+            $tipo   = 'paid_quota_' . $umbral;
+
+            $yaEsteMes = $db->table('user_email_automation')
+                ->where('user_id', $uid)
+                ->where('email_type', $tipo)
+                ->where('sent_at >=', $desdeMes)
+                ->countAllResults() > 0;
+            if ($yaEsteMes) {
+                continue;
+            }
+
+            // Siguiente plan: de Pro (2) se sube a Business (3). Business es el tope:
+            // a ese cliente se le ofrece el bono y un plan a medida.
+            $clave = (int) $c['plan_id'];
+            if (!array_key_exists($clave, $siguientes)) {
+                $siguientes[$clave] = null;
+                if ($clave === 2) {
+                    try {
+                        $siguientes[$clave] = $db->table('api_plans')
+                            ->select('id, name, monthly_quota')
+                            ->where('id', 3)
+                            ->get()->getRowArray() ?: null;
+                    } catch (\Throwable $e) {
+                        log_message('error', '[EmailAutomation::paidQuota] plan Business: ' . $e->getMessage());
+                    }
+                }
+            }
+
+            CLI::write("  -> Enviando '{$tipo}' a {$c['email']} ({$usadas}/{$cupo})...");
+            $res = $this->emailService->sendPaidQuotaWarning(
+                ['id' => $uid, 'email' => $c['email'], 'name' => $c['name']],
+                ['name' => $c['plan_name'], 'monthly_quota' => $cupo],
+                $usadas,
+                $umbral,
+                (int) $c['wallet'],
+                $siguientes[$clave]
+            );
+            if (!empty($res['success'])) {
+                $this->automationModel->markAsSent($uid, $tipo, $res['body'] ?? '');
+                $this->recordTracking($uid, 'email_sent_' . $tipo);
+                $enviados++;
+                CLI::write("     [SENT] {$tipo} OK", 'yellow');
+            }
+        }
+
+        CLI::write('  - Avisos de cupo enviados: ' . $enviados);
+    }
+
+    /**
+     * 30-37 días después de que TERMINE un Pro/Business cancelado, si no ha vuelto.
+     * Una vez al año como mucho. Es comercial: usuariosElegibles() descarta las bajas.
+     */
+    protected function processApiWinback(): void
+    {
+        $db = \Config\Database::connect();
+
+        $conMotivo = in_array('cancellation_reason', $db->getFieldNames('user_subscriptions'), true);
+
+        $filas = $db->table('user_subscriptions us')
+            ->select('us.user_id, us.plan_id, us.current_period_end, ap.name AS plan_name'
+                . ($conMotivo ? ', us.cancellation_reason' : ''))
+            ->join('api_plans ap', 'ap.id = us.plan_id', 'left')
+            ->where('us.status', 'canceled')
+            ->whereIn('us.plan_id', [2, 3])
+            ->where('us.current_period_end >=', date('Y-m-d H:i:s', strtotime('-37 days')))
+            ->where('us.current_period_end <=', date('Y-m-d H:i:s', strtotime('-30 days')))
+            ->orderBy('us.current_period_end', 'DESC')
+            ->get()->getResultArray();
+
+        if (empty($filas)) {
+            CLI::write('  - Sin bajas de Pro/Business en la ventana de 30-37 días.', 'dark_gray');
+            return;
+        }
+
+        // Quien ya ha vuelto a un plan de pago de la API no recibe nada
+        $activos = array_flip(array_map('intval', array_column($db->table('user_subscriptions')
+            ->select('user_id')
+            ->where('status', 'active')
+            ->whereIn('plan_id', [2, 3])
+            ->get()->getResultArray(), 'user_id')));
+
+        $usuarios = $this->usuariosElegibles(array_column($filas, 'user_id'));
+        $vistos   = [];
+
+        foreach ($filas as $f) {
+            $uid = (int) $f['user_id'];
+            if (isset($vistos[$uid]) || isset($activos[$uid]) || !isset($usuarios[$uid])) {
+                continue;
+            }
+            $vistos[$uid] = true;
+
+            if ($this->automationModel->wasSentRecently($uid, 'api_winback', 365)) {
+                continue;
+            }
+
+            CLI::write("  -> Enviando 'api_winback' a {$usuarios[$uid]['email']}...");
+            $this->registrarEnvio($uid, 'api_winback', $this->emailService->sendApiWinback(
+                $usuarios[$uid] + ['user_id' => $uid],
+                ['name' => $f['plan_name'] ?? ''],
+                (string) ($f['cancellation_reason'] ?? '')
+            ));
         }
     }
 

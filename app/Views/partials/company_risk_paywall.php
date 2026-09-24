@@ -48,6 +48,7 @@ $pwNum     = is_array($pwEventos) ? count($pwEventos) : 0;
 $pwLimpia  = !empty($riskProfile) && $pwNum === 0;
 $pwUnica   = !empty($riskProfile) && $pwNum === 1;
 $pwGratis  = (int) solvencia('consultasGratis', 3);
+$pwChecks  = risk_num_comprobaciones();
 
 /*
  * "SIN INCIDENCIAS" Y "SIN DATOS" NO SON LO MISMO, Y SE VEÍAN IGUAL.
@@ -228,19 +229,20 @@ $pwBgColor  = $pwVis[1];
                 lo que no.
             <?php elseif ($pwLimpia): ?>
                 No constan incidencias de <strong style="color: #0f172a;"><?= esc($compNameStr) ?></strong> en el BORME, y ya has
-                gastado tus <?= $pwGratis ?> consultas gratuitas de este mes. El dictamen completo te da el histórico verificado y
-                de dónde sale la puntuación: lo que se adjunta a un expediente de cliente.
+                gastado tus <?= $pwGratis ?> consultas gratuitas de este mes. El dictamen completo te da las <?= $pwChecks ?> comprobaciones
+                registrales con su resultado y de dónde sale la puntuación: lo que se adjunta a un expediente de cliente.
             <?php elseif ($pwUnica): ?>
                 <!-- No se repite aquí que ha agotado la cuota: ya lo dicen la píldora roja
                      de la cabecera y la amarilla de justo encima. Tres veces la misma mala
                      noticia antes de llegar a lo que ofreces no aumenta la urgencia, cansa. -->
                 De <strong style="color: #0f172a;"><?= esc($compNameStr) ?></strong> consta una sola incidencia y ya la tienes
-                ahí arriba: lo que queda por ver es desde cuándo, cuánto pesa en esa puntuación y qué más se ha revisado
-                para llegar a ella.
+                ahí arriba: lo que queda por ver es cuánto pesa en esa puntuación y qué más se ha revisado para llegar
+                a ella.
             <?php elseif (!empty($riskProfile)): ?>
                 De <strong style="color: #0f172a;"><?= esc($compNameStr) ?></strong> constan
-                <strong style="color: #0f172a;"><?= $pwNum ?> incidencias</strong> y el titular solo nombra la más grave. El
-                dictamen las lista todas con su fecha, su gravedad y el peso que tiene cada una en la puntuación.
+                <strong style="color: #0f172a;"><?= $pwNum ?> incidencias</strong> y el titular solo nombra la más grave. Los
+                actos están en el BORME de esta ficha; el dictamen te dice cuáles pesan: la gravedad de cada una, cuánto
+                aporta a la puntuación y las <?= $pwChecks ?> comprobaciones registrales con su resultado.
             <?php else: ?>
                 Has analizado el límite mensual de <?= $pwGratis ?> empresas gratuitas. Para consultar el dictamen de <strong style="color: #0f172a;"><?= esc($compNameStr) ?></strong> o desbloquear más empresas:
             <?php endif; ?>
@@ -339,7 +341,7 @@ $pwBgColor  = $pwVis[1];
                         <!-- En una empresa sin eventos, prometer "los actos con su fecha" es
                              prometer una lista vacía: ahí lo que se entrega es qué se ha
                              mirado para poder afirmar que no hay nada. -->
-                        <li>· <?= $pwNum > 0 ? 'Actos del BORME con su fecha' : 'Qué fuentes se han revisado' ?></li>
+                        <li>· <?= $pwNum > 0 ? 'Gravedad de cada acto del BORME' : 'Qué fuentes se han revisado' ?></li>
                         <li>· Listo para el expediente</li>
                         <li style="color: #94a3b8;">· Sin vigilancia ni avisos</li>
                     </ul>

@@ -29,7 +29,7 @@
             
             <div class="alert-box">
                 <strong>⚡ Consejo para producción:</strong>
-                <p style="margin: 10px 0 0; font-size: 14px;">Si vas a lanzar tu aplicación a producción o esperas recibir tráfico real, te recomendamos activar el <strong>Plan Pro</strong> hoy mismo. Evitarás bloqueos por límite de cuota y tendrás monitorización avanzada.</p>
+                <p style="margin: 10px 0 0; font-size: 14px;">Si vas a lanzar tu aplicación a producción o esperas recibir tráfico real, te recomendamos activar el <strong>Plan Pro</strong> hoy mismo. El plan Free son 100 consultas en total; Pro te da 3.000 cada mes y la respuesta completa, sin campos enmascarados.</p>
             </div>
 
             <div class="cta-container">
