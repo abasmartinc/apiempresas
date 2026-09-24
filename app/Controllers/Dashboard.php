@@ -243,7 +243,16 @@ class Dashboard extends BaseController
                 $hasRiskPlan = true;
             }
         }
-        $isRiskUser = ($intent === 'view_risk_profile' || $prefProduct === 'risk' || session('intended_product') === 'risk' || $hasRiskPlan);
+        // Un plan de pago de la API manda sobre cómo se registró el usuario: quien entró
+        // por una ficha de riesgo y después contrata Pro/Business debe ver su panel de la API.
+        $hasPaidApiPlan = false;
+        if (!empty($data['plan'])) {
+            $pSlug = strtolower(trim((string)($data['plan']->plan_slug ?? '')));
+            $pType = strtolower(trim((string)($data['plan']->product_type ?? '')));
+            $hasPaidApiPlan = in_array($pType, ['api', 'bundle'], true) && $pSlug !== 'free';
+        }
+
+        $isRiskUser = $hasRiskPlan || (!$hasPaidApiPlan && ($intent === 'view_risk_profile' || $prefProduct === 'risk' || session('intended_product') === 'risk'));
 
         if (($isRiskUser || $viewParam === 'risk') && $viewParam !== 'api') {
             return $this->renderRiskDashboard($user, $data);

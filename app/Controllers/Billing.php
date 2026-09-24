@@ -73,11 +73,22 @@ class Billing extends BaseController
                 $hasRiskPlan = true;
             }
         }
-        $isRiskUser = ($intent === 'view_risk_profile' || $prefProduct === 'risk' || session('intended_product') === 'risk' || $hasRiskPlan);
+        // Igual que en Dashboard: un plan de pago de la API manda sobre signup_intent.
+        $hasPaidApiPlan = false;
+        if (!empty($data['plan'])) {
+            $pSlug = strtolower(trim((string)($data['plan']->plan_slug ?? '')));
+            $pType = strtolower(trim((string)($data['plan']->product_type ?? '')));
+            $hasPaidApiPlan = in_array($pType, ['api', 'bundle'], true) && $pSlug !== 'free';
+        }
+        $isRiskUser = $hasRiskPlan || (!$hasPaidApiPlan && ($intent === 'view_risk_profile' || $prefProduct === 'risk' || session('intended_product') === 'risk'));
         $viewParam = $this->request->getGet('view');
         $planParam = $this->request->getGet('plan');
 
-        if (($isRiskUser || $viewParam === 'risk' || $planParam === 'risk_pro') && $viewParam !== 'api') {
+        // Si viene a contratar un plan de la API (botones de precios), se le enseña el
+        // pago de la API aunque se registrara por el perfil de riesgo.
+        $pideApi = in_array($planParam, ['pro', 'business'], true);
+
+        if (($isRiskUser || $viewParam === 'risk' || $planParam === 'risk_pro') && $viewParam !== 'api' && !$pideApi) {
             return $this->renderRiskBilling($user, $data);
         }
 
