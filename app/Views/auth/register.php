@@ -141,7 +141,15 @@
                 <div class="auth-separator" style="margin: 12px 0;">O regístrate con un clic</div>
 
                 <div class="social-login-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 0;">
-                    <?php $oauthIntent = request()->getGet('intent') ? '?intent=' . urlencode(request()->getGet('intent')) : ''; ?>
+                    <?php
+                        // intent y, si viene de "Activar Pro/Business", el destino de pago
+                        // (Google lo respeta; GitHub todavía no lee `redirect`).
+                        $oauthQuery = array_filter([
+                            'intent'   => request()->getGet('intent') ?: null,
+                            'redirect' => !empty($redirectUrl) ? $redirectUrl : null,
+                        ]);
+                        $oauthIntent = $oauthQuery ? '?' . http_build_query($oauthQuery) : '';
+                    ?>
                     <a href="<?= site_url('auth/google') . $oauthIntent ?>" class="social-btn google" style="display: flex; align-items: center; justify-content: center; gap: 6px; background: #ffffff; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 12px; padding: 8px 5px; font-size: 12px; font-weight: 700; text-decoration: none; transition: all 0.25s ease;">
                         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="16">
                         <span>Google</span>

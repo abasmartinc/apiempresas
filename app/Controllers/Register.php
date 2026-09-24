@@ -33,12 +33,26 @@ class Register extends BaseController
      */
     public function index()
     {
+        // Botones "Activar Pro / Business" de la home y de la página de precios:
+        // llegan con ?plan=pro|business (y period). Antes se ignoraba y el usuario que
+        // quería pagar acababa en el panel del plan Free. Ahora, tras el alta (o al
+        // momento si ya tiene sesión), va al pago con ese plan y periodo ya marcados.
+        $destinoPago = null;
+        $planPedido  = strtolower(trim((string) $this->request->getGet('plan')));
+        if (in_array($planPedido, ['pro', 'business'], true)) {
+            $periodo     = $this->request->getGet('period') === 'monthly' ? 'monthly' : 'annual';
+            $destinoPago = 'billing?plan=' . $planPedido . '&period=' . $periodo;
+        }
+
         if (session('logged_in')) {
-            $redirectUrl = $this->request->getGet('redirect') ?? 'dashboard';
+            $redirectUrl = $destinoPago ?? ($this->request->getGet('redirect') ?? 'dashboard');
             return redirect()->to(site_url(ltrim($redirectUrl, '/')));
         }
         $validation = session('validation') ?? \Config\Services::validation();
         $redirectUrl = $this->request->getGet('redirect') ?? '';
+        if ($redirectUrl === '' && $destinoPago !== null) {
+            $redirectUrl = $destinoPago;
+        }
         if ($this->request->getGet('intent')) {
             session()->set('signup_intent', trim((string)$this->request->getGet('intent')));
         }

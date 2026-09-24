@@ -1692,7 +1692,7 @@
                                 </svg> Grafos de Poder Societario</li>
                         </ul>
 
-                        <a href="<?= site_url('register?intent=api&plan=pro') ?>" class="api-pricing-btn primary">Activar Plan Pro</a>
+                        <a href="<?= site_url('register?intent=api&plan=pro&period=annual') ?>" class="api-pricing-btn primary">Activar Plan Pro</a>
                     </div>
 
                     <!-- BUSINESS -->
@@ -1726,7 +1726,7 @@
                                 </svg> Soporte Prioritario Slack</li>
                         </ul>
 
-                        <a href="<?= site_url('register?intent=api&plan=business') ?>" class="api-pricing-btn">Activar Business</a>
+                        <a href="<?= site_url('register?intent=api&plan=business&period=annual') ?>" class="api-pricing-btn">Activar Business</a>
                     </div>
                 </div>
 
@@ -2471,6 +2471,13 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                     pricePro.textContent = pricePro.dataset.monthly;
                     priceBusiness.textContent = priceBusiness.dataset.monthly;
                 }
+
+                // Los botones de pago llevan el periodo que el usuario está viendo
+                document.querySelectorAll('a[href*="register?intent=api&plan=pro"], a[href*="register?intent=api&plan=business"]').forEach(function (a) {
+                    var u = new URL(a.href, window.location.origin);
+                    u.searchParams.set('period', isAnnual ? 'annual' : 'monthly');
+                    a.href = u.toString();
+                });
             }
 
             function syntaxHighlight(json) {

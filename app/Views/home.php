@@ -279,7 +279,7 @@
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Listado de Constituciones</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Grafos de Poder Societario</li>
                         </ul>
-                        <a href="<?= site_url('register?intent=api&plan=pro') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Pro", "plan": "pro", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Pro</a>
+                        <a href="<?= site_url('register?intent=api&plan=pro&period=annual') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Pro", "plan": "pro", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Pro</a>
                         <div style="text-align: center; margin-top: 16px;">
                             <a href="<?= site_url('planes/pro') ?>" style="color: #c7d2fe; font-size: 0.9rem; text-decoration: none; font-weight: 500; border-bottom: 1px dashed #818cf8; padding-bottom: 2px; transition: color 0.2s;">Ver casos de uso y ejemplos &rarr;</a>
                         </div>
@@ -299,7 +299,7 @@
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> IA Predictiva y Calculadora Match B2B</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Soporte Prioritario Slack / Email</li>
                         </ul>
-                        <a href="<?= site_url('register?intent=api&plan=business') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Business", "plan": "business", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Business</a>
+                        <a href="<?= site_url('register?intent=api&plan=business&period=annual') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Business", "plan": "business", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Business</a>
                         <div style="text-align: center; margin-top: 16px;">
                             <a href="<?= site_url('planes/business') ?>" style="color: #a7f3d0; font-size: 0.9rem; text-decoration: none; font-weight: 500; border-bottom: 1px dashed #34d399; padding-bottom: 2px; transition: color 0.2s;">Ver casos de uso y ejemplos &rarr;</a>
                         </div>
@@ -1066,6 +1066,13 @@
                 pricePro.textContent = pricePro.dataset.monthly;
                 priceBiz.textContent = priceBiz.dataset.monthly;
             }
+
+            // Los botones de pago llevan el periodo que el usuario está viendo
+            document.querySelectorAll('a[href*="register?intent=api&plan=pro"], a[href*="register?intent=api&plan=business"]').forEach(function (a) {
+                var u = new URL(a.href, window.location.origin);
+                u.searchParams.set('period', isAnnualHome ? 'annual' : 'monthly');
+                a.href = u.toString();
+            });
         }
     </script>
 </body>
