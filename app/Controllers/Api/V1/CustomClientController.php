@@ -13,6 +13,15 @@ class CustomClientController extends BaseApiController
     /** @var CompanyModel */
     protected $companyModel;
 
+    /**
+     * Usuarios que pueden usar el endpoint de cada cliente a medida. Antes cualquier
+     * API Key (también la Free) podía llamarlo y recibía los datos sin enmascarar.
+     * Al resto se le responde igual que si el cliente no existiera.
+     */
+    private const CLIENTES = [
+        'subvify' => [398],
+    ];
+
     public function __construct()
     {
         $this->companyModel = new CompanyModel();
@@ -21,6 +30,19 @@ class CustomClientController extends BaseApiController
 
     public function companies(string $clientSlug)
     {
+        $userId    = (int) (\App\Filters\ApiKeyFilter::$apiMeta['user_id'] ?? 0);
+        $permitido = self::CLIENTES[strtolower($clientSlug)] ?? [];
+        if (!in_array($userId, $permitido, true)) {
+            return $this->respond(
+                [
+                    'success' => false,
+                    'error'   => 'CLIENT_NOT_FOUND',
+                    'message' => 'No se ha encontrado una configuración para el cliente: ' . $clientSlug
+                ],
+                ResponseInterface::HTTP_NOT_FOUND
+            );
+        }
+
         $cif = trim((string) $this->request->getGet('cif'));
 
         if ($cif === '') {

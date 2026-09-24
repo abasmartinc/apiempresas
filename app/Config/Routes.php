@@ -183,9 +183,6 @@ $routes->get('e/c/(:any)', 'EmailTracking::click/$1');
 $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function ($routes) {
 
 
-    // TEMP
-    $routes->get('temp-upgrade', 'TempUpgrade::index');
-    $routes->get('test-cif', 'TestCif::index');
 
     // Auth Webw Commercial Endpoints (Expansion)
     $routes->get('api/v1/companies', 'Api\V1\CompaniesByCif::index');
@@ -546,7 +543,6 @@ $routes->get('api/empresa/private-data/(:any)', 'Company::ajaxPrivateData/$1');
 // Bajo api/* para quedar exento de CSRF (la ficha se sirve cacheada por Cloudflare).
 $routes->post('api/empresa/desbloquear-riesgo', 'Company::ajaxUnlockRisk');
 $routes->post('api/empresa/vigilar', 'Company::ajaxToggleWatch');
-$routes->get('test-pdf', 'TestPdf::index');
 
 // Fallback for broken "no disponible" links
 $routes->get('no%20disponible(:any)', 'Company::handleBrokenCif/$1');
@@ -604,5 +600,4 @@ $routes->post('unsubscribe/confirm', 'Unsubscribe::confirm');
 $routes->get('([a-zA-Z][0-9]{7}[a-zA-Z0-9].*)', 'Company::show/$1');
 $routes->get('(:segment)', 'Company::show/$1');
 
-$routes->get('testpdf2', 'TestPdf2::index');
 

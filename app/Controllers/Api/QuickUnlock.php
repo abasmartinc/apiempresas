@@ -39,6 +39,16 @@ class QuickUnlock extends BaseController
             ]);
         }
 
+        // Límite por IP para altas nuevas: sin él, cualquiera podía crear cuentas
+        // Free sin fin (cada una con su API Key) y mandar correos a direcciones
+        // ajenas desde nuestro dominio. Mismo formato de error que el resto.
+        if (\Config\Services::throttler()->check(md5($this->request->getIPAddress() . '_quick_unlock'), 3, HOUR) === false) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Has creado varias cuentas en poco tiempo. Espera una hora o regístrate desde la página de alta.',
+            ]);
+        }
+
         // New user registration flow
         $password = bin2hex(random_bytes(8));
         $token = bin2hex(random_bytes(32));

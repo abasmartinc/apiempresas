@@ -712,7 +712,7 @@ class EmailService
         $cupo = number_format((int) $this->planPro()['monthly_quota'], 0, ',', '.');
         return '<ul style="margin:0 0 14px; padding-left:20px;">'
             . $li('<strong>' . $cupo . ' consultas cada mes</strong>, que se renuevan el día 1. El Free son ' . $this->freeLimit() . ' en total y no se renuevan.')
-            . $li('<strong>La respuesta completa</strong>: dirección, objeto social íntegro y coordenadas.')
+            . $li('<strong>La dirección completa</strong> de cada empresa, que en Free llega enmascarada: es lo que necesitas para facturar o dar de alta un cliente. También las coordenadas.')
             . $li('<strong>Administradores y cargos</strong> de cada empresa, añadiendo ' . $c('&amp;admin=true') . '.')
             . $li('<strong>Scoring y señales de actividad</strong>: ' . $c('/api/v1/companies/score') . ' y ' . $c('/api/v1/companies/signals') . '.')
             . '</ul>';
@@ -745,7 +745,7 @@ class EmailService
             $userData,
             'Tu primera consulta ha funcionado. Esto es lo siguiente',
             'Lo que añade el Plan Pro a la respuesta que acabas de recibir.',
-            'Tu primera consulta a la API ha funcionado. Lo que has recibido son datos reales, con dos recortes del plan Free: la dirección llega enmascarada y el objeto social, cortado.<br><br>Cuando tu integración vaya a producción, el <b>Plan Pro</b> te da:' . $this->ventajasPro() . $this->precioPro() . ' No cambias ni tu API Key ni tu código.',
+            'Tu primera consulta a la API ha funcionado. Lo que has recibido son datos reales, con una limitación importante del plan Free: la dirección llega enmascarada, y sin ella no puedes rellenar facturas ni fichas de cliente.<br><br>Cuando tu integración vaya a producción, el <b>Plan Pro</b> te da:' . $this->ventajasPro() . $this->precioPro() . ' No cambias ni tu API Key ni tu código.',
             'Ver el Plan Pro',
             base_url('billing?plan=pro'),
             'one_request_inactive_1h'
@@ -760,8 +760,8 @@ class EmailService
         return $this->sendApiAutomation(
             $userData,
             'Ya has consultado 5 empresas: esto es lo que no estás viendo',
-            'La dirección completa y el objeto social íntegro, sin asteriscos.',
-            'Ya llevas 5 empresas consultadas. En tus respuestas habrás visto la dirección como <code>*** [ACTUALIZA A PRO PARA VER LA DIRECCION ]</code> y el objeto social cortado a 100 caracteres.<br><br>Con el <b>Plan Pro</b> recibes el dato completo en la misma llamada, sin cambiar tu código, y además puedes pedir los administradores y cargos de cada empresa con <code>&amp;admin=true</code>.<br><br>Son ' . $this->lineaPro() . '.',
+            'La dirección completa de cada empresa, sin asteriscos.',
+            'Ya llevas 5 empresas consultadas. En tus respuestas habrás visto la dirección como <code>*** [ACTUALIZA A PRO PARA VER LA DIRECCION ]</code>: justo el dato que necesitas para facturar o dar de alta un cliente.<br><br>Con el <b>Plan Pro</b> recibes el dato completo en la misma llamada, sin cambiar tu código, y además puedes pedir los administradores y cargos de cada empresa con <code>&amp;admin=true</code>.<br><br>Son ' . $this->lineaPro() . '.',
             'Desbloquear datos Pro',
             base_url('billing?plan=pro'),
             'reached_5_requests'
