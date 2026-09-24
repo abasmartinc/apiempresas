@@ -288,15 +288,15 @@
         
         const endpoints = [
             {
-                cmd: "curl -X GET 'https://api.apiempresas.es/v1/companies/match?q=A08166803' \\ \n  -H 'Authorization: Bearer biz_key_999'",
+                cmd: "curl -X GET 'https://apiempresas.es/api/v1/companies/match?cif=A08166803&seller_sector=software' \\ \n  -H 'X-API-KEY: TU_API_KEY'",
                 res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"data"</span>: {\n    <span class="json-key">"target"</span>: <span class="json-string">"A08166803"</span>,\n    <span class="json-key">"matches"</span>: [\n      {\n        <span class="json-key">"cif"</span>: <span class="json-string">"V46011425"</span>,\n        <span class="json-key">"name"</span>: <span class="json-string">"CONSUM S COOP"</span>,\n        <span class="json-key">"score"</span>: <span class="json-number">0.98</span>\n      },\n      {\n        <span class="json-key">"cif"</span>: <span class="json-string">"A60194776"</span>,\n        <span class="json-key">"name"</span>: <span class="json-string">"EROSKI SA"</span>,\n        <span class="json-key">"score"</span>: <span class="json-number">0.96</span>\n      }\n    ]\n  }\n}`
             },
             {
-                cmd: "curl -X GET 'https://api.apiempresas.es/v1/companies/contact-prep?cif=A08166803' \\ \n  -H 'Authorization: Bearer biz_key_999'",
+                cmd: "curl -X GET 'https://apiempresas.es/api/v1/companies/contact-prep?cif=A08166803' \\ \n  -H 'X-API-KEY: TU_API_KEY'",
                 res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"data"</span>: {\n    <span class="json-key">"tacticas"</span>: [\n      <span class="json-string">"Enfatizar escalabilidad técnica"</span>,\n      <span class="json-string">"Mencionar caso de éxito sectorial"</span>\n    ],\n    <span class="json-key">"guiones_email"</span>: <span class="json-string">"Hola [Nombre], noté que..."</span>,\n    <span class="json-key">"guiones_linkedin"</span>: <span class="json-string">"Hola, veo que lideráis..."</span>\n  }\n}`
             },
             {
-                cmd: "curl -X POST 'https://api.apiempresas.es/v1/companies/batch' \\ \n  -H 'Authorization: Bearer biz_key_999' \\ \n  -d '{\"cifs\": [\"A08166803\", \"V46011425\"]}'",
+                cmd: "curl -X POST 'https://apiempresas.es/api/v1/companies/batch' \\ \n  -H 'X-API-KEY: TU_API_KEY' \\ \n  -d '{\"cifs\": [\"A08166803\", \"V46011425\"]}'",
                 res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"processed"</span>: <span class="json-number">2</span>,\n  <span class="json-key">"data"</span>: [\n    { <span class="json-key">"cif"</span>: <span class="json-string">"A08166803"</span>, <span class="json-key">"status"</span>: <span class="json-string">"ACTIVA"</span> },\n    { <span class="json-key">"cif"</span>: <span class="json-string">"V46011425"</span>, <span class="json-key">"status"</span>: <span class="json-string">"ACTIVA"</span> }\n  ]\n}`
             }
         ];

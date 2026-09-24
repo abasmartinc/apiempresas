@@ -12,7 +12,8 @@ use OpenApi\Attributes as OA;
     description: ""
 )]
 #[OA\Server(url: "/", description: "Entorno de Producción (Consume Créditos)")]
-#[OA\Server(url: "/api/sandbox/v1", description: "Entorno Sandbox de Pruebas (Gratis. Usa CIF: A15075062)")]
+// El sandbox no se declara como servidor: sus rutas son /api/sandbox/v1/companies y
+// las de la especificación ya empiezan por /api/v1, así que la combinación daba 404.
 #[OA\SecurityScheme(
     securityScheme: "ApiKeyAuth",
     type: "apiKey",

@@ -55,7 +55,7 @@ class RadarApiController extends BaseApiController
     )]
     public function index()
     {
-        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
+        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['access_slug'] ?? (\App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free');
         
         $filters = [
             'province' => $this->request->getGet('province'),

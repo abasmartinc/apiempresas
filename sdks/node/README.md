@@ -25,7 +25,7 @@ const api = new ApiEmpresas({
 ```typescript
 async function fetchCompany() {
   try {
-    const company = await api.companies.get('B12345678');
+    const company = await api.companies.get('A15075062');
     console.log(company.name);
   } catch (error) {
     console.error('Error fetching company:', error.message);
@@ -37,7 +37,7 @@ async function fetchCompany() {
 
 ```typescript
 async function fetchBorme() {
-  const bormeData = await api.companies.borme('B12345678');
+  const bormeData = await api.companies.borme('A15075062');
   console.log(bormeData.events);
 }
 ```
@@ -47,7 +47,7 @@ async function fetchBorme() {
 ```typescript
 async function fetchBatch() {
   const response = await api.companies.batch({
-    cifs: ['B12345678', 'A15075062']
+    cifs: ['A15075062', 'A46103834']
   });
   console.log('Resultados:', response.data);
   console.log('Coste:', response.meta.cost);
@@ -56,11 +56,11 @@ async function fetchBatch() {
 
 ## Entorno de Pruebas (Sandbox)
 
-Para probar la integración sin consumir saldo, puedes apuntar a la URL del Sandbox:
+Para probar la integración sin consumir saldo, apunta a la URL del Sandbox con tu misma API Key. Devuelve datos simulados: `A15075062` (empresa encontrada) y `B00000000` (no encontrada).
 
 ```typescript
 const api = new ApiEmpresas({
-  apiKey: 'sandbox_api_key',
+  apiKey: 'TU_API_KEY',
   baseURL: 'https://apiempresas.es/api/sandbox/v1'
 });
 ```

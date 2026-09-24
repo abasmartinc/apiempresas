@@ -45,6 +45,43 @@ class ApiKeyFilter implements FilterInterface
         return 1; // Fallback
     }
 
+    /**
+     * Respuesta de error de este filtro.
+     *
+     * Contrato: los campos que cada error ya devolvía ($legacy) salen tal cual, con
+     * el mismo nombre y valor. Solo se AÑADEN los que falten: success=false, code
+     * (identificador estable para programar contra él) y los campos RFC 7807 que ya
+     * dan los controladores y promete la documentación, más la cabecera X-Request-Id.
+     */
+    private function errorResponse(int $status, array $legacy, string $code, string $detail, array $headers = [])
+    {
+        $body = $legacy;
+        $extra = [
+            'success'  => false,
+            'code'     => $code,
+            'type'     => 'https://apiempresas.com/docs/errors/' . strtolower($code),
+            'title'    => $code,
+            'status'   => $status,
+            'detail'   => $detail,
+            'instance' => self::$apiRequestId,
+        ];
+        foreach ($extra as $k => $v) {
+            if (!array_key_exists($k, $body)) {
+                $body[$k] = $v;
+            }
+        }
+
+        $response = service('response')->setStatusCode($status);
+        foreach ($headers as $name => $value) {
+            $response->setHeader($name, (string) $value);
+        }
+        if (self::$apiRequestId !== '') {
+            $response->setHeader('X-Request-Id', self::$apiRequestId);
+        }
+
+        return $response->setJSON($body);
+    }
+
     public function before(RequestInterface $request, $arguments = null)
     {
         helper('api');
@@ -80,7 +117,7 @@ class ApiKeyFilter implements FilterInterface
         }
 
         if ($apiKey === '') {
-            return service('response')->setStatusCode(401)->setJSON(['error' => 'Falta la API key (X-API-KEY).']);
+            return $this->errorResponse(401, ['error' => 'Falta la API key (X-API-KEY).'], 'API_KEY_MISSING', 'Falta la API key (X-API-KEY).');
         }
 
         // 3) Validar contra DB
@@ -123,11 +160,11 @@ class ApiKeyFilter implements FilterInterface
         $row = $builder->get()->getRow();
 
         if (!$row) {
-            return service('response')->setStatusCode(401)->setJSON(['error' => 'API key inválida']);
+            return $this->errorResponse(401, ['error' => 'API key inválida'], 'API_KEY_INVALID', 'API key inválida');
         }
 
         if ((int)$row->is_active !== 1 || (int)$row->user_active !== 1) {
-            return service('response')->setStatusCode(403)->setJSON(['error' => 'API key inactiva o usuario inactivo']);
+            return $this->errorResponse(403, ['error' => 'API key inactiva o usuario inactivo'], 'API_KEY_INACTIVE', 'API key inactiva o usuario inactivo');
         }
 
         // 3.1) IP Whitelist Check (Geo-Bypass)
@@ -152,9 +189,8 @@ class ApiKeyFilter implements FilterInterface
             if (!empty($allowedCountries) && !in_array($cfCountry, $allowedCountries)) {
                 // Denegar acceso sin inactivar la clave (evita caídas de servicio legítimo)
                 log_message('warning', "GEO-ANOMALY DENIED: API Key {$row->api_key_id} blocked request from {$cfCountry}. User: {$row->email}");
-                return service('response')->setStatusCode(403)->setJSON([
-                    'error' => 'Acceso denegado. Petición originada desde país no autorizado (' . $cfCountry . ').'
-                ]);
+                $msgPais = 'Acceso denegado. Petición originada desde país no autorizado (' . $cfCountry . ').';
+                return $this->errorResponse(403, ['error' => $msgPais], 'COUNTRY_NOT_ALLOWED', $msgPais);
             }
         }
 
@@ -178,12 +214,7 @@ class ApiKeyFilter implements FilterInterface
             $requestsThisSecond = (int) cache()->get($rateLimitKey);
             
             if ($requestsThisSecond >= $maxRequestsPerSecond) {
-                return service('response')->setStatusCode(429)
-                    ->setHeader('X-RateLimit-Limit', (string)$maxRequestsPerSecond)
-                    ->setHeader('X-RateLimit-Remaining', '0')
-                    ->setHeader('X-RateLimit-Reset', (string)(time() + 1))
-                    ->setHeader('Retry-After', '1')
-                    ->setJSON([
+                return $this->errorResponse(429, [
                     'success' => false,
                     'error'   => 'TOO_MANY_REQUESTS',
                     'message' => 'Has superado el límite de ' . $maxRequestsPerSecond . ' peticiones por segundo. Por favor, reduce la velocidad de tus peticiones o utiliza el endpoint /batch.',
@@ -192,6 +223,11 @@ class ApiKeyFilter implements FilterInterface
                     'status'  => 429,
                     'detail'  => 'Has superado el límite de ' . $maxRequestsPerSecond . ' peticiones por segundo. Por favor, reduce la velocidad de tus peticiones o utiliza el endpoint /batch.',
                     'instance'=> self::$apiRequestId
+                ], 'TOO_MANY_REQUESTS', 'Has superado el límite de ' . $maxRequestsPerSecond . ' peticiones por segundo.', [
+                    'X-RateLimit-Limit'     => $maxRequestsPerSecond,
+                    'X-RateLimit-Remaining' => '0',
+                    'X-RateLimit-Reset'     => time() + 1,
+                    'Retry-After'           => '1',
                 ]);
             }
             
@@ -257,21 +293,32 @@ class ApiKeyFilter implements FilterInterface
                         ? 'Has consumido las ' . $monthlyQuota . ' consultas gratuitas garantizadas y no tienes saldo suficiente en el monedero. Recarga créditos o actualiza a un plan de pago.'
                         : 'Has superado el límite de consultas de tu plan (' . $monthlyQuota . ') y no tienes saldo suficiente en el monedero. Recarga créditos para continuar.';
 
-                    return service('response')->setStatusCode(429)
-                        ->setHeader('X-RateLimit-Limit', (string)($maxRequestsPerSecond ?? 2))
-                        ->setHeader('X-RateLimit-Remaining', '0')
-                        ->setHeader('X-RateLimit-Reset', (string)(time() + 1))
-                        ->setHeader('X-Quota-Limit', (string)$monthlyQuota)
-                        ->setHeader('X-Quota-Remaining', '0')
-                        ->setJSON([
+                    // Mismo 429 y mismos campos de siempre. Lo añadido (code, RFC 7807,
+                    // quota_resets_at, X-Quota-Reset) permite distinguirlo del 429 por
+                    // velocidad: este NO se arregla reintentando (no lleva Retry-After).
+                    // El Free no se renueva (100 consultas en total): quota_resets_at = null.
+                    $quotaReset = ((int)$planId === 1) ? null : strtotime('first day of next month 00:00:00');
+                    $quotaHeaders = [
+                        'X-RateLimit-Limit'     => $maxRequestsPerSecond ?? 2,
+                        'X-RateLimit-Remaining' => '0',
+                        'X-RateLimit-Reset'     => time() + 1,
+                        'X-Quota-Limit'         => $monthlyQuota,
+                        'X-Quota-Remaining'     => '0',
+                    ];
+                    if ($quotaReset !== null) {
+                        $quotaHeaders['X-Quota-Reset'] = $quotaReset;
+                    }
+
+                    return $this->errorResponse(429, [
                         'success' => false,
                         'error'   => 'Quota Exceeded',
                         'message' => $errorMsg,
                         'current_usage' => $currentUsage,
                         'wallet_balance' => $walletBalance,
                         'cost_required' => $creditCost,
-                        'upgrade_url' => site_url('billing')
-                    ]);
+                        'upgrade_url' => site_url('billing'),
+                        'quota_resets_at' => $quotaReset !== null ? date('c', $quotaReset) : null,
+                    ], 'QUOTA_EXCEEDED', $errorMsg, $quotaHeaders);
                 }
             }
 
@@ -285,11 +332,11 @@ class ApiKeyFilter implements FilterInterface
                 $ipUsage = $db->table('api_requests r')->join($subscriptionTable . ' us', 'us.user_id = r.user_id')->where('us.plan_id', 1)->where('us.status', 'active')->where('r.ip_address', $ipAddress)->where('r.status_code', 200)->where('r.created_at >=', self::FREE_DESDE . ' 00:00:00')->countAllResults();
 
                 if ($ipUsage >= 100) {
-                    return service('response')->setStatusCode(429)->setJSON([
+                    return $this->errorResponse(429, [
                         'success' => false,
                         'error'   => 'Quota Exceeded',
                         'message' => 'Límite de seguridad por IP alcanzado. Actualiza tu plan.',
-                    ]);
+                    ], 'IP_LIMIT_EXCEEDED', 'Límite de seguridad por IP alcanzado. Actualiza tu plan.');
                 }
             }
 
@@ -321,6 +368,10 @@ class ApiKeyFilter implements FilterInterface
             'subscription_id' => $subscriptionId,
             'plan_id'         => (int)$planId,
             'plan_slug'       => $planSlug,
+            // Nivel de acceso a funciones: un Free con saldo en el monedero accede como
+            // Pro (datos completos, score, señales, radar). Es lo que vende la página del
+            // bono. El cobro sigue yendo por plan_id; batch y Business no cambian.
+            'access_slug'     => ($planSlug === 'free' && $walletBalance > 0) ? 'pro' : $planSlug,
             'request_id'      => (string)self::$apiRequestId,
             'search_term'     => $searchTerm ? (string)$searchTerm : null,
             'sub_cost'        => $subCost,

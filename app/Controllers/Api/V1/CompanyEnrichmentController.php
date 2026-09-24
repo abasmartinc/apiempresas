@@ -54,7 +54,7 @@ class CompanyEnrichmentController extends BaseApiController
             return $this->fail('CIF es requerido', 400);
         }
 
-        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
+        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['access_slug'] ?? (\App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free');
 
         if (!$this->planAccess->canAccess($planSlug, 'company_score')) {
             return $this->failForbidden('Tu plan no tiene acceso al scoring comercial.');
@@ -117,7 +117,7 @@ class CompanyEnrichmentController extends BaseApiController
         $cif = $this->request->getGet('cif');
         if (!$cif) return $this->fail('CIF es requerido', 400);
 
-        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
+        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['access_slug'] ?? (\App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free');
         if (!$this->planAccess->canAccess($planSlug, 'company_signals')) {
             $signals = $this->scoringService->getSignals($cif);
             $count = is_array($signals) ? count($signals) : 0;
@@ -172,7 +172,7 @@ class CompanyEnrichmentController extends BaseApiController
         $cif = $this->request->getGet('cif');
         if (!$cif) return $this->fail('CIF es requerido', 400);
 
-        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
+        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['access_slug'] ?? (\App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free');
         $accessLevel = $this->planAccess->getAccessLevel($planSlug, 'insights');
 
         if ($accessLevel === 'none') {
@@ -242,7 +242,7 @@ class CompanyEnrichmentController extends BaseApiController
         $cif = $this->request->getGet('cif');
         if (!$cif) return $this->fail('CIF es requerido', 400);
 
-        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free';
+        $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['access_slug'] ?? (\App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free');
         if (!$this->planAccess->canAccess($planSlug, 'contact_prep')) {
             return $this->respond([
                 'success' => false,

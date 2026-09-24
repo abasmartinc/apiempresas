@@ -80,7 +80,7 @@ $fmt = function ($n) {
                             <div class="plan-desc">El plan básico gratuito.</div>
                             
                             <ul class="plan-features">
-                                <li style="color: #64748b;"><div class="feature-icon" style="background: #f1f5f9; color: #64748b;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> 100 consultas al mes</li>
+                                <li style="color: #64748b;"><div class="feature-icon" style="background: #f1f5f9; color: #64748b;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> 100 consultas en total (no se renuevan)</li>
                                 <li style="color: #64748b;"><div class="feature-icon" style="background: #f1f5f9; color: #64748b;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> Datos limitados</li>
                             </ul>
                         </label>

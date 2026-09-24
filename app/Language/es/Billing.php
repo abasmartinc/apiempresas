@@ -105,7 +105,7 @@ return [
     'success_bonus_desc' => 'Hemos confirmado tu pago y tus créditos ya están disponibles en tu monedero prepago. Recuerda que no tienen caducidad.',
     'success_bonus_btn_wallet' => 'Ir a mi Monedero',
     'success_bonus_btn_docs' => 'Ver documentación',
-    'success_bonus_note' => 'Los créditos de este bono se consumirán únicamente cuando agotes tu cuota mensual gratuita o tu plan principal. Nunca caducan.',
+    'success_bonus_note' => 'Mientras tengas saldo, cada consulta se descuenta del monedero y te llega con los datos completos. Si tienes un plan de pago, primero se usa su cuota. Nunca caducan.',
     'success_bonus_summary_title' => 'Resumen de recarga',
     'success_bonus_concept' => 'Concepto',
     'success_bonus_concept_val' => 'Bono API a Medida',

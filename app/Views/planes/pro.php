@@ -280,15 +280,15 @@
         
         const endpoints = [
             {
-                cmd: "curl -X GET 'https://api.apiempresas.es/v1/companies/score?cif=B86854536' \\ \n  -H 'Authorization: Bearer pro_key_555'",
+                cmd: "curl -X GET 'https://apiempresas.es/api/v1/companies/score?cif=B86854536' \\ \n  -H 'X-API-KEY: TU_API_KEY'",
                 res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"data"</span>: {\n    <span class="json-key">"cif"</span>: <span class="json-string">"B86854536"</span>,\n    <span class="json-key">"score"</span>: <span class="json-number">92</span>,\n    <span class="json-key">"risk_level"</span>: <span class="json-string">"LOW"</span>,\n    <span class="json-key">"recommendation"</span>: <span class="json-string">"Aprobar crédito"</span>\n  }\n}`
             },
             {
-                cmd: "curl -X GET 'https://api.apiempresas.es/v1/companies/search?cnae=6201' \\ \n  -H 'Authorization: Bearer pro_key_555'",
+                cmd: "curl -X GET 'https://apiempresas.es/api/v1/companies/search?q=software&multiple=true' \\ \n  -H 'X-API-KEY: TU_API_KEY'",
                 res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"data"</span>: [\n    {\n      <span class="json-key">"cif"</span>: <span class="json-string">"B12345678"</span>,\n      <span class="json-key">"name"</span>: <span class="json-string">"TECH SOLUTIONS IBERIA SL"</span>\n    },\n    {\n      <span class="json-key">"cif"</span>: <span class="json-string">"B98765432"</span>,\n      <span class="json-key">"name"</span>: <span class="json-string">"DATA DRIVEN APPS SL"</span>\n    }\n  ]\n}`
             },
             {
-                cmd: "curl -X GET 'https://api.apiempresas.es/v1/companies/borme?cif=B86854536' \\ \n  -H 'Authorization: Bearer pro_key_555'",
+                cmd: "curl -X GET 'https://apiempresas.es/api/v1/companies/borme?cif=B86854536' \\ \n  -H 'X-API-KEY: TU_API_KEY'",
                 res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"data"</span>: {\n    <span class="json-key">"cif"</span>: <span class="json-string">"B86854536"</span>,\n    <span class="json-key">"company_name"</span>: <span class="json-string">"CAMCOMTUR GEORGIA SL"</span>,\n    <span class="json-key">"events"</span>: [\n      {\n        <span class="json-key">"date"</span>: <span class="json-string">"2023-11-15"</span>,\n        <span class="json-key">"act_types"</span>: <span class="json-string">"Nombramientos"</span>,\n        <span class="json-key">"description"</span>: <span class="json-string">"Nombramiento de Administrador Único"</span>,\n        <span class="json-key">"url_pdf"</span>: <span class="json-string">"https://www.boe.es/..."</span>\n      }\n    ]\n  }\n}`
             }
         ];

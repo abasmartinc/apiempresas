@@ -45,6 +45,11 @@ class BaseApiController extends ResourceController
                 if (!isset($data['detail'])) {
                     $data['detail'] = $errorMessage;
                 }
+                // "code": el mismo identificador en todos los errores (también en los
+                // de autenticación y cupo). Campo nuevo: no cambia ninguno existente.
+                if (!isset($data['code'])) {
+                    $data['code'] = $errorCodeStr;
+                }
                 if (!isset($data['instance'])) {
                     $reqId = \App\Filters\ApiKeyFilter::$apiRequestId ?? 'req_' . bin2hex(random_bytes(4));
                     if ($reqId === '') $reqId = 'req_' . bin2hex(random_bytes(4));

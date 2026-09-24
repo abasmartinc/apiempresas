@@ -130,7 +130,9 @@ class CompaniesSearch extends BaseApiController
 
             // Apply masking if Free plan
             $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
-            if ((int)$planId === 1) {
+            // Con saldo en el monedero, datos completos (igual que /companies)
+            $conSaldo = (int) (\App\Filters\ApiKeyFilter::$apiMeta['wallet_balance'] ?? 0) > 0;
+            if ((int)$planId === 1 && !$conSaldo) {
                 if ($multiple) {
                     foreach ($items as &$item) {
                         $item = mask_company_data($item);
@@ -209,7 +211,9 @@ class CompaniesSearch extends BaseApiController
 
             // Apply masking if Free plan
             $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
-            if ((int)$planId === 1) {
+            // Con saldo en el monedero, datos completos (igual que /companies)
+            $conSaldo = (int) (\App\Filters\ApiKeyFilter::$apiMeta['wallet_balance'] ?? 0) > 0;
+            if ((int)$planId === 1 && !$conSaldo) {
                 if ($multiple) {
                     foreach ($data as &$item) {
                         $item = mask_company_data($item);

@@ -617,7 +617,7 @@
             <div class="cro-section">
                 <h2 class="cro-title">Catálogo de Endpoints y Costes</h2>
                 <p style="text-align:center; color:#64748b; margin-top:-16px; margin-bottom:32px; font-size:1.05rem; max-width: 650px; margin-left: auto; margin-right: auto;">
-                    Con una sola API Key obtienes acceso a <strong>toda nuestra API REST</strong>. El coste se descuenta de tu monedero de forma automática únicamente con cada petición exitosa (HTTP 200 OK). Las llamadas erróneas o de prueba en nuestro Sandbox <strong>no consumen créditos</strong>.
+                    Con una sola API Key obtienes acceso a <strong>todos los endpoints de este catálogo, con los datos completos</strong>. El coste se descuenta de tu monedero de forma automática únicamente con cada petición exitosa (HTTP 200 OK). Las llamadas erróneas o de prueba en nuestro Sandbox <strong>no consumen créditos</strong>.
                 </p>
 
                 <div class="cro-endpoint-card">

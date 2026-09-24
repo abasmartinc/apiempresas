@@ -47,7 +47,8 @@ class ThrottleFilter implements FilterInterface
         if (strpos($path, 'api/') === 0) {
             // Límite para el resto de la API (sandbox, anónima): 120 peticiones por minuto
             if ($throttler->check(md5($ip . '_api'), 120, 60) === false) {
-                return Services::response()->setStatusCode(429)->setBody('Too Many Requests (API)');
+                // Solo se añade Retry-After (la ventana es de 60 s); el cuerpo no cambia.
+                return Services::response()->setStatusCode(429)->setHeader('Retry-After', '60')->setBody('Too Many Requests (API)');
             }
         } else {
             // --- WEB PÚBLICA (Separación Usuario vs Rastreadores en Rutas SEO) ---

@@ -45,11 +45,12 @@ class UsageStatus extends BaseController
             ]);
         }
 
-        // 2. Obtener uso del mes actual (SUM de api_usage_daily)
-        $currentMonth = date('Y-m');
+        // 2. Uso del cupo gratuito: es de por vida (desde FREE_DESDE), no mensual.
+        //    Antes se contaba solo el mes en curso y los avisos del 50 % / 80 % no
+        //    saltaban a tiempo a quien había gastado consultas en meses anteriores.
         $usage = $this->apiUsageDailyModel->selectSum('requests_count')
             ->where('user_id', $userId)
-            ->like('date', $currentMonth, 'after')
+            ->where('date >=', \App\Filters\ApiKeyFilter::FREE_DESDE)
             ->get()->getRowArray();
         
         $count = (int)($usage['requests_count'] ?? 0);

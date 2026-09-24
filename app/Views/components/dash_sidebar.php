@@ -5,7 +5,7 @@
             💎 <?= lang('Dashboard.prepaid_wallet') ?>
         </div>
         <?php if ($walletLowBalance ?? false): ?>
-            <a href="<?= site_url('billing/checkout_bonus') ?>" style="background: #10b981; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.7rem; text-decoration: none; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);"><?= lang('Dashboard.recharge') ?></a>
+            <a href="<?= site_url('crear-bono-api') ?>" style="background: #10b981; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.7rem; text-decoration: none; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);"><?= lang('Dashboard.recharge') ?></a>
         <?php endif; ?>
     </div>
     

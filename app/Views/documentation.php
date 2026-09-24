@@ -217,7 +217,7 @@
                                 <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">2. Parámetros</label>
                                 <div style="display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #cbd5e1; padding: 4px 4px 4px 12px; border-radius: 8px; transition: border-color 0.2s;" id="pg-param-container">
                                     <span id="pg-param-label" style="color: #64748b; font-weight: 600; font-family: monospace;">?cif=</span>
-                                    <input type="text" id="pg-cif" value="A15075062" placeholder="Ej: B12345678" style="flex: 1; border: none; padding: 8px 0; outline: none; font-size: 0.95rem; color: #0f172a; font-family: monospace;">
+                                    <input type="text" id="pg-cif" value="A15075062" placeholder="Ej: A15075062" style="flex: 1; border: none; padding: 8px 0; outline: none; font-size: 0.95rem; color: #0f172a; font-family: monospace;">
                                 </div>
                                 <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 8px;">Usa <code style="background: #f1f5f9; padding: 2px 4px; border-radius: 4px; color: #e11d48; font-family: monospace;">A15075062</code> para probar el Sandbox.</p>
                             </div>
@@ -270,7 +270,7 @@
                             if(inputCif.value === 'A15075062') inputCif.value = 'Inditex';
                         } else {
                             paramLabel.textContent = '?cif=';
-                            inputCif.placeholder = 'Ej: B12345678';
+                            inputCif.placeholder = 'Ej: A15075062';
                             if(inputCif.value === 'Inditex') inputCif.value = 'A15075062';
                         }
                     });
@@ -393,7 +393,7 @@
                     <p>
                         Para acceder a los endpoints debes incluir tu <strong>X-API-KEY</strong> en la cabecera de la petición. Puedes generar y copiar tu clave desde tu <a href="<?= site_url('dashboard') ?>">panel de control</a>.
                     </p>
-                    <pre><code class="language-http">GET /api/v1/companies?cif=B12345678 HTTP/1.1
+                    <pre><code class="language-http">GET /api/v1/companies?cif=A15075062 HTTP/1.1
 Host: apiempresas.es
 X-API-KEY: tu_api_key_aqui
 Accept: application/json</code></pre>
@@ -422,7 +422,7 @@ Accept: application/json</code></pre>
                             <tr>
                                 <td><code>cif</code></td>
                                 <td>string</td>
-                                <td><strong>Requerido.</strong> El CIF/NIF de la empresa (ej: B12345678).</td>
+                                <td><strong>Requerido.</strong> El CIF/NIF de la empresa (ej: A15075062).</td>
                             </tr>
                             <tr>
                                 <td><code>admin</code></td>
@@ -765,7 +765,7 @@ Accept: application/json</code></pre>
                         
                         <h5>Cuerpo de la Petición (JSON)</h5>
                         <pre><code class="language-json">{
-  "cifs": ["B12345678", "A87654321", "B00000000"],
+  "cifs": ["A15075062", "A46103834"],
   "admin": true
 }</code></pre>
 
@@ -827,7 +827,7 @@ Accept: application/json</code></pre>
                             <tr>
                                 <td><code>cif</code></td>
                                 <td>string</td>
-                                <td><strong>Requerido.</strong> El CIF/NIF de la empresa (ej: B12345678).</td>
+                                <td><strong>Requerido.</strong> El CIF/NIF de la empresa (ej: A15075062).</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1168,7 +1168,26 @@ Accept: application/json</code></pre>
   "detail": "Empresa no encontrada.",
   "instance": "req_8f73b1a2c9"
 }</code></pre>
-                    <p>El campo <code>instance</code> es único para cada petición y resulta muy útil si necesitas reportar un problema a soporte.</p>
+                    <p>El campo <code>instance</code> es único para cada petición (coincide con la cabecera <code>X-Request-Id</code>) y resulta muy útil si necesitas reportar un problema a soporte.</p>
+                    <p>Para programar contra los errores usa el campo <code>code</code>: es un identificador estable que viene en todas las respuestas de error. Estos son los errores de autenticación y consumo:</p>
+                    <table class="docs-table" style="margin-bottom: 24px;">
+                        <thead>
+                            <tr>
+                                <th>HTTP</th>
+                                <th><code>code</code></th>
+                                <th>Qué significa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>401</td><td><code>API_KEY_MISSING</code></td><td>No se ha enviado la cabecera <code>X-API-KEY</code>.</td></tr>
+                            <tr><td>401</td><td><code>API_KEY_INVALID</code></td><td>La API Key no existe.</td></tr>
+                            <tr><td>403</td><td><code>API_KEY_INACTIVE</code></td><td>La API Key o la cuenta están desactivadas.</td></tr>
+                            <tr><td>403</td><td><code>COUNTRY_NOT_ALLOWED</code></td><td>La petición sale de un país no permitido para tu API Key.</td></tr>
+                            <tr><td>429</td><td><code>TOO_MANY_REQUESTS</code></td><td>Demasiadas peticiones por segundo. Espera lo que indique <code>Retry-After</code> y reintenta.</td></tr>
+                            <tr><td>429</td><td><code>QUOTA_EXCEEDED</code></td><td>Has agotado las consultas de tu plan y no tienes saldo. Reintentar no sirve: recarga saldo o cambia de plan. En planes de pago, <code>quota_resets_at</code> y la cabecera <code>X-Quota-Reset</code> indican cuándo se renueva el cupo; en Free las 100 consultas no se renuevan (<code>quota_resets_at</code> es <code>null</code>).</td></tr>
+                            <tr><td>429</td><td><code>IP_LIMIT_EXCEEDED</code></td><td>Límite de seguridad por IP del plan Free.</td></tr>
+                        </tbody>
+                    </table>
                 </section>
 
                 <!-- THROTTLING -->
@@ -1209,13 +1228,17 @@ Accept: application/json</code></pre>
                                 <td>Consultas mensuales que te quedan antes de empezar a usar saldo del monedero.</td>
                             </tr>
                             <tr>
+                                <td><code>X-Quota-Reset</code></td>
+                                <td>Solo en el error de cupo agotado de los planes de pago: timestamp Unix de cuándo se renueva el cupo mensual.</td>
+                            </tr>
+                            <tr>
                                 <td><code>X-Request-Id</code></td>
                                 <td>Identificador único de trazabilidad de la petición. Útil para darte soporte técnico rápido.</td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <p>Si superas el límite por segundo, recibirás un error <code>429 Too Many Requests</code> junto con la cabecera <code>Retry-After: 1</code> indicando que esperes 1 segundo. Si necesitas procesar muchas empresas de golpe, te recomendamos utilizar el endpoint <a href="#batch">Batch</a>.</p>
+                    <p>Si superas el límite por segundo, recibirás un error <code>429 Too Many Requests</code> junto con la cabecera <code>Retry-After: 1</code> indicando que esperes 1 segundo (<code>code</code>: <code>TOO_MANY_REQUESTS</code>). El cupo agotado también responde 429, pero con <code>code</code> <code>QUOTA_EXCEEDED</code> y sin <code>Retry-After</code>: no reintentes en ese caso. Si necesitas procesar muchas empresas de golpe, te recomendamos utilizar el endpoint <a href="#batch">Batch</a>.</p>
                 </section>
 
                 <!-- PAGINACION -->
@@ -1248,15 +1271,15 @@ Accept: application/json</code></pre>
                                 <span style="background: #e0e7ff; color: #4338ca; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">Oficial</span>
                             </div>
                             <p style="color:#475569; font-size:0.95rem; margin-bottom: 10px;">Instalación vía Composer:</p>
-                            <pre style="background: #0f172a; padding: 10px 15px; border-radius: 8px; margin: 0;"><code class="language-bash" style="color: #e2e8f0;">composer require apiempresas/php</code></pre>
+                            <pre style="background: #0f172a; padding: 10px 15px; border-radius: 8px; margin: 0;"><code class="language-bash" style="color: #e2e8f0;">composer require apiempresas/apiempresas-php</code></pre>
                             <p style="color:#475569; font-size:0.95rem; margin-top:15px; margin-bottom: 10px;">Ejemplo de uso:</p>
                             <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0;"><code class="language-php" style="color: #e2e8f0;">require_once 'vendor/autoload.php';
 
 use ApiEmpresas\ApiEmpresas;
 
 $api = new ApiEmpresas('tu_api_key');
-$empresa = $api->companies()->getByCif('B12345678');
-echo $empresa->name;</code></pre>
+$empresa = $api->companies->get('A15075062');
+echo $empresa['name'];</code></pre>
                         </div>
 
                         <!-- Node.js SDK -->
@@ -1273,8 +1296,8 @@ echo $empresa->name;</code></pre>
                             <p style="color:#475569; font-size:0.95rem; margin-top:15px; margin-bottom: 10px;">Ejemplo de uso con TypeScript:</p>
                             <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0;"><code class="language-typescript" style="color: #e2e8f0;">import { ApiEmpresas } from 'apiempresas';
 
-const api = new ApiEmpresas('tu_api_key');
-const empresa = await api.companies.getByCif('B12345678');
+const api = new ApiEmpresas({ apiKey: 'tu_api_key' });
+const empresa = await api.companies.get('A15075062');
 console.log(empresa.name);</code></pre>
                         </div>
 
@@ -1293,8 +1316,8 @@ console.log(empresa.name);</code></pre>
                             <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0;"><code class="language-python" style="color: #e2e8f0;">from apiempresas import ApiEmpresas
 
 api = ApiEmpresas('tu_api_key')
-empresa = api.companies.get_by_cif('B12345678')
-print(empresa.name)</code></pre>
+respuesta = api.companies.get('A15075062')
+print(respuesta['data']['name'])</code></pre>
                         </div>
                     </div>
                 </section>
@@ -1311,7 +1334,7 @@ print(empresa.name)</code></pre>
                         </h3>
                         <pre><code class="language-php">&lt;?php
 $apiKey = 'TU_API_KEY';
-$cif = 'B12345678';
+$cif = 'A15075062';
 $url = 'https://apiempresas.es/api/v1/companies?cif=' . $cif;
 
 $ch = curl_init($url);
@@ -1335,7 +1358,7 @@ print_r($data);
 $response = Http::withHeaders([
     'X-API-KEY' => 'TU_API_KEY'
 ])->get('https://apiempresas.es/api/v1/companies', [
-    'cif' => 'B12345678'
+    'cif' => 'A15075062'
 ]);
 
 if ($response->successful()) {
@@ -1353,7 +1376,7 @@ $response = $client->request('GET', 'https://apiempresas.es/api/v1/companies', [
         'X-API-KEY' => 'TU_API_KEY',
         'Accept'    => 'application/json'
     ],
-    'query' => ['cif' => 'B12345678']
+    'query' => ['cif' => 'A15075062']
 ]);
 
 $data = json_decode($response->getBody(), true);</code></pre>
@@ -1379,7 +1402,7 @@ const getCompany = async (cif) => {
                         <pre><code class="language-python">import requests
 
 url = "https://apiempresas.es/api/v1/companies"
-params = {"cif": "B12345678"}
+params = {"cif": "A15075062"}
 headers = {"X-API-KEY": "TU_API_KEY"}
 
 response = requests.get(url, params=params, headers=headers)
@@ -1389,7 +1412,7 @@ print(response.json())</code></pre>
                             <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" width="24" height="24" alt="JavaScript" />
                             JavaScript (Fetch Browser)
                         </h3>
-                        <pre><code class="language-js">fetch('https://apiempresas.es/api/v1/companies?cif=B12345678', {
+                        <pre><code class="language-js">fetch('https://apiempresas.es/api/v1/companies?cif=A15075062', {
   headers: {
     'X-API-KEY': 'TU_API_KEY',
     'Accept': 'application/json'

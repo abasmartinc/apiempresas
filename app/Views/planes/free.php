@@ -267,11 +267,11 @@
         
         const endpoints = [
             {
-                cmd: "curl -X GET 'https://api.apiempresas.es/v1/companies/B12345678' \\ \n  -H 'Authorization: Bearer test_key_123'",
-                res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"data"</span>: {\n    <span class="json-key">"cif"</span>: <span class="json-string">"B12345678"</span>,\n    <span class="json-key">"name"</span>: <span class="json-string">"TECH SOLUTIONS IBERIA SL"</span>,\n    <span class="json-key">"cnae"</span>: <span class="json-string">"6201"</span>,\n    <span class="json-key">"cnae_description"</span>: <span class="json-string">"Actividades de programación informática"</span>,\n    <span class="json-key">"status"</span>: <span class="json-string">"ACTIVA"</span>\n  }\n}`
+                cmd: "curl -X GET 'https://apiempresas.es/api/v1/companies?cif=A15075062' \\ \n  -H 'X-API-KEY: TU_API_KEY'",
+                res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"data"</span>: {\n    <span class="json-key">"cif"</span>: <span class="json-string">"A15075062"</span>,\n    <span class="json-key">"name"</span>: <span class="json-string">"INDUSTRIA DE DISENO TEXTIL SA"</span>,\n    <span class="json-key">"cnae"</span>: <span class="json-string">"4642"</span>,\n    <span class="json-key">"cnae_description"</span>: <span class="json-string">"Comercio al por mayor de prendas de vestir y calzado"</span>,\n    <span class="json-key">"status"</span>: <span class="json-string">"ACTIVA"</span>\n  }\n}`
             },
             {
-                cmd: "curl -X GET 'https://api.apiempresas.es/v1/companies/search?name=mercadona' \\ \n  -H 'Authorization: Bearer test_key_123'",
+                cmd: "curl -X GET 'https://apiempresas.es/api/v1/companies/search?name=mercadona' \\ \n  -H 'X-API-KEY: TU_API_KEY'",
                 res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"data"</span>: [\n    {\n      <span class="json-key">"cif"</span>: <span class="json-string">"A46103834"</span>,\n      <span class="json-key">"name"</span>: <span class="json-string">"MERCADONA SA"</span>,\n      <span class="json-key">"status"</span>: <span class="json-string">"ACTIVA"</span>\n    },\n    {\n      <span class="json-key">"cif"</span>: <span class="json-string">"B82635904"</span>,\n      <span class="json-key">"name"</span>: <span class="json-string">"MERCADONA ONLINE SL"</span>,\n      <span class="json-key">"status"</span>: <span class="json-string">"ACTIVA"</span>\n    }\n  ]\n}`
             }
         ];
