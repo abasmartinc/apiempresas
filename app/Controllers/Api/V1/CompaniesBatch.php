@@ -160,6 +160,13 @@ class CompaniesBatch extends BaseApiController
         $monthlyRemaining = max(0, $monthlyQuota - $currentUsage);
         $totalAvailable = $monthlyRemaining + $walletBalance;
 
+        // El monitor de status.apiempresas.es no gasta cupo (igual que en ApiKeyFilter).
+        $esMonitor = ((int) $userId === \App\Filters\ApiKeyFilter::MONITOR_USER_ID);
+        if ($esMonitor) {
+            $monthlyRemaining = $foundCount;
+            $totalAvailable   = $foundCount;
+        }
+
         $truncated = false;
         $allowedCount = $foundCount;
 
@@ -215,7 +222,7 @@ class CompaniesBatch extends BaseApiController
         }
 
         // 6. Update ApiKeyFilter Meta
-        \App\Filters\ApiKeyFilter::$apiSkipBilling = false;
+        \App\Filters\ApiKeyFilter::$apiSkipBilling = $esMonitor;
         \App\Filters\ApiKeyFilter::$apiMeta['sub_cost'] = $subCost;
         \App\Filters\ApiKeyFilter::$apiMeta['wallet_cost'] = $walletCost;
 
