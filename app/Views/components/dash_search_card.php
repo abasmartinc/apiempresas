@@ -48,6 +48,24 @@ $isWarning = ($requestsUsed >= $warningThreshold);
     </script>
     <?php endif; ?>
 
+    <?php if (!$isLimitReached): ?>
+    <script>
+        // Enlace de los correos: /dashboard?probar=A15075062 hace la consulta de ejemplo
+        // al abrir el panel, para que el primer JSON real esté a un clic del correo.
+        window.addEventListener('load', function () {
+            var cif = new URLSearchParams(window.location.search).get('probar');
+            if (!cif || !/^[A-Za-z0-9]{9}$/.test(cif)) return;
+            var input = document.getElementById('dash_q');
+            var btn = document.getElementById('btnDashValidate');
+            if (!input || !btn) return;
+            input.value = cif.toUpperCase();
+            if (window.trackEvent) trackEvent('email_probar_cif', { cif: cif });
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            btn.click();
+        });
+    </script>
+    <?php endif; ?>
+
     <?php if (!isset($isBonusUser) || !$isBonusUser): ?>
     <div class="progress-container" style="margin-top: 12px;">
         <div class="progress-bar-bg" style="height: 12px; background: #e2e8f0; border-radius: 6px;">

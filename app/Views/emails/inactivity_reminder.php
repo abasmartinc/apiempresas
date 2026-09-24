@@ -56,7 +56,7 @@
 }</pre>
 
             <div class="cta-container">
-                <a href="<?= site_url('dashboard') ?>" class="btn">Ver mi API Key</a>
+                <a href="<?= site_url('dashboard?probar=A15075062') ?>" class="btn">▶ Probar ahora con un clic</a>
             </div>
 
         </div>

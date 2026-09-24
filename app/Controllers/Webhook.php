@@ -67,6 +67,13 @@ class Webhook extends Controller
                 $invoice = $event->data->object;
                 $this->handleInvoicePaymentFailed($invoice);
                 break;
+            // Cambios hechos fuera de nuestra web (portal de Stripe, panel de Stripe):
+            // cancelar al final del periodo, reactivar una cancelación o renovar. Sin
+            // esto la BD no se enteraba y el cliente veía un estado que no era el suyo.
+            case 'customer.subscription.updated':
+                $subscription = $event->data->object;
+                $this->handleSubscriptionUpdated($subscription, $event->data->previous_attributes ?? null);
+                break;
             case 'customer.subscription.deleted':
                 $subscription = $event->data->object;
                 $this->handleSubscriptionDeleted($subscription);
@@ -783,6 +790,98 @@ class Webhook extends Controller
         } catch (\Throwable $e) {
             // Nunca devolver error a Stripe por un correo: reintentaría el evento
             log_message('error', '[Webhook::paymentFailed] ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Sincroniza con la BD una suscripción que ha cambiado en Stripe.
+     *
+     * Convención de la casa (ApiKeyFilter, getActivePlanByUserId): `canceled` con
+     * current_period_end en el futuro = el cliente conserva el plan hasta esa fecha.
+     *
+     *  - cancel_at_period_end = true  → status 'canceled' (conserva hasta fin de periodo).
+     *    Si viene de fuera (portal), se le confirma por correo; si la baja la hizo en
+     *    nuestra web, Billing ya lo marcó y ya le escribió, y no se repite.
+     *  - cancel_at_period_end = false y Stripe la da por viva → status 'active' (p. ej.
+     *    ha reactivado la baja desde el portal).
+     *  - current_period_end se actualiza siempre (renovaciones, cambios de ciclo).
+     *
+     * No cambia de plan: si Stripe cambia el precio, solo se deja aviso en el log.
+     * El fin real lo sigue cerrando customer.subscription.deleted.
+     */
+    private function handleSubscriptionUpdated($subscription, $previo = null): void
+    {
+        try {
+            $stripeSubscriptionId = (string) ($subscription->id ?? '');
+            if ($stripeSubscriptionId === '') {
+                return;
+            }
+
+            $db  = \Config\Database::connect();
+            $sub = $db->table('user_subscriptions')
+                ->where('stripe_subscription_id', $stripeSubscriptionId)
+                ->orderBy('id', 'DESC')
+                ->get()->getRowArray();
+            if (!$sub) {
+                // Aún no existe en local (llegó antes que checkout.session.completed): lo
+                // creará ese evento o invoice.paid.
+                return;
+            }
+
+            // Fin de periodo: en versiones nuevas de la API va en los items
+            $finTs = $subscription->current_period_end
+                ?? ($subscription->items->data[0]->current_period_end ?? null);
+
+            $estadoStripe = (string) ($subscription->status ?? '');
+            $cancelaAlFin = !empty($subscription->cancel_at_period_end) || !empty($subscription->cancel_at);
+            $viva         = in_array($estadoStripe, ['active', 'trialing', 'past_due'], true);
+
+            $cambios = [];
+            if ($finTs) {
+                $cambios['current_period_end'] = date('Y-m-d H:i:s', (int) $finTs);
+            }
+
+            $pasaACancelada = false;
+            if ($viva && $cancelaAlFin && $sub['status'] !== 'canceled') {
+                $cambios['status']      = 'canceled';
+                $cambios['canceled_at'] = date('Y-m-d H:i:s');
+                $pasaACancelada = true;
+            } elseif ($viva && !$cancelaAlFin && $sub['status'] === 'canceled') {
+                // Reactivada: vuelve a renovarse
+                $cambios['status']      = 'active';
+                $cambios['canceled_at'] = null;
+                log_message('info', "[Webhook::subUpdated] Suscripción reactivada: {$stripeSubscriptionId}");
+            }
+
+            if (!empty($cambios)) {
+                $cambios['updated_at'] = date('Y-m-d H:i:s');
+                $db->table('user_subscriptions')->where('id', (int) $sub['id'])->update($cambios);
+            }
+
+            // Cambio de precio hecho en Stripe: no sabemos a qué plan corresponde
+            $precioNuevo = $subscription->items->data[0]->price->id ?? null;
+            $precioViejo = $previo->items->data[0]->price->id ?? null;
+            if ($precioViejo && $precioNuevo && $precioViejo !== $precioNuevo) {
+                log_message('warning', "[Webhook::subUpdated] {$stripeSubscriptionId} cambió de precio en Stripe ({$precioViejo} → {$precioNuevo}). El plan local NO se ha cambiado: revísalo a mano.");
+            }
+
+            // Baja hecha fuera de nuestra web: confirmar al cliente como en Billing
+            if ($pasaACancelada) {
+                $user = $db->table('users')->select('id, email, name')->where('id', (int) $sub['user_id'])->get()->getRowArray();
+                $plan = $db->table('api_plans')->select('name, product_type')->where('id', (int) $sub['plan_id'])->get()->getRowArray() ?: [];
+                if ($user) {
+                    (new \App\Services\EmailService())->sendSubscriptionCanceled(
+                        $user,
+                        ['name' => $plan['name'] ?? '', 'product_type' => $plan['product_type'] ?? ''],
+                        $cambios['current_period_end'] ?? ($sub['current_period_end'] ?? null),
+                        ''
+                    );
+                }
+                log_message('info', "[Webhook::subUpdated] Cancelada al final del periodo desde fuera de la web: {$stripeSubscriptionId}");
+            }
+        } catch (\Throwable $e) {
+            // Nunca devolver error a Stripe por esto: reintentaría el evento
+            log_message('error', '[Webhook::subUpdated] ' . $e->getMessage());
         }
     }
 

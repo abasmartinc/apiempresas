@@ -8,6 +8,12 @@ use CodeIgniter\HTTP\ResponseInterface;
 
 class ApiKeyFilter implements FilterInterface
 {
+    /**
+     * Desde cuándo cuenta el cupo gratuito "de por vida" (100 consultas). Lo usan
+     * este filtro y email:automation: si cambia, cambia en los dos sitios.
+     */
+    public const FREE_DESDE = '2026-05-28';
+
     public static array $apiMeta = [];
     public static float $apiT0 = 0.0;
     public static string $apiRequestId = '';
@@ -220,7 +226,7 @@ class ApiKeyFilter implements FilterInterface
 
             if ($currentUsage === null) {
                 if ((int)$planId === 1) {
-                    $usageRow = $db->table('api_usage_daily')->selectSum('requests_count')->where('user_id', (int)$row->user_id)->where('date >=', '2026-05-28')->get()->getRow();
+                    $usageRow = $db->table('api_usage_daily')->selectSum('requests_count')->where('user_id', (int)$row->user_id)->where('date >=', self::FREE_DESDE)->get()->getRow();
                 } else {
                     $usageRow = $db->table('api_usage_daily')->selectSum('requests_count')->where('user_id', (int)$row->user_id)->where('plan_id', (int)$planId)->like('date', $currentMonth, 'after')->get()->getRow();
                 }
@@ -270,10 +276,13 @@ class ApiKeyFilter implements FilterInterface
             }
 
             // IP Limits for free plan
+            // Solo cuentan las respuestas 200, como el cupo: antes contaban también los
+            // errores (que no se cobran) y quien probaba con CIF mal formados podía
+            // quedarse bloqueado por IP sin haber gastado ninguna consulta.
             if ((int)$planId === 1 && $walletBalance <= 0 && $db->tableExists('api_requests')) {
                 $ipAddress = $request->getIPAddress();
                 $subscriptionTable = $db->tableExists('user_subscriptions') ? 'user_subscriptions' : 'usersuscriptions';
-                $ipUsage = $db->table('api_requests r')->join($subscriptionTable . ' us', 'us.user_id = r.user_id')->where('us.plan_id', 1)->where('us.status', 'active')->where('r.ip_address', $ipAddress)->where('r.created_at >=', '2026-05-28 00:00:00')->countAllResults();
+                $ipUsage = $db->table('api_requests r')->join($subscriptionTable . ' us', 'us.user_id = r.user_id')->where('us.plan_id', 1)->where('us.status', 'active')->where('r.ip_address', $ipAddress)->where('r.status_code', 200)->where('r.created_at >=', self::FREE_DESDE . ' 00:00:00')->countAllResults();
 
                 if ($ipUsage >= 100) {
                     return service('response')->setStatusCode(429)->setJSON([

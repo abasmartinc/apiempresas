@@ -630,6 +630,11 @@ if (!function_exists('company_objeto_social_real')) {
         if ($label !== '' && mb_strtolower($obj, 'UTF-8') === mb_strtolower($label, 'UTF-8')) {
             return '';
         }
+        // Coletilla ", cnae:9900." al final del objeto social: es el código otra vez.
+        $sinCola = rtrim(preg_replace('/[\s,;]*cnae\s*:?\s*\d{2,4}\s*\.?\s*$/iu', '', $obj));
+        if ($sinCola !== $obj) {
+            $obj = $sinCola . ($sinCola !== '' && !preg_match('/[.!?]$/u', $sinCola) ? '.' : '');
+        }
         return $obj;
     }
 }

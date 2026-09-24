@@ -234,26 +234,9 @@ class CompaniesByCif extends BaseApiController
                 ],
                 ResponseInterface::HTTP_INTERNAL_SERVER_ERROR
             );
-        } finally {
-            // Trigger: Milestone 1st Request Email
-            try {
-                if (isset($company) && $company) {
-                    $userId = \App\Filters\ApiKeyFilter::$apiMeta['user_id'] ?? null;
-                    if ($userId) {
-                        $automationModel = new \App\Models\EmailAutomationModel();
-                        if (!$automationModel->wasSent($userId, 'first_request')) {
-                            $userModel = new \App\Models\UserModel();
-                            $user = $userModel->asArray()->find($userId);
-                            if ($user && (int)$user['is_admin'] === 0 && (int)($user['unsuscribe'] ?? 0) === 0 && ($user['signup_intent'] ?? '') === 'api') {
-                                $this->emailService->sendFirstRequestMilestone($user);
-                                $automationModel->markAsSent($userId, 'first_request');
-                            }
-                        }
-                    }
-                }
-            } catch (\Exception $e) {
-                log_message('error', '[CompaniesByCif::Milestone] ' . $e->getMessage());
-            }
         }
+        // El correo de "primera consulta" ya no se envía aquí: se mandaba dentro de la
+        // petición y hacía más lenta justo la primera llamada del usuario. Ahora lo
+        // envía email:automation (trigger first_request).
     }
 }

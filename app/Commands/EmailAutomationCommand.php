@@ -107,6 +107,17 @@ class EmailAutomationCommand extends BaseCommand
             return;
         }
 
+        // 1b. TRIGGER: first_request — primera consulta con éxito (antes se enviaba
+        //     dentro de la propia petición a la API). Solo si aún no llega a 5: con
+        //     más, el correo que toca es el de reached_5_requests.
+        //     Y solo si la última llamada es reciente: a quien probó hace meses no se le
+        //     felicita ahora por su "primera consulta".
+        $reciente = $lastRequestTime && (time() - strtotime($lastRequestTime)) < 2 * 86400;
+        if ($totalRequests >= 1 && $totalRequests < 5 && $reciente && !$this->automationModel->wasSent($userId, 'first_request')) {
+            $this->checkAndSend($user, 'first_request', 'email_sent_first_request');
+            return;
+        }
+
         // 2. TRIGGER: reached_5_requests
         if ($totalRequests >= 5) {
             $this->checkAndSend($user, 'reached_5_requests', 'email_sent_engaged');
@@ -406,6 +417,9 @@ class EmailAutomationCommand extends BaseCommand
 
         $result = ['success' => false, 'body' => ''];
         switch ($triggerType) {
+            case 'first_request':
+                $result = $this->emailService->sendFirstRequestMilestone($user);
+                break;
             case 'no_requests_15min':
                 $result = $this->emailService->sendNoUsage15Min($user);
                 break;
@@ -449,7 +463,7 @@ class EmailAutomationCommand extends BaseCommand
     {
         $res = $this->usageModel->selectSum('requests_count')
             ->where('user_id', $userId)
-            ->where('date >=', '2026-05-28')
+            ->where('date >=', \App\Filters\ApiKeyFilter::FREE_DESDE)
             ->get()->getRowArray();
         return (int)($res['requests_count'] ?? 0);
     }
@@ -961,8 +975,8 @@ class EmailAutomationCommand extends BaseCommand
     }
 
     /**
-     * Detecta usuarios Free con alta tasa de errores 400 hoy,
-     * les envía un email de ayuda técnica y restaura las consultas fallidas.
+     * Detecta usuarios Free con alta tasa de errores 400 hoy y les envía un correo de
+     * ayuda con sus propios ejemplos. No toca el uso: los errores no se cobran.
      */
     protected function processBadRequestUsers()
     {
@@ -997,22 +1011,26 @@ class EmailAutomationCommand extends BaseCommand
         foreach ($results as $user) {
             $userId   = (int)$user['id'];
             $badCount = (int)$user['bad_count'];
-            $restore  = min($badCount, 50);
 
-            CLI::write("  -> {$user['email']}: {$badCount} errores 400. Restaurando {$restore} consultas...");
+            // Las peticiones con error no se cobran (ApiKeyFilter solo factura las 200).
+            // Antes aquí se restaban hasta 50 del uso de hoy "para devolverlas", y lo que
+            // se restaba eran consultas buenas: se regalaban. Ahora solo se ayuda.
+            $ejemplos = array_column($db->query("
+                SELECT DISTINCT search_term
+                FROM api_requests
+                WHERE user_id = ? AND status_code = 400 AND DATE(created_at) = CURDATE()
+                  AND search_term IS NOT NULL AND search_term <> ''
+                LIMIT 3
+            ", [$userId])->getResultArray(), 'search_term');
 
-            $db->query("
-                UPDATE api_usage_daily
-                SET requests_count = GREATEST(0, requests_count - ?),
-                    updated_at = NOW()
-                WHERE user_id = ? AND date = CURDATE()
-            ", [$restore, $userId]);
+            CLI::write("  -> {$user['email']}: {$badCount} errores 400. Enviando ayuda...");
 
-            $result = $this->emailService->sendBadRequestHelp($user, $restore);
+            $result = $this->emailService->sendBadRequestHelp($user, $badCount, $ejemplos);
 
             if ($result['success']) {
                 $this->automationModel->markAsSent($userId, 'bad_request_help', $result['body']);
-                CLI::write("     [SENT] bad_request_help OK — {$restore} consultas restauradas", 'yellow');
+                $this->recordTracking($userId, 'email_sent_bad_request_help');
+                CLI::write("     [SENT] bad_request_help OK", 'yellow');
             } else {
                 CLI::write("     [ERROR] No se pudo enviar el email a {$user['email']}", 'red');
             }

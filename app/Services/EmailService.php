@@ -648,10 +648,10 @@ class EmailService
     {
         static $pro = null;
         if ($pro === null) {
-            $pro = ['name' => 'Pro', 'monthly_quota' => 3000, 'price_monthly' => null];
+            $pro = ['name' => 'Pro', 'monthly_quota' => 3000, 'price_monthly' => null, 'price_annual' => null];
             try {
                 $fila = \Config\Database::connect()->table('api_plans')
-                    ->select('name, monthly_quota, price_monthly')->where('id', 2)
+                    ->select('name, monthly_quota, price_monthly, price_annual')->where('id', 2)
                     ->get()->getRowArray();
                 if ($fila) {
                     $pro = array_merge($pro, array_filter($fila, static fn ($v) => $v !== null && $v !== ''));
@@ -669,15 +669,38 @@ class EmailService
         $pro    = $this->planPro();
         $precio = (float) ($pro['price_monthly'] ?? 0);
         return number_format((int) $pro['monthly_quota'], 0, ',', '.') . ' consultas cada mes'
-            . ($precio > 0 ? ' por <strong>' . rtrim(rtrim(number_format($precio, 2, ',', '.'), '0'), ',') . ' €/mes + IVA</strong>, sin permanencia' : ', sin permanencia');
+            . ($precio > 0 ? ' por <strong>' . self::euros($precio) . ' €/mes + IVA</strong>, sin permanencia' . $this->anualPro() : ', sin permanencia');
     }
 
-    /** "Cuesta 19 €/mes + IVA, sin permanencia." (sin precio si no se conoce) */
+    /** Importe en euros sin decimales sobrantes: 19 → "19", 182,5 → "182,50" */
+    private static function euros(float $x): string
+    {
+        return rtrim(rtrim(number_format($x, 2, ',', '.'), '0'), ',');
+    }
+
+    /**
+     * " o 182 €/año si pagas el año entero (te ahorras un 20 %)", con enlace a la página
+     * de precios con el anual ya marcado. Vacío si no hay precio anual en api_plans.
+     */
+    private function anualPro(): string
+    {
+        $pro     = $this->planPro();
+        $mensual = (float) ($pro['price_monthly'] ?? 0);
+        $anual   = (float) ($pro['price_annual'] ?? 0);
+        if ($anual <= 0 || $mensual <= 0 || $anual >= $mensual * 12) {
+            return '';
+        }
+        $ahorro = (int) round((1 - $anual / ($mensual * 12)) * 100);
+        return ', o <a href="' . site_url('billing?plan=pro&period=annual') . '" style="color:#2563eb;font-weight:700;">'
+            . self::euros($anual) . ' €/año</a> si pagas el año entero (te ahorras un ' . $ahorro . ' %)';
+    }
+
+    /** "Cuesta 19 €/mes + IVA, sin permanencia, o 182 €/año…" (sin precio si no se conoce) */
     private function precioPro(): string
     {
         $precio = (float) ($this->planPro()['price_monthly'] ?? 0);
         return $precio > 0
-            ? 'Cuesta <strong>' . rtrim(rtrim(number_format($precio, 2, ',', '.'), '0'), ',') . ' €/mes + IVA</strong>, sin permanencia.'
+            ? 'Cuesta <strong>' . self::euros($precio) . ' €/mes + IVA</strong>, sin permanencia' . $this->anualPro() . '.'
             : 'Sin permanencia.';
     }
 
@@ -706,9 +729,9 @@ class EmailService
             $userData,
             'Tu primera llamada a la API, lista para copiar',
             'Pega tu API Key en este curl y tendrás los datos de una empresa real en segundos.',
-            'He visto que todavía no has lanzado tu primera validación técnica.<br><br>Para que no pierdas tiempo con la documentación, aquí tienes tu endpoint listo:<br><br><code style="background:#f1f5f9; padding:10px; display:block; border-radius:5px;">GET /api/v1/companies?cif=A15075062</code><br><br>No olvides incluir tu <b>X-API-KEY</b> en los headers. Si necesitas un ejemplo en un lenguaje específico, responde a este correo.',
-            'Ver mi API Key',
-            base_url('dashboard'),
+            'He visto que todavía no has lanzado tu primera validación técnica.<br><br>Para que no pierdas tiempo con la documentación, aquí tienes tu endpoint listo:<br><br><code style="background:#f1f5f9; padding:10px; display:block; border-radius:5px;">GET /api/v1/companies?cif=A15075062</code><br><br>No olvides incluir tu <b>X-API-KEY</b> en los headers. Si prefieres verlo antes de escribir código, el botón de abajo hace esa misma consulta desde tu panel. Y si necesitas un ejemplo en un lenguaje concreto, responde a este correo.',
+            '▶ Probarla ahora con un clic',
+            base_url('dashboard?probar=A15075062'),
             'no_requests_15min'
         );
     }
@@ -724,7 +747,7 @@ class EmailService
             'Lo que añade el Plan Pro a la respuesta que acabas de recibir.',
             'Tu primera consulta a la API ha funcionado. Lo que has recibido son datos reales, con dos recortes del plan Free: la dirección llega enmascarada y el objeto social, cortado.<br><br>Cuando tu integración vaya a producción, el <b>Plan Pro</b> te da:' . $this->ventajasPro() . $this->precioPro() . ' No cambias ni tu API Key ni tu código.',
             'Ver el Plan Pro',
-            base_url('billing'),
+            base_url('billing?plan=pro'),
             'one_request_inactive_1h'
         );
     }
@@ -740,7 +763,7 @@ class EmailService
             'La dirección completa y el objeto social íntegro, sin asteriscos.',
             'Ya llevas 5 empresas consultadas. En tus respuestas habrás visto la dirección como <code>*** [ACTUALIZA A PRO PARA VER LA DIRECCION ]</code> y el objeto social cortado a 100 caracteres.<br><br>Con el <b>Plan Pro</b> recibes el dato completo en la misma llamada, sin cambiar tu código, y además puedes pedir los administradores y cargos de cada empresa con <code>&amp;admin=true</code>.<br><br>Son ' . $this->lineaPro() . '.',
             'Desbloquear datos Pro',
-            base_url('billing'),
+            base_url('billing?plan=pro'),
             'reached_5_requests'
         );
     }
@@ -758,23 +781,45 @@ class EmailService
             'Cuando llegues a ' . $limite . ', la API dejará de responder. Así lo evitas.',
             'Has alcanzado las 80 consultas de tus ' . $limite . ' gratuitas. Cuando llegues a ' . $limite . ', la API responderá con error 429 y tu integración se parará.<br><br>Para que no pase, el <b>Plan Pro</b>:' . $this->ventajasPro() . $this->precioPro() . '<br><br>¿Solo necesitas unas pocas consultas más? Un <b>bono de créditos</b>, sin suscripción y también con los datos completos: <a href="' . site_url('crear-bono-api') . '" style="color:#2563eb;font-weight:700;">crear bono</a>.',
             'Evitar el corte: ver Plan Pro',
-            base_url('billing'),
+            base_url('billing?plan=pro'),
             'reached_80_requests'
         );
     }
 
     /**
      * TRIGGER: bad_request_help
-     * Sent when a user generates many 400 errors (bad CIF format).
-     * Includes info about how many credits were restored.
+     *
+     * Muchas peticiones de hoy devuelven 400 por el formato del CIF. Es solo ayuda:
+     * las respuestas con error no se cobran (ApiKeyFilter solo factura las 200), así
+     * que no hay nada que "devolver". Antes el correo decía que se devolvían y el
+     * comando restaba esas consultas del uso de hoy, es decir, regalaba consultas
+     * buenas. Los ejemplos son los CIF reales que ha enviado el usuario.
+     *
+     * @param list<string> $ejemplos valores de `cif` que han dado 400 hoy
      */
-    public function sendBadRequestHelp(array $userData, int $errorCount): array
+    public function sendBadRequestHelp(array $userData, int $errorCount, array $ejemplos = []): array
     {
+        $code = static fn (string $t, string $fondo) => '<code style="background:' . $fondo . '; padding:6px 10px; display:inline-block; border-radius:4px; margin:4px 0;">' . $t . '</code>';
+
+        $lista = '';
+        foreach (array_slice($ejemplos, 0, 3) as $cif) {
+            $lista .= $code('❌ /api/v1/companies?cif=' . esc(mb_substr((string) $cif, 0, 60)), '#f1f5f9') . '<br>';
+        }
+        $bloqueEjemplos = $lista !== ''
+            ? '<b>Algunas de las que has enviado hoy:</b><br>' . $lista
+            : '<b>Por ejemplo:</b><br>' . $code('❌ /api/v1/companies?cif=A08649477ELADJUDICATARIO', '#f1f5f9') . '<br>';
+
         return $this->sendApiAutomation(
             $userData,
-            'Te hemos devuelto ' . $errorCount . ' consultas que fallaron por el formato del CIF',
-            'El error 400 viene de enviar texto pegado al CIF. Así se corrige.',
-            "Nuestro sistema automatizado de monitoreo ha detectado una alta tasa de errores en tus peticiones de hoy (<b>{$errorCount} consultas rechazadas con código 400 - Bad Request</b>).<br><br>Este error ocurre cuando el parámetro <code>cif</code> no tiene el formato correcto de un identificador fiscal español. El problema más habitual es enviar texto adicional pegado al CIF al parsearlo desde un documento externo.<br><br><b>Ejemplos de peticiones incorrectas detectadas:</b><br><code style=\"background:#f1f5f9; padding:6px 10px; display:inline-block; border-radius:4px; margin:4px 0;\">❌ /api/v1/companies?cif=A08649477ELADJUDICATARIO</code><br><code style=\"background:#f1f5f9; padding:6px 10px; display:inline-block; border-radius:4px; margin:4px 0;\">❌ /api/v1/companies?cif=ADJUDICATARIO</code><br><br><b>El formato correcto es únicamente el identificador limpio:</b><br><code style=\"background:#dcfce7; padding:6px 10px; display:inline-block; border-radius:4px; margin:4px 0;\">✅ /api/v1/companies?cif=A08649477</code><br><br>Para que este error técnico no penalice tu prueba, <b>hemos devuelto automáticamente las {$errorCount} consultas rechazadas</b> a tu cuenta. Puedes verificarlo en tu dashboard.<br><br>Si tienes alguna duda sobre cómo extraer correctamente los identificadores de tus documentos, responde a este correo y te echamos un cable.",
+            'Hoy ' . $errorCount . ' peticiones tuyas han fallado por el formato del CIF',
+            'No te las hemos cobrado. Así se corrige el error 400.',
+            "Hoy <b>{$errorCount} de tus peticiones</b> han devuelto error 400 (Bad Request). No te preocupes por el cupo: <b>las peticiones con error no se cobran</b>.<br><br>"
+                . 'El 400 aparece cuando el parámetro <code>cif</code> no es un identificador fiscal español válido. Lo más habitual es enviar texto pegado al CIF al extraerlo de un documento o de una hoja de cálculo.<br><br>'
+                . $bloqueEjemplos . '<br>'
+                . '<b>El formato correcto es solo el identificador</b>, sin espacios ni texto añadido:<br>'
+                . $code('✅ /api/v1/companies?cif=A08649477', '#dcfce7') . '<br><br>'
+                . 'Un truco: antes de llamar, quédate solo con letras y números y comprueba que quedan 9 caracteres.<br><br>'
+                . 'Si no ves de dónde sale el texto de más, responde a este correo con un ejemplo y te echamos un cable.',
             'Ver mi dashboard',
             base_url('dashboard'),
             'bad_request_help'
@@ -794,7 +839,7 @@ class EmailService
             'Actívala de nuevo en un minuto con el Plan Pro, sin cambiar tu código.',
             'Has agotado tus ' . $limite . ' consultas gratuitas. Desde ahora la API responde con error 429 y tu integración no recibe datos.<br><br>Tienes dos formas de reanudarla hoy mismo, sin cambiar tu código:<br><br>• <b>Plan Pro</b>: ' . $this->lineaPro() . ', con la respuesta completa.<br>• <b>Bono de créditos</b>, si solo necesitas unas pocas más, sin suscripción: <a href="' . site_url('crear-bono-api') . '" style="color:#2563eb;font-weight:700;">crear bono</a>.',
             'Reanudar con el Plan Pro',
-            base_url('billing'),
+            base_url('billing?plan=pro'),
             'reached_100_percent_quota'
         );
     }

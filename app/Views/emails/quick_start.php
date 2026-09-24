@@ -54,7 +54,7 @@
             <p style="margin-top: 25px;">Solo tienes que lanzar una petición <code>GET</code> a nuestro endpoint e incluir tu <strong>X-API-KEY</strong> en las cabeceras.</p>
 
             <div class="cta-container">
-                <a href="<?= site_url('dashboard') ?>" class="btn">🛠️ Ver Documentación y Claves</a>
+                <a href="<?= site_url('dashboard?probar=A15075062') ?>" class="btn">▶ Probar ahora con un CIF real</a>
             </div>
             
             <p style="margin-top: 30px; font-size: 14px; color: #64748b;">

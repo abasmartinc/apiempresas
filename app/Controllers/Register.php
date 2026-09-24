@@ -47,6 +47,7 @@ class Register extends BaseController
         if ($this->request->getGet('cif')) {
             session()->set('signup_cif', trim((string)$this->request->getGet('cif')));
         }
+        $this->recordarReferer();
 
         return view('auth/register', [
             'validation' => $validation,
@@ -195,6 +196,7 @@ class Register extends BaseController
             ? trim((string) $this->request->getPost('intent')) 
             : (session()->get('signup_intent') ?: null);
 
+        $intentPorDefecto = false;
         if (!$intent) {
             if (strpos((string)$redirectUrl, 'radar') !== false) {
                 $intent = 'radar';
@@ -208,6 +210,7 @@ class Register extends BaseController
                 $intent = 'view_risk_profile';
             } else {
                 $intent = 'api';
+                $intentPorDefecto = true;   // sin intención ni pista: se asume API
             }
         }
         session()->remove('signup_intent');
@@ -238,6 +241,9 @@ class Register extends BaseController
         try {
             // 1) Crear usuario
             $user_id = $this->userModel->insert($data);
+            if ($user_id && $intentPorDefecto) {
+                $this->logIntentPorDefecto((int) $user_id);
+            }
 
             if (!$user_id) {
                 return redirect()
@@ -349,6 +355,46 @@ class Register extends BaseController
      * Deja constancia de la empresa que originó el registro (tracking_events).
      * Sin tocar user_events: ahí un evento 'view_risk_profile' consumiría cuota.
      */
+    /** Página desde la que se llegó al formulario de alta (la primera, no se pisa). */
+    protected function recordarReferer(): void
+    {
+        $ref = (string) ($this->request->getServer('HTTP_REFERER') ?? '');
+        if ($ref !== '' && !session('signup_referer') && !str_contains($ref, '/register')) {
+            session()->set('signup_referer', substr($ref, 0, 255));
+        }
+    }
+
+    /**
+     * Deja constancia de un alta clasificada como 'api' SIN que nada lo indicara (sin
+     * intent y sin pista en el redirect). Esas altas reciben la secuencia técnica de la
+     * API; con este evento se puede medir cuántas son y de qué página vienen antes de
+     * decidir si merecen otro trato:
+     *
+     *   SELECT JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.referer')) AS origen, COUNT(*)
+     *   FROM tracking_events WHERE event_name = 'signup_intent_por_defecto'
+     *   GROUP BY origen ORDER BY 2 DESC;
+     */
+    protected function logIntentPorDefecto(int $userId): void
+    {
+        try {
+            (new \App\Models\TrackingEventModel())->insert([
+                'event_name'   => 'signup_intent_por_defecto',
+                'page'         => 'register',
+                'user_id'      => $userId,
+                'session_id'   => substr((string) session_id(), 0, 100),
+                'anonymous_id' => '',
+                'element'      => '',
+                'metadata'     => json_encode([
+                    'referer'  => substr((string) (session('signup_referer') ?: ($this->request->getServer('HTTP_REFERER') ?? '')), 0, 255),
+                    'redirect' => substr((string) ($this->request->getGet('redirect') ?? $this->request->getPost('redirect') ?? ''), 0, 255),
+                ]),
+                'created_at'   => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'logIntentPorDefecto: ' . $e->getMessage());
+        }
+    }
+
     protected function logSignupOrigin(int $userId, ?string $intent = null): void
     {
         // La sesión es la fuente principal, pero el formulario rápido arrastra el CIF
@@ -390,6 +436,7 @@ class Register extends BaseController
         if ($intent !== '') {
             session()->set('signup_intent', $intent);
         }
+        $this->recordarReferer();
 
         $cif = trim((string)($this->request->getGet('cif') ?? ''));
         if ($cif !== '') {
@@ -507,6 +554,7 @@ class Register extends BaseController
             ? trim((string) $this->request->getPost('intent')) 
             : (session()->get('signup_intent') ?: null);
 
+        $intentPorDefecto = false;
         if (!$intent) {
             if (strpos($redirect, 'radar') !== false) {
                 $intent = 'radar';
@@ -518,6 +566,7 @@ class Register extends BaseController
                 $intent = 'view_risk_profile';
             } else {
                 $intent = 'api';
+                $intentPorDefecto = true;   // sin intención ni pista: se asume API
             }
         }
         session()->remove('signup_intent');
@@ -545,6 +594,9 @@ class Register extends BaseController
 
         try {
             $user_id = $this->userModel->insert($data);
+            if ($user_id && $intentPorDefecto) {
+                $this->logIntentPorDefecto((int) $user_id);
+            }
             
             // API key and Subscription (Free)
             $this->ApikeysModel->insert([

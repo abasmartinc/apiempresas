@@ -561,12 +561,21 @@ $fmt = function ($n) {
             trackEvent('checkout_view', { current_plan: currentPlan });
         }
 
-        if (currentPlan === 'pro') {
+        // Preselección desde la URL: los correos enlazan con ?plan=pro&period=annual.
+        // Sin parámetros, el comportamiento de siempre.
+        const qs = new URLSearchParams(window.location.search);
+        const planUrl = qs.get('plan');
+        if ((planUrl === 'pro' || planUrl === 'business') && planUrl !== currentPlan) {
+            setSelectedPlan(planUrl);
+        } else if (currentPlan === 'pro') {
             setSelectedPlan('business');
         } else if (currentPlan === 'business') {
             setSelectedPlan('business');
         } else {
             setSelectedPlan('pro');
+        }
+        if (qs.get('period') === 'annual') {
+            setPeriod('annual');
         }
     })();
 </script>

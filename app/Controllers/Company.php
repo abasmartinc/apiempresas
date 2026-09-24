@@ -334,6 +334,20 @@ class Company extends BaseController
             ], 86400 * 7); // Cache for 7 days
         }
 
+        // La caché count_cta_* va por provincia + CNAE. Sin CNAE la clave es la misma
+        // para TODAS las empresas de la provincia, así que traía el sector de otra
+        // empresa: Camcomtur (CNAE descartado) salía con "563.233 empresas de
+        // Consultoría empresarial y otros en Madrid", que en realidad era la provincia
+        // entera. Sin CNAE no hay sector, diga lo que diga la caché.
+        if ($cnaeCodeStr === '') {
+            $sectorName   = 'todos los sectores';
+            $cnaeUrlParam = '';
+        }
+        // Y nunca un texto con la codificación rota ("Consultor�a").
+        if (!mb_check_encoding((string) $sectorName, 'UTF-8')) {
+            $sectorName = mb_convert_encoding((string) $sectorName, 'UTF-8', 'ISO-8859-1');
+        }
+
         $sectorUrlParam = urlencode($sectorName);
         $radarCheckoutUrl = site_url("checkout/radar-export?type=single&provincia={$provUrlParam}&cnae={$cnaeUrlParam}&sector={$sectorUrlParam}");
         
