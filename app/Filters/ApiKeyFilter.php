@@ -415,10 +415,25 @@ class ApiKeyFilter implements FilterInterface
                 ]);
 
                 if ((int)$meta['wallet_cost'] > 0) {
+                    // GREATEST: el saldo nunca queda en negativo aunque varias peticiones
+                    // simultáneas lo den por bueno a la vez
                     $db->table('user_wallets')
                        ->where('user_id', (int)$meta['user_id'])
-                       ->set('balance', 'balance - ' . (int)$meta['wallet_cost'], false)
+                       ->set('balance', 'GREATEST(balance - ' . (int)$meta['wallet_cost'] . ', 0)', false)
                        ->update();
+                }
+
+                // Actualizar al momento el contador de uso en caché. Antes solo se
+                // releía de la BD cada 30 s y, mientras tanto, el cupo parecía intacto:
+                // con peticiones seguidas (o batch) se podía gastar varias veces el cupo.
+                if ((int)$meta['sub_cost'] > 0) {
+                    $claveUso = ((int)$meta['plan_id'] === 1)
+                        ? 'api_usage_lifetime_' . (int)$meta['user_id']
+                        : 'api_usage_' . (int)$meta['user_id'] . '_' . date('Y-m');
+                    $usoCache = cache()->get($claveUso);
+                    if ($usoCache !== null) {
+                        cache()->save($claveUso, (int)$usoCache + (int)$meta['sub_cost'], 30);
+                    }
                 }
             }
 

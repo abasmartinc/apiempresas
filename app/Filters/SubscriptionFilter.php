@@ -21,8 +21,6 @@ class SubscriptionFilter implements FilterInterface
         $productType = $arguments[0] ?? 'api';
         $isApiRoute = (strpos($currentUri, 'api/') !== false || $productType === 'api');
 
-        @file_put_contents(WRITEPATH . 'debug_redirect.txt', date('Y-m-d H:i:s') . " | SUB_FILTER | URI: {$currentUri} | Product: {$productType} | LoggedIn: " . ($isLoggedIn?'Y':'N') . " | ApiAuth: " . ($isApiAuthenticated?'Y':'N') . " | isApiRoute: " . ($isApiRoute?'Y':'N') . "\n", FILE_APPEND);
-
         if (!$isLoggedIn && !$isApiAuthenticated) {
             // If it's an API request, return JSON instead of redirecting
             if ($isApiRoute) {

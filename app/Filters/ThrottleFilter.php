@@ -94,7 +94,7 @@ class ThrottleFilter implements FilterInterface
                 strpos($path, 'blog/') === 0 ||
                 in_array($path, ['docs', 'documentation', 'documentation/en', 'api-docs'], true) ||
                 in_array($path, ['planes/free', 'planes/pro', 'planes/business'], true) ||
-                in_array($path, ['api-empresas', 'spanish-company-api', 'spanish-company-data-api', 'leads-empresas-nuevas', 'radar-demo', 'copilot-pro', 'autocompletado-cif-empresas', 'plugin-wordpress-buscador-empresas'], true)
+                in_array($path, ['api-empresas', 'spanish-company-api', 'spanish-company-data-api', 'leads-empresas-nuevas', 'radar-demo', 'copilot-pro', 'plugin-wordpress-buscador-empresas'], true)
             );
 
             if ($isReadMethod && $isCrawlerUserAgent && $isSeoPublicPath) {

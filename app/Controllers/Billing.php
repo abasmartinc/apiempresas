@@ -763,6 +763,12 @@ class Billing extends BaseController
         if ($credits < 10000) {
             return redirect()->to(site_url('crear-bono-api'))->with('error', lang('Messages.flash_10'));
         }
+        // Tope: calculateBonusPrice() cobra 1.499 € por cualquier cantidad desde 1.000.000,
+        // así que sin límite 100 millones de créditos costaban lo mismo que uno.
+        if ($credits > 1000000) {
+            return redirect()->to(site_url('crear-bono-api'))
+                ->with('error', 'El bono máximo es de 1.000.000 de créditos. Para más volumen, escríbenos y te preparamos un plan a medida.');
+        }
 
         // Lógica de Precios (Igual a la de Javascript por seguridad) delegada a BillingService
         $price = $this->billingService->calculateBonusPrice($credits);

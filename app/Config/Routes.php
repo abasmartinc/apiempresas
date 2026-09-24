@@ -553,10 +553,11 @@ $routes->get('no%20disponible(:any)', 'Company::handleBrokenCif/$1');
 $routes->get('no disponible(:any)', 'Company::handleBrokenCif/$1');
 
 // Company Suggestions (Professional Landing)
-$routes->get('autocompletado-cif-empresas', 'CompanySuggestions::index');
-$routes->get('autocompletado-cif-empresas/get', 'CompanySuggestions::getSuggestions');
-$routes->addRedirect('company-suggestions', 'autocompletado-cif-empresas');
-$routes->addRedirect('company-suggestions/get', 'autocompletado-cif-empresas/get');
+// Página de autocompletado retirada (24-09-2026): no se usaba y su endpoint /get
+// devolvía empresas con dirección completa sin API Key. El validador de CIF está en
+// la home. Las URL antiguas redirigen allí; /get ya no existe (404).
+$routes->addRedirect('autocompletado-cif-empresas', '/', 301);
+$routes->addRedirect('company-suggestions', '/', 301);
 
 // Herramienta de Perfil de Riesgo y Solvencia Corporativa
 $routes->get('perfil-de-riesgo', 'RiskProfileController::index');

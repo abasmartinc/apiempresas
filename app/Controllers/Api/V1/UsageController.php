@@ -115,9 +115,16 @@ class UsageController extends BaseApiController
             $remainingCalls = max(0, $monthlyQuota - $monthlyCount);
 
             // 3. History (Recent Queried Companies with query counts)
+            // Solo consultas que se cobraron (200 en endpoints de pago). Antes entraba
+            // cualquier CIF pedido, también con error o al sandbox (gratis), y este
+            // endpoint, que no gasta cupo, devolvía su ficha: se podían sacar fichas sin
+            // pagar. Así solo se repite lo que el usuario ya ha pagado.
             $recentRequests = $this->apiRequestsModel
                 ->select('search_term, COUNT(*) as query_count, MAX(created_at) as last_query')
                 ->where('user_id', $userId)
+                ->where('status_code', 200)
+                ->notLike('endpoint', 'sandbox', 'both')
+                ->notLike('endpoint', 'professional/search', 'both')
                 ->where('search_term IS NOT NULL')
                 ->where('search_term !=', '')
                 ->groupStart()

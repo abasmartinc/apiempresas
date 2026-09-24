@@ -6,7 +6,6 @@ use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\CompanyModel;
-use OpenApi\Attributes as OA;
 
 class Professional extends BaseApiController
 {
@@ -17,41 +16,45 @@ class Professional extends BaseApiController
     /** @var CompanyModel */
     protected $companyModel;
 
+    /**
+     * Estos endpoints son de un único cliente (plan 7, "Professional"). Antes cualquier
+     * API Key válida podía usarlos, incluida la de un Free: /search es gratis y devolvía
+     * la dirección completa, y /details daba la ficha sin enmascarar. No se documentan
+     * en el Swagger público.
+     */
+    private const PLAN_PROFESSIONAL = 7;
+
     public function __construct()
     {
         $this->companyModel = new CompanyModel();
         helper('api');
     }
 
+    /** 403 si quien llama no es el plan Professional; null si puede seguir. */
+    private function soloProfessional()
+    {
+        $planId = (int) (\App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 0);
+        if ($planId === self::PLAN_PROFESSIONAL) {
+            return null;
+        }
+
+        return $this->respond([
+            'success' => false,
+            'error'   => 'PLAN_REQUIRED',
+            'message' => 'Este endpoint no está disponible en tu plan.',
+        ], ResponseInterface::HTTP_FORBIDDEN);
+    }
+
     /**
      * Step 1: Search / Autocomplete (Free)
      * GET /api/v1/professional/search?q=...
      */
-    #[OA\Get(
-        path: "/api/v1/professional/search",
-        summary: "Búsqueda Autocompletado Profesional",
-        description: "Devuelve coincidencias ligeras para autocompletado en búsquedas.",
-        tags: ["2. Plan Pro"]
-    )]
-    #[OA\Parameter(
-        name: "q",
-        in: "query",
-        required: true,
-        description: "Término de búsqueda",
-        schema: new OA\Schema(type: "string")
-    )]
-    #[OA\Response(
-        response: 200,
-        description: "Resultados del autocompletado",
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(property: "success", type: "boolean", example: true),
-                new OA\Property(property: "data", type: "array", items: new OA\Items(type: "object"))
-            ]
-        )
-    )]
     public function search()
     {
+        if ($bloqueo = $this->soloProfessional()) {
+            return $bloqueo;
+        }
+
         $q = trim((string) $this->request->getGet('q'));
 
         if ($q === '') {
@@ -115,31 +118,12 @@ class Professional extends BaseApiController
      * Step 2: Company Details (Billed)
      * GET /api/v1/professional/details?cif=...
      */
-    #[OA\Get(
-        path: "/api/v1/professional/details",
-        summary: "Detalles Profesionales de Empresa",
-        description: "Devuelve los datos profesionales de una empresa basados en su CIF.",
-        tags: ["2. Plan Pro"]
-    )]
-    #[OA\Parameter(
-        name: "cif",
-        in: "query",
-        required: true,
-        description: "El CIF de la empresa",
-        schema: new OA\Schema(type: "string")
-    )]
-    #[OA\Response(
-        response: 200,
-        description: "Detalles completos de la empresa",
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(property: "success", type: "boolean", example: true),
-                new OA\Property(property: "data", type: "object")
-            ]
-        )
-    )]
     public function details()
     {
+        if ($bloqueo = $this->soloProfessional()) {
+            return $bloqueo;
+        }
+
         $cif = trim((string) $this->request->getGet('cif'));
 
         if ($cif === '') {
