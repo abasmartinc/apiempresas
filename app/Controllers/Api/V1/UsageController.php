@@ -176,6 +176,9 @@ class UsageController extends BaseApiController
                         'wallet_balance'  => $walletBalance,
                         'plan_name'       => $planName,
                         'plan_slug'       => $planSlug,
+                        // En Free, monthly_queries y monthly_quota son de por vida (100 en
+                        // total, no se renuevan). Campo nuevo para no cambiar los de siempre.
+                        'quota_period'    => ((int) $planId === 1) ? 'lifetime' : 'monthly',
                     ],
                     'history' => $history
                 ]

@@ -397,6 +397,15 @@
 Host: apiempresas.es
 X-API-KEY: tu_api_key_aqui
 Accept: application/json</code></pre>
+                    <p>También se acepta la cabecera <code>Authorization: Bearer tu_api_key_aqui</code>.</p>
+
+                    <h4>Entorno de pruebas (Sandbox)</h4>
+                    <p>Para probar tu integración sin gastar consultas, usa la misma API Key con la base <code>https://apiempresas.es/api/sandbox/v1</code> (mismas rutas que producción: <code>/companies</code>, <code>/companies/search</code>, <code>/companies/score</code>…). El Sandbox devuelve datos simulados y solo admite estos CIF:</p>
+                    <ul>
+                        <li><code>A15075062</code>: empresa encontrada (datos de ejemplo de Inditex).</li>
+                        <li><code>B00000000</code>: empresa no encontrada (404).</li>
+                    </ul>
+                    <p>Cualquier otro CIF devuelve un error. El Sandbox responde siempre con los datos completos, sin los recortes del plan Free ni los límites de cupo: sirve para comprobar el formato de las respuestas, no lo que verás con tu plan.</p>
                 </section>
 
                 <!-- BY CIF -->
@@ -1154,7 +1163,13 @@ Accept: application/json</code></pre>
   "data": {
     "stats": {
       "monthly_queries": 150,
-      "total_queries": 1250
+      "total_queries": 1250,
+      "monthly_quota": 3000,
+      "remaining_calls": 2850,
+      "wallet_balance": 0,
+      "plan_name": "Pro",
+      "plan_slug": "pro",
+      "quota_period": "monthly"
     },
     "history": [
       {
@@ -1169,7 +1184,10 @@ Accept: application/json</code></pre>
                             <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.monthly_queries</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Número de llamadas realizadas en el ciclo de facturación actual.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.monthly_queries</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Consultas cobradas en el periodo del cupo: el mes en curso en Pro y Business; desde el alta en Free.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.monthly_quota</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Consultas incluidas en tu plan (al mes, o 100 en total en Free).</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.remaining_calls</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Consultas del plan que te quedan antes de usar saldo del monedero.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.quota_period</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;"><code>monthly</code> (se renueva cada mes) o <code>lifetime</code> (Free: no se renueva).</td></tr>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">history[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">Histórico de consultas individuales con su fecha y CIF.</td></tr>
                         </tbody>
                     </table>
@@ -1242,11 +1260,11 @@ Accept: application/json</code></pre>
                             </tr>
                             <tr>
                                 <td><code>X-Quota-Limit</code></td>
-                                <td>Límite mensual total de consultas de tu plan actual.</td>
+                                <td>Consultas incluidas en tu plan: al mes en Pro y Business; en Free, 100 en total (no se renuevan).</td>
                             </tr>
                             <tr>
                                 <td><code>X-Quota-Remaining</code></td>
-                                <td>Consultas mensuales que te quedan antes de empezar a usar saldo del monedero.</td>
+                                <td>Consultas de tu plan que te quedan, ya descontada la petición actual, antes de empezar a usar saldo del monedero.</td>
                             </tr>
                             <tr>
                                 <td><code>X-Quota-Reset</code></td>

@@ -59,6 +59,44 @@ class ApiKeyFilter implements FilterInterface
      * (identificador estable para programar contra él) y los campos RFC 7807 que ya
      * dan los controladores y promete la documentación, más la cabecera X-Request-Id.
      */
+    /**
+     * Guarda en api_requests los rechazos de este filtro con cliente identificado
+     * (403 y 429). Antes no quedaban registrados: no se veían en el panel ni en
+     * soporte. Con $agrupar, como mucho uno por minuto y clave, para que un cliente
+     * que insiste no llene la tabla. No afecta al cobro (solo se cobran los 200).
+     */
+    private function registrarRechazo(RequestInterface $request, $row, int $status, ?string $agrupar = null): void
+    {
+        try {
+            if ($agrupar !== null) {
+                $clave = 'apilog_' . $agrupar . '_' . (int) $row->api_key_id;
+                if (cache()->get($clave)) {
+                    return;
+                }
+                cache()->save($clave, 1, 60);
+            }
+
+            $db = \Config\Database::connect('default');
+            $ua = (string) $request->getUserAgent();
+            $db->table('api_requests')->insert([
+                'user_id'         => (int) $row->user_id,
+                'api_key_id'      => (int) $row->api_key_id,
+                'subscription_id' => !empty($row->subscription_id) ? (int) $row->subscription_id : null,
+                'endpoint'        => (string) $request->getUri()->getPath(),
+                'http_method'     => (string) $request->getMethod(),
+                'status_code'     => $status,
+                'request_id'      => (string) self::$apiRequestId,
+                'ip_address'      => $request->getIPAddress(),
+                'user_agent'      => substr($ua, 0, 255),
+                'duration_ms'     => self::$apiT0 > 0.0 ? (int) round((microtime(true) - self::$apiT0) * 1000) : null,
+                'search_term'     => null,
+                'created_at'      => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', '[ApiKeyFilter::registrarRechazo] ' . $e->getMessage());
+        }
+    }
+
     private function errorResponse(int $status, array $legacy, string $code, string $detail, array $headers = [])
     {
         $body = $legacy;
@@ -170,6 +208,7 @@ class ApiKeyFilter implements FilterInterface
         }
 
         if ((int)$row->is_active !== 1 || (int)$row->user_active !== 1) {
+            $this->registrarRechazo($request, $row, 403, 'inactive');
             return $this->errorResponse(403, ['error' => 'API key inactiva o usuario inactivo'], 'API_KEY_INACTIVE', 'API key inactiva o usuario inactivo');
         }
 
@@ -196,6 +235,7 @@ class ApiKeyFilter implements FilterInterface
                 // Denegar acceso sin inactivar la clave (evita caídas de servicio legítimo)
                 log_message('warning', "GEO-ANOMALY DENIED: API Key {$row->api_key_id} blocked request from {$cfCountry}. User: {$row->email}");
                 $msgPais = 'Acceso denegado. Petición originada desde país no autorizado (' . $cfCountry . ').';
+                $this->registrarRechazo($request, $row, 403, 'country');
                 return $this->errorResponse(403, ['error' => $msgPais], 'COUNTRY_NOT_ALLOWED', $msgPais);
             }
         }
@@ -220,6 +260,7 @@ class ApiKeyFilter implements FilterInterface
             $requestsThisSecond = (int) cache()->get($rateLimitKey);
             
             if ($requestsThisSecond >= $maxRequestsPerSecond) {
+                $this->registrarRechazo($request, $row, 429, 'rate');
                 return $this->errorResponse(429, [
                     'success' => false,
                     'error'   => 'TOO_MANY_REQUESTS',
@@ -315,6 +356,7 @@ class ApiKeyFilter implements FilterInterface
                         $quotaHeaders['X-Quota-Reset'] = $quotaReset;
                     }
 
+                    $this->registrarRechazo($request, $row, 429, 'quota');
                     return $this->errorResponse(429, [
                         'success' => false,
                         'error'   => 'Quota Exceeded',
@@ -338,6 +380,7 @@ class ApiKeyFilter implements FilterInterface
                 $ipUsage = $db->table('api_requests r')->join($subscriptionTable . ' us', 'us.user_id = r.user_id')->where('us.plan_id', 1)->where('us.status', 'active')->where('r.ip_address', $ipAddress)->where('r.status_code', 200)->where('r.created_at >=', self::FREE_DESDE . ' 00:00:00')->countAllResults();
 
                 if ($ipUsage >= 100) {
+                    $this->registrarRechazo($request, $row, 429, 'ip');
                     return $this->errorResponse(429, [
                         'success' => false,
                         'error'   => 'Quota Exceeded',
@@ -499,7 +542,13 @@ class ApiKeyFilter implements FilterInterface
             $response->setHeader('X-RateLimit-Remaining', (string)$meta['rate_remaining']);
             $response->setHeader('X-RateLimit-Reset', (string)$meta['rate_reset']);
             $response->setHeader('X-Quota-Limit', (string)$meta['quota_limit']);
-            $response->setHeader('X-Quota-Remaining', (string)$meta['quota_remaining']);
+            // quota_remaining se calcula antes de cobrar esta petición: si se ha cobrado
+            // del cupo, se descuenta aquí para que la cabecera no vaya una por detrás.
+            $restante = (int) $meta['quota_remaining'];
+            if (!$skipBilling && (int) $meta['sub_cost'] > 0) {
+                $restante = max(0, $restante - (int) $meta['sub_cost']);
+            }
+            $response->setHeader('X-Quota-Remaining', (string) $restante);
         } catch (\Throwable $e) {
             log_message('error', '[ApiKeyFilter::after] ' . $e->getMessage());
         }
