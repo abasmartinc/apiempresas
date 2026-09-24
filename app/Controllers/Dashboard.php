@@ -44,7 +44,9 @@ class Dashboard extends BaseController
 
 
         // Determinar si hay que mostrar el wizard de onboarding
-        $data['show_wizard'] = ((int)($user->wizard_completed ?? 0) === 0);
+        // Con ?probar=CIF (enlace de los correos) el panel lanza la consulta real: el
+        // asistente la tapaba y el usuario gastaba una consulta sin ver el resultado.
+        $data['show_wizard'] = ((int)($user->wizard_completed ?? 0) === 0) && !$this->request->getGet('probar');
 
 
         // Allow admins to view client, risk or api dashboards
@@ -87,6 +89,20 @@ class Dashboard extends BaseController
 
         // --- Personalization stats for non-admins ---
         $data['api_key'] = $this->ApikeysModel->where(['user_id' => $userId, 'is_active' => 1])->first();
+
+        // Red de seguridad: cuentas creadas sin ninguna clave (altas antiguas por GitHub o
+        // LinkedIn) reciben una al entrar. Si tiene una desactivada, no se toca.
+        if (!$data['api_key'] && $this->ApikeysModel->where('user_id', $userId)->countAllResults() === 0) {
+            $this->ApikeysModel->insert([
+                'user_id'    => $userId,
+                'name'       => 'Default API Key',
+                'api_key'    => bin2hex(random_bytes(32)),
+                'is_active'  => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+            $data['api_key'] = $this->ApikeysModel->where(['user_id' => $userId, 'is_active' => 1])->first();
+        }
         
         // --- API Usage & Activation Metrics ---
         $db = \Config\Database::connect();

@@ -400,7 +400,7 @@ function showUpgradeModal() {
         }
     }).then((result) => {
         if (result.isConfirmed) {
-            window.location.href = '<?= site_url('billing') ?>';
+            window.location.href = '<?= site_url('billing?plan=pro&source=dash_limit_modal') ?>';
         }
     });
 }

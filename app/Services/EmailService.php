@@ -1104,6 +1104,38 @@ class EmailService
      * Sin descuento, porque no hay cupones configurados en Stripe. Se adapta al motivo
      * de la baja si se guardó.
      */
+    /**
+     * Empezó a pagar Pro o Business de la API y no terminó (1-48 h). Comercial: con baja.
+     * Resuelve las dudas típicas antes del pago y vuelve al checkout con plan y periodo.
+     */
+    public function sendApiCheckoutAbandoned(array $userData, string $plan, string $period): array
+    {
+        $plan    = $plan === 'business' ? 'business' : 'pro';
+        $period  = $period === 'annual' ? 'annual' : 'monthly';
+        $nombre  = $plan === 'business' ? 'Business' : 'Pro';
+        $li      = static fn (string $h) => '<li style="margin:0 0 6px;">' . $h . '</li>';
+
+        $contenido = $this->p('Empezaste a activar el plan <strong>' . $nombre . '</strong> de la API y el pago se quedó a medias. Lo tienes guardado: el botón te lleva al mismo punto, con el plan y el periodo que elegiste.')
+            . $this->p('Por si alguna duda te frenó:')
+            . '<ul style="margin:0 0 14px; padding-left:20px;">'
+            . $li('<strong>Sin permanencia:</strong> lo cancelas desde tu panel cuando quieras.')
+            . $li('<strong>Factura con tus datos fiscales</strong> (NIF y dirección), descargable desde el panel.')
+            . $li('<strong>No cambias nada en tu código:</strong> misma API Key, y en cuanto se confirma el pago tienes el cupo y los datos completos.')
+            . $li('<strong>Si prefieres no suscribirte,</strong> un <a href="' . site_url('crear-bono-api') . '" style="color:#2563eb;font-weight:700;">bono de créditos</a> se paga una vez y no caduca.')
+            . '</ul>'
+            . $this->p('Si algo no te cuadra (forma de pago, factura, volumen), responde a este correo y te contestamos.');
+
+        return $this->sendApiAutomation(
+            $userData,
+            'Tu plan ' . $nombre . ' está a un paso: retoma el pago donde lo dejaste',
+            'Sin permanencia, con factura a tu empresa y sin tocar tu código.',
+            $contenido,
+            'Terminar la activación',
+            site_url('billing?plan=' . $plan . '&period=' . $period),
+            'api_checkout_abandoned'
+        );
+    }
+
     public function sendApiWinback(array $userData, array $plan, string $motivo = ''): array
     {
         $nombre = trim((string) ($plan['name'] ?? '')) ?: 'de pago';

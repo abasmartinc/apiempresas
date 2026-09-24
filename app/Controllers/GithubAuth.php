@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\UserModel;
+use App\Models\ApikeysModel;
 use App\Models\UsersuscriptionsModel;
 use App\Services\EmailService;
 use GuzzleHttp\Client as GuzzleClient;
@@ -143,7 +144,6 @@ class GithubAuth extends BaseController
 
         // 3. Si sigue sin existir, crear usuario nuevo
         if (!$user) {
-            $apiKey = bin2hex(random_bytes(16)); // not 'sk_' actually wait, it was $apiKey
             $host = $this->request->getServer('HTTP_HOST') ?? '';
             $lang = (strpos((string)$host, 'spaincompanyapi') !== false) ? 'en' : 'es';
             $intent = session()->get('signup_intent') ?: 'api';
@@ -155,13 +155,14 @@ class GithubAuth extends BaseController
                 'lang'              => $lang,
                 'github_id'         => $githubId,
                 'avatar'            => $avatar,
-                'api_key'           => $apiKey,
                 'is_active'         => 1,
                 'api_access'        => 1,
                 'source_app'        => 'apiempresas',
                 'signup_intent'     => $intent,
-                'preferred_product' => ($intent === 'radar') ? 'radar' : 'api',
-                'password_hash'     => password_hash(bin2hex(random_bytes(10)), PASSWORD_DEFAULT) // Password aleatorio
+                'password_hash'     => password_hash(bin2hex(random_bytes(10)), PASSWORD_DEFAULT), // Password aleatorio
+                // Sin esto quedaba 0000-00-00 y la cuenta no entraba en los correos por antigüedad
+                'created_at'        => date('Y-m-d H:i:s'),
+                'updated_at'        => date('Y-m-d H:i:s'),
             ];
 
             $userId = $this->userModel->insert($userData);
@@ -171,9 +172,23 @@ class GithubAuth extends BaseController
             $this->subsModel->insert([
                 'user_id'   => $userId,
                 'plan_id'   => 1, // Plan Básico/Gratis
-                'status'    => 'active',
-                'starts_at' => date('Y-m-d H:i:s'),
-                'ends_at'   => date('Y-m-d H:i:s', strtotime('+100 years'))
+                'status'               => 'active',
+                'current_period_start' => date('Y-m-d H:i:s'),
+                'current_period_end'   => date('Y-m-d H:i:s', strtotime('+1 month')),
+                'created_at'           => date('Y-m-d H:i:s'),
+                'updated_at'           => date('Y-m-d H:i:s'),
+            ]);
+
+            // API Key en api_keys, que es la tabla que leen el panel y la API. Antes se
+            // guardaba en users.api_key (que nadie lee): el usuario se quedaba sin clave
+            // válida. La suscripción usaba starts_at/ends_at, columnas que no existen.
+            (new ApikeysModel())->insert([
+                'user_id'    => $userId,
+                'name'       => 'Default API Key',
+                'api_key'    => bin2hex(random_bytes(32)),
+                'is_active'  => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
             // Enviar email de bienvenida

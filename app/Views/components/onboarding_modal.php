@@ -25,9 +25,9 @@ if (isset($show_wizard) && $show_wizard && session()->has('user_id')) {
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
             <label style="display: block; font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 12px;"><?= lang('Wizard.click_to_test') ?></label>
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;">
-                <button class="wiz-badge" onclick="simulateApi('A15075062', 'Inditex S.A.', 'Arteixo', 'A Coruña')">👕 Inditex</button>
-                <button class="wiz-badge" onclick="simulateApi('A46103834', 'Mercadona S.A.', 'Tavernes Blanques', 'Valencia')">🛒 Mercadona</button>
-                <button class="wiz-badge" onclick="simulateApi('A28015865', 'Telefónica S.A.', 'Madrid', 'Madrid')">📱 Telefónica</button>
+                <button class="wiz-badge" onclick="simulateApi('A15075062')">👕 Inditex</button>
+                <button class="wiz-badge" onclick="simulateApi('A46103834')">🛒 Mercadona</button>
+                <button class="wiz-badge" onclick="simulateApi('A28015865')">📱 Telefónica</button>
             </div>
             
             <div style="display: flex; align-items: center; gap: 16px;">
@@ -40,6 +40,7 @@ if (isset($show_wizard) && $show_wizard && session()->has('user_id')) {
                 <input type="text" id="wiz-cif-input" placeholder="<?= lang('Wizard.cif_placeholder') ?>" style="flex: 1; padding: 16px; border-radius: 12px; border: 1px solid #cbd5e1; font-weight: 700; font-size: 1rem; outline: none;">
                 <button onclick="simulateApiManual()" style="background: #2152ff; color: white; border: none; padding: 0 24px; border-radius: 12px; font-weight: 800; cursor: pointer;"><?= lang('Wizard.validate') ?></button>
             </div>
+            <p id="wiz-error" style="display: none; margin: 12px 0 0; color: #dc2626; font-size: 0.85rem; font-weight: 700;"></p>
         </div>
         
         <div style="text-align: center; margin-top: 24px;">
@@ -234,30 +235,54 @@ print(response.json())</pre>
         });
     }
 
-    function simulateApi(cif, name, municipality, province) {
+    // Llamada REAL a la API con la clave del usuario (antes era un setTimeout con datos
+    // inventados). Cuenta como su primera llamada: el panel y los correos lo saben.
+    let freeResponse = null;
+
+    function wizardError(msg) {
+        document.getElementById('wizard-loading').style.display = 'none';
+        document.getElementById('wizard-step-1').style.display = 'block';
+        const box = document.getElementById('wiz-error');
+        box.textContent = msg;
+        box.style.display = 'block';
+    }
+
+    async function simulateApi(cif) {
+        document.getElementById('wiz-error').style.display = 'none';
         document.getElementById('wizard-step-1').style.display = 'none';
         document.getElementById('wizard-loading').style.display = 'block';
-        
-        currentCompany = { cif: cif, name: name, municipality: municipality || 'Madrid', province: province || 'Madrid' };
-        document.getElementById('wiz-res-name').innerText = name;
 
         // Inyectar el CIF en los códigos de ejemplo del Paso 3
         document.querySelectorAll('.snip-cif').forEach(el => el.innerText = cif);
 
-        setTimeout(() => {
+        try {
+            const res = await fetch('<?= site_url('api/v1/companies') ?>?cif=' + encodeURIComponent(cif), {
+                headers: { 'X-API-KEY': <?= json_encode($apiKey) ?>, 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const body = await res.json().catch(() => ({}));
+            if (!res.ok || !body.data) {
+                wizardError(body.message || body.detail || (typeof body.error === 'string' ? body.error : 'No hemos podido consultar esa empresa. Prueba con otro CIF.'));
+                return;
+            }
+            freeResponse = body;
+            currentCompany = body.data;
+            document.getElementById('wiz-res-name').innerText = body.data.name || cif;
             document.getElementById('wizard-loading').style.display = 'none';
             document.getElementById('wizard-step-2').style.display = 'block';
-            togglePlan('free'); // Mostrar Free por defecto para no confundir
-        }, 1200);
+            togglePlan('free'); // Primero lo que recibe hoy
+        } catch (e) {
+            wizardError('No hemos podido conectar con la API. Inténtalo de nuevo.');
+        }
     }
 
     function simulateApiManual() {
-        const cif = document.getElementById('wiz-cif-input').value.trim();
+        const input = document.getElementById('wiz-cif-input');
+        const cif = input.value.trim().toUpperCase();
         if (!cif) {
-            document.getElementById('wiz-cif-input').style.borderColor = '#ef4444';
+            input.style.borderColor = '#ef4444';
             return;
         }
-        simulateApi(cif, "Empresa " + cif, "Localidad", "Provincia");
+        simulateApi(cif);
     }
 
     function goBackToStep1() {
@@ -323,35 +348,11 @@ print(response.json())</pre>
             proBtn.style.backgroundColor = '#f8fafc';
             proBtn.style.boxShadow = 'none';
 
-            label.innerText = 'FREE RESPONSE';
+            label.innerText = 'RESPUESTA REAL · TU PLAN';
             label.style.backgroundColor = '#f1f5f9';
             label.style.color = '#475569';
 
-            dataObj = {
-                "success": true,
-                "data": {
-                    "name": currentCompany.name,
-                    "cif": currentCompany.cif,
-                    "cnae": "4771",
-                    "cnae_label": "Comercio al por menor",
-                    "cnae_2025": "4771",
-                    "cnae_2025_label": "Comercio al por menor",
-                    "corporate_purpose": "La importación, exportación, fabricación, comercialización y venta al p... [ACTUALIZA A PRO PARA VER EL DETALLE COMPLETO]",
-                    "founded": "1985-06-12",
-                    "province": currentCompany.province,
-                    "address": "*** [ACTUALIZA A PRO PARA VER LA DIRECCION ]",
-                    "municipality": currentCompany.municipality,
-                    "status": "Activa",
-                    "upsell_opportunities": {
-                        "campos_ocultos": [
-                            "direccion_completa",
-                            "objeto_social_completo",
-                            "geolocalizacion_lat_lng"
-                        ],
-                        "mensaje": "🔒 Pásate al plan Pro para desbloquear la ubicación y los datos societarios completos de esta empresa."
-                    }
-                }
-            };
+            dataObj = freeResponse || {};
         } else {
             proBtn.style.borderColor = '#2152ff';
             proBtn.style.backgroundColor = '#eff6ff';
@@ -361,29 +362,23 @@ print(response.json())</pre>
             freeBtn.style.backgroundColor = '#f8fafc';
             freeBtn.style.boxShadow = 'none';
 
-            label.innerText = 'PRO RESPONSE';
+            label.innerText = 'LO QUE AÑADE PRO';
             label.style.backgroundColor = '#dbeafe';
             label.style.color = '#1d4ed8';
 
-            dataObj = {
-                "success": true,
-                "data": {
-                    "name": currentCompany.name,
-                    "cif": currentCompany.cif,
-                    "cnae": "4771",
-                    "cnae_label": "Comercio al por menor",
-                    "cnae_2025": "4771",
-                    "cnae_2025_label": "Comercio al por menor",
-                    "corporate_purpose": "La importación, exportación, fabricación, comercialización y venta al por menor y al por mayor de artículos de vestir y complementos.",
-                    "founded": "1985-06-12",
-                    "province": currentCompany.province,
-                    "address": "AVENIDA DE LA DIPUTACION (EDIFICIO PRINCIPAL), S/N",
-                    "municipality": currentCompany.municipality,
-                    "lat": 43.3155,
-                    "lng": -8.5022,
-                    "status": "Activa"
-                }
-            };
+            // Versión Pro construida sobre la respuesta real: se marcan los campos que
+            // se desbloquean en lugar de inventar valores.
+            const pro = JSON.parse(JSON.stringify(freeResponse || { success: true, data: {} }));
+            const d = pro.data || {};
+            if (typeof d.address === 'string' && d.address.indexOf('ACTUALIZA A PRO') !== -1) {
+                d.address = '🔓 Dirección completa (visible con Pro)';
+            }
+            if (typeof d.corporate_purpose === 'string' && d.corporate_purpose.indexOf('[ACTUALIZA A PRO') !== -1) {
+                d.corporate_purpose = d.corporate_purpose.replace(/\.\.\. \[ACTUALIZA A PRO[^\]]*\]/, '') + ' … 🔓 (texto completo con Pro)';
+            }
+            if (d.lat === undefined) { d.lat = '🔓 latitud'; d.lng = '🔓 longitud'; }
+            delete d.upsell_opportunities;
+            dataObj = pro;
         }
 
         document.getElementById('wiz-json-container').innerHTML = syntaxHighlight(dataObj);

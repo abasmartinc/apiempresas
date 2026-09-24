@@ -244,6 +244,8 @@ $fmt = function ($n) {
                                 <input type="hidden" name="period" id="periodInput" value="monthly" />
                                 <input type="hidden" name="plan" id="planInput" value="pro" />
                                 <input type="hidden" name="payment_method" id="paymentMethodInput" value="stripe" />
+                                <?php // Origen de la venta (?source=... de los botones del panel, del 429, etc.) ?>
+                                <input type="hidden" name="source" value="<?= esc(substr(preg_replace('/[^a-z0-9_\-]/i', '', (string) service('request')->getGet('source')), 0, 64)) ?>" />
                             </form>
                         </div>
                     </div>

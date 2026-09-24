@@ -85,16 +85,8 @@ class QuickUnlock extends BaseController
             'logged_in' => true,
         ]);
 
-        $emailService->sendRegistrationAdminNotification([
-            'user_id' => $userId,
-            'name'    => explode('@', $email)[0],
-            'email'   => $email,
-            'company' => 'N/A (Quick Unlock)'
-        ]);
-        
-        $emailService->sendSetPasswordEmail($email, $token);
-
-        // Generate API Key for the new user
+        // La clave se crea ANTES de los correos: si el envío fallaba, la cuenta quedaba
+        // sin clave, la petición daba 500 y al reintentar decía "ya existe una cuenta".
         $keyValue = bin2hex(random_bytes(32));
         $apiKeyModel->insert([
             'user_id' => $userId,
@@ -104,12 +96,25 @@ class QuickUnlock extends BaseController
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
+        try {
+            $emailService->sendRegistrationAdminNotification([
+                'user_id' => $userId,
+                'name'    => explode('@', $email)[0],
+                'email'   => $email,
+                'company' => 'N/A (Quick Unlock)'
+            ]);
+            $emailService->sendSetPasswordEmail($email, $token);
+        } catch (\Throwable $e) {
+            log_message('error', '[QuickUnlock] Error enviando correos: ' . $e->getMessage());
+        }
+
         return $this->response->setJSON([
             'status' => 'success',
             'api_key' => $keyValue,
             // Sin la clave en la URL: quedaba en el historial del navegador y en los
             // logs. La documentación no la usaba; el usuario ya tiene sesión y la ve en su panel.
-            'redirect' => site_url('documentation')
+            // Al panel con la primera consulta lanzada: ve su clave y una respuesta real.
+            'redirect' => site_url('dashboard?probar=A15075062')
         ]);
     }
 }

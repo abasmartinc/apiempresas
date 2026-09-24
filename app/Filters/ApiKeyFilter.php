@@ -65,6 +65,21 @@ class ApiKeyFilter implements FilterInterface
      * soporte. Con $agrupar, como mucho uno por minuto y clave, para que un cliente
      * que insiste no llene la tabla. No afecta al cobro (solo se cobran los 200).
      */
+    /**
+     * Enlaces de compra para los 429 de cupo (campos nuevos; upgrade_url no cambia).
+     * Free → Pro, Pro → Business, Business → solo bono. El origen llega al checkout.
+     */
+    public static function enlacesCompra(int $planId, string $source): array
+    {
+        $siguiente = $planId === 1 ? 'pro' : ($planId === 2 ? 'business' : null);
+        return [
+            'checkout_url' => $siguiente !== null
+                ? site_url('billing?plan=' . $siguiente . '&period=annual&source=' . $source)
+                : null,
+            'recharge_url' => site_url('crear-bono-api?source=' . $source),
+        ];
+    }
+
     private function registrarRechazo(RequestInterface $request, $row, int $status, ?string $agrupar = null): void
     {
         try {
@@ -366,7 +381,7 @@ class ApiKeyFilter implements FilterInterface
                         'cost_required' => $creditCost,
                         'upgrade_url' => site_url('billing'),
                         'quota_resets_at' => $quotaReset !== null ? date('c', $quotaReset) : null,
-                    ], 'QUOTA_EXCEEDED', $errorMsg, $quotaHeaders);
+                    ] + self::enlacesCompra((int) $planId, 'api_429_quota'), 'QUOTA_EXCEEDED', $errorMsg, $quotaHeaders);
                 }
             }
 
@@ -385,7 +400,8 @@ class ApiKeyFilter implements FilterInterface
                         'success' => false,
                         'error'   => 'Quota Exceeded',
                         'message' => 'Límite de seguridad por IP alcanzado. Actualiza tu plan.',
-                    ], 'IP_LIMIT_EXCEEDED', 'Límite de seguridad por IP alcanzado. Actualiza tu plan.');
+                        'upgrade_url' => site_url('billing'),
+                    ] + self::enlacesCompra(1, 'api_429_ip'), 'IP_LIMIT_EXCEEDED', 'Límite de seguridad por IP alcanzado. Actualiza tu plan.');
                 }
             }
 

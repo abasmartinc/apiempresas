@@ -1,5 +1,5 @@
 <!-- PASO 3: INTEGRACIÓN -->
-<section id="section-paso3" class="activation-main-card" style="margin-top: 32px; position: relative; <?= $requestsUsedThisMonth > 0 ? '' : 'opacity: 0.6; pointer-events: none;' ?>">
+<section id="section-paso3" class="activation-main-card" style="margin-top: 32px; position: relative; ">
     <div style="position: absolute; top: -14px; left: 32px; background: <?= $requestsUsedThisMonth > 0 ? '#2152ff' : '#94a3b8' ?>; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"><?= lang('Dashboard.step_3') ?></div>
     <div style="margin-top: 10px;">
         <h2 style="font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 0 0 8px !important;"><?= lang('Dashboard.integrate_system') ?></h2>

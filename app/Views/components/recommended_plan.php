@@ -116,7 +116,7 @@ if ($isPaid && strpos($currentPlanSlug, 'pro') !== false) {
             </div>
         </div>
 
-        <a href="<?= site_url('billing') ?>" class="btn primary"
+        <a href="<?= site_url('billing?plan=' . ($isPaid ? 'business' : 'pro') . '&source=dash_recommended') ?>" class="btn primary"
             style="background: #10b981; color: white !important; width: 100%; display: block; text-align: center; text-decoration: none; padding: 18px; border-radius: 12px; font-weight: 900; font-size: 1.15rem; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); transition: all 0.2s transform;">
             <?= $recoCta ?>
         </a>

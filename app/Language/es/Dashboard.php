@@ -56,7 +56,7 @@ return [
     'step_2' => 'Paso 2',
     'copy_api_key' => 'Copia tu API Key',
     'use_key_connect' => 'Usa tu clave para conectar tu sistema.',
-    'make_first_search' => 'Realiza tu primera búsqueda (Paso 1) para activar tu clave.',
+    'make_first_search' => 'Tu clave ya funciona: cópiala y úsala en tu código, o prueba antes una búsqueda en el Paso 1.',
     'regenerate_key' => 'Regenerar clave',
     'show' => 'Mostrar',
     'copy' => 'Copiar',

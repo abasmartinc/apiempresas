@@ -2127,12 +2127,12 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
 
                 $.post('<?= site_url("api/quick-unlock") ?>', { email: email }, function(res) {
                     if (res.status === 'success') {
-                        trackEvent('api_quick_unlock_success', { email: email });
+                        trackEvent('api_quick_unlock_success', {});
                         Swal.fire({
                             title: '¡API Key Generada!',
-                            text: 'Tu llave es: ' + res.api_key + '. Te redirigimos a la documentación.',
+                            text: 'Tu API Key es: ' + res.api_key + '. Te llevamos a tu panel, donde ya estará lanzada tu primera consulta.',
                             icon: 'success',
-                            confirmButtonText: 'Ir a Documentación'
+                            confirmButtonText: 'Ir a mi panel'
                         }).then(() => {
                             window.location.href = res.redirect;
                         });

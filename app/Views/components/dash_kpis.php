@@ -24,7 +24,7 @@
         
         $meta1 = (!$isPaid && $requestsUsed >= $freeLimit) ? lang('Dashboard.activate_pro') : ((isset($isBonusUser) && $isBonusUser) ? lang('Dashboard.pay_as_you_go') : lang('Dashboard.limit', [($isPaid ? number_format($maxLimit ?? 0, 0, ',', '.') : $freeLimit)]));
         
-        $attr1 = (!$isPaid && $requestsUsed >= $freeLimit) ? 'onclick="window.location.href=\''.site_url('billing').'\'"' : '';
+        $attr1 = (!$isPaid && $requestsUsed >= $freeLimit) ? 'onclick="window.location.href=\''.site_url('billing?plan=pro&source=dash_kpi_limit').'\'"' : '';
     ?>
     <?= view('components/ui/kpi', [
         'theme' => $theme1,

@@ -182,7 +182,7 @@ class CompaniesBatch extends BaseApiController
                 'error'   => 'Quota Exceeded',
                 'message' => 'Has superado el límite de consultas y no tienes saldo en el monedero.',
                 'upgrade_url' => site_url('billing')
-            ]);
+            ] + \App\Filters\ApiKeyFilter::enlacesCompra($planId, 'api_429_batch'));
         }
 
         $subCost = 0;

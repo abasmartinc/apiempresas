@@ -44,7 +44,7 @@
     <p style="color: #64748b; font-size: 0.8rem; font-weight: 600; margin-bottom: 20px;">
         <?= $remainingRequests <= 0 ? lang('Dashboard.free_limit_reached_alert') : lang('Dashboard.free_limit_warning') ?>
     </p>
-    <a href="<?= site_url('billing') ?>" class="btn primary" style="width: 100%; display: block; text-align: center; text-decoration: none; padding: 14px; font-weight: 800; background: #10b981; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+    <a href="<?= site_url('billing?plan=pro&source=dash_sidebar') ?>" class="btn primary" style="width: 100%; display: block; text-align: center; text-decoration: none; padding: 14px; font-weight: 800; background: #10b981; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
         <?= lang('Dashboard.activate_pro_btn') ?>
     </a>
 </section>

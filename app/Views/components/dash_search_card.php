@@ -115,11 +115,11 @@ $isWarning = ($requestsUsed >= $warningThreshold);
                 <div class="aha-val" id="aha-status">-</div>
             </div>
             <div class="aha-item" style="grid-column: span 2;">
-                <div class="aha-label" style="display:flex; justify-content:space-between;"><?= lang('Dashboard.address') ?> <?php if (!$isPaid && ($walletBalance ?? 0) <= 0): ?><a href="<?=site_url('billing')?>" style="color:#2152ff;text-decoration:none;"><?= lang('Dashboard.unlock_pro') ?></a><?php endif; ?></div>
+                <div class="aha-label" style="display:flex; justify-content:space-between;"><?= lang('Dashboard.address') ?> <?php if (!$isPaid && ($walletBalance ?? 0) <= 0): ?><a href="<?=site_url('billing?plan=pro&source=dash_result_address')?>" style="color:#2152ff;text-decoration:none;"><?= lang('Dashboard.unlock_pro') ?></a><?php endif; ?></div>
                 <div class="aha-val" id="aha-address">-</div>
             </div>
             <div class="aha-item" style="grid-column: span 2;">
-                <div class="aha-label" style="display:flex; justify-content:space-between;"><?= lang('Dashboard.activity') ?> <?php if (!$isPaid && ($walletBalance ?? 0) <= 0): ?><a href="<?=site_url('billing')?>" style="color:#2152ff;text-decoration:none;"><?= lang('Dashboard.unlock_pro') ?></a><?php endif; ?></div>
+                <div class="aha-label" style="display:flex; justify-content:space-between;"><?= lang('Dashboard.activity') ?> <?php if (!$isPaid && ($walletBalance ?? 0) <= 0): ?><a href="<?=site_url('billing?plan=pro&source=dash_result_activity')?>" style="color:#2152ff;text-decoration:none;"><?= lang('Dashboard.unlock_pro') ?></a><?php endif; ?></div>
                 <div class="aha-val" id="aha-activity">-</div>
             </div>
         </div>
@@ -132,7 +132,7 @@ $isWarning = ($requestsUsed >= $warningThreshold);
                     <button class="btn-small" id="btnCopyEndpoint"><?= lang('Dashboard.copy_endpoint') ?></button>
                     <button class="btn-small" id="btnShowJson"><?= lang('Dashboard.view_popup') ?></button>
                 </div>
-                <a href="<?= site_url('billing') ?>" class="btn-small primary" style="background: #10b981; color: white !important; border: none; text-align: center; justify-content: center; padding: 14px; font-weight: 900; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); border-radius: 12px; font-size: 1rem;"><?= lang('Dashboard.activate_pro_auto') ?></a>
+                <a href="<?= site_url('billing?plan=pro&source=dash_result_cta') ?>" class="btn-small primary" style="background: #10b981; color: white !important; border: none; text-align: center; justify-content: center; padding: 14px; font-weight: 900; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); border-radius: 12px; font-size: 1rem;"><?= lang('Dashboard.activate_pro_auto') ?></a>
             </div>
         </div>
         <?php endif; ?>

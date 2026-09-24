@@ -242,7 +242,7 @@
             <div class="plan-card-bg"></div>
             <h2>¿Listo para integrar?</h2>
             <p>Obtén tu API Key gratuita en menos de 1 minuto. Sin tarjeta de crédito.</p>
-            <a href="<?= site_url('register?plan=free') ?>" class="btn-primary-cta">Crear cuenta gratis</a>
+            <a href="<?= site_url('register?intent=api&plan=free') ?>" class="btn-primary-cta">Crear cuenta gratis</a>
         </div>
         
         <div class="alternative-plans">

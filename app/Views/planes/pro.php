@@ -255,7 +255,7 @@
             <div class="plan-card-bg"></div>
             <h2>Pásate al nivel profesional</h2>
             <p>Obtén tu API Key Pro al instante y empieza a automatizar.</p>
-            <a href="<?= site_url('register?plan=pro') ?>" class="btn-primary-cta">Empezar con Pro (19€/mes + IVA)</a>
+            <a href="<?= site_url('register?intent=api&plan=pro&period=monthly') ?>" class="btn-primary-cta">Empezar con Pro (19€/mes + IVA)</a>
         </div>
         
         <div class="alternative-plans">

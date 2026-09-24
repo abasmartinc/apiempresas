@@ -121,13 +121,16 @@ class Usage extends BaseController
             
             $usageToday = ($todayRow->total ?? 0) + ($todayRow->credits_total ?? 0);
         } else {
-            // Usuario Free o Usuario con Bono
+            // Usuario Free o Usuario con Bono. El Free son 100 consultas de por vida (no
+            // se renuevan cada mes): se cuenta desde FREE_DESDE, igual que ApiKeyFilter y
+            // el panel. Antes contaba solo el mes en curso y enseñaba consultas que ya no quedaban.
             $sumRow = $db->table('api_usage_daily')
                 ->selectSum('requests_count', 'total')
                 ->selectSum('credits_used', 'credits_total')
                 ->where('user_id', $userId)
-                ->where('date >=', date('Y-m-01'))
+                ->where('date >=', \App\Filters\ApiKeyFilter::FREE_DESDE)
                 ->get()->getRow();
+            $data['quota_lifetime'] = true;
             
             $usageMonth = ($sumRow->total ?? 0) + ($sumRow->credits_total ?? 0);
 

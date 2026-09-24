@@ -11,7 +11,7 @@
         </div>
         
         <div style="display: flex; align-items: center; gap: 16px;">
-            <a id="usage-trigger-cta" href="<?= site_url('billing') ?>" class="btn" style="white-space: nowrap; font-weight: 800; padding: 10px 24px; border-radius: 12px; font-size: 0.9rem; transition: all 0.2s ease; border: none;">
+            <a id="usage-trigger-cta" href="<?= site_url('billing?plan=pro&source=usage_banner') ?>" class="btn" style="white-space: nowrap; font-weight: 800; padding: 10px 24px; border-radius: 12px; font-size: 0.9rem; transition: all 0.2s ease; border: none;">
                 <?= lang('UsageTrigger.activate_radar') ?>
             </a>
             <button id="usage-trigger-close" style="background: transparent; border: none; cursor: pointer; padding: 4px; opacity: 0.6; transition: opacity 0.2s ease;" title="Cerrar">

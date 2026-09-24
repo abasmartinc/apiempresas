@@ -172,11 +172,11 @@
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                     </div>
                     <div class="kpi-content">
-                        <span class="label"><?= lang('Usage.queries_this_month') ?></span>
+                        <span class="label"><?= !empty($quota_lifetime) ? 'Consultas usadas' : lang('Usage.queries_this_month') ?></span>
                         <div class="value">
                             <span><?= $fmt($usedThisMonth) ?></span>
                         </div>
-                        <div class="meta"><?= lang('Usage.current_acc') ?></div>
+                        <div class="meta"><?= !empty($quota_lifetime) ? 'De las 100 del plan Free (no se renuevan)' : lang('Usage.current_acc') ?></div>
                     </div>
                 </div>
 
@@ -368,7 +368,7 @@
                             </div>
                             <?php if ($monthlyQuotaInt !== null): ?>
                                 <div style="text-align: right; font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 6px; font-weight: 600;">
-                                    <?= sprintf(lang('Usage.queries_left'), $fmt($remaining)) ?>
+                                    <?= sprintf(lang('Usage.queries_left'), $fmt($remaining)) ?><?= !empty($quota_lifetime) ? ' (no se renuevan)' : '' ?>
                                 </div>
                             <?php endif; ?>
                         </div>

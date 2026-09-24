@@ -37,7 +37,7 @@ class EmailAutomationCommand extends BaseCommand
         // =========================================================================
         // BLOQUE 1: USUARIOS DE LA API (Solo usuarios con signup_intent = 'api')
         // =========================================================================
-        CLI::write('📡 [1/5] Procesando automatizaciones de API...', 'cyan');
+        CLI::write('📡 [1/6] Procesando automatizaciones de API...', 'cyan');
         
         $apiUsers = $db->table('users')
             ->select('users.*, user_subscriptions.plan_id')
@@ -59,7 +59,7 @@ class EmailAutomationCommand extends BaseCommand
         // =========================================================================
         // BLOQUE 2: FLUJO DE RIESGO, PAYWALL Y UPSELL PACKS
         // =========================================================================
-        CLI::write('🛡️ [2/5] Procesando automatizaciones de Riesgo y Solvencia...', 'cyan');
+        CLI::write('🛡️ [2/6] Procesando automatizaciones de Riesgo y Solvencia...', 'cyan');
         $this->processRiskPaywallTriggers();
         $this->processRiskPackUpsellTriggers();
         $this->processSolvenciaCiclo();
@@ -67,20 +67,26 @@ class EmailAutomationCommand extends BaseCommand
         // =========================================================================
         // BLOQUE 3: USUARIOS CON ALTA TASA DE ERRORES 400 EN API
         // =========================================================================
-        CLI::write('🔍 [3/5] Detectando usuarios con errores 400 en peticiones...', 'cyan');
+        CLI::write('🔍 [3/6] Detectando usuarios con errores 400 en peticiones...', 'cyan');
         $this->processBadRequestUsers();
 
         // =========================================================================
         // BLOQUE 4: CLIENTES DE PAGO DE LA API CERCA DEL CUPO DEL MES
         // =========================================================================
-        CLI::write('💳 [4/5] Revisando el cupo mensual de los clientes de pago de la API...', 'cyan');
+        CLI::write('💳 [4/6] Revisando el cupo mensual de los clientes de pago de la API...', 'cyan');
         $this->processPaidApiQuota();
 
         // =========================================================================
         // BLOQUE 5: RECUPERACIÓN DE QUIEN DEJÓ PRO O BUSINESS HACE UN MES
         // =========================================================================
-        CLI::write('↩️  [5/5] Recuperación de bajas de planes de pago de la API...', 'cyan');
+        CLI::write('↩️  [5/6] Recuperación de bajas de planes de pago de la API...', 'cyan');
         $this->processApiWinback();
+
+        // =========================================================================
+        // BLOQUE 6: PAGOS DE PRO/BUSINESS EMPEZADOS Y NO TERMINADOS
+        // =========================================================================
+        CLI::write('🛒 [6/6] Pagos de planes de la API sin terminar...', 'cyan');
+        $this->processApiCheckoutAbandoned();
 
         CLI::write('✅ Proceso de automatización finalizado con éxito.', 'green');
     }
@@ -955,6 +961,76 @@ class EmailAutomationCommand extends BaseCommand
                 $usuarios[$uid] + ['user_id' => $uid],
                 ['name' => $f['plan_name'] ?? ''],
                 (string) ($f['cancellation_reason'] ?? '')
+            ));
+        }
+    }
+
+    /**
+     * Empezó el pago de Pro o Business (checkout_started de Billing) entre hace 48 h y hace
+     * 1 h y no lo terminó. Un correo por usuario cada 30 días; solo a quien admite
+     * correos comerciales y no tiene ya un plan de pago de la API.
+     */
+    protected function processApiCheckoutAbandoned(): void
+    {
+        $db = \Config\Database::connect();
+
+        $empezados = $db->table('tracking_events')
+            ->select('user_id, metadata, created_at')
+            ->where('event_name', 'checkout_started')
+            ->where('page', 'billing')
+            ->where('user_id >', 0)
+            ->groupStart()
+                ->like('metadata', '"plan":"pro"')
+                ->orLike('metadata', '"plan":"business"')
+            ->groupEnd()
+            ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-48 hours')))
+            ->where('created_at <=', date('Y-m-d H:i:s', strtotime('-1 hour')))
+            ->orderBy('created_at', 'DESC')
+            ->get()->getResultArray();
+
+        $porUsuario = [];
+        foreach ($empezados as $e) {
+            $uid = (int) $e['user_id'];
+            if (!isset($porUsuario[$uid])) {
+                $porUsuario[$uid] = $e;   // el intento más reciente
+            }
+        }
+        if (empty($porUsuario)) {
+            CLI::write('  - Sin pagos de la API sin terminar.', 'dark_gray');
+            return;
+        }
+
+        $conPlan = array_flip(array_map('intval', array_column($db->table('user_subscriptions')
+            ->select('user_id')
+            ->whereIn('plan_id', [2, 3])
+            ->groupStart()
+                ->where('status', 'active')
+                ->orGroupStart()->where('status', 'canceled')->where('current_period_end >', date('Y-m-d H:i:s'))->groupEnd()
+            ->groupEnd()
+            ->get()->getResultArray(), 'user_id')));
+
+        $usuarios = $this->usuariosElegibles(array_keys($porUsuario));
+
+        foreach ($porUsuario as $uid => $intento) {
+            if (isset($conPlan[$uid]) || !isset($usuarios[$uid])) {
+                continue;
+            }
+
+            $completado = $db->table('tracking_events')
+                ->where('event_name', 'checkout_completed')
+                ->where('user_id', $uid)
+                ->where('created_at >=', $intento['created_at'])
+                ->countAllResults() > 0;
+            if ($completado || $this->automationModel->wasSentRecently($uid, 'api_checkout_abandoned', 30)) {
+                continue;
+            }
+
+            $meta = json_decode((string) $intento['metadata'], true) ?: [];
+            CLI::write("  -> Enviando 'api_checkout_abandoned' a {$usuarios[$uid]['email']}...");
+            $this->registrarEnvio($uid, 'api_checkout_abandoned', $this->emailService->sendApiCheckoutAbandoned(
+                $usuarios[$uid] + ['user_id' => $uid],
+                (string) ($meta['plan'] ?? 'pro'),
+                (string) ($meta['period'] ?? 'monthly')
             ));
         }
     }

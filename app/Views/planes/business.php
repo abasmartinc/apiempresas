@@ -263,7 +263,7 @@
             <div class="plan-card-bg"></div>
             <h2>Escala tus operaciones hoy</h2>
             <p>Únete a los clientes que ya están revolucionando su inteligencia comercial.</p>
-            <a href="<?= site_url('register?plan=business') ?>" class="btn-primary-cta">Empezar con Business (49€/mes + IVA)</a>
+            <a href="<?= site_url('register?intent=api&plan=business&period=monthly') ?>" class="btn-primary-cta">Empezar con Business (49€/mes + IVA)</a>
         </div>
         
         <div class="alternative-plans">
