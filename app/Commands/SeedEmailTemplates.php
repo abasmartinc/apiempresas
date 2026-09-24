@@ -158,9 +158,11 @@ class SeedEmailTemplates extends BaseCommand
             [
                 'slug'    => 'automation_generic',
                 'name'    => 'Plantilla Genérica de Automatización',
-                'subject' => 'Notificación APIEmpresas.es',
+                // El asunto lo pone cada envío. Antes era fijo ("Notificación
+                // APIEmpresas.es") y todos los avisos de la API llegaban iguales.
+                'subject' => '{subject}',
                 'view'    => 'automation_generic',
-                'vars'    => '{name}, {content}, {button_text}, {button_url}',
+                'vars'    => '{subject}, {preheader}, {name}, {content}, {button_text}, {button_url}',
                 'trigger' => 'Plantilla base usada para múltiples avisos (Límites de cuota, avisos de 15min, reporte mensual, etc).'
             ],
             [
@@ -307,6 +309,7 @@ class SeedEmailTemplates extends BaseCommand
                     'button_url'     => ['<?= $button_url ?>'],
                     'button_text'    => ['<?= esc($button_text) ?>'],
                     'subject'        => ['<?= esc($subject) ?>', '<?= $subject ?>'],
+                    'preheader'      => ['<?= esc($preheader) ?>', '<?= $preheader ?>'],
                 ];
 
                 foreach ($replacements as $placeholder => $tags) {

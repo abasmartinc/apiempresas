@@ -551,17 +551,46 @@ class EmailService
     }
 
     /**
+     * Avisos de la API con la plantilla común `automation_generic`.
+     *
+     * Cada aviso trae su asunto y su preheader: antes la plantilla tenía el asunto
+     * fijo "Notificación APIEmpresas.es" y los siete avisos llegaban iguales. Pasa
+     * además el user_id, para que el envío quede en email_logs (antes no quedaba).
+     */
+    private function sendApiAutomation(array $userData, string $asunto, string $preheader, string $contenidoHtml, string $botonTexto, string $botonUrl): array
+    {
+        return $this->sendTemplateEmail('automation_generic', [
+            'subject'     => $asunto,
+            'preheader'   => $preheader,
+            'name'        => $userData['name'] ?? 'Usuario',
+            'content'     => $contenidoHtml,
+            'button_text' => $botonTexto,
+            'button_url'  => $botonUrl,
+        ], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
+    }
+
+    /** Cupo del plan Free, para no escribir "100" a mano en los asuntos. */
+    private function freeLimit(): int
+    {
+        helper('api');
+        return get_free_plan_limit();
+    }
+
+    /**
      * TRIGGER: no_requests_15min
      */
     public function sendNoUsage15Min(array $userData)
     {
-        $templateData = [
-            'name'        => $userData['name'] ?? 'Usuario',
-            'content'     => 'He visto que todavía no has lanzado tu primera validación técnica.<br><br>Para que no pierdas tiempo con la documentación, aquí tienes tu endpoint listo:<br><br><code style="background:#f1f5f9; padding:10px; display:block; border-radius:5px;">GET /api/v1/companies?cif=B12345678</code><br><br>No olvides incluir tu <b>X-API-KEY</b> en los headers. Si necesitas un ejemplo en un lenguaje específico, responde a este correo.',
-            'button_text' => 'Ver mi API Key',
-            'button_url'  => base_url('dashboard')
-        ];
-        return $this->sendTemplateEmail('automation_generic', $templateData, $userData['email'], ['papelo.amh@gmail.com']);
+        // CIF de una empresa real: con el ficticio B12345678 la primera prueba
+        // gastaba una consulta y devolvía un error.
+        return $this->sendApiAutomation(
+            $userData,
+            'Tu primera llamada a la API, lista para copiar',
+            'Pega tu API Key en este curl y tendrás los datos de una empresa real en segundos.',
+            'He visto que todavía no has lanzado tu primera validación técnica.<br><br>Para que no pierdas tiempo con la documentación, aquí tienes tu endpoint listo:<br><br><code style="background:#f1f5f9; padding:10px; display:block; border-radius:5px;">GET /api/v1/companies?cif=A15075062</code><br><br>No olvides incluir tu <b>X-API-KEY</b> en los headers. Si necesitas un ejemplo en un lenguaje específico, responde a este correo.',
+            'Ver mi API Key',
+            base_url('dashboard')
+        );
     }
 
     /**
@@ -569,13 +598,14 @@ class EmailService
      */
     public function sendOneUsageInactive1H(array $userData)
     {
-        $templateData = [
-            'name'        => $userData['name'] ?? 'Usuario',
-            'content'     => 'Has realizado tu primera validación con éxito. ¡Buen comienzo!<br><br>Ahora que ya has probado la base, queremos enseñarte cómo llevar tu automatización al siguiente nivel. El <b>Plan Pro</b> desbloquea capas de datos inteligentes que no están disponibles en la versión Free:<br><br>• <b>Scoring de Propensión:</b> Identifica empresas con alta probabilidad de compra.<br>• <b>Señales de Crecimiento:</b> Detecta eventos del BORME en tiempo real.<br>• <b>Insights Tecnológicos:</b> Descubre el stack técnico de tus clientes.',
-            'button_text' => 'Ver capacidades del Plan Pro',
-            'button_url'  => base_url('billing')
-        ];
-        return $this->sendTemplateEmail('automation_generic', $templateData, $userData['email'], ['papelo.amh@gmail.com']);
+        return $this->sendApiAutomation(
+            $userData,
+            'Tu primera consulta ha funcionado. Esto es lo siguiente',
+            'Lo que añade el Plan Pro a la respuesta que acabas de recibir.',
+            'Has realizado tu primera validación con éxito. ¡Buen comienzo!<br><br>Ahora que ya has probado la base, queremos enseñarte cómo llevar tu automatización al siguiente nivel. El <b>Plan Pro</b> desbloquea capas de datos inteligentes que no están disponibles en la versión Free:<br><br>• <b>Scoring de Propensión:</b> Identifica empresas con alta probabilidad de compra.<br>• <b>Señales de Crecimiento:</b> Detecta eventos del BORME en tiempo real.<br>• <b>Insights Tecnológicos:</b> Descubre el stack técnico de tus clientes.',
+            'Ver capacidades del Plan Pro',
+            base_url('billing')
+        );
     }
 
     /**
@@ -583,13 +613,14 @@ class EmailService
      */
     public function sendReached5Requests(array $userData)
     {
-        $templateData = [
-            'name'        => $userData['name'] ?? 'Usuario',
-            'content'     => 'Ya has validado tus primeras empresas. ¡Genial!<br><br>Como habrás notado, en el Plan Free enmascaramos campos clave como la <b>dirección completa, el objeto social detallado y los cargos societarios</b>.<br><br>Pásate a Pro para desbloquear el 100% del payload y automatizar tu flujo de datos sin "asteriscos".',
-            'button_text' => 'Desbloquear datos Pro',
-            'button_url'  => base_url('billing')
-        ];
-        return $this->sendTemplateEmail('automation_generic', $templateData, $userData['email'], ['papelo.amh@gmail.com']);
+        return $this->sendApiAutomation(
+            $userData,
+            'Ya has consultado 5 empresas: esto es lo que no estás viendo',
+            'La dirección completa y el objeto social íntegro, sin asteriscos.',
+            'Ya has validado tus primeras empresas. ¡Genial!<br><br>Como habrás notado, en el Plan Free enmascaramos campos clave como la <b>dirección completa, el objeto social detallado y los cargos societarios</b>.<br><br>Pásate a Pro para desbloquear el 100% del payload y automatizar tu flujo de datos sin "asteriscos".',
+            'Desbloquear datos Pro',
+            base_url('billing')
+        );
     }
 
     /**
@@ -597,13 +628,16 @@ class EmailService
      */
     public function sendReached80Requests(array $userData)
     {
-        $templateData = [
-            'name'        => $userData['name'] ?? 'Usuario',
-            'content'     => 'Has alcanzado las 80 consultas. Tu bono garantizado de 100 está cerca de agotarse.<br><br>Para evitar que tu integración se detenga por falta de cuota, te recomendamos activar el Plan Pro hoy mismo.<br><br><b>¿Qué obtendrás al activar Pro?</b><br>• Hasta 3.000 consultas mensuales.<br>• Datos enriquecidos sin enmascarar.<br>• Soporte técnico prioritario.',
-            'button_text' => 'Evitar cortes de servicio',
-            'button_url'  => base_url('billing')
-        ];
-        return $this->sendTemplateEmail('automation_generic', $templateData, $userData['email'], ['papelo.amh@gmail.com']);
+        $limite = $this->freeLimit();
+
+        return $this->sendApiAutomation(
+            $userData,
+            'Has usado el 80 % de tus ' . $limite . ' consultas gratuitas',
+            'Cuando llegues a ' . $limite . ', la API dejará de responder. Así lo evitas.',
+            'Has alcanzado las 80 consultas. Tu bono garantizado de ' . $limite . ' está cerca de agotarse.<br><br>Para evitar que tu integración se detenga por falta de cuota, te recomendamos activar el Plan Pro hoy mismo.<br><br><b>¿Qué obtendrás al activar Pro?</b><br>• Hasta 3.000 consultas mensuales.<br>• Datos enriquecidos sin enmascarar.<br>• Soporte técnico prioritario.',
+            'Evitar cortes de servicio',
+            base_url('billing')
+        );
     }
 
     /**
@@ -613,13 +647,14 @@ class EmailService
      */
     public function sendBadRequestHelp(array $userData, int $errorCount): array
     {
-        $templateData = [
-            'name'        => $userData['name'] ?? 'Usuario',
-            'content'     => "Nuestro sistema automatizado de monitoreo ha detectado una alta tasa de errores en tus peticiones de hoy (<b>{$errorCount} consultas rechazadas con código 400 - Bad Request</b>).<br><br>Este error ocurre cuando el parámetro <code>cif</code> no tiene el formato correcto de un identificador fiscal español. El problema más habitual es enviar texto adicional pegado al CIF al parsearlo desde un documento externo.<br><br><b>Ejemplos de peticiones incorrectas detectadas:</b><br><code style=\"background:#f1f5f9; padding:6px 10px; display:inline-block; border-radius:4px; margin:4px 0;\">❌ /api/v1/companies?cif=A08649477ELADJUDICATARIO</code><br><code style=\"background:#f1f5f9; padding:6px 10px; display:inline-block; border-radius:4px; margin:4px 0;\">❌ /api/v1/companies?cif=ADJUDICATARIO</code><br><br><b>El formato correcto es únicamente el identificador limpio:</b><br><code style=\"background:#dcfce7; padding:6px 10px; display:inline-block; border-radius:4px; margin:4px 0;\">✅ /api/v1/companies?cif=A08649477</code><br><br>Para que este error técnico no penalice tu prueba, <b>hemos devuelto automáticamente las {$errorCount} consultas rechazadas</b> a tu cuenta. Puedes verificarlo en tu dashboard.<br><br>Si tienes alguna duda sobre cómo extraer correctamente los identificadores de tus documentos, responde a este correo y te echamos un cable.",
-            'button_text' => 'Ver mi dashboard',
-            'button_url'  => base_url('dashboard')
-        ];
-        return $this->sendTemplateEmail('automation_generic', $templateData, $userData['email'], ['papelo.amh@gmail.com']);
+        return $this->sendApiAutomation(
+            $userData,
+            'Te hemos devuelto ' . $errorCount . ' consultas que fallaron por el formato del CIF',
+            'El error 400 viene de enviar texto pegado al CIF. Así se corrige.',
+            "Nuestro sistema automatizado de monitoreo ha detectado una alta tasa de errores en tus peticiones de hoy (<b>{$errorCount} consultas rechazadas con código 400 - Bad Request</b>).<br><br>Este error ocurre cuando el parámetro <code>cif</code> no tiene el formato correcto de un identificador fiscal español. El problema más habitual es enviar texto adicional pegado al CIF al parsearlo desde un documento externo.<br><br><b>Ejemplos de peticiones incorrectas detectadas:</b><br><code style=\"background:#f1f5f9; padding:6px 10px; display:inline-block; border-radius:4px; margin:4px 0;\">❌ /api/v1/companies?cif=A08649477ELADJUDICATARIO</code><br><code style=\"background:#f1f5f9; padding:6px 10px; display:inline-block; border-radius:4px; margin:4px 0;\">❌ /api/v1/companies?cif=ADJUDICATARIO</code><br><br><b>El formato correcto es únicamente el identificador limpio:</b><br><code style=\"background:#dcfce7; padding:6px 10px; display:inline-block; border-radius:4px; margin:4px 0;\">✅ /api/v1/companies?cif=A08649477</code><br><br>Para que este error técnico no penalice tu prueba, <b>hemos devuelto automáticamente las {$errorCount} consultas rechazadas</b> a tu cuenta. Puedes verificarlo en tu dashboard.<br><br>Si tienes alguna duda sobre cómo extraer correctamente los identificadores de tus documentos, responde a este correo y te echamos un cable.",
+            'Ver mi dashboard',
+            base_url('dashboard')
+        );
     }
 
     /**
@@ -627,13 +662,16 @@ class EmailService
      */
     public function sendQuotaExceeded(array $userData)
     {
-        $templateData = [
-            'name'        => $userData['name'] ?? 'Usuario',
-            'content'     => 'Has agotado tu bono de 100 consultas gratuitas.<br><br>Tu integración ha dejado de recibir datos oficiales hasta que actives un Plan Pro o Business.<br><br><b>Activa Pro ahora para reanudar el servicio instantáneamente:</b>',
-            'button_text' => 'Reanudar servicio (Plan Pro)',
-            'button_url'  => base_url('billing')
-        ];
-        return $this->sendTemplateEmail('automation_generic', $templateData, $userData['email'], ['papelo.amh@gmail.com']);
+        $limite = $this->freeLimit();
+
+        return $this->sendApiAutomation(
+            $userData,
+            'Has agotado tus ' . $limite . ' consultas gratuitas: tu integración está parada',
+            'Actívala de nuevo en un minuto con el Plan Pro, sin cambiar tu código.',
+            'Has agotado tu bono de ' . $limite . ' consultas gratuitas.<br><br>Tu integración ha dejado de recibir datos oficiales hasta que actives un Plan Pro o Business.<br><br><b>Activa Pro ahora para reanudar el servicio instantáneamente:</b>',
+            'Reanudar servicio (Plan Pro)',
+            base_url('billing')
+        );
     }
 
     /**
@@ -641,13 +679,14 @@ class EmailService
      */
     public function sendMonthlyUsageReport(array $userData, int $usage): array
     {
-        $templateData = [
-            'name'        => $userData['name'] ?? 'Usuario',
-            'content'     => "Aquí tienes el resumen de actividad de tu cuenta en los últimos 30 días:<br><br>• <b>Consultas a la API realizadas:</b> {$usage}<br><br>Si tu consumo sigue aumentando y necesitas asegurar disponibilidad, mayor tasa de peticiones y datos mercantiles completos sin restricciones, te recomendamos revisar nuestros planes:",
-            'button_text' => 'Ver Planes y Facturación',
-            'button_url'  => site_url('billing')
-        ];
-        return $this->sendTemplateEmail('automation_generic', $templateData, $userData['email'], ['papelo.amh@gmail.com']);
+        return $this->sendApiAutomation(
+            $userData,
+            'Tu uso de la API en los últimos 30 días: ' . number_format($usage, 0, ',', '.') . ' consultas',
+            'Resumen de actividad de tu cuenta de APIEmpresas.',
+            "Aquí tienes el resumen de actividad de tu cuenta en los últimos 30 días:<br><br>• <b>Consultas a la API realizadas:</b> {$usage}<br><br>Si tu consumo sigue aumentando y necesitas asegurar disponibilidad, mayor tasa de peticiones y datos mercantiles completos sin restricciones, te recomendamos revisar nuestros planes:",
+            'Ver Planes y Facturación',
+            site_url('billing')
+        );
     }
 
     /**
@@ -1045,6 +1084,13 @@ class EmailService
 
         $subject = $this->parsePlaceholders($subjectTemplate, $data);
         $body    = $this->parsePlaceholders($bodyTemplate, $data);
+
+        // Si una plantilla con asunto variable se usa sin pasarlo, que no salga
+        // "{subject}" en la bandeja de entrada.
+        if (str_contains($subject, '{subject}') || trim($subject) === '') {
+            $subject = 'APIEmpresas.es';
+        }
+        $body = str_replace('{preheader}', '', $body);
 
         // Baja de un clic específica para alertas: el enlace genérico daría de baja del
         // marketing, que no es lo mismo. Sin una salida propia no se pueden enviar.
