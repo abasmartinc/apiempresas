@@ -14,6 +14,12 @@ class ApiKeyFilter implements FilterInterface
      */
     public const FREE_DESDE = '2026-05-28';
 
+    /**
+     * Cuenta interna del monitor de status.apiempresas.es: sus consultas no se
+     * cobran ni gastan cupo (comprueba cada 5 minutos con un CIF real).
+     */
+    public const MONITOR_USER_ID = 376;
+
     public static array $apiMeta = [];
     public static float $apiT0 = 0.0;
     public static string $apiRequestId = '';
@@ -244,7 +250,7 @@ class ApiKeyFilter implements FilterInterface
         $endpointPath = (string) $request->getUri()->getPath();
         $creditCost = $this->getEndpointCost($endpointPath);
 
-        if ($creditCost === 0) {
+        if ($creditCost === 0 || (int) $row->user_id === self::MONITOR_USER_ID) {
             self::$apiSkipBilling = true;
         }
 
