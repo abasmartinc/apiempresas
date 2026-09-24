@@ -22,7 +22,7 @@ return [
     'credits_no_exp' => 'Créditos sin caducidad',
     'status' => 'Estado',
     'operational' => 'Operativo',
-    'uptime' => 'Disponibilidad 99.9%',
+    'uptime' => 'Ver estado del servicio',
 
     'step_1' => 'Paso 1',
     'limit_monthly_reached' => 'Límite mensual alcanzado',

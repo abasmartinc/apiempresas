@@ -200,9 +200,26 @@
                     <div class="kpi-content">
                         <span class="label"><?= lang('Usage.api_status') ?></span>
                         <div class="value" style="color: #10b981;">
-                            <span><?= lang('Usage.operational') ?></span>
+                            <span id="usage-status"><?= lang('Usage.operational') ?></span>
                         </div>
-                        <div class="meta"><?= lang('Usage.availability') ?></div>
+                        <div class="meta"><a id="usage-uptime" href="https://status.apiempresas.es" target="_blank" rel="noopener" style="color: inherit;"><?= lang('Usage.availability') ?></a></div>
+                        <script>
+                            // Estado y disponibilidad reales de status.apiempresas.es (antes, 99.9% fijo)
+                            document.addEventListener('DOMContentLoaded', function () {
+                                fetch('https://status.apiempresas.es/api.php').then(r => r.json()).then(data => {
+                                    const eps = (data.endpoints || []).filter(e => e.uptime_30d !== null && e.uptime_30d !== undefined);
+                                    const up = document.getElementById('usage-uptime');
+                                    if (eps.length && up) {
+                                        const media = eps.reduce((a, e) => a + Number(e.uptime_30d), 0) / eps.length;
+                                        up.textContent = 'Disponibilidad 30 días: ' + media.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' %';
+                                    }
+                                    const estados = { operational: ['Operativo', '#10b981'], degraded: ['Degradado', '#d97706'], partial: ['Incidencia', '#dc2626'], down: ['Caído', '#dc2626'] };
+                                    const st = document.getElementById('usage-status');
+                                    const e = estados[data.overall_status];
+                                    if (e && st) { st.textContent = e[0]; st.parentElement.style.color = e[1]; }
+                                }).catch(() => {});
+                            });
+                        </script>
                     </div>
                 </div>
             </div>

@@ -8,7 +8,7 @@ return [
     'daily_activity' => 'Actividad diaria',
     'api_status' => 'Estado de la API',
     'operational' => 'Operativo',
-    'availability' => 'Disponibilidad 99.9%',
+    'availability' => 'Ver estado del servicio',
     'range' => 'Rango',
     'last_30_days' => 'Últimos 30 días',
     'last_7_days' => 'Últimos 7 días',
