@@ -147,7 +147,7 @@
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                 </div>
                 <h3>10.000 Consultas/mes</h3>
-                <p>La capacidad necesaria para equipos enteros y aplicaciones de alto tráfico. Además de acceso prioritario a soporte (Slack Connect).</p>
+                <p>La capacidad necesaria para equipos enteros y aplicaciones de alto tráfico. Además de soporte prioritario por email.</p>
             </div>
         </div>
 

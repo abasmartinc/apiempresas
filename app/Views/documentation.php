@@ -1259,6 +1259,7 @@ Accept: application/json</code></pre>
                         </tbody>
                     </table>
 
+                    <p>La disponibilidad de cada endpoint, medida cada 5 minutos, está publicada en <a href="https://status.apiempresas.es" target="_blank" rel="noopener">status.apiempresas.es</a>.</p>
                     <p>Si superas el límite por segundo, recibirás un error <code>429 Too Many Requests</code> junto con la cabecera <code>Retry-After: 1</code> indicando que esperes 1 segundo (<code>code</code>: <code>TOO_MANY_REQUESTS</code>). El cupo agotado también responde 429, pero con <code>code</code> <code>QUOTA_EXCEEDED</code> y sin <code>Retry-After</code>: no reintentes en ese caso. Si necesitas procesar muchas empresas de golpe, te recomendamos utilizar el endpoint <a href="#batch">Batch</a>.</p>
                 </section>
 

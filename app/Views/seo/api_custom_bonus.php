@@ -599,9 +599,9 @@
                     <div>
                         <div style="color: #2563eb; font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                            Disponibilidad 99.9%
+                            Estado del servicio en vivo
                         </div>
-                        <p style="color: #64748b; font-size: 0.95rem; margin: 0; line-height: 1.6;">Nuestra infraestructura escalable en la nube garantiza latencias por debajo de 50ms para las validaciones directas por CIF/NIF.</p>
+                        <p style="color: #64748b; font-size: 0.95rem; margin: 0; line-height: 1.6;">Consulta la disponibilidad de cada endpoint en tiempo real en <a href="https://status.apiempresas.es" target="_blank" rel="noopener">status.apiempresas.es</a>.</p>
                     </div>
                     <div>
                         <div style="color: #2563eb; font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">

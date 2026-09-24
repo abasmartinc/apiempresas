@@ -346,49 +346,14 @@ $fmt = function ($n) {
                             <div style="border: 1px solid #e2e8f0; border-radius: 6px; width: 50px; height: 32px; display: flex; align-items: center; justify-content: center; background: #fff;">
                                 <span style="font-family: Arial, sans-serif; font-weight: 800; color: #016fd0; font-size: 11px;">AMEX</span>
                             </div>
-                            <div style="border: 1px solid #e2e8f0; border-radius: 6px; width: 50px; height: 32px; display: flex; align-items: center; justify-content: center; background: #fff;">
-                                <span style="font-family: Arial, sans-serif; font-style: italic; font-weight: 800; color: #003087; font-size: 12px;">PayPal</span>
-                            </div>
                         </div>
                         <div style="text-align: center; font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 32px;">
                             <?= lang('Billing.more_methods') ?>
                         </div>
 
-                        <!-- Testimonio Integrado (Carrusel) -->
-                        <div style="background: #edf4ff; border-radius: 16px; padding: 24px; position: relative; min-height: 190px; display: flex; flex-direction: column; justify-content: center;">
-                            <div style="position: absolute; top: 16px; left: 16px; color: #60a5fa; opacity: 0.6;">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"></path></svg>
-                            </div>
-                            <div style="display:flex; gap: 4px; color: #fbbf24; justify-content: center; margin-bottom: 16px;">
-                                <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                                <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                                <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                                <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                                <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            </div>
-                            
-                            <div id="review-slider" style="transition: opacity 0.4s ease-in-out; opacity: 1;">
-                                <div style="display: flex; justify-content: center; margin-bottom: 12px;">
-                                    <div id="review-avatar-fallback" style="display: none; width: 48px; height: 48px; border-radius: 50%; align-items: center; justify-content: center; background: linear-gradient(135deg, #1d4ed8 0%, #14b8a6 100%); color: #ffffff; font-weight: 900; font-size: 0.85rem; border: 3px solid #ffffff; box-shadow: 0 10px 24px rgba(37, 99, 235, 0.18);">AS</div>
-                                    <img id="review-avatar" src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=96&h=96&q=80" alt="Foto de Alex S." loading="lazy" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 3px solid #ffffff; box-shadow: 0 10px 24px rgba(37, 99, 235, 0.18);">
-                                </div>
-                                <p id="review-text" style="font-size: 0.95rem; color: #0f172a; text-align: center; line-height: 1.6; margin: 0 0 16px; font-weight: 500;">La integración con APIEmpresas es brutal. Puedes ver parámetros clave y mucho más. Todo muy rápido y fiable.</p>
-                                <div style="font-size: 0.85rem; text-align: center; color: #475569;">
-                                    <span id="review-author" style="font-weight: 900; color: #0f172a;">Alex S.</span> · <span id="review-role">CTO en SaaS B2B</span>
-                                </div>
-                            </div>
-
-                            <script>
-                                document.addEventListener('DOMContentLoaded', () => {
-                                    let currentReview = 1;
-                                    setInterval(() => {
-                                        const slides = document.querySelectorAll('.testimonial-slide');
-                                        slides.forEach(s => s.style.display = 'none');
-                                        currentReview = (currentReview % slides.length) + 1;
-                                        document.getElementById('testim-' + currentReview).style.display = 'block';
-                                    }, 6000); 
-                                });
-                            </script>
+                        <!-- Datos comprobables en lugar de testimonio -->
+                        <div style="background: #edf4ff; border-radius: 16px; padding: 20px 24px; text-align: center; font-size: 0.9rem; color: #0f172a; line-height: 1.6;">
+                            ¿Quieres comprobarlo antes de pagar? Mira la <a href="https://status.apiempresas.es" target="_blank" rel="noopener" style="font-weight: 800; color: #1d4ed8;">disponibilidad en tiempo real</a> de cada endpoint o prueba la API con las <strong>100 consultas gratis</strong> del plan Free.
                         </div>
                     </div>
 

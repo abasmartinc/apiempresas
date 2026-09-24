@@ -933,19 +933,12 @@
                 <p class="api-hero-sub">
                     Endpoints JSON para consulta por CIF/NIF, enriquecimiento B2B masivo,
                     webhooks de alertas BORME y onboarding KYB automatizado.
-                    Latencia &lt;200ms &middot; 99.9% SLA.
+                    Disponibilidad en tiempo real en <a href="https://status.apiempresas.es" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline;">status.apiempresas.es</a>.
                 </p>
 
                 <!-- Stars -->
                 <div class="api-hero-stars">
-                    <div style="display:flex; color:#fbbf24;">
-                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    </div>
-                    <span style="color:#94a3b8; font-size:0.92rem;">Usado por <strong>+1.200</strong> desarrolladores y equipos SaaS</span>
+                    <span style="color:#94a3b8; font-size:0.92rem;"><strong>100 consultas gratis</strong> para probarla · Sin tarjeta</span>
                 </div>
 
                 <!-- Badges -->
@@ -956,7 +949,7 @@
                     </span>
                     <span class="api-hero-chip api-hero-chip--blue">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                        REST API · &lt;200ms
+                        REST API · JSON
                     </span>
                     <span class="api-hero-chip api-hero-chip--purple">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -983,12 +976,12 @@
                         <div style="font-size:0.78rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-top:2px;">Empresas indexadas</div>
                     </div>
                     <div style="text-align:center;">
-                        <div style="font-size:1.6rem; font-weight:900; color:#fff; letter-spacing:-0.04em;">&lt;200ms</div>
-                        <div style="font-size:0.78rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-top:2px;">Latencia media</div>
+                        <div style="font-size:1.6rem; font-weight:900; color:#fff; letter-spacing:-0.04em;">3 SDK</div>
+                        <div style="font-size:0.78rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-top:2px;">PHP · Node · Python</div>
                     </div>
                     <div style="text-align:center;">
-                        <div style="font-size:1.6rem; font-weight:900; color:#fff; letter-spacing:-0.04em;">99.9%</div>
-                        <div style="font-size:0.78rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-top:2px;">Uptime garantizado</div>
+                        <a href="https://status.apiempresas.es" target="_blank" rel="noopener" style="text-decoration:none;"><div style="font-size:1.6rem; font-weight:900; color:#fff; letter-spacing:-0.04em;">En vivo</div>
+                        <div style="font-size:0.78rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-top:2px;">Estado del servicio</div></a>
                     </div>
                     <div style="text-align:center;">
                         <div style="font-size:1.6rem; font-weight:900; color:#fff; letter-spacing:-0.04em;">Diario</div>
@@ -1723,7 +1716,7 @@
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> Soporte Prioritario Slack</li>
+                                </svg> Soporte prioritario por email</li>
                         </ul>
 
                         <a href="<?= site_url('register?intent=api&plan=business&period=annual') ?>" class="api-pricing-btn">Activar Business</a>
@@ -1860,7 +1853,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         style="display:flex;align-items:center;gap:8px;color:#64748b;font-size:0.88rem;font-weight:700;">
                         <span
                             style="background:#eff6ff;color:#2563eb;padding:6px 8px;border-radius:8px;font-size:14px;">⚡</span>
-                        Respuesta &lt; 200ms
+                        Respuestas en JSON
                     </div>
                     <div
                         style="display:flex;align-items:center;gap:8px;color:#64748b;font-size:0.88rem;font-weight:700;">
@@ -1878,7 +1871,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         style="display:flex;align-items:center;gap:8px;color:#64748b;font-size:0.88rem;font-weight:700;">
                         <span
                             style="background:#eff6ff;color:#2563eb;padding:6px 8px;border-radius:8px;font-size:14px;">🤖</span>
-                        IA en cada respuesta
+                        IA en insights y contact-prep
                     </div>
                 </div>
             </div>
@@ -1978,9 +1971,10 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         </button>
                         <div class="api-faq-answer">
                             <div class="api-faq-answer-inner">
-                                Nuestra infraestructura está diseñada para ser escalable. Por defecto, permitimos
-                                ráfagas de hasta 10 peticiones por segundo en planes estándar, pero podemos habilitar
-                                cuotas personalizadas para ingestas masivas de datos en planes Enterprise.
+                                El plan Free admite 2 peticiones por segundo y los planes Pro y Business, 20.
+                                Para procesar muchas empresas de golpe, el endpoint <code>/companies/batch</code>
+                                consulta hasta 100 CIF en una sola petición. Si necesitas más, escríbenos y
+                                preparamos un plan a medida.
                             </div>
                         </div>
                     </div>
@@ -2039,28 +2033,28 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                             <div>
                                 <div
                                     style="color: #fff; font-size: 1.75rem; font-weight: 950; letter-spacing: -0.04em;">
-                                    +800</div>
+                                    +3,5M</div>
                                 <div
                                     style="color: rgba(255,255,255,0.5); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; margin-top: 4px;">
-                                    EMPRESAS INTEGRADAS</div>
+                                    EMPRESAS EN LA BASE</div>
                             </div>
                             <div style="width: 1px; background: rgba(255,255,255,0.1);"></div>
                             <div>
                                 <div
                                     style="color: #fff; font-size: 1.75rem; font-weight: 950; letter-spacing: -0.04em;">
-                                    &lt; 200ms</div>
+                                    100</div>
                                 <div
                                     style="color: rgba(255,255,255,0.5); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; margin-top: 4px;">
-                                    LATENCIA MEDIA</div>
+                                    CONSULTAS GRATIS</div>
                             </div>
                             <div style="width: 1px; background: rgba(255,255,255,0.1);"></div>
                             <div>
                                 <div
                                     style="color: #fff; font-size: 1.75rem; font-weight: 950; letter-spacing: -0.04em;">
-                                    99.9%</div>
+                                    <a href="https://status.apiempresas.es" target="_blank" rel="noopener" style="color:#fff; text-decoration:none;">En vivo</a></div>
                                 <div
                                     style="color: rgba(255,255,255,0.5); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; margin-top: 4px;">
-                                    UPTIME SLA</div>
+                                    ESTADO DEL SERVICIO</div>
                             </div>
                         </div>
 
