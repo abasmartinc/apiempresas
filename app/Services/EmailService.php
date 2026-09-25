@@ -1560,6 +1560,63 @@ class EmailService
     }
 
     /**
+     * TRIGGER: risk_dormido_14 — registrado de Solvencia que no ha vuelto en dos
+     * semanas y no vigila nada. La consulta fue una foto de un día; vigilarla es
+     * gratis y es la única razón para volver sin tener que acordarse.
+     *
+     * @param array{nombre:string,cif:string}|null $empresa la última que consultó
+     */
+    public function sendRiskDormido14(array $userData, ?array $empresa): array
+    {
+        helper('company');
+        $vigGratis = (int) solvencia('vigilanciasGratis', 5);
+
+        if ($empresa) {
+            $contenido = $this->p('Hace un par de semanas consultaste <strong>' . esc($empresa['nombre']) . '</strong>. Lo que viste era la foto de ese día: desde entonces el BORME ha seguido publicando.')
+                . $this->p('Si es cliente o proveedor tuyo, <strong>vigílala gratis</strong>: te escribimos el día que se publique algo de ella (un concurso, una disolución, un cese) y no gasta consultas.');
+            $boton = ['Vigilar ' . company_short_name($empresa['nombre']), site_url(rawurlencode($empresa['cif']) . '?vigilar=1&origen=email')];
+        } else {
+            $contenido = $this->p('Te registraste para revisar empresas en el Registro Mercantil. Además de consultarlas, puedes <strong>vigilarlas gratis</strong>: te escribimos el día que el BORME publique algo de ellas, sin gastar consultas.');
+            $boton = ['Elegir empresas para vigilar', site_url('dashboard?view=risk')];
+        }
+        $contenido .= $this->p('Con el plan gratuito vigilas hasta ' . $vigGratis . ' empresas y tienes ' . (int) solvencia('consultasGratis', 3) . ' consultas al mes.');
+
+        return $this->sendRiskGeneric(
+            $userData,
+            $empresa ? '¿Te avisamos si ' . company_short_name($empresa['nombre']) . ' se mueve en el BORME?' : '¿Te avisamos si tus clientes se mueven en el BORME?',
+            $contenido,
+            $boton[0],
+            $boton[1],
+            'Vigilar una empresa es gratis y no gasta consultas.',
+            'risk_dormido_14'
+        );
+    }
+
+    /**
+     * TRIGGER: risk_dormido_30 — al mes del alta, sin volver y sin vigilar nada: la
+     * carga de cartera. Gratis se ve el nivel de riesgo de hasta N de sus clientes.
+     */
+    public function sendRiskDormido30(array $userData): array
+    {
+        helper('company');
+        $niveles = (int) solvencia('carteraNivelesGratis', 25);
+
+        $contenido = $this->p('¿Quieres saber cuáles de tus clientes tienen algo en el Registro Mercantil? Sube la lista que exporta tu programa de facturación (Excel o CSV con los CIF) y te lo decimos al momento.')
+            . $this->p('Con la cuenta gratuita ves el nivel de <strong>hasta ' . $niveles . ' clientes</strong> (grave, a revisar o sin incidencias) y puedes vigilar ' . (int) solvencia('vigilanciasGratis', 5) . ' de ellos para que te avisemos si algo cambia.')
+            . $this->p('No necesitas tarjeta y no gasta tus consultas del mes.');
+
+        return $this->sendRiskGeneric(
+            $userData,
+            '¿Cuáles de tus clientes tienen algo en el Registro Mercantil?',
+            $contenido,
+            'Revisar mi lista de clientes',
+            site_url('cartera'),
+            'Sube tu lista y ve el nivel de riesgo de hasta ' . $niveles . ' clientes, gratis.',
+            'risk_dormido_30'
+        );
+    }
+
+    /**
      * TRIGGER: risk_unused_credits_48h
      */
     public function sendRiskUnusedCreditsReminder(array $userData, int $remainingCredits): array

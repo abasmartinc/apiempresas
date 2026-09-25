@@ -801,10 +801,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 + 'style="background:none;border:none;padding:0;font:inherit;color:#b45309;'
                 + 'font-weight:800;text-decoration:underline;cursor:pointer;">Activarlos ahora</button>';
         } else if (confirmar) {
+            // Tras vigilar una, el siguiente paso natural es vigilar el resto de
+            // clientes: se ofrece aquí la carga de la lista (cartera).
             nota.style.color = '#047857';
-            nota.textContent = correo
-                ? 'Listo. Te escribimos a ' + correo + ' en cuanto se mueva.'
-                : 'Listo. Te escribimos en cuanto se mueva.';
+            var correoSeguro = correo.replace(/[&<>"']/g, function (c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+            nota.innerHTML = (correo
+                ? 'Listo. Te escribimos a ' + correoSeguro + ' en cuanto se mueva.'
+                : 'Listo. Te escribimos en cuanto se mueva.')
+                + ' <a href="<?= site_url('cartera?source=ficha_vigilar') ?>" '
+                + 'onclick="if (window.trackEvent) window.trackEvent(\'risk_cartera_cta\', { from: \'vigilar\' });" '
+                + 'style="color:#2563eb;font-weight:800;text-decoration:none;white-space:nowrap;">¿Tienes más? Sube tu lista →</a>';
         } else {
             nota.style.color = '#047857';
             nota.textContent = correo

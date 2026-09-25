@@ -178,6 +178,18 @@ $riskLevelText = $label;  // El motor sigue emitiendo BAJO/MEDIO/ALTO y eso no s
                 </button>
             </div>
         <?php endif; ?>
+
+        <!-- LA CARTERA, JUSTO DESPUÉS DEL PRIMER DICTAMEN
+             Quien acaba de revisar un cliente suele tener más. Subir la lista que
+             exporta su programa de facturación y vigilarla de golpe es lo que más
+             engancha con la vigilancia, y no aparecía en la ficha. Va siempre visible:
+             la ficha está cacheada y el enlace no depende del usuario. -->
+        <div style="width: 100%; margin-top: 12px; text-align: center; font-size: 0.78rem; color: #64748b; line-height: 1.5;">
+            ¿Tienes más clientes o proveedores?
+            <a href="<?= site_url('cartera?source=ficha_dictamen') ?>"
+               onclick="if (window.trackEvent) window.trackEvent('risk_cartera_cta', { from: 'dictamen' });"
+               style="color: #2563eb; font-weight: 800; text-decoration: none; white-space: nowrap;">Sube tu lista y vigílalos de golpe →</a>
+        </div>
     </div>
 
     <!-- RIGHT COLUMN (Factors) -->

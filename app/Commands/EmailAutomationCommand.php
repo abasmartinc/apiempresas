@@ -544,6 +544,7 @@ class EmailAutomationCommand extends BaseCommand
         $this->cicloSeguimientoPro();
         $this->cicloRenovacionAnual();
         $this->cicloListaLlena();
+        $this->cicloDormidos();
         $this->cicloWinbackSolvencia();
 
         if ((int) date('j') <= 3) {
@@ -903,6 +904,71 @@ class EmailAutomationCommand extends BaseCommand
             CLI::write("  -> Enviando 'risk_winback' a {$usuarios[$uid]['email']}...");
             $this->registrarEnvio($uid, 'risk_winback',
                 $this->emailService->sendRiskWinback($usuarios[$uid] + ['user_id' => $uid], (string) ($f['cancellation_reason'] ?? '')));
+        }
+    }
+
+    /**
+     * Registrados de Solvencia que no vuelven: a los 14 días (vigilar gratis la que
+     * consultó) y a los 30 (subir su lista de clientes). Solo a quien no ha consultado
+     * nada en los últimos 10 días, no vigila ninguna empresa y no es cliente.
+     */
+    protected function cicloDormidos(): void
+    {
+        $db = \Config\Database::connect();
+        $ventanas = [
+            'risk_dormido_14' => [14, 17],
+            'risk_dormido_30' => [30, 33],
+        ];
+        $suscriptores = $this->idsSuscriptores();
+
+        foreach ($ventanas as $tipo => [$min, $max]) {
+            $ids = array_map('intval', array_column($db->table('users')
+                ->select('id')
+                ->where('signup_intent', 'view_risk_profile')
+                ->where('created_at <=', date('Y-m-d H:i:s', strtotime('-' . $min . ' days')))
+                ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-' . $max . ' days')))
+                ->get()->getResultArray(), 'id'));
+            if (empty($ids)) {
+                continue;
+            }
+
+            foreach ($this->usuariosElegibles($ids) as $uid => $u) {
+                if (isset($suscriptores[$uid])
+                    || $this->vigilanciasActivas($uid) > 0
+                    || $this->automationModel->wasSentRecently($uid, $tipo, 60)
+                    || $this->recibioHoy($uid)) {
+                    continue;
+                }
+                $reciente = $db->table('user_events')
+                    ->where('user_id', $uid)->where('event_type', 'view_risk_profile')
+                    ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-10 days')))
+                    ->countAllResults() > 0;
+                if ($reciente) {
+                    continue;   // ha vuelto: no está dormido
+                }
+
+                if ($tipo === 'risk_dormido_14') {
+                    $empresa = null;
+                    $ultima  = $db->table('user_events')->select('trigger_type')
+                        ->where('user_id', $uid)->where('event_type', 'view_risk_profile')
+                        ->where('trigger_type IS NOT NULL', null, false)->where('trigger_type <>', '')
+                        ->orderBy('created_at', 'DESC')->limit(1)->get()->getRowArray();
+                    if ($ultima) {
+                        $cif  = strtoupper(trim((string) $ultima['trigger_type']));
+                        $fila = $db->table('companies')->select('company_name')->where('cif', $cif)->get()->getRowArray();
+                        $empresa = [
+                            'cif'    => $cif,
+                            'nombre' => company_display_name((string) ($fila['company_name'] ?? $cif), $cif),
+                        ];
+                    }
+                    CLI::write("  -> Enviando 'risk_dormido_14' a {$u['email']}...");
+                    $res = $this->emailService->sendRiskDormido14($u + ['user_id' => $uid], $empresa);
+                } else {
+                    CLI::write("  -> Enviando 'risk_dormido_30' a {$u['email']}...");
+                    $res = $this->emailService->sendRiskDormido30($u + ['user_id' => $uid]);
+                }
+                $this->registrarEnvio($uid, $tipo, $res);
+            }
         }
     }
 
