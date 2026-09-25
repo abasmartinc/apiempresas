@@ -1,6 +1,6 @@
 <!-- PASO 3: INTEGRACIÓN -->
 <section id="section-paso3" class="activation-main-card" style="margin-top: 32px; position: relative; ">
-    <div style="position: absolute; top: -14px; left: 32px; background: <?= $requestsUsedThisMonth > 0 ? '#2152ff' : '#94a3b8' ?>; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"><?= lang('Dashboard.step_3') ?></div>
+    <div style="position: absolute; top: -14px; left: 32px; background: #2152ff; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"><?= lang('Dashboard.step_3') ?></div>
     <div style="margin-top: 10px;">
         <h2 style="font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 0 0 8px !important;"><?= lang('Dashboard.integrate_system') ?></h2>
         <p style="font-size: 0.95rem; color: #64748b; font-weight: 600; margin: 0 0 20px;">
@@ -82,7 +82,7 @@ print(response.json())</div>
             </div>
             <div class="dash-dev-card">
                 <span class="dash-dev-kicker">SDK oficiales</span>
-                <p><code>composer require apiempresas/apiempresas-php</code> · <code>npm install apiempresas</code> · <code>pip install apiempresas</code></p>
+                <p class="dash-dev-cmds"><code>composer require apiempresas/apiempresas-php</code><code>npm install apiempresas</code><code>pip install apiempresas</code></p>
                 <a href="<?= site_url('documentation#sdks') ?>">Ver los SDK &rarr;</a>
             </div>
         </div>
@@ -91,7 +91,9 @@ print(response.json())</div>
             .dash-dev-card { padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; }
             .dash-dev-kicker { display: block; margin-bottom: 4px; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #2152ff; }
             .dash-dev-card p { margin: 0 0 8px; font-size: 0.82rem; color: #475569; font-weight: 600; line-height: 1.45; }
-            .dash-dev-card code { background: #e2e8f0; color: #0f172a; padding: 1px 5px; border-radius: 4px; font-size: 0.74rem; word-break: break-all; }
+            .dash-dev-card code { background: #e2e8f0; color: #0f172a; padding: 1px 5px; border-radius: 4px; font-size: 0.74rem; white-space: nowrap; }
+            .dash-dev-cmds { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+            .dash-dev-cmds code { max-width: 100%; overflow-x: auto; }
             .dash-dev-card a { font-size: 0.8rem; font-weight: 800; color: #2152ff; text-decoration: none; }
             @media (max-width: 720px) { .dash-dev-links { grid-template-columns: 1fr; } }
         </style>

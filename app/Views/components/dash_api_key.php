@@ -1,6 +1,6 @@
 <!-- API KEY SECTION -->
 <section class="activation-main-card" id="section-api-key" data-track-section="api_key_block" style="margin-top: 32px; position: relative; <?= $requestsUsedThisMonth > 0 ? 'border-color: #2152ff; box-shadow: 0 10px 15px -3px rgba(33, 82, 255, 0.1);' : '' ?>">
-    <div style="position: absolute; top: -14px; left: 32px; background: <?= $requestsUsedThisMonth > 0 ? '#2152ff' : '#94a3b8' ?>; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"><?= lang('Dashboard.step_2') ?></div>
+    <div style="position: absolute; top: -14px; left: 32px; background: #2152ff; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"><?= lang('Dashboard.step_2') ?></div>
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; margin-top: 10px;">
         <div>
             <h2 style="font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 0 0 8px !important;"><?= lang('Dashboard.copy_api_key') ?></h2>
