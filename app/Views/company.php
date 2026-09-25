@@ -83,8 +83,10 @@
             'a' => $faqFiable
         ],
         [
-            'q' => "¿Cómo consultar la solvencia y riesgo de impago de {$companyName}?",
-            'a' => "En APIEmpresas puede obtener el **Informe de Solvencia de {$companyName}** (CIF {$companyCif}) en PDF. Incluye el índice de solvencia (Scoring IES), su estado en el Registro Mercantil, el histórico de actos publicados en el BORME y las incidencias detectadas."
+            // Antes: "riesgo de impago" y "Scoring IES". El índice mide la gravedad de lo
+            // que consta en el Registro, no predice impagos; la respuesta dice lo que hay.
+            'q' => "¿Cómo consultar la solvencia de {$companyName}?",
+            'a' => "En APIEmpresas puede ver el **informe de solvencia de {$companyName}** (CIF {$companyCif}): el índice de gravedad de lo que consta en el Registro Mercantil (de 0 a 100), su estado registral, los actos publicados en el BORME con su fecha y las incidencias detectadas, como concursos, disoluciones o ceses. También puede vigilarla gratis: le avisamos por correo cuando el BORME publique algo nuevo de ella."
         ],
         [
             'q' => "¿Cuál es el teléfono y dirección de {$companyName}?",
@@ -360,12 +362,14 @@
                                 // Con un estado adverso, la cinta dice el estado y no la edad:
                                 // "Veterana (+10a)" en una extinguida se lee como solidez.
                                 $ribbonText = $estadoReg['etiqueta'];
-                                if ($estadoReg['cerrada']) {
+                                // Sin rojo: el rojo es de la puntuación. Ámbar para el concurso
+                                // (sigue operando); gris pizarra para el resto de estados adversos.
+                                if (($estadoReg['clave'] ?? '') === 'concurso') {
+                                    $ribbonGradient = 'linear-gradient(135deg, #d97706 0%, #92400e 100%)';
+                                    $ribbonShadow = 'rgba(146, 64, 14, 0.35)';
+                                } else {
                                     $ribbonGradient = 'linear-gradient(135deg, #64748b 0%, #334155 100%)';
                                     $ribbonShadow = 'rgba(51, 65, 85, 0.35)';
-                                } else {
-                                    $ribbonGradient = 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)';
-                                    $ribbonShadow = 'rgba(185, 28, 28, 0.35)';
                                 }
                             } elseif (!empty($constValHeader) && $timestamp = strtotime($constValHeader)) {
                                 $ageInDays = (time() - $timestamp) / (60 * 60 * 24);

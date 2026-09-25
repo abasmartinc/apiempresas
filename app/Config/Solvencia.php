@@ -134,6 +134,13 @@ class Solvencia extends BaseConfig
      */
     public array $garantiaPlanes = ['risk_pro'];
 
+    /**
+     * Prueba social (App\Libraries\PruebaSocial): "Vigilamos N empresas · N avisos en
+     * los últimos 30 días", calculada de la BD. Por debajo de este número de empresas
+     * vigiladas no se enseña: una cifra pequeña resta confianza en vez de sumarla.
+     */
+    public int $pruebaSocialMinimo = 100;
+
     // -------------------------------------------------------------------
     // Lo que se COBRA por los pagos de un solo uso, en céntimos
     // -------------------------------------------------------------------

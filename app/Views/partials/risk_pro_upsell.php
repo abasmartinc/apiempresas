@@ -286,6 +286,11 @@ $upsellTrackMeta = esc(json_encode([
                 </div>
             <?php endif; ?>
 
+            <?php $pruebaSocial = \App\Libraries\PruebaSocial::linea(); ?>
+            <?php if ($pruebaSocial !== ''): ?>
+                <div style="margin-top: 10px; color: #475569; font-size: 0.72rem; line-height: 1.4; text-align: center;">📈 <?= esc($pruebaSocial) ?></div>
+            <?php endif; ?>
+
             <div style="display: flex; align-items: center; justify-content: center; gap: 5px; margin-top: 10px; color: #64748b; font-size: 0.72rem;">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                 Pago seguro Stripe &bull; Cancela en 1 clic

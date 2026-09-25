@@ -473,21 +473,26 @@ if (!function_exists('company_estado_registral')) {
     function company_estado_registral(array $company, ?array $riskProfile = null): array
     {
         $estados = [
+            // Colores (25-09-2026): el rojo queda para la puntuación de riesgo, que es el
+            // veredicto. El estado es un hecho: gris pizarra para lo que no opera con
+            // normalidad (extinguida, liquidación, disuelta, hoja cerrada) y ámbar para el
+            // concurso, la única situación en la que la empresa sigue operando y alguien
+            // puede seguir vendiéndole.
             'extinguida'   => ['peso' => 100, 'etiqueta' => 'Extinguida',        'titulo' => 'Sociedad extinguida',
                                'frase' => 'consta como extinguida en el Registro Mercantil',
                                'cerrada' => true,  'definitiva' => true,  'colores' => ['#334155', '#f1f5f9', '#cbd5e1']],
             'concurso'     => ['peso' => 95,  'etiqueta' => 'En concurso',       'titulo' => 'Concurso de acreedores en curso',
                                'frase' => 'tiene un concurso de acreedores en curso',
-                               'cerrada' => false, 'definitiva' => false, 'colores' => ['#b91c1c', '#fef2f2', '#fecaca']],
+                               'cerrada' => false, 'definitiva' => false, 'colores' => ['#92400e', '#fffbeb', '#fde68a']],
             'liquidacion'  => ['peso' => 90,  'etiqueta' => 'En liquidación',    'titulo' => 'Sociedad en liquidación',
                                'frase' => 'está en fase de liquidación',
-                               'cerrada' => true,  'definitiva' => false, 'colores' => ['#b91c1c', '#fef2f2', '#fecaca']],
+                               'cerrada' => true,  'definitiva' => false, 'colores' => ['#334155', '#f1f5f9', '#cbd5e1']],
             'disuelta'     => ['peso' => 85,  'etiqueta' => 'Disuelta',          'titulo' => 'Sociedad disuelta',
                                'frase' => 'consta como disuelta en el Registro Mercantil',
-                               'cerrada' => true,  'definitiva' => false, 'colores' => ['#b91c1c', '#fef2f2', '#fecaca']],
+                               'cerrada' => true,  'definitiva' => false, 'colores' => ['#334155', '#f1f5f9', '#cbd5e1']],
             'hoja_cerrada' => ['peso' => 80,  'etiqueta' => 'Hoja cerrada',      'titulo' => 'Hoja registral cerrada',
                                'frase' => 'tiene la hoja registral cerrada',
-                               'cerrada' => false, 'definitiva' => false, 'colores' => ['#b91c1c', '#fef2f2', '#fecaca']],
+                               'cerrada' => false, 'definitiva' => false, 'colores' => ['#334155', '#f1f5f9', '#cbd5e1']],
         ];
 
         $statusRaw = trim((string) ($company['status'] ?? ''));

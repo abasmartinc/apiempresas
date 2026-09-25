@@ -317,12 +317,14 @@
                                 // With an adverse state the ribbon shows the state, not the age:
                                 // "Veteran (+10y)" on a struck-off company reads as solidity.
                                 $ribbonText = $estadoReg['etiqueta'];
-                                if ($estadoReg['cerrada']) {
+                                // Sin rojo: el rojo es de la puntuación. Ámbar para el concurso
+                                // (sigue operando); gris pizarra para el resto de estados adversos.
+                                if (($estadoReg['clave'] ?? '') === 'concurso') {
+                                    $ribbonGradient = 'linear-gradient(135deg, #d97706 0%, #92400e 100%)';
+                                    $ribbonShadow = 'rgba(146, 64, 14, 0.35)';
+                                } else {
                                     $ribbonGradient = 'linear-gradient(135deg, #64748b 0%, #334155 100%)';
                                     $ribbonShadow = 'rgba(51, 65, 85, 0.35)';
-                                } else {
-                                    $ribbonGradient = 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)';
-                                    $ribbonShadow = 'rgba(185, 28, 28, 0.35)';
                                 }
                             } elseif (!empty($constValHeader) && $timestamp = strtotime($constValHeader)) {
                                 $ageInDays = (time() - $timestamp) / (60 * 60 * 24);

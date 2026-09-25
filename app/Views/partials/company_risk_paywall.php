@@ -462,6 +462,11 @@ $pwBgColor  = $pwVis[1];
                             </span>
                         </div>
                     <?php endif; ?>
+
+                    <?php $pruebaSocial = \App\Libraries\PruebaSocial::linea(); ?>
+                    <?php if ($pruebaSocial !== ''): ?>
+                        <div style="margin-top: 8px; color: #475569; font-size: 0.7rem; line-height: 1.35; text-align: left;">📈 <?= esc($pruebaSocial) ?></div>
+                    <?php endif; ?>
                 </div>
             </form>
 

@@ -481,6 +481,43 @@
         <?php endif; ?>
     </div>
 
+    <!-- MÉTRICA GUÍA -->
+    <?php $mg = $metrica_guia ?? []; ?>
+    <div class="card" style="padding: 1.75rem; margin-bottom: 1.5rem;">
+        <div style="margin-bottom: 1rem;">
+            <h3 style="margin: 0 0 4px 0; font-size: 1.25rem; color: #0f172a; font-weight: 800;">Métrica guía: aviso en los primeros 30 días</h3>
+            <p style="margin: 0; font-size: 0.85rem; color: #64748b;">
+                Registrados con intención de riesgo que ya llevan 30 días, dados de alta en el periodo &bull; <?= esc($period_label) ?>.
+                Recibir un aviso del BORME en el primer mes anticipa el paso a Pro mejor que las consultas.
+            </p>
+        </div>
+        <?php if (empty($mg) || (int) ($mg['altas'] ?? 0) === 0): ?>
+            <p style="margin: 0; font-size: 0.9rem; color: #94a3b8;">Todavía no hay registrados de este periodo con 30 días cumplidos.</p>
+        <?php else: ?>
+            <?php $fmtPct = static fn ($v) => $v === null ? '—' : number_format((float) $v, 1, ',', '.') . ' %'; ?>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px;">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px;">
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Con aviso en 30 días</div>
+                    <div style="font-size: 1.6rem; font-weight: 900; color: #0f172a;"><?= $fmtPct($mg['pct_con_alerta']) ?></div>
+                    <div style="font-size: 0.8rem; color: #64748b;"><?= number_format((int) $mg['con_alerta'], 0, ',', '.') ?> de <?= number_format((int) $mg['altas'], 0, ',', '.') ?> altas</div>
+                </div>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px;">
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Vigilan algo en 30 días</div>
+                    <div style="font-size: 1.6rem; font-weight: 900; color: #0f172a;"><?= $fmtPct($mg['pct_con_vigilancia']) ?></div>
+                    <div style="font-size: 0.8rem; color: #64748b;"><?= number_format((int) $mg['con_vigilancia'], 0, ',', '.') ?> usuarios</div>
+                </div>
+                <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 14px;">
+                    <div style="font-size: 0.75rem; color: #047857; font-weight: 700; text-transform: uppercase;">Pasan a Pro · con aviso</div>
+                    <div style="font-size: 1.6rem; font-weight: 900; color: #065f46;"><?= $fmtPct($mg['conv_con_alerta']) ?></div>
+                </div>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px;">
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Pasan a Pro · sin aviso</div>
+                    <div style="font-size: 1.6rem; font-weight: 900; color: #0f172a;"><?= $fmtPct($mg['conv_sin_alerta']) ?></div>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+
     <!-- VIGILANCIAS POR ORIGEN -->
     <div class="card" style="padding: 1.75rem; margin-bottom: 1.5rem;">
         <div style="margin-bottom: 1rem;">

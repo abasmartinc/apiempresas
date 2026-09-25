@@ -561,6 +561,7 @@ class RiskProfileAnalytics extends BaseController
             'title' => 'Analítica de Perfil de Riesgo & Solvencia',
             'ui_events' => $ui,
             'vigilancias_origen' => $this->vigilanciasPorOrigen($db ?? \Config\Database::connect(), $dateFrom, $dateTo),
+            'metrica_guia' => $this->metricaGuia($db ?? \Config\Database::connect(), $dateFrom, $dateTo),
             'mediana_dias_pago' => $medianaDiasPago,
             'period' => $period,
             'period_label' => $periodLabel,
@@ -918,6 +919,7 @@ class RiskProfileAnalytics extends BaseController
             'cartera'     => 'Carga de cartera (CSV)',
             'onboarding'  => 'Guía del panel',
             'alta_pro'    => 'Página de éxito de Pro',
+            'email'       => 'Enlace «vigilar» de un correo',
             'unlock'      => 'Automática al desbloquear un dictamen',
             'search'      => 'Automática al buscar un CIF',
             'auto'        => 'Relleno inicial (histórico)',
@@ -925,10 +927,72 @@ class RiskProfileAnalytics extends BaseController
 
         foreach ($filas as &$f) {
             $f['etiqueta'] = $nombres[$f['source'] ?? ''] ?? ('Otro: ' . ($f['source'] ?? '—'));
-            $f['elegida']  = in_array($f['source'], ['teaser', 'manual', 'cartera', 'onboarding', 'alta_pro'], true);
+            $f['elegida']  = in_array($f['source'], ['teaser', 'manual', 'cartera', 'onboarding', 'alta_pro', 'email'], true);
         }
 
         return $filas;
+    }
+
+    /**
+     * Métrica guía de Solvencia: de los registrados con intención de riesgo que ya
+     * llevan 30 días, cuántos recibieron al menos un aviso del BORME en esos 30 días.
+     * Predice mejor el paso a Pro que las consultas; se enseña junto a la conversión
+     * a Pro de quien recibió aviso y de quien no, para poder comprobarlo.
+     */
+    private function metricaGuia($db, ?string $dateFrom, ?string $dateTo): array
+    {
+        try {
+            $filtro = '';
+            $params = [];
+            if ($dateFrom) { $filtro .= ' AND u.created_at >= ?'; $params[] = $dateFrom; }
+            if ($dateTo)   { $filtro .= ' AND u.created_at <= ?'; $params[] = $dateTo; }
+
+            $fila = $db->query("
+                SELECT COUNT(*) AS altas,
+                       SUM(t.con_alerta) AS con_alerta,
+                       SUM(t.con_vigilancia) AS con_vigilancia,
+                       SUM(t.pro) AS pro,
+                       SUM(t.con_alerta AND t.pro) AS pro_con_alerta
+                FROM (
+                    SELECT u.id,
+                           EXISTS(SELECT 1 FROM user_email_automation a
+                                   WHERE a.user_id = u.id AND a.email_type = 'borme_alert'
+                                     AND a.sent_at < u.created_at + INTERVAL 30 DAY) AS con_alerta,
+                           EXISTS(SELECT 1 FROM user_company_watch w
+                                   WHERE w.user_id = u.id
+                                     AND w.created_at < u.created_at + INTERVAL 30 DAY) AS con_vigilancia,
+                           EXISTS(SELECT 1 FROM user_subscriptions us
+                                   JOIN api_plans ap ON ap.id = us.plan_id
+                                   WHERE us.user_id = u.id
+                                     AND (ap.slug = 'risk_pro' OR ap.product_type = 'risk')) AS pro
+                    FROM users u
+                    WHERE u.is_admin = 0
+                      AND u.signup_intent = 'view_risk_profile'
+                      AND u.created_at <= NOW() - INTERVAL 30 DAY
+                      {$filtro}
+                ) t
+            ", $params)->getRowArray() ?: [];
+        } catch (\Throwable $e) {
+            log_message('error', '[RiskProfileAnalytics] metricaGuia: ' . $e->getMessage());
+            return [];
+        }
+
+        $altas        = (int) ($fila['altas'] ?? 0);
+        $conAlerta    = (int) ($fila['con_alerta'] ?? 0);
+        $pro          = (int) ($fila['pro'] ?? 0);
+        $proConAlerta = (int) ($fila['pro_con_alerta'] ?? 0);
+        $sinAlerta    = $altas - $conAlerta;
+        $pct = static fn (int $a, int $b) => $b > 0 ? round(100 * $a / $b, 1) : null;
+
+        return [
+            'altas'              => $altas,
+            'con_alerta'         => $conAlerta,
+            'pct_con_alerta'     => $pct($conAlerta, $altas),
+            'con_vigilancia'     => (int) ($fila['con_vigilancia'] ?? 0),
+            'pct_con_vigilancia' => $pct((int) ($fila['con_vigilancia'] ?? 0), $altas),
+            'conv_con_alerta'    => $pct($proConAlerta, $conAlerta),
+            'conv_sin_alerta'    => $pct($pro - $proConAlerta, $sinAlerta),
+        ];
     }
 
     private function getEmailTemplates()
