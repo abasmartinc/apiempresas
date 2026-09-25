@@ -217,7 +217,9 @@ $redirectVigilar = strpos($redirectPath, 'ver-riesgo=1') !== false
                 <?php elseif ($teaserEstado['cerrada']): ?>
                     Está en proceso de cierre. Falta saber en qué punto
                 <?php elseif ($teaserEstado['clave'] === 'hoja_cerrada'): ?>
-                    Tiene la hoja registral cerrada. Falta saber por qué
+                    <?php /* El motivo del cierre ya sale arriba, en el titular: "falta saber por qué"
+                             lo contradecía. Lo que se compra es el resto. */ ?>
+                    Tiene la hoja registral cerrada. Mira qué más consta
                 <?php elseif ($teaserTotalAlerts > 0): ?>
                     <?php /* No "qué es": el motivo principal ya sale arriba, y los actos,
                              gratis más abajo. Lo que falta, y se compra, es cuánto pesa. */ ?>
