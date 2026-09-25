@@ -66,6 +66,20 @@ document.addEventListener('DOMContentLoaded', function() {
             ctaText: '#ffffff',
             ctaLabel: '<?= lang('UsageTrigger.50_percent_cta') ?>'
         },
+        '100_percent': {
+            icon: '⛔',
+            title: '<?= lang('UsageTrigger.100_percent_title') ?>',
+            desc: '<?= lang('UsageTrigger.100_percent_desc') ?>',
+            bg: '#fef2f2',
+            border: '#fecaca',
+            text: '#991b1b',
+            ctaBg: '#dc2626',
+            ctaText: '#ffffff',
+            ctaLabel: '<?= lang('UsageTrigger.100_percent_cta') ?>',
+            href: '<?= site_url('billing?plan=pro&source=usage_banner_100') ?>',
+            // Estado, no aviso de una vez: no se marca como visto en user_trigger_events
+            persistente: true
+        },
         '80_percent': {
             icon: '🚨',
             title: '<?= lang('UsageTrigger.80_percent_title') ?>',
@@ -86,10 +100,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.trigger && triggers[data.trigger]) {
                 const config = triggers[data.trigger];
                 
-                // Verificar si el usuario lo cerró en esta sesión
-                if (localStorage.getItem('hide_trigger_' + data.trigger) === 'true') {
-                    return;
-                }
+                // Verificar si el usuario lo cerró (el de 100 % solo en esta sesión:
+                // mientras siga sin consultas debe volver a verlo)
+                const almacen = config.persistente ? sessionStorage : localStorage;
+                try {
+                    if (almacen.getItem('hide_trigger_' + data.trigger) === 'true') {
+                        return;
+                    }
+                } catch (e) {}
 
                 // Aplicar estilos y textos
                 icon.textContent = config.icon;
@@ -101,15 +119,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 cta.style.backgroundColor = config.ctaBg;
                 cta.style.color = config.ctaText;
                 cta.textContent = config.ctaLabel || '<?= lang('UsageTrigger.default_cta') ?>';
+                if (config.href) cta.href = config.href;
                 
                 // Mostrar banner
                 container.style.display = 'block';
 
-                // Registrar evento 'mostrar'
-                logTriggerEvent('trigger_shown', data.trigger);
+                // Registrar evento 'mostrar'. El de 100 % es un estado que dura, no un
+                // aviso de una vez: se mide con trackEvent y no se marca como visto.
+                if (config.persistente) {
+                    if (window.trackEvent) trackEvent('usage_banner_shown', { trigger: data.trigger });
+                } else {
+                    logTriggerEvent('trigger_shown', data.trigger);
+                }
                 
                 // Eventos de interacción
                 cta.addEventListener('click', () => {
+                    if (config.persistente) {
+                        if (window.trackEvent) trackEvent('usage_banner_clicked', { trigger: data.trigger });
+                        return;
+                    }
                     logTriggerEvent('trigger_clicked', data.trigger);
                     logTriggerEvent('upgrade_clicked', data.trigger);
                 });
@@ -117,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 closeBtn.addEventListener('click', () => {
                     container.style.display = 'none';
                     // Guardar en localStorage para no molestar en la sesión actual
-                    localStorage.setItem('hide_trigger_' + data.trigger, 'true');
+                    try { almacen.setItem('hide_trigger_' + data.trigger, 'true'); } catch (e) {}
                 });
             }
         })

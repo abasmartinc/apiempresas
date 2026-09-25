@@ -42,6 +42,7 @@ class CompanyModel extends Model
         'company_enrichment.ai_tags',
         'company_enrichment.ai_pitch',
         'company_enrichment.ai_borme_summary',
+        'company_enrichment.notes         AS company_notes',
     ];
 
     /**

@@ -28,9 +28,12 @@ if (!function_exists('mask_company_data')) {
         // 5. CIF -> The user sample shows it UNMASKED. 
         // We will keep it as is (removing the previous masking logic).
 
+        helper('url');
         $data['upsell_opportunities'] = [
             'campos_ocultos' => ['direccion_completa', 'objeto_social_completo', 'geolocalizacion_lat_lng'],
-            'mensaje' => '🔒 Pásate al plan Pro para desbloquear la ubicación y los datos societarios completos de esta empresa.'
+            'mensaje' => '🔒 Pásate al plan Pro para desbloquear la ubicación y los datos societarios completos de esta empresa.',
+            // Campo añadido: enlace directo a la compra (los campos anteriores no cambian)
+            'upgrade_url' => site_url('billing?plan=pro&source=api_free_mask'),
         ];
 
         return $data;

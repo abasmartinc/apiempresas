@@ -72,6 +72,29 @@ print(response.json())</div>
                 <?= lang('Wizard.download_collection') ?>
             </a>
         </div>
+
+        <!-- Atajos para integrar: sandbox (no gasta consultas) y SDK oficiales -->
+        <div class="dash-dev-links">
+            <div class="dash-dev-card">
+                <span class="dash-dev-kicker">Sandbox · gratis</span>
+                <p>Prueba tu código sin gastar consultas: misma clave, base <code>/api/sandbox/v1</code> y CIF <code>A15075062</code>.</p>
+                <a href="<?= site_url('documentation#auth') ?>">Ver cómo usarlo &rarr;</a>
+            </div>
+            <div class="dash-dev-card">
+                <span class="dash-dev-kicker">SDK oficiales</span>
+                <p><code>composer require apiempresas/apiempresas-php</code> · <code>npm install apiempresas</code> · <code>pip install apiempresas</code></p>
+                <a href="<?= site_url('documentation#sdks') ?>">Ver los SDK &rarr;</a>
+            </div>
+        </div>
+        <style>
+            .dash-dev-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+            .dash-dev-card { padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; }
+            .dash-dev-kicker { display: block; margin-bottom: 4px; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #2152ff; }
+            .dash-dev-card p { margin: 0 0 8px; font-size: 0.82rem; color: #475569; font-weight: 600; line-height: 1.45; }
+            .dash-dev-card code { background: #e2e8f0; color: #0f172a; padding: 1px 5px; border-radius: 4px; font-size: 0.74rem; word-break: break-all; }
+            .dash-dev-card a { font-size: 0.8rem; font-weight: 800; color: #2152ff; text-decoration: none; }
+            @media (max-width: 720px) { .dash-dev-links { grid-template-columns: 1fr; } }
+        </style>
     </div>
     <script>
         document.querySelectorAll('.snippet-tab').forEach(tab => {

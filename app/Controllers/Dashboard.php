@@ -196,12 +196,9 @@ class Dashboard extends BaseController
                         'title' => lang('Dashboard.usage_msg_limit_exceeded_title'),
                         'text'  => lang('Dashboard.usage_msg_limit_exceeded_text')
                     ];
-                } else {
-                    $data['usageMessage'] = [
-                        'title' => lang('Dashboard.usage_msg_limit_reached_title'),
-                        'text'  => lang('Dashboard.usage_msg_limit_reached_text')
-                    ];
                 }
+                // Free agotado sin monedero: lo cuenta el banner de uso (nivel 100 %),
+                // con el botón de compra; aquí no se repite.
             } elseif ($requestsUsedThisMonth >= ($maxLimit * 0.6)) {
                 $data['usageMessage'] = [
                     'title' => lang('Dashboard.usage_msg_almost_reached_title'),

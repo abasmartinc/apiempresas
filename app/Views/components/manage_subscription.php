@@ -187,8 +187,15 @@
                     if (reason === 'too_expensive' || reason === 'low_usage') {
                         return {
                             tipo: 'bono',
-                            title: 'Antes de irte: ¿pagar solo lo que uses?',
-                            html: 'Si no aprovechas el plan ' + plan + ' todos los meses, con un <strong>bono de créditos</strong> pagas solo las consultas que haces: pago único, sin cuota mensual y sin caducidad. Tu API Key y tu código no cambian.',
+                            badge: 'Una alternativa antes de irte',
+                            title: 'Paga solo las consultas que uses',
+                            copy: 'Si no aprovechas el plan <strong>' + plan + '</strong> todos los meses, un bono de créditos puede encajarte mejor que una cuota mensual.',
+                            puntos: [
+                                { t: 'Pago único', d: 'Sin cuota mensual ni renovaciones.' },
+                                { t: 'Sin caducidad', d: 'Gastas los créditos a tu ritmo.' },
+                                { t: 'Nada que cambiar', d: 'Misma API Key y mismo código.' }
+                            ],
+                            nota: 'Si eliges «Cancelar y ver bonos», tu plan ' + plan + ' se cancela igual al final del periodo y te llevamos a los bonos.',
                             confirm: 'Cancelar y ver bonos',
                             deny: 'Solo cancelar'
                         };
@@ -196,8 +203,15 @@
                     if (reason === 'technical_issues' || reason === 'missing_features') {
                         return {
                             tipo: 'soporte',
-                            title: '¿Nos das la oportunidad de arreglarlo?',
-                            html: 'Cuéntanos qué ha fallado o qué echas en falta en un ticket: respondemos en menos de 2 horas. Si no lo resolvemos, cancelas igual y no pierdes nada.',
+                            badge: 'Antes de cancelar',
+                            title: '¿Nos dejas intentar arreglarlo?',
+                            copy: 'Cuéntanos en un ticket qué ha fallado o qué echas en falta. Lo revisa el equipo técnico, no un bot.',
+                            puntos: [
+                                { t: 'Menos de 2 horas', d: 'Es lo que tardamos en responder.' },
+                                { t: 'Caso concreto', d: 'Revisamos tus consultas y tu integración.' },
+                                { t: 'Sin compromiso', d: 'Si no se resuelve, cancelas igual.' }
+                            ],
+                            nota: 'Abrir un ticket no cancela tu plan: sigue activo mientras lo vemos.',
                             confirm: 'Abrir un ticket',
                             deny: 'Seguir con la cancelación'
                         };
@@ -399,18 +413,79 @@
 
                             track('cancel_offer_shown', { reason: reason, offer: oferta.tipo, plan: planNameAttr });
                             Swal.fire({
+                                width: 640,
+                                padding: 0,
+                                buttonsStyling: false,
                                 title: oferta.title,
-                                html: oferta.html,
-                                icon: 'question',
+                                html: `
+                                    <style>
+                                        .retain-modal { font-family: inherit; color: #0f172a; text-align: left; }
+                                        .retain-modal__hero { position: relative; overflow: hidden; padding: 28px 32px 24px; background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 56%, #14b8a6 100%); color: #ffffff; }
+                                        .retain-modal__hero::after { content: ""; position: absolute; inset: auto -70px -120px auto; width: 260px; height: 260px; border-radius: 999px; background: rgba(255,255,255,0.16); }
+                                        .retain-modal__badge { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 8px; padding: 7px 11px; border: 1px solid rgba(255,255,255,0.28); border-radius: 999px; background: rgba(255,255,255,0.12); font-size: 0.78rem; font-weight: 800; }
+                                        .retain-modal__dot { width: 7px; height: 7px; border-radius: 999px; background: #67e8f9; box-shadow: 0 0 0 5px rgba(103,232,249,0.18); }
+                                        .retain-modal__title { position: relative; z-index: 1; margin: 18px 0 8px; font-size: 1.6rem; line-height: 1.15; font-weight: 900; }
+                                        .retain-modal__copy { position: relative; z-index: 1; margin: 0; max-width: 520px; color: rgba(255,255,255,0.86); font-size: 0.96rem; line-height: 1.55; }
+                                        .retain-modal__copy strong { color: #ffffff; }
+                                        .retain-modal__body { padding: 24px 32px 8px; background: #ffffff; }
+                                        .retain-modal__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+                                        .retain-modal__item { padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; }
+                                        .retain-modal__check { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin-bottom: 8px; border-radius: 8px; background: #eff6ff; color: #2563eb; }
+                                        .retain-modal__item-title { display: block; margin: 0 0 3px; font-size: 0.92rem; font-weight: 900; color: #0f172a; }
+                                        .retain-modal__item-detail { display: block; margin: 0; font-size: 0.8rem; line-height: 1.35; color: #64748b; }
+                                        .retain-modal__note { margin: 16px 0 0; padding: 12px 14px; border-radius: 10px; background: #f1f5f9; color: #475569; font-size: 0.8rem; line-height: 1.45; }
+                                        .retain-popup { border-radius: 16px; overflow: hidden; }
+                                        .retain-popup .swal2-html-container { margin: 0; padding: 0; overflow: visible; }
+                                        .retain-popup .swal2-title, .retain-popup .swal2-icon { display: none !important; }
+                                        .retain-popup .swal2-actions { width: 100%; justify-content: flex-end; gap: 10px; margin: 0; padding: 18px 32px 28px; background: #ffffff; border-top: 1px solid #edf2f7; box-sizing: border-box; }
+                                        .retain-btn { border: 0; border-radius: 10px; padding: 12px 18px; font-weight: 900; font-size: 0.92rem; cursor: pointer; transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+                                        .retain-btn:hover { transform: translateY(-1px); }
+                                        .retain-btn--primary { background: #2152ff; color: #ffffff; box-shadow: 0 12px 24px rgba(33,82,255,0.22); }
+                                        .retain-btn--primary:hover { background: #1d4ed8; }
+                                        .retain-btn--keep { background: #0f172a; color: #ffffff; box-shadow: 0 12px 24px rgba(15,23,42,0.16); }
+                                        .retain-btn--keep:hover { background: #1e293b; }
+                                        .retain-btn--cancel { background: #ffffff; color: #dc2626; border: 1px solid #fecaca; }
+                                        .retain-btn--cancel:hover { background: #fef2f2; }
+                                        @media (max-width: 640px) {
+                                            .retain-modal__hero, .retain-modal__body { padding-left: 20px; padding-right: 20px; }
+                                            .retain-modal__grid { grid-template-columns: 1fr; }
+                                            .retain-popup .swal2-actions { padding-left: 20px; padding-right: 20px; flex-direction: column-reverse; }
+                                            .retain-btn { width: 100%; }
+                                        }
+                                    </style>
+                                    <div class="retain-modal">
+                                        <div class="retain-modal__hero">
+                                            <span class="retain-modal__badge"><span class="retain-modal__dot"></span> ${oferta.badge}</span>
+                                            <h2 class="retain-modal__title">${oferta.title}</h2>
+                                            <p class="retain-modal__copy">${oferta.copy}</p>
+                                        </div>
+                                        <div class="retain-modal__body">
+                                            <div class="retain-modal__grid">
+                                                ${oferta.puntos.map(p => `
+                                                    <div class="retain-modal__item">
+                                                        <span class="retain-modal__check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+                                                        <span class="retain-modal__item-title">${p.t}</span>
+                                                        <span class="retain-modal__item-detail">${p.d}</span>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                            <p class="retain-modal__note">${oferta.nota}</p>
+                                        </div>
+                                    </div>
+                                `,
                                 showDenyButton: true,
                                 showCancelButton: true,
                                 confirmButtonText: oferta.confirm,
                                 denyButtonText: oferta.deny,
                                 cancelButtonText: 'Mantener mi plan',
-                                confirmButtonColor: '#2152ff',
-                                denyButtonColor: '#dc2626',
-                                cancelButtonColor: '#0f172a',
-                                reverseButtons: true
+                                reverseButtons: true,
+                                focusCancel: true,
+                                customClass: {
+                                    popup: 'retain-popup',
+                                    confirmButton: 'retain-btn retain-btn--primary',
+                                    denyButton: 'retain-btn retain-btn--cancel',
+                                    cancelButton: 'retain-btn retain-btn--keep'
+                                }
                             }).then((r2) => {
                                 if (r2.isConfirmed) {
                                     track('cancel_offer_accepted', { reason: reason, offer: oferta.tipo, plan: planNameAttr });

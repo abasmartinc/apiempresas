@@ -496,6 +496,18 @@
                                     <?= esc($company['name'] ?? '-') ?><?php if (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-'): ?> - CIF <?= esc($companyCif) ?><?php endif; ?>
                                 </h1>
 
+                                <?php if (!empty(trim((string) ($company['company_notes'] ?? '')))): ?>
+                                <?php
+                                    // Nota editorial (company_enrichment.notes): texto escapado, saltos de línea respetados y URLs convertidas en enlaces.
+                                    $companyNotesHtml = nl2br(esc(trim((string) $company['company_notes'])));
+                                    $companyNotesHtml = preg_replace('~(https?://[^\s<]+)~i', '<a href="$1" style="color: #1d4ed8; font-weight: 600; text-decoration: underline;">$1</a>', $companyNotesHtml);
+                                ?>
+                                <div class="company-notes" role="note" style="display: flex; align-items: flex-start; gap: 10px; background: #fffbeb; border: 1px solid #fde68a; color: #78350f; padding: 12px 14px; border-radius: 10px; margin: -4px 0 16px 0; font-size: 0.95rem; line-height: 1.45;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px;" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                    <div><?= $companyNotesHtml ?></div>
+                                </div>
+                                <?php endif; ?>
+
                                 <?php if (!empty($company['ai_pitch'])): ?>
                                 <p style="font-size: 1.05rem; color: #475569; margin: 0 0 16px 0; line-height: 1.4; text-wrap: balance; font-weight: 500;">
                                     <?= esc($company['ai_pitch']) ?>

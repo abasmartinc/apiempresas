@@ -74,6 +74,13 @@ class UsageStatus extends BaseController
     protected function detectTrigger(int $userId, int $count, float $percentage): ?string
     {
         // Reglas de prioridad (de mayor a menor urgencia)
+
+        // 100 %: la clave ya devuelve 429. No es un aviso de una vez: se muestra
+        // mientras dure (el usuario puede cerrarlo en la sesión). No se aplica a quien
+        // tiene saldo en el monedero, porque a él no se le corta.
+        if ($percentage >= 100 && $this->saldoMonedero($userId) <= 0) {
+            return '100_percent';
+        }
         
         // Trigger 4: 80%
         if ($percentage >= 80) {
@@ -104,5 +111,16 @@ class UsageStatus extends BaseController
         }
 
         return null;
+    }
+
+    private function saldoMonedero(int $userId): int
+    {
+        try {
+            $row = \Config\Database::connect()->table('user_wallets')
+                ->select('balance')->where('user_id', $userId)->get()->getRow();
+            return (int) ($row->balance ?? 0);
+        } catch (\Throwable $e) {
+            return 0;
+        }
     }
 }

@@ -183,8 +183,17 @@ if ($isBonusUser && !($isPaid ?? false)) {
                     document.getElementById('aha-status').textContent = comp.status || 'Activa';
                     
                     <?php if (!$isPaid && $walletBalance <= 0): ?>
-                    document.getElementById('aha-address').innerHTML = '<span style="filter: blur(4px); user-select: none;">Calle Falsa 123, 28080 Madrid</span> <span style="font-size:0.8rem; color:#e11d48; margin-left:8px; font-weight:800;">🔒 Pro</span>';
-                    document.getElementById('aha-activity').innerHTML = '<span style="filter: blur(4px); user-select: none;">La prestación de servicios de consultoría...</span> <span style="font-size:0.8rem; color:#e11d48; margin-left:8px; font-weight:800;">🔒 Pro</span>';
+                    // Lo que trae de verdad la respuesta del plan Free, sin datos inventados:
+                    // la dirección no viene (se dice), y del objeto social vienen los
+                    // primeros caracteres reales.
+                    const candado = (t) => '<span style="font-size:0.75rem; color:#2152ff; margin-left:8px; font-weight:800; white-space:nowrap;">🔒 ' + t + '</span>';
+                    const esc = (t) => { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; };
+                    document.getElementById('aha-address').innerHTML = '<span style="color:#64748b; font-weight:600;">Dirección completa y coordenadas incluidas en Pro</span>' + candado('Con Pro');
+                    const objetoApi = String(comp.corporate_purpose || '').trim();
+                    const objeto = objetoApi.replace(/\s*\.{3}\s*\[ACTUALIZA[^\]]*\]\s*$/i, '').trim();
+                    document.getElementById('aha-activity').innerHTML = objeto
+                        ? esc(objeto) + (objeto !== objetoApi ? '… ' + candado('Completo con Pro') : '')
+                        : '-';
                     <?php else: ?>
                     document.getElementById('aha-address').textContent = comp.address || '-';
                     document.getElementById('aha-activity').textContent = comp.corporate_purpose || '-';

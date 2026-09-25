@@ -16,6 +16,10 @@ return [
     '80_percent_desc'  => 'Tu integración dejará de funcionar pronto. Activa Pro para mantener el servicio.',
     '80_percent_cta'   => 'Evitar corte de servicio',
     
+    '100_percent_title' => 'Has usado tus consultas gratuitas',
+    '100_percent_desc'  => 'Tu clave devuelve error 429 hasta que actives un plan. Pro: 3.000 consultas al mes con todos los datos. Sin suscripción: un bono.',
+    '100_percent_cta'   => 'Activar Pro',
+
     'default_cta'      => 'Activar Plan Pro',
     'activate_radar'   => '🔥 Activar Radar + API',
 ];
