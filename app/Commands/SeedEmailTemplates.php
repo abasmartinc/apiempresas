@@ -53,9 +53,9 @@ class SeedEmailTemplates extends BaseCommand
             [
                 'slug'    => 'welcome_risk',
                 'name'    => 'Bienvenida (Riesgo y Solvencia)',
-                'subject' => '🛡️ Tu cuenta está lista: dispones de 3 informes de riesgo gratis este mes',
+                'subject' => '🛡️ Tu cuenta está lista: tienes {gratis} consultas de solvencia gratis este mes',
                 'view'    => 'welcome_risk',
-                'vars'    => '{name}, {button_url}, {origin_line}',
+                'vars'    => '{name}, {button_url}, {origin_line}, {gratis}, {vig_gratis}',
                 'trigger' => 'Se envía inmediatamente a los usuarios registrados con intención de ver perfil de riesgo (view_risk_profile).'
             ],
             [
@@ -69,7 +69,7 @@ class SeedEmailTemplates extends BaseCommand
             [
                 'slug'    => 'risk_first_query_nudge',
                 'name'    => 'Seguimiento 1ª Consulta de Riesgo (12h-48h)',
-                'subject' => '🛡️ Tu análisis de {company_name}: te quedan 2 consultas de solvencia gratis este mes',
+                'subject' => 'Tu consulta de {company_name}: te quedan {quedan} consultas gratis este mes',
                 'view'    => 'risk_first_query_nudge',
                 'vars'    => '{name}, {company_name}, {button_url}',
                 'trigger' => 'Se envía 12h-48h tras la primera consulta de riesgo para incentivar el uso de los créditos restantes.'
@@ -77,15 +77,15 @@ class SeedEmailTemplates extends BaseCommand
             [
                 'slug'    => 'risk_paywall_abandoned',
                 'name'    => 'Paywall de Riesgo Alcanzado (Límite 3/3)',
-                'subject' => 'Has usado tus 3 consultas de este mes: cómo seguir revisando clientes',
+                'subject' => 'Has usado tus {gratis} consultas de este mes: cómo seguir revisando clientes',
                 'view'    => 'risk_paywall_abandoned',
                 'vars'    => '{name}, {company_name}, {button_url}, {pdf_url}',
                 'trigger' => 'Se envía 2h tras agotar las 3 consultas gratuitas de riesgo al intentar auditar una empresa.'
             ],
             [
                 'slug'    => 'risk_pack_welcome',
-                'name'    => 'Bienvenida Pack Auditorías (Compra)',
-                'subject' => '🛡️ Tu pack de {credits} auditorías de solvencia ya está activo',
+                'name'    => 'Bienvenida Pack de consultas (Compra)',
+                'subject' => '🛡️ Tu pack de {credits} consultas de solvencia ya está activo',
                 'view'    => 'risk_pack_welcome',
                 'vars'    => '{name}, {credits}, {button_url}',
                 'trigger' => 'Se envía inmediatamente tras la compra de un Pack de Auditorías de Solvencia (risk_pack_5).'
@@ -101,7 +101,7 @@ class SeedEmailTemplates extends BaseCommand
             [
                 'slug'    => 'risk_credits_low_upsell',
                 'name'    => 'Upsell Solvencia Pro (Créditos de Pack Bajos/Agotados)',
-                'subject' => 'Saldo de auditorías ({remaining_credits_text}): Solvencia Pro vigila tu cartera por ti',
+                'subject' => 'Consultas del pack: {remaining_credits_text}. Solvencia Pro vigila tu cartera por ti',
                 'view'    => 'risk_credits_low_upsell',
                 'vars'    => '{name}, {remaining_credits_text}, {credits_status_phrase}, {button_url}, {pack_url}',
                 'trigger' => 'Se envía automáticamente a compradores de packs cuando les queda <= 1 crédito para ofrecer Solvencia Pro.'
@@ -154,6 +154,14 @@ class SeedEmailTemplates extends BaseCommand
                 'view'    => 'risk_generic',
                 'vars'    => '{asunto}, {preheader}, {name}, {content}, {button_text}, {button_url}',
                 'trigger' => 'Correos de Solvencia sin diseño propio: lista de vigilancia llena, resumen mensual de la cartera, pago sin terminar, consultas renovadas y comparativa de precio.'
+            ],
+            [
+                'slug'    => 'risk_servicio',
+                'name'    => 'Solvencia Pro: avisos de servicio',
+                'subject' => '{asunto}',
+                'view'    => 'risk_generic',
+                'vars'    => '{asunto}, {preheader}, {name}, {content}, {button_text}, {button_url}',
+                'trigger' => 'Misma plantilla que risk_generic, pero transaccional (llega aunque el cliente haya rechazado el marketing): puesta en marcha de Pro sin vigilancias, seguimiento del día 20 y aviso de renovación anual.'
             ],
             [
                 'slug'    => 'automation_generic',

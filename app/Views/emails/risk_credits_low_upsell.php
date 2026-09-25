@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tus créditos de auditoría de solvencia - APIEmpresas</title>
+    <title>Tus consultas de solvencia - APIEmpresas</title>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1e293b; margin: 0; padding: 0; background-color: #f1f5f9;">
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f1f5f9; padding: 25px 0;">
@@ -24,12 +24,12 @@
                     <tr>
                         <td style="padding: 35px 35px 25px;">
                             <div style="display: inline-block; background: #fffbeb; color: #b45309; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 14px; border: 1px solid #fde68a;">
-                                ⚠️ Saldo de Auditorías: {remaining_credits_text}
+                                ⚠️ Consultas del pack: {remaining_credits_text}
                             </div>
 
                             <h2 style="margin: 0 0 16px; color: #0f172a; font-size: 22px; font-weight: 800;">Hola, {name}:</h2>
                             <p style="margin: 0 0 18px; color: #475569; font-size: 15px; line-height: 1.6;">
-                                Te informamos de que {credits_status_phrase} de tu pack de auditorías de solvencia mercantil.
+                                Te informamos de que {credits_status_phrase} de tu pack de consultas de solvencia.
                             </p>
                             <p style="margin: 0 0 22px; color: #475569; font-size: 15px; line-height: 1.6;">
                                 Si tienes previsto analizar más clientes o proveedores este mes antes de venderles a crédito, te interesará dar el salto a <strong>Solvencia Pro</strong>:
@@ -41,25 +41,25 @@
                                     <td style="padding: 24px;">
                                         <span style="background: #2563eb; color: #ffffff; font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.05em;">RECOMENDADO</span>
                                         <h3 style="margin: 10px 0 4px; color: #0f172a; font-size: 18px; font-weight: 800;">Solvencia Pro</h3>
-                                        <div style="font-size: 24px; font-weight: 900; color: #1d4ed8; margin-bottom: 12px;">29 € <span style="font-size: 13px; color: #64748b; font-weight: 600;">/ mes</span></div>
+                                        <div style="font-size: 24px; font-weight: 900; color: #1d4ed8; margin-bottom: 12px;">{precio_pro} <span style="font-size: 13px; color: #64748b; font-weight: 600;">/ mes</span></div>
                                         
                                         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 16px;">
                                             <tr>
                                                 <td width="22" valign="top" style="color: #2563eb; font-weight: 800; font-size: 14px;">✓</td>
                                                 <td style="color: #334155; font-size: 13.5px; line-height: 1.4; padding-bottom: 6px;">
-                                                    <strong>300 consultas al mes</strong> de cualquier empresa de España, sin ir recargando packs.
+                                                    <strong>{consultas_pro} consultas al mes</strong> de cualquier empresa de España, sin ir recargando packs.
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td width="22" valign="top" style="color: #2563eb; font-weight: 800; font-size: 14px;">✓</td>
                                                 <td style="color: #334155; font-size: 13.5px; line-height: 1.4; padding-bottom: 6px;">
-                                                    <strong>Vigilancia de hasta 25 empresas:</strong> te escribimos el día que el BORME publique algo de ellas.
+                                                    <strong>Vigilancia de hasta {vig_pro} empresas:</strong> te escribimos el día que el BORME publique algo de ellas.
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td width="22" valign="top" style="color: #2563eb; font-weight: 800; font-size: 14px;">✓</td>
                                                 <td style="color: #334155; font-size: 13.5px; line-height: 1.4; padding-bottom: 6px;">
-                                                    <strong>Sin permanencia:</strong> Úsalo los meses que tengas operaciones y cancela en 1 clic cuando quieras. 30 días de garantía.
+                                                    <strong>Sin permanencia:</strong> Úsalo los meses que tengas operaciones y cancela en 1 clic cuando quieras. {garantia_dias} días de garantía.
                                                 </td>
                                             </tr>
                                         </table>
@@ -68,7 +68,7 @@
                                             <tr>
                                                 <td align="center">
                                                     <a href="{button_url}" target="_blank" style="display: block; text-align: center; background: #2563eb; color: #ffffff !important; padding: 13px 24px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 14px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);">
-                                                        ⚡ Pasar a Solvencia Pro (29 €/mes + IVA)
+                                                        ⚡ Pasar a Solvencia Pro ({precio_pro}/mes + IVA)
                                                     </a>
                                                 </td>
                                             </tr>
@@ -80,7 +80,7 @@
                             <!-- Alternative Pack Reload -->
                             <p style="margin: 0 0 20px; color: #64748b; font-size: 13.5px; text-align: center;">
                                 ¿Prefieres seguir con recargas puntuales sin suscripción mensual?<br>
-                                <a href="{pack_url}" style="color: #0f766e; font-weight: 700; text-decoration: underline;">Recargar otro Pack de 5 Auditorías por 9,90 € + IVA</a>
+                                <a href="{pack_url}" style="color: #0f766e; font-weight: 700; text-decoration: underline;">Recargar otro pack de 5 consultas por {precio_pack} + IVA</a>
                             </p>
                         </td>
                     </tr>

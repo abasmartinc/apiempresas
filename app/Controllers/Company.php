@@ -2014,7 +2014,8 @@ class Company extends BaseController
 
         // Origen del alta, solo de una lista cerrada (llega del navegador).
         $origen = (string) ($payload['source'] ?? 'manual');
-        if (!in_array($origen, ['manual', 'teaser'], true)) {
+        // 'email': el enlace "vigilar" de los correos de Solvencia (ficha con ?vigilar=1&origen=email)
+        if (!in_array($origen, ['manual', 'teaser', 'email'], true)) {
             $origen = 'manual';
         }
 

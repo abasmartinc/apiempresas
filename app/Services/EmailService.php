@@ -1175,12 +1175,14 @@ class EmailService
      */
     public function sendRiskFirstQueryNudge(array $userData, array $companyData = []): array
     {
+        helper('company');   // solvencia()
         $compName = !empty($companyData['name']) ? $companyData['name'] : (!empty($companyData['cif']) ? $companyData['cif'] : 'tu cliente');
 
         $templateData = [
             'name'         => $userData['name'] ?? 'Usuario',
             'company_name' => $compName,
-            'button_url'   => site_url('dashboard')
+            'quedan'       => (string) max(0, (int) solvencia('consultasGratis', 3) - 1),
+            'button_url'   => site_url('dashboard?view=risk')
         ];
         return $this->sendTemplateEmail('risk_first_query_nudge', $templateData, $userData['email'], ['papelo.amh@gmail.com'], [], $userData['user_id'] ?? 0);
     }
@@ -1196,7 +1198,7 @@ class EmailService
         $templateData = [
             'name'         => $userData['name'] ?? 'Usuario',
             'company_name' => $compName,
-            'button_url'   => site_url('billing?plan=risk_pro'),
+            'button_url'   => site_url('billing?view=risk&plan=risk_pro'),
             'pdf_url'      => !empty($cif) ? site_url('dashboard?cif=' . urlencode((string)$cif)) : site_url('dashboard')
         ];
         return $this->sendTemplateEmail('risk_paywall_abandoned', $templateData, $userData['email'], ['papelo.amh@gmail.com'], [], $userData['user_id'] ?? 0);
@@ -1208,14 +1210,14 @@ class EmailService
      * $contenidoHtml es HTML ya construido: quien llama escapa lo que venga de datos
      * (nombres de empresa, etc.).
      */
-    public function sendRiskGeneric(array $userData, string $asunto, string $contenidoHtml, string $botonTexto, string $botonUrl, string $preheader = '', string $tipo = ''): array
+    public function sendRiskGeneric(array $userData, string $asunto, string $contenidoHtml, string $botonTexto, string $botonUrl, string $preheader = '', string $tipo = '', string $plantilla = 'risk_generic'): array
     {
         $nombre = trim((string) ($userData['name'] ?? ''));
         if ($nombre === '' && !empty($userData['email'])) {
             $nombre = explode('@', (string) $userData['email'])[0];
         }
 
-        return $this->sendTemplateEmail('risk_generic', [
+        return $this->sendTemplateEmail($plantilla, [
             '_log_slug'   => $tipo,
             'asunto'      => $asunto,
             'preheader'   => $preheader,
@@ -1224,6 +1226,24 @@ class EmailService
             'button_text' => esc($botonTexto),
             'button_url'  => $botonUrl,
         ], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
+    }
+
+    /** Cifras comerciales de Solvencia para las plantillas ({gratis}, {precio_pro}…). */
+    private function datosSolvencia(): array
+    {
+        helper('company');
+        return [
+            'gratis'              => (string) (int) solvencia('consultasGratis', 3),
+            'vig_gratis'          => (string) (int) solvencia('vigilanciasGratis', 5),
+            'vig_pro'             => (string) (int) solvencia('vigilanciasPro', 25),
+            'consultas_pro'       => (string) (int) solvencia('consultasPro', 300),
+            'precio_pro'          => (string) solvencia('precios.pro_mensual', '29 €'),
+            'precio_pro_anual'    => (string) solvencia('precios.pro_anual', '290 €'),
+            'precio_pdf'          => (string) solvencia('precios.pdf', '3,90 €'),
+            'precio_pack'         => (string) solvencia('precios.pack5', '9,90 €'),
+            'garantia_dias'       => (string) (int) solvencia('garantiaDias', 30),
+            'informe_tradicional' => str_replace('–', ' y ', (string) solvencia('precios.informe_tradicional', '20–44 €')),
+        ];
     }
 
     /** Párrafo de correo con el estilo de la plantilla. */
@@ -1246,7 +1266,7 @@ class EmailService
         $vig = (int) solvencia('vigilanciasPro', 25);
         $contenido = $this->p('Un informe suelto de una empresa cuesta entre 20 y 44 € en un proveedor tradicional, y es una foto del día en que lo pides.')
             . $this->p('Con <strong>Solvencia Pro</strong> (29 €/mes + IVA) vigilas hasta <strong>' . $vig . ' empresas</strong> y te escribimos el día que el BORME publique algo de ellas: un concurso, una disolución, un cese de administrador o un cierre de hoja registral. Incluye ' . (int) solvencia('consultasPro', 300) . ' consultas al mes.')
-            . $this->p('Sin permanencia y con ' . (int) solvencia('garantiaDias', 30) . ' días de garantía: si no te sirve, te devolvemos el dinero. Si lo pagas anual, 290 € (dos meses gratis).');
+            . $this->p('Sin permanencia y con ' . (int) solvencia('garantiaDias', 30) . ' días de garantía: si no te sirve, te devolvemos el dinero. Si lo pagas anual, <a href="' . site_url('billing?view=risk&plan=risk_pro&period=annual') . '" style="color:#2563eb;font-weight:700;">' . esc((string) solvencia('precios.pro_anual', '290 €')) . ' al año (dos meses gratis)</a>.');
 
         return $this->sendRiskGeneric(
             $userData,
@@ -1334,14 +1354,16 @@ class EmailService
         $anual = $periodo === 'annual';
         $contenido = $this->p('Empezaste a activar <strong>Solvencia Pro</strong>' . ($anual ? ' en su modalidad anual' : '') . ' y el pago no llegó a completarse.')
             . $this->p('Si fue un problema con la tarjeta o tienes alguna duda sobre el plan, responde a este correo y te ayudamos. Si prefieres retomarlo, el botón te lleva de vuelta.')
-            . $this->p('Recuerda: sin permanencia y con ' . (int) solvencia('garantiaDias', 30) . ' días de garantía.');
+            . $this->p($anual
+                ? 'Recuerda: ' . (int) solvencia('garantiaDias', 30) . ' días de garantía, y si lo cancelas no se renueva al terminar el año.'
+                : 'Recuerda: sin permanencia y con ' . (int) solvencia('garantiaDias', 30) . ' días de garantía.');
 
         return $this->sendRiskGeneric(
             $userData,
             'Tu activación de Solvencia Pro se quedó a medias',
             $contenido,
             'Retomar la activación',
-            site_url('billing?view=risk&plan=risk_pro'),
+            site_url('billing?view=risk&plan=risk_pro' . ($anual ? '&period=annual' : '')),
             '¿Hubo algún problema con el pago? Te ayudamos.',
             'risk_checkout_abandoned'
         );
@@ -1392,6 +1414,151 @@ class EmailService
         );
     }
 
+
+    /**
+     * TRIGGER: risk_pro_activacion — Pro desde hace 2-10 días y sin ninguna empresa
+     * en vigilancia. Sin empresas vigiladas no llega ningún aviso, el cliente no ve
+     * valor y pide la devolución o no renueva. Lleva las empresas que ya consultó,
+     * cada una con su enlace para vigilarla en un clic (la ficha con ?vigilar=1).
+     *
+     * @param list<array{nombre:string,cif:string}> $consultadas
+     */
+    public function sendRiskProActivacion(array $userData, array $consultadas): array
+    {
+        helper('company');
+        $vigPro = (int) solvencia('vigilanciasPro', 25);
+
+        $contenido = $this->p('Tu <strong>Solvencia Pro</strong> ya está activo, pero todavía no vigilas ninguna empresa. Es la parte que trabaja sola: cuando el BORME publica algo de una empresa vigilada (un concurso, una disolución, un cese), te escribimos ese mismo día.');
+
+        if ($consultadas !== []) {
+            $lista = '';
+            foreach (array_slice($consultadas, 0, 5) as $e) {
+                $url = site_url(rawurlencode($e['cif']) . '?vigilar=1&origen=email');
+                $lista .= '<li style="margin:0 0 6px;">' . esc($e['nombre'])
+                    . ' — <a href="' . $url . '" style="color:#2563eb;font-weight:700;">vigilar</a></li>';
+            }
+            $contenido .= $this->p('Empieza por las que ya has consultado, con un clic cada una:')
+                . '<ul style="margin:0 0 14px; padding-left:20px; color:#334155;">' . $lista . '</ul>';
+        }
+
+        $contenido .= $this->p('¿Tienes una lista de clientes? Sube el Excel o CSV que exporta tu programa de facturación y ponemos en vigilancia hasta ' . $vigPro . ' de golpe.')
+            . $this->p('Si algo no te queda claro, responde a este correo y te ayudamos a dejarlo configurado.');
+
+        return $this->sendRiskGeneric(
+            $userData,
+            'Tu Solvencia Pro aún no vigila ninguna empresa',
+            $contenido,
+            'Subir mi lista de clientes',
+            site_url('cartera'),
+            'Pon tus clientes en vigilancia y te avisamos el día que el BORME publique algo.',
+            'risk_pro_activacion',
+            'risk_servicio'
+        );
+    }
+
+    /**
+     * TRIGGER: risk_pro_seguimiento — hacia el día 20 de la primera suscripción: lo que
+     * Solvencia Pro ha hecho por el cliente hasta ahora. Quien no ve el trabajo que se
+     * hace en silencio (la mayoría de los meses no pasa nada) no renueva.
+     */
+    public function sendRiskProSeguimiento(array $userData, int $dias, int $vigiladas, int $avisos, int $consultas): array
+    {
+        helper('company');
+        $vigPro = (int) solvencia('vigilanciasPro', 25);
+
+        $items = '<li style="margin:0 0 6px;"><strong>' . $vigiladas . '</strong> ' . ($vigiladas === 1 ? 'empresa vigilada' : 'empresas vigiladas') . ' de ' . $vigPro . ' posibles, revisadas cada día en el BORME.</li>'
+            . '<li style="margin:0 0 6px;"><strong>' . $avisos . '</strong> ' . ($avisos === 1 ? 'aviso enviado' : 'avisos enviados') . ' por movimientos en esas empresas.</li>'
+            . '<li style="margin:0 0 6px;"><strong>' . $consultas . '</strong> ' . ($consultas === 1 ? 'empresa consultada' : 'empresas consultadas') . '.</li>';
+
+        $contenido = $this->p('Llevas ' . $dias . ' días con <strong>Solvencia Pro</strong>. Esto es lo que ha hecho por ti hasta ahora:')
+            . '<ul style="margin:0 0 14px; padding-left:20px; color:#334155;">' . $items . '</ul>';
+
+        if ($vigiladas === 0) {
+            $contenido .= $this->p('Todavía no vigilas ninguna empresa, así que no podemos avisarte de nada. Añade tus clientes y proveedores habituales: tardas un minuto subiendo la lista que exporta tu programa de facturación.');
+            $boton = ['Subir mi lista de clientes', site_url('cartera')];
+        } elseif ($vigiladas < $vigPro) {
+            $contenido .= $this->p('Te quedan ' . ($vigPro - $vigiladas) . ' huecos de vigilancia. Cuantos más clientes vigiles, antes te enteras si alguno entra en concurso o se disuelve.');
+            $boton = ['Añadir más empresas', site_url('cartera')];
+        } else {
+            $boton = ['Ver mi vigilancia', site_url('dashboard?view=risk')];
+        }
+
+        $contenido .= $this->p('Si algo no funciona como esperabas, responde a este correo: lo revisamos contigo.');
+
+        return $this->sendRiskGeneric(
+            $userData,
+            'Tus primeros ' . $dias . ' días con Solvencia Pro',
+            $contenido,
+            $boton[0],
+            $boton[1],
+            $vigiladas . ' empresas vigiladas y ' . $avisos . ' avisos hasta ahora.',
+            'risk_pro_seguimiento',
+            'risk_servicio'
+        );
+    }
+
+    /**
+     * TRIGGER: risk_renovacion_30 / risk_renovacion_7 — el plan anual se renueva pronto.
+     * Avisar antes de cobrar 290 € evita sorpresas, reclamaciones y contracargos.
+     */
+    public function sendRiskRenovacionAnual(array $userData, string $fecha, int $diasAntes, int $vigiladas, int $avisos, string $tipo): array
+    {
+        helper('company');
+        $importe = (string) solvencia('precios.pro_anual', '290 €');
+
+        $contenido = $this->p('Tu <strong>Solvencia Pro anual</strong> se renueva el <strong>' . esc($fecha) . '</strong>, dentro de ' . $diasAntes . ' días. Se cobrará ' . esc($importe) . ' + IVA en tu forma de pago habitual.')
+            . $this->p('Ahora vigilas ' . $vigiladas . ' ' . ($vigiladas === 1 ? 'empresa' : 'empresas') . ' y en este periodo te hemos enviado ' . $avisos . ' ' . ($avisos === 1 ? 'aviso' : 'avisos') . ' del BORME.')
+            . $this->p('No tienes que hacer nada para seguir. Si no quieres renovar, cancélalo desde «Gestionar suscripción» antes de esa fecha y conservarás el plan hasta entonces.');
+
+        return $this->sendRiskGeneric(
+            $userData,
+            'Tu Solvencia Pro anual se renueva el ' . $fecha,
+            $contenido,
+            'Gestionar suscripción',
+            site_url('billing?view=risk'),
+            'Aviso con ' . $diasAntes . ' días de antelación: no tienes que hacer nada para seguir.',
+            $tipo,
+            'risk_servicio'
+        );
+    }
+
+    /**
+     * TRIGGER: risk_winback — 30-37 días después de que termine un Solvencia Pro
+     * cancelado, si no ha vuelto. Una vez al año como mucho. Comercial.
+     */
+    public function sendRiskWinback(array $userData, string $motivo = ''): array
+    {
+        helper('company');
+        $gratis    = (int) solvencia('consultasGratis', 3);
+        $vigGratis = (int) solvencia('vigilanciasGratis', 5);
+        $anualUrl  = site_url('billing?view=risk&plan=risk_pro&period=annual');
+
+        $porMotivo = match ($motivo) {
+            'too_expensive'
+                => 'Si lo dejaste por el precio: pagando anual sale a ' . esc((string) solvencia('precios.pro_anual_mes', '24,16 €')) . ' al mes, dos meses gratis. <a href="' . $anualUrl . '" style="color:#2563eb;font-weight:700;">Ver el plan anual</a>.',
+            'low_usage', 'temporary_pause'
+                => 'Si no lo usabas todos los meses, el plan gratuito sigue contigo: ' . $gratis . ' consultas al mes y ' . $vigGratis . ' empresas vigiladas sin coste. Y cuando tengas más movimiento, vuelves a Pro en un minuto.',
+            'technical_issues', 'missing_features'
+                => 'Si lo dejaste por algo que no funcionaba o que echabas en falta, cuéntanoslo respondiendo a este correo. Si ya está resuelto te lo diremos, y si no, nos ayudas a priorizarlo.',
+            default
+                => 'Si nos cuentas en una línea por qué lo dejaste, respondiendo a este correo, nos ayudas mucho.',
+        };
+
+        $contenido = $this->p('Hace un mes que terminó tu <strong>Solvencia Pro</strong>. Tu cuenta sigue activa con el plan gratuito: ' . $gratis . ' consultas al mes y vigilancia de ' . $vigGratis . ' empresas.')
+            . $this->p('Lo que dejaste de tener: vigilar hasta ' . (int) solvencia('vigilanciasPro', 25) . ' empresas y ver en cada aviso el detalle del acto (quién entra, quién sale, qué capital).')
+            . $this->p($porMotivo);
+
+        return $this->sendRiskGeneric(
+            $userData,
+            'Tu cuenta de Solvencia sigue activa',
+            $contenido,
+            'Volver a Solvencia Pro',
+            site_url('billing?view=risk&plan=risk_pro'),
+            'Sigues teniendo el plan gratuito. Y si vuelves a Pro, tu vigilancia te espera.',
+            'risk_winback'
+        );
+    }
+
     /**
      * TRIGGER: risk_unused_credits_48h
      */
@@ -1402,7 +1569,7 @@ class EmailService
         $templateData = [
             'name'              => $userData['name'] ?? 'Usuario',
             'remaining_credits' => $credText,
-            'button_url'        => site_url('dashboard')
+            'button_url'        => site_url('dashboard?view=risk')
         ];
         return $this->sendTemplateEmail('risk_unused_credits_48h', $templateData, $userData['email'], ['papelo.amh@gmail.com'], [], $userData['user_id'] ?? 0);
     }
@@ -1482,8 +1649,8 @@ class EmailService
             'name'                   => $userData['name'] ?? 'Usuario',
             'remaining_credits_text' => $credText,
             'credits_status_phrase'  => $phrase,
-            'button_url'             => site_url('billing?plan=risk_pro'),
-            'pack_url'               => site_url('billing?plan=risk_pack_5')
+            'button_url'             => site_url('billing?view=risk&plan=risk_pro'),
+            'pack_url'               => site_url('billing?view=risk&plan=risk_pack_5')
         ];
 
         return $this->sendTemplateEmail('risk_credits_low_upsell', $templateData, $userData['email'], ['papelo.amh@gmail.com'], [], $userData['user_id'] ?? 0);
@@ -1496,6 +1663,13 @@ class EmailService
     {
         $templateModel = new EmailTemplateModel();
         $template = $templateModel->getBySlug($slug);
+
+        // Plantillas de Solvencia: sus cifras (consultas, vigilancias, precios, garantía)
+        // salen de Config\Solvencia y no de números escritos a mano en el HTML. Lo que
+        // mande quien llama tiene prioridad.
+        if ($slug === 'welcome_risk' || $slug === 'borme_alert' || str_starts_with($slug, 'risk_')) {
+            $data += $this->datosSolvencia();
+        }
 
         if (!$template) {
             log_message('error', "[EmailService] Plantilla no encontrada: {$slug}");
@@ -1530,6 +1704,9 @@ class EmailService
             'api_plan_welcome',
             // Confirmación de una acción del propio cliente
             'subscription_canceled',
+            // Solvencia Pro: puesta en marcha, seguimiento y aviso de renovación anual.
+            // Son del servicio que el cliente paga, no marketing.
+            'risk_servicio',
         ];
 
         // Las alertas del BORME tienen consentimiento propio: quien las ha activado las

@@ -29,7 +29,7 @@
 
                             <h2 style="margin: 0 0 16px; color: #0f172a; font-size: 22px; font-weight: 800;">Hola, {name}:</h2>
                             <p style="margin: 0 0 18px; color: #475569; font-size: 15px; line-height: 1.6;">
-                                Vemos que has alcanzado el límite mensual de 3 consultas gratuitas mientras analizabas a <strong>{company_name}</strong>.
+                                Vemos que has alcanzado el límite mensual de {gratis} consultas gratuitas mientras analizabas a <strong>{company_name}</strong>.
                             </p>
                             <p style="margin: 0 0 20px; color: #475569; font-size: 15px; line-height: 1.6;">
                                 Si necesitas revisar más clientes o proveedores antes de que se renueven el mes que viene, tienes dos opciones:
@@ -45,9 +45,9 @@
                                                 <td style="padding: 20px 18px;">
                                                     <span style="background: #2563eb; color: #ffffff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 999px; text-transform: uppercase;">RECOMENDADO</span>
                                                     <h3 style="margin: 8px 0 4px; color: #0f172a; font-size: 16px; font-weight: 800;">Solvencia Pro</h3>
-                                                    <div style="font-size: 22px; font-weight: 900; color: #1d4ed8; margin-bottom: 8px;">29 € <span style="font-size: 12px; color: #64748b; font-weight: 600;">/ mes</span></div>
+                                                    <div style="font-size: 22px; font-weight: 900; color: #1d4ed8; margin-bottom: 8px;">{precio_pro} <span style="font-size: 12px; color: #64748b; font-weight: 600;">/ mes</span></div>
                                                     <p style="margin: 0 0 12px; color: #475569; font-size: 12.5px; line-height: 1.4;">
-                                                        <strong>Vigila hasta 25 empresas</strong> y te escribimos el día que el BORME publique algo de ellas. 300 consultas al mes, sin permanencia y con 30 días de garantía. O 290 €/año: dos meses gratis.
+                                                        <strong>Vigila hasta {vig_pro} empresas</strong> y te escribimos el día que el BORME publique algo de ellas. {consultas_pro} consultas al mes, sin permanencia y con {garantia_dias} días de garantía. O 290 €/año: dos meses gratis.
                                                     </p>
                                                     <a href="{button_url}" target="_blank" style="display: block; text-align: center; background: #2563eb; color: #ffffff !important; padding: 10px 14px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 13px;">
                                                         ⚡ Activar Solvencia Pro
@@ -63,7 +63,7 @@
                                                 <td style="padding: 20px 18px;">
                                                     <span style="background: #10b981; color: #ffffff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 999px; text-transform: uppercase;">PAGO PUNTUAL</span>
                                                     <h3 style="margin: 8px 0 4px; color: #0f172a; font-size: 16px; font-weight: 800;">Informe en PDF</h3>
-                                                    <div style="font-size: 22px; font-weight: 900; color: #059669; margin-bottom: 8px;">3,90 € <span style="font-size: 12px; color: #64748b; font-weight: 600;">+ IVA</span></div>
+                                                    <div style="font-size: 22px; font-weight: 900; color: #059669; margin-bottom: 8px;">{precio_pdf} <span style="font-size: 12px; color: #64748b; font-weight: 600;">+ IVA</span></div>
                                                     <p style="margin: 0 0 12px; color: #475569; font-size: 12.5px; line-height: 1.4;">
                                                         El dictamen de una empresa concreta, en pantalla y en PDF, con cada acto del BORME y su fecha. Pago único.
                                                     </p>
@@ -80,7 +80,7 @@
                             <!-- Price Anchoring Note -->
                             <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px;">
                                 <p style="margin: 0; color: #475569; font-size: 13px; line-height: 1.5;">
-                                    💡 <strong>Sale a cuenta desde la segunda empresa del mes:</strong> un informe suelto en un proveedor tradicional cuesta entre 20 y 44 €. Y con Pro no es una foto de un día: te avisamos si algo cambia.
+                                    💡 <strong>Sale a cuenta desde la segunda empresa del mes:</strong> un informe suelto en un proveedor tradicional cuesta entre {informe_tradicional}. Y con Pro no es una foto de un día: te avisamos si algo cambia.
                                 </p>
                             </div>
                         </td>

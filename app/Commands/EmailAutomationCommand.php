@@ -60,9 +60,11 @@ class EmailAutomationCommand extends BaseCommand
         // BLOQUE 2: FLUJO DE RIESGO, PAYWALL Y UPSELL PACKS
         // =========================================================================
         CLI::write('🛡️ [2/6] Procesando automatizaciones de Riesgo y Solvencia...', 'cyan');
+        // Primero el ciclo de vida (pagos sin terminar, clientes de Pro, renovaciones):
+        // con un correo de Solvencia al día como mucho, lo más importante va antes.
+        $this->bloque('2/solvencia', fn () => $this->processSolvenciaCiclo());
         $this->bloque('2/riesgo', fn () => $this->processRiskPaywallTriggers());
         $this->bloque('2/packs', fn () => $this->processRiskPackUpsellTriggers());
-        $this->bloque('2/solvencia', fn () => $this->processSolvenciaCiclo());
 
         // =========================================================================
         // BLOQUE 3: USUARIOS CON ALTA TASA DE ERRORES 400 EN API
@@ -228,6 +230,11 @@ class EmailAutomationCommand extends BaseCommand
               -- gratuitas: le llegaban \"límite 3/3 alcanzado\" y \"te quedan X gratis\"
               -- justo después de pagar. Su secuencia es la del pack.
               AND COALESCE(u.risk_credits, 0) = 0
+              -- Quien compró un pack y lo ha gastado tampoco es un gratuito: recibía
+              -- «has usado tus 3 consultas gratuitas» a la vez que la oferta del pack.
+              AND u.id NOT IN (
+                  SELECT user_id FROM user_events WHERE event_type = 'purchase_risk_pack'
+              )
         ", [$startOfMonth])->getResultArray();
 
         CLI::write("  - Candidatos de Riesgo / Freemium detectados: " . count($riskCandidates));
@@ -236,6 +243,11 @@ class EmailAutomationCommand extends BaseCommand
 
         foreach ($riskCandidates as $user) {
             $userId = (int)$user['id'];
+
+            // Como mucho un correo de Solvencia al día por usuario (también estos)
+            if ($this->recibioHoy($userId)) {
+                continue;
+            }
 
             // Obtener eventos de consulta de riesgo de este mes
             $events = $db->table('user_events')
@@ -410,7 +422,7 @@ class EmailAutomationCommand extends BaseCommand
                 ->where('email_type', 'risk_credits_low_upsell')
                 ->where('sent_at >=', $ultimaCompra)
                 ->countAllResults() > 0;
-            if ($yaTrasCompra) {
+            if ($yaTrasCompra || $this->recibioHoy($userId)) {
                 continue;
             }
 
@@ -528,7 +540,11 @@ class EmailAutomationCommand extends BaseCommand
     {
         helper('company');
         $this->cicloPagoSinTerminar();
+        $this->cicloActivacionPro();
+        $this->cicloSeguimientoPro();
+        $this->cicloRenovacionAnual();
         $this->cicloListaLlena();
+        $this->cicloWinbackSolvencia();
 
         if ((int) date('j') <= 3) {
             $this->cicloResumenCartera();
@@ -649,6 +665,244 @@ class EmailAutomationCommand extends BaseCommand
             CLI::write("  -> Enviando 'risk_checkout_abandoned' a {$usuario['email']}...");
             $this->registrarEnvio($uid, 'risk_checkout_abandoned',
                 $this->emailService->sendRiskCheckoutAbandoned($usuario, (string) ($meta['period'] ?? 'monthly')));
+        }
+    }
+
+    /**
+     * Clientes de Solvencia Pro, para los avisos de servicio: sin el filtro de la baja
+     * del marketing (esos correos son del servicio que pagan).
+     */
+    protected function usuariosCliente(array $ids): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        if (empty($ids)) {
+            return [];
+        }
+        $salida = [];
+        foreach (array_chunk($ids, 500) as $trozo) {
+            foreach (\Config\Database::connect()->table('users')
+                        ->select('id, email, name, created_at, signup_intent')
+                        ->whereIn('id', $trozo)
+                        ->where('is_admin', 0)
+                        ->get()->getResultArray() as $f) {
+                $salida[(int) $f['id']] = $f;
+            }
+        }
+        return $salida;
+    }
+
+    /** Suscripciones de Solvencia Pro (plan risk_pro o de tipo risk). */
+    protected function suscripcionesSolvencia(): \CodeIgniter\Database\BaseBuilder
+    {
+        return \Config\Database::connect()->table('user_subscriptions us')
+            ->join('api_plans ap', 'ap.id = us.plan_id')
+            ->groupStart()->where('ap.slug', 'risk_pro')->orWhere('ap.product_type', 'risk')->groupEnd();
+    }
+
+    protected function vigilanciasActivas(int $userId): int
+    {
+        return \Config\Database::connect()->table('user_company_watch')
+            ->where('user_id', $userId)->where('active', 1)->countAllResults();
+    }
+
+    protected function avisosDesde(int $userId, string $desde): int
+    {
+        return \Config\Database::connect()->table('user_email_automation')
+            ->where('user_id', $userId)->where('email_type', 'borme_alert')
+            ->where('sent_at >=', $desde)->countAllResults();
+    }
+
+    /**
+     * Pro desde hace 2-10 días sin ninguna empresa en vigilancia: correo con las que
+     * ya consultó para vigilarlas en un clic. Una vez por cliente.
+     */
+    protected function cicloActivacionPro(): void
+    {
+        $db = \Config\Database::connect();
+        $subs = $this->suscripcionesSolvencia()
+            ->select('us.user_id, us.created_at')
+            ->where('us.status', 'active')
+            ->where('us.created_at <=', date('Y-m-d H:i:s', strtotime('-2 days')))
+            ->where('us.created_at >=', date('Y-m-d H:i:s', strtotime('-10 days')))
+            ->get()->getResultArray();
+        if (empty($subs)) {
+            return;
+        }
+
+        $usuarios = $this->usuariosCliente(array_column($subs, 'user_id'));
+        foreach ($usuarios as $uid => $u) {
+            if ($this->vigilanciasActivas($uid) > 0
+                || $this->automationModel->wasSentRecently($uid, 'risk_pro_activacion', 365)
+                || $this->recibioHoy($uid)) {
+                continue;
+            }
+
+            // Empresas que ya consultó (las más recientes primero)
+            $cifs = array_column($db->table('user_events')
+                ->select('trigger_type, MAX(created_at) AS ultima', false)
+                ->where('user_id', $uid)->where('event_type', 'view_risk_profile')
+                ->where('trigger_type IS NOT NULL', null, false)->where('trigger_type <>', '')
+                ->groupBy('trigger_type')->orderBy('ultima', 'DESC')->limit(5)
+                ->get()->getResultArray(), 'trigger_type');
+
+            $consultadas = [];
+            if ($cifs) {
+                $nombres = array_column($db->table('companies')->select('cif, company_name')
+                    ->whereIn('cif', $cifs)->get()->getResultArray(), 'company_name', 'cif');
+                foreach ($cifs as $cif) {
+                    $cif = strtoupper(trim((string) $cif));
+                    $consultadas[] = [
+                        'cif'    => $cif,
+                        'nombre' => company_display_name((string) ($nombres[$cif] ?? $cif), $cif),
+                    ];
+                }
+            }
+
+            CLI::write("  -> Enviando 'risk_pro_activacion' a {$u['email']}...");
+            $this->registrarEnvio($uid, 'risk_pro_activacion',
+                $this->emailService->sendRiskProActivacion($u + ['user_id' => $uid], $consultadas));
+        }
+    }
+
+    /**
+     * Hacia el día 20 de su PRIMERA suscripción a Solvencia Pro: lo que ha hecho el
+     * servicio por él (vigiladas, avisos, consultas). Una vez por cliente.
+     */
+    protected function cicloSeguimientoPro(): void
+    {
+        $db = \Config\Database::connect();
+        $subs = $this->suscripcionesSolvencia()
+            ->select('us.user_id, us.created_at')
+            ->where('us.status', 'active')
+            ->where('us.created_at <=', date('Y-m-d H:i:s', strtotime('-18 days')))
+            ->where('us.created_at >=', date('Y-m-d H:i:s', strtotime('-24 days')))
+            ->get()->getResultArray();
+        if (empty($subs)) {
+            return;
+        }
+
+        $inicio = [];
+        foreach ($subs as $sub) {
+            $inicio[(int) $sub['user_id']] = (string) $sub['created_at'];
+        }
+        $usuarios = $this->usuariosCliente(array_keys($inicio));
+
+        foreach ($usuarios as $uid => $u) {
+            // Solo en la primera suscripción: quien vuelve no necesita el seguimiento
+            $anteriores = $this->suscripcionesSolvencia()
+                ->where('us.user_id', $uid)->where('us.created_at <', $inicio[$uid])->countAllResults();
+            if ($anteriores > 0
+                || $this->automationModel->wasSentRecently($uid, 'risk_pro_seguimiento', 365)
+                || $this->recibioHoy($uid)) {
+                continue;
+            }
+
+            $consultas = (int) ($db->table('user_events')
+                ->select('COUNT(DISTINCT trigger_type) AS n', false)
+                ->where('user_id', $uid)->where('event_type', 'view_risk_profile')
+                ->where('created_at >=', $inicio[$uid])
+                ->get()->getRowArray()['n'] ?? 0);
+            $dias = max(1, (int) floor((time() - strtotime($inicio[$uid])) / 86400));
+
+            CLI::write("  -> Enviando 'risk_pro_seguimiento' a {$u['email']}...");
+            $this->registrarEnvio($uid, 'risk_pro_seguimiento',
+                $this->emailService->sendRiskProSeguimiento(
+                    $u + ['user_id' => $uid],
+                    $dias,
+                    $this->vigilanciasActivas($uid),
+                    $this->avisosDesde($uid, $inicio[$uid]),
+                    $consultas
+                ));
+        }
+    }
+
+    /**
+     * Plan anual de Solvencia Pro que se renueva: aviso a 30 y a 7 días. Solo planes
+     * activos (los cancelados no se renuevan) con periodo de más de 300 días.
+     */
+    protected function cicloRenovacionAnual(): void
+    {
+        $ventanas = [
+            'risk_renovacion_30' => [28, 30],
+            'risk_renovacion_7'  => [5, 7],
+        ];
+        foreach ($ventanas as $tipo => [$min, $max]) {
+            $subs = $this->suscripcionesSolvencia()
+                ->select('us.user_id, us.current_period_start, us.current_period_end')
+                ->where('us.status', 'active')
+                ->where('us.current_period_end >=', date('Y-m-d H:i:s', strtotime('+' . $min . ' days')))
+                ->where('us.current_period_end <=', date('Y-m-d H:i:s', strtotime('+' . $max . ' days')))
+                ->where('DATEDIFF(us.current_period_end, us.current_period_start) > 300', null, false)
+                ->get()->getResultArray();
+            if (empty($subs)) {
+                continue;
+            }
+
+            $porUsuario = [];
+            foreach ($subs as $sub) {
+                $porUsuario[(int) $sub['user_id']] = $sub;
+            }
+            $usuarios = $this->usuariosCliente(array_keys($porUsuario));
+
+            foreach ($usuarios as $uid => $u) {
+                if ($this->automationModel->wasSentRecently($uid, $tipo, 60) || $this->recibioHoy($uid)) {
+                    continue;
+                }
+                $sub  = $porUsuario[$uid];
+                $fin  = strtotime((string) $sub['current_period_end']);
+                $dias = max(1, (int) ceil(($fin - time()) / 86400));
+
+                CLI::write("  -> Enviando '{$tipo}' a {$u['email']}...");
+                $this->registrarEnvio($uid, $tipo,
+                    $this->emailService->sendRiskRenovacionAnual(
+                        $u + ['user_id' => $uid],
+                        date('d/m/Y', $fin),
+                        $dias,
+                        $this->vigilanciasActivas($uid),
+                        $this->avisosDesde($uid, (string) $sub['current_period_start']),
+                        $tipo
+                    ));
+            }
+        }
+    }
+
+    /**
+     * 30-37 días después de que TERMINE un Solvencia Pro cancelado, si no ha vuelto.
+     * Una vez al año como mucho. Comercial: usuariosElegibles() descarta las bajas.
+     */
+    protected function cicloWinbackSolvencia(): void
+    {
+        $db = \Config\Database::connect();
+        $conMotivo = in_array('cancellation_reason', $db->getFieldNames('user_subscriptions'), true);
+
+        $filas = $this->suscripcionesSolvencia()
+            ->select('us.user_id, us.current_period_end' . ($conMotivo ? ', us.cancellation_reason' : ''))
+            ->where('us.status', 'canceled')
+            ->where('us.current_period_end >=', date('Y-m-d H:i:s', strtotime('-37 days')))
+            ->where('us.current_period_end <=', date('Y-m-d H:i:s', strtotime('-30 days')))
+            ->orderBy('us.current_period_end', 'DESC')
+            ->get()->getResultArray();
+        if (empty($filas)) {
+            return;
+        }
+
+        $suscriptores = $this->idsSuscriptores();
+        $usuarios     = $this->usuariosElegibles(array_column($filas, 'user_id'));
+        $vistos       = [];
+
+        foreach ($filas as $f) {
+            $uid = (int) $f['user_id'];
+            if (isset($vistos[$uid]) || isset($suscriptores[$uid]) || !isset($usuarios[$uid])) {
+                continue;
+            }
+            $vistos[$uid] = true;
+            if ($this->automationModel->wasSentRecently($uid, 'risk_winback', 365) || $this->recibioHoy($uid)) {
+                continue;
+            }
+
+            CLI::write("  -> Enviando 'risk_winback' a {$usuarios[$uid]['email']}...");
+            $this->registrarEnvio($uid, 'risk_winback',
+                $this->emailService->sendRiskWinback($usuarios[$uid] + ['user_id' => $uid], (string) ($f['cancellation_reason'] ?? '')));
         }
     }
 

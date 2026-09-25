@@ -24,7 +24,7 @@
                         <td style="padding: 35px 35px 25px;">
                             <h2 style="margin: 0 0 16px; color: #0f172a; font-size: 22px; font-weight: 800;">Hola, {name}:</h2>
                             <p style="margin: 0 0 20px; color: #475569; font-size: 15px; line-height: 1.6;">
-                                Te recordamos que en tu cuenta aún dispones de <strong>{remaining_credits} consultas de solvencia y perfil de riesgo 100% gratuitas</strong> para aprovechar durante este mes.
+                                Te recordamos que en tu cuenta aún dispones de <strong>{remaining_credits} consultas de solvencia gratuitas</strong> para aprovechar durante este mes.
                             </p>
                             
                             <!-- Value Proposition Box -->
@@ -65,7 +65,7 @@
                             
                             <div style="background-color: #fefce8; border-left: 4px solid #eab308; padding: 14px 18px; border-radius: 6px; margin-bottom: 25px;">
                                 <p style="margin: 0; color: #854d0e; font-size: 13.5px; line-height: 1.5;">
-                                    ⏳ <strong>No acumulable:</strong> Los 3 créditos mensuales gratuitos no se acumulan para el mes siguiente. ¡Aprovéchalos antes del cierre de mes!
+                                    ⏳ <strong>No acumulable:</strong> Las {gratis} consultas gratuitas de cada mes no se acumulan para el mes siguiente. ¡Aprovéchalos antes del cierre de mes!
                                 </p>
                             </div>
 
@@ -74,7 +74,7 @@
                                 <tr>
                                     <td align="center">
                                         <a href="{button_url}" target="_blank" style="display: inline-block; background: #2563eb; color: #ffffff !important; padding: 15px 32px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 15px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
-                                            🔍 Auditar Empresa Ahora
+                                            🔍 Consultar una empresa
                                         </a>
                                     </td>
                                 </tr>
@@ -86,7 +86,7 @@
                     <tr>
                         <td style="padding: 0 35px 30px;">
                             <p style="margin: 0; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 12px; text-align: center; line-height: 1.5;">
-                                Si no deseas recibir avisos de tus créditos, puedes responder a este correo o gestionar tus preferencias.<br><br>
+                                Si no deseas recibir estos avisos, puedes responder a este correo o gestionar tus preferencias.<br><br>
                                 &copy; <?= date('Y') ?> APIEmpresas España.
                             </p>
                         </td>

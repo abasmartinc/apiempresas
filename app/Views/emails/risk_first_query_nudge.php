@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tu auditoría en APIEmpresas - Solvencia y Perfil de Riesgo</title>
+    <title>Tu consulta de solvencia - APIEmpresas</title>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1e293b; margin: 0; padding: 0; background-color: #f1f5f9;">
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f1f5f9; padding: 25px 0;">
@@ -24,7 +24,7 @@
                     <tr>
                         <td style="padding: 35px 35px 25px;">
                             <div style="display: inline-block; background: #eff6ff; color: #1d4ed8; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 14px; border: 1px solid #bfdbfe;">
-                                🛡️ Seguimiento de Auditoría
+                                🛡️ Tu consulta de solvencia
                             </div>
 
                             <h2 style="margin: 0 0 16px; color: #0f172a; font-size: 22px; font-weight: 800;">Hola, {name}:</h2>
@@ -32,7 +32,7 @@
                                 Vemos que recientemente consultaste el perfil de solvencia y riesgo de <strong>{company_name}</strong> en APIEmpresas.
                             </p>
                             <p style="margin: 0 0 20px; color: #475569; font-size: 15px; line-height: 1.6;">
-                                Saber qué consta en el Registro Mercantil de un cliente —concursos, disoluciones, cuentas sin depositar, cambios de administrador— es el primer paso para <strong>proteger tu tesorería antes de conceder pagos aplazados o firmar contratos</strong>.
+                                Saber qué consta en el Registro Mercantil de un cliente —concursos, disoluciones, cuentas sin depositar, cambios de administrador— es el primer paso <strong>antes de conceder pagos aplazados o firmar contratos</strong>.
                             </p>
                             
                             <!-- Remaining Credits Callout -->
@@ -41,13 +41,13 @@
                                     <td style="padding: 20px 24px;">
                                         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
                                             <span style="font-size: 20px;">🎁</span>
-                                            <strong style="color: #065f46; font-size: 15px;">Aún dispones de 2 consultas gratuitas este mes</strong>
+                                            <strong style="color: #065f46; font-size: 15px;">Aún dispones de {quedan} consultas gratuitas este mes</strong>
                                         </div>
                                         <p style="margin: 0; color: #047857; font-size: 13.5px; line-height: 1.5;">
-                                            Tus créditos mensuales no son acumulables para el mes siguiente. Te recomendamos aprovecharlos hoy mismo para auditar:
+                                            Las consultas gratuitas no se acumulan para el mes siguiente. Buenas candidatas para usarlas:
                                         </p>
                                         <ul style="margin: 10px 0 0; padding-left: 20px; color: #166534; font-size: 13.5px; line-height: 1.6;">
-                                            <li><strong>Tu cliente con mayor riesgo de impago:</strong> comprueba si consta un concurso, una disolución o cuentas sin depositar.</li>
+                                            <li><strong>El cliente que más te debe o que más tarda en pagar:</strong> comprueba si consta un concurso, una disolución o cuentas sin depositar.</li>
                                             <li><strong>Un nuevo proveedor clave:</strong> comprueba que está al día en el Registro antes de pagarle anticipos.</li>
                                             <li><strong>Tu propia sociedad o competencia directa:</strong> mira lo que ve de ti un cliente que te investigue.</li>
                                         </ul>
@@ -60,7 +60,7 @@
                                 <tr>
                                     <td align="center">
                                         <a href="{button_url}" target="_blank" style="display: inline-block; background: #2563eb; color: #ffffff !important; padding: 15px 32px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 15px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
-                                            🔍 Auditar a Otro Cliente Gratis
+                                            🔍 Consultar otra empresa gratis
                                         </a>
                                     </td>
                                 </tr>

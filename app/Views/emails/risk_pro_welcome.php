@@ -28,7 +28,7 @@
 
                             <h2 style="margin: 0 0 16px; color: #0f172a; font-size: 22px; font-weight: 800;">¡Bienvenido a Solvencia Pro, {name}!</h2>
                             <p style="margin: 0 0 18px; color: #475569; font-size: 15px; line-height: 1.6;">
-                                Tu suscripción a <strong>Solvencia Pro</strong> ya está operativa. Puedes auditar la solvencia de cualquier sociedad mercantil de España y poner <strong>hasta 25 empresas bajo vigilancia</strong> del BORME.
+                                Tu suscripción a <strong>Solvencia Pro</strong> ya está operativa. Puedes consultar la solvencia de cualquier sociedad mercantil de España y poner <strong>hasta {vig_pro} empresas bajo vigilancia</strong> del BORME.
                             </p>
 
                             <!-- Value Proposition Box -->
@@ -42,7 +42,7 @@
                                             <tr>
                                                 <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">🔔</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
-                                                    <strong>Cartera vigilada:</strong> pon hasta 25 empresas en seguimiento y te escribimos el día que alguna se mueva en el Registro Mercantil.
+                                                    <strong>Cartera vigilada:</strong> pon hasta {vig_pro} empresas en seguimiento y te escribimos el día que alguna se mueva en el Registro Mercantil.
                                                 </td>
                                             </tr>
                                         </table>
@@ -62,7 +62,7 @@
                                             <tr>
                                                 <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">🛡️</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
-                                                    <strong>Índice de solvencia IES:</strong> una cifra de 0 a 100 con la gravedad de lo que consta en el Registro Mercantil, y su semáforo.
+                                                    <strong>Índice de gravedad:</strong> una cifra de 0 a 100 con la gravedad de lo que consta en el Registro Mercantil, y su semáforo.
                                                 </td>
                                             </tr>
                                         </table>

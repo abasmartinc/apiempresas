@@ -679,11 +679,19 @@ $eurosLargo = static fn (float $n): string => number_format($n, 2, ',', '.');
     if (btnMonthly) btnMonthly.addEventListener('click', () => setPeriod('monthly'));
     if (btnAnnual) btnAnnual.addEventListener('click', () => setPeriod('annual'));
 
+    // Los correos enlazan al anual con ?period=annual (p. ej. el pago anual que se quedó a medias)
+    try {
+        if (new URLSearchParams(window.location.search).get('period') === 'annual' && btnAnnual) {
+            setPeriod('annual');
+        }
+    } catch (e) {}
+
     const form = document.getElementById('riskCheckoutForm');
     if (form) {
         form.addEventListener('submit', () => {
             if (window.trackEvent) {
-                trackEvent('checkout_started', {
+                // checkout_started ya lo registra el servidor: con el mismo nombre se contaba doble
+                trackEvent('checkout_submit_clicked', {
                     plan: 'risk_pro',
                     period: periodInput ? periodInput.value : 'monthly',
                     source: 'risk_billing'

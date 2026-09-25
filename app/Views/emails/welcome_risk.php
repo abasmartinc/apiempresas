@@ -28,7 +28,7 @@
                                  si no hubiera, llega vacío y el correo sigue leyéndose bien. -->
                             {origin_line}
                             <p style="margin: 0 0 20px; color: #475569; font-size: 15px; line-height: 1.6;">
-                                Tu cuenta ya está activa. Dispones de <strong>3 consultas de solvencia y perfil de riesgo 100% gratuitas cada mes</strong> para revisar lo que consta en el Registro Mercantil de cualquier cliente o proveedor en España antes de venderle a crédito.
+                                Tu cuenta ya está activa. Dispones de <strong>{gratis} consultas de solvencia gratuitas cada mes</strong> para revisar lo que consta en el Registro Mercantil de cualquier cliente o proveedor en España antes de venderle a crédito.
                             </p>
                             
                             <!-- Value Proposition Box -->
@@ -50,9 +50,9 @@
                                         <!-- Feature 2 -->
                                         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
                                             <tr>
-                                                <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">💶</td>
+                                                <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">🔔</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
-                                                    <strong>Vigilancia gratis de 5 empresas:</strong> te escribimos el día que el BORME publique algo de ellas.
+                                                    <strong>Vigilancia gratis de {vig_gratis} empresas:</strong> te escribimos el día que el BORME publique algo de ellas.
                                                 </td>
                                             </tr>
                                         </table>
@@ -72,7 +72,7 @@
                                             <tr>
                                                 <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">📊</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
-                                                    <strong>Histórico del Registro Mercantil:</strong> nombramientos, ceses, cambios de domicilio, ampliaciones de capital y cualquier otro acto publicado en el BORME.
+                                                    <strong>Cada acto con su fecha y su peso:</strong> concursos, disoluciones, cuentas sin depositar o ceses, y cuánto pesa cada uno en el índice.
                                                 </td>
                                             </tr>
                                         </table>
@@ -83,7 +83,7 @@
                             <!-- Highlight Box -->
                             <div style="background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 14px 18px; border-radius: 6px; margin-bottom: 25px;">
                                 <p style="margin: 0; color: #1e40af; font-size: 13.5px; line-height: 1.5;">
-                                    💡 <strong>Sin costes ocultos:</strong> Tus 3 consultas gratuitas se renuevan automáticamente cada mes sin que tengas que introducir tarjeta ni contratar planes.
+                                    💡 <strong>Sin costes ocultos:</strong> Tus {gratis} consultas gratuitas se renuevan automáticamente cada mes sin que tengas que introducir tarjeta ni contratar planes.
                                 </p>
                             </div>
 

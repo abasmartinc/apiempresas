@@ -2620,12 +2620,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 try {
                     const qsVig = new URLSearchParams(window.location.search);
                     if (qsVig.get('vigilar') === '1') {
+                        // Desde un correo de Solvencia llega con origen=email
+                        const origenVig = qsVig.get('origen') === 'email' ? 'email' : 'teaser';
                         qsVig.delete('vigilar');
+                        qsVig.delete('origen');
                         const restoVig = qsVig.toString();
                         history.replaceState(null, '', window.location.pathname + (restoVig ? '?' + restoVig : '') + window.location.hash);
 
                         if (!data.is_watching) {
-                            btnWatch.dataset.origen = 'teaser';   // para medir esta entrada
+                            btnWatch.dataset.origen = origenVig;   // para medir esta entrada
                             btnWatch.click();
                         }
                         btnWatch.scrollIntoView({ behavior: 'smooth', block: 'center' });

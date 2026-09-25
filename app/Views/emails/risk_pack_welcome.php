@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pack de Auditorías de Solvencia Activo - APIEmpresas</title>
+    <title>Tu pack de consultas de solvencia - APIEmpresas</title>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1e293b; margin: 0; padding: 0; background-color: #f1f5f9;">
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f1f5f9; padding: 25px 0;">
@@ -28,13 +28,13 @@
 
                             <h2 style="margin: 0 0 16px; color: #0f172a; font-size: 22px; font-weight: 800;">¡Gracias por tu compra, {name}!</h2>
                             <p style="margin: 0 0 18px; color: #475569; font-size: 15px; line-height: 1.6;">
-                                Hemos acreditado con éxito tu <strong>Pack de {credits} auditorías completas de solvencia y riesgo</strong> en tu cuenta de APIEmpresas.
+                                Hemos acreditado con éxito tu <strong>pack de {credits} consultas de solvencia</strong> en tu cuenta de APIEmpresas.
                             </p>
 
                             <!-- Highlight / Reassurance Box -->
                             <div style="background-color: #f0fdf4; border-left: 4px solid #10b981; padding: 14px 18px; border-radius: 6px; margin-bottom: 24px;">
                                 <p style="margin: 0; color: #065f46; font-size: 14px; line-height: 1.5;">
-                                    ⏳ <strong>Tus créditos nunca caducan:</strong> Puedes utilizarlos a tu ritmo hoy mismo o a lo largo del año cada vez que vayas a cerrar un acuerdo comercial con un nuevo cliente o proveedor.
+                                    ⏳ <strong>Las consultas del pack no caducan:</strong> Puedes utilizarlos a tu ritmo hoy mismo o a lo largo del año cada vez que vayas a cerrar un acuerdo comercial con un nuevo cliente o proveedor.
                                 </p>
                             </div>
 
@@ -42,7 +42,7 @@
                             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 25px;">
                                 <tr>
                                     <td style="padding: 20px 24px;">
-                                        <p style="margin: 0 0 14px; color: #0f172a; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">¿Qué incluye cada informe auditado?</p>
+                                        <p style="margin: 0 0 14px; color: #0f172a; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">¿Qué incluye cada informe?</p>
                                         
                                         <!-- Feature 1 -->
                                         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
@@ -57,7 +57,7 @@
                                         <!-- Feature 2 -->
                                         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
                                             <tr>
-                                                <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">💶</td>
+                                                <td width="26" valign="top" style="font-size: 16px; line-height: 1.2;">📌</td>
                                                 <td style="padding-left: 8px; color: #334155; font-size: 14px; line-height: 1.5;">
                                                     <strong>Cada acto con su fecha:</strong> concursos, disoluciones, cuentas sin depositar o ceses, y el peso de cada uno en la puntuación.
                                                 </td>
@@ -87,12 +87,20 @@
                                 </tr>
                             </table>
 
+                            <!-- Vigilancia y Pro -->
+                            <div style="background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 14px 18px; border-radius: 6px; margin-bottom: 10px;">
+                                <p style="margin: 0; color: #1e3a8a; font-size: 14px; line-height: 1.55;">
+                                    🔔 <strong>Además, vigila gratis hasta {vig_gratis} empresas:</strong> te escribimos el día que el BORME publique algo de ellas, sin gastar consultas.<br>
+                                    Si revisas clientes a menudo, <strong>Solvencia Pro</strong> ({precio_pro}/mes) incluye {consultas_pro} consultas al mes y vigila hasta {vig_pro} empresas.
+                                </p>
+                            </div>
+
                             <!-- CTA Button -->
                             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 25px 0 15px;">
                                 <tr>
                                     <td align="center">
                                         <a href="{button_url}" target="_blank" style="display: inline-block; background: #0f766e; color: #ffffff !important; padding: 15px 32px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 15px; box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);">
-                                            🔍 Acceder y Auditar Empresas
+                                            🔍 Consultar una empresa
                                         </a>
                                     </td>
                                 </tr>
