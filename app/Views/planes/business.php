@@ -12,7 +12,7 @@
       "@context": "https://schema.org/",
       "@type": "Product",
       "name": "Infraestructura API Enterprise - Plan Business",
-      "description": "Tarifas y planes para alto volumen. Conecta tu ERP al Registro Mercantil, extrae datos B2B masivos y recibe Webhooks de notificaciones en tiempo real sin límites.",
+      "description": "Tarifas y planes para alto volumen. Conecta tu ERP al Registro Mercantil, extrae datos B2B masivos y recibe Webhooks de notificaciones en tiempo real.",
       "brand": {
         "@type": "Brand",
         "name": "APIEmpresas"
@@ -100,7 +100,7 @@
                 Plan Business (Escala)
             </div>
             <h1 class="plan-title">Infraestructura API <span>Enterprise</span></h1>
-            <p class="plan-subtitle">Tarifas y planes para alto volumen. Conecta tu ERP al Registro Mercantil, extrae datos B2B masivos y recibe Webhooks de notificaciones en tiempo real sin límites.</p>
+            <p class="plan-subtitle">Tarifas y planes para alto volumen. Conecta tu ERP al Registro Mercantil, extrae datos B2B masivos y recibe Webhooks de notificaciones en tiempo real.</p>
         </div>
 
         <div class="plan-demo-wrapper" style="background: #f8fafc;">

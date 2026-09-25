@@ -63,6 +63,17 @@ if ($isBonusUser && !($isPaid ?? false)) {
                     ]) ?>
                 <?php endif; ?>
 
+                <?php if ($isPaid): ?>
+                    <?= view('components/paid_quota_alert', [
+                        'planId'   => (int) $get($plan, 'plan_id', 0),
+                        'planName' => (string) $get($plan, 'plan_name', ''),
+                        'quota'    => (int) ($maxLimit ?? 0),
+                        'used'     => (int) ($requestsUsedThisMonth ?? 0),
+                        'wallet'   => (int) ($walletBalance ?? 0),
+                        'source'   => 'dash',
+                    ]) ?>
+                <?php endif; ?>
+
                 <?php if (!empty($answeredTickets)): ?>
                     <?php foreach($answeredTickets as $t): ?>
                         <?= view('components/ui/alert', [
@@ -296,7 +307,7 @@ if ($isBonusUser && !($isPaid ?? false)) {
         });
 
         document.getElementById('btnCopyEndpoint')?.addEventListener('click', () => {
-            const endpoint = `<?= site_url('api/v1/companies') ?>?cif=${encodeURIComponent(inputQ.value || 'B12345678')}`;
+            const endpoint = `<?= site_url('api/v1/companies') ?>?cif=${encodeURIComponent(inputQ.value || 'A15075062')}`;
             navigator.clipboard.writeText(endpoint);
             
             Swal.fire({
@@ -387,7 +398,7 @@ function showUpgradeModal() {
 
     Swal.fire({
         title: '¡Límite alcanzado!',
-        text: 'Has consumido tus <?= $freeLimit ?> consultas gratuitas. Activa el Plan Pro para tener acceso ilimitado y automatizar tus procesos.',
+        text: 'Has consumido tus <?= $freeLimit ?> consultas gratuitas. Con el Plan Pro tienes 3.000 consultas al mes con todos los datos de cada empresa. Si prefieres no suscribirte, también puedes comprar un bono.',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Activar Plan Pro',

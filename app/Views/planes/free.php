@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <?= view('partials/head', [
-        'title' => 'API Registro Mercantil GRATIS: Entorno Sandbox para Pruebas | APIEmpresas',
-        'excerptText' => 'Prueba nuestra API de empresas gratis sin tarjeta de crédito. Entorno Sandbox con datos reales del Registro Mercantil para validación de CIF y desarrollo.'
+        'title' => 'API Registro Mercantil GRATIS: 100 consultas reales para probar | APIEmpresas',
+        'excerptText' => 'Prueba nuestra API de empresas gratis sin tarjeta de crédito. 100 consultas reales al Registro Mercantil para validar CIF y probar tu integración.'
     ]) ?>
     <link rel="stylesheet" href="<?= base_url('public/css/home.css') ?>?v=<?= time() ?>">
     <link rel="stylesheet" href="<?= base_url('public/css/home-mobile.css') ?>?v=<?= time() ?>" media="screen and (max-width: 768px)">
@@ -11,8 +11,8 @@
     {
       "@context": "https://schema.org/",
       "@type": "Product",
-      "name": "API Registro Mercantil - Plan Free (Sandbox)",
-      "description": "Entorno Sandbox diseñado para que los desarrolladores prueben la integración y validen CIFs con datos oficiales reales sin tarjeta de crédito.",
+      "name": "API Registro Mercantil - Plan Free",
+      "description": "100 consultas gratuitas a datos reales del Registro Mercantil para que pruebes la integración y valides CIFs, sin tarjeta de crédito.",
       "brand": {
         "@type": "Brand",
         "name": "APIEmpresas"
@@ -98,7 +98,7 @@
                 Plan Free (Testing)
             </div>
             <h1 class="plan-title">API Registro Mercantil <span>GRATIS</span></h1>
-            <p class="plan-subtitle">Entorno Sandbox diseñado para que los desarrolladores prueben la integración y validen CIFs con datos oficiales reales sin tarjeta de crédito.</p>
+            <p class="plan-subtitle">100 consultas gratuitas a datos reales del Registro Mercantil para que pruebes la integración y valides CIFs, sin tarjeta de crédito.</p>
         </div>
 
         <div class="plan-demo-wrapper">
@@ -110,7 +110,7 @@
                     <div class="terminal-title">bash - api-empresas - 80x24</div>
                 </div>
                 <div class="terminal-tabs">
-                    <div class="term-tab active" data-tab="0">GET /companies/{cif}</div>
+                    <div class="term-tab active" data-tab="0">GET /companies?cif=</div>
                     <div class="term-tab" data-tab="1">GET /companies/search</div>
                 </div>
                 <div class="terminal-body">
@@ -144,7 +144,7 @@
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 16.1A5 5 0 0 1 5.9 20M2 12.05A9 9 0 0 1 9.95 20M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"></path><line x1="2" y1="20" x2="2.01" y2="20"></line></svg>
                 </div>
                 <h3>Endpoint Principal</h3>
-                <p>Acceso al endpoint GET /companies/{cif}. Simple, rápido y sin límite de tiempo (100 peticiones).</p>
+                <p>Acceso al endpoint de consulta por CIF (<code>GET /companies?cif=</code>). Simple y rápido. Las 100 consultas no caducan.</p>
             </div>
         </div>
 
@@ -218,7 +218,7 @@
             <h3 class="endpoints-title">Endpoints incluidos en el Plan Free</h3>
             <div class="endpoints-grid">
                 <div class="endpoint-card">
-                    <div class="endpoint-route">GET /companies/{cif}</div>
+                    <div class="endpoint-route">GET /companies?cif=</div>
                     <p class="endpoint-desc">Obtén los datos oficiales básicos (Razón Social, Estado, CNAE) de una empresa indicando únicamente su CIF.</p>
                 </div>
                 <div class="endpoint-card">

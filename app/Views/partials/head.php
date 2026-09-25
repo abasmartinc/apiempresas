@@ -208,7 +208,7 @@ $enUrl = str_replace(['apiempresas.es', 'apiempresas.local'], ['spaincompanyapi.
       "publisher": { "@id": "<?= esc($homeUrl) ?>#org" },
       "image": "<?= esc($ogImage) ?>",
       "offers": [
-        { "@type": "Offer", "name": "Free (Sandbox)", "price": "0",  "priceCurrency": "EUR", "category": "Free",         "url": "<?= esc($urlPricingAnchor) ?>" },
+        { "@type": "Offer", "name": "Free", "price": "0",  "priceCurrency": "EUR", "category": "Free",         "url": "<?= esc($urlPricingAnchor) ?>" },
         { "@type": "Offer", "name": "Pro",           "price": "19", "priceCurrency": "EUR", "category": "Subscription", "url": "<?= esc($urlPricingAnchor) ?>" },
         { "@type": "Offer", "name": "Business",      "price": "49", "priceCurrency": "EUR", "category": "Subscription", "url": "<?= esc($urlPricingAnchor) ?>" }
       ],

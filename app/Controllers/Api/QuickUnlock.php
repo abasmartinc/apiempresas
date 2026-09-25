@@ -96,6 +96,8 @@ class QuickUnlock extends BaseController
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
+        \App\Libraries\Embudo::alta((int) $userId, 'quick_unlock', 'api');
+
         try {
             $emailService->sendRegistrationAdminNotification([
                 'user_id' => $userId,

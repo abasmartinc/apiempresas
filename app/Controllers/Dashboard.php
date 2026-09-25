@@ -223,15 +223,9 @@ class Dashboard extends BaseController
                     'text'  => lang('Dashboard.usage_msg_welcome_text')
                 ];
             }
-        } else {
-            // Plan de Pago superado con wallet
-            if ($requestsUsedThisMonth >= $maxLimit && $walletBalance > 0) {
-                $data['usageMessage'] = [
-                    'title' => lang('Dashboard.usage_msg_monthly_exceeded_title'),
-                    'text'  => lang('Dashboard.usage_msg_limit_exceeded_text')
-                ];
-            }
         }
+        // Planes de pago: el aviso de cupo (80 %, agotado, monedero) lo pinta
+        // components/paid_quota_alert en la vista, con estimación y opciones.
         $data['dashboardUsageMessage'] = $data['usageMessage']['text'] ?? '';
 
         // Fast query just to know whether to show onboarding strip or not

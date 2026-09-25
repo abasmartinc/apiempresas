@@ -105,6 +105,7 @@ $fmt = function ($n) {
                                 <div class="amount" data-monthly="19" data-annual="182">19</div>
                                 <div class="currency">€ / <span class="per"><?= lang('Billing.per_month') ?></span> <?= lang('Billing.plus_vat') ?></div>
                             </div>
+                            <div class="annual-note" style="margin:-4px 0 10px; font-size:0.8rem; font-weight:700; color:#059669; min-height:1.2em;"></div>
                             
                             <div class="plan-desc"><?= lang('Billing.pro_desc') ?></div>
                             
@@ -137,6 +138,7 @@ $fmt = function ($n) {
                                 <div class="amount" data-monthly="49" data-annual="470">49</div>
                                 <div class="currency">€ / <span class="per"><?= lang('Billing.per_month') ?></span> <?= lang('Billing.plus_vat') ?></div>
                             </div>
+                            <div class="annual-note" style="margin:-4px 0 10px; font-size:0.8rem; font-weight:700; color:#059669; min-height:1.2em;"></div>
                             
                             <div class="plan-desc"><?= lang('Billing.business_desc') ?></div>
                             
@@ -148,6 +150,12 @@ $fmt = function ($n) {
                                 <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> <?= lang('Billing.bus_f5') ?></li>
                             </ul>
                         </label>
+                    </div>
+
+                    <!-- Alternativa sin suscripción: el bono (precios y condiciones, los de su página) -->
+                    <div style="margin: 16px 0 8px; padding: 14px 18px; border: 1px dashed #cbd5e1; border-radius: 14px; background: #f8fafc; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                        <span style="font-size: 0.92rem; color: #334155; font-weight: 600;">¿Prefieres no suscribirte? Compra un <strong>bono de créditos</strong>: pago único, sin caducidad y con la misma API Key.</span>
+                        <a href="<?= site_url('crear-bono-api?source=billing_bono') ?>" style="white-space: nowrap; font-size: 0.88rem; font-weight: 800; color: #2152ff; text-decoration: none;">Ver bonos &rarr;</a>
                     </div>
 
                     <?php if (session('error')): ?>
@@ -450,6 +458,21 @@ $fmt = function ($n) {
         function update() {
             const period = getPeriod();
             
+            // Equivalencia del anual en €/mes y ahorro frente a pagar 12 meses
+            const eur = v => v.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+            document.querySelectorAll('.plan-card').forEach(c => {
+                const note = c.querySelector('.annual-note');
+                const amountEl = c.querySelector('.amount');
+                if (!note || !amountEl) return;
+                const m = parseFloat(amountEl.getAttribute('data-monthly'));
+                const a = parseFloat(amountEl.getAttribute('data-annual'));
+                if (!(m > 0 && a > 0)) return;
+                const ahorro = Math.round(m * 12 - a);
+                note.textContent = (period === 'annual')
+                    ? '≈ ' + eur(Math.round(a / 12 * 100) / 100) + ' €/mes · ahorras ' + ahorro + ' € al año'
+                    : 'o ' + eur(Math.round(a / 12 * 100) / 100) + ' €/mes pagando anual (ahorras ' + ahorro + ' €)';
+            });
+
             // Actualizar el texto del precio en todas las tarjetas
             document.querySelectorAll('.plan-card').forEach(c => {
                 const amountEl = c.querySelector('.amount');
@@ -517,8 +540,7 @@ $fmt = function ($n) {
                 if (window.trackEvent) {
                     trackEvent('checkout_started', {
                         plan: document.getElementById('planInput').value,
-                        period: document.getElementById('periodInput').value,
-                        email: document.getElementById('bill_email').value
+                        period: document.getElementById('periodInput').value
                     });
                 }
             });

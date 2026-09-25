@@ -1147,7 +1147,20 @@ class Billing extends BaseController
 
         // Una recarga de la página de éxito no debe contar una segunda conversión
         $attrKey = 'checkout_logged_' . ($stripeSessionId ?: 'sim_' . date('YmdHi'));
-        if (!session()->get($attrKey)) {
+        // El webhook de Stripe también la registra (Webhook::registrarVenta): una sola
+        // fila por sesión de pago, la escriba quien la escriba primero.
+        $yaRegistrada = false;
+        if ($hasStripeSession) {
+            try {
+                $yaRegistrada = \Config\Database::connect()->table('tracking_events')
+                    ->where('event_name', 'checkout_completed')
+                    ->like('metadata', '"stripe_id":"' . $stripeSessionId . '"')
+                    ->countAllResults() > 0;
+            } catch (\Throwable $e) {
+                $yaRegistrada = false;
+            }
+        }
+        if (!$yaRegistrada && !session()->get($attrKey)) {
             session()->set($attrKey, true);
             $this->logCheckoutEvent('checkout_completed', $attrSource, [
                 'plan'       => $attrPlan ?? ($lastInfo['plan'] ?? ($checkoutData['type'] ?? '')),
@@ -1694,6 +1707,11 @@ class Billing extends BaseController
                 'status' => 'success',
                 'message' => 'Tu suscripción ha sido cancelada. Seguirás teniendo acceso hasta el final del periodo facturado y no se te cobrará de nuevo.'
             ]);
+        }
+
+        // Aceptó la oferta de la baja (pagar por uso): tras cancelar, a la página del bono
+        if ($this->request->getPost('after_cancel') === 'bono') {
+            return redirect()->to(site_url('crear-bono-api?source=cancel_offer_bono'))->with('message', lang('Messages.flash_20'));
         }
 
         return redirect()->to(site_url('billing'))->with('message', lang('Messages.flash_20'));

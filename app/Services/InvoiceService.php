@@ -38,6 +38,10 @@ class InvoiceService
             $existing = $this->invoiceModel->where('stripe_invoice_id', $stripeInvoiceId)->first();
             if ($existing) {
                 log_message('info', "[InvoiceService] Saltando creación de factura duplicada para Stripe ID: {$stripeInvoiceId}");
+                // Stripe reenvía el mismo `invoice.paid` (reintentos, varios endpoints).
+                // Quien llama debe saber que la factura ya existía para no volver a
+                // mandar los correos de pago y de factura.
+                $existing->ya_existia = true;
                 return $existing;
             }
         }
@@ -74,6 +78,7 @@ class InvoiceService
             $invoice->pdf_path = $pdfPath; // Asegurar que el objeto en memoria tiene el valor
         }
 
+        $invoice->ya_existia = false;
         return $invoice;
     }
 

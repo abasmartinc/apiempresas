@@ -180,6 +180,8 @@ class LinkedinAuth extends BaseController
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
+            \App\Libraries\Embudo::alta((int) $userId, 'linkedin', $intent);
+
             // Email de bienvenida
             try {
                 $emailService = new EmailService();

@@ -88,6 +88,11 @@ class EmailAutomationCommand extends BaseCommand
         CLI::write('🛒 [6/6] Pagos de planes de la API sin terminar...', 'cyan');
         $this->processApiCheckoutAbandoned();
 
+        // Hitos del embudo (primera consulta, primera desde fuera del navegador, la
+        // décima). No envía nada: solo deja los eventos para medir la activación.
+        CLI::write('📊 Eventos del embudo (primeras consultas)...', 'cyan');
+        CLI::write('  - Eventos nuevos: ' . \App\Libraries\Embudo::registrarLlamadas(48));
+
         CLI::write('✅ Proceso de automatización finalizado con éxito.', 'green');
     }
 

@@ -45,6 +45,7 @@ class Webhook extends Controller
             case 'checkout.session.completed':
                 $session = $event->data->object;
                 $this->handleCheckoutSessionCompleted($session);
+                $this->registrarVenta($session);
                 break;
             // Pagos que no se confirman al momento (domiciliación SEPA, por ejemplo):
             // `completed` llega con payment_status 'unpaid' y el cobro real se
@@ -55,6 +56,7 @@ class Webhook extends Controller
                 if ((($session->metadata->plan ?? '') === 'risk_pack_5') && ($session->mode ?? '') === 'payment') {
                     $this->abonarPackRiesgo($session);
                 }
+                $this->registrarVenta($session);
                 break;
             case 'invoice.paid':
                 $invoice = $event->data->object;
@@ -146,6 +148,62 @@ class Webhook extends Controller
             (string) ($session->metadata->target_cif ?? ''),
             isset($session->amount_total) ? (int) $session->amount_total : null
         );
+    }
+
+    /**
+     * Registra la venta (checkout_completed) desde Stripe. Antes solo se registraba si
+     * el navegador volvía a /billing/success: quien cerraba la pestaña tras pagar no
+     * contaba como venta. Una sola fila por sesión de pago, la escriba antes el
+     * webhook o la página de éxito (las dos miran stripe_id). Nunca interrumpe el
+     * webhook.
+     */
+    private function registrarVenta($session): void
+    {
+        try {
+            $stripeId = (string) ($session->id ?? '');
+            $pagado   = in_array((string) ($session->payment_status ?? ''), ['paid', 'no_payment_required'], true);
+            if ($stripeId === '' || !$pagado) {
+                return;   // SEPA pendiente: se registra en async_payment_succeeded
+            }
+
+            $db = \Config\Database::connect();
+            $ya = $db->table('tracking_events')
+                ->where('event_name', 'checkout_completed')
+                ->like('metadata', '"stripe_id":"' . $stripeId . '"')
+                ->countAllResults() > 0;
+            if ($ya) {
+                return;
+            }
+
+            $userId = (int) ($session->client_reference_id ?? $session->metadata->user_id ?? 0);
+            if ($userId <= 0) {
+                // Compra sin sesión: handleCheckoutSessionCompleted ya ha creado o
+                // enlazado el usuario por el email de Stripe
+                $email = strtolower(trim((string) ($session->customer_details->email ?? $session->customer_email ?? '')));
+                if ($email !== '') {
+                    $u = $db->table('users')->select('id')->where('email', $email)->get()->getRow();
+                    $userId = (int) ($u->id ?? 0);
+                }
+            }
+
+            $db->table('tracking_events')->insert([
+                'event_name'   => 'checkout_completed',
+                'page'         => 'billing',
+                'user_id'      => $userId,
+                'session_id'   => '',
+                'anonymous_id' => '',
+                'element'      => substr((string) ($session->metadata->source ?? ''), 0, 255),
+                'metadata'     => json_encode([
+                    'plan'      => (string) ($session->metadata->plan ?? ''),
+                    'period'    => (string) ($session->metadata->period ?? ''),
+                    'stripe_id' => $stripeId,
+                    'via'       => 'webhook',
+                ]),
+                'created_at'   => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', '[Webhook::registrarVenta] ' . $e->getMessage());
+        }
     }
 
     private function handleCheckoutSessionCompleted($session)

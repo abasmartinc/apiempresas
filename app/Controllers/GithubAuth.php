@@ -191,6 +191,8 @@ class GithubAuth extends BaseController
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
+            \App\Libraries\Embudo::alta((int) $userId, 'github', $intent);
+
             // Enviar email de bienvenida
             try {
                 $emailService = new EmailService();

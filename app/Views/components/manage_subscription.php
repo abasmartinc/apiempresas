@@ -177,6 +177,51 @@
                     return div.innerHTML;
                 }
 
+                // Oferta antes de confirmar la baja, solo en los planes de la API y según
+                // el motivo. No cambia el plan ni el precio: ofrece el bono (pago por uso)
+                // a quien le sale caro o lo usa poco, y soporte a quien tiene un problema.
+                const esPlanApi = (nombre) => /^(pro|business)$/i.test(String(nombre || '').trim());
+                function ofertaRetencion(reason, planNombre) {
+                    if (!esPlanApi(planNombre)) return null;
+                    const plan = escapeHtml(planNombre);
+                    if (reason === 'too_expensive' || reason === 'low_usage') {
+                        return {
+                            tipo: 'bono',
+                            title: 'Antes de irte: ¿pagar solo lo que uses?',
+                            html: 'Si no aprovechas el plan ' + plan + ' todos los meses, con un <strong>bono de créditos</strong> pagas solo las consultas que haces: pago único, sin cuota mensual y sin caducidad. Tu API Key y tu código no cambian.',
+                            confirm: 'Cancelar y ver bonos',
+                            deny: 'Solo cancelar'
+                        };
+                    }
+                    if (reason === 'technical_issues' || reason === 'missing_features') {
+                        return {
+                            tipo: 'soporte',
+                            title: '¿Nos das la oportunidad de arreglarlo?',
+                            html: 'Cuéntanos qué ha fallado o qué echas en falta en un ticket: respondemos en menos de 2 horas. Si no lo resolvemos, cancelas igual y no pierdes nada.',
+                            confirm: 'Abrir un ticket',
+                            deny: 'Seguir con la cancelación'
+                        };
+                    }
+                    return null;
+                }
+
+                function track(evento, datos) {
+                    try { if (window.trackEvent) window.trackEvent(evento, datos || {}); } catch (e) {}
+                }
+
+                function enviarBaja(form, reason, feedback, despues) {
+                    setCancellationFeedback(form, reason, feedback);
+                    let despuesInput = form.querySelector('input[name="after_cancel"]');
+                    if (!despuesInput) {
+                        despuesInput = document.createElement('input');
+                        despuesInput.type = 'hidden';
+                        despuesInput.name = 'after_cancel';
+                        form.appendChild(despuesInput);
+                    }
+                    despuesInput.value = despues || '';
+                    form.submit();
+                }
+
                 function setCancellationFeedback(form, reason, feedback) {
                     let reasonInput = form.querySelector('input[name="cancellation_reason"]');
                     let feedbackInput = form.querySelector('input[name="cancellation_feedback"]');
@@ -343,10 +388,44 @@
                                 popup: 'cancel-sub-popup',
                             }
                         }).then((result) => {
-                            if (result.isConfirmed) {
-                                setCancellationFeedback(form, result.value?.reason, result.value?.feedback);
-                                form.submit();
+                            if (!result.isConfirmed) return;
+                            const reason = result.value?.reason;
+                            const feedback = result.value?.feedback;
+                            const oferta = ofertaRetencion(reason, planNameAttr);
+                            if (!oferta) {
+                                enviarBaja(form, reason, feedback, '');
+                                return;
                             }
+
+                            track('cancel_offer_shown', { reason: reason, offer: oferta.tipo, plan: planNameAttr });
+                            Swal.fire({
+                                title: oferta.title,
+                                html: oferta.html,
+                                icon: 'question',
+                                showDenyButton: true,
+                                showCancelButton: true,
+                                confirmButtonText: oferta.confirm,
+                                denyButtonText: oferta.deny,
+                                cancelButtonText: 'Mantener mi plan',
+                                confirmButtonColor: '#2152ff',
+                                denyButtonColor: '#dc2626',
+                                cancelButtonColor: '#0f172a',
+                                reverseButtons: true
+                            }).then((r2) => {
+                                if (r2.isConfirmed) {
+                                    track('cancel_offer_accepted', { reason: reason, offer: oferta.tipo, plan: planNameAttr });
+                                    if (oferta.tipo === 'bono') {
+                                        enviarBaja(form, reason, feedback, 'bono');
+                                    } else {
+                                        window.location.href = <?= json_encode(site_url('tickets/create?source=cancel_offer')) ?>;
+                                    }
+                                } else if (r2.isDenied) {
+                                    track('cancel_offer_declined', { reason: reason, offer: oferta.tipo, plan: planNameAttr });
+                                    enviarBaja(form, reason, feedback, '');
+                                } else {
+                                    track('cancel_offer_kept_plan', { reason: reason, offer: oferta.tipo, plan: planNameAttr });
+                                }
+                            });
                         });
                     });
                 });

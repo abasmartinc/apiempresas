@@ -165,6 +165,18 @@
                 <p class="dash-sub"><?= lang('Usage.subtitle') ?></p>
             </div>
 
+            <?php if (empty($quota_lifetime) && !$isBonus && $monthlyQuotaInt !== null): ?>
+                <?= view('components/paid_quota_alert', [
+                    'planId'   => (int) $get($plan, 'plan_id', 0),
+                    'planName' => (string) $planName,
+                    'quota'    => $monthlyQuotaInt,
+                    'used'     => $usedThisMonth,
+                    'wallet'   => null,
+                    'userId'   => (int) session('user_id'),
+                    'source'   => 'usage',
+                ]) ?>
+            <?php endif; ?>
+
             <!-- KPIs (Dashboard Exact Match) -->
             <div class="kpi-grid-3">
                 <div class="kpi-card-pro">

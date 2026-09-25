@@ -288,6 +288,8 @@ class Register extends BaseController
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
+            \App\Libraries\Embudo::alta((int) $user_id, 'register', $data['signup_intent'] ?? null);
+
             // 4) Enviar notificaciones
             $userData = [
                 'user_id'       => $user_id,
@@ -631,6 +633,8 @@ class Register extends BaseController
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
+
+            \App\Libraries\Embudo::alta((int) $user_id, 'register_quick', $intent);
 
             // Notificaciones. En su PROPIO try: llegados aquí la cuenta, la API key
             // y la suscripción ya existen, así que un fallo mandando un correo no
