@@ -109,7 +109,8 @@ class Usage extends BaseController
                 ->where('date >=', date('Y-m-01'))
                 ->get()->getRow();
             
-            $usageMonth = ($sumRow->total ?? 0) + ($sumRow->credits_total ?? 0);
+            // Solo consultas del plan, como ApiKeyFilter; el monedero se muestra aparte
+            $usageMonth = (int) ($sumRow->total ?? 0);
 
             $todayRow = $db->table('api_usage_daily')
                 ->selectSum('requests_count', 'total')
@@ -119,7 +120,7 @@ class Usage extends BaseController
                 ->where('date', date('Y-m-d'))
                 ->get()->getRow();
             
-            $usageToday = ($todayRow->total ?? 0) + ($todayRow->credits_total ?? 0);
+            $usageToday = (int) ($todayRow->total ?? 0);
         } else {
             // Usuario Free o Usuario con Bono. El Free son 100 consultas de por vida (no
             // se renuevan cada mes): se cuenta desde FREE_DESDE, igual que ApiKeyFilter y
@@ -132,7 +133,8 @@ class Usage extends BaseController
                 ->get()->getRow();
             $data['quota_lifetime'] = true;
             
-            $usageMonth = ($sumRow->total ?? 0) + ($sumRow->credits_total ?? 0);
+            // Solo consultas del plan, como ApiKeyFilter; el monedero se muestra aparte
+            $usageMonth = (int) ($sumRow->total ?? 0);
 
             $todayRow = $db->table('api_usage_daily')
                 ->selectSum('requests_count', 'total')
@@ -141,7 +143,7 @@ class Usage extends BaseController
                 ->where('date', date('Y-m-d'))
                 ->get()->getRow();
             
-            $usageToday = ($todayRow->total ?? 0) + ($todayRow->credits_total ?? 0);
+            $usageToday = (int) ($todayRow->total ?? 0);
         }
 
         $data['api_request_total_month'] = $usageMonth;

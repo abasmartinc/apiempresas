@@ -45,6 +45,17 @@ class UsageStatus extends BaseController
             ]);
         }
 
+        // Con saldo en el monedero la API no le corta (cobra del monedero) y ya ve los
+        // datos completos: los avisos del cupo gratuito no le aplican.
+        if ($this->saldoMonedero($userId) > 0) {
+            return $this->respond([
+                'plan'             => 'free',
+                'requests_count'   => 0,
+                'usage_percentage' => 0,
+                'trigger'          => null
+            ]);
+        }
+
         // 2. Uso del cupo gratuito: es de por vida (desde FREE_DESDE), no mensual.
         //    Antes se contaba solo el mes en curso y los avisos del 50 % / 80 % no
         //    saltaban a tiempo a quien había gastado consultas en meses anteriores.
@@ -78,7 +89,7 @@ class UsageStatus extends BaseController
         // 100 %: la clave ya devuelve 429. No es un aviso de una vez: se muestra
         // mientras dure (el usuario puede cerrarlo en la sesión). No se aplica a quien
         // tiene saldo en el monedero, porque a él no se le corta.
-        if ($percentage >= 100 && $this->saldoMonedero($userId) <= 0) {
+        if ($percentage >= 100) {
             return '100_percent';
         }
         

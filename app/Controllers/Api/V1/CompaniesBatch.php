@@ -143,7 +143,7 @@ class CompaniesBatch extends BaseApiController
         $monthlyQuota = $planRow ? (int)$planRow->monthly_quota : 0;
 
         $currentMonth = date('Y-m');
-        $cacheKey = "api_usage_{$userId}_{$currentMonth}";
+        $cacheKey = "api_usage_{$userId}_p{$planId}_{$currentMonth}";   // misma clave que ApiKeyFilter
         $currentUsage = cache()->get($cacheKey);
 
         if ($currentUsage === null) {

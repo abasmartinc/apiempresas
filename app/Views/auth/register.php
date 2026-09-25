@@ -55,7 +55,7 @@
                 <div class="social-login-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 0;">
                     <?php
                         // intent y, si viene de "Activar Pro/Business", el destino de pago
-                        // (Google lo respeta; GitHub todavía no lee `redirect`).
+                        // (Google, GitHub y LinkedIn lo respetan).
                         $oauthQuery = array_filter([
                             'intent'   => request()->getGet('intent') ?: null,
                             'redirect' => !empty($redirectUrl) ? $redirectUrl : null,

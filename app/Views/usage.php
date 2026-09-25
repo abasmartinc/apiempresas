@@ -683,6 +683,10 @@
                         return;
                     }
 
+                    // Todo lo que viene de las peticiones (el término buscado lo escribe
+                    // cualquier usuario final de la integración) se escapa antes de pintarlo.
+                    const escHtml = (v) => String(v ?? '').replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
+
                     result.data.forEach(req => {
                         const statusColor = req.status_code == 200 ? '#10b981' : '#e11d48';
                         const isFree = req.plan_name && req.plan_name.toLowerCase().includes('free');
@@ -708,13 +712,13 @@
                         tr.onclick = function() { openLogDetails(this); };
 
                         tr.innerHTML = `
-                            <td style="font-size: 0.85rem; color: #64748b; font-weight: 600; white-space: nowrap;">${req.date_display}</td>
-                            <td><span class="usage-pill">${req.short_endpoint}</span></td>
-                            <td style="font-weight: 800; color: #1e293b;">${req.search_term || '--'}</td>
-                            <td style="color: ${statusColor}; font-weight: 900;">${req.status_code} <br><span style="font-size:0.7rem; color:#94a3b8; font-weight:600;">(${req.duration_ms}ms)</span></td>
+                            <td style="font-size: 0.85rem; color: #64748b; font-weight: 600; white-space: nowrap;">${escHtml(req.date_display)}</td>
+                            <td><span class="usage-pill">${escHtml(req.short_endpoint)}</span></td>
+                            <td style="font-weight: 800; color: #1e293b;">${escHtml(req.search_term || '--')}</td>
+                            <td style="color: ${statusColor}; font-weight: 900;">${escHtml(req.status_code)} <br><span style="font-size:0.7rem; color:#94a3b8; font-weight:600;">(${escHtml(req.duration_ms)}ms)</span></td>
                             <td>
                                 <span style="background: ${planBg}; color: ${planColor}; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; border: 1px solid ${planBorder}; white-space: nowrap;">
-                                    ${req.plan_name || '--'}
+                                    ${escHtml(req.plan_name || '--')}
                                 </span>
                             </td>
                         `;

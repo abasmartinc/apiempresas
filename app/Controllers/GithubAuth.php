@@ -36,14 +36,32 @@ class GithubAuth extends BaseController
             session()->set('signup_intent', trim((string)$this->request->getGet('intent')));
         }
 
-        $url = "https://github.com/login/oauth/authorize?client_id={$this->clientId}&redirect_uri={$this->redirectUri}&scope=user:email";
+        // Destino tras entrar (p. ej. "Activar Pro" → billing?plan=pro). Antes se ignoraba
+        // y quien se registraba desde un botón de compra acababa en el panel.
+        $destino = trim((string) ($this->request->getGet('redirect') ?? ''));
+        if ($destino !== '' && $this->destinoSeguro($destino)) {
+            session()->set('github_redirect', $destino);
+        } else {
+            session()->remove('github_redirect');
+        }
+
+        // state contra CSRF en el login (LinkedIn ya lo usaba; GitHub no)
+        $state = bin2hex(random_bytes(16));
+        session()->set('github_state', $state);
+
+        $url = "https://github.com/login/oauth/authorize?" . http_build_query([
+            'client_id'    => $this->clientId,
+            'redirect_uri' => $this->redirectUri,
+            'scope'        => 'user:email',
+            'state'        => $state,
+        ]);
         return redirect()->to($url);
     }
 
     public function callback()
     {
         // DEBUG: Loggear todo lo que llega para ver qué está pasando
-        log_message('error', '[GithubAuth] Callback recibido. Query params: ' . json_encode($_GET));
+        log_message('debug', '[GithubAuth] Callback recibido. Parámetros: ' . implode(',', array_keys($_GET)));
         
         $code = $this->request->getGet('code') ?? $_GET['code'] ?? null;
         $error = $this->request->getGet('error') ?? $_GET['error'] ?? null;
@@ -54,6 +72,13 @@ class GithubAuth extends BaseController
         }
 
         if (!$code) {
+            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_28'));
+        }
+
+        $state = (string) ($this->request->getGet('state') ?? '');
+        $stateEsperado = (string) (session('github_state') ?? '');
+        session()->remove('github_state');
+        if ($stateEsperado === '' || !hash_equals($stateEsperado, $state)) {
             return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_28'));
         }
 
@@ -191,7 +216,7 @@ class GithubAuth extends BaseController
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
-            \App\Libraries\Embudo::alta((int) $userId, 'github', $intent);
+            \App\Libraries\Embudo::alta((int) $userId, 'github', $intent, (string) (session('github_redirect') ?? ''));
 
             // Enviar email de bienvenida
             try {
@@ -208,7 +233,10 @@ class GithubAuth extends BaseController
             }
         }
 
-        // Iniciar sesión
+        // Iniciar sesión con un identificador de sesión nuevo (evita fijación de sesión)
+        $destino = (string) (session('github_redirect') ?? '');
+        session()->remove('github_redirect');
+        session()->regenerate();
         session()->set([
             'user_id'     => $user->id,
             'user_email'  => $user->email,
@@ -218,6 +246,24 @@ class GithubAuth extends BaseController
             'logged_in'   => true,
         ]);
 
+        if ($destino !== '' && $this->destinoSeguro($destino)) {
+            return redirect()->to(site_url($destino));
+        }
         return redirect()->to(site_url('dashboard'));
+    }
+
+    /**
+     * Destino interno seguro tras el alta/login (mismo criterio que GoogleAuth): ruta
+     * relativa del sitio, sin esquema ni barra inicial.
+     */
+    private function destinoSeguro(string $ruta): bool
+    {
+        $ruta = trim($ruta);
+        if ($ruta === '' || $ruta[0] === '/' || strpos($ruta, '\\') !== false) {
+            return false;
+        }
+        $primeraBarra = strpos($ruta, '/');
+        $cabeza = $primeraBarra === false ? $ruta : substr($ruta, 0, $primeraBarra);
+        return strpos($cabeza, ':') === false;
     }
 }

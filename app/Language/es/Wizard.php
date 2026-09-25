@@ -16,7 +16,7 @@ return [
     'compare_title' => 'Compara los resultados',
     'compare_desc' => 'Esta es la respuesta real que acabas de recibir con tu plan. <span style="color: #2152ff; font-weight: 800;">Haz clic en el Plan PRO abajo</span> para descubrir los datos ocultos que se desbloquean.',
     'plan_free' => 'Plan Free (Actual)',
-    'plan_free_desc' => 'Datos básicos. Oculta dirección, objeto social y coordenadas.',
+    'plan_free_desc' => 'Datos básicos. Sin dirección ni coordenadas y con el objeto social recortado.',
     'recommended' => 'Recomendado',
     'plan_pro' => 'Plan PRO',
     'plan_pro_desc' => 'Dirección completa, objeto social íntegro y coordenadas. 3.000 consultas al mes.',

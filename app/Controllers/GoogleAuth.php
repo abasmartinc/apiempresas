@@ -253,7 +253,7 @@ class GoogleAuth extends BaseController
                     $user_id = $this->createNewGoogleUser($email, $name, $googleId, $picture, $intent, $destinoPed, $cifOrigen);
                     session()->remove('signup_intent');
                     $this->logSignupOrigin((int) $user_id, $intent, $cifOrigen);
-                    \App\Libraries\Embudo::alta((int) $user_id, 'google', $intent);
+                    \App\Libraries\Embudo::alta((int) $user_id, 'google', $intent, $destinoPed);
                     $user = $this->userModel->find($user_id);
                 }
             } else {

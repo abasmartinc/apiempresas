@@ -522,8 +522,11 @@ $fmt = function ($n) {
                 } else {
                     checkoutSection.style.display = 'block';
                     if (currentPlan !== 'free' && currentPlan !== 'none') {
-                        if (checkoutTitle) checkoutTitle.textContent = '<?= lang('Billing.confirm_change') ?>';
-                        if (checkoutSub) checkoutSub.innerHTML = '<?= lang('Billing.confirm_change_desc') ?>';
+                        // Bajar de Business a Pro no es "mejorar": se avisa de que se pierde lo
+                        // que quede de Business y de la alternativa (cancelar a fin de periodo).
+                        const esBajada = (currentPlan === 'business' && plan === 'pro');
+                        if (checkoutTitle) checkoutTitle.textContent = esBajada ? <?= json_encode(lang('Billing.confirm_downgrade')) ?> : <?= json_encode(lang('Billing.confirm_change')) ?>;
+                        if (checkoutSub) checkoutSub.textContent = esBajada ? <?= json_encode(lang('Billing.confirm_downgrade_desc')) ?> : <?= json_encode(lang('Billing.confirm_change_desc')) ?>;
                     } else {
                         if (checkoutTitle) checkoutTitle.textContent = '<?= lang('Billing.complete_activation') ?>';
                         if (checkoutSub) checkoutSub.textContent = '<?= lang('Billing.complete_activation_desc') ?>';
@@ -538,7 +541,8 @@ $fmt = function ($n) {
         if (form) {
             form.addEventListener('submit', () => {
                 if (window.trackEvent) {
-                    trackEvent('checkout_started', {
+                    // Nombre propio: checkout_started ya lo registra el servidor (page = 'billing')
+                    trackEvent('checkout_submit_clicked', {
                         plan: document.getElementById('planInput').value,
                         period: document.getElementById('periodInput').value
                     });

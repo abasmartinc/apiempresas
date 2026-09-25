@@ -319,7 +319,9 @@ class ApiKeyFilter implements FilterInterface
         try {
 
             $currentMonth = date('Y-m');
-            $cacheKey = ((int)$planId === 1) ? "api_usage_lifetime_{$row->user_id}" : "api_usage_{$row->user_id}_{$currentMonth}";
+            // El plan va en la clave: al subir de plan a mitad de mes, el contador del
+            // plan nuevo empieza en su valor real (0) y no hereda el del anterior.
+            $cacheKey = ((int)$planId === 1) ? "api_usage_lifetime_{$row->user_id}" : "api_usage_{$row->user_id}_p{$planId}_{$currentMonth}";
             $currentUsage = cache()->get($cacheKey);
 
             if ($currentUsage === null) {
@@ -545,10 +547,22 @@ class ApiKeyFilter implements FilterInterface
                 if ((int)$meta['sub_cost'] > 0) {
                     $claveUso = ((int)$meta['plan_id'] === 1)
                         ? 'api_usage_lifetime_' . (int)$meta['user_id']
-                        : 'api_usage_' . (int)$meta['user_id'] . '_' . date('Y-m');
+                        : 'api_usage_' . (int)$meta['user_id'] . '_p' . (int)$meta['plan_id'] . '_' . date('Y-m');
                     $usoCache = cache()->get($claveUso);
                     if ($usoCache !== null) {
-                        cache()->save($claveUso, (int)$usoCache + (int)$meta['sub_cost'], 30);
+                        // Sin alargar la caducidad: antes cada petición la renovaba 30 s y,
+                        // con tráfico continuo, el contador no se volvía a leer de la BD
+                        // nunca (los incrementos perdidos no se corregían).
+                        $ttl = 30;
+                        try {
+                            $metaCache = cache()->getMetaData($claveUso);
+                            if (is_array($metaCache) && !empty($metaCache['expire'])) {
+                                $ttl = max(1, (int)$metaCache['expire'] - time());
+                            }
+                        } catch (\Throwable $e) {
+                            $ttl = 30;
+                        }
+                        cache()->save($claveUso, (int)$usoCache + (int)$meta['sub_cost'], $ttl);
                     }
                 }
             }

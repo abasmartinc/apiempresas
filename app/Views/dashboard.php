@@ -180,7 +180,7 @@ if ($isBonusUser && !($isPaid ?? false)) {
                     const comp = data.data;
                     document.getElementById('aha-name').textContent = comp.name || '-';
                     document.getElementById('aha-cif').textContent = comp.cif || '-';
-                    document.getElementById('aha-status').textContent = comp.status || 'Activa';
+                    document.getElementById('aha-status').textContent = comp.status || '-';
                     
                     <?php if (!$isPaid && $walletBalance <= 0): ?>
                     // Lo que trae de verdad la respuesta del plan Free, sin datos inventados:
@@ -188,7 +188,7 @@ if ($isBonusUser && !($isPaid ?? false)) {
                     // primeros caracteres reales.
                     const candado = (t) => '<span style="font-size:0.75rem; color:#2152ff; margin-left:8px; font-weight:800; white-space:nowrap;">🔒 ' + t + '</span>';
                     const esc = (t) => { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; };
-                    document.getElementById('aha-address').innerHTML = '<span style="color:#64748b; font-weight:600;">Dirección completa y coordenadas incluidas en Pro</span>' + candado('Con Pro');
+                    document.getElementById('aha-address').innerHTML = comp.address ? '<span style="color:#64748b; font-weight:600;">Dirección completa y coordenadas incluidas en Pro</span>' + candado('Con Pro') : '-';
                     const objetoApi = String(comp.corporate_purpose || '').trim();
                     const objeto = objetoApi.replace(/\s*\.{3}\s*\[ACTUALIZA[^\]]*\]\s*$/i, '').trim();
                     document.getElementById('aha-activity').innerHTML = objeto
@@ -276,7 +276,8 @@ if ($isBonusUser && !($isPaid ?? false)) {
 
         document.getElementById('btnShowJson')?.addEventListener('click', () => {
             if(window.lastAhaResult) {
-                const jsonStr = JSON.stringify(window.lastAhaResult, null, 4);
+                const jsonStr = JSON.stringify(window.lastAhaResult, null, 4)
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 Swal.fire({
                     title: 'Respuesta JSON',
                     html: `
@@ -290,7 +291,7 @@ if ($isBonusUser && !($isPaid ?? false)) {
                     width: '600px',
                     didOpen: () => {
                         document.getElementById('swalCopyJson').addEventListener('click', () => {
-                            navigator.clipboard.writeText(jsonStr);
+                            navigator.clipboard.writeText(JSON.stringify(window.lastAhaResult, null, 4));
                             const btn = document.getElementById('swalCopyJson');
                             btn.textContent = '¡Copiado!';
                             btn.style.background = '#10b981';

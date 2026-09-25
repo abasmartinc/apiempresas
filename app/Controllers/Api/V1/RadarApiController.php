@@ -70,7 +70,9 @@ class RadarApiController extends BaseApiController
         $limit = $this->planAccess->getRadarLimit($planSlug);
         
         $meta = [
-            'plan' => $planSlug,
+            // El plan contratado, como siempre. access_slug (Free con saldo = pro) solo
+            // decide los límites; aquí devolvía "pro" a un Free con bono.
+            'plan' => \App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? $planSlug,
             'count' => count($results),
             'limit' => $limit,
             'total_disponibles' => $totalCount,

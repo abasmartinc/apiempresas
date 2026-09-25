@@ -120,7 +120,7 @@ return [
 
     // Usage messages
     'usage_msg_limit_exceeded_title' => 'Límite gratuito superado',
-    'usage_msg_limit_exceeded_text' => 'Se están consumiendo créditos automáticamente de tu monedero a medida.',
+    'usage_msg_limit_exceeded_text' => 'Tus consultas se están cobrando de tu monedero a medida que las haces.',
     'usage_msg_limit_reached_title' => 'Has alcanzado el límite gratuito',
     'usage_msg_limit_reached_text' => 'Activa Pro para seguir validando empresas automáticamente.',
     'usage_msg_almost_reached_title' => 'Límite casi alcanzado',

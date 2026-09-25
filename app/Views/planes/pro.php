@@ -231,10 +231,6 @@
                     <p class="endpoint-desc">Obtén el scoring comercial y nivel de riesgo financiero de una empresa mediante IA antes de dar crédito o cerrar un contrato.</p>
                 </div>
                 <div class="endpoint-card">
-                    <div class="endpoint-route">GET /companies/search</div>
-                    <p class="endpoint-desc">Búsquedas avanzadas filtrando por sector (CNAE), provincia u otras características para crear listas segmentadas.</p>
-                </div>
-                <div class="endpoint-card" style="grid-column: 1 / -1; max-width: 600px; margin: 0 auto; width: 100%;">
                     <div class="endpoint-route">GET /companies/borme</div>
                     <p class="endpoint-desc">Consulta los eventos y publicaciones oficiales del Registro Mercantil (BORME) asociados a la empresa, como nombramientos, ampliaciones de capital o balances.</p>
                 </div>

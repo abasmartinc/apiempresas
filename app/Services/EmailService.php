@@ -878,7 +878,8 @@ class EmailService
         $meses    = [1 => 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
                      'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
         $renueva  = '1 de ' . $meses[(int) date('n', strtotime('first day of next month'))];
-        $urlPlan  = site_url('billing');
+        // Directo al plan siguiente (Business), no a /billing a secas
+        $urlPlan  = site_url('billing?plan=business');
         $urlBono  = site_url('crear-bono-api');
 
         // Qué pasa al llegar al 100 %, según tenga o no saldo en el monedero
@@ -1118,7 +1119,9 @@ class EmailService
         $contenido = $this->p('Empezaste a activar el plan <strong>' . $nombre . '</strong> de la API y el pago se quedó a medias. Lo tienes guardado: el botón te lleva al mismo punto, con el plan y el periodo que elegiste.')
             . $this->p('Por si alguna duda te frenó:')
             . '<ul style="margin:0 0 14px; padding-left:20px;">'
-            . $li('<strong>Sin permanencia:</strong> lo cancelas desde tu panel cuando quieras.')
+            . $li($period === 'annual'
+                ? '<strong>Pago anual sin renovación forzosa:</strong> si lo cancelas desde tu panel, no se renueva al terminar el año.'
+                : '<strong>Sin permanencia:</strong> lo cancelas desde tu panel cuando quieras.')
             . $li('<strong>Factura con tus datos fiscales</strong> (NIF y dirección), descargable desde el panel.')
             . $li('<strong>No cambias nada en tu código:</strong> misma API Key, y en cuanto se confirma el pago tienes el cupo y los datos completos.')
             . $li('<strong>Si prefieres no suscribirte,</strong> un <a href="' . site_url('crear-bono-api') . '" style="color:#2563eb;font-weight:700;">bono de créditos</a> se paga una vez y no caduca.')
@@ -1128,7 +1131,7 @@ class EmailService
         return $this->sendApiAutomation(
             $userData,
             'Tu plan ' . $nombre . ' está a un paso: retoma el pago donde lo dejaste',
-            'Sin permanencia, con factura a tu empresa y sin tocar tu código.',
+            ($period === 'annual' ? 'Factura a tu empresa' : 'Sin permanencia, con factura a tu empresa') . ' y sin tocar tu código.',
             $contenido,
             'Terminar la activación',
             site_url('billing?plan=' . $plan . '&period=' . $period),

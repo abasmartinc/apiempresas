@@ -1,7 +1,14 @@
 <?php
 // Unified limits logic
 $limitToUse = $isPaid ? ($maxLimit ?? 3000) : ($freeLimit ?? 20);
-$isLimitReached = ($requestsUsed >= $limitToUse);
+// Bloqueado solo si se acabó el cupo y no hay saldo en el monedero: con saldo, la API
+// sigue respondiendo (cobra del monedero), así que el buscador también.
+$isLimitReached = ($requestsUsed >= $limitToUse) && ((int) ($walletBalance ?? 0) <= 0);
+$planIdCard = (int) (is_object($plan ?? null) ? ($plan->plan_id ?? 0) : (is_array($plan ?? null) ? ($plan['plan_id'] ?? 0) : 0));
+// Pro sin cupo: pasar a Business. Business (el más alto): bono.
+$urlDesbloqueo = $planIdCard === 2
+    ? site_url('billing?plan=business&source=dash_limit_locked')
+    : site_url('crear-bono-api?source=dash_limit_locked');
 $warningThreshold = $isPaid ? ($limitToUse * 0.8) : ($limitToUse * 0.7);
 $isWarning = ($requestsUsed >= $warningThreshold);
 ?>
@@ -21,7 +28,7 @@ $isWarning = ($requestsUsed >= $warningThreshold);
         
         <?php if ($isLimitReached): ?>
             <?php if ($isPaid): ?>
-                <div onclick="showUpgradeBusinessModal()" style="position: absolute; inset: 0; cursor: pointer; z-index: 5;"></div>
+                <a href="<?= esc($urlDesbloqueo) ?>" aria-label="Ampliar consultas" style="position: absolute; inset: 0; cursor: pointer; z-index: 5;"></a>
             <?php else: ?>
                 <div onclick="showUpgradeModal()" style="position: absolute; inset: 0; cursor: pointer; z-index: 5;"></div>
             <?php endif; ?>

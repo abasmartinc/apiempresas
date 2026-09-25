@@ -36,6 +36,15 @@ class LinkedinAuth extends BaseController
             session()->set('signup_intent', trim((string)$this->request->getGet('intent')));
         }
 
+        // Destino tras entrar (p. ej. "Activar Pro" → billing?plan=pro). Antes se ignoraba
+        // y quien se registraba desde un botón de compra acababa en el panel.
+        $destino = trim((string) ($this->request->getGet('redirect') ?? ''));
+        if ($destino !== '' && $this->destinoSeguro($destino)) {
+            session()->set('linkedin_redirect', $destino);
+        } else {
+            session()->remove('linkedin_redirect');
+        }
+
         $state = bin2hex(random_bytes(16));
         session()->set('linkedin_state', $state);
 
@@ -180,7 +189,7 @@ class LinkedinAuth extends BaseController
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
-            \App\Libraries\Embudo::alta((int) $userId, 'linkedin', $intent);
+            \App\Libraries\Embudo::alta((int) $userId, 'linkedin', $intent, (string) (session('linkedin_redirect') ?? ''));
 
             // Email de bienvenida
             try {
@@ -197,7 +206,10 @@ class LinkedinAuth extends BaseController
             }
         }
 
-        // Iniciar sesión
+        // Iniciar sesión con un identificador de sesión nuevo (evita fijación de sesión)
+        $destino = (string) (session('linkedin_redirect') ?? '');
+        session()->remove('linkedin_redirect');
+        session()->regenerate();
         session()->set([
             'user_id'     => $user->id,
             'user_email'  => $user->email,
@@ -207,6 +219,24 @@ class LinkedinAuth extends BaseController
             'logged_in'   => true,
         ]);
 
+        if ($destino !== '' && $this->destinoSeguro($destino)) {
+            return redirect()->to(site_url($destino));
+        }
         return redirect()->to(site_url('dashboard'));
+    }
+
+    /**
+     * Destino interno seguro tras el alta/login (mismo criterio que GoogleAuth): ruta
+     * relativa del sitio, sin esquema ni barra inicial.
+     */
+    private function destinoSeguro(string $ruta): bool
+    {
+        $ruta = trim($ruta);
+        if ($ruta === '' || $ruta[0] === '/' || strpos($ruta, '\\') !== false) {
+            return false;
+        }
+        $primeraBarra = strpos($ruta, '/');
+        $cabeza = $primeraBarra === false ? $ruta : substr($ruta, 0, $primeraBarra);
+        return strpos($cabeza, ':') === false;
     }
 }

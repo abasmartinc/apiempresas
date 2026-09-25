@@ -282,6 +282,9 @@ class Billing extends BaseController
             $source = (string) session('email_source');
         }
         session()->set('checkout_source', $source);
+        // El mismo origen viaja a Stripe (metadatos): así lo tiene también la venta que
+        // registra el webhook, incluido el que viene de un correo.
+        $postData['source'] = $source;
 
         $this->logCheckoutEvent('checkout_started', $source, [
             'plan'   => $plan,
@@ -1132,14 +1135,30 @@ class Billing extends BaseController
         // --- ATRIBUCIÓN DE LA COMPRA ---
         // La sesión PHP puede perderse en el salto a Stripe y de vuelta, por eso el
         // source viaja también en los metadatos de la sesión de Stripe.
+        //
+        // Con sesión de Stripe, el plan, el periodo, el usuario y si está cobrado salen
+        // SIEMPRE de Stripe. Antes solo se leía Stripe cuando la sesión PHP no tenía
+        // origen, y en las compras con origen el plan salía de datos de una compra
+        // anterior (last_purchase_info).
         $attrSource = (string) (session('checkout_source') ?? '');
-        if ($attrSource === '' && $hasStripeSession) {
+        $attrPlan   = null;
+        $attrPeriod = null;
+        $attrUserId = $userId;
+        $attrPagado = true;
+        if ($hasStripeSession) {
             try {
                 $attrStripe = (new \Stripe\StripeClient(env('STRIPE_SECRET_KEY')))
                     ->checkout->sessions->retrieve($stripeSessionId);
-                $attrSource = (string) ($attrStripe->metadata->source ?? '');
+                if ($attrSource === '') {
+                    $attrSource = (string) ($attrStripe->metadata->source ?? '');
+                }
                 $attrPlan   = (string) ($attrStripe->metadata->plan ?? '');
                 $attrPeriod = (string) ($attrStripe->metadata->period ?? '');
+                if ($attrUserId <= 0) {
+                    $attrUserId = (int) ($attrStripe->client_reference_id ?? $attrStripe->metadata->user_id ?? 0);
+                }
+                // Pagos que se confirman más tarde (SEPA): los registra el webhook al cobrarse
+                $attrPagado = in_array((string) ($attrStripe->payment_status ?? ''), ['paid', 'no_payment_required'], true);
             } catch (\Throwable $e) {
                 log_message('error', '[Billing::success] atribución: ' . $e->getMessage());
             }
@@ -1160,13 +1179,13 @@ class Billing extends BaseController
                 $yaRegistrada = false;
             }
         }
-        if (!$yaRegistrada && !session()->get($attrKey)) {
+        if (!$yaRegistrada && $attrPagado && !session()->get($attrKey)) {
             session()->set($attrKey, true);
             $this->logCheckoutEvent('checkout_completed', $attrSource, [
                 'plan'       => $attrPlan ?? ($lastInfo['plan'] ?? ($checkoutData['type'] ?? '')),
                 'period'     => $attrPeriod ?? ($lastInfo['period'] ?? ''),
                 'stripe_id'  => $stripeSessionId ?: null,
-            ], $userId);
+            ], $attrUserId);
         }
         session()->remove('checkout_source');
 

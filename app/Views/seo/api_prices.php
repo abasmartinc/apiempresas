@@ -1622,7 +1622,7 @@
                             <h3>Free</h3>
                         </div>
                         <div class="api-price-value">0€<span>/ único</span></div>
-                        <p class="api-pricing-card__desc">Para entornos de desarrollo, sandboxing técnico y validación de esquemas JSON.</p>
+                        <p class="api-pricing-card__desc">Para probar la integración con datos reales: 100 consultas que no caducan.</p>
 
                         <ul class="api-price-list">
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
@@ -1659,7 +1659,8 @@
                         <div class="api-pricing-card__header">
                             <h3>Pro</h3>
                         </div>
-                        <div class="api-price-value"><b id="pricePro" data-monthly="19" data-annual="15" style="font-weight: inherit;">15</b>€<span>/ mes</span></div>
+                        <div class="api-price-value"><b id="pricePro" data-monthly="19" data-annual="15,17" style="font-weight: inherit;">15,17</b>€<span>/ mes</span></div>
+                        <div class="api-annual-note" style="margin: -6px 0 10px; font-size: 0.8rem; font-weight: 700; color: #059669;">Pago anual: 182 € (ahorras 46 €)</div>
                         <p class="api-pricing-card__desc">Integración completa para procesos de onboarding B2B, enriquecimiento de leads y scoring.</p>
 
                         <ul class="api-price-list">
@@ -1693,7 +1694,8 @@
                         <div class="api-pricing-card__header">
                             <h3>Business</h3>
                         </div>
-                        <div class="api-price-value"><b id="priceBusiness" data-monthly="49" data-annual="39" style="font-weight: inherit;">39</b>€<span>/ mes</span></div>
+                        <div class="api-price-value"><b id="priceBusiness" data-monthly="49" data-annual="39,17" style="font-weight: inherit;">39,17</b>€<span>/ mes</span></div>
+                        <div class="api-annual-note" style="margin: -6px 0 10px; font-size: 0.8rem; font-weight: 700; color: #059669;">Pago anual: 470 € (ahorras 118 €)</div>
                         <p class="api-pricing-card__desc">Sincronización en tiempo real vía Webhooks y volumen masivo para plataformas de misión crítica.</p>
 
                         <ul class="api-price-list">
@@ -1716,7 +1718,7 @@
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> Soporte prioritario por email</li>
+                                </svg> Soporte por email: respuesta en menos de 2 h</li>
                         </ul>
 
                         <a href="<?= site_url('register?intent=api&plan=business&period=annual') ?>" class="api-pricing-btn">Activar Business</a>
@@ -2455,6 +2457,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                     
                     pricePro.textContent = pricePro.dataset.annual;
                     priceBusiness.textContent = priceBusiness.dataset.annual;
+                    document.querySelectorAll('.api-annual-note').forEach(function (n) { n.style.display = ''; });
                 } else {
                     knob.style.transform = 'translateX(0px)';
                     labelMonthly.style.color = '#2563eb';
@@ -2464,6 +2467,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                     
                     pricePro.textContent = pricePro.dataset.monthly;
                     priceBusiness.textContent = priceBusiness.dataset.monthly;
+                    document.querySelectorAll('.api-annual-note').forEach(function (n) { n.style.display = 'none'; });
                 }
 
                 // Los botones de pago llevan el periodo que el usuario está viendo

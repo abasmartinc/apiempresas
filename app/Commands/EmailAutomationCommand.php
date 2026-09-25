@@ -53,40 +53,40 @@ class EmailAutomationCommand extends BaseCommand
         CLI::write("  - Usuarios API Free detectados: " . count($apiUsers));
 
         foreach ($apiUsers as $user) {
-            $this->processApiTriggersForUser($user);
+            $this->bloque('1/usuario ' . ($user['id'] ?? '?'), fn () => $this->processApiTriggersForUser($user));
         }
 
         // =========================================================================
         // BLOQUE 2: FLUJO DE RIESGO, PAYWALL Y UPSELL PACKS
         // =========================================================================
         CLI::write('🛡️ [2/6] Procesando automatizaciones de Riesgo y Solvencia...', 'cyan');
-        $this->processRiskPaywallTriggers();
-        $this->processRiskPackUpsellTriggers();
-        $this->processSolvenciaCiclo();
+        $this->bloque('2/riesgo', fn () => $this->processRiskPaywallTriggers());
+        $this->bloque('2/packs', fn () => $this->processRiskPackUpsellTriggers());
+        $this->bloque('2/solvencia', fn () => $this->processSolvenciaCiclo());
 
         // =========================================================================
         // BLOQUE 3: USUARIOS CON ALTA TASA DE ERRORES 400 EN API
         // =========================================================================
         CLI::write('🔍 [3/6] Detectando usuarios con errores 400 en peticiones...', 'cyan');
-        $this->processBadRequestUsers();
+        $this->bloque('3', fn () => $this->processBadRequestUsers());
 
         // =========================================================================
         // BLOQUE 4: CLIENTES DE PAGO DE LA API CERCA DEL CUPO DEL MES
         // =========================================================================
         CLI::write('💳 [4/6] Revisando el cupo mensual de los clientes de pago de la API...', 'cyan');
-        $this->processPaidApiQuota();
+        $this->bloque('4', fn () => $this->processPaidApiQuota());
 
         // =========================================================================
         // BLOQUE 5: RECUPERACIÓN DE QUIEN DEJÓ PRO O BUSINESS HACE UN MES
         // =========================================================================
         CLI::write('↩️  [5/6] Recuperación de bajas de planes de pago de la API...', 'cyan');
-        $this->processApiWinback();
+        $this->bloque('5', fn () => $this->processApiWinback());
 
         // =========================================================================
         // BLOQUE 6: PAGOS DE PRO/BUSINESS EMPEZADOS Y NO TERMINADOS
         // =========================================================================
         CLI::write('🛒 [6/6] Pagos de planes de la API sin terminar...', 'cyan');
-        $this->processApiCheckoutAbandoned();
+        $this->bloque('6', fn () => $this->processApiCheckoutAbandoned());
 
         // Hitos del embudo (primera consulta, primera desde fuera del navegador, la
         // décima). No envía nada: solo deja los eventos para medir la activación.
@@ -94,6 +94,20 @@ class EmailAutomationCommand extends BaseCommand
         CLI::write('  - Eventos nuevos: ' . \App\Libraries\Embudo::registrarLlamadas(48));
 
         CLI::write('✅ Proceso de automatización finalizado con éxito.', 'green');
+    }
+
+    /**
+     * Ejecuta un bloque aislado: si falla, lo deja en el log y en pantalla y sigue con
+     * los demás. Antes un error en cualquier bloque dejaba sin ejecutar todos los siguientes.
+     */
+    protected function bloque(string $nombre, callable $fn): void
+    {
+        try {
+            $fn();
+        } catch (\Throwable $e) {
+            log_message('error', '[EmailAutomation] Bloque ' . $nombre . ': ' . $e->getMessage());
+            CLI::write('  ⚠️ Error en el bloque ' . $nombre . ': ' . $e->getMessage(), 'red');
+        }
     }
 
     /**
@@ -945,10 +959,15 @@ class EmailAutomationCommand extends BaseCommand
         }
 
         // Quien ya ha vuelto a un plan de pago de la API no recibe nada
+        // "Con plan" = activo o cancelado aún dentro del periodo pagado (p. ej. tras
+        // pasar de Pro a Business y cancelar Business, que sigue vigente)
         $activos = array_flip(array_map('intval', array_column($db->table('user_subscriptions')
             ->select('user_id')
-            ->where('status', 'active')
             ->whereIn('plan_id', [2, 3])
+            ->groupStart()
+                ->where('status', 'active')
+                ->orGroupStart()->where('status', 'canceled')->where('current_period_end >', date('Y-m-d H:i:s'))->groupEnd()
+            ->groupEnd()
             ->get()->getResultArray(), 'user_id')));
 
         $usuarios = $this->usuariosElegibles(array_column($filas, 'user_id'));
@@ -1031,7 +1050,14 @@ class EmailAutomationCommand extends BaseCommand
                 ->where('user_id', $uid)
                 ->where('created_at >=', $intento['created_at'])
                 ->countAllResults() > 0;
-            if ($completado || $this->automationModel->wasSentRecently($uid, 'api_checkout_abandoned', 30)) {
+            // Si ha vuelto a intentarlo en la última hora puede estar pagando ahora mismo
+            $reciente = $db->table('tracking_events')
+                ->where('event_name', 'checkout_started')
+                ->where('page', 'billing')
+                ->where('user_id', $uid)
+                ->where('created_at >', date('Y-m-d H:i:s', strtotime('-1 hour')))
+                ->countAllResults() > 0;
+            if ($completado || $reciente || $this->automationModel->wasSentRecently($uid, 'api_checkout_abandoned', 30)) {
                 continue;
             }
 

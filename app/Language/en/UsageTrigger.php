@@ -16,6 +16,10 @@ return [
     '80_percent_desc'  => 'Your integration will stop working soon. Activate Pro to keep the service running.',
     '80_percent_cta'   => 'Prevent service interruption',
     
+    '100_percent_title' => 'You have used your free queries',
+    '100_percent_desc'  => 'Your key returns a 429 error until you activate a plan. Pro: 3,000 queries a month with full data. No subscription: a prepaid pack.',
+    '100_percent_cta'   => 'Activate Pro',
+
     'default_cta'      => 'Activate Pro Plan',
     'activate_radar'   => '🔥 Activate Radar + API',
 ];

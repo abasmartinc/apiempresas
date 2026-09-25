@@ -133,11 +133,15 @@ class Dashboard extends BaseController
                 ->selectSum('requests_count', 'total')
                 ->selectSum('credits_used', 'credits_total')
                 ->where('user_id', $userId)
-                ->where('date >=', '2026-05-28')
+                ->where('date >=', \App\Filters\ApiKeyFilter::FREE_DESDE)
                 ->get()->getRow();
         }
         
-        $requestsUsedThisMonth = (int)($usageSum->total ?? 0) + (int)($usageSum->credits_total ?? 0);
+        // Solo consultas del plan (requests_count), igual que ApiKeyFilter al decidir el
+        // 429. Los créditos del monedero (credits_used) son otra cosa: se muestran aparte
+        // (walletSpent). Antes se sumaban y un usuario que había gastado bono veía el plan
+        // agotado y el buscador bloqueado con sus consultas intactas.
+        $requestsUsedThisMonth = (int)($usageSum->total ?? 0);
         
         $remainingRequests = max(0, $maxLimit - $requestsUsedThisMonth);
         
@@ -227,6 +231,21 @@ class Dashboard extends BaseController
 
         // Fast query just to know whether to show onboarding strip or not
         $data['has_first_request'] = $requestsUsedThisMonth > 0;
+
+        // El asistente de bienvenida ("gasta 1 de tus 100 consultas gratis") es solo para
+        // una cuenta Free recién creada: sin plan de pago, sin saldo y sin consultas.
+        if ($isPaid || $walletBalance > 0 || $requestsUsedThisMonth > 0) {
+            $data['show_wizard'] = false;
+        }
+        // Con ?probar= la primera consulta la hace el propio panel: el asistente ya no
+        // tiene sentido y no debe volver a salir en la siguiente visita.
+        if ($this->request->getGet('probar') && (int) ($user->wizard_completed ?? 0) === 0) {
+            try {
+                $userModel->update($userId, ['wizard_completed' => 1]);
+            } catch (\Throwable $e) {
+                log_message('error', '[Dashboard] wizard_completed: ' . $e->getMessage());
+            }
+        }
         $data['requestsUsed'] = $requestsUsedThisMonth; // Alias for convenience in view
 
         // Comprobar si hay tickets respondidos por el admin
@@ -340,11 +359,12 @@ class Dashboard extends BaseController
                 $builder->where('plan_id', $plan->plan_id);
                 $builder->where('date >=', date('Y-m-01'));
             } else {
-                $builder->where('date >=', '2026-05-28'); // Free limit lifetime
+                $builder->where('date >=', \App\Filters\ApiKeyFilter::FREE_DESDE); // Free: de por vida
             }
             
             $usageSum = $builder->get()->getRow();
-            $requestCount = (int)($usageSum->total ?? 0) + (int)($usageSum->credits_total ?? 0);
+            // Igual que el panel y ApiKeyFilter: solo consultas del plan, sin créditos del monedero
+            $requestCount = (int)($usageSum->total ?? 0);
 
             $kpis = [
                 'api_request_total_month' => $requestCount,

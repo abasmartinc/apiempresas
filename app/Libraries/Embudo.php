@@ -20,13 +20,30 @@ class Embudo
 {
     public const PAGE = 'embudo';
 
-    public static function alta(int $userId, string $via, ?string $intent = null): void
+    public static function alta(int $userId, string $via, ?string $intent = null, ?string $destino = null): void
     {
         if ($userId <= 0) {
             return;
         }
         try {
             $req = service('request');
+            // Plan con el que llegó (p. ej. "Activar Pro" → redirect=billing?plan=pro):
+            // del destino que pasa quien llama, del parámetro plan o del redirect.
+            $plan = '';
+            foreach ([$destino, (string) ($req->getGetPost('redirect') ?? ''), (string) ($req->getGetPost('plan') ?? '')] as $cand) {
+                $cand = (string) $cand;
+                if ($cand === '') {
+                    continue;
+                }
+                if (preg_match('/(?:^|[?&])plan=([a-z_]+)/i', $cand, $m)) {
+                    $plan = $m[1];
+                    break;
+                }
+                if (preg_match('/^[a-z_]+$/i', $cand)) {
+                    $plan = $cand;
+                    break;
+                }
+            }
             (new \App\Models\TrackingEventModel())->insert([
                 'event_name'   => 'signup_completed',
                 'page'         => self::PAGE,
@@ -36,7 +53,7 @@ class Embudo
                 'element'      => substr($via, 0, 255),
                 'metadata'     => json_encode([
                     'intent' => (string) ($intent ?? ''),
-                    'plan'   => substr(preg_replace('/[^a-z_]/', '', strtolower((string) ($req->getGetPost('plan') ?? ''))), 0, 20),
+                    'plan'   => substr(strtolower($plan), 0, 20),
                     'source' => substr(preg_replace('/[^a-z0-9_\-]/i', '', (string) (session('email_source') ?? '')), 0, 64),
                 ]),
                 'created_at'   => date('Y-m-d H:i:s'),
@@ -63,6 +80,7 @@ class Embudo
                 ->where('created_at >=', $desde)
                 ->where('user_id >', 0)
                 ->where('user_id <>', \App\Filters\ApiKeyFilter::MONITOR_USER_ID)
+                ->notLike('endpoint', 'sandbox')   // el sandbox no es uso real
                 ->get()->getResultArray(), 'user_id'));
             if (empty($ids)) {
                 return 0;
@@ -83,6 +101,7 @@ class Embudo
                 if (!isset($hechos[$uid . ':first_call'])) {
                     $r = $db->table('api_requests')->select('created_at, user_agent, endpoint')
                         ->where('user_id', $uid)->where('status_code', 200)
+                        ->notLike('endpoint', 'sandbox')
                         ->orderBy('id', 'ASC')->limit(1)->get()->getRowArray();
                     if ($r) {
                         $creados += self::insertar($uid, 'first_call', $r);
@@ -91,6 +110,7 @@ class Embudo
                 if (!isset($hechos[$uid . ':first_integration_call'])) {
                     $r = $db->table('api_requests')->select('created_at, user_agent, endpoint')
                         ->where('user_id', $uid)->where('status_code', 200)
+                        ->notLike('endpoint', 'sandbox')
                         ->groupStart()
                             ->where('user_agent IS NULL', null, false)
                             ->orNotLike('user_agent', 'Mozilla/', 'after')
@@ -103,6 +123,7 @@ class Embudo
                 if (!isset($hechos[$uid . ':call_10'])) {
                     $r = $db->table('api_requests')->select('created_at, user_agent, endpoint')
                         ->where('user_id', $uid)->where('status_code', 200)
+                        ->notLike('endpoint', 'sandbox')
                         ->orderBy('id', 'ASC')->limit(1, 9)->get()->getRowArray();
                     if ($r) {
                         $creados += self::insertar($uid, 'call_10', $r);
