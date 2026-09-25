@@ -40,7 +40,72 @@ class Webhook extends Controller
             return $this->response->setStatusCode(400);
         }
 
-        // Handle the event
+        /*
+         * Responder a Stripe YA y procesar después.
+         *
+         * Stripe espera la respuesta pocos segundos. Antes se respondía al final, tras
+         * consultar la API de Stripe, generar el PDF de la factura y mandar dos correos
+         * por SMTP; con el servidor cargado (25-09-2026, 3:18 de la madrugada) no daba
+         * tiempo, Stripe lo marcaba como timeout y reintentaba. El servidor, en cambio,
+         * sí terminaba cada intento, así que salían los correos una vez por reintento.
+         *
+         * La firma ya está validada: a partir de aquí Stripe recibe 200 y el trabajo
+         * sigue en segundo plano. Contrapartida: si algo falla después, Stripe no
+         * reintenta. Por eso todo va dentro de un try y el fallo queda en el log con el
+         * id del evento, para reenviarlo a mano desde el panel de Stripe (Reenviar).
+         */
+        $this->responderAStripe();
+
+        try {
+            $this->procesarEvento($event);
+        } catch (\Throwable $e) {
+            log_message('critical', '[Webhook::stripe] Error procesando ' . ($event->type ?? '?') . ' ' . ($event->id ?? '?')
+                . ' (reenviar desde el panel de Stripe cuando esté corregido): ' . $e->getMessage()
+                . ' en ' . $e->getFile() . ':' . $e->getLine());
+        }
+
+        // La respuesta ya salió: CodeIgniter no reenvía cabeceras (headers_sent) y el
+        // cuerpo vacío no añade nada.
+        return $this->response->setStatusCode(200)->setBody('');
+    }
+
+    /**
+     * Envía ya el 200 a Stripe y cierra la conexión, dejando que el script continúe.
+     */
+    private function responderAStripe(): void
+    {
+        ignore_user_abort(true);   // que cerrar la conexión no corte el proceso
+        @set_time_limit(300);
+
+        // Soltar los buffers de CodeIgniter: si no, la respuesta se quedaría retenida
+        // hasta el final del script.
+        while (ob_get_level() > 0) {
+            @ob_end_clean();
+        }
+
+        $cuerpo = '{"received":true}';
+        if (!headers_sent()) {
+            http_response_code(200);
+            header('Content-Type: application/json');
+            header('Content-Length: ' . strlen($cuerpo));
+            header('Connection: close');
+        }
+        echo $cuerpo;
+
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();          // PHP-FPM
+        } elseif (function_exists('litespeed_finish_request')) {
+            litespeed_finish_request();        // LiteSpeed
+        } else {
+            flush();                           // mod_php: Content-Length + Connection: close
+        }
+    }
+
+    /**
+     * Reparte el evento de Stripe a su manejador.
+     */
+    private function procesarEvento($event): void
+    {
         switch ($event->type) {
             case 'checkout.session.completed':
                 $session = $event->data->object;
@@ -82,10 +147,8 @@ class Webhook extends Controller
                 break;
             // Add other event types here if needed
             default:
-                echo 'Received unknown event type ' . $event->type;
+                log_message('debug', '[Webhook::stripe] Evento no gestionado: ' . $event->type);
         }
-
-        return $this->response->setStatusCode(200);
     }
 
     /**
@@ -607,8 +670,9 @@ class Webhook extends Controller
                 (float)($invoice->tax / 100) // Tax
             );
 
-            // Enviar notificación por email al admin
-            if ($invoice) {
+            // Enviar notificación por email al admin. Solo la primera vez: si Stripe
+            // reenvía el evento, la factura ya existe y los correos ya salieron.
+            if ($invoice && empty($invoice->ya_existia)) {
                 $emailService = new \App\Services\EmailService();
                 $emailService->sendPaymentNotification([
                     'invoice'        => $invoice,
@@ -740,6 +804,13 @@ class Webhook extends Controller
             $taxAmount,
             $customPlanName
         );
+
+        // Si la factura ya existía es un reenvío del mismo evento de Stripe: los
+        // correos y el trabajo de exportación ya se hicieron la primera vez.
+        if ($dbInvoice && !empty($dbInvoice->ya_existia)) {
+            log_message('info', "[Webhook::stripe] invoice.paid repetido para {$invoice->id}; no se reenvían correos.");
+            return;
+        }
 
         if ($dbInvoice) {
             $emailService = new \App\Services\EmailService();
