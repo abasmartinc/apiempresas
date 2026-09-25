@@ -376,7 +376,20 @@ $redirectVigilar = strpos($redirectPath, 'ver-riesgo=1') !== false
                     </div>
                 </div>
                 <p class="rt-opt__text">
+                    <?php switch ($teaserEstado['clave'] ?? ''):
+                        case 'hoja_cerrada': ?>
+                    ¿Tienes relación con <strong style="color: #334155;"><?= esc($companyName) ?></strong>? Te avisamos si se reabre la hoja o si pasa a disolución, liquidación o extinción.
+                    <?php break;
+                        case 'disuelta':
+                        case 'liquidacion': ?>
+                    Te avisamos cuando el BORME publique <?= ($teaserEstado['clave'] ?? '') === 'liquidacion' ? 'la extinción' : 'la liquidación o la extinción' ?> de <strong style="color: #334155;"><?= esc($companyName) ?></strong>: es el momento de reclamar lo pendiente.
+                    <?php break;
+                        case 'concurso': ?>
+                    Te avisamos de cada paso del concurso de <strong style="color: #334155;"><?= esc($companyName) ?></strong>: convenio, liquidación o conclusión.
+                    <?php break;
+                        default: ?>
                     Te escribimos el día que el BORME publique algo de <strong style="color: #334155;"><?= esc($companyName) ?></strong>.
+                    <?php endswitch; ?>
                 </p>
                 <a class="rt-btn rt-btn--sm rt-btn--soft-green" href="<?= site_url('register/quick') ?>?intent=view_risk_profile&cif=<?= urlencode($compCif) ?>&redirect=<?= urlencode($redirectVigilar) ?>" data-track-click="risk_teaser_cta" data-track-element="watch" data-track-meta="<?= $teaserTrackMeta ?>">
                     <span>Activar aviso gratis</span>
