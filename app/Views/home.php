@@ -74,10 +74,10 @@
                         <button type="button" class="hero-curl-copy" id="heroCurlCopy" aria-label="Copiar la petición curl">Copiar</button>
                     </div>
                     <div class="editor-body">
-<pre><code id="heroCurlCode"><span class="hc-cmd">curl</span> <span class="hc-str">"https://apiempresas.es/api/v1/companies?cif=B12345678"</span> \
+<pre><code id="heroCurlCode"><span class="hc-cmd">curl</span> <span class="hc-str">"https://apiempresas.es/api/v1/companies?cif=A46103834"</span> \
   <span class="hc-flag">-H</span> <span class="hc-str">"X-API-KEY: TU_API_KEY"</span></code></pre>
 <pre class="hc-res"><code><span class="hc-muted"># Respuesta (resumida)</span>
-{ <span class="hc-key">"success"</span>: <span class="hc-bool">true</span>, <span class="hc-key">"data"</span>: { <span class="hc-key">"cif"</span>: <span class="hc-val">"B12345678"</span>, <span class="hc-key">"name"</span>: <span class="hc-val">"EMPRESA DE EJEMPLO SL"</span>, <span class="hc-key">"status"</span>: <span class="hc-val">"ACTIVA"</span>, … } }</code></pre>
+{ <span class="hc-key">"success"</span>: <span class="hc-bool">true</span>, <span class="hc-key">"data"</span>: { <span class="hc-key">"cif"</span>: <span class="hc-val">"A46103834"</span>, <span class="hc-key">"name"</span>: <span class="hc-val">"MERCADONA SA"</span>, <span class="hc-key">"status"</span>: <span class="hc-val">"Activa"</span>, … } }</code></pre>
                     </div>
                 </div>
                 <div class="hero-sdks" aria-label="Instalar un SDK">
@@ -86,7 +86,7 @@
                     <code>pip install apiempresas</code>
                     <code>composer require apiempresas/apiempresas-php</code>
                 </div>
-                <p class="hero-curl-note">Crea tu cuenta gratis y cambia <code>B12345678</code> por el CIF que quieras y <code>TU_API_KEY</code> por tu clave. <a href="<?= site_url('documentation#sdks') ?>">Ver ejemplos en PHP, Node.js y Python →</a></p>
+                <p class="hero-curl-note">Crea tu cuenta gratis y cambia <code>A46103834</code> por el CIF que quieras y <code>TU_API_KEY</code> por tu clave. <a href="<?= site_url('documentation#sdks') ?>">Ver ejemplos en PHP, Node.js y Python →</a></p>
             </div>
             <style>
                 .hero-curl { max-width: 760px; margin: 40px auto 0; text-align: left; }
@@ -936,7 +936,9 @@
                     cif: "B12345678",
                     name: "EMPRESA DE EJEMPLO SL",
                     status: "ACTIVA",
+                    founded: "2019-03-12",
                     province: "MADRID",
+                    municipality: "MADRID",
                     address: "CALLE DE EJEMPLO 42, MADRID",
                     cnae: "6201",
                     cnae_label: "Actividades de programación informática"
@@ -1240,7 +1242,7 @@
             var btn = document.getElementById('heroCurlCopy');
             if (!btn) return;
             btn.addEventListener('click', function () {
-                var text = 'curl "https://apiempresas.es/api/v1/companies?cif=B12345678" \\\n  -H "X-API-KEY: TU_API_KEY"';
+                var text = 'curl "https://apiempresas.es/api/v1/companies?cif=A46103834" \\\n  -H "X-API-KEY: TU_API_KEY"';
                 var done = function () {
                     btn.textContent = 'Copiado';
                     setTimeout(function () { btn.textContent = 'Copiar'; }, 2000);

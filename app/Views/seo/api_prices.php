@@ -822,7 +822,7 @@
                         <li><span class="n">3</span><div>
                             <h3>Aplica tus reglas</h3>
                             <ul>
-                                <li>Si el estado no es <code>ACTIVA</code>, rechaza el alta o pásala a revisión.</li>
+                                <li>Si el estado no es «activa» (compáralo sin distinguir mayúsculas), rechaza el alta o pásala a revisión.</li>
                                 <li>Si quien firma no aparece en <code>administrators</code>, pide un poder o revisa a mano.</li>
                                 <li>Si la razón social no coincide con la que escribió el cliente, pídele que la corrija.</li>
                             </ul>
@@ -1322,7 +1322,7 @@ res = requests.get(
 <span class="api-code-keyword">else</span>:
     empresa = res[<span class="api-code-string">"data"</span>]
     admins  = [a[<span class="api-code-string">"name"</span>] <span class="api-code-keyword">for</span> a <span class="api-code-keyword">in</span> empresa.get(<span class="api-code-string">"administrators"</span>, [])]
-    activa  = empresa[<span class="api-code-string">"status"</span>] == <span class="api-code-string">"ACTIVA"</span>
+    activa  = (empresa[<span class="api-code-string">"status"</span>] <span class="api-code-keyword">or</span> <span class="api-code-string">""</span>).upper() == <span class="api-code-string">"ACTIVA"</span>
     firmante_ok = <span class="api-code-string">"JUAN PÉREZ GARCÍA"</span> <span class="api-code-keyword">in</span> admins
     <span class="api-code-keyword">print</span>(<span class="api-code-string">"Alta aprobada"</span> <span class="api-code-keyword">if</span> activa <span class="api-code-keyword">and</span> firmante_ok <span class="api-code-keyword">else</span> <span class="api-code-string">"Revisión manual"</span>)
 </pre>
@@ -1339,7 +1339,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
 } <span class="api-code-keyword">else</span> {
     <span class="api-code-keyword">$e</span>      = <span class="api-code-keyword">$res</span>[<span class="api-code-string">'data'</span>];
     <span class="api-code-keyword">$admins</span> = array_column(<span class="api-code-keyword">$e</span>[<span class="api-code-string">'administrators'</span>] ?? [], <span class="api-code-string">'name'</span>);
-    <span class="api-code-keyword">$ok</span>     = <span class="api-code-keyword">$e</span>[<span class="api-code-string">'status'</span>] === <span class="api-code-string">'ACTIVA'</span> &amp;&amp; in_array(<span class="api-code-string">'JUAN PÉREZ GARCÍA'</span>, <span class="api-code-keyword">$admins</span>);
+    <span class="api-code-keyword">$ok</span>     = strtoupper(<span class="api-code-keyword">$e</span>[<span class="api-code-string">'status'</span>] ?? <span class="api-code-string">''</span>) === <span class="api-code-string">'ACTIVA'</span> &amp;&amp; in_array(<span class="api-code-string">'JUAN PÉREZ GARCÍA'</span>, <span class="api-code-keyword">$admins</span>);
     <span class="api-code-keyword">echo</span> <span class="api-code-keyword">$ok</span> ? <span class="api-code-string">'Alta aprobada'</span> : <span class="api-code-string">'Revisión manual'</span>;
 }
 </pre>
@@ -1354,7 +1354,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
 } <span class="api-code-keyword">else</span> {
   <span class="api-code-keyword">const</span> { status, administrators = [] } = res.data;
   <span class="api-code-keyword">const</span> firmanteOk = administrators.some(a => a.name === <span class="api-code-string">'JUAN PÉREZ GARCÍA'</span>);
-  console.log(status === <span class="api-code-string">'ACTIVA'</span> &amp;&amp; firmanteOk ? <span class="api-code-string">'Alta aprobada'</span> : <span class="api-code-string">'Revisión manual'</span>);
+  console.log((status || <span class="api-code-string">''</span>).toUpperCase() === <span class="api-code-string">'ACTIVA'</span> &amp;&amp; firmanteOk ? <span class="api-code-string">'Alta aprobada'</span> : <span class="api-code-string">'Revisión manual'</span>);
 }
 </pre>
                 </div>
@@ -1647,7 +1647,9 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         cif: "B12345678",
                         name: "EMPRESA DE EJEMPLO SL",
                         status: "ACTIVA",
+                        founded: "2019-03-12",
                         province: "MADRID",
+                        municipality: "MADRID",
                         address: "CALLE DE EJEMPLO 42, MADRID",
                         cnae: "6201",
                         cnae_label: "Actividades de programación informática",
