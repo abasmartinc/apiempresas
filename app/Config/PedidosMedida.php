@@ -56,9 +56,10 @@ class PedidosMedida extends BaseConfig
      * Si se deja vacío se busca sola entre los nombres de $candidatosAnioCuentas.
      * Si no existe ninguna, la columna del CSV sale vacía y queda en el log.
      */
-    public string $columnaAnioCuentas = '';
+    public string $columnaAnioCuentas = 'ult_cuentas_anio';
 
     public array $candidatosAnioCuentas = [
+        'ult_cuentas_anio',
         'ult_cuentas_year',
         'ultimas_cuentas_year',
         'ultimo_ejercicio_depositado',
