@@ -86,11 +86,18 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                 <div class="nav-dropdown-menu nav-dropdown-mega">
                     <div class="nav-mega-col">
                         <h4 style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin: 0 0 6px 10px;">Productos</h4>
-                        <a href="<?= site_url('api-empresas') ?>">
+                        <a href="<?= site_url() ?>">
                             <div class="nav-item-icon">🔌</div>
                             <div>
-                                <strong>API Empresas</strong>
-                                <span>Integra datos oficiales del Registro Mercantil en tu software.</span>
+                                <strong>API de empresas</strong>
+                                <span>Valida CIF y consulta datos del Registro Mercantil y el BORME.</span>
+                            </div>
+                        </a>
+                        <a href="<?= site_url('api-empresas') ?>">
+                            <div class="nav-item-icon">✅</div>
+                            <div>
+                                <strong>API KYB</strong>
+                                <span>Verifica NIF, estado y administradores en el alta de clientes.</span>
                             </div>
                         </a>
                         <a href="<?= site_url('perfil-de-riesgo') ?>">
@@ -320,8 +327,11 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                     <div class="mobile-nav-label">Soluciones</div>
                     
                     <div style="padding: 12px 18px 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em;">Productos</div>
+                    <a href="<?= site_url() ?>" class="mobile-nav-link">
+                        <span>API de empresas</span>
+                    </a>
                     <a href="<?= site_url('api-empresas') ?>" class="mobile-nav-link">
-                        <span>API Empresas</span>
+                        <span>API KYB</span>
                     </a>
                     <a href="<?= site_url('perfil-de-riesgo') ?>" class="mobile-nav-link">
                         <span>Perfil de Riesgo</span>

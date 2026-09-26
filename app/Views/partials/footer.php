@@ -43,7 +43,7 @@
             <div>
                 <h4 class="foot-title">Desarrolladores y Ayuda</h4>
                 <ul class="foot-links">
-                    <li><a href="<?=site_url('api-empresas') ?>">API Empresas</a></li>
+                    <li><a href="<?=site_url('api-empresas') ?>">API KYB</a></li>
                     <li><a href="<?=site_url('plugin-wordpress-buscador-empresas') ?>">Plugin de WordPress</a></li>
                     <li><a href="<?=site_url('documentation') ?>">Documentación API</a></li>
                     <li><a href="https://status.apiempresas.es" target="_blank" rel="noopener">Estado del servicio</a></li>

@@ -11,7 +11,10 @@ class ApiPrices extends BaseController
     {
         $freeLimit = get_free_plan_limit();
 
-        return view('seo/api_prices', ['freeLimit' => $freeLimit]);
+        return view('seo/api_prices', [
+            'freeLimit'   => $freeLimit,
+            'publicStats' => \App\Libraries\PublicStats::get(),
+        ]);
     }
 
     /**

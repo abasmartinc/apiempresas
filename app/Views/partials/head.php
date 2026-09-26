@@ -244,11 +244,12 @@ if ($isHome):
 
 <!-- Global SweetAlert2 Confirmations -->
 <?php
-// En la home SweetAlert2 se carga con defer: ahí solo se usa al pulsar algo
-// (data-confirm, cerrar sesión, reseña, triggerAhaMoment), y los scripts con
-// defer se ejecutan antes de DOMContentLoaded. En el resto de páginas sigue
-// síncrono porque algunas lo llaman en scripts en línea al cargar.
-$swalDefer = (uri_string() === '');
+// En la home y en /api-empresas SweetAlert2 se carga con defer: ahí solo se usa
+// al pulsar algo (data-confirm, cerrar sesión, reseña, triggerAhaMoment, alta
+// rápida de API key), y los scripts con defer se ejecutan antes de
+// DOMContentLoaded. En el resto de páginas sigue síncrono porque algunas lo
+// llaman en scripts en línea al cargar.
+$swalDefer = in_array(uri_string(), ['', 'api-empresas'], true);
 ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"<?= $swalDefer ? ' defer' : '' ?>></script>
 <script>

@@ -66,42 +66,12 @@ class Home extends BaseController
     }
 
     /**
-     * Cifras reales de la base de datos para la home (empresas, actos del BORME
-     * y fecha del último BORME procesado).
-     *
-     * Los COUNT(*) sobre tablas de millones de filas tardan unos segundos, así
-     * que se calculan como mucho una vez cada 12 horas y se guardan en caché.
-     * Si algo falla, devuelve [] y la home no muestra el bloque.
+     * Cifras reales para la home. Ahora las calcula App\Libraries\PublicStats,
+     * que comparte con /api-empresas (misma caché de 12 h).
      */
     private function getHomeStats(): array
     {
-        $cache    = \Config\Services::cache();
-        $cacheKey = 'home_stats_v1';
-        $stats    = $cache->get($cacheKey);
-        if (is_array($stats)) {
-            return $stats;
-        }
-
-        try {
-            $db = \Config\Database::connect();
-
-            $companies = (int) $db->query('SELECT COUNT(*) AS n FROM companies')->getRow()->n;
-            $acts      = (int) $db->query('SELECT COUNT(*) AS n FROM borme_posts')->getRow()->n;
-            $lastBorme = $db->query('SELECT MAX(borme_date) AS d FROM borme_posts')->getRow()->d;
-
-            $stats = [
-                'companies'  => $companies,
-                'acts'       => $acts,
-                'last_borme' => $lastBorme ? date('Y-m-d', strtotime((string) $lastBorme)) : null,
-            ];
-            $cache->save($cacheKey, $stats, 12 * 3600);
-        } catch (\Throwable $e) {
-            log_message('error', 'home stats: ' . $e->getMessage());
-            $stats = [];
-            $cache->save($cacheKey, $stats, 600); // reintentar en 10 minutos
-        }
-
-        return $stats;
+        return \App\Libraries\PublicStats::get();
     }
 
     public function englishStandalone()

@@ -3,8 +3,8 @@
 
 <head>
     <?= view('partials/head', [
-        'title' => 'API REST de Datos Mercantiles y Onboarding KYB en España | APIEmpresas',
-        'excerptText' => 'Integra datos oficiales del Registro Mercantil y BORME en tu CRM o ERP. API REST diseñada para enriquecimiento de datos B2B, onboarding KYB automatizado y scoring IA.',
+        'title' => 'API KYB para verificar empresas y NIF en España | APIEmpresas',
+        'excerptText' => 'Automatiza el KYB de clientes y proveedores: verifica el NIF, el estado registral, los administradores y los actos del BORME con una API REST. ' . (int) $freeLimit . ' consultas gratis.',
         'canonical' => site_url('api-empresas'),
         'robots' => 'index,follow',
     ]) ?>
@@ -158,8 +158,6 @@
             border-color: rgba(255,255,255,0.3);
             color: #fff;
         }
-        /* Keep radar-hero for other pages */
-        .radar-hero { border-bottom: none !important; }
 
         @keyframes mesh-glow-3 {
 
@@ -175,19 +173,6 @@
             }
         }
 
-        .api-code-block {
-            background: #0f172a;
-            border-radius: 16px;
-            padding: 24px;
-            font-family: 'Fira Code', monospace;
-            font-size: 13px;
-            color: #e2e8f0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin: 40px auto 0;
-            text-align: left;
-            box-shadow: 0 20px 50px -12px rgba(15, 23, 42, 0.35);
-        }
-
         .api-code-keyword {
             color: #c678dd;
         }
@@ -198,33 +183,6 @@
 
         .api-code-attr {
             color: #d19a66;
-        }
-
-        .api-feature-card {
-            background: #fff;
-            padding: 32px;
-            border-radius: 24px;
-            border: 1px solid #e2e8f0;
-            transition: all 0.3s ease;
-        }
-
-        .api-feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
-            border-color: #3b82f6;
-        }
-
-        .api-feature-icon {
-            width: 48px;
-            height: 48px;
-            background: #eff6ff;
-            color: #3b82f6;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            margin-bottom: 20px;
         }
 
         .api-endpoint-row:hover {
@@ -469,277 +427,6 @@
             .api-pricing-grid {
                 grid-template-columns: 1fr;
             }
-
-            .api-integration-grid {
-                grid-template-columns: 1fr !important;
-            }
-        }
-
-        /* --- Integration Section --- */
-        .api-integration-grid {
-            display: grid;
-            grid-template-columns: 1fr 1.4fr;
-            gap: 64px;
-            align-items: center;
-            margin-top: 0;
-        }
-
-        .api-integration-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-        }
-
-        .api-tab {
-            padding: 8px 18px;
-            border-radius: 99px;
-            font-size: 12px;
-            font-weight: 800;
-            letter-spacing: 0.05em;
-            cursor: pointer;
-            border: 2px solid #e2e8f0;
-            color: #94a3b8;
-            background: transparent;
-            transition: all 0.2s ease;
-        }
-
-        .api-tab.active {
-            background: #0f172a;
-            border-color: #0f172a;
-            color: #fff;
-        }
-
-        .api-terminal {
-            background: #0f172a;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 40px 80px -20px rgba(15, 23, 42, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        .api-terminal__bar {
-            background: #1e293b;
-            padding: 14px 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        .api-terminal__dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .api-terminal__dot--red {
-            background: #ff5f57;
-        }
-
-        .api-terminal__dot--amber {
-            background: #febc2e;
-        }
-
-        .api-terminal__dot--green {
-            background: #28c840;
-        }
-
-        .api-terminal__title {
-            flex: 1;
-            text-align: center;
-            font-size: 12px;
-            color: #475569;
-            font-weight: 700;
-        }
-
-        .api-terminal__body {
-            padding: 28px;
-            font-family: 'Fira Code', 'Courier New', monospace;
-            font-size: 13.5px;
-            line-height: 1.8;
-            color: #e2e8f0;
-        }
-
-        .api-integration-stat {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px 0;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .api-integration-stat:last-child {
-            border-bottom: none;
-        }
-
-        .api-integration-stat__icon {
-            width: 40px;
-            height: 40px;
-            background: #eff6ff;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            flex-shrink: 0;
-        }
-
-        .api-integration-stat__text strong {
-            display: block;
-            font-size: 0.9rem;
-            font-weight: 800;
-            color: #0f172a;
-        }
-
-        .api-integration-stat__text span {
-            font-size: 0.82rem;
-            color: #94a3b8;
-            font-weight: 500;
-        }
-
-        /* --- IA Preview Card --- */
-        .api-preview-card {
-            background: #fff;
-            border-radius: 24px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.12);
-            overflow: hidden;
-            text-align: left;
-        }
-
-        .api-preview-card__header {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 20px 24px;
-            border-bottom: 1px solid #f1f5f9;
-            background: #f8fafc;
-        }
-
-        .api-preview-card__logo {
-            width: 42px;
-            height: 42px;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            border-radius: 12px;
-            color: #fff;
-            font-weight: 900;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .api-preview-card__info h4 {
-            margin: 0;
-            font-size: 0.95rem;
-            font-weight: 800;
-            color: #0f172a;
-        }
-
-        .api-preview-card__info span {
-            font-size: 0.8rem;
-            color: #94a3b8;
-            font-weight: 600;
-        }
-
-        .api-preview-card__status {
-            margin-left: auto;
-            background: #dcfce7;
-            color: #16a34a;
-            font-size: 11px;
-            font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 99px;
-            letter-spacing: 0.05em;
-        }
-
-        .api-preview-card__body {
-            padding: 24px;
-        }
-
-        .api-score-sector {
-            margin-bottom: 24px;
-        }
-
-        .api-score-main {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .api-score-label {
-            font-size: 11px;
-            font-weight: 800;
-            color: #94a3b8;
-            letter-spacing: 0.08em;
-        }
-
-        .api-score-value {
-            font-size: 2.2rem;
-            font-weight: 950;
-            color: #0f172a;
-            letter-spacing: -0.04em;
-        }
-
-        .api-score-value span {
-            font-size: 1rem;
-            color: #94a3b8;
-            font-weight: 600;
-        }
-
-        .api-score-bar {
-            height: 8px;
-            background: #f1f5f9;
-            border-radius: 99px;
-            overflow: hidden;
-        }
-
-        .api-score-progress {
-            height: 100%;
-            background: linear-gradient(90deg, #2563eb, #06b6d4);
-            border-radius: 99px;
-        }
-
-        .api-insights-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .api-insight-item label {
-            display: block;
-            font-size: 10px;
-            font-weight: 800;
-            color: #94a3b8;
-            letter-spacing: 0.08em;
-            margin-bottom: 8px;
-        }
-
-        .api-insight-item p {
-            margin: 0;
-            font-size: 0.82rem;
-            color: #475569;
-            line-height: 1.5;
-            font-weight: 500;
-        }
-
-        .api-signals-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-
-        .api-signals-tags span {
-            background: #eff6ff;
-            color: #2563eb;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 99px;
-            border: 1px solid #dbeafe;
         }
 
         /* PREMIUM CTA ANIMATIONS */
@@ -891,8 +578,8 @@
     {
       "@context": "https://schema.org",
       "@type": "WebAPI",
-      "name": "API REST de Datos Mercantiles",
-      "description": "API REST JSON para validación de empresas españolas, enriquecimiento B2B y automatización KYB. Acceso a datos oficiales del Registro Mercantil.",
+      "name": "API KYB de APIEmpresas",
+      "description": "API REST para verificar empresas españolas en procesos KYB: NIF, estado registral, administradores y actos del BORME.",
       "documentation": "<?= site_url('documentation') ?>",
       "provider": {
         "@type": "Organization",
@@ -907,7 +594,12 @@
 
     <main class="radar-page">
 
-        <!-- HERO SECTION UNIFICADO -->
+        <!-- HERO: API KYB (26-09-2026). La home se queda con "API de empresas / validar CIF";
+             esta página apunta a KYB, verificación de empresas y NIF. -->
+        <?php
+        $ps = $publicStats ?? [];
+        $fmtCorto = static fn(int $n): string => \App\Libraries\PublicStats::corto($n);
+        ?>
         <header class="api-unified-hero">
             <div class="container" style="max-width:1100px; margin:0 auto; padding:0 2rem;">
 
@@ -917,51 +609,45 @@
                     <a href="<?= site_url('spanish-company-api') ?>" class="inactive" title="English version">🇬🇧 EN</a>
                 </div>
 
-                <!-- Badge -->
                 <div class="api-hero-badge">
                     <span class="api-hero-badge-dot"></span>
-                    API REST · Infraestructura de Datos a Escala
+                    API KYB · Verificación de empresas
                 </div>
 
-                <!-- H1 -->
                 <h1 class="api-hero-title">
-                    API REST de Datos Mercantiles<br>
-                    <span>Registro Mercantil y BORME</span>
+                    API KYB para verificar empresas en España<br>
+                    <span>NIF, estado registral y administradores</span>
                 </h1>
 
-                <!-- Subtitle -->
                 <p class="api-hero-sub">
-                    Endpoints JSON para consulta por CIF/NIF, enriquecimiento B2B masivo,
-                    webhooks de alertas BORME y onboarding KYB automatizado.
-                    Disponibilidad en tiempo real en <a href="https://status.apiempresas.es" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline;">status.apiempresas.es</a>.
+                    Automatiza el alta de clientes y proveedores B2B: comprueba que el NIF corresponde a una
+                    sociedad que existe y está activa, quién la administra y qué ha publicado en el BORME.
+                    Una llamada REST y la respuesta en JSON.
                 </p>
 
-                <!-- Stars -->
                 <div class="api-hero-stars">
-                    <span style="color:#94a3b8; font-size:0.92rem;"><strong>100 consultas gratis</strong> para probarla · Sin tarjeta</span>
+                    <span style="color:#94a3b8; font-size:0.92rem;"><strong><?= (int) $freeLimit ?> consultas gratis</strong> para probarla · Sin tarjeta</span>
                 </div>
 
-                <!-- Badges -->
                 <div class="api-hero-badges">
                     <span class="api-hero-chip api-hero-chip--green">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        Datos Oficiales BORME
+                        Datos del BORME
                     </span>
                     <span class="api-hero-chip api-hero-chip--blue">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                        REST API · JSON
+                        REST · JSON
                     </span>
                     <span class="api-hero-chip api-hero-chip--purple">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        KYB &amp; Compliance Listo
+                        Para procesos KYB y KYC
                     </span>
                 </div>
 
-                <!-- CTAs -->
                 <div class="api-hero-actions">
-                    <a href="<?= site_url('register?intent=api') ?>" class="api-hero-btn-primary">
+                    <a href="<?= site_url('register?intent=api&plan=free&source=api_kyb_hero') ?>" class="api-hero-btn-primary" data-track-event="hero_cta_click" data-track-metadata='{"cta_text": "Probar la API gratis", "source_block": "hero", "page_type": "api_kyb"}'>
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
-                        Probar API gratis
+                        Probar la API gratis
                     </a>
                     <a href="<?= site_url('documentation') ?>" class="api-hero-btn-ghost">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -969,273 +655,294 @@
                     </a>
                 </div>
 
-                <!-- Proof items -->
-                <div style="display:flex; gap:32px; justify-content:center; flex-wrap:wrap; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.07);">
-                    <div style="text-align:center;">
-                        <div style="font-size:1.6rem; font-weight:900; color:#fff; letter-spacing:-0.04em;">+3.5M</div>
-                        <div style="font-size:0.78rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-top:2px;">Empresas indexadas</div>
-                    </div>
-                    <div style="text-align:center;">
-                        <div style="font-size:1.6rem; font-weight:900; color:#fff; letter-spacing:-0.04em;">3 SDK</div>
-                        <div style="font-size:0.78rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-top:2px;">PHP · Node · Python</div>
-                    </div>
-                    <div style="text-align:center;">
-                        <a href="https://status.apiempresas.es" target="_blank" rel="noopener" style="text-decoration:none;"><div style="font-size:1.6rem; font-weight:900; color:#fff; letter-spacing:-0.04em;">En vivo</div>
-                        <div style="font-size:0.78rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-top:2px;">Estado del servicio</div></a>
-                    </div>
-                    <div style="text-align:center;">
-                        <div style="font-size:1.6rem; font-weight:900; color:#fff; letter-spacing:-0.04em;">Diario</div>
-                        <div style="font-size:0.78rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-top:2px;">Sincronización BORME</div>
-                    </div>
+                <!-- Cifras reales (App\Libraries\PublicStats, caché de 12 h) -->
+                <div class="kyb-proof">
+                    <?php if (!empty($ps['companies'])): ?>
+                    <div><strong><?= esc($fmtCorto((int) $ps['companies'])) ?></strong><span>Empresas</span></div>
+                    <?php endif; ?>
+                    <?php if (!empty($ps['acts'])): ?>
+                    <div><strong><?= esc($fmtCorto((int) $ps['acts'])) ?></strong><span>Actos del BORME</span></div>
+                    <?php endif; ?>
+                    <div><strong>Diario</strong><span>Actualización del BORME</span></div>
+                    <div><a href="https://status.apiempresas.es" target="_blank" rel="noopener"><strong>En vivo</strong><span>Estado del servicio</span></a></div>
                 </div>
 
             </div>
         </header>
 
+        <style>
+            .kyb-proof { display:flex; gap:32px; justify-content:center; flex-wrap:wrap; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.07); }
+            .kyb-proof div { text-align:center; }
+            .kyb-proof a { text-decoration:none; }
+            .kyb-proof strong { display:block; font-size:1.6rem; font-weight:900; color:#fff; letter-spacing:-0.04em; }
+            .kyb-proof span { display:block; font-size:0.78rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-top:2px; }
 
-        <!-- SEO BLOCK: CÓMO FUNCIONA -->
-        <section class="radar-section" style="padding: 120px 0; background: #fbfcfe;">
-            <div class="container">
-                <div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 80px; align-items: center;">
+            .kyb-wrap { max-width: 1100px; margin: 0 auto; }
+            .kyb-lead { font-size: 1.1rem; line-height: 1.7; color: #475569; max-width: 780px; }
+            .kyb-table-box { background:#fff; border:1px solid #e2e8f0; border-radius:20px; overflow:hidden; margin-top:36px; box-shadow: 0 10px 30px -18px rgba(15,23,42,.18); }
+            .kyb-table { width:100%; border-collapse:collapse; }
+            .kyb-table th { background:#f8fafc; text-align:left; font-size:12px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:.05em; padding:16px 20px; border-bottom:2px solid #e2e8f0; }
+            .kyb-table td { padding:16px 20px; border-bottom:1px solid #f1f5f9; vertical-align:top; font-size:0.95rem; color:#334155; line-height:1.5; }
+            .kyb-table tr:last-child td { border-bottom:none; }
+            .kyb-table td:first-child { font-weight:800; color:#0f172a; width:28%; }
+            .kyb-table tr.kyb-no td { background:#fafafa; color:#64748b; }
+            .kyb-plan { display:inline-block; font-size:11px; font-weight:800; padding:4px 10px; border-radius:99px; white-space:nowrap; }
+            .kyb-plan--free { background:#f1f5f9; color:#475569; }
+            .kyb-plan--pro { background:#eef2ff; color:#4338ca; }
+            .kyb-plan--biz { background:#ecfdf5; color:#047857; }
+            .kyb-plan--no { background:#fef2f2; color:#b91c1c; }
+
+            .kyb-flow { display:grid; grid-template-columns: 1.05fr .95fr; gap:48px; align-items:start; margin-top:40px; }
+            .kyb-steps { list-style:none; padding:0; margin:0; display:grid; gap:22px; }
+            .kyb-steps > li { display:flex; gap:16px; }
+            .kyb-steps .n { flex-shrink:0; width:34px; height:34px; border-radius:10px; background:#2563eb; color:#fff; font-weight:900; display:flex; align-items:center; justify-content:center; }
+            .kyb-steps h3 { margin:2px 0 4px; font-size:1.05rem; font-weight:800; color:#0f172a; }
+            .kyb-steps p { margin:0; color:#64748b; font-size:0.95rem; line-height:1.55; }
+            .kyb-steps ul { margin:8px 0 0; padding-left:18px; color:#475569; font-size:0.92rem; line-height:1.6; list-style:disc; }
+            .kyb-steps ul li { display:list-item; margin-bottom:4px; }
+            .kyb-code { background:#0f172a; border-radius:20px; overflow:hidden; border:1px solid #1e293b; box-shadow: 0 30px 60px -20px rgba(15,23,42,.35); }
+            .kyb-code-bar { background:#1e293b; padding:12px 18px; font-family:monospace; font-size:12px; color:#94a3b8; }
+            .kyb-code pre { margin:0; padding:22px 24px; font-family:'Fira Code','JetBrains Mono',Consolas,monospace; font-size:13px; line-height:1.7; color:#e2e8f0; overflow-x:auto; }
+            .kyb-code .k { color:#f07178; } .kyb-code .s { color:#c3e88d; } .kyb-code .c { color:#64748b; }
+            .kyb-errors { margin-top:18px; background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:18px 20px; }
+            .kyb-errors h3 { margin:0 0 10px; font-size:0.95rem; font-weight:800; color:#0f172a; }
+            .kyb-errors dl { margin:0; display:grid; grid-template-columns:auto 1fr; gap:8px 14px; font-size:0.88rem; color:#475569; }
+            .kyb-errors dt { font-family:monospace; font-weight:700; color:#1e40af; }
+            .kyb-errors dd { margin:0; }
+
+            .kyb-cards { display:grid; grid-template-columns: repeat(3, 1fr); gap:24px; margin-top:36px; }
+            .kyb-card { background:#fff; border:1px solid #e2e8f0; border-radius:20px; padding:26px; }
+            .kyb-card h3 { margin:0 0 10px; font-size:1.1rem; font-weight:850; color:#0f172a; }
+            .kyb-card p { margin:0; color:#475569; font-size:0.95rem; line-height:1.6; }
+            .kyb-sectors { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px; margin-top:36px; }
+            .kyb-sector { background:#fff; border:1px solid #e2e8f0; border-radius:18px; padding:22px; }
+            .kyb-sector h3 { margin:0 0 8px; font-size:1rem; font-weight:800; color:#0f172a; }
+            .kyb-sector p { margin:0; color:#64748b; font-size:0.9rem; line-height:1.55; }
+            .kyb-more { margin-top:22px; display:flex; gap:24px; flex-wrap:wrap; font-weight:800; }
+            .kyb-more a { color:#2563eb; text-decoration:none; }
+
+            .kyb-flow > * { min-width: 0; }
+            @media (max-width: 900px) {
+                .kyb-flow, .kyb-cards { grid-template-columns: 1fr; }
+            }
+            @media (max-width: 640px) {
+                .kyb-table thead { display:none; }
+                .kyb-table, .kyb-table tbody, .kyb-table tr, .kyb-table td { display:block; width:auto; }
+                .kyb-table tr { padding:14px 18px; border-bottom:1px solid #f1f5f9; }
+                .kyb-table td { padding:0; border:none; }
+                .kyb-table td:first-child { margin-bottom:4px; width:auto; }
+                .kyb-table tr.kyb-no { background:#fafafa; }
+                .kyb-table tr.kyb-no td { background:transparent; }
+                .kyb-table td:last-child { margin-top:8px; }
+                .kyb-errors dl { grid-template-columns: 1fr; gap:2px; }
+                .kyb-errors dd { margin-bottom:8px; }
+                .kyb-code pre { font-size:12px; padding:18px; }
+            }
+        </style>
+
+        <!-- QUÉ CUBRE UN KYB -->
+        <section class="radar-section" style="background:#fbfcfe;">
+            <div class="container kyb-wrap">
+                <div class="radar-kicker">Know Your Business</div>
+                <h2 class="radar-title" style="margin-top:12px;">Qué comprueba un KYB de empresa y qué cubre la API</h2>
+                <p class="kyb-lead">
+                    El KYB es la verificación de una empresa antes de darla de alta como cliente, proveedor o socio.
+                    Esto es lo que puedes automatizar con la API y lo que tendrás que resolver por otra vía.
+                </p>
+
+                <div class="kyb-table-box">
+                    <table class="kyb-table">
+                        <thead>
+                            <tr><th>Comprobación</th><th>Qué devuelve la API</th><th>Plan</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>La empresa existe y el NIF es suyo</td>
+                                <td>Razón social de la sociedad a partir del NIF (CIF) que te da el cliente.</td>
+                                <td><span class="kyb-plan kyb-plan--free">Desde Free</span></td>
+                            </tr>
+                            <tr>
+                                <td>Sigue activa</td>
+                                <td>Estado registral según las publicaciones del BORME: activa, disuelta, en concurso, extinguida…</td>
+                                <td><span class="kyb-plan kyb-plan--free">Desde Free</span></td>
+                            </tr>
+                            <tr>
+                                <td>Quién puede firmar por ella</td>
+                                <td>Administradores y cargos actuales, con el parámetro <code>admin=true</code>.</td>
+                                <td><span class="kyb-plan kyb-plan--pro">Pro</span></td>
+                            </tr>
+                            <tr>
+                                <td>Dónde está y a qué se dedica</td>
+                                <td>Domicilio social, CNAE y objeto social completos. En Free, CNAE y provincia.</td>
+                                <td><span class="kyb-plan kyb-plan--pro">Pro</span></td>
+                            </tr>
+                            <tr>
+                                <td>Cambios recientes que merecen revisión</td>
+                                <td>Historial de actos del BORME: cambios de administradores, de domicilio o de capital.</td>
+                                <td><span class="kyb-plan kyb-plan--pro">Pro</span></td>
+                            </tr>
+                            <tr>
+                                <td>Señales de riesgo</td>
+                                <td>Disoluciones, concursos y otras señales societarias (Pro). Perfil de riesgo y solvencia (Business).</td>
+                                <td><span class="kyb-plan kyb-plan--pro">Pro</span> <span class="kyb-plan kyb-plan--biz">Business</span></td>
+                            </tr>
+                            <tr class="kyb-no">
+                                <td>Titular real</td>
+                                <td>No incluido. Pídele la declaración al cliente o consulta el Registro de Titularidades Reales si tienes acceso como sujeto obligado.</td>
+                                <td><span class="kyb-plan kyb-plan--no">No incluido</span></td>
+                            </tr>
+                            <tr class="kyb-no">
+                                <td>Listas de sanciones y PEP</td>
+                                <td>No incluido. Necesitarás un proveedor específico de listas de sanciones.</td>
+                                <td><span class="kyb-plan kyb-plan--no">No incluido</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- CÓMO AUTOMATIZAR EL ONBOARDING -->
+        <section class="radar-section radar-section--soft">
+            <div class="container kyb-wrap">
+                <div class="radar-kicker">Onboarding B2B</div>
+                <h2 class="radar-title" style="margin-top:12px;">Cómo automatizar el onboarding KYB con la API</h2>
+                <p class="kyb-lead">Un flujo típico de alta de empresa, de principio a fin.</p>
+
+                <div class="kyb-flow">
+                    <ol class="kyb-steps">
+                        <li><span class="n">1</span><div>
+                            <h3>Pide el NIF en el formulario de alta</h3>
+                            <p>Con el NIF (el antiguo CIF) basta para identificar a la sociedad. Si el cliente no lo tiene a mano, el buscador por nombre te lo da.</p>
+                        </div></li>
+                        <li><span class="n">2</span><div>
+                            <h3>Consulta la empresa</h3>
+                            <p>Una llamada a <code>/companies?cif=…&amp;admin=true</code> devuelve razón social, estado, domicilio, CNAE y administradores.</p>
+                        </div></li>
+                        <li><span class="n">3</span><div>
+                            <h3>Aplica tus reglas</h3>
+                            <ul>
+                                <li>Si el estado no es <code>ACTIVA</code>, rechaza el alta o pásala a revisión.</li>
+                                <li>Si quien firma no aparece en <code>administrators</code>, pide un poder o revisa a mano.</li>
+                                <li>Si la razón social no coincide con la que escribió el cliente, pídele que la corrija.</li>
+                            </ul>
+                        </div></li>
+                        <li><span class="n">4</span><div>
+                            <h3>Guarda la evidencia</h3>
+                            <p>Conserva la respuesta y la fecha de la consulta como prueba de la comprobación que hiciste.</p>
+                        </div></li>
+                        <li><span class="n">5</span><div>
+                            <h3>Revisa tu cartera cada cierto tiempo</h3>
+                            <p>Con <code>/companies/batch</code> (100 NIF por petición) y <code>/companies/signals</code> detectas clientes que se han disuelto o han entrado en concurso.</p>
+                        </div></li>
+                    </ol>
+
                     <div>
-                        <div class="radar-kicker">Integración sin fricción</div>
-                        <h2 class="radar-title"
-                            style="margin-top: 12px; margin-bottom: 32px; font-size: 2.75rem; letter-spacing: -0.03em;">
-                            Arquitectura orientada a la automatización masiva</h2>
-
-                        <p class="radar-text"
-                            style="font-size: 1.2rem; line-height: 1.7; color: #334155; margin-bottom: 40px; max-width: 600px;">
-                            Nuestra infraestructura abstrae la complejidad del Registro Mercantil ofreciendo una interfaz REST de baja latencia para sistemas de misión crítica.
-                        </p>
-
-                        <div style="display: grid; gap: 32px; margin-bottom: 48px;">
-                            <div style="display: flex; gap: 20px; align-items: flex-start;">
-                                <div
-                                    style="background: #2563eb; color: #fff; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; flex-shrink: 0; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.25);">
-                                    1</div>
-                                <div>
-                                    <h4 style="margin: 0 0 4px; font-weight: 800; color: #0f172a;">Consulta Masiva</h4>
-                                    <p style="margin: 0; font-size: 1rem; color: #64748b; line-height: 1.5;">Peticiones
-                                        por <strong>CIF o NIF</strong> con payloads JSON estructurados.</p>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 20px; align-items: flex-start;">
-                                <div
-                                    style="background: #2563eb; color: #fff; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; flex-shrink: 0; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.25);">
-                                    2</div>
-                                <div>
-                                    <h4 style="margin: 0 0 4px; font-weight: 800; color: #0f172a;">Respuesta en Tiempo
-                                        Real</h4>
-                                    <p style="margin: 0; font-size: 1rem; color: #64748b; line-height: 1.5;">Datos
-                                        oficiales, CNAE y estado mercantil en menos de 200ms.</p>
-                                </div>
-                            </div>
+                        <div class="kyb-code">
+                            <div class="kyb-code-bar">GET /api/v1/companies?cif=B12345678&amp;admin=true</div>
+<pre>{
+  <span class="k">"success"</span>: true,
+  <span class="k">"data"</span>: {
+    <span class="k">"cif"</span>: <span class="s">"B12345678"</span>,
+    <span class="k">"name"</span>: <span class="s">"EMPRESA DE EJEMPLO SL"</span>,
+    <span class="k">"status"</span>: <span class="s">"ACTIVA"</span>,
+    <span class="k">"province"</span>: <span class="s">"MADRID"</span>,
+    <span class="k">"cnae"</span>: <span class="s">"6201"</span>,
+    <span class="k">"cnae_label"</span>: <span class="s">"Actividades de programación informática"</span>,
+    <span class="k">"administrators"</span>: [
+      { <span class="k">"name"</span>: <span class="s">"JUAN PÉREZ GARCÍA"</span>, <span class="k">"position"</span>: <span class="s">"Administrador Único"</span> }
+    ]
+  }
+}</pre>
                         </div>
-
-                        <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: center;">
-                            <a href="<?= site_url() ?>" class="radar-btn radar-btn--ghost"
-                                style="border: 2px solid #e2e8f0; padding: 14px 32px; border-radius: 16px; font-size: 1rem;">
-                                Consultar CIF en Web
-                            </a>
-                            <a href="<?= site_url('documentation') ?>"
-                                style="font-weight: 800; color: #2563eb; text-decoration: none; display: flex; align-items: center; gap: 8px; font-size: 1.05rem;">
-                                Guía de integración técnica →
-                            </a>
-                        </div>
-                    </div>
-
-                    <div style="position: relative;">
-                        <!-- Subtle background glow for the terminal -->
-                        <div
-                            style="position: absolute; inset: -40px; background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 70%); pointer-events: none;">
-                        </div>
-
-                        <div
-                            style="background: #0f172a; border-radius: 24px; padding: 32px; box-shadow: 0 50px 100px -20px rgba(15, 23, 42, 0.4); border: 1px solid rgba(255,255,255,0.05); position: relative; z-index: 2;">
-                            <div style="display: flex; gap: 8px; margin-bottom: 24px;">
-                                <span
-                                    style="width: 10px; height: 10px; background: #ff5f57; border-radius: 50%;"></span>
-                                <span
-                                    style="width: 10px; height: 10px; background: #febc2e; border-radius: 50%;"></span>
-                                <span
-                                    style="width: 10px; height: 10px; background: #28c840; border-radius: 50%;"></span>
-                            </div>
-                            <pre
-                                style="margin: 0; font-family: 'Fira Code', monospace; font-size: 14px; line-height: 1.6;">
-<span style="color: #c678dd;">GET</span> <span style="color: #98c379;">/v1/companies?cif=B12345678</span>
-<span style="color: #abb2bf;">{</span>
-  <span style="color: #d19a66;">"success"</span>: <span style="color: #d19a66;">true</span>,
-  <span style="color: #d19a66;">"data"</span>: <span style="color: #abb2bf;">{</span>
-    <span style="color: #d19a66;">"name"</span>: <span style="color: #98c379;">"TECH FLOW SOLUTIONS SL"</span>,
-    <span style="color: #d19a66;">"cif"</span>: <span style="color: #98c379;">"B12345678"</span>,
-    <span style="color: #d19a66;">"status"</span>: <span style="color: #98c379;">"ACTIVA"</span>,
-    <span style="color: #d19a66;">"founded"</span>: <span style="color: #98c379;">"2024-03-12"</span>,
-    <span style="color: #d19a66;">"cnae"</span>: <span style="color: #98c379;">"6201"</span>,
-    <span style="color: #d19a66;">"cnae_label"</span>: <span style="color: #98c379;">"Programación informática"</span>,
-    <span style="color: #d19a66;">"municipality"</span>: <span style="color: #98c379;">"MADRID"</span>,
-    <span style="color: #d19a66;">"score"</span>: <span style="color: #d19a66;">94</span>
-  <span style="color: #abb2bf;">}</span>
-<span style="color: #abb2bf;">}</span></pre>
+                        <div class="kyb-errors">
+                            <h3>Respuestas que también te sirven para decidir</h3>
+                            <dl>
+                                <dt>COMPANY_NOT_FOUND</dt><dd>No hay ninguna sociedad con ese NIF.</dd>
+                                <dt>INVALID_CIF_FORMAT</dt><dd>El NIF no tiene el formato de una sociedad (letra, 7 dígitos y carácter de control).</dd>
+                                <dt>AUTONOMO_NOT_SUPPORTED</dt><dd>Es el NIF de una persona física. La API solo cubre sociedades, por protección de datos.</dd>
+                            </dl>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- SEO BLOCK: QUÉ PUEDES HACER -->
+        <!-- KYB, KYC Y NIF -->
         <section class="radar-section">
-            <div class="container">
-                <div class="radar-split">
-                    <div class="radar-split__content">
-                        <div class="radar-kicker">Potencia para tu stack</div>
-                        <h2 class="radar-title">Capacidades de Enriquecimiento B2B</h2>
-                        <p class="radar-text">Integra inteligencia mercantil en tu flujo de trabajo y elimina los silos de información desactualizada en tu base de datos.</p>
-                        <ul style="display: grid; gap: 12px; margin-top: 24px;">
-                            <li
-                                style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
-                                <span style="color: #3b82f6;">✓</span> Onboarding KYB en segundos
-                            </li>
-                            <li
-                                style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
-                                <span style="color: #3b82f6;">✓</span> Sincronización masiva de bases de datos
-                            </li>
-                            <li
-                                style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
-                                <span style="color: #3b82f6;">✓</span> Enriquecimiento de CRM (Salesforce, HubSpot, etc.)
-                            </li>
-                            <li
-                                style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
-                                <span style="color: #3b82f6;">✓</span> Monitorización de insolvencias y cambios BORME
-                            </li>
-                            <li
-                                style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #475569;">
-                                <span style="color: #3b82f6;">✓</span> Scoring de salud mercantil vía IA
-                            </li>
-                        </ul>
+            <div class="container kyb-wrap">
+                <div class="radar-kicker">Conceptos</div>
+                <h2 class="radar-title" style="margin-top:12px;">KYB, KYC y NIF: lo que conviene saber</h2>
+                <div class="kyb-cards">
+                    <div class="kyb-card">
+                        <h3>KYB no es KYC</h3>
+                        <p>El KYC verifica a personas físicas: quién es y si su identidad es real. El KYB verifica a empresas: que existen, que siguen activas, quién las administra y, si tu actividad lo exige, quién es su titular real.</p>
                     </div>
-                    <div class="api-terminal" style="max-width: 500px;">
-                        <div class="api-terminal__bar">
-                            <span class="api-terminal__dot api-terminal__dot--red"></span>
-                            <span class="api-terminal__dot api-terminal__dot--amber"></span>
-                            <span class="api-terminal__dot api-terminal__dot--green"></span>
-                            <span class="api-terminal__title">bash — curl</span>
-                        </div>
-                        <div class="api-terminal__body">
-                            <span style="color: #98c379;">$</span> curl -X GET <span
-                                class="api-code-string">"https://apiempresas.es/api/v1/companies?cif=B12345678"</span>
-                            \<br>
-                            &nbsp;&nbsp;-H <span class="api-code-string">"X-API-KEY: tu_clave"</span>
-                        </div>
+                    <div class="kyb-card">
+                        <h3>¿NIF o CIF?</h3>
+                        <p>Desde 2008 las sociedades tienen NIF; «CIF» se sigue usando para referirse a él. La API acepta el NIF de cualquier sociedad, con o sin guiones. El de personas físicas (autónomos) no, por protección de datos.</p>
+                    </div>
+                    <div class="kyb-card">
+                        <h3>Validar el formato no basta</h3>
+                        <p>El dígito de control solo dice que el número está bien formado. No dice si la empresa existe, si está activa ni si quien se da de alta tiene algo que ver con ella. Para eso hay que consultarla.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- CASOS DE USO -->
+        <!-- CASOS POR SECTOR -->
         <section class="radar-section radar-section--soft">
-            <div class="container">
-                <div class="radar-heading radar-heading--center">
-                    <div class="radar-kicker">Soluciones B2B</div>
-                    <h2 class="radar-title">Casos de uso de nuestra API REST B2B</h2>
-                </div>
-                <div class="radar-grid"
-                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-top: 40px;">
-                    <div
-                        style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
-                        <div style="font-size: 2rem; margin-bottom: 16px;">🛡️</div>
-                        <h4 style="margin: 0; font-weight: 800;">Compliance & KYB Automatizado</h4>
+            <div class="container kyb-wrap">
+                <div class="radar-kicker">Quién la usa</div>
+                <h2 class="radar-title" style="margin-top:12px;">Verificación de empresas por sector</h2>
+                <div class="kyb-sectors">
+                    <div class="kyb-sector">
+                        <h3>Fintech y financiación</h3>
+                        <p>Alta de empresas como clientes y revisión de su situación antes de conceder crédito o aplazar pagos.</p>
                     </div>
-                    <div
-                        style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
-                        <div style="font-size: 2rem; margin-bottom: 16px;">📈</div>
-                        <h4 style="margin: 0; font-weight: 800;">Enriquecimiento de Leads B2B</h4>
+                    <div class="kyb-sector">
+                        <h3>Marketplaces B2B</h3>
+                        <p>Alta de vendedores y proveedores comprobando que la sociedad existe y está activa.</p>
                     </div>
-                    <div
-                        style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
-                        <div style="font-size: 2rem; margin-bottom: 16px;">🔄</div>
-                        <h4 style="margin: 0; font-weight: 800;">Sincronización de CRM/ERP</h4>
+                    <div class="kyb-sector">
+                        <h3>SaaS y facturación</h3>
+                        <p>Alta de clientes empresa con la razón social y el domicilio fiscal correctos desde el principio.</p>
                     </div>
-                    <div
-                        style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
-                        <div style="font-size: 2rem; margin-bottom: 16px;">💳</div>
-                        <h4 style="margin: 0; font-weight: 800;">Risk Analysis & Lending</h4>
+                    <div class="kyb-sector">
+                        <h3>Asesorías y despachos</h3>
+                        <p>Alta de nuevos clientes y revisión periódica de la cartera para detectar disoluciones o concursos.</p>
                     </div>
-                    <div
-                        style="background: white; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center;">
-                        <div style="font-size: 2rem; margin-bottom: 16px;">🚀</div>
-                        <h4 style="margin: 0; font-weight: 800;">SaaS Product Integration</h4>
+                    <div class="kyb-sector">
+                        <h3>Compras y proveedores</h3>
+                        <p>Homologación de proveedores: estado, administradores y, en Business, contratos públicos y perfil de riesgo.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- VALUE HOOKS -->
+        <!-- ENDPOINTS PARA KYB -->
         <section class="radar-section">
-            <div class="container">
-                <div class="radar-heading radar-heading--center">
-                    <div class="radar-kicker">Por qué elegirnos</div>
-                    <h2 class="radar-title">Diferencia tu producto con datos inteligentes</h2>
-                    <p class="radar-subtitle">
-                        No entregamos datos estáticos. Entregamos inteligencia accionable lista para ser integrada en
-                        tus procesos.
-                    </p>
-                </div>
-
-                <div class="radar-grid"
-                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px;">
-                    <div class="api-feature-card">
-                        <div class="api-feature-icon">🛡️</div>
-                        <h3>Ingestión Masiva de Datos</h3>
-                        <p class="radar-text">Diseñada para flujos de alta demanda. Nuestra arquitectura soporta miles de peticiones simultáneas sin degradación de latencia.</p>
-                    </div>
-                    <div class="api-feature-card">
-                        <div class="api-feature-icon">🎯</div>
-                        <h3>Scoring IA Predictivo</h3>
-                        <p class="radar-text">Transforma datos brutos en inteligencia accionable. Prioriza tus esfuerzos comerciales basándote en la solvencia y potencial de cada empresa.</p>
-                    </div>
-                    <div class="api-feature-card">
-                        <div class="api-feature-icon">⚡</div>
-                        <h3>Notificaciones Push</h3>
-                        <p class="radar-text">Recibe payloads de Webhooks en tiempo real. Mantén tu base de datos
-                            sincronizada con el BORME sin procesos de polling.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ENDPOINTS TABLE -->
-        <section class="radar-section radar-section--soft">
-            <div class="container">
+            <div class="container kyb-wrap">
                 <div class="radar-heading">
-                    <div class="radar-kicker">Documentación rápida</div>
-                    <h2 class="radar-title">Capacidades de la API</h2>
+                    <div class="radar-kicker">Referencia rápida</div>
+                    <h2 class="radar-title">Endpoints de la API para KYB</h2>
                     <p class="radar-subtitle" style="text-align: left; max-width: 800px; margin-left: 0;">
-                        Consulta empresas en España mediante endpoints API REST. Accede a datos fiscales, actividad,
-                        estado y otra información oficial del Registro Mercantil en tiempo real.
+                        Los que más se usan en una verificación de empresa. El resto (scoring comercial, empresas
+                        recién constituidas, grafos societarios…) está en la documentación.
                     </p>
                 </div>
 
-                <div
-                    style="background: #fff; border-radius: 24px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: var(--shadow-soft);">
+                <div style="background: #fff; border-radius: 24px; border: 1px solid #e2e8f0; overflow-x: auto; box-shadow: var(--shadow-soft);">
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead>
                             <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
-                                <th
-                                    style="padding: 20px; text-align: left; font-weight: 800; font-size: 13px; color: #64748b; text-transform: uppercase;">
-                                    Endpoint</th>
-                                <th
-                                    style="padding: 20px; text-align: left; font-weight: 800; font-size: 13px; color: #64748b; text-transform: uppercase;">
-                                    Utilidad de Negocio e Integración</th>
-                                <th
-                                    style="padding: 20px; text-align: center; font-weight: 800; font-size: 13px; color: #64748b; text-transform: uppercase;">
-                                    Estado</th>
-                                <th
-                                    style="padding: 20px; text-align: center; font-weight: 800; font-size: 13px; color: #64748b; text-transform: uppercase;">
-                                    Payload</th>
+                                <th style="padding: 20px; text-align: left; font-weight: 800; font-size: 13px; color: #64748b; text-transform: uppercase;">Endpoint</th>
+                                <th style="padding: 20px; text-align: left; font-weight: 800; font-size: 13px; color: #64748b; text-transform: uppercase;">Para qué sirve en un KYB</th>
+                                <th style="padding: 20px; text-align: center; font-weight: 800; font-size: 13px; color: #64748b; text-transform: uppercase;">Plan</th>
+                                <th style="padding: 20px; text-align: center; font-weight: 800; font-size: 13px; color: #64748b; text-transform: uppercase;">Ejemplo</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- CORE ENDPOINTS -->
                             <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
                                 <td style="padding: 18px 20px;">
                                     <div
@@ -1245,19 +952,13 @@
                                 </td>
                                 <td style="padding: 18px 20px;">
                                     <strong
-                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Data Enrichment Legal</strong>
+                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Datos de la empresa por NIF</strong>
                                     <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
-                                        Obtén el perfil legal completo: <code style="color: #2563eb;">name</code>, <code
-                                            style="color: #2563eb;">founded</code>, <code
-                                            style="color: #2563eb;">address</code>, <code
-                                            style="color: #2563eb;">cnae</code>, <code
-                                            style="color: #2563eb;">status</code> y enlaces a registros.
-                                        <span style="color: #64748b; font-style: italic;">(Datos de contacto protegidos
-                                            en Free)</span>.
+                                        Razón social, estado registral, CNAE y provincia. Con <code style="color: #2563eb;">admin=true</code>, administradores y cargos (Pro). En Free, el domicilio y el objeto social van ocultos.
                                     </p>
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;"><span
-                                        style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">GÉNERICO</span>
+                                        style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">FREE</span>
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;">
                                     <button type="button" onclick="event.preventDefault(); showJsonPreview('get_companies')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
@@ -1272,20 +973,18 @@
                                 </td>
                                 <td style="padding: 18px 20px;">
                                     <strong
-                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Normalización y Búsqueda</strong>
+                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Buscar por nombre</strong>
                                     <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
-                                        Localiza empresas por nombre comercial o razón social. Incluye sugerencias
-                                        fonéticas y coincidencias parciales con alta precisión.
+                                        Encuentra el NIF de una sociedad cuando el cliente solo te da su nombre.
                                     </p>
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;"><span
-                                        style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">GÉNERICO</span>
+                                        style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">FREE</span>
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;">
                                     <button type="button" onclick="event.preventDefault(); showJsonPreview('get_search')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
-
                             <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
                                 <td style="padding: 18px 20px;">
                                     <div
@@ -1297,7 +996,7 @@
                                     <strong
                                         style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Consulta Múltiple (Batch)</strong>
                                     <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
-                                        Consulta de golpe hasta 100 CIFs en una única petición ahorrando latencia de red. El consumo se calcula dinámicamente por cada CIF encontrado.
+                                        Revisa hasta 100 NIF en una sola petición: útil para repasar la cartera de clientes o proveedores. Solo se cobra por cada empresa encontrada.
                                     </p>
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;"><span
@@ -1306,56 +1005,6 @@
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;">
                                     <button type="button" onclick="event.preventDefault(); showJsonPreview('post_batch')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
-                                </td>
-                            </tr>
-
-                            <!-- ENRICHMENT & IA -->
-                            <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 18px 20px;">
-                                    <div
-                                        style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">
-                                        GET /companies/score</div>
-                                    <div style="font-size: 0.75rem; color: #94a3b8;">Parámetro: ?cif=...</div>
-                                </td>
-                                <td style="padding: 18px 20px;">
-                                    <strong
-                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Comercial
-                                        Scoring IA</strong>
-                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
-                                        Algoritmo de propensión de compra. Devuelve <code
-                                            style="color: #2563eb;">score</code> (0-100), <code
-                                            style="color: #2563eb;">priority</code> (Muy Alta - Baja) y un mensaje
-                                        descriptivo del potencial comercial.
-                                    </p>
-                                </td>
-                                <td style="padding: 18px 20px; text-align: center;"><span
-                                        style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO
-                                        / BUS</span></td>
-                                <td style="padding: 18px 20px; text-align: center;">
-                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_score')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
-                                </td>
-                            </tr>
-                            <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 18px 20px;">
-                                    <div
-                                        style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">
-                                        GET /companies/signals</div>
-                                    <div style="font-size: 0.75rem; color: #94a3b8;">Parámetro: ?cif=...</div>
-                                </td>
-                                <td style="padding: 18px 20px;">
-                                    <strong
-                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Señales
-                                        Societarias (BORME)</strong>
-                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
-                                        Monitoriza cambios de capital, actos de insolvencia, nombramientos directivos y
-                                        renovaciones de cargos societarios en tiempo real.
-                                    </p>
-                                </td>
-                                <td style="padding: 18px 20px; text-align: center;"><span
-                                        style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO
-                                        / BUS</span></td>
-                                <td style="padding: 18px 20px; text-align: center;">
-                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_signals')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
                             <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
@@ -1384,120 +1033,24 @@
                                 <td style="padding: 18px 20px;">
                                     <div
                                         style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">
-                                        GET /companies/insights</div>
+                                        GET /companies/signals</div>
                                     <div style="font-size: 0.75rem; color: #94a3b8;">Parámetro: ?cif=...</div>
                                 </td>
                                 <td style="padding: 18px 20px;">
                                     <strong
-                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Predictive Business Insights</strong>
+                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Señales
+                                        Societarias (BORME)</strong>
                                     <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
-                                        Análisis avanzado de necesidades. Devuelve <code
-                                            style="color: #2563eb;">profile</code> (resumen IA del nicho) y <code
-                                            style="color: #2563eb;">prob</code> (índice de probabilidad de éxito en
-                                        captación).
-                                    </p>
-                                </td>
-                                <td style="padding: 18px 20px; text-align: center;"><span
-                                        style="background: #f5f3ff; color: #8b5cf6; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">IA
-                                        PREMIUM</span></td>
-                                <td style="padding: 18px 20px; text-align: center;">
-                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_insights')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
-                                </td>
-                            </tr>
-
-                            <!-- RADAR -->
-                            <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 18px 20px;">
-                                    <div
-                                        style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">
-                                        GET /companies/radar</div>
-                                    <div style="font-size: 0.75rem; color: #94a3b8;">Filtros: province, sector...</div>
-                                </td>
-                                <td style="padding: 18px 20px;">
-                                    <strong
-                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Endpoint
-                                        de Nuevas Constituciones</strong>
-                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
-                                        Extracción masiva de empresas recién constituidas. Filtra por geolocalización o
-                                        actividad económica (CNAE) para alimentar tu flujo de ventas frío.
+                                        Disoluciones, concursos, cambios de capital y de administradores publicados en el BORME.
                                     </p>
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;"><span
                                         style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO
                                         / BUS</span></td>
                                 <td style="padding: 18px 20px; text-align: center;">
-                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_radar')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
+                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_signals')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
-
-                            <!-- NETWORK -->
-                            <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 18px 20px;">
-                                    <div
-                                        style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">
-                                        GET /companies/network</div>
-                                    <div style="font-size: 0.75rem; color: #94a3b8;">Parámetro: ?cif=...</div>
-                                </td>
-                                <td style="padding: 18px 20px;">
-                                    <strong
-                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Grafos de Poder Societario</strong>
-                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
-                                        Obtiene la red de vinculación entre empresas a través de sus administradores.
-                                    </p>
-                                </td>
-                                <td style="padding: 18px 20px; text-align: center;"><span
-                                        style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO
-                                        / BUS</span></td>
-                                <td style="padding: 18px 20px; text-align: center;">
-                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_network')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
-                                </td>
-                            </tr>
-
-                            <!-- MATCH -->
-                            <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 18px 20px;">
-                                    <div
-                                        style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">
-                                        GET /companies/match</div>
-                                    <div style="font-size: 0.75rem; color: #94a3b8;">Filtros: cif, seller_sector</div>
-                                </td>
-                                <td style="padding: 18px 20px;">
-                                    <strong
-                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Calculadora de Match B2B</strong>
-                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
-                                        Evalúa el encaje comercial entre una empresa prospecto y un sector de ventas, devolviendo un score y argumentario.
-                                    </p>
-                                </td>
-                                <td style="padding: 18px 20px; text-align: center;"><span
-                                        style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span></td>
-                                <td style="padding: 18px 20px; text-align: center;">
-                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_match')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
-                                </td>
-                            </tr>
-
-                            <!-- CONTRACTS -->
-                            <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 18px 20px;">
-                                    <div
-                                        style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">
-                                        GET /companies/contracts</div>
-                                    <div style="font-size: 0.75rem; color: #94a3b8;">Filtros: cif, page, limit</div>
-                                </td>
-                                <td style="padding: 18px 20px;">
-                                    <strong
-                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Contratos y Adjudicaciones Públicas</strong>
-                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
-                                        Historial de contratos y adjudicaciones públicas de la empresa, órgano de contratación e importe de adjudicación.
-                                    </p>
-                                </td>
-                                <td style="padding: 18px 20px; text-align: center;"><span
-                                        style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span></td>
-                                <td style="padding: 18px 20px; text-align: center;">
-                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_contracts')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
-                                </td>
-                            </tr>
-
-                            <!-- RISK PROFILE -->
                             <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
                                 <td style="padding: 18px 20px;">
                                     <div
@@ -1518,8 +1071,6 @@
                                     <button type="button" onclick="event.preventDefault(); showJsonPreview('get_risk_profile')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
-
-                            <!-- WEBHOOKS -->
                             <tr class="api-endpoint-row">
                                 <td style="padding: 18px 20px;">
                                     <div
@@ -1542,53 +1093,12 @@
                                     <button type="button" onclick="event.preventDefault(); showJsonPreview('post_webhook')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
                                 </td>
                             </tr>
-                            <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 18px 20px;">
-                                    <div
-                                        style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">
-                                        GET /webhooks</div>
-                                    <div style="font-size: 0.75rem; color: #94a3b8;">Headers: X-API-KEY</div>
-                                </td>
-                                <td style="padding: 18px 20px;">
-                                    <strong
-                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Gestión
-                                        de Webhooks</strong>
-                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
-                                        Lista y gestiona tus suscripciones activas para recibir notificaciones HTTP
-                                        instantáneas.
-                                    </p>
-                                </td>
-                                <td style="padding: 18px 20px; text-align: center;"><span
-                                        style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span>
-                                </td>
-                                <td style="padding: 18px 20px; text-align: center;">
-                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('get_webhooks')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
-                                </td>
-                            </tr>
-                            <tr class="api-endpoint-row">
-                                <td style="padding: 18px 20px;">
-                                    <div
-                                        style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">
-                                        DELETE /webhooks/{id}</div>
-                                    <div style="font-size: 0.75rem; color: #94a3b8;">Path param: webhook_id</div>
-                                </td>
-                                <td style="padding: 18px 20px;">
-                                    <strong
-                                        style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Baja
-                                        de Webhooks</strong>
-                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">
-                                        Elimina la suscripción a eventos de forma programática.
-                                    </p>
-                                </td>
-                                <td style="padding: 18px 20px; text-align: center;"><span
-                                        style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span>
-                                </td>
-                                <td style="padding: 18px 20px; text-align: center;">
-                                    <button type="button" onclick="event.preventDefault(); showJsonPreview('delete_webhook')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button>
-                                </td>
-                            </tr>
                         </tbody>
                     </table>
+                </div>
+                <div class="kyb-more">
+                    <a href="<?= site_url('documentation') ?>">Ver todos los endpoints en la documentación →</a>
+                    <a href="<?= site_url() ?>#precios">Comparativa completa de planes →</a>
                 </div>
             </div>
         </section>
@@ -1597,11 +1107,10 @@
         <section id="planes" class="radar-section">
             <div class="container">
                 <div class="radar-heading radar-heading--center">
-                    <div class="radar-kicker">Precios transparentes</div>
-                    <h2 class="radar-title">Planes diseñados para crecer</h2>
+                    <div class="radar-kicker">Precios</div>
+                    <h2 class="radar-title">Planes para verificar empresas (KYB)</h2>
                     <p class="radar-subtitle">
-                        Sin costes de integración. Empieza gratis e integra la potencia de datos oficiales en tu stack
-                        en minutos.
+                        Empieza gratis para probar el flujo con datos reales. Para verificar administradores y revisar la cartera necesitarás Pro.
                     </p>
                 </div>
 
@@ -1622,21 +1131,21 @@
                             <h3>Free</h3>
                         </div>
                         <div class="api-price-value">0€<span>/ único</span></div>
-                        <p class="api-pricing-card__desc">Para probar la integración con datos reales: 100 consultas que no caducan.</p>
+                        <p class="api-pricing-card__desc">Para probar el flujo de alta con datos reales: <?= (int) $freeLimit ?> consultas que no caducan.</p>
 
                         <ul class="api-price-list">
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> <?= $freeLimit ?> consultas garantizadas</li>
+                                </svg> <?= (int) $freeLimit ?> consultas gratis (no se renuevan)</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> Datos básicos oficiales</li>
+                                </svg> Razón social, estado, CNAE y provincia</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> Acceso a /companies</li>
+                                </svg> Consulta por NIF y buscador por nombre</li>
                         </ul>
 
                         <div class="api-price-cta" style="margin-top: 32px;">
@@ -1660,8 +1169,8 @@
                             <h3>Pro</h3>
                         </div>
                         <div class="api-price-value"><b id="pricePro" data-monthly="19" data-annual="15,17" style="font-weight: inherit;">15,17</b>€<span>/ mes</span></div>
-                        <div class="api-annual-note" style="margin: -6px 0 10px; font-size: 0.8rem; font-weight: 700; color: #059669;">Pago anual: 182 € (ahorras 46 €)</div>
-                        <p class="api-pricing-card__desc">Integración completa para procesos de onboarding B2B, enriquecimiento de leads y scoring.</p>
+                        <div class="api-annual-note" style="margin: -6px 0 10px; font-size: 0.8rem; font-weight: 700; color: #ecfdf5; opacity: .92;">Pago anual: 182 € (ahorras 46 €)</div>
+                        <p class="api-pricing-card__desc">Para el KYB completo: administradores, domicilio, historial del BORME y revisión de cartera.</p>
 
                         <ul class="api-price-list">
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
@@ -1671,19 +1180,19 @@
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> Historial Actos BORME</li>
+                                </svg> Administradores y cargos</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> Scoring IA Incluido</li>
+                                </svg> Domicilio y objeto social completos</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> Listado de Constituciones</li>
+                                </svg> Historial del BORME y señales</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> Grafos de Poder Societario</li>
+                                </svg> Consultas por lotes: 100 NIF por petición</li>
                         </ul>
 
                         <a href="<?= site_url('register?intent=api&plan=pro&period=annual') ?>" class="api-pricing-btn primary">Activar Plan Pro</a>
@@ -1695,8 +1204,8 @@
                             <h3>Business</h3>
                         </div>
                         <div class="api-price-value"><b id="priceBusiness" data-monthly="49" data-annual="39,17" style="font-weight: inherit;">39,17</b>€<span>/ mes</span></div>
-                        <div class="api-annual-note" style="margin: -6px 0 10px; font-size: 0.8rem; font-weight: 700; color: #059669;">Pago anual: 470 € (ahorras 118 €)</div>
-                        <p class="api-pricing-card__desc">Sincronización en tiempo real vía Webhooks y volumen masivo para plataformas de misión crítica.</p>
+                        <div class="api-annual-note" style="margin: -6px 0 10px; font-size: 0.8rem; font-weight: 700; color: #ecfdf5; opacity: .92;">Pago anual: 470 € (ahorras 118 €)</div>
+                        <p class="api-pricing-card__desc">Para más volumen y análisis de riesgo: perfil de solvencia, contratos públicos y webhooks.</p>
 
                         <ul class="api-price-list">
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
@@ -1706,15 +1215,15 @@
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> Webhooks Push PUSH</li>
+                                </svg> Perfil de riesgo y solvencia</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> IA Insights & Predictiva de Negocio</li>
+                                </svg> Contratos y adjudicaciones públicas</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> Calculadora de Match B2B</li>
+                                </svg> Webhooks Push (Notificaciones BORME)</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
@@ -1724,6 +1233,7 @@
                         <a href="<?= site_url('register?intent=api&plan=business&period=annual') ?>" class="api-pricing-btn">Activar Business</a>
                     </div>
                 </div>
+                <p style="text-align:center; margin-top:28px; font-weight:800;"><a href="<?= site_url() ?>#precios" style="color:#2563eb; text-decoration:none;">Ver la comparativa completa de planes y funciones →</a></p>
 
             </div>
 
@@ -1768,9 +1278,9 @@
         <section class="radar-section radar-section--soft">
             <div class="container">
                 <div class="radar-heading radar-heading--center">
-                    <div class="radar-kicker">Developer First</div>
-                    <h2 class="radar-title">Implementación orientada a Desarrolladores</h2>
-                    <p class="radar-subtitle">Documentación OpenAPI, autenticación mediante API Key y SDKs para una activación inmediata en producción.</p>
+                    <div class="radar-kicker">Para desarrolladores</div>
+                    <h2 class="radar-title">Ejemplo de verificación KYB en Python, PHP y Node.js</h2>
+                    <p class="radar-subtitle">Consulta la empresa con sus administradores y decide si el alta sigue adelante. Autenticación con API key y SDK para PHP, Node.js y Python.</p>
                 </div>
 
                 <!-- Language tabs -->
@@ -1796,55 +1306,55 @@
                         <span
                             style="width:12px;height:12px;border-radius:50%;background:#28c840;display:inline-block;"></span>
                         <span id="tab-filename"
-                            style="flex:1;text-align:center;font-size:12px;color:#64748b;font-weight:700;font-family:monospace;">api_empresas.py</span>
+                            style="flex:1;text-align:center;font-size:12px;color:#64748b;font-weight:700;font-family:monospace;">verificar_empresa.py</span>
                     </div>
                     <pre id="code-python"
                         style="margin:0;padding:32px 36px;font-family:'Fira Code','Courier New',monospace;font-size:13.5px;line-height:2;color:#e2e8f0;overflow-x:auto;"><span class="api-code-keyword">import</span> requests
 
-url     = <span class="api-code-string">"https://apiempresas.es/api/v1/companies"</span>
-params  = {<span class="api-code-attr">"cif"</span>: <span class="api-code-string">"B12345678"</span>}
-headers = {<span class="api-code-attr">"X-API-KEY"</span>: <span class="api-code-string">"tu_clave_aqui"</span>}
+res = requests.get(
+    <span class="api-code-string">"https://apiempresas.es/api/v1/companies"</span>,
+    params={<span class="api-code-attr">"cif"</span>: <span class="api-code-string">"B12345678"</span>, <span class="api-code-attr">"admin"</span>: <span class="api-code-string">"true"</span>},
+    headers={<span class="api-code-attr">"X-API-KEY"</span>: <span class="api-code-string">"tu_clave_aqui"</span>},
+).json()
 
-res  = requests.get(url, params=params, headers=headers)
-data = res.json()
-
-<span class="api-code-keyword">if</span> data[<span class="api-code-string">"success"</span>]:
-    company = data[<span class="api-code-string">"data"</span>]
-    <span class="api-code-keyword">print</span>(company[<span class="api-code-string">"name"</span>])     <span style="color:#475569"># → Tech Flow Solutions SL</span>
-    <span class="api-code-keyword">print</span>(company[<span class="api-code-string">"province"</span>]) <span style="color:#475569"># → MADRID</span>
-    <span class="api-code-keyword">print</span>(company[<span class="api-code-string">"founded"</span>])  <span style="color:#475569"># → 2024-03-12</span>
+<span class="api-code-keyword">if not</span> res[<span class="api-code-string">"success"</span>]:
+    <span class="api-code-keyword">print</span>(<span class="api-code-string">"Revisión manual:"</span>, res[<span class="api-code-string">"error"</span>])   <span style="color:#475569"># p. ej. COMPANY_NOT_FOUND</span>
+<span class="api-code-keyword">else</span>:
+    empresa = res[<span class="api-code-string">"data"</span>]
+    admins  = [a[<span class="api-code-string">"name"</span>] <span class="api-code-keyword">for</span> a <span class="api-code-keyword">in</span> empresa.get(<span class="api-code-string">"administrators"</span>, [])]
+    activa  = empresa[<span class="api-code-string">"status"</span>] == <span class="api-code-string">"ACTIVA"</span>
+    firmante_ok = <span class="api-code-string">"JUAN PÉREZ GARCÍA"</span> <span class="api-code-keyword">in</span> admins
+    <span class="api-code-keyword">print</span>(<span class="api-code-string">"Alta aprobada"</span> <span class="api-code-keyword">if</span> activa <span class="api-code-keyword">and</span> firmante_ok <span class="api-code-keyword">else</span> <span class="api-code-string">"Revisión manual"</span>)
 </pre>
                     <pre id="code-php"
-                        style="display:none;margin:0;padding:32px 36px;font-family:'Fira Code','Courier New',monospace;font-size:13.5px;line-height:2;color:#e2e8f0;overflow-x:auto;"><span class="api-code-keyword">$ch</span> = curl_init();
-
+                        style="display:none;margin:0;padding:32px 36px;font-family:'Fira Code','Courier New',monospace;font-size:13.5px;line-height:2;color:#e2e8f0;overflow-x:auto;"><span class="api-code-keyword">$ch</span> = curl_init(<span class="api-code-string">"https://apiempresas.es/api/v1/companies?cif=B12345678&amp;admin=true"</span>);
 curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
-    CURLOPT_URL            => <span class="api-code-string">"https://apiempresas.es/api/v1/companies?cif=B12345678"</span>,
     CURLOPT_HTTPHEADER     => [<span class="api-code-string">"X-API-KEY: tu_clave_aqui"</span>],
     CURLOPT_RETURNTRANSFER => <span class="api-code-keyword">true</span>,
 ]);
+<span class="api-code-keyword">$res</span> = json_decode(curl_exec(<span class="api-code-keyword">$ch</span>), <span class="api-code-keyword">true</span>);
 
-<span class="api-code-keyword">$data</span> = json_decode(curl_exec(<span class="api-code-keyword">$ch</span>), <span class="api-code-keyword">true</span>);
-
-<span class="api-code-keyword">if</span> (<span class="api-code-keyword">$data</span>[<span class="api-code-string">'success'</span>]) {
-    <span class="api-code-keyword">$c</span> = <span class="api-code-keyword">$data</span>[<span class="api-code-string">'data'</span>];
-    <span class="api-code-keyword">echo</span> <span class="api-code-keyword">$c</span>[<span class="api-code-string">'name'</span>];      <span style="color:#475569">// → Tech Flow Solutions SL</span>
-    <span class="api-code-keyword">echo</span> <span class="api-code-keyword">$c</span>[<span class="api-code-string">'province'</span>];  <span style="color:#475569">// → MADRID</span>
+<span class="api-code-keyword">if</span> (!<span class="api-code-keyword">$res</span>[<span class="api-code-string">'success'</span>]) {
+    <span class="api-code-keyword">echo</span> <span class="api-code-string">'Revisión manual: '</span> . <span class="api-code-keyword">$res</span>[<span class="api-code-string">'error'</span>];
+} <span class="api-code-keyword">else</span> {
+    <span class="api-code-keyword">$e</span>      = <span class="api-code-keyword">$res</span>[<span class="api-code-string">'data'</span>];
+    <span class="api-code-keyword">$admins</span> = array_column(<span class="api-code-keyword">$e</span>[<span class="api-code-string">'administrators'</span>] ?? [], <span class="api-code-string">'name'</span>);
+    <span class="api-code-keyword">$ok</span>     = <span class="api-code-keyword">$e</span>[<span class="api-code-string">'status'</span>] === <span class="api-code-string">'ACTIVA'</span> &amp;&amp; in_array(<span class="api-code-string">'JUAN PÉREZ GARCÍA'</span>, <span class="api-code-keyword">$admins</span>);
+    <span class="api-code-keyword">echo</span> <span class="api-code-keyword">$ok</span> ? <span class="api-code-string">'Alta aprobada'</span> : <span class="api-code-string">'Revisión manual'</span>;
 }
 </pre>
                     <pre id="code-node"
-                        style="display:none;margin:0;padding:32px 36px;font-family:'Fira Code','Courier New',monospace;font-size:13.5px;line-height:2;color:#e2e8f0;overflow-x:auto;"><span class="api-code-keyword">const</span> axios = require(<span class="api-code-string">'axios'</span>);
+                        style="display:none;margin:0;padding:32px 36px;font-family:'Fira Code','Courier New',monospace;font-size:13.5px;line-height:2;color:#e2e8f0;overflow-x:auto;"><span class="api-code-keyword">const</span> res = <span class="api-code-keyword">await</span> fetch(
+  <span class="api-code-string">'https://apiempresas.es/api/v1/companies?cif=B12345678&amp;admin=true'</span>,
+  { headers: { <span class="api-code-string">'X-API-KEY'</span>: <span class="api-code-string">'tu_clave_aqui'</span> } }
+).then(r => r.json());
 
-<span class="api-code-keyword">const</span> res = <span class="api-code-keyword">await</span> axios.get(<span class="api-code-string">'https://apiempresas.es/api/v1/companies'</span>, {
-  params:  { cif: <span class="api-code-string">'B12345678'</span> },
-  headers: { <span class="api-code-string">'X-API-KEY'</span>: <span class="api-code-string">'tu_clave_aqui'</span> }
-});
-
-<span class="api-code-keyword">const</span> { success, data } = res.data;
-
-<span class="api-code-keyword">if</span> (success) {
-  <span class="api-code-keyword">const</span> { name, cnae_label, founded } = data;
-  console.log(name);       <span style="color:#475569">// → Tech Flow Solutions SL</span>
-  console.log(cnae_label); <span style="color:#475569">// → Programación informática</span>
+<span class="api-code-keyword">if</span> (!res.success) {
+  console.log(<span class="api-code-string">'Revisión manual:'</span>, res.error);
+} <span class="api-code-keyword">else</span> {
+  <span class="api-code-keyword">const</span> { status, administrators = [] } = res.data;
+  <span class="api-code-keyword">const</span> firmanteOk = administrators.some(a => a.name === <span class="api-code-string">'JUAN PÉREZ GARCÍA'</span>);
+  console.log(status === <span class="api-code-string">'ACTIVA'</span> &amp;&amp; firmanteOk ? <span class="api-code-string">'Alta aprobada'</span> : <span class="api-code-string">'Revisión manual'</span>);
 }
 </pre>
                 </div>
@@ -1872,8 +1382,8 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                     <div
                         style="display:flex;align-items:center;gap:8px;color:#64748b;font-size:0.88rem;font-weight:700;">
                         <span
-                            style="background:#eff6ff;color:#2563eb;padding:6px 8px;border-radius:8px;font-size:14px;">🤖</span>
-                        IA en insights y contact-prep
+                            style="background:#eff6ff;color:#2563eb;padding:6px 8px;border-radius:8px;font-size:14px;">📦</span>
+                        SDK: npm, pip y composer
                     </div>
                 </div>
             </div>
@@ -1881,7 +1391,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
 
         <script>
             function switchTab(lang) {
-                const names = { python: 'api_empresas.py', php: 'api_empresas.php', node: 'api_empresas.js' };
+                const names = { python: 'verificar_empresa.py', php: 'verificar_empresa.php', node: 'verificar_empresa.js' };
                 ['python', 'php', 'node'].forEach(l => {
                     document.getElementById('code-' + l).style.display = (l === lang) ? 'block' : 'none';
                     const btn = document.getElementById('tab-' + l);
@@ -1900,89 +1410,57 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
         </script>
 
 
-        <!-- FAQ SECTION -->
+        <!-- FAQ KYB: se pinta desde $kybFaqs, que genera también el JSON-LD FAQPage de abajo -->
+        <?php
+        $kybFaqs = [
+            ['¿Qué es un KYB y en qué se diferencia del KYC?',
+             'El KYB (Know Your Business) es la verificación de una empresa antes de trabajar con ella: que existe, que sigue activa, quién la administra y, si tu actividad lo exige, quién es su titular real. El KYC (Know Your Customer) verifica a personas físicas. La API cubre la parte de la empresa con datos del BORME.'],
+            ['¿Sirve la API para cumplir la normativa de prevención del blanqueo?',
+             'Te ayuda a identificar a la persona jurídica y a comprobar su estado y sus administradores con datos del BORME, y te deja la respuesta como evidencia. No sustituye tu política de diligencia debida: no incluye titularidad real ni listas de sanciones o PEP, que tendrás que cubrir por otra vía.'],
+            ['¿Puedo verificar el NIF de una empresa por API?',
+             'Sí. Envías el NIF de la sociedad (el antiguo CIF, con o sin guiones) a /companies y recibes su razón social y su estado registral. Si no existe ninguna sociedad con ese NIF, la API responde COMPANY_NOT_FOUND. Los NIF de personas físicas (autónomos) no se consultan, por protección de datos.'],
+            ['¿Cómo compruebo que quien firma es administrador de la empresa?',
+             'Añade admin=true a la consulta (plan Pro o superior) y compara el nombre de quien firma con la lista de administradores y cargos actuales. Si no aparece, lo normal es pedirle un poder o revisar el alta a mano.'],
+            ['¿Con qué frecuencia se actualizan los datos?',
+             'Revisamos el BORME a diario: las constituciones, los nombramientos y ceses, los cambios de domicilio o capital y las disoluciones, concursos y extinciones se incorporan con cada boletín publicado.'],
+            ['¿Puedo revisar toda mi cartera de clientes de golpe?',
+             'Sí. Con /companies/batch consultas hasta 100 NIF en una sola petición (plan Pro o superior), y /companies/signals te avisa de disoluciones, concursos y otros cambios. El plan Free admite 2 peticiones por segundo; Pro y Business, 20.'],
+        ];
+        ?>
         <section class="radar-section">
             <div class="container">
                 <div class="radar-heading radar-heading--center">
-                    <div class="radar-kicker">Respuesta a dudas técnicas</div>
-                    <h2 class="radar-title">Soporte Técnico e Integración</h2>
-                    <p class="radar-subtitle">Resolvemos tus dudas sobre el flujo de datos mercantiles y las capacidades de nuestra infraestructura.</p>
+                    <div class="radar-kicker">Preguntas frecuentes</div>
+                    <h2 class="radar-title">Preguntas frecuentes sobre la API KYB</h2>
+                    <p class="radar-subtitle">Lo que suele preguntarse antes de conectar la verificación de empresas al alta de clientes.</p>
                 </div>
 
                 <div class="api-faq">
-                    <div class="api-faq-item active">
+                    <?php foreach ($kybFaqs as $i => [$q, $a]): ?>
+                    <div class="api-faq-item<?= $i === 0 ? ' active' : '' ?>">
                         <button class="api-faq-question" onclick="this.parentElement.classList.toggle('active')">
-                            <span>¿Cómo realizar la integración técnica de la API?</span>
+                            <span><?= esc($q) ?></span>
                             <span class="api-faq-icon">+</span>
                         </button>
                         <div class="api-faq-answer">
-                            <div class="api-faq-answer-inner">
-                                La integración es sencilla mediante una API REST estándar. Solo necesitas tu API Key
-                                para realizar peticiones GET a nuestros endpoints. Disponemos de ejemplos listos para
-                                usar en Python, PHP, Node.js y cURL en nuestra documentación oficial.
-                            </div>
+                            <div class="api-faq-answer-inner"><?= esc($a) ?></div>
                         </div>
                     </div>
-
-                    <div class="api-faq-item">
-                        <button class="api-faq-question" onclick="this.parentElement.classList.toggle('active')">
-                            <span>¿Cuál es la frecuencia de actualización de los datos societarios?</span>
-                            <span class="api-faq-icon">+</span>
-                        </button>
-                        <div class="api-faq-answer">
-                            <div class="api-faq-answer-inner">
-                                Nuestro motor monitoriza el BORME (Boletín Oficial del Registro Mercantil) diariamente.
-                                Las nuevas constituciones, ceses, nombramientos y ampliaciones de capital suelen estar
-                                disponibles en la API pocas horas después de su publicación oficial.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="api-faq-item">
-                        <button class="api-faq-question" onclick="this.parentElement.classList.toggle('active')">
-                            <span>¿Es posible recibir alertas automáticas del BORME vía Webhooks?</span>
-                            <span class="api-faq-icon">+</span>
-                        </button>
-                        <div class="api-faq-answer">
-                            <div class="api-faq-answer-inner">
-                                Sí, el plan Business permite configurar Webhooks. Puedes registrar una URL de callback
-                                para recibir notificaciones PUSH cada vez que detectemos una nueva empresa que cumpla
-                                tus filtros de sector o provincia, evitando el polling constante.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="api-faq-item">
-                        <button class="api-faq-question" onclick="this.parentElement.classList.toggle('active')">
-                            <span>¿Qué esquema de datos JSON devuelve el endpoint /companies?</span>
-                            <span class="api-faq-icon">+</span>
-                        </button>
-                        <div class="api-faq-answer">
-                            <div class="api-faq-answer-inner">
-                                Devolvemos un JSON estructurado con: Datos legales (CIF, Razón Social), CNAE, Capital
-                                Social, Localización (Dirección, Provincia), Estado (Activa/Extinguida), Cargos
-                                Directivos y Scoring de propensión comercial basado en IA.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="api-faq-item">
-                        <button class="api-faq-question" onclick="this.parentElement.classList.toggle('active')">
-                            <span>¿Cuál es el límite de peticiones por segundo?</span>
-                            <span class="api-faq-icon">+</span>
-                        </button>
-                        <div class="api-faq-answer">
-                            <div class="api-faq-answer-inner">
-                                El plan Free admite 2 peticiones por segundo y los planes Pro y Business, 20.
-                                Para procesar muchas empresas de golpe, el endpoint <code>/companies/batch</code>
-                                consulta hasta 100 CIF en una sola petición. Si necesitas más, escríbenos y
-                                preparamos un plan a medida.
-                            </div>
-                        </div>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </section>
+        <script type="application/ld+json">
+        <?= json_encode([
+            '@context'   => 'https://schema.org',
+            '@type'      => 'FAQPage',
+            'mainEntity' => array_map(static fn($f) => [
+                '@type'          => 'Question',
+                'name'           => $f[0],
+                'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f[1]],
+            ], $kybFaqs),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
+        </script>
 
         <!-- FINAL CTA -->
         <section style="padding: 80px 0 100px;">
@@ -2023,11 +1501,10 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         <!-- Headline -->
                         <h2
                             style="color: #ffffff; font-size: 2.75rem; font-weight: 950; margin: 0 0 16px; letter-spacing: -0.04em; line-height: 1.1;">
-                            Empieza a usar la API de empresas ahora</h2>
+                            Automatiza tus verificaciones KYB</h2>
                         <p
                             style="color: rgba(255,255,255,0.65); font-size: 1.1rem; font-weight: 500; margin: 0 0 48px; max-width: 480px; margin-left: auto; margin-right: auto; line-height: 1.6;">
-                            Únete a las empresas que ya automatizan su validación mercantil y captan clientes antes que
-                            nadie.</p>
+                            Conecta la verificación de empresas a tu alta de clientes y proveedores. Empieza con <?= (int) $freeLimit ?> consultas gratis.</p>
 
                         <!-- Stats row -->
                         <div
@@ -2035,16 +1512,16 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                             <div>
                                 <div
                                     style="color: #fff; font-size: 1.75rem; font-weight: 950; letter-spacing: -0.04em;">
-                                    +3,5M</div>
+                                    <?= !empty($ps['companies']) ? esc($fmtCorto((int) $ps['companies'])) : '+4 M' ?></div>
                                 <div
                                     style="color: rgba(255,255,255,0.5); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; margin-top: 4px;">
-                                    EMPRESAS EN LA BASE</div>
+                                    EMPRESAS</div>
                             </div>
                             <div style="width: 1px; background: rgba(255,255,255,0.1);"></div>
                             <div>
                                 <div
                                     style="color: #fff; font-size: 1.75rem; font-weight: 950; letter-spacing: -0.04em;">
-                                    100</div>
+                                    <?= (int) $freeLimit ?></div>
                                 <div
                                     style="color: rgba(255,255,255,0.5); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; margin-top: 4px;">
                                     CONSULTAS GRATIS</div>
@@ -2062,7 +1539,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
 
                         <!-- CTA Button + disclaimer stacked -->
                         <div style="display: flex; flex-direction: column; align-items: center; gap: 14px;">
-                            <a href="<?= site_url('register?intent=api') ?>"
+                            <a href="<?= site_url('register?intent=api&plan=free&source=api_kyb_final') ?>"
                                 style="display: inline-block; background: linear-gradient(135deg, #facc15 0%, #f97316 100%); color: #0b1020; font-weight: 900; font-size: 1.05rem; padding: 18px 48px; border-radius: 16px; text-decoration: none; box-shadow: 0 10px 30px -5px rgba(15,23,42,0.45); transition: all 0.3s ease; letter-spacing: 0.01em;">
                                 Obtener API Key gratis
                             </a>
@@ -2075,89 +1552,73 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
             </div>
         </section>
 
-        <!-- FAQ SCHEMA -->
-        <script type="application/ld+json">
-        {
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "¿Cómo se integra la API de empresas?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "La integración se realiza mediante una API REST estándar usando una API Key. Tienes ejemplos disponibles en Python, PHP y Node.js."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "¿Qué frecuencia de actualización tienen los datos del BORME?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Monitorizamos el BORME diariamente, procesando altas y cambios societarios pocas horas después de su publicación oficial."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "¿Ofrecen soporte para Webhooks?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Sí, el plan Business permite configurar Webhooks para recibir notificaciones push en tiempo real sobre eventos del Registro Mercantil."
-              }
-            }
-          ]
-        }
-        </script>
 
     </main>
 
     <?= view('partials/footer') ?>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        $(document).ready(function() {
-            // Tracking Inicial
-            trackEvent('api_prices_view');
-
-            $('#api_quick_unlock_form').on('submit', function(e) {
-                e.preventDefault();
-                const $btn = $(this).find('button');
-                const $input = $(this).find('input');
-                const email = $input.val();
-                
-                $btn.prop('disabled', true).text('Generando...');
-
-                $.post('<?= site_url("api/quick-unlock") ?>', { email: email }, function(res) {
-                    if (res.status === 'success') {
-                        trackEvent('api_quick_unlock_success', {});
-                        Swal.fire({
-                            title: '¡API Key Generada!',
-                            text: 'Tu API Key es: ' + res.api_key + '. Te llevamos a tu panel, donde ya estará lanzada tu primera consulta.',
-                            icon: 'success',
-                            confirmButtonText: 'Ir a mi panel'
-                        }).then(() => {
-                            window.location.href = res.redirect;
-                        });
-                    } else if (res.status === 'exists') {
-                        window.location.href = res.redirect;
-                    } else {
-                        Swal.fire('Error', res.message || 'Error al generar la llave', 'error');
-                        $btn.prop('disabled', false).text('Obtener API Key Gratis');
-                    }
-                }).fail(function() {
-                    Swal.fire('Error', 'Error de conexión', 'error');
-                    $btn.prop('disabled', false).text('Obtener API Key Gratis');
-                });
-            });
-
-            function trackEvent(type, metadata = {}) {
-                $.post('<?= site_url("api/tracking/event") ?>', {
-                    event_type: type,
-                    source: 'api_landing',
-                    metadata: JSON.stringify(metadata)
+        // Sin jQuery (26-09-2026): la cabecera ya carga jQuery y SweetAlert2 una vez;
+        // antes esta página los volvía a descargar de forma síncrona solo para esto.
+        (function () {
+            function post(url, data) {
+                return fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: new URLSearchParams(data).toString(),
+                    credentials: 'same-origin'
                 });
             }
-        });
+            function trackEvent(type, metadata) {
+                post('<?= site_url("api/tracking/event") ?>', {
+                    event_type: type,
+                    source: 'api_landing',
+                    metadata: JSON.stringify(metadata || {})
+                }).catch(function () {});
+            }
+            function aviso(opts, fallbackText) {
+                if (window.Swal) { return Swal.fire(opts); }
+                alert(fallbackText);
+                return Promise.resolve();
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                trackEvent('api_prices_view');
+
+                var form = document.getElementById('api_quick_unlock_form');
+                if (!form) return;
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    var btn = form.querySelector('button');
+                    var email = form.querySelector('input').value;
+                    var reset = function () { btn.disabled = false; btn.textContent = 'Obtener API Key Gratis'; };
+                    btn.disabled = true;
+                    btn.textContent = 'Generando...';
+
+                    post('<?= site_url("api/quick-unlock") ?>', { email: email })
+                        .then(function (r) { return r.json(); })
+                        .then(function (res) {
+                            if (res.status === 'success') {
+                                trackEvent('api_quick_unlock_success', {});
+                                aviso({
+                                    title: '¡API Key Generada!',
+                                    text: 'Tu API Key es: ' + res.api_key + '. Te llevamos a tu panel, donde ya estará lanzada tu primera consulta.',
+                                    icon: 'success',
+                                    confirmButtonText: 'Ir a mi panel'
+                                }, 'Tu API Key es: ' + res.api_key).then(function () { window.location.href = res.redirect; });
+                            } else if (res.status === 'exists') {
+                                window.location.href = res.redirect;
+                            } else {
+                                aviso({ title: 'Error', text: res.message || 'Error al generar la llave', icon: 'error' }, res.message || 'Error al generar la llave');
+                                reset();
+                            }
+                        })
+                        .catch(function () {
+                            aviso({ title: 'Error', text: 'Error de conexión', icon: 'error' }, 'Error de conexión');
+                            reset();
+                        });
+                });
+            });
+        })();
     </script>
         <!-- JSON PREVIEW MODAL -->
         <div id="json-modal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.4); z-index:9999; backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:20px;">
@@ -2183,17 +1644,16 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                 get_companies: {
                     success: true,
                     data: {
-                        id: 12345,
-                        name: "TECH FLOW SOLUTIONS SL",
                         cif: "B12345678",
-                        cnae: "6201",
-                        cnae_label: "Programación informática",
-                        founded: "2024-03-12",
-                        province: "MADRID",
-                        municipality: "MADRID",
-                        address: "CALLE DE LA TECNOLOGIA 42",
+                        name: "EMPRESA DE EJEMPLO SL",
                         status: "ACTIVA",
-                        score: 94
+                        province: "MADRID",
+                        address: "CALLE DE EJEMPLO 42, MADRID",
+                        cnae: "6201",
+                        cnae_label: "Actividades de programación informática",
+                        administrators: [
+                            { name: "JUAN PÉREZ GARCÍA", position: "Administrador Único" }
+                        ]
                     }
                 },
                 get_search: {
@@ -2209,28 +1669,10 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                 post_batch: {
                     success: true,
                     data: [
-                        { name: "INDUSTRIA DE DISENO TEXTIL SA", cif: "A15075062" },
-                        { name: "INDITEX LOGISTICA SA", cif: "B00000001" }
+                        { name: "EMPRESA DE EJEMPLO SL", cif: "B12345678" },
+                        { name: "OTRA EMPRESA DE EJEMPLO SA", cif: "A87654321" }
                     ],
-                    meta: {
-                        requested: 2,
-                        found: 2,
-                        cost: 2,
-                        truncated: false
-                    }
-                },
-                get_score: {
-                    success: true,
-                    data: {
-                        cif: "B12345678",
-                        score: 94,
-                        priority: "MUY_ALTA",
-                        reasons: ["Crecimiento de capital reciente", "Alta actividad en BORME"],
-                        last_signal: {
-                            type: "AMPLIACION_CAPITAL",
-                            date: "2024-05-01"
-                        }
-                    }
+                    meta: { requested: 2, found: 2, cost: 2, truncated: false }
                 },
                 get_signals: {
                     success: true,
@@ -2261,77 +1703,11 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         ]
                     }
                 },
-                get_insights: {
-                    success: true,
-                    data: {
-                        profile: "SaaS / Fintech / Cloud",
-                        summary: "Empresa con alta tracción y necesidad inminente de escalado tecnológico.",
-                        needs: ["Infraestructura Cloud", "Ciberseguridad", "Contratación Devs"],
-                        conversion_probability: "HIGH",
-                        estimated_ticket: "10k-50k€"
-                    }
-                },
-                get_radar: {
-                    success: true,
-                    meta: {
-                        plan: "business",
-                        count: 142,
-                        limit: 500
-                    },
-                    data: [
-                        { name: "NEW CORP SL", cif: "B99887766", founded: "2024-05-05", province: "BARCELONA", score: 88 }
-                    ]
-                },
-                get_network: {
-                    success: true,
-                    data: {
-                        cif: "B12345678",
-                        administrators: [
-                            {
-                                name: "GARCIA LOPEZ JUAN",
-                                position: "Administrador Único",
-                                linked_companies: [
-                                    { name: "OTRA EMPRESA SL", cif: "B87654321", status: "ACTIVA" }
-                                ]
-                            }
-                        ]
-                    }
-                },
-                get_contracts: {
-                    success: true,
-                    data: {
-                        cif: "A01001411",
-                        company_name: "RHEINMETALL EXPAL MUNITIONS SA",
-                        summary: {
-                            total_contracts: 32,
-                            total_amount: "617746086.47",
-                            currency: "EUR"
-                        },
-                        contracts: [
-                            {
-                                tender_id: "https://contrataciondelestado.es/sindicacion/licitacionesPerfilContratante/20344437",
-                                title: "Suministro de 27.000 granadas de mortero de 81 mm...",
-                                contracting_authority: "Jefatura de Asuntos Económicos del Mando de Apoyo Logístico",
-                                award_date: "2026-08-25",
-                                amount: "4395320.00",
-                                currency: "EUR",
-                                tender_url: "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=B4EkDEGFvaA%2Bk2oCbDosIw%3D%3D"
-                            }
-                        ],
-                        pagination: {
-                            total: 32,
-                            page: 1,
-                            limit: 20,
-                            total_pages: 2,
-                            has_more: true
-                        }
-                    }
-                },
                 get_risk_profile: {
                     success: true,
                     data: {
-                        cif: "A01001411",
-                        company_name: "RHEINMETALL EXPAL MUNITIONS SA",
+                        cif: "B12345678",
+                        company_name: "EMPRESA DE EJEMPLO SL",
                         risk_score: 62,
                         risk_level: "ALTO",
                         confidence_score: 49,
@@ -2365,35 +1741,11 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         calculated_at: "2026-08-24T00:00:00Z"
                     }
                 },
-                get_match: {
-                    success: true,
-                    data: {
-                        cif: "B12345678",
-                        seller_sector: "software",
-                        match_score: 85,
-                        analysis: {
-                            match_level: "Alto",
-                            synergy: "Alta sinergia",
-                            buyer_needs: ["Digitalización", "CRM"]
-                        },
-                        sales_pitch: "He visto que están creciendo. Nuestro software puede ayudarles a..."
-                    }
-                },
                 post_webhook: {
                     success: true,
                     message: "Webhook creado correctamente",
                     id: 789
                 },
-                get_webhooks: {
-                    success: true,
-                    data: [
-                        { id: "789", url: "https://tucrm.com/api/callback", event: "company.created" }
-                    ]
-                },
-                delete_webhook: {
-                    success: true,
-                    message: "Webhook eliminado"
-                }
             };
 
             function showJsonPreview(key) {

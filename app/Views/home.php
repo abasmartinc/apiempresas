@@ -209,7 +209,7 @@
                         </ul>
                         <div class="use-case-foot">
                             <span class="use-case-plan">Desde el plan Free</span>
-                            <a href="<?= site_url('documentation#endpoint-by-cif') ?>" data-track-event="use_case_click" data-track-metadata='{"use_case": "Alta de clientes y KYB", "page_type": "home"}'>Ver el endpoint por CIF →</a>
+                            <a href="<?= site_url('api-empresas') ?>" data-track-event="use_case_click" data-track-metadata='{"use_case": "Alta de clientes y KYB", "page_type": "home"}'>Ver la API KYB →</a>
                         </div>
                     </div>
                     <div class="feature-card use-case card-teal reveal delay-2">
@@ -933,17 +933,13 @@
             get_companies: {
                 success: true,
                 data: {
-                    id: 12345,
-                    name: "TECH FLOW SOLUTIONS SL",
                     cif: "B12345678",
-                    cnae: "6201",
-                    cnae_label: "Programación informática",
-                    founded: "2024-03-12",
-                    province: "MADRID",
-                    municipality: "MADRID",
-                    address: "CALLE DE LA TECNOLOGIA 42",
+                    name: "EMPRESA DE EJEMPLO SL",
                     status: "ACTIVA",
-                    score: 94
+                    province: "MADRID",
+                    address: "CALLE DE EJEMPLO 42, MADRID",
+                    cnae: "6201",
+                    cnae_label: "Actividades de programación informática"
                 }
             },
             get_search: {
