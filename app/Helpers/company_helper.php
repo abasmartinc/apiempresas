@@ -454,7 +454,7 @@ if (!function_exists('risk_level_visual')) {
  *
  * Fuentes, y gana la MÁS GRAVE de las dos:
  *  1. El motor: los `LEGAL_STATE_*` de `canonical_events` (LegalDistressStateGraph)
- *     y el acto `EXTINCION_SOCIEDAD`, que es terminal.
+ *     (antes también el acto suelto `EXTINCION_SOCIEDAD`: ver la nota de abajo).
  *  2. `companies.status`, por texto.
  * No se usa CONCURSO_ACREEDORES suelto: puede estar ya concluido. Para eso está
  * LEGAL_STATE_CONCURSO_ACTIVO.
@@ -504,7 +504,12 @@ if (!function_exists('company_estado_registral')) {
             if ($code === '') {
                 continue;
             }
-            if ($code === 'LEGAL_STATE_EXTINTA' || $code === 'EXTINCION_SOCIEDAD') {
+            // Solo el estado legal del motor (25-09-2026). El acto suelto
+            // EXTINCION_SOCIEDAD ya no cuenta: el clasificador antiguo lo sacaba de
+            // cualquier "extinción" del texto ("Extinción del poder conferido a...") y
+            // así MERCADONA SA (A46103834) salía como extinguida. El motor 3.0.3 solo da
+            // LEGAL_STATE_EXTINTA con una extinción real y sin actos posteriores.
+            if ($code === 'LEGAL_STATE_EXTINTA') {
                 $candidatas[] = 'extinguida';
             } elseif ($code === 'LEGAL_STATE_CONCURSO_ACTIVO') {
                 $candidatas[] = 'concurso';

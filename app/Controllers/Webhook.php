@@ -353,6 +353,23 @@ class Webhook extends Controller
                 $this->abonarPackRiesgo($session, (int) $userId);
             }
 
+            // PEDIDO A MEDIDA (Config\PedidosMedida): se apunta el pago y sale el
+            // correo con el enlace de descarga, aunque el cliente cierre la pestaña
+            // antes de volver de Stripe. Si ya lo hizo la página de gracias, no repite.
+            if ($planSlug === \App\Services\PedidoMedidaService::PLAN
+                && in_array((string) ($session->payment_status ?? ''), ['paid', 'no_payment_required'], true)) {
+                try {
+                    (new \App\Services\PedidoMedidaService())->registrarPago(
+                        (string) ($session->metadata->pedido ?? ''),
+                        (string) $session->id,
+                        (string) ($session->customer_details->email ?? ''),
+                        isset($session->amount_total) ? (int) $session->amount_total : null
+                    );
+                } catch (\Throwable $e) {
+                    log_message('error', '[Webhook::pedido_medida] ' . $e->getMessage());
+                }
+            }
+
             // EXPORT JOBS
             if (in_array($planSlug, ['directory_single', 'subsidies_single', 'contracts_single', 'radar'])) {
                 $exportContext = json_decode($session->metadata->export_context ?? '{}', true);
@@ -741,7 +758,17 @@ class Webhook extends Controller
             $credits = (int)($metadata->credits ?? 0);
             $customPlanName = "Paquete de {$credits} créditos";
         }
-        
+
+        // Pedido a medida: sin plan en api_plans. Sin esto caía al plan 'radar' y la
+        // factura decía "Radar B2B".
+        if ($planSlug === \App\Services\PedidoMedidaService::PLAN) {
+            $freePlan = $planModel->find(1);
+            if ($freePlan) {
+                $plan = $freePlan;
+            }
+            $customPlanName = (string) ($metadata->product_name ?? 'Listado de empresas a medida');
+        }
+
         if (!$plan && isset($invoice->subtotal)) {
             $basePrice = (float)($invoice->subtotal / 100);
             $plan = $planModel->where('price_monthly', $basePrice)->first();
@@ -826,7 +853,7 @@ class Webhook extends Controller
             $emailService->sendInvoiceToUser([
                 'customer_name'  => $dbInvoice->billing_name,
                 'customer_email' => $dbInvoice->billing_email,
-                'plan_name'      => $plan->name ?? 'Descarga Excel',
+                'plan_name'      => $customPlanName ?? ($plan->name ?? 'Descarga Excel'),
                 'amount'         => $dbInvoice->total_amount,
                 'currency'       => $dbInvoice->currency,
                 'invoice_number' => $dbInvoice->invoice_number,

@@ -65,6 +65,14 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
             </a>
         </div>
 
+        <style>
+            .nav-dropdown-mega .nav-mega-col { display: flex; flex-direction: column; gap: 4px; }
+            .nav-dropdown-mega .nav-mega-sub { margin: 10px 0 2px 10px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; }
+            .nav-dropdown-mega a.nav-compact { padding: 5px 10px; }
+            .nav-dropdown-mega a.nav-compact strong { font-size: 13px; font-weight: 600; color: #475569; }
+            .nav-dropdown-mega a.nav-compact:hover strong { color: #0f172a; }
+        </style>
+
         <!-- Programmatic Navigation (Desktop) -->
         <nav class="desktop-only" aria-label="Principal" style="display:flex; align-items:center; gap: 20px;">
             
@@ -76,11 +84,8 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                     </svg>
                 </button>
                 <div class="nav-dropdown-menu nav-dropdown-mega">
-                    
+                    <div class="nav-mega-col">
                         <h4 style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin: 0 0 6px 10px;">Productos</h4>
-                        <h4 style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin: 0 0 6px 10px;">Integraciones</h4>
-
-                        <!-- Fila 1: API Empresas | Plugin WordPress -->
                         <a href="<?= site_url('api-empresas') ?>">
                             <div class="nav-item-icon">🔌</div>
                             <div>
@@ -88,6 +93,20 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                                 <span>Integra datos oficiales del Registro Mercantil en tu software.</span>
                             </div>
                         </a>
+                        <a href="<?= site_url('perfil-de-riesgo') ?>">
+                            <div class="nav-item-icon">🛡️</div>
+                            <div>
+                                <strong style="display: flex; align-items: center; gap: 6px;">Perfil de Riesgo <b style="background: #2563eb; color: white; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">NUEVO</b></strong>
+                                <span>Consulta scoring de solvencia, alertas BORME y riesgo comercial.</span>
+                            </div>
+                        </a>
+                        <div class="nav-mega-sub">Otras herramientas</div>
+                        <a class="nav-compact" href="<?= site_url('encontrar-empresas-similares') ?>"><strong>Empresas Gemelas</strong></a>
+                        <a class="nav-compact" href="<?= getRadarRedirect('header') ?>"><strong>Radar Inteligente</strong></a>
+                        <a class="nav-compact" href="https://vertice.apiempresas.es" target="_blank" rel="noopener"><strong>Vértice</strong></a>
+                    </div>
+                    <div class="nav-mega-col">
+                        <h4 style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin: 0 0 6px 10px;">Integraciones</h4>
                         <a href="<?= site_url('plugin-wordpress-buscador-empresas') ?>">
                             <div class="nav-item-icon">
                                 <img src="<?= base_url('public/img/logos/wordpress.svg') ?>" width="18" height="18" alt="WordPress" style="display: block;">
@@ -95,15 +114,6 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                             <div>
                                 <strong style="display: flex; align-items: center; gap: 6px;">Plugin WordPress <b style="background: #10b981; color: white; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">DISPONIBLE</b></strong>
                                 <span>Buscador B2B para convertir tu web en imán de leads corporativos.</span>
-                            </div>
-                        </a>
-
-                        <!-- Fila 2: Perfil de Riesgo | Extensión Google Sheets -->
-                        <a href="<?= site_url('perfil-de-riesgo') ?>">
-                            <div class="nav-item-icon">🛡️</div>
-                            <div>
-                                <strong style="display: flex; align-items: center; gap: 6px;">Perfil de Riesgo <b style="background: #2563eb; color: white; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">NUEVO</b></strong>
-                                <span>Consulta scoring de solvencia, alertas BORME y riesgo comercial.</span>
                             </div>
                         </a>
                         <a href="<?= site_url('integraciones/google-sheets') ?>">
@@ -115,15 +125,6 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                                 <span>Sincroniza y enriquece BBDD masivamente desde tus hojas de cálculo.</span>
                             </div>
                         </a>
-
-                        <!-- Fila 3: Empresas Gemelas | App Zapier / Make -->
-                        <a href="<?= site_url('encontrar-empresas-similares') ?>">
-                            <div class="nav-item-icon">👥</div>
-                            <div>
-                                <strong>Empresas Gemelas</strong>
-                                <span>Encuentra empresas idénticas a tus clientes con IA.</span>
-                            </div>
-                        </a>
                         <a href="#" class="js-track-wp-cta">
                             <div class="nav-item-icon">
                                 <img src="<?= base_url('public/img/logos/zapier.svg') ?>" width="18" height="18" alt="Zapier" style="display: block;">
@@ -131,15 +132,6 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                             <div>
                                 <strong style="display: flex; align-items: center; gap: 6px;">App Zapier / Make <b style="background: #f1f5f9; color: #64748b; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">PRÓXIMAMENTE</b></strong>
                                 <span>Automatiza conectando nuestra API con miles de herramientas.</span>
-                            </div>
-                        </a>
-
-                        <!-- Fila 4: Radar Inteligente | Plugin Shopify B2B -->
-                        <a href="<?= getRadarRedirect('header') ?>">
-                            <div class="nav-item-icon">📡</div>
-                            <div>
-                                <strong>Radar Inteligente</strong>
-                                <span>Detecta en tiempo real nuevas empresas publicadas en el BORME.</span>
                             </div>
                         </a>
                         <a href="#" class="js-track-wp-cta">
@@ -151,17 +143,7 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                                 <span>Valida CIF y solvencia financiera en el checkout B2B.</span>
                             </div>
                         </a>
-
-                        <!-- Fila 5: Vértice | Espacio libre -->
-                        <a href="https://vertice.apiempresas.es" target="_blank">
-                            <div class="nav-item-icon">📍</div>
-                            <div>
-                                <strong>Vértice</strong>
-                                <span>Geomarketing avanzado para expandir tu red comercial.</span>
-                            </div>
-                        </a>
-                        <div style="height: 100%;"></div>
-
+                    </div>
                 </div>
             </div>
 
@@ -211,18 +193,14 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                 </div>
             </div>
 
-            <a class="minor-nav-link" href="<?= site_url('documentation') ?>" style="color: rgba(255,255,255,0.9); font-weight: 600; text-decoration: none; font-size: 15px; margin-left: 8px;">Docs</a>
+            <a class="minor-nav-link" href="<?= site_url() ?>#precios" data-track-event="nav_pricing_click" data-track-metadata='{"source_block": "header"}'>Precios</a>
+            <a class="minor-nav-link" href="<?= site_url('documentation') ?>">Docs</a>
         </nav>
 
         <div class="desktop-only auth-buttons" style="position: relative;">
-            <button onclick="if(typeof toggleGlobalCopilotSticky === 'function') toggleGlobalCopilotSticky();" class="btn btn_header btn_header--ghost" style="position: relative; padding-left: 12px; padding-right: 12px; gap: 8px; display: flex; align-items: center; border: 1px solid rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.15); transition: all 0.2s ease; overflow: visible;">
-                <span style="font-size: 1.1rem;">✨</span>
-                <span style="color: #f3e8ff; font-weight: 600;">Copiloto</span>
-                <span style="position: absolute; top: -8px; right: -8px; background: linear-gradient(135deg, #a855f7, #d946ef); color: white; font-size: 0.6rem; font-weight: 900; padding: 2px 6px; border-radius: 6px; letter-spacing: 0.05em; box-shadow: 0 2px 5px rgba(168, 85, 247, 0.3);">NUEVO</span>
-            </button>
             <?php if (!session('logged_in') || !empty($force_public_header)): ?>
                 <a class="btn btn_header btn_header--ghost header-public-item" href="<?= site_url() ?>enter">Iniciar sesión</a>
-                <a class="btn btn_header btn_header--primary header-public-item" href="<?= site_url() ?>register">Crear cuenta gratis</a>
+                <a class="btn btn_header btn_header--primary header-public-item" href="<?= site_url('register') . (uri_string() === '' ? '?intent=api&source=home_header' : '') ?>">Crear cuenta gratis</a>
                 <a class="btn btn_header btn_header--primary header-private-item" style="display: none;" href="<?= site_url('dashboard') ?>">Dashboard</a>
                 <a class="btn btn_header btn_header--ghost header-private-item" style="display: none; padding: 8px 12px;" href="<?= site_url('logout') ?>" title="Cerrar sesión">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
@@ -334,6 +312,10 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                 <button class="mobile-menu-close" aria-label="Cerrar menú">&times;</button>
             </div>
             <nav class="mobile-nav">
+                <div class="mobile-nav-group" style="margin-bottom: 16px;">
+                    <a href="<?= site_url() ?>#precios" class="mobile-nav-link" data-track-event="nav_pricing_click" data-track-metadata='{"source_block": "mobile_header"}'>Precios</a>
+                    <a href="<?= site_url('documentation') ?>" class="mobile-nav-link">Docs</a>
+                </div>
                 <div class="mobile-nav-group">
                     <div class="mobile-nav-label">Soluciones</div>
                     
@@ -344,15 +326,11 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                     <a href="<?= site_url('perfil-de-riesgo') ?>" class="mobile-nav-link">
                         <span>Perfil de Riesgo</span>
                     </a>
-                    <a href="<?= site_url('encontrar-empresas-similares') ?>" class="mobile-nav-link">
-                        <span>Empresas Gemelas</span>
-                    </a>
-                    <a href="<?= getRadarRedirect('mobile_header') ?>" class="mobile-nav-link">
-                        <span>Radar Inteligente</span>
-                    </a>
-                    <a href="https://vertice.apiempresas.es" target="_blank" class="mobile-nav-link">
-                        <span>Vértice</span>
-                    </a>
+
+                    <div style="padding: 16px 18px 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em;">Otras herramientas</div>
+                    <a href="<?= site_url('encontrar-empresas-similares') ?>" class="mobile-nav-link"><span>Empresas Gemelas</span></a>
+                    <a href="<?= getRadarRedirect('mobile_header') ?>" class="mobile-nav-link"><span>Radar Inteligente</span></a>
+                    <a href="https://vertice.apiempresas.es" target="_blank" rel="noopener" class="mobile-nav-link"><span>Vértice</span></a>
 
                     <div style="padding: 16px 18px 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em;">Integraciones</div>
                     <a href="<?= site_url('plugin-wordpress-buscador-empresas') ?>" class="mobile-nav-link"><span>Plugin WordPress</span></a>
@@ -380,13 +358,10 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                     </a>
                 </div>
 
-                <div class="mobile-nav-group" style="margin-top: 16px;">
-                    <a href="<?= site_url('documentation') ?>" class="mobile-nav-link">Docs</a>
-                </div>
                 <div class="mobile-auth">
                     <?php if (!session('logged_in') || !empty($force_public_header)): ?>
                         <a href="<?= site_url() ?>enter" class="btn btn-full ghost header-public-item">Iniciar sesión</a>
-                        <a href="<?= site_url() ?>register" class="btn btn-full primary header-public-item">Crear cuenta gratis</a>
+                        <a href="<?= site_url('register') . (uri_string() === '' ? '?intent=api&source=home_header' : '') ?>" class="btn btn-full primary header-public-item">Crear cuenta gratis</a>
                         <a href="<?= site_url('dashboard') ?>" class="btn btn-full ghost header-private-item" style="display: none;">Dashboard</a>
                         <a href="<?= site_url('logout') ?>" class="btn btn-full ghost logout header-private-item" style="display: none;">Salir</a>
                     <?php else: ?>
@@ -424,6 +399,15 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
         close.addEventListener('click', closeMenu);
         overlay.addEventListener('click', function (e) {
             if (e.target === overlay) closeMenu();
+        });
+        // Enlaces a una sección de la misma página (p. ej. Precios en la home): cerrar el menú
+        overlay.querySelectorAll('a[href*="#"]').forEach(function (a) {
+            a.addEventListener('click', function () {
+                try {
+                    var u = new URL(a.href, location.href);
+                    if (u.pathname === location.pathname && u.hash) closeMenu();
+                } catch (e) {}
+            });
         });
 
         // User Dropdown

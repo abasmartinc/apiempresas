@@ -30,7 +30,7 @@ class Home extends BaseController
 
         // Dynamic Social Proof Counter (with short cache)
         $cache = \Config\Services::cache();
-        $cacheKey = 'home_social_proof_text_v3';
+        $cacheKey = 'home_social_proof_text_v4';
         $socialProofText = $cache->get($cacheKey);
 
         if ($socialProofText === null) {
@@ -42,15 +42,12 @@ class Home extends BaseController
             $webValidationsToday = $searchLogModel->countLogsForDay($today);
             $totalReal = $apiValidationsToday + $webValidationsToday;
 
-            if ($totalReal <= 0) {
-                $socialProofText = ''; // No data, hide block
-            } elseif ($totalReal < 50) {
-                $socialProofText = "Más de 100 empresas validadas hoy automáticamente";
-            } elseif ($totalReal < 200) {
-                $roundedTotal = ceil($totalReal / 50) * 50;
-                $socialProofText = "Más de " . number_format($roundedTotal, 0, ',', '.') . " empresas validadas hoy automáticamente";
+            // Solo la cifra real (llamadas a la API + búsquedas web de hoy).
+            // Por debajo de 50 no se muestra nada: nunca se infla el número.
+            if ($totalReal < 50) {
+                $socialProofText = '';
             } else {
-                $socialProofText = "Hoy se han validado " . number_format($totalReal, 0, ',', '.') . " empresas automáticamente";
+                $socialProofText = "Hoy se han hecho " . number_format($totalReal, 0, ',', '.') . " consultas de empresas";
             }
 
             // Save to cache for 5 minutes (short cache)
@@ -63,8 +60,48 @@ class Home extends BaseController
         return view('home', [
             'showReviewModal' => $showReviewModal,
             'socialProofText' => $socialProofText,
-            'freeLimit' => $freeLimit
+            'freeLimit' => $freeLimit,
+            'homeStats' => $this->getHomeStats(),
         ]);
+    }
+
+    /**
+     * Cifras reales de la base de datos para la home (empresas, actos del BORME
+     * y fecha del último BORME procesado).
+     *
+     * Los COUNT(*) sobre tablas de millones de filas tardan unos segundos, así
+     * que se calculan como mucho una vez cada 12 horas y se guardan en caché.
+     * Si algo falla, devuelve [] y la home no muestra el bloque.
+     */
+    private function getHomeStats(): array
+    {
+        $cache    = \Config\Services::cache();
+        $cacheKey = 'home_stats_v1';
+        $stats    = $cache->get($cacheKey);
+        if (is_array($stats)) {
+            return $stats;
+        }
+
+        try {
+            $db = \Config\Database::connect();
+
+            $companies = (int) $db->query('SELECT COUNT(*) AS n FROM companies')->getRow()->n;
+            $acts      = (int) $db->query('SELECT COUNT(*) AS n FROM borme_posts')->getRow()->n;
+            $lastBorme = $db->query('SELECT MAX(borme_date) AS d FROM borme_posts')->getRow()->d;
+
+            $stats = [
+                'companies'  => $companies,
+                'acts'       => $acts,
+                'last_borme' => $lastBorme ? date('Y-m-d', strtotime((string) $lastBorme)) : null,
+            ];
+            $cache->save($cacheKey, $stats, 12 * 3600);
+        } catch (\Throwable $e) {
+            log_message('error', 'home stats: ' . $e->getMessage());
+            $stats = [];
+            $cache->save($cacheKey, $stats, 600); // reintentar en 10 minutos
+        }
+
+        return $stats;
     }
 
     public function englishStandalone()
@@ -73,7 +110,7 @@ class Home extends BaseController
 
         // Dynamic Social Proof Counter (English)
         $cache = \Config\Services::cache();
-        $cacheKey = 'home_social_proof_text_en_v1';
+        $cacheKey = 'home_social_proof_text_en_v2';
         $socialProofText = $cache->get($cacheKey);
 
         if ($socialProofText === null) {
@@ -85,15 +122,11 @@ class Home extends BaseController
             $webValidationsToday = $searchLogModel->countLogsForDay($today);
             $totalReal = $apiValidationsToday + $webValidationsToday;
 
-            if ($totalReal <= 0) {
+            // Real figure only; hidden below 50 (see index()).
+            if ($totalReal < 50) {
                 $socialProofText = '';
-            } elseif ($totalReal < 50) {
-                $socialProofText = "Over 100 companies validated today automatically";
-            } elseif ($totalReal < 200) {
-                $roundedTotal = ceil($totalReal / 50) * 50;
-                $socialProofText = "Over " . number_format($roundedTotal, 0, '.', ',') . " companies validated today automatically";
             } else {
-                $socialProofText = "Today " . number_format($totalReal, 0, '.', ',') . " companies were validated automatically";
+                $socialProofText = number_format($totalReal, 0, '.', ',') . " company lookups today";
             }
 
             $cache->save($cacheKey, $socialProofText, 300);

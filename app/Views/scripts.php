@@ -28,6 +28,14 @@ $isEn = (service('request')->getLocale() === 'en');
         const RADAR_BASE_URL = '<?= site_url("leads-empresas-nuevas") ?>';
         const COMPANY_BASE_URL = '<?= site_url() ?>'.replace(/\/$/, '') + '/';
 
+        // Enter en el buscador lanza la búsqueda (no hay <form>)
+        $('#q').on('keydown', function(e) {
+            if (e.key === 'Enter' && !e.originalEvent?.isComposing) {
+                e.preventDefault();
+                if (!$('#btnBuscar').prop('disabled')) $('#btnBuscar').trigger('click');
+            }
+        });
+
         $('#btnBuscar').on('click', function(e) {
             e.preventDefault();
             const $btn = $(this);
@@ -203,7 +211,7 @@ $isEn = (service('request')->getLocale() === 'en');
     <div style="flex-grow: 1;">
       <div style="background: #ffffff; border: 1px solid #bfdbfe; display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 800; color: #2563eb; margin-bottom: 12px;">
         <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #2563eb;"></span>
-        <?= $isEn ? '⚡ Instant REST Integration' : '⚡ Integración en 5 minutos' ?>
+        <?= $isEn ? '⚡ Instant REST Integration' : '⚡ API REST con SDKs' ?>
       </div>
       <h4 style="margin: 0 0 8px 0; font-size: 1.25rem; color: #0f172a; font-weight: 900;"><?= $isEn ? 'Automate company verification in your systems' : 'Automatiza la validación de empresas en tu software' ?></h4>
       <p style="margin: 0; font-size: 1rem; color: #475569; line-height: 1.6; max-width: 520px;"><?= $isEn ? 'Query CIF, company status, CNAE activity and legal data directly from your CRM, ERP or web checkout with our ultra-fast API.' : 'Consulta CIF, estado mercantil, actividad CNAE y datos oficiales directamente desde tu CRM, ERP o pasarela web con nuestra API REST.' ?></p>

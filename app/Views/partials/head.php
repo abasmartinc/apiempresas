@@ -113,36 +113,19 @@ $enUrl = str_replace(['apiempresas.es', 'apiempresas.local'], ['spaincompanyapi.
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300..900&family=JetBrains+Mono:wght@400;600&display=swap"
         rel="stylesheet"
 />
 
 <!-- Styles -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-<link rel="stylesheet" href="<?= base_url('public/css/styles.css?v=' . (file_exists(FCPATH . 'public/css/styles.css') ? filemtime(FCPATH . 'public/css/styles.css') : time())) ?>" /><!-- Sentry Error Tracking -->
-<script src="<?= base_url('public/js/sentry-8.54.0.min.js') ?>" crossorigin="anonymous"></script>
-<script>
-<?php if (env('SENTRY_DSN')): ?>
-  Sentry.init({
-    dsn: "<?= env('SENTRY_DSN') ?>",
-    integrations: [
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration(),
-    ],
-    tracesSampleRate: 1.0, 
-    replaysSessionSampleRate: 0.1, 
-    replaysOnErrorSampleRate: 1.0, 
-    environment: "<?= ENVIRONMENT ?>",
-  });
-<?php endif; ?>
-</script>
+<?php /* animate.css retirado el 25-09-2026: solo lo usaban billing/success_radar y success_copilot, que ahora llevan su propia animación. */ ?>
+<link rel="stylesheet" href="<?= base_url('public/css/styles.css?v=' . (file_exists(FCPATH . 'public/css/styles.css') ? filemtime(FCPATH . 'public/css/styles.css') : time())) ?>" /><?php /* Sentry retirado el 25-09-2026 (ya no se usa). */ ?>
 
 
 <!-- jQuery (Required for many interactive elements) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
 
-<!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+<!-- SweetAlert2: se carga una sola vez, más abajo (lo usan scripts en línea de otras páginas) -->
 
 
 <!-- Favicons -->
@@ -256,59 +239,18 @@ if ($isHome):
       }]
     }
     </script>
-    <script type="application/ld+json">
-        {
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          "@id": "<?= esc($urlFaqsAnchor) ?>",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "¿Cómo validar un CIF en España?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Puedes validar el formato del CIF y, además, verificar datos de empresa (razón social/estado) contrastándolos con fuentes oficiales. En APIEmpresas.es puedes hacerlo desde el buscador o integrarlo por API REST."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Qué diferencia hay entre validar CIF y verificar una empresa?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Validar CIF suele referirse a comprobar el formato y consistencia. Verificar empresa implica contrastar información clave (razón social, estado, etc.) con datos fiables para reducir errores en altas y facturación."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Puedo comprobar un NIF-IVA intracomunitario (VIES)?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Sí. Puedes validar el NIF-IVA intracomunitario contra VIES y utilizar ese resultado en procesos de onboarding y cumplimiento."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Para qué sirve en KYB/KYC?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Para automatizar verificaciones, reducir riesgo y fraude en altas, y dejar evidencia de la verificación en tus flujos de negocio."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Cómo integro la API para validar CIF?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Creas una cuenta, obtienes tu API Key y haces llamadas REST. Tienes documentación y ejemplos en cURL, PHP/Laravel, Node y Python listos para copiar."
-      }
-    }
-  ]
-}
-    </script>
+    <?php /* El FAQPage de la home se genera en home.php a partir de las preguntas visibles. */ ?>
 <?php endif; ?>
 
 <!-- Global SweetAlert2 Confirmations -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<?php
+// En la home SweetAlert2 se carga con defer: ahí solo se usa al pulsar algo
+// (data-confirm, cerrar sesión, reseña, triggerAhaMoment), y los scripts con
+// defer se ejecutan antes de DOMContentLoaded. En el resto de páginas sigue
+// síncrono porque algunas lo llaman en scripts en línea al cargar.
+$swalDefer = (uri_string() === '');
+?>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"<?= $swalDefer ? ' defer' : '' ?>></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     document.body.addEventListener('click', function(e) {

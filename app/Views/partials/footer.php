@@ -158,7 +158,7 @@
                     </div>
                 </div>
                 <p class="foot-desc">
-                    Datos oficiales procedentes de BORME, AEAT, INE y VIES. Cumplimiento normativo y trazabilidad para procesos KYB/KYC y facturación B2B.
+                    Datos procedentes del BORME y de la Plataforma de Contratación del Sector Público. Para procesos KYB/KYC y facturación B2B.
                 </p>
                 <div class="foot-legal-row">
                     <a href="#" class="minor" data-modal-target="modalPrivacy">Privacidad</a> · 

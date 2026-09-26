@@ -2,6 +2,15 @@
 <html lang="es">
 <head>
     <?=view('partials/head') ?>
+    <style>
+        /* Sustituye a animate.css (retirado del head global el 25-09-2026) */
+        @keyframes aeFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes aeFadeInDown { from { opacity: 0; transform: translate3d(0, -30px, 0); } to { opacity: 1; transform: none; } }
+        .animate__animated { animation-duration: .8s; animation-fill-mode: both; }
+        .animate__fadeIn { animation-name: aeFadeIn; }
+        .animate__fadeInDown { animation-name: aeFadeInDown; }
+        @media (prefers-reduced-motion: reduce) { .animate__animated { animation: none !important; } }
+    </style>
     <link rel="stylesheet" href="<?= base_url('public/css/billing-success.css') ?>" />
     <style>
         .radar-accent { color: #f59e0b !important; }

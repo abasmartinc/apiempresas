@@ -138,6 +138,14 @@ $routes->get('billing/portal', 'Billing::portal');
 $routes->post('billing/rotate-key', 'Billing::rotate_key');
 $routes->post('billing/cancel-subscription', 'Billing::cancel_subscription');
 
+// Pedidos a medida pactados por soporte (Config\PedidosMedida): enlace de pago,
+// vuelta de Stripe y descarga. El POST pasa por el CSRF (la vista lleva csrf_field()).
+$routes->get('pedido/([a-f0-9]{16,64})', 'PedidoMedida::index/$1');
+$routes->post('pedido/([a-f0-9]{16,64})/pagar', 'PedidoMedida::pagar/$1');
+$routes->get('pedido/([a-f0-9]{16,64})/gracias', 'PedidoMedida::gracias/$1');
+$routes->get('pedido/([a-f0-9]{16,64})/descargar', 'PedidoMedida::descargar/$1');
+$routes->post('pedido/([a-f0-9]{16,64})/generar', 'PedidoMedida::generar/$1');
+
 $routes->get('consumption', 'Usage::index');
 $routes->get('consumption/request/(:any)', 'Usage::getRequestDetails/$1');
 $routes->get('consumption/logs_ajax', 'Usage::getLogsAjax');
