@@ -255,6 +255,22 @@ class ApiKeyFilter implements FilterInterface
             }
         }
 
+        // 3.6) Bajas por privacidad (26-09-2026). La ficha web da 404 a los CIF de
+        // company_privacy_optouts; la API los seguía sirviendo. Cualquier endpoint que
+        // reciba ?cif= responde como si la empresa no existiera (404, no se cobra).
+        // /search y /batch filtran sus resultados en el controlador.
+        if (strpos($endpointPath, 'api/sandbox/v1') === false) {
+            $cifParam = $request->getGet('cif');
+            if (is_string($cifParam) && $cifParam !== ''
+                && \App\Services\ApiCompanyEnricher::isOptedOut($cifParam)) {
+                return $this->errorResponse(404, [
+                    'success' => false,
+                    'error'   => 'COMPANY_NOT_FOUND',
+                    'message' => 'Empresa no encontrada.',
+                ], 'COMPANY_NOT_FOUND', 'Empresa no encontrada.');
+            }
+        }
+
         // 4) Registrar uso (con throttling para evitar bloqueos en ráfagas)
         try {
             $lastUsed = $row->last_used_at ? strtotime($row->last_used_at) : 0;

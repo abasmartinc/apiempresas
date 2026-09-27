@@ -121,6 +121,8 @@ class CompaniesBatch extends BaseApiController
 
         // 3. Query Database
         $companies = $this->companyModel->getByCifs($cleanCifs, true);
+        // Las empresas con baja por privacidad cuentan como no encontradas (y no se cobran).
+        $companies = \App\Services\ApiCompanyEnricher::withoutOptedOut($companies);
         $foundCount = count($companies);
 
         if ($foundCount === 0) {
@@ -195,31 +197,23 @@ class CompaniesBatch extends BaseApiController
             $walletCost = $allowedCount - $monthlyRemaining;
         }
 
-        // 5. Final Formatting (Filtering & Admins)
-        $companyIds = array_column($companies, 'id');
-        $administratorsMap = [];
+        // 5. Final Formatting (campos añadidos, limpieza y administradores vigentes)
+        // El batch es solo para planes de pago: acceso completo.
+        $companies = \App\Services\ApiCompanyEnricher::enrich(array_values($companies), true);
 
-        if ($includeAdmins && !empty($companyIds)) {
-            $admins = $db->table('company_administrators')
-                ->select('company_id, name, position')
-                ->whereIn('company_id', $companyIds)
-                ->get()->getResultArray();
-            
-            foreach ($admins as $ad) {
-                $administratorsMap[$ad['company_id']][] = [
-                    'name' => $ad['name'],
-                    'position' => $ad['position']
-                ];
-            }
-        }
+        $companyIds = array_map('intval', array_column($companies, 'id'));
+        $administratorsMap = ($includeAdmins && !empty($companyIds))
+            ? \App\Services\ApiCompanyEnricher::currentAdministrators($companyIds)
+            : [];
 
         foreach ($companies as &$company) {
-            $cid = $company['id'];
+            $cid = (int) $company['id'];
             $company = filter_company_data($company);
-            if ($includeAdmins && isset($administratorsMap[$cid])) {
-                $company['administrators'] = group_administrators($administratorsMap[$cid]);
+            if ($includeAdmins && !empty($administratorsMap[$cid])) {
+                $company['administrators'] = $administratorsMap[$cid];
             }
         }
+        unset($company);
 
         // 6. Update ApiKeyFilter Meta
         \App\Filters\ApiKeyFilter::$apiSkipBilling = $esMonitor;

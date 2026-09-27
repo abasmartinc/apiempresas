@@ -42,6 +42,41 @@ class RadarApiController extends BaseApiController
         description: "Rango de tiempo: 'hoy', '7' días o '30' días",
         schema: new OA\Schema(type: "string", default: "hoy")
     )]
+    #[OA\Parameter(
+        name: "priority",
+        in: "query",
+        required: false,
+        description: "Prioridad comercial calculada (valor de priority_level, por ejemplo alta, media o baja).",
+        schema: new OA\Schema(type: "string")
+    )]
+    #[OA\Parameter(
+        name: "cnae",
+        in: "query",
+        required: false,
+        description: "Uno o varios prefijos CNAE separados por comas (por ejemplo 62 o 4711,4719).",
+        schema: new OA\Schema(type: "string")
+    )]
+    #[OA\Parameter(
+        name: "min_score",
+        in: "query",
+        required: false,
+        description: "Puntuación mínima de oportunidad (0-100).",
+        schema: new OA\Schema(type: "integer")
+    )]
+    #[OA\Parameter(
+        name: "main_act_type",
+        in: "query",
+        required: false,
+        description: "Tipo del último acto relevante del BORME (por ejemplo Constitución o Ampliación de capital).",
+        schema: new OA\Schema(type: "string")
+    )]
+    #[OA\Parameter(
+        name: "has_phone",
+        in: "query",
+        required: false,
+        description: "Si es true, solo empresas con teléfono.",
+        schema: new OA\Schema(type: "boolean")
+    )]
     #[OA\Response(
         response: 200,
         description: "Leads encontrados",
@@ -61,6 +96,11 @@ class RadarApiController extends BaseApiController
             'province' => $this->request->getGet('province'),
             'priority' => $this->request->getGet('priority'),
             'range'    => $this->request->getGet('range') ?? 'hoy',
+            // Añadidos el 26-09-2026 (mismos filtros que el Radar de la web)
+            'cnae'          => $this->request->getGet('cnae'),
+            'min_score'     => $this->request->getGet('min_score'),
+            'main_act_type' => $this->request->getGet('main_act_type'),
+            'has_phone'     => $this->request->getGet('has_phone'),
         ];
 
         $radarData = $this->radarService->getRadarResults($filters, $planSlug);

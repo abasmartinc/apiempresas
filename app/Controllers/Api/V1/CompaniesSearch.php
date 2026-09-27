@@ -128,6 +128,16 @@ class CompaniesSearch extends BaseApiController
             $isOldFormat = $multiple && !isset($cachedData['data']);
             $items = $multiple ? ($isOldFormat ? $cachedData : $cachedData['data']) : $cachedData;
 
+            // Bajas por privacidad: fuera de los resultados (una sola, 404).
+            if ($multiple) {
+                $items = \App\Services\ApiCompanyEnricher::withoutOptedOut($items);
+                if (empty($items)) {
+                    return $this->respond(['success' => false, 'error' => 'COMPANY_NOT_FOUND', 'message' => 'No se encontraron empresas similares al nombre indicado.'], ResponseInterface::HTTP_NOT_FOUND);
+                }
+            } elseif (!empty($items['cif']) && \App\Services\ApiCompanyEnricher::isOptedOut((string) $items['cif'])) {
+                return $this->respond(['success' => false, 'error' => 'COMPANY_NOT_FOUND', 'message' => 'No se encontró ninguna empresa similar al nombre indicado.'], ResponseInterface::HTTP_NOT_FOUND);
+            }
+
             // Apply masking if Free plan
             $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
             // Con saldo en el monedero, datos completos (igual que /companies)
@@ -140,6 +150,15 @@ class CompaniesSearch extends BaseApiController
                 } else {
                     $items = mask_company_data($items);
                 }
+            }
+
+            unset($item); // la referencia del foreach de arriba no debe seguir viva
+            // Campos añadidos (estado normalizado; financials con acceso completo)
+            $accesoCompleto = (int) $planId > 1 || $conSaldo;
+            if ($multiple) {
+                $items = \App\Services\ApiCompanyEnricher::enrich(array_values($items), $accesoCompleto);
+            } else {
+                $items = \App\Services\ApiCompanyEnricher::enrich([$items], $accesoCompleto)[0];
             }
 
             // Apply filtering (remove requested fields)
@@ -209,6 +228,16 @@ class CompaniesSearch extends BaseApiController
             // Guardar en cache (para multiple guarda ['data'=>..., 'meta'=>...], para single guarda solo 'data')
             cache()->save($cacheKey, $dataToCache, 3600);
 
+            // Bajas por privacidad: fuera de los resultados (una sola, 404).
+            if ($multiple) {
+                $data = \App\Services\ApiCompanyEnricher::withoutOptedOut($data);
+                if (empty($data)) {
+                    return $this->respond(['success' => false, 'error' => 'COMPANY_NOT_FOUND', 'message' => 'No se encontraron empresas similares al nombre indicado.'], ResponseInterface::HTTP_NOT_FOUND);
+                }
+            } elseif (!empty($data['cif']) && \App\Services\ApiCompanyEnricher::isOptedOut((string) $data['cif'])) {
+                return $this->respond(['success' => false, 'error' => 'COMPANY_NOT_FOUND', 'message' => 'No se encontró ninguna empresa similar al nombre indicado.'], ResponseInterface::HTTP_NOT_FOUND);
+            }
+
             // Apply masking if Free plan
             $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
             // Con saldo en el monedero, datos completos (igual que /companies)
@@ -221,6 +250,15 @@ class CompaniesSearch extends BaseApiController
                 } else {
                     $data = mask_company_data($data);
                 }
+            }
+
+            unset($item); // la referencia del foreach de arriba no debe seguir viva
+            // Campos añadidos (estado normalizado; financials con acceso completo)
+            $accesoCompleto = (int) $planId > 1 || $conSaldo;
+            if ($multiple) {
+                $data = \App\Services\ApiCompanyEnricher::enrich(array_values($data), $accesoCompleto);
+            } else {
+                $data = \App\Services\ApiCompanyEnricher::enrich([$data], $accesoCompleto)[0];
             }
 
             // Apply filtering (remove requested fields)

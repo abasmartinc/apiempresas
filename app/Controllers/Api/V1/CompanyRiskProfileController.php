@@ -174,7 +174,7 @@ class CompanyRiskProfileController extends BaseApiController
                     'success' => false,
                     'error'   => 'PLAN_RESTRICTION',
                     'message' => 'El acceso al perfil de riesgo corporativo requiere el plan Business.'
-                ],
+                ] + $this->ganchoRiesgo($planSlug),
                 ResponseInterface::HTTP_FORBIDDEN
             );
         }
@@ -377,5 +377,35 @@ class CompanyRiskProfileController extends BaseApiController
             'model_version'      => $modelVersion,
             'calculated_at'      => $calculatedAt,
         ];
+    }
+
+    /**
+     * Gancho de venta del 403 (campo nuevo, 26-09-2026). A un plan de pago se le dice
+     * el nivel de riesgo (ALTO/MEDIO/BAJO), sin puntuación ni detalle; al Free solo si
+     * hay perfil calculado, porque el nivel es lo que vende Solvencia. Con tope diario
+     * por usuario, porque los 403 no se cobran.
+     */
+    private function ganchoRiesgo(string $planSlug): array
+    {
+        $gancho = [
+            'upsell_opportunities' => [
+                'mensaje'     => 'Con el plan Business ves la puntuación, las seis dimensiones de riesgo, el estado legal y cada evento del BORME que la explica.',
+                'upgrade_url' => site_url('billing?plan=business&source=api_403_risk'),
+            ],
+        ];
+        $cif = \App\Services\ApiCompanyEnricher::normalizeCif((string) $this->request->getGet('cif'));
+        $userId = (int) (\App\Filters\ApiKeyFilter::$apiMeta['user_id'] ?? 0);
+        if ($cif === '' || !is_valid_cif($cif) || !\App\Services\ApiCompanyEnricher::teaserAllowed($userId)) {
+            return $gancho;
+        }
+        $nivel = \App\Services\ApiCompanyEnricher::riskLevel($cif);
+        $gancho['upsell_opportunities']['perfil_disponible'] = $nivel !== null;
+        $esPago = in_array(strtolower($planSlug), ['pro', 'business', 'enterprise'], true);
+        if ($nivel !== null && $esPago) {
+            $gancho['upsell_opportunities']['nivel_riesgo'] = $nivel;
+            $gancho['upsell_opportunities']['mensaje'] = 'Nivel de riesgo de esta empresa: ' . $nivel
+                . '. Con el plan Business ves la puntuación, las seis dimensiones, el estado legal y cada evento del BORME que lo explica.';
+        }
+        return $gancho;
     }
 }

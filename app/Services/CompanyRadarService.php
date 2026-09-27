@@ -33,7 +33,8 @@ class CompanyRadarService
             companies.municipality,
             crs.score_total,
             crs.priority_level,
-            crs.main_act_type
+            crs.main_act_type,
+            companies.cnae_code AS cnae
         ');
         $builder->join('company_radar_scores crs', 'crs.company_id = companies.id', 'left');
         
@@ -44,6 +45,31 @@ class CompanyRadarService
 
         if (!empty($filters['priority'])) {
             $builder->where('crs.priority_level', $filters['priority']);
+        }
+
+        // Filtros añadidos (26-09-2026), los mismos que ya tiene el Radar de la web.
+        // cnae: uno o varios prefijos separados por comas ("62" o "4711,4719").
+        $cnaes = array_values(array_filter(array_map('trim', explode(',', (string) ($filters['cnae'] ?? ''))),
+            fn($c) => preg_match('/^\d{1,4}$/', $c)));
+        if ($cnaes) {
+            $builder->groupStart();
+            foreach (array_slice($cnaes, 0, 20) as $i => $c) {
+                $i === 0 ? $builder->like('companies.cnae_code', $c, 'after') : $builder->orLike('companies.cnae_code', $c, 'after');
+            }
+            $builder->groupEnd();
+        }
+
+        if (isset($filters['min_score']) && $filters['min_score'] !== '' && is_numeric($filters['min_score'])) {
+            $builder->where('crs.score_total >=', (int) $filters['min_score']);
+        }
+
+        if (!empty($filters['main_act_type'])) {
+            $builder->where('crs.main_act_type', (string) $filters['main_act_type']);
+        }
+
+        if (!empty($filters['has_phone']) && filter_var($filters['has_phone'], FILTER_VALIDATE_BOOLEAN)) {
+            $builder->where('companies.phone IS NOT NULL', null, false);
+            $builder->where('companies.phone !=', '');
         }
 
         // Rango temporal (default hoy si no se especifica)

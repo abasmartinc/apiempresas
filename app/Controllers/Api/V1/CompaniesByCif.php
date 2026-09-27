@@ -30,7 +30,7 @@ class CompaniesByCif extends BaseApiController
     #[OA\Get(
         path: "/api/v1/companies",
         summary: "Obtener Empresa por CIF",
-        description: "Devuelve los datos detallados de una empresa a partir de su CIF exacto. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 1 crédito del monedero (bono prepago). Las respuestas con error (400, 404, etc.) no consumen cuota ni créditos.",
+        description: "Devuelve los datos detallados de una empresa a partir de su CIF exacto. **Coste:** 1 llamada de tu cuota mensual (plan suscripción) o 1 crédito del monedero (bono prepago). Las respuestas con error (400, 404, etc.) no consumen cuota ni créditos. **Estado normalizado (todos los planes):** `status_code` (ACTIVE, PRESUMED_ACTIVE, INSOLVENCY, IN_LIQUIDATION, DISSOLVED, REGISTRY_CLOSED, MERGED, INACTIVE, EXTINCT, UNKNOWN), `status_source` (registry o borme_analysis) y `status_date`. `status` sigue siendo el texto del Registro tal cual. **Pro, Business o saldo:** `financials` con `size_band` (LT_500K, 500K_1M, GT_1M, NO_REVENUE; tramo orientativo de facturación), `size_band_label` y `last_accounts_year` (último ejercicio depositado que consta en nuestra base; puede haber uno posterior).",
         tags: ["1. Plan Free"]
     )]
     #[OA\Parameter(
@@ -44,7 +44,7 @@ class CompaniesByCif extends BaseApiController
         name: "admin",
         in: "query",
         required: false,
-        description: "Si es 'true', incluye los administradores y cargos directivos actuales de la empresa. Exclusivo para planes Pro y Business.",
+        description: "Si es 'true', incluye los administradores y cargos vigentes: nombramientos del BORME menos los ceses, dimisiones y revocaciones publicados después. Cada uno lleva `since` (fecha del nombramiento vigente; null si es anterior a nuestro histórico). Exclusivo para planes Pro y Business.",
         schema: new OA\Schema(type: "boolean")
     )]
     #[OA\Response(
@@ -144,33 +144,10 @@ class CompaniesByCif extends BaseApiController
         $cached = cache($cacheKey);
 
         if (is_array($cached) && !empty($cached)) {
-            // Apply masking if Free plan and no wallet balance
-            $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
-            $walletBalance = \App\Filters\ApiKeyFilter::$apiMeta['wallet_balance'] ?? 0;
-            if ((int)$planId === 1 && $walletBalance <= 0) {
-                $cached = mask_company_data($cached);
-            }
-
-            $companyId = $cached['id'] ?? null;
-
-            // Apply filtering (remove requested fields)
-            $cached = filter_company_data($cached);
-
-            // Administradores y Cargos
-            $includeAdmins = filter_var($this->request->getGet('admin'), FILTER_VALIDATE_BOOLEAN);
-            if ($includeAdmins && ((int)$planId > 1 || $walletBalance > 0) && $companyId) {
-                $db = \Config\Database::connect();
-                $admins = $db->table('company_administrators')
-                    ->select('name, position')
-                    ->where('company_id', $companyId)
-                    ->get()->getResultArray();
-                $cached['administrators'] = group_administrators($admins);
-            }
-
             return $this->respond(
                 [
                     'success' => true,
-                    'data'    => $cached,
+                    'data'    => $this->completar($cached),
                 ],
                 ResponseInterface::HTTP_OK
             );
@@ -190,36 +167,12 @@ class CompaniesByCif extends BaseApiController
                 );
             }
 
-            // Guardar SOLO data en cache (completa)
             cache()->save($cacheKey, $company, 2592000); // 30 dias
-
-            // Apply masking if Free plan and no wallet balance
-            $planId = \App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1;
-            $walletBalance = \App\Filters\ApiKeyFilter::$apiMeta['wallet_balance'] ?? 0;
-            if ((int)$planId === 1 && $walletBalance <= 0) {
-                $company = mask_company_data($company);
-            }
-
-            $companyId = $company['id'] ?? null;
-
-            // Apply filtering (remove requested fields)
-            $company = filter_company_data($company);
-
-            // Administradores y Cargos
-            $includeAdmins = filter_var($this->request->getGet('admin'), FILTER_VALIDATE_BOOLEAN);
-            if ($includeAdmins && ((int)$planId > 1 || $walletBalance > 0) && $companyId) {
-                $db = \Config\Database::connect();
-                $admins = $db->table('company_administrators')
-                    ->select('name, position')
-                    ->where('company_id', $companyId)
-                    ->get()->getResultArray();
-                $company['administrators'] = group_administrators($admins);
-            }
 
             return $this->respond(
                 [
                     'success' => true,
-                    'data'    => $company,
+                    'data'    => $this->completar($company),
                 ],
                 ResponseInterface::HTTP_OK
             );
@@ -238,5 +191,34 @@ class CompaniesByCif extends BaseApiController
         // El correo de "primera consulta" ya no se envía aquí: se mandaba dentro de la
         // petición y hacía más lenta justo la primera llamada del usuario. Ahora lo
         // envía email:automation (trigger first_request).
+    }
+
+    /**
+     * Deja la ficha lista para responder: enmascarado del Free, campos añadidos
+     * (estado normalizado, financials o el gancho del Free), limpieza y, con
+     * admin=true en planes de pago o con saldo, los administradores VIGENTES.
+     * Mismo tratamiento para la ficha recién leída y para la cacheada.
+     */
+    private function completar(array $company): array
+    {
+        $planId        = (int) (\App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1);
+        $walletBalance = (int) (\App\Filters\ApiKeyFilter::$apiMeta['wallet_balance'] ?? 0);
+        $fullAccess    = $planId > 1 || $walletBalance > 0;
+
+        if (!$fullAccess) {
+            $company = mask_company_data($company);
+        }
+
+        $company = \App\Services\ApiCompanyEnricher::enrich([$company], $fullAccess)[0];
+        $companyId = $company['id'] ?? null; // id actual (enrich lo refresca por CIF)
+        $company = filter_company_data($company);
+
+        $includeAdmins = filter_var($this->request->getGet('admin'), FILTER_VALIDATE_BOOLEAN);
+        if ($includeAdmins && $fullAccess && $companyId) {
+            $vigentes = \App\Services\ApiCompanyEnricher::currentAdministrators([(int) $companyId]);
+            $company['administrators'] = $vigentes[(int) $companyId] ?? [];
+        }
+
+        return $company;
     }
 }

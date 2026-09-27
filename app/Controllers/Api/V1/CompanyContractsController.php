@@ -180,7 +180,7 @@ class CompanyContractsController extends BaseApiController
                     'success' => false,
                     'error'   => 'PLAN_RESTRICTION',
                     'message' => 'El acceso a contratos públicos requiere el plan Business.'
-                ],
+                ] + $this->ganchoContratos(),
                 ResponseInterface::HTTP_FORBIDDEN
             );
         }
@@ -367,5 +367,39 @@ class CompanyContractsController extends BaseApiController
         $decimalPart = substr(str_pad($decimalPart, 2, '0'), 0, 2);
 
         return $integerPart . '.' . $decimalPart;
+    }
+
+    /**
+     * Gancho de venta del 403 (campo nuevo, 26-09-2026): cuántos contratos tiene la
+     * empresa y por cuánto, sin el detalle. Con tope diario por usuario
+     * (ApiCompanyEnricher::TEASERS_POR_DIA) porque los 403 no se cobran.
+     */
+    private function ganchoContratos(): array
+    {
+        $gancho = [
+            'upsell_opportunities' => [
+                'mensaje'     => 'Con el plan Business ves cada contrato: órgano, título, fecha, importe y enlace a la licitación.',
+                'upgrade_url' => site_url('billing?plan=business&source=api_403_contracts'),
+            ],
+        ];
+        $cif = \App\Services\ApiCompanyEnricher::normalizeCif((string) $this->request->getGet('cif'));
+        $userId = (int) (\App\Filters\ApiKeyFilter::$apiMeta['user_id'] ?? 0);
+        if ($cif === '' || !is_valid_cif($cif) || !\App\Services\ApiCompanyEnricher::teaserAllowed($userId)) {
+            return $gancho;
+        }
+        $res = \App\Services\ApiCompanyEnricher::contractsSummary($cif);
+        if ($res === null) {
+            return $gancho;
+        }
+        $gancho['upsell_opportunities']['contratos_detectados'] = $res['total_contracts'];
+        $gancho['upsell_opportunities']['importe_total']        = $res['total_amount'];
+        $gancho['upsell_opportunities']['currency']             = 'EUR';
+        $gancho['upsell_opportunities']['ultima_adjudicacion']  = $res['last_award_date'];
+        if ($res['total_contracts'] > 0) {
+            $gancho['upsell_opportunities']['mensaje'] = 'Esta empresa tiene ' . $res['total_contracts']
+                . ' contratos públicos adjudicados por ' . number_format($res['total_amount'], 0, ',', '.')
+                . ' €. Con el plan Business ves cada contrato: órgano, título, fecha, importe y enlace a la licitación.';
+        }
+        return $gancho;
     }
 }

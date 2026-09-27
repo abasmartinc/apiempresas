@@ -436,7 +436,7 @@ Accept: application/json</code></pre>
                             <tr>
                                 <td><code>admin</code></td>
                                 <td>boolean</td>
-                                <td><strong>Opcional.</strong> Si es <code>true</code>, incluye los administradores y cargos directivos actuales. <span class="plan-badge pro" style="margin-left: 5px; display: inline-block;">Pro</span></td>
+                                <td><strong>Opcional.</strong> Si es <code>true</code>, incluye los administradores y cargos vigentes (se descuentan los ceses, dimisiones y revocaciones publicados en el BORME). <span class="plan-badge pro" style="margin-left: 5px; display: inline-block;">Pro</span></td>
                             </tr>
                         </tbody>
                     </table>
@@ -448,13 +448,22 @@ Accept: application/json</code></pre>
     "cif": "B12345678",
     "name": "EMPRESA DE EJEMPLO SL",
     "status": "ACTIVA",
+    "status_code": "ACTIVE",
+    "status_source": "registry",
+    "status_date": "2011-02-03",
     "province": "MADRID",
     "cnae": "6201",
     "cnae_label": "Actividades de programación informática",
+    "financials": {
+      "size_band": "GT_1M",
+      "size_band_label": "Más de 1 M€",
+      "last_accounts_year": 2023
+    },
     "administrators": [
       {
         "name": "JUAN PÉREZ GARCÍA",
-        "position": "Administrador Único"
+        "position": "Adm. Unico",
+        "since": "2019-03-01"
       }
     ]
   }
@@ -487,7 +496,27 @@ Accept: application/json</code></pre>
                             <tr>
                                 <td><code style="background: transparent; color: #2563eb; font-weight: 600;">status</code></td>
                                 <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">enum</span></td>
-                                <td style="color: #475569;">Estado mercantil actual. Puede ser: <code style="font-size: 0.8rem;">ACTIVA</code>, <code style="font-size: 0.8rem;">CESADA</code>, <code style="font-size: 0.8rem;">LIQUIDACION</code>.</td>
+                                <td style="color: #475569;">Estado tal como figura en el Registro, sin normalizar (por ejemplo <code style="font-size: 0.8rem;">ACTIVA</code>, <code style="font-size: 0.8rem;">Activa</code>, <code style="font-size: 0.8rem;">Extinción</code>). Puede venir vacío. Para programar, usa <code style="font-size: 0.8rem;">status_code</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">status_code</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">enum</span></td>
+                                <td style="color: #475569;">Estado normalizado. <code style="font-size: 0.8rem;">ACTIVE</code> (activa en el Registro), <code style="font-size: 0.8rem;">PRESUMED_ACTIVE</code> (sin estado en el Registro y sin ningún hecho en el BORME que la cierre), <code style="font-size: 0.8rem;">INSOLVENCY</code> (concurso en curso), <code style="font-size: 0.8rem;">IN_LIQUIDATION</code>, <code style="font-size: 0.8rem;">DISSOLVED</code>, <code style="font-size: 0.8rem;">REGISTRY_CLOSED</code> (hoja registral cerrada), <code style="font-size: 0.8rem;">MERGED</code> (absorbida), <code style="font-size: 0.8rem;">INACTIVE</code>, <code style="font-size: 0.8rem;">EXTINCT</code> o <code style="font-size: 0.8rem;">UNKNOWN</code>. Todos los planes.</td>
+                            </tr>
+                            <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">status_source</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string | null</span></td>
+                                <td style="color: #475569;">De dónde sale <code style="font-size: 0.8rem;">status_code</code>: <code style="font-size: 0.8rem;">registry</code> (estado del Registro) o <code style="font-size: 0.8rem;">borme_analysis</code> (lectura de los actos del BORME, que manda cuando hay un hecho más grave que el estado registrado).</td>
+                            </tr>
+                            <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">status_date</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">date | null</span></td>
+                                <td style="color: #475569;">Fecha del estado, cuando se conoce.</td>
+                            </tr>
+                            <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">financials</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">object</span></td>
+                                <td style="color: #475569;"><span class="plan-badge pro">Pro</span> <code style="font-size: 0.8rem;">size_band</code>: tramo orientativo de facturación (<code style="font-size: 0.8rem;">LT_500K</code>, <code style="font-size: 0.8rem;">500K_1M</code>, <code style="font-size: 0.8rem;">GT_1M</code> o <code style="font-size: 0.8rem;">NO_REVENUE</code>; null si no consta) y su texto en <code style="font-size: 0.8rem;">size_band_label</code>. <code style="font-size: 0.8rem;">last_accounts_year</code>: último ejercicio con cuentas depositadas que consta en nuestra base (puede existir uno posterior aún no incorporado).</td>
                             </tr>
                             <tr>
                                 <td><code style="background: transparent; color: #2563eb; font-weight: 600;">province</code></td>
@@ -502,7 +531,7 @@ Accept: application/json</code></pre>
                             <tr>
                                 <td><code style="background: transparent; color: #2563eb; font-weight: 600;">administrators[]</code></td>
                                 <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td>
-                                <td style="color: #475569;">Lista de administradores actuales. Cada objeto contiene <code style="font-size: 0.8rem;">name</code> y su cargo oficial (<code style="font-size: 0.8rem;">position</code>).</td>
+                                <td style="color: #475569;">Administradores y cargos vigentes: nombramientos del BORME menos los ceses, dimisiones y revocaciones posteriores. Cada objeto contiene <code style="font-size: 0.8rem;">name</code>, su cargo (<code style="font-size: 0.8rem;">position</code>; si tiene varios, separados por comas) y <code style="font-size: 0.8rem;">since</code>, la fecha del nombramiento vigente (null si es anterior a nuestro histórico del BORME).</td>
                             </tr>
                         </tbody>
                     </table>
@@ -514,6 +543,8 @@ Accept: application/json</code></pre>
                         <li><code>corporate_purpose</code> se corta a 100 caracteres cuando es más largo.</li>
                         <li><code>lat</code> y <code>lng</code> no se incluyen.</li>
                         <li>Se añade el objeto <code>upsell_opportunities</code>. Si tu código necesita saber si la respuesta está recortada, comprueba si existe ese campo.</li>
+                        <li><code>financials</code> no se incluye. Dentro de <code>upsell_opportunities</code>, <code>datos_pro</code> indica si hay tramo de facturación y año de cuentas, y cuántos administradores constan.</li>
+                        <li><code>status_code</code>, <code>status_source</code> y <code>status_date</code> llegan igual que en los planes de pago.</li>
                     </ul>
                     <p>Con un plan Pro o Business, o con saldo de bono, recibes los datos completos sin cambiar nada en tu código.</p>
                 </section>
@@ -922,6 +953,22 @@ Accept: application/json</code></pre>
                                 <td><code>priority</code></td>
                                 <td>Nivel de relevancia comercial: <code>alta</code>, <code>media</code>, <code>baja</code>.</td>
                             </tr>
+                            <tr>
+                                <td><code>cnae</code></td>
+                                <td>Uno o varios prefijos CNAE separados por comas (ej: <code>62</code> o <code>4711,4719</code>).</td>
+                            </tr>
+                            <tr>
+                                <td><code>min_score</code></td>
+                                <td>Puntuación mínima de oportunidad, de 0 a 100.</td>
+                            </tr>
+                            <tr>
+                                <td><code>main_act_type</code></td>
+                                <td>Tipo del último acto relevante del BORME (ej: <code>Constitución</code>, <code>Ampliación de capital</code>).</td>
+                            </tr>
+                            <tr>
+                                <td><code>has_phone</code></td>
+                                <td>Con <code>true</code>, solo empresas con teléfono.</td>
+                            </tr>
                         </tbody>
                     </table>
 
@@ -1063,8 +1110,17 @@ Accept: application/json</code></pre>
                     <pre><code class="language-json">{
   "success": false,
   "error": "PLAN_RESTRICTION",
-  "message": "El acceso a contratos públicos requiere el plan Business."
+  "message": "El acceso a contratos públicos requiere el plan Business.",
+  "upsell_opportunities": {
+    "mensaje": "Esta empresa tiene 14 contratos públicos adjudicados por 2.318.400 €. Con el plan Business ves cada contrato: órgano, título, fecha, importe y enlace a la licitación.",
+    "upgrade_url": "https://apiempresas.es/billing?plan=business&source=api_403_contracts",
+    "contratos_detectados": 14,
+    "importe_total": 2318400.0,
+    "currency": "EUR",
+    "ultima_adjudicacion": "2026-06-12"
+  }
 }</code></pre>
+                    <p style="font-size: 13px; color: #64748b;">El resumen de <code>upsell_opportunities</code> sale en un máximo de 25 respuestas 403 al día por cuenta; a partir de ahí solo llevan <code>mensaje</code> y <code>upgrade_url</code>.</p>
                 </section>
 
                 <!-- PERFIL DE RIESGO -->
@@ -1131,8 +1187,15 @@ Accept: application/json</code></pre>
                     <pre><code class="language-json">{
   "success": false,
   "error": "PLAN_RESTRICTION",
-  "message": "El acceso al perfil de riesgo corporativo requiere el plan Business."
+  "message": "El acceso al perfil de riesgo corporativo requiere el plan Business.",
+  "upsell_opportunities": {
+    "mensaje": "Nivel de riesgo de esta empresa: MEDIO. Con el plan Business ves la puntuación, las seis dimensiones, el estado legal y cada evento del BORME que lo explica.",
+    "upgrade_url": "https://apiempresas.es/billing?plan=business&source=api_403_risk",
+    "perfil_disponible": true,
+    "nivel_riesgo": "MEDIO"
+  }
 }</code></pre>
+                    <p style="font-size: 13px; color: #64748b;"><code>nivel_riesgo</code> solo aparece en planes de pago; en el Free se indica únicamente si hay perfil calculado (<code>perfil_disponible</code>). Máximo 25 respuestas con este resumen al día por cuenta.</p>
 
                     <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                         <thead style="background: #f8fafc;">

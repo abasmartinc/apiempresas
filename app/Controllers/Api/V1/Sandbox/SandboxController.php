@@ -33,8 +33,23 @@ class SandboxController extends \App\Controllers\Api\V1\BaseApiController
         return $this->respond([
             'success' => false,
             'error' => 'TEST_MODE_RESTRICTION',
-            'message' => 'Estás usando la API Key en modo Sandbox. Para buscar datos reales, utiliza tu Live API Key en la URL de producción. Los CIFs permitidos en pruebas son A15075062 (éxito) y B00000000 (no encontrado).'
+            'message' => 'Estás usando la API Key en modo Sandbox. Para buscar datos reales, utiliza tu Live API Key en la URL de producción. Los CIFs permitidos en pruebas son A15075062 (éxito) y B00000000 (no encontrado).',
+            // Campos añadidos (26-09-2026): el mensaje de arriba habla de una "Live API
+            // Key" que no existe (hay una sola clave) y quien prueba CIF reales se queda
+            // atascado. 'message' no cambia por contrato; esto dice lo que hay que hacer.
+            'hint'           => 'El sandbox solo acepta los CIF de prueba A15075062 y B00000000. Para consultar cualquier otro CIF usa esta misma API Key en la URL de producción (gasta 1 consulta de tu plan).',
+            'allowed_cifs'   => ['A15075062', 'B00000000'],
+            'production_url' => $this->urlProduccion(),
         ], ResponseInterface::HTTP_FORBIDDEN);
+    }
+
+    /** La misma petición contra producción: /api/sandbox/v1/... → /api/v1/... con sus parámetros. */
+    private function urlProduccion(): string
+    {
+        $path  = (string) $this->request->getUri()->getPath();
+        $prod  = preg_replace('#api/sandbox/v1#', 'api/v1', $path, 1);
+        $query = (string) $this->request->getUri()->getQuery();
+        return rtrim(site_url(ltrim((string) $prod, '/')), '/') . ($query !== '' ? '?' . $query : '');
     }
 
     private function getMockInditex()
@@ -54,7 +69,16 @@ class SandboxController extends \App\Controllers\Api\V1\BaseApiController
             'lat' => '43.317',
             'lng' => '-8.508',
             'status' => 'ACTIVA',
-            'updated_at' => date('Y-m-d H:i:s', strtotime('-2 days'))
+            'updated_at' => date('Y-m-d H:i:s', strtotime('-2 days')),
+            // Campos añadidos en producción el 26-09-2026 (ApiCompanyEnricher)
+            'status_code'   => 'ACTIVE',
+            'status_source' => 'registry',
+            'status_date'   => null,
+            'financials'    => [
+                'size_band'          => 'GT_1M',
+                'size_band_label'    => 'Más de 1 M€',
+                'last_accounts_year' => 2024,
+            ]
         ];
     }
 
@@ -81,8 +105,8 @@ class SandboxController extends \App\Controllers\Api\V1\BaseApiController
         // Mapeo opcional de administradores
         if (filter_var($this->request->getGet('admin'), FILTER_VALIDATE_BOOLEAN)) {
             $data['administrators'] = [
-                ['name' => 'MARTA ORTEGA PEREZ', 'position' => 'Presidente'],
-                ['name' => 'OSCAR GARCIA MACEIRAS', 'position' => 'Consejero Delegado']
+                ['name' => 'MARTA ORTEGA PEREZ', 'position' => 'Presidente', 'since' => '2022-04-01'],
+                ['name' => 'OSCAR GARCIA MACEIRAS', 'position' => 'Consejero Delegado', 'since' => '2021-12-01']
             ];
         }
 
