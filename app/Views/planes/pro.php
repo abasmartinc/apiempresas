@@ -112,7 +112,7 @@
                 </div>
                 <div class="terminal-tabs">
                     <div class="term-tab active" data-tab="0">Scoring IA</div>
-                    <div class="term-tab" data-tab="1">Búsqueda Sector</div>
+                    <div class="term-tab" data-tab="1">Búsqueda por nombre</div>
                     <div class="term-tab" data-tab="2">Eventos BORME</div>
                 </div>
                 <div class="terminal-body">
@@ -138,7 +138,7 @@
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                 </div>
                 <h3>Scoring Comercial</h3>
-                <p>Antes de dar crédito o cerrar un contrato, la API te devuelve un scoring de IA basado en impagos y antigüedad.</p>
+                <p>Prioriza a quién llamar: una puntuación comercial (0-100) calculada con las señales del BORME (último acto, fecha, antigüedad) y los motivos que la explican.</p>
             </div>
             
             <div class="plan-feature-card">
@@ -228,11 +228,39 @@
             <div class="endpoints-grid">
                 <div class="endpoint-card">
                     <div class="endpoint-route">GET /companies/score</div>
-                    <p class="endpoint-desc">Obtén el scoring comercial y nivel de riesgo financiero de una empresa mediante IA antes de dar crédito o cerrar un contrato.</p>
+                    <p class="endpoint-desc">Puntuación comercial (0-100) con su prioridad, los motivos y la última señal del BORME. Para riesgo de impago y solvencia, el perfil de riesgo va en Business.</p>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-route">GET /watchlist/events</div>
+                    <p class="endpoint-desc">Vigila hasta 100 empresas y consulta sus cambios: actos nuevos en el BORME, cambios de estado y de nivel de riesgo. No gasta consultas.</p>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-route">GET /companies?admin=true</div>
+                    <p class="endpoint-desc">Datos completos con administradores vigentes y su fecha de nombramiento, tramo de facturación y último año de cuentas depositadas.</p>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-route">POST /companies/batch</div>
+                    <p class="endpoint-desc">Hasta 100 CIF en una sola petición, con los mismos datos completos. Se cobra una consulta por empresa encontrada.</p>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-route">GET /companies/signals</div>
+                    <p class="endpoint-desc">Eventos societarios relevantes del BORME: nombramientos, ampliaciones, cambios de domicilio y más.</p>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-route">GET /companies/network</div>
+                    <p class="endpoint-desc">Red de empresas vinculadas a través de sus administradores, en formato de nodos y conexiones.</p>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-route">GET /companies/radar</div>
+                    <p class="endpoint-desc">Empresas recién constituidas: hasta 100 por consulta, filtrables por provincia, CNAE, puntuación y teléfono.</p>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-route">GET /companies/insights</div>
+                    <p class="endpoint-desc">Vista previa del análisis comercial con IA: perfil de la empresa y probabilidad de conversión. El análisis completo va en Business.</p>
                 </div>
                 <div class="endpoint-card">
                     <div class="endpoint-route">GET /companies/borme</div>
-                    <p class="endpoint-desc">Consulta los eventos y publicaciones oficiales del Registro Mercantil (BORME) asociados a la empresa, como nombramientos, ampliaciones de capital o balances.</p>
+                    <p class="endpoint-desc">Consulta los eventos y publicaciones oficiales del Registro Mercantil (BORME) asociados a la empresa, como nombramientos, ceses, ampliaciones de capital o cambios de domicilio.</p>
                 </div>
             </div>
             <div style="text-align: center; margin-top: 16px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
@@ -276,8 +304,8 @@
         
         const endpoints = [
             {
-                cmd: "curl -X GET 'https://apiempresas.es/api/v1/companies/score?cif=B86854536' \\ \n  -H 'X-API-KEY: TU_API_KEY'",
-                res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"data"</span>: {\n    <span class="json-key">"cif"</span>: <span class="json-string">"B86854536"</span>,\n    <span class="json-key">"score"</span>: <span class="json-number">92</span>,\n    <span class="json-key">"risk_level"</span>: <span class="json-string">"LOW"</span>,\n    <span class="json-key">"recommendation"</span>: <span class="json-string">"Aprobar crédito"</span>\n  }\n}`
+                cmd: "curl -X GET 'https://apiempresas.es/api/v1/companies/score?cif=B12345678' \\ \n  -H 'X-API-KEY: TU_API_KEY'",
+                res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"data"</span>: {\n    <span class="json-key">"cif"</span>: <span class="json-string">"B12345678"</span>,\n    <span class="json-key">"score"</span>: <span class="json-number">78</span>,\n    <span class="json-key">"priority"</span>: <span class="json-string">"alta"</span>,\n    <span class="json-key">"reasons"</span>: [\n      <span class="json-string">"Ampliación de capital reciente"</span>,\n      <span class="json-string">"Sociedad con más de 5 años"</span>\n    ],\n    <span class="json-key">"last_signal"</span>: {\n      <span class="json-key">"type"</span>: <span class="json-string">"Ampliación de capital"</span>,\n      <span class="json-key">"date"</span>: <span class="json-string">"2026-09-10"</span>\n    },\n    <span class="json-key">"source"</span>: <span class="json-string">"radar"</span>\n  }\n}`
             },
             {
                 cmd: "curl -X GET 'https://apiempresas.es/api/v1/companies/search?q=software&multiple=true' \\ \n  -H 'X-API-KEY: TU_API_KEY'",

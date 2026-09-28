@@ -768,7 +768,7 @@
                             </tr>
                             <tr>
                                 <td>Quién puede firmar por ella</td>
-                                <td>Administradores y cargos actuales, con el parámetro <code>admin=true</code>.</td>
+                                <td>Administradores y cargos vigentes, con su fecha de nombramiento, con el parámetro <code>admin=true</code>.</td>
                                 <td><span class="kyb-plan kyb-plan--pro">Pro</span></td>
                             </tr>
                             <tr>
@@ -1180,11 +1180,19 @@
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> Administradores y cargos</li>
+                                </svg> Administradores vigentes, con fecha de nombramiento</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
                                 </svg> Domicilio y objeto social completos</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                                </svg> Tramo de facturación y último año de cuentas</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                                </svg> Vigilancia de 100 empresas (BORME, estado y riesgo)</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
@@ -1220,6 +1228,10 @@
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
                                 </svg> Contratos y adjudicaciones públicas</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                                </svg> Vigilancia de 1.000 empresas (BORME, estado y riesgo)</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />

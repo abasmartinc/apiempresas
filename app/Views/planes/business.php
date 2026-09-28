@@ -3,7 +3,7 @@
 <head>
     <?= view('partials/head', [
         'title' => 'Infraestructura API de Datos Mercantiles para ERP | Plan Business',
-        'excerptText' => 'Tarifas y planes de nuestra API Enterprise para extraer datos masivos del Registro Mercantil, conexión ERP y Webhooks en tiempo real.'
+        'excerptText' => 'Plan Business de la API: 10.000 consultas al mes, perfil de riesgo, contratos públicos, vigilancia de hasta 1.000 empresas e IA comercial.'
     ]) ?>
     <link rel="stylesheet" href="<?= base_url('public/css/home.css') ?>?v=<?= time() ?>">
     <link rel="stylesheet" href="<?= base_url('public/css/home-mobile.css') ?>?v=<?= time() ?>" media="screen and (max-width: 768px)">
@@ -12,7 +12,7 @@
       "@context": "https://schema.org/",
       "@type": "Product",
       "name": "Infraestructura API Enterprise - Plan Business",
-      "description": "Tarifas y planes para alto volumen. Conecta tu ERP al Registro Mercantil, extrae datos B2B masivos y recibe Webhooks de notificaciones en tiempo real.",
+      "description": "Tarifas y planes para alto volumen. Conecta tu ERP al Registro Mercantil, evalúa el riesgo de tus clientes y vigila hasta 1.000 empresas sin gastar consultas.",
       "brand": {
         "@type": "Brand",
         "name": "APIEmpresas"
@@ -100,7 +100,7 @@
                 Plan Business (Escala)
             </div>
             <h1 class="plan-title">Infraestructura API <span>Enterprise</span></h1>
-            <p class="plan-subtitle">Tarifas y planes para alto volumen. Conecta tu ERP al Registro Mercantil, extrae datos B2B masivos y recibe Webhooks de notificaciones en tiempo real.</p>
+            <p class="plan-subtitle">Tarifas y planes para alto volumen. Conecta tu ERP al Registro Mercantil, evalúa el riesgo de tus clientes y vigila hasta 1.000 empresas sin gastar consultas.</p>
         </div>
 
         <div class="plan-demo-wrapper" style="background: #f8fafc;">
@@ -114,7 +114,7 @@
                 <div class="terminal-tabs">
                     <div class="term-tab active" data-tab="0">Match B2B</div>
                     <div class="term-tab" data-tab="1">Preparación de Contacto</div>
-                    <div class="term-tab" data-tab="2">Enriquecimiento Bulk</div>
+                    <div class="term-tab" data-tab="2">Perfil de riesgo</div>
                 </div>
                 <div class="terminal-body">
                     <div><span class="prompt">$</span> <span class="command" id="term-cmd"></span><span id="term-cursor" style="display:inline-block; width:8px; height:15px; background: white; animation: blink 1s infinite; vertical-align: middle;"></span></div>
@@ -131,7 +131,7 @@
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
                 </div>
                 <h3>Match B2B Inteligente</h3>
-                <p>Encuentra empresas gemelas. Pasa el CIF de tu mejor cliente y nuestra IA te devolverá una lista de prospectos idénticos con alta probabilidad de cierre.</p>
+                <p>Dinos qué vendes y el CIF de un prospecto: la API puntúa el encaje (0-100) y te da el argumento de venta y una recomendación de contacto.</p>
             </div>
             
             <div class="plan-feature-card">
@@ -226,6 +226,11 @@
         <div class="endpoints-section">
             <h3 class="endpoints-title">Endpoints incluidos en el Plan Business</h3>
             <p class="endpoints-subtitle">Además de todos los endpoints de los planes Free y Pro, desbloqueas:</p>
+            <div class="endpoints-grid">
+                <div class="endpoint-card">
+                    <div class="endpoint-route">GET /watchlist/events</div>
+                    <p class="endpoint-desc">Vigila hasta 1.000 empresas (100 en Pro) y consulta sus cambios en el BORME, en su estado y en su nivel de riesgo sin gastar consultas.</p>
+                </div>
                 <div class="endpoint-card">
                     <div class="endpoint-route">GET /companies/risk-profile</div>
                     <p class="endpoint-desc">Scoring de riesgo algorítmico, cumplimiento de depósito de cuentas anuales y alertas mercantiles BORME para evaluar solvencia y riesgo de impago.</p>
@@ -236,15 +241,19 @@
                 </div>
                 <div class="endpoint-card">
                     <div class="endpoint-route">GET /companies/match</div>
-                    <p class="endpoint-desc">Encuentra empresas gemelas y negocios similares a tus mejores clientes usando nuestra IA para prospección comercial automatizada.</p>
+                    <p class="endpoint-desc">Puntúa el encaje (0-100) entre un prospecto y el sector que tú vendes, con los problemas que resuelves, el argumento de venta y una recomendación.</p>
                 </div>
                 <div class="endpoint-card">
                     <div class="endpoint-route">GET /companies/contact-prep</div>
                     <p class="endpoint-desc">Genera tácticas de ventas, enfoques y borradores de emails altamente personalizados por IA antes de contactar a un prospecto.</p>
                 </div>
                 <div class="endpoint-card">
-                    <div class="endpoint-route">POST /companies/batch</div>
-                    <p class="endpoint-desc">Enriquece y procesa el estado de múltiples empresas (por lotes) en una sola llamada para actualizar tu base de datos rápidamente.</p>
+                    <div class="endpoint-route">GET /companies/insights</div>
+                    <p class="endpoint-desc">Análisis comercial completo con IA: perfil, necesidades detectadas, ticket estimado y probabilidad de conversión. En Pro solo la vista previa.</p>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-route">GET /companies/radar</div>
+                    <p class="endpoint-desc">Empresas recién constituidas: hasta 1.000 por consulta (100 en Pro), filtrables por provincia, CNAE, puntuación y teléfono.</p>
                 </div>
             </div>
             <div style="text-align: center; margin-top: 16px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
@@ -289,15 +298,15 @@
         const endpoints = [
             {
                 cmd: "curl -X GET 'https://apiempresas.es/api/v1/companies/match?cif=A08166803&seller_sector=software' \\ \n  -H 'X-API-KEY: TU_API_KEY'",
-                res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"data"</span>: {\n    <span class="json-key">"target"</span>: <span class="json-string">"A08166803"</span>,\n    <span class="json-key">"matches"</span>: [\n      {\n        <span class="json-key">"cif"</span>: <span class="json-string">"V46011425"</span>,\n        <span class="json-key">"name"</span>: <span class="json-string">"CONSUM S COOP"</span>,\n        <span class="json-key">"score"</span>: <span class="json-number">0.98</span>\n      },\n      {\n        <span class="json-key">"cif"</span>: <span class="json-string">"A60194776"</span>,\n        <span class="json-key">"name"</span>: <span class="json-string">"EROSKI SA"</span>,\n        <span class="json-key">"score"</span>: <span class="json-number">0.96</span>\n      }\n    ]\n  }\n}`
+                res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"data"</span>: {\n    <span class="json-key">"match_score"</span>: <span class="json-number">82</span>,\n    <span class="json-key">"fit_level"</span>: <span class="json-string">"Alto"</span>,\n    <span class="json-key">"pain_points_addressed"</span>: [\n      <span class="json-string">"Digitalización de procesos"</span>,\n      <span class="json-string">"Control de stock"</span>\n    ],\n    <span class="json-key">"sales_argument"</span>: <span class="json-string">"Empresa en expansión con necesidad de herramientas de gestión."</span>,\n    <span class="json-key">"recommendation"</span>: <span class="json-string">"Prioridad Alta: Contactar inmediatamente."</span>\n  }\n}`
             },
             {
                 cmd: "curl -X GET 'https://apiempresas.es/api/v1/companies/contact-prep?cif=A08166803' \\ \n  -H 'X-API-KEY: TU_API_KEY'",
-                res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"data"</span>: {\n    <span class="json-key">"tacticas"</span>: [\n      <span class="json-string">"Enfatizar escalabilidad técnica"</span>,\n      <span class="json-string">"Mencionar caso de éxito sectorial"</span>\n    ],\n    <span class="json-key">"guiones_email"</span>: <span class="json-string">"Hola [Nombre], noté que..."</span>,\n    <span class="json-key">"guiones_linkedin"</span>: <span class="json-string">"Hola, veo que lideráis..."</span>\n  }\n}`
+                res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"data"</span>: {\n    <span class="json-key">"sales_approach"</span>: <span class="json-string">"Enfoque consultivo centrado en eficiencia operativa"</span>,\n    <span class="json-key">"suggested_message"</span>: <span class="json-string">"Hola, he visto que habéis ampliado capital este mes..."</span>,\n    <span class="json-key">"likely_objection"</span>: <span class="json-string">"Ya tenemos un proveedor"</span>,\n    <span class="json-key">"attack_angle"</span>: <span class="json-string">"Ahorro de tiempo en la gestión diaria"</span>\n  }\n}`
             },
             {
-                cmd: "curl -X POST 'https://apiempresas.es/api/v1/companies/batch' \\ \n  -H 'X-API-KEY: TU_API_KEY' \\ \n  -d '{\"cifs\": [\"A08166803\", \"V46011425\"]}'",
-                res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"processed"</span>: <span class="json-number">2</span>,\n  <span class="json-key">"data"</span>: [\n    { <span class="json-key">"cif"</span>: <span class="json-string">"A08166803"</span>, <span class="json-key">"status"</span>: <span class="json-string">"ACTIVA"</span> },\n    { <span class="json-key">"cif"</span>: <span class="json-string">"V46011425"</span>, <span class="json-key">"status"</span>: <span class="json-string">"ACTIVA"</span> }\n  ]\n}`
+                cmd: "curl -X GET 'https://apiempresas.es/api/v1/companies/risk-profile?cif=B12345678' \\ \n  -H 'X-API-KEY: TU_API_KEY'",
+                res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"data"</span>: {\n    <span class="json-key">"cif"</span>: <span class="json-string">"B12345678"</span>,\n    <span class="json-key">"risk_score"</span>: <span class="json-number">34</span>,\n    <span class="json-key">"risk_level"</span>: <span class="json-string">"MEDIO"</span>,\n    <span class="json-key">"legal_state"</span>: <span class="json-string">"NORMAL"</span>,\n    <span class="json-key">"dimensions"</span>: {\n      <span class="json-key">"legal_distress"</span>: <span class="json-number">0</span>,\n      <span class="json-key">"filing_compliance"</span>: <span class="json-number">40</span>,\n      <span class="json-key">"governance_volatility"</span>: <span class="json-number">25</span>\n    },\n    <span class="json-key">"summary_message"</span>: <span class="json-string">"Constan observaciones de riesgo moderado."</span>\n  }\n}`
             }
         ];
         

@@ -419,24 +419,27 @@
                     'free' => [
                         (int) $freeLimit . ' consultas gratis (no se renuevan)',
                         'Validación por CIF y buscador por nombre',
-                        'Datos básicos: razón social, estado, CNAE, provincia y fecha de constitución',
+                        'Datos básicos: razón social, estado normalizado, CNAE, provincia y fecha de constitución',
                         'Scoring comercial básico (sin desglose)',
                         'Empresas recién constituidas (hoy, 7 o 30 días): 10 por consulta',
                         'Sin tarjeta de crédito',
                     ],
                     'pro' => [
                         '3.000 consultas al mes',
-                        'Datos completos, con dirección, administradores y cargos',
+                        'Datos completos, con dirección y administradores vigentes (con fecha de nombramiento)',
+                        'Tramo de facturación y último año de cuentas depositadas',
                         'Consultas por lotes: hasta 100 CIFs por petición',
                         'Historial BORME, señales y grafos societarios',
+                        'Vigilancia de 100 empresas: cambios en el BORME, el estado y el riesgo, sin gastar consultas',
                         'Scoring comercial IA completo (0-100)',
-                        'Empresas recién constituidas (hoy, 7 o 30 días): hasta 100 por consulta',
+                        'Empresas recién constituidas (hoy, 7 o 30 días): hasta 100 por consulta, filtrables por CNAE y teléfono',
                         'Soporte prioritario por email',
                     ],
                     'business' => [
                         '10.000 consultas al mes',
                         'Perfil de riesgo y solvencia',
                         'Contratos y adjudicaciones públicas',
+                        'Vigilancia de 1.000 empresas (BORME, estado y riesgo)',
                         'Webhooks Push (Notificaciones BORME)',
                         'IA Business Insights completo',
                         'IA Contact Prep y Calculadora Match B2B',
@@ -585,7 +588,7 @@
                                     <div class="cap-col-feature">
                                         <div class="cap-feature-name">Datos de empresa por CIF</div>
                                         <div class="cap-feature-endpoint">GET /api/v1/companies</div>
-                                        <div class="cap-feature-desc">Comprueba que la sociedad existe y obtén su razón social, estado, CNAE, domicilio y capital.</div>
+                                        <div class="cap-feature-desc">Comprueba que la sociedad existe y obtén su razón social, estado (también normalizado), CNAE, domicilio y capital. En Pro, además, tramo de facturación y último año de cuentas.</div>
                                         <button type="button" onclick="event.preventDefault(); showJsonPreview('get_companies')" class="btn-json-preview">Ver Respuesta JSON</button>
                                     </div>
                                 </td>
@@ -598,7 +601,7 @@
                                     <div class="cap-col-feature">
                                         <div class="cap-feature-name">Administradores y cargos</div>
                                         <div class="cap-feature-endpoint">GET /api/v1/companies?cif=…&amp;admin=true</div>
-                                        <div class="cap-feature-desc">Añade a la respuesta los administradores y cargos actuales de la empresa.</div>
+                                        <div class="cap-feature-desc">Añade a la respuesta los administradores y cargos vigentes, con su fecha de nombramiento: se descuentan los ceses publicados en el BORME.</div>
                                     </div>
                                 </td>
                                 <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
@@ -654,7 +657,7 @@
                                     <div class="cap-col-feature">
                                         <div class="cap-feature-name">Empresas recién constituidas</div>
                                         <div class="cap-feature-endpoint">GET /api/v1/companies/radar</div>
-                                        <div class="cap-feature-desc">Listado de empresas constituidas en España hoy o en los últimos 7 o 30 días, filtrable por provincia.</div>
+                                        <div class="cap-feature-desc">Listado de empresas constituidas en España hoy o en los últimos 7 o 30 días, filtrable por provincia, CNAE, puntuación y teléfono.</div>
                                         <button type="button" onclick="event.preventDefault(); showJsonPreview('get_radar')" class="btn-json-preview">Ver Respuesta JSON</button>
                                     </div>
                                 </td>
@@ -687,6 +690,18 @@
                                 <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
                                 <td class="cap-featured-col" style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
                                 <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Vigilancia de empresas</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/watchlist/events</div>
+                                        <div class="cap-feature-desc">Da de alta las empresas que te interesan y consulta sus actos nuevos en el BORME, cambios de estado y cambios de nivel de riesgo. No gasta consultas.</div>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center; font-size: 0.85rem; font-weight: 700;">100 empresas</td>
+                                <td style="text-align: center; font-size: 0.85rem; font-weight: 700;">1.000 empresas</td>
                             </tr>
                             <tr>
                                 <td>

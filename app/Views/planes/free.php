@@ -136,7 +136,7 @@
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                 </div>
                 <h3>Validación Básica</h3>
-                <p>Verifica si un CIF existe en el registro, obtén su Razón Social oficial y su código de actividad (CNAE).</p>
+                <p>Verifica si un CIF existe en el registro y obtén su razón social, su estado (también normalizado, para programar contra él) y su código de actividad (CNAE).</p>
             </div>
             
             <div class="plan-feature-card">
@@ -219,11 +219,27 @@
             <div class="endpoints-grid">
                 <div class="endpoint-card">
                     <div class="endpoint-route">GET /companies?cif=</div>
-                    <p class="endpoint-desc">Obtén los datos oficiales básicos (Razón Social, Estado, CNAE) de una empresa indicando únicamente su CIF.</p>
+                    <p class="endpoint-desc">Obtén los datos básicos (razón social, estado, CNAE, provincia) de una empresa con su CIF. La dirección y el objeto social completos van en Pro.</p>
                 </div>
                 <div class="endpoint-card">
                     <div class="endpoint-route">GET /companies/search</div>
                     <p class="endpoint-desc">Busca una empresa por su nombre comercial y localiza su CIF y estado actual de forma rápida y sencilla.</p>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-route">GET /companies/score</div>
+                    <p class="endpoint-desc">Puntuación comercial (0-100) de la empresa. En Free ves la cifra; el desglose va en Pro.</p>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-route">GET /companies/radar</div>
+                    <p class="endpoint-desc">Empresas recién constituidas (hoy, 7 o 30 días): 10 por consulta, con el nombre y el CIF ocultos.</p>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-route">GET /usage</div>
+                    <p class="endpoint-desc">Consulta tu consumo y las consultas que te quedan. No gasta consultas. Disponible en todos los planes.</p>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-route">/api/sandbox/v1/…</div>
+                    <p class="endpoint-desc">Entorno de pruebas con los mismos endpoints y respuestas de ejemplo (CIF A15075062 y B00000000). No gasta consultas. Disponible en todos los planes.</p>
                 </div>
             </div>
             <div style="text-align: center; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
@@ -247,7 +263,7 @@
         
         <div class="alternative-plans">
             <strong>¿No es exactamente lo que buscas?</strong><br>
-            Si necesitas automatizar el alta de clientes, explora el <a href="<?= site_url('planes/pro') ?>">Plan Pro</a>. Para descubrir empresas gemelas usando IA, mira el <a href="<?= site_url('planes/business') ?>">Plan Business</a>.
+            Si necesitas automatizar el alta de clientes, explora el <a href="<?= site_url('planes/pro') ?>">Plan Pro</a>. Para perfil de riesgo, contratos públicos y vigilancia de hasta 1.000 empresas, mira el <a href="<?= site_url('planes/business') ?>">Plan Business</a>.
         </div>
 
     </div>
@@ -268,7 +284,7 @@
         const endpoints = [
             {
                 cmd: "curl -X GET 'https://apiempresas.es/api/v1/companies?cif=A15075062' \\ \n  -H 'X-API-KEY: TU_API_KEY'",
-                res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"data"</span>: {\n    <span class="json-key">"cif"</span>: <span class="json-string">"A15075062"</span>,\n    <span class="json-key">"name"</span>: <span class="json-string">"INDUSTRIA DE DISENO TEXTIL SA"</span>,\n    <span class="json-key">"cnae"</span>: <span class="json-string">"4642"</span>,\n    <span class="json-key">"cnae_description"</span>: <span class="json-string">"Comercio al por mayor de prendas de vestir y calzado"</span>,\n    <span class="json-key">"status"</span>: <span class="json-string">"ACTIVA"</span>\n  }\n}`
+                res: `{\n  <span class="json-key">"success"</span>: <span class="json-number">true</span>,\n  <span class="json-key">"data"</span>: {\n    <span class="json-key">"cif"</span>: <span class="json-string">"A15075062"</span>,\n    <span class="json-key">"name"</span>: <span class="json-string">"INDUSTRIA DE DISENO TEXTIL SA"</span>,\n    <span class="json-key">"cnae"</span>: <span class="json-string">"4642"</span>,\n    <span class="json-key">"cnae_label"</span>: <span class="json-string">"Comercio al por mayor de prendas de vestir y calzado"</span>,\n    <span class="json-key">"address"</span>: <span class="json-string">"*** [ACTUALIZA A PRO PARA VER LA DIRECCION ]"</span>,\n    <span class="json-key">"status"</span>: <span class="json-string">"ACTIVA"</span>,\n    <span class="json-key">"status_code"</span>: <span class="json-string">"ACTIVE"</span>\n  }\n}`
             },
             {
                 cmd: "curl -X GET 'https://apiempresas.es/api/v1/companies/search?name=mercadona' \\ \n  -H 'X-API-KEY: TU_API_KEY'",

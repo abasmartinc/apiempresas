@@ -1,14 +1,13 @@
 {
     "info": {
-        "_postman_id": "8c5e2a1b-7d3a-4f5a-9e2c-1b2a3d4f5g6h",
+        "_postman_id": "8c5e2a1b-7d3a-4f5a-9e2c-1b2a3d4f5a01",
         "name": "APIEmpresas.es - Plan Free",
-        "description": "Colecci\u00f3n completa de la API de APIEmpresas.es organizada por planes de acceso (Free, Professional y Business).",
-        "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
+        "description": "Colección de la API de APIEmpresas.es organizada por planes (Free, Pro y Business). Pon tu clave en la variable API_KEY. Actualizada el 28-09-2026.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
         {
             "name": "1. Plan Free",
-            "description": "Endpoints accesibles para todos los planes, incluido el plan Free.",
             "item": [
                 {
                     "name": "Consulta por CIF",
@@ -22,12 +21,12 @@
                             },
                             {
                                 "key": "Accept",
-                                "value": "application\/json",
+                                "value": "application/json",
                                 "type": "text"
                             }
                         ],
                         "url": {
-                            "raw": "https:\/\/apiempresas.es\/api\/v1\/companies?cif=B12345678",
+                            "raw": "https://apiempresas.es/api/v1/companies?cif=A15075062",
                             "protocol": "https",
                             "host": [
                                 "apiempresas",
@@ -41,14 +40,15 @@
                             "query": [
                                 {
                                     "key": "cif",
-                                    "value": "B12345678"
+                                    "value": "A15075062"
                                 }
                             ]
-                        }
+                        },
+                        "description": "Datos básicos y status_code. En Free, dirección y objeto social van recortados. Coste: 1 consulta."
                     }
                 },
                 {
-                    "name": "B\u00fasqueda por Nombre",
+                    "name": "Búsqueda por Nombre",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -59,12 +59,12 @@
                             },
                             {
                                 "key": "Accept",
-                                "value": "application\/json",
+                                "value": "application/json",
                                 "type": "text"
                             }
                         ],
                         "url": {
-                            "raw": "https:\/\/apiempresas.es\/api\/v1\/companies\/search?q=Telef\u00f3nica",
+                            "raw": "https://apiempresas.es/api/v1/companies/search?q=mercadona",
                             "protocol": "https",
                             "host": [
                                 "apiempresas",
@@ -79,14 +79,15 @@
                             "query": [
                                 {
                                     "key": "q",
-                                    "value": "Telef\u00f3nica"
+                                    "value": "mercadona"
                                 }
                             ]
-                        }
+                        },
+                        "description": "Añade multiple=true&limit=20 para varios resultados."
                     }
                 },
                 {
-                    "name": "Estad\u00edsticas de Consumo",
+                    "name": "Scoring Comercial (básico)",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -97,12 +98,90 @@
                             },
                             {
                                 "key": "Accept",
-                                "value": "application\/json",
+                                "value": "application/json",
                                 "type": "text"
                             }
                         ],
                         "url": {
-                            "raw": "https:\/\/apiempresas.es\/api\/v1\/usage",
+                            "raw": "https://apiempresas.es/api/v1/companies/score?cif=A15075062",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "score"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "A15075062"
+                                }
+                            ]
+                        },
+                        "description": "En Free, solo la puntuación; el desglose va en Pro."
+                    }
+                },
+                {
+                    "name": "Empresas recién constituidas",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/radar?range=7",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "radar"
+                            ],
+                            "query": [
+                                {
+                                    "key": "range",
+                                    "value": "7"
+                                }
+                            ]
+                        },
+                        "description": "En Free, 10 resultados con nombre y CIF ocultos."
+                    }
+                },
+                {
+                    "name": "Estadísticas de Consumo",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/usage",
                             "protocol": "https",
                             "host": [
                                 "apiempresas",
@@ -113,7 +192,51 @@
                                 "v1",
                                 "usage"
                             ]
-                        }
+                        },
+                        "description": "No gasta consultas."
+                    }
+                },
+                {
+                    "name": "Sandbox: Consulta por CIF",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/sandbox/v1/companies?cif=A15075062&admin=true",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "sandbox",
+                                "v1",
+                                "companies"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "A15075062"
+                                },
+                                {
+                                    "key": "admin",
+                                    "value": "true"
+                                }
+                            ]
+                        },
+                        "description": "Respuestas de ejemplo. Solo acepta A15075062 (éxito) y B00000000 (no encontrada). No gasta consultas."
                     }
                 }
             ]

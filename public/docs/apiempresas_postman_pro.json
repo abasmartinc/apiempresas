@@ -1,14 +1,13 @@
 {
     "info": {
-        "_postman_id": "8c5e2a1b-7d3a-4f5a-9e2c-1b2a3d4f5g6h",
+        "_postman_id": "8c5e2a1b-7d3a-4f5a-9e2c-1b2a3d4f5a02",
         "name": "APIEmpresas.es - Plan Pro",
-        "description": "Colecci\u00f3n completa de la API de APIEmpresas.es organizada por planes de acceso (Free, Professional y Business).",
-        "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
+        "description": "Colección de la API de APIEmpresas.es organizada por planes (Free, Pro y Business). Pon tu clave en la variable API_KEY. Actualizada el 28-09-2026.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
         {
             "name": "1. Plan Free",
-            "description": "Endpoints accesibles para todos los planes, incluido el plan Free.",
             "item": [
                 {
                     "name": "Consulta por CIF",
@@ -22,12 +21,12 @@
                             },
                             {
                                 "key": "Accept",
-                                "value": "application\/json",
+                                "value": "application/json",
                                 "type": "text"
                             }
                         ],
                         "url": {
-                            "raw": "https:\/\/apiempresas.es\/api\/v1\/companies?cif=B12345678",
+                            "raw": "https://apiempresas.es/api/v1/companies?cif=A15075062",
                             "protocol": "https",
                             "host": [
                                 "apiempresas",
@@ -41,14 +40,15 @@
                             "query": [
                                 {
                                     "key": "cif",
-                                    "value": "B12345678"
+                                    "value": "A15075062"
                                 }
                             ]
-                        }
+                        },
+                        "description": "Datos básicos y status_code. En Free, dirección y objeto social van recortados. Coste: 1 consulta."
                     }
                 },
                 {
-                    "name": "B\u00fasqueda por Nombre",
+                    "name": "Búsqueda por Nombre",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -59,12 +59,12 @@
                             },
                             {
                                 "key": "Accept",
-                                "value": "application\/json",
+                                "value": "application/json",
                                 "type": "text"
                             }
                         ],
                         "url": {
-                            "raw": "https:\/\/apiempresas.es\/api\/v1\/companies\/search?q=Telef\u00f3nica",
+                            "raw": "https://apiempresas.es/api/v1/companies/search?q=mercadona",
                             "protocol": "https",
                             "host": [
                                 "apiempresas",
@@ -79,14 +79,15 @@
                             "query": [
                                 {
                                     "key": "q",
-                                    "value": "Telef\u00f3nica"
+                                    "value": "mercadona"
                                 }
                             ]
-                        }
+                        },
+                        "description": "Añade multiple=true&limit=20 para varios resultados."
                     }
                 },
                 {
-                    "name": "Estad\u00edsticas de Consumo",
+                    "name": "Scoring Comercial (básico)",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -97,44 +98,12 @@
                             },
                             {
                                 "key": "Accept",
-                                "value": "application\/json",
+                                "value": "application/json",
                                 "type": "text"
                             }
                         ],
                         "url": {
-                            "raw": "https:\/\/apiempresas.es\/api\/v1\/usage",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "usage"
-                            ]
-                        }
-                    }
-                }
-            ]
-        },
-        {
-            "name": "2. Plan Pro",
-            "description": "Endpoints que requieren suscripci\u00f3n activa al Plan Professional o superior.",
-            "item": [
-                {
-                    "name": "Scoring Comercial",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https:\/\/apiempresas.es\/api\/v1\/companies\/score?cif=B12345678",
+                            "raw": "https://apiempresas.es/api/v1/companies/score?cif=A15075062",
                             "protocol": "https",
                             "host": [
                                 "apiempresas",
@@ -149,14 +118,15 @@
                             "query": [
                                 {
                                     "key": "cif",
-                                    "value": "B12345678"
+                                    "value": "A15075062"
                                 }
                             ]
-                        }
+                        },
+                        "description": "En Free, solo la puntuación; el desglose va en Pro."
                     }
                 },
                 {
-                    "name": "Se\u00f1ales Societarias",
+                    "name": "Empresas recién constituidas",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -164,10 +134,256 @@
                                 "key": "X-API-KEY",
                                 "value": "{{API_KEY}}",
                                 "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
                             }
                         ],
                         "url": {
-                            "raw": "https:\/\/apiempresas.es\/api\/v1\/companies\/signals?cif=B12345678",
+                            "raw": "https://apiempresas.es/api/v1/companies/radar?range=7",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "radar"
+                            ],
+                            "query": [
+                                {
+                                    "key": "range",
+                                    "value": "7"
+                                }
+                            ]
+                        },
+                        "description": "En Free, 10 resultados con nombre y CIF ocultos."
+                    }
+                },
+                {
+                    "name": "Estadísticas de Consumo",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/usage",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "usage"
+                            ]
+                        },
+                        "description": "No gasta consultas."
+                    }
+                },
+                {
+                    "name": "Sandbox: Consulta por CIF",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/sandbox/v1/companies?cif=A15075062&admin=true",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "sandbox",
+                                "v1",
+                                "companies"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "A15075062"
+                                },
+                                {
+                                    "key": "admin",
+                                    "value": "true"
+                                }
+                            ]
+                        },
+                        "description": "Respuestas de ejemplo. Solo acepta A15075062 (éxito) y B00000000 (no encontrada). No gasta consultas."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2. Plan Pro",
+            "item": [
+                {
+                    "name": "Consulta por CIF con administradores",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies?cif=A46103834&admin=true",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "A46103834"
+                                },
+                                {
+                                    "key": "admin",
+                                    "value": "true"
+                                }
+                            ]
+                        },
+                        "description": "Datos completos, financials (tramo de facturación y último año de cuentas) y administradores vigentes con su fecha de nombramiento."
+                    }
+                },
+                {
+                    "name": "Consulta Múltiples Empresas (Batch)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/batch",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "batch"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"cifs\": [\n    \"A15075062\",\n    \"A46103834\"\n  ],\n  \"admin\": true\n}"
+                        },
+                        "description": "Hasta 100 CIF. Se cobra una consulta por empresa encontrada."
+                    }
+                },
+                {
+                    "name": "Scoring Comercial",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/score?cif=A15075062",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "score"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "A15075062"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Señales Societarias",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/signals?cif=A15075062",
                             "protocol": "https",
                             "host": [
                                 "apiempresas",
@@ -182,7 +398,7 @@
                             "query": [
                                 {
                                     "key": "cif",
-                                    "value": "B12345678"
+                                    "value": "A15075062"
                                 }
                             ]
                         }
@@ -197,10 +413,15 @@
                                 "key": "X-API-KEY",
                                 "value": "{{API_KEY}}",
                                 "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
                             }
                         ],
                         "url": {
-                            "raw": "https:\/\/apiempresas.es\/api\/v1\/companies\/borme?cif=B12345678",
+                            "raw": "https://apiempresas.es/api/v1/companies/borme?cif=A15075062",
                             "protocol": "https",
                             "host": [
                                 "apiempresas",
@@ -215,7 +436,7 @@
                             "query": [
                                 {
                                     "key": "cif",
-                                    "value": "B12345678"
+                                    "value": "A15075062"
                                 }
                             ]
                         }
@@ -230,10 +451,15 @@
                                 "key": "X-API-KEY",
                                 "value": "{{API_KEY}}",
                                 "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
                             }
                         ],
                         "url": {
-                            "raw": "https:\/\/apiempresas.es\/api\/v1\/companies\/network?cif=B79359220",
+                            "raw": "https://apiempresas.es/api/v1/companies/network?cif=A15075062",
                             "protocol": "https",
                             "host": [
                                 "apiempresas",
@@ -248,14 +474,14 @@
                             "query": [
                                 {
                                     "key": "cif",
-                                    "value": "B79359220"
+                                    "value": "A15075062"
                                 }
                             ]
                         }
                     }
                 },
                 {
-                    "name": "B\u00fasqueda Autocompletado Profesional",
+                    "name": "Radar con filtros",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -263,10 +489,15 @@
                                 "key": "X-API-KEY",
                                 "value": "{{API_KEY}}",
                                 "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
                             }
                         ],
                         "url": {
-                            "raw": "https:\/\/apiempresas.es\/api\/v1\/professional\/search?q=Telef\u00f3nica",
+                            "raw": "https://apiempresas.es/api/v1/companies/radar?range=30&province=MADRID&cnae=62&has_phone=true",
                             "protocol": "https",
                             "host": [
                                 "apiempresas",
@@ -275,20 +506,33 @@
                             "path": [
                                 "api",
                                 "v1",
-                                "professional",
-                                "search"
+                                "companies",
+                                "radar"
                             ],
                             "query": [
                                 {
-                                    "key": "q",
-                                    "value": "Telef\u00f3nica"
+                                    "key": "range",
+                                    "value": "30"
+                                },
+                                {
+                                    "key": "province",
+                                    "value": "MADRID"
+                                },
+                                {
+                                    "key": "cnae",
+                                    "value": "62"
+                                },
+                                {
+                                    "key": "has_phone",
+                                    "value": "true"
                                 }
                             ]
-                        }
+                        },
+                        "description": "Hasta 100 resultados en Pro y 1.000 en Business. Filtros opcionales: province, cnae (prefijos separados por comas), min_score, priority, main_act_type, has_phone."
                     }
                 },
                 {
-                    "name": "Detalles Profesionales de Empresa",
+                    "name": "Insights IA (vista previa)",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -296,10 +540,15 @@
                                 "key": "X-API-KEY",
                                 "value": "{{API_KEY}}",
                                 "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
                             }
                         ],
                         "url": {
-                            "raw": "https:\/\/apiempresas.es\/api\/v1\/professional\/details?cif=B12345678",
+                            "raw": "https://apiempresas.es/api/v1/companies/insights?cif=A15075062",
                             "protocol": "https",
                             "host": [
                                 "apiempresas",
@@ -308,20 +557,21 @@
                             "path": [
                                 "api",
                                 "v1",
-                                "professional",
-                                "details"
+                                "companies",
+                                "insights"
                             ],
                             "query": [
                                 {
                                     "key": "cif",
-                                    "value": "B12345678"
+                                    "value": "A15075062"
                                 }
                             ]
-                        }
+                        },
+                        "description": "En Pro, perfil y probabilidad de conversión. El análisis completo va en Business."
                     }
                 },
                 {
-                    "name": "Consulta M\u00faltiples Empresas (Batch)",
+                    "name": "Vigilancia: añadir empresas",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -332,21 +582,17 @@
                             },
                             {
                                 "key": "Content-Type",
-                                "value": "application\/json",
+                                "value": "application/json",
                                 "type": "text"
                             },
                             {
                                 "key": "Accept",
-                                "value": "application\/json",
+                                "value": "application/json",
                                 "type": "text"
                             }
                         ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"cifs\": [\"B12345678\", \"A87654321\"],\n  \"admin\": true\n}"
-                        },
                         "url": {
-                            "raw": "https:\/\/apiempresas.es\/api\/v1\/companies\/batch",
+                            "raw": "https://apiempresas.es/api/v1/watchlist",
                             "protocol": "https",
                             "host": [
                                 "apiempresas",
@@ -355,10 +601,132 @@
                             "path": [
                                 "api",
                                 "v1",
-                                "companies",
-                                "batch"
+                                "watchlist"
                             ]
-                        }
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"cifs\": [\n    \"A15075062\",\n    \"A46103834\"\n  ]\n}"
+                        },
+                        "description": "Hasta 500 CIF por petición. Pro: 100 empresas en total; Business: 1.000. No gasta consultas."
+                    }
+                },
+                {
+                    "name": "Vigilancia: listar empresas",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/watchlist?page=1&limit=100",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "watchlist"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "100"
+                                }
+                            ]
+                        },
+                        "description": "No gasta consultas."
+                    }
+                },
+                {
+                    "name": "Vigilancia: eventos",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/watchlist/events?since=2026-09-01&types=borme_act,status_change,risk_level_change",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "watchlist",
+                                "events"
+                            ],
+                            "query": [
+                                {
+                                    "key": "since",
+                                    "value": "2026-09-01"
+                                },
+                                {
+                                    "key": "types",
+                                    "value": "borme_act,status_change,risk_level_change"
+                                }
+                            ]
+                        },
+                        "description": "Cambios desde una fecha (máximo 90 días atrás), de más antiguo a más reciente. No gasta consultas."
+                    }
+                },
+                {
+                    "name": "Vigilancia: quitar empresa",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/watchlist/A15075062",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "watchlist",
+                                "A15075062"
+                            ]
+                        },
+                        "description": "404 NOT_WATCHING si no estaba en tu vigilancia."
                     }
                 }
             ]
