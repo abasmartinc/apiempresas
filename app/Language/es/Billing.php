@@ -20,7 +20,7 @@ return [
     'pro_f5' => 'Grafos de Poder Societario',
     'business_desc' => 'Pensado para plataformas con más carga y procesos críticos: 10.000 consultas al mes.',
     'bus_f1' => '10.000 consultas al mes',
-    'bus_f2' => 'Vigilancia de 1.000 empresas',
+    'bus_f2' => 'Vigilancia de 1.000 empresas y webhooks',
     'bus_f3' => 'IA Predictiva de Oportunidades',
     'bus_f4' => 'Calculadora de Match B2B',
     'bus_f5' => 'Soporte por email: respuesta en menos de 2 h',

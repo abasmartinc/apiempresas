@@ -966,7 +966,7 @@
                                 "webhooks"
                             ]
                         },
-                        "description": "Los webhooks se pueden registrar, pero todavía no se envían eventos. Para seguir cambios usa la vigilancia (/watchlist/events)."
+                        "description": "Tus webhooks registrados."
                     }
                 },
                 {
@@ -1005,9 +1005,43 @@
                         },
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"url\": \"https://tu-dominio.com/webhook\",\n  \"event\": \"company.created\"\n}"
+                            "raw": "{\n  \"url\": \"https://tu-dominio.com/webhooks/apiempresas\",\n  \"event\": \"watchlist.*\"\n}"
                         },
-                        "description": "Solo HTTPS a un host público. Todavía no se envían eventos."
+                        "description": "Eventos: company.borme_act, company.status_changed, company.risk_level_changed o watchlist.* (los tres). Guarda el secret de la respuesta para comprobar la firma X-ApiEmpresas-Signature. Solo HTTPS a un host público."
+                    }
+                },
+                {
+                    "name": "Probar Webhook",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/webhooks/123/test",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "webhooks",
+                                "123",
+                                "test"
+                            ]
+                        },
+                        "description": "Envía un test.ping a la URL del webhook en el momento y devuelve el código HTTP que respondió."
                     }
                 },
                 {

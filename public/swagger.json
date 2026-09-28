@@ -1494,7 +1494,7 @@
                     "3. Plan Business"
                 ],
                 "summary": "Crear Webhook",
-                "description": "Registra una nueva URL para recibir eventos asíncronos.",
+                "description": "Registra una URL para recibir los eventos de tu vigilancia: company.borme_act, company.status_changed, company.risk_level_changed o watchlist.* (los tres). La respuesta incluye el secret para comprobar la firma X-ApiEmpresas-Signature (t=<timestamp>,v1=<HMAC-SHA256 hex de 't.cuerpo'>). Eventos generados cada 15 minutos; reintentos durante 8 horas.",
                 "operationId": "9f3b040ea012169a4f2fea1c1551f351",
                 "requestBody": {
                     "required": true,
@@ -1755,6 +1755,37 @@
                     },
                     "403": {
                         "description": "Plan sin vigilancia (Free)"
+                    }
+                }
+            }
+        },
+        "/api/v1/webhooks/{id}/test": {
+            "post": {
+                "tags": [
+                    "3. Plan Business"
+                ],
+                "summary": "Probar un webhook",
+                "description": "Envía un test.ping a la URL del webhook en el momento y devuelve el código HTTP que respondió. **Coste:** 0.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "ID del webhook",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Entregado"
+                    },
+                    "502": {
+                        "description": "Tu servidor no respondió con 2xx"
+                    },
+                    "404": {
+                        "description": "Webhook no encontrado"
                     }
                 }
             }

@@ -1089,14 +1089,14 @@ Accept: application/json</code></pre>
                         <li>Los eventos salen de más antiguo a más reciente. El <code>id</code> es estable: úsalo para no procesar dos veces el mismo evento.</li>
                         <li><code>model_change: true</code> indica que el nivel cambió por un recálculo de nuestro modelo, no por algo nuevo de la empresa; <code>null</code> si no se puede saber.</li>
                         <li>Uso recomendado: una consulta al día con <code>since</code> = la fecha de tu última consulta.</li>
-                        <li>Plan Free: 403 <code>PLAN_RESTRICTION</code>. Por ahora no hay avisos por webhook: la vigilancia se consulta.</li>
+                        <li>Plan Free: 403 <code>PLAN_RESTRICTION</code>. En Business puedes recibir estos mismos eventos en tu servidor con <a href="#endpoint-webhooks">webhooks</a>.</li>
                     </ul>
                 </section>
 
                 <section class="docs-section" id="endpoint-webhooks">
                     <h2>8. Webhooks (Solo Business)</h2>
-                    <p>Recibe notificaciones automáticas en tiempo real en tu sistema cuando detectemos nuevas empresas o señales.</p>
-                    
+                    <p>Recibe en tu servidor, sin tener que consultar la API, los cambios de las empresas de tu <a href="#endpoint-watchlist">vigilancia</a>: actos nuevos en el BORME, cambios de estado y cambios de nivel de riesgo. Los eventos se generan cada 15 minutos.</p>
+
                     <div class="endpoint-header" style="margin-bottom: 5px;">
                         <span class="http-badge get">GET</span>
                         <code>/webhooks</code>
@@ -1107,40 +1107,73 @@ Accept: application/json</code></pre>
                         <code>/webhooks</code>
                         <span class="plan-badge business">Business</span>
                     </div>
+                    <div class="endpoint-header" style="margin-bottom: 5px;">
+                        <span class="http-badge post">POST</span>
+                        <code>/webhooks/{id}/test</code>
+                        <span class="plan-badge business">Business</span>
+                    </div>
                     <div class="endpoint-header">
-                        <span class="http-badge" style="background: #f93e3e;">DELETE</span>
+                        <span class="http-badge delete">DELETE</span>
                         <code>/webhooks/{id}</code>
                         <span class="plan-badge business">Business</span>
                     </div>
 
-                    <h4>Ejemplo de respuesta (GET)</h4>
-                    <pre><code class="language-json">{
-  "success": true,
-  "data": [
-    {
-      "id": 1,
-      "url": "https://midominio.com/webhook",
-      "event": "company.updated",
-      "created_at": "2023-11-01 10:00:00"
-    }
-  ]
-}</code></pre>
+                    <h4>Crear un webhook</h4>
+                    <pre><code class="language-json">// Petición
+{ "url": "https://tu-dominio.com/webhooks/apiempresas", "event": "watchlist.*" }
 
-                    <h4>Ejemplo de respuesta (POST / DELETE)</h4>
-                    <pre><code class="language-json">{
+// Respuesta (201)
+{
   "success": true,
   "message": "Webhook creado correctamente",
-  "id": 1
+  "id": 12,
+  "event": "watchlist.*",
+  "secret": "3f9c1b2a7d..."
 }</code></pre>
+                    <p>Guarda el <code>secret</code>: sirve para comprobar que cada envío es nuestro. Si lo mandas en la petición, se usa el tuyo.</p>
+
                     <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                         <thead style="background: #f8fafc;">
-                            <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
+                            <tr><th style="width: 30%;">Evento</th><th>Cuándo llega</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">event</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Tipo de evento suscrito (ej: `company.updated`, `radar.new`).</td></tr>
-                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">url</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">URL de tu servidor donde enviaremos el payload (POST). Debe ser HTTPS (puerto 443) y pública.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">company.borme_act</code></td><td style="color: #475569;">Se publica un acto en el BORME de una empresa vigilada.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">company.status_changed</code></td><td style="color: #475569;">El Registro cambia el estado de una empresa vigilada.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">company.risk_level_changed</code></td><td style="color: #475569;">Cambia su nivel de riesgo (<code>model_change: true</code> si es por un recálculo de nuestro modelo).</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">watchlist.*</code></td><td style="color: #475569;">Los tres anteriores.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">test.ping</code></td><td style="color: #475569;">Solo al llamar a <code>/webhooks/{id}/test</code>.</td></tr>
                         </tbody>
                     </table>
+
+                    <h4>Qué recibe tu servidor</h4>
+                    <p>Un <code>POST</code> con JSON y estas cabeceras: <code>X-ApiEmpresas-Event</code>, <code>X-ApiEmpresas-Delivery</code> (id único del envío) y <code>X-ApiEmpresas-Signature</code>.</p>
+                    <pre><code class="language-json">{
+  "id": "5d41402a-bc4b-2a76-b971-9d911017c592",
+  "event": "company.borme_act",
+  "created_at": "2026-09-28T10:15:00+02:00",
+  "data": {
+    "id": "borme_act:8812345",
+    "type": "borme_act",
+    "date": "2026-09-28",
+    "cif": "B12345678",
+    "company_name": "EMPRESA DE EJEMPLO SL",
+    "data": { "act_types": "Nombramientos", "description": "Nombramientos. Adm. Unico: ...", "url_pdf": "https://www.boe.es/borme/..." }
+  }
+}</code></pre>
+
+                    <h4>Comprobar la firma</h4>
+                    <p><code>X-ApiEmpresas-Signature</code> tiene la forma <code>t=1790000000,v1=&lt;firma&gt;</code>. La firma es el HMAC-SHA256, en hexadecimal, de <code>t + "." + cuerpo</code> con tu <code>secret</code>. Rechaza el envío si no coincide o si <code>t</code> tiene más de 5 minutos.</p>
+                    <pre><code class="language-php">[$t, $v1] = array_map(fn($p) => explode('=', $p, 2)[1], explode(',', $_SERVER['HTTP_X_APIEMPRESAS_SIGNATURE']));
+$body = file_get_contents('php://input');
+$ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(time() - (int) $t) < 300;</code></pre>
+
+                    <h4>Reintentos</h4>
+                    <ul>
+                        <li>Responde con un código 2xx en menos de 10 segundos. Si no, reintentamos a los 1, 5 y 30 minutos, a las 2 y a las 6 horas; después se descarta.</li>
+                        <li>Usa <code>X-ApiEmpresas-Delivery</code> para no procesar dos veces el mismo envío.</li>
+                        <li>Un webhook con 50 fallos seguidos se desactiva. Vuelve a crearlo cuando tu servidor responda.</li>
+                        <li>La URL debe ser HTTPS (puerto 443) y pública. No seguimos redirecciones.</li>
+                    </ul>
                 </section>
 
                 <!-- CONTRATOS PUBLICOS -->

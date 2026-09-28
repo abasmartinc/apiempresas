@@ -3,7 +3,7 @@
 <head>
     <?= view('partials/head', [
         'title' => 'Infraestructura API de Datos Mercantiles para ERP | Plan Business',
-        'excerptText' => 'Plan Business de la API: 10.000 consultas al mes, perfil de riesgo, contratos públicos, vigilancia de hasta 1.000 empresas e IA comercial.'
+        'excerptText' => 'Plan Business de la API: 10.000 consultas al mes, perfil de riesgo, contratos públicos, vigilancia de 1.000 empresas con webhooks e IA comercial.'
     ]) ?>
     <link rel="stylesheet" href="<?= base_url('public/css/home.css') ?>?v=<?= time() ?>">
     <link rel="stylesheet" href="<?= base_url('public/css/home-mobile.css') ?>?v=<?= time() ?>" media="screen and (max-width: 768px)">
@@ -12,7 +12,7 @@
       "@context": "https://schema.org/",
       "@type": "Product",
       "name": "Infraestructura API Enterprise - Plan Business",
-      "description": "Tarifas y planes para alto volumen. Conecta tu ERP al Registro Mercantil, evalúa el riesgo de tus clientes y vigila hasta 1.000 empresas sin gastar consultas.",
+      "description": "Tarifas y planes para alto volumen. Conecta tu ERP al Registro Mercantil, evalúa el riesgo de tus clientes y recibe por webhook los cambios de hasta 1.000 empresas vigiladas.",
       "brand": {
         "@type": "Brand",
         "name": "APIEmpresas"
@@ -100,7 +100,7 @@
                 Plan Business (Escala)
             </div>
             <h1 class="plan-title">Infraestructura API <span>Enterprise</span></h1>
-            <p class="plan-subtitle">Tarifas y planes para alto volumen. Conecta tu ERP al Registro Mercantil, evalúa el riesgo de tus clientes y vigila hasta 1.000 empresas sin gastar consultas.</p>
+            <p class="plan-subtitle">Tarifas y planes para alto volumen. Conecta tu ERP al Registro Mercantil, evalúa el riesgo de tus clientes y recibe por webhook los cambios de hasta 1.000 empresas vigiladas.</p>
         </div>
 
         <div class="plan-demo-wrapper" style="background: #f8fafc;">
@@ -230,6 +230,10 @@
                 <div class="endpoint-card">
                     <div class="endpoint-route">GET /watchlist/events</div>
                     <p class="endpoint-desc">Vigila hasta 1.000 empresas (100 en Pro) y consulta sus cambios en el BORME, en su estado y en su nivel de riesgo sin gastar consultas.</p>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-route">POST /webhooks</div>
+                    <p class="endpoint-desc">Recibe en tu servidor, firmados, los cambios de tus empresas vigiladas: actos del BORME, estado y nivel de riesgo. Con reintentos automáticos.</p>
                 </div>
                 <div class="endpoint-card">
                     <div class="endpoint-route">GET /companies/risk-profile</div>
