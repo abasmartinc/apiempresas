@@ -214,6 +214,12 @@ $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function
     $routes->post('api/v1/webhooks', 'Api\V1\WebhookController::create');
     $routes->delete('api/v1/webhooks/(:num)', 'Api\V1\WebhookController::delete/$1');
 
+    // Vigilancia de empresas (27-09-2026, piloto). /events antes que la ruta con CIF.
+    $routes->get('api/v1/watchlist/events', 'Api\V1\WatchlistController::events');
+    $routes->get('api/v1/watchlist', 'Api\V1\WatchlistController::index');
+    $routes->post('api/v1/watchlist', 'Api\V1\WatchlistController::create');
+    $routes->delete('api/v1/watchlist/(:segment)', 'Api\V1\WatchlistController::delete/$1');
+
     // Dedicated Professional Plan routes
     $routes->get('api/v1/professional/search', 'Api\V1\Professional::search');
     $routes->get('api/v1/professional/details', 'Api\V1\Professional::details');

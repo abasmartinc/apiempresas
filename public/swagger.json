@@ -1582,6 +1582,182 @@
                     }
                 }
             }
+        },
+        "/api/v1/watchlist": {
+            "get": {
+                "tags": [
+                    "2. Plan Pro"
+                ],
+                "summary": "Empresas vigiladas",
+                "description": "Lista las empresas de tu vigilancia. **Coste:** 0. Pro: hasta 100 empresas; Business: hasta 1.000.",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "description": "Página (>= 1).",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "description": "Resultados por página (1-500).",
+                        "schema": {
+                            "type": "integer",
+                            "default": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de empresas vigiladas"
+                    },
+                    "403": {
+                        "description": "Plan sin vigilancia (Free)"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "2. Plan Pro"
+                ],
+                "summary": "Añadir empresas a la vigilancia",
+                "description": "Añade hasta 500 CIF por petición con `{\"cifs\": [\"A46103834\"]}`. Devuelve added, already_watching, not_found, invalid y rejected_over_limit. **Coste:** 0.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "cifs": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "A46103834"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Resultado del alta por CIF"
+                    },
+                    "400": {
+                        "description": "Petición mal formada"
+                    },
+                    "403": {
+                        "description": "Plan sin vigilancia (Free)"
+                    }
+                }
+            }
+        },
+        "/api/v1/watchlist/{cif}": {
+            "delete": {
+                "tags": [
+                    "2. Plan Pro"
+                ],
+                "summary": "Quitar una empresa de la vigilancia",
+                "description": "**Coste:** 0.",
+                "parameters": [
+                    {
+                        "name": "cif",
+                        "in": "path",
+                        "required": true,
+                        "description": "CIF de la empresa",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Quitada"
+                    },
+                    "404": {
+                        "description": "No estaba en tu vigilancia (NOT_WATCHING)"
+                    }
+                }
+            }
+        },
+        "/api/v1/watchlist/events": {
+            "get": {
+                "tags": [
+                    "2. Plan Pro"
+                ],
+                "summary": "Cambios en las empresas vigiladas",
+                "description": "Cambios desde una fecha, de más antiguo a más reciente: `borme_act`, `status_change` y `risk_level_change` (`model_change: true` si coincide con un recálculo del modelo). **Coste:** 0.",
+                "parameters": [
+                    {
+                        "name": "since",
+                        "in": "query",
+                        "required": false,
+                        "description": "YYYY-MM-DD (incluida). Por defecto hace 7 días; máximo 90 días atrás.",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "types",
+                        "in": "query",
+                        "required": false,
+                        "description": "borme_act, status_change, risk_level_change (separados por comas).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "cif",
+                        "in": "query",
+                        "required": false,
+                        "description": "Solo los eventos de esta empresa.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "description": "Página (>= 1).",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "description": "Resultados por página (1-500).",
+                        "schema": {
+                            "type": "integer",
+                            "default": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eventos"
+                    },
+                    "400": {
+                        "description": "Parámetros no válidos"
+                    },
+                    "403": {
+                        "description": "Plan sin vigilancia (Free)"
+                    }
+                }
+            }
         }
     },
     "components": {

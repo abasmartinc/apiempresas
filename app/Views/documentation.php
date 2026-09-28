@@ -79,6 +79,12 @@
                             </a>
                         </li>
                         <li>
+                            <a href="#endpoint-watchlist">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                <span class="nav-num">7.1</span> Vigilancia <span class="sidebar-badge pro">Pro</span>
+                            </a>
+                        </li>
+                        <li>
                             <a href="#endpoint-webhooks">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
                                 <span class="nav-num">8.</span> Webhooks <span class="sidebar-badge biz">Biz</span>
@@ -1002,6 +1008,91 @@ Accept: application/json</code></pre>
                 </section>
 
                 <!-- WEBHOOKS -->
+                <section class="docs-section" id="endpoint-watchlist">
+                    <h2>7.1 Vigilancia de Empresas</h2>
+                    <p>Da de alta las empresas que te interesan y consulta sus cambios desde una fecha: actos nuevos en el BORME, cambios de estado en el Registro y cambios de nivel de riesgo. <strong>No gasta consultas.</strong> Pro: hasta 100 empresas. Business: hasta 1.000.</p>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge post">POST</span>
+                        <code>/watchlist</code>
+                        <span class="plan-badge pro">Pro</span>
+                    </div>
+                    <p>Añade hasta 500 CIF por petición. La respuesta dice qué pasó con cada uno.</p>
+                    <pre><code class="language-json">// Petición
+{ "cifs": ["A46103834", "A15075062"] }
+
+// Respuesta
+{
+  "success": true,
+  "data": {
+    "added": ["A46103834"],
+    "already_watching": ["A15075062"],
+    "not_found": [],
+    "invalid": [],
+    "rejected_over_limit": []
+  },
+  "meta": { "total": 2, "watch_limit": 100 }
+}</code></pre>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/watchlist</code>
+                    </div>
+                    <p>Lista tus empresas vigiladas (<code>page</code>, <code>limit</code> hasta 500).</p>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge delete">DELETE</span>
+                        <code>/watchlist/{cif}</code>
+                    </div>
+                    <p>Quita una empresa. Si no estaba en tu vigilancia, responde 404 <code>NOT_WATCHING</code>.</p>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/watchlist/events</code>
+                    </div>
+                    <table class="docs-table">
+                        <thead><tr><th>Parámetro</th><th>Descripción</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>since</code></td><td>Fecha <code>YYYY-MM-DD</code>, incluida. Por defecto, hace 7 días; como mucho, 90 días atrás.</td></tr>
+                            <tr><td><code>types</code></td><td>Opcional. <code>borme_act</code>, <code>status_change</code>, <code>risk_level_change</code>, separados por comas.</td></tr>
+                            <tr><td><code>cif</code></td><td>Opcional. Solo los eventos de esa empresa.</td></tr>
+                            <tr><td><code>page</code> / <code>limit</code></td><td>Paginación (hasta 500 por página).</td></tr>
+                        </tbody>
+                    </table>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": [
+    {
+      "id": "borme_act:8812345",
+      "type": "borme_act",
+      "date": "2026-09-22",
+      "cif": "B12345678",
+      "company_name": "EMPRESA DE EJEMPLO SL",
+      "data": {
+        "act_types": "Nombramientos, Ceses/Dimisiones",
+        "description": "Ceses/Dimisiones. Adm. Unico: ...",
+        "url_pdf": "https://www.boe.es/borme/dias/2026/09/22/pdfs/BORME-A-2026-181-28.pdf"
+      }
+    },
+    {
+      "id": "risk_level_change:B12345678:2026-09-25",
+      "type": "risk_level_change",
+      "date": "2026-09-25",
+      "cif": "B12345678",
+      "company_name": "EMPRESA DE EJEMPLO SL",
+      "data": { "from": "BAJO", "to": "MEDIO", "model_change": false }
+    }
+  ],
+  "meta": { "since": "2026-09-20", "types": ["borme_act", "status_change", "risk_level_change"], "total": 2, "page": 1, "limit": 100, "has_more": false }
+}</code></pre>
+                    <ul>
+                        <li>Los eventos salen de más antiguo a más reciente. El <code>id</code> es estable: úsalo para no procesar dos veces el mismo evento.</li>
+                        <li><code>model_change: true</code> indica que el nivel cambió por un recálculo de nuestro modelo, no por algo nuevo de la empresa; <code>null</code> si no se puede saber.</li>
+                        <li>Uso recomendado: una consulta al día con <code>since</code> = la fecha de tu última consulta.</li>
+                        <li>Plan Free: 403 <code>PLAN_RESTRICTION</code>. Por ahora no hay avisos por webhook: la vigilancia se consulta.</li>
+                    </ul>
+                </section>
+
                 <section class="docs-section" id="endpoint-webhooks">
                     <h2>8. Webhooks (Solo Business)</h2>
                     <p>Recibe notificaciones automáticas en tiempo real en tu sistema cuando detectemos nuevas empresas o señales.</p>
@@ -1558,6 +1649,7 @@ print(response.json())</code></pre>
     .http-badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; margin-right: 8px; color: white; }
     .http-badge.get { background: #61affe; }
     .http-badge.post { background: #49cc90; }
+    .http-badge.delete { background: #f93e3e; }
     .endpoint-header { display: flex; align-items: center; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px; gap: 10px; }
     .plan-badge { font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 99px; margin-left: auto; }
     .plan-badge.pro { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }

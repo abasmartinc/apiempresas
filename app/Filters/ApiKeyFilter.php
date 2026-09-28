@@ -30,6 +30,7 @@ class ApiKeyFilter implements FilterInterface
         // Endpoints que no deben costar
         if (strpos($path, 'api/sandbox/v1') !== false) return 0;
         if (strpos($path, 'api/v1/webhooks') !== false) return 0;
+        if (strpos($path, 'api/v1/watchlist') !== false) return 0; // Vigilancia: no gasta cupo (27-09-2026)
         if (strpos($path, 'api/v1/usage') !== false) return 0;
         if (strpos($path, 'api/v1/companies/batch') !== false) return 0;
         if (strpos($path, 'api/v1/professional/search') !== false) return 0; // Autocompletado gratuito (mínimo 3 chars), el cobro real es en /professional/details
