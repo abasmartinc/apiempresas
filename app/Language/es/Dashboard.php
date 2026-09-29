@@ -132,4 +132,10 @@ return [
     'usage_msg_welcome_title' => '¡Bienvenido!',
     'usage_msg_welcome_text' => 'Empieza validando una empresa para ver cómo funciona la API en tiempo real.',
     'usage_msg_monthly_exceeded_title' => 'Límite mensual superado',
+    // Guía en PDF (29-09-2026)
+    'guide_banner_title' => '¿Primera vez con una API?',
+    'guide_banner_text' => 'Te lo explicamos desde cero en una guía de 26 páginas: tu primera consulta en 5 minutos, qué hace cada función y qué hacer si algo falla.',
+    'guide_sidebar_title' => 'Guía para empezar',
+    'guide_sidebar_text' => 'La API explicada paso a paso, en PDF.',
+    'guide_button' => 'Ver la guía (PDF)',
 ];

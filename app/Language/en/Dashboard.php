@@ -132,4 +132,10 @@ return [
     'usage_msg_welcome_title' => 'Welcome!',
     'usage_msg_welcome_text' => 'Start by validating a company to see how the API works in real time.',
     'usage_msg_monthly_exceeded_title' => 'Monthly limit exceeded',
+    // Guía en PDF (29-09-2026)
+    'guide_banner_title' => 'New to APIs?',
+    'guide_banner_text' => 'A 26-page step-by-step guide (in Spanish): your first request in 5 minutes, what each endpoint does and what to do when something fails.',
+    'guide_sidebar_title' => 'Getting started guide',
+    'guide_sidebar_text' => 'The API explained step by step, as a PDF (in Spanish).',
+    'guide_button' => 'View the guide (PDF)',
 ];

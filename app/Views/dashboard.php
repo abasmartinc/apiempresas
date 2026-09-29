@@ -90,6 +90,9 @@ if ($isBonusUser && !($isPaid ?? false)) {
 
             <div class="dash-grid">
                 <div>
+                    <?php if (!$isPaid && empty($has_first_request)): ?>
+                        <?= view('components/dash_guide', ['variant' => 'banner']) ?>
+                    <?php endif; ?>
                     <?= view('components/dash_search_card', get_defined_vars()) ?>
                     <?= view('components/dash_api_key', get_defined_vars()) ?>
                     <?= view('components/dash_integration', get_defined_vars()) ?>

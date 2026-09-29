@@ -129,6 +129,8 @@
 <?php endif; ?>
 <?php endif; ?>
 
+<?= view('components/dash_guide', ['variant' => 'sidebar']) ?>
+
 <section class="dash-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-top: 24px;">
     <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
         <div style="background: #eff6ff; color: #2152ff; padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
