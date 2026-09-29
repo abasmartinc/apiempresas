@@ -1,6 +1,6 @@
 {
   "name": "apiempresas",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "SDK oficial de APIEmpresas.es para Node.js y TypeScript",
   "main": "dist/index.js",
   "files": [

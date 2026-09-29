@@ -422,12 +422,15 @@
                         'Datos básicos: razón social, estado normalizado, CNAE, provincia y fecha de constitución',
                         'Scoring comercial básico (sin desglose)',
                         'Empresas recién constituidas (hoy, 7 o 30 días): 10 por consulta',
+                        'Recuento de segmentos gratis: cuántas empresas hay por sector, zona y tamaño',
                         'Sin tarjeta de crédito',
                     ],
                     'pro' => [
                         '3.000 consultas al mes',
                         'Datos completos, con dirección y administradores vigentes (con fecha de nombramiento)',
                         'Tramo de facturación y último año de cuentas depositadas',
+                        'Verificación KYB en una llamada: estado, nombre, firmante y NIF en VIES',
+                        'Nombre a CIF en lote: completa tu base de clientes (solo pagas las coincidencias)',
                         'Consultas por lotes: hasta 100 CIFs por petición',
                         'Historial BORME, señales y grafos societarios',
                         'Vigilancia de 100 empresas: cambios en el BORME, el estado y el riesgo, sin gastar consultas',
@@ -441,6 +444,7 @@
                         'Contratos y adjudicaciones públicas',
                         'Vigilancia de 1.000 empresas (BORME, estado y riesgo)',
                         'Webhooks Push (Notificaciones BORME)',
+                        'Segmentos: descarga empresas por CNAE, zona, tamaño y teléfono',
                         'IA Business Insights completo',
                         'IA Contact Prep y Calculadora Match B2B',
                         'Empresas recién constituidas (hoy, 7 o 30 días): hasta 1.000 por consulta',
@@ -611,6 +615,30 @@
                             <tr>
                                 <td>
                                     <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Verificación KYB</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies/verify</div>
+                                        <div class="cap-feature-desc">En una llamada: si opera, si el nombre coincide, si quien firma es administrador vigente y si el NIF está en VIES, con una recomendación pass, review o fail. En Business, también el nivel de riesgo.</div>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Nombre a CIF (en lote)</div>
+                                        <div class="cap-feature-endpoint">POST /api/v1/companies/reconcile</div>
+                                        <div class="cap-feature-desc">Pasa hasta 100 nombres de empresa y recibe el CIF de cada una con una puntuación de confianza. Solo pagas los que encuentran coincidencia.</div>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
                                         <div class="cap-feature-name">Buscador Inteligente</div>
                                         <div class="cap-feature-endpoint">GET /api/v1/companies/search</div>
                                         <div class="cap-feature-desc">Encuentra empresas por nombre o razón social con autocompletado y normalización.</div>
@@ -702,6 +730,18 @@
                                 <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
                                 <td class="cap-featured-col" style="text-align: center; font-size: 0.85rem; font-weight: 700;">100 empresas</td>
                                 <td style="text-align: center; font-size: 0.85rem; font-weight: 700;">1.000 empresas</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Segmentos de empresas</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies/filter</div>
+                                        <div class="cap-feature-desc">Filtra por CNAE, provincia, municipio, fecha de constitución, teléfono, tramo de facturación y año de cuentas. Contar cuántas encajan es gratis; descargar las filas, 5 consultas por empresa.</div>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; font-size: 0.85rem; font-weight: 700;">Recuento</td>
+                                <td class="cap-featured-col" style="text-align: center; font-size: 0.85rem; font-weight: 700;">Recuento</td>
+                                <td style="text-align: center; font-size: 0.85rem; font-weight: 700;">Recuento y filas</td>
                             </tr>
                             <tr>
                                 <td>

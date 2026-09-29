@@ -1789,6 +1789,268 @@
                     }
                 }
             }
+        },
+        "/api/v1/companies/verify": {
+            "get": {
+                "tags": [
+                    "2. Plan Pro"
+                ],
+                "summary": "Verificación KYB",
+                "description": "En una llamada: existencia y estado (status_code), coincidencia del nombre (0-100), si la persona es administrador vigente, NIF-IVA en VIES, alertas (flags) y decision_hint (pass, review, fail). Business añade risk. **Coste:** 2 consultas (o 2 créditos). Los errores no consumen.",
+                "parameters": [
+                    {
+                        "name": "cif",
+                        "in": "query",
+                        "required": true,
+                        "description": "CIF de la empresa",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "required": false,
+                        "description": "Razón social que te han dado.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "person",
+                        "in": "query",
+                        "required": false,
+                        "description": "Nombre y apellidos de quien firma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "vat",
+                        "in": "query",
+                        "required": false,
+                        "description": "true para comprobar el NIF-IVA en VIES.",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resultado de la verificación"
+                    },
+                    "403": {
+                        "description": "Plan Free sin saldo"
+                    },
+                    "404": {
+                        "description": "Empresa no encontrada (decision_hint: fail)"
+                    }
+                }
+            }
+        },
+        "/api/v1/companies/filter": {
+            "get": {
+                "tags": [
+                    "3. Plan Business"
+                ],
+                "summary": "Segmentos de empresas",
+                "description": "Filtra empresas por CNAE, provincia, municipio, estado, fecha de constitución, teléfono, tramo de facturación y año de cuentas. Hace falta al menos cnae, province o municipality. Con count_only=true devuelve solo el recuento: **gratis en todos los planes**. Sin count_only devuelve las filas (plan Business): **5 consultas por fila devuelta**, hasta 1.000 por petición, paginando con cursor. No devuelve teléfonos, solo has_phone.",
+                "parameters": [
+                    {
+                        "name": "cnae",
+                        "in": "query",
+                        "required": false,
+                        "description": "Prefijos CNAE separados por comas (ej: 62 o 4711,4719).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "province",
+                        "in": "query",
+                        "required": false,
+                        "description": "Provincia del Registro Mercantil (ej: MADRID).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "municipality",
+                        "in": "query",
+                        "required": false,
+                        "description": "Municipio (ej: GETAFE).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "description": "active (por defecto), active_or_unknown o any.",
+                        "schema": {
+                            "type": "string",
+                            "default": "active"
+                        }
+                    },
+                    {
+                        "name": "founded_from",
+                        "in": "query",
+                        "required": false,
+                        "description": "Constituidas desde (YYYY-MM-DD).",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "founded_to",
+                        "in": "query",
+                        "required": false,
+                        "description": "Constituidas hasta (YYYY-MM-DD).",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "has_phone",
+                        "in": "query",
+                        "required": false,
+                        "description": "true: solo empresas con teléfono (no se devuelve el número).",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "size_band",
+                        "in": "query",
+                        "required": false,
+                        "description": "Tramos separados por comas: NO_REVENUE, LT_500K, 500K_1M, GT_1M.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "min_accounts_year",
+                        "in": "query",
+                        "required": false,
+                        "description": "Último año de cuentas igual o posterior.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "count_only",
+                        "in": "query",
+                        "required": false,
+                        "description": "true: solo el recuento (gratis, todos los planes).",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "description": "Filas por página (1-1000).",
+                        "schema": {
+                            "type": "integer",
+                            "default": 100
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "required": false,
+                        "description": "meta.next_cursor de la página anterior.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Recuento (data.total) o filas (data[] y meta con total, cost, next_cursor)"
+                    },
+                    "400": {
+                        "description": "Filtros no válidos"
+                    },
+                    "403": {
+                        "description": "Filas sin plan Business (upsell_opportunities.total trae el recuento)"
+                    },
+                    "429": {
+                        "description": "Sin cupo para pagar filas (5 por fila)"
+                    }
+                }
+            }
+        },
+        "/api/v1/companies/reconcile": {
+            "post": {
+                "tags": [
+                    "2. Plan Pro"
+                ],
+                "summary": "Nombre a CIF (reconciliación)",
+                "description": "Envía hasta 100 nombres de empresa (con provincia opcional para desempatar) y recibe, para cada uno, el CIF con una puntuación de 0 a 100 y un veredicto: match (85 o más y claramente por delante), ambiguous (hasta 3 candidatos) o no_match. **Coste:** 1 consulta por cada match; ambiguous y no_match no se cobran. Si no llega el cupo, los nombres que quedan salen como skipped_quota.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "province": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "name"
+                                            ]
+                                        }
+                                    },
+                                    "names": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "description": "Alternativa a items, sin provincia."
+                                    }
+                                }
+                            },
+                            "example": {
+                                "items": [
+                                    {
+                                        "name": "Mercadona, S.A.",
+                                        "province": "Valencia"
+                                    },
+                                    {
+                                        "name": "Talleres Pérez"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Resultado por nombre (data[].status: match, ambiguous, no_match, invalid, skipped_quota) y meta con el coste"
+                    },
+                    "400": {
+                        "description": "Entrada no válida"
+                    },
+                    "403": {
+                        "description": "Plan Free sin saldo"
+                    }
+                }
+            }
         }
     },
     "components": {

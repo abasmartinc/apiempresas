@@ -6,7 +6,15 @@ import {
   BatchResponse, 
   ScoreData, 
   BormeData, 
-  SignalsData 
+  SignalsData,
+  VerifyOptions,
+  VerifyResult,
+  FilterOptions,
+  SegmentRow,
+  SegmentMeta,
+  ReconcileItem,
+  ReconcileResult,
+  ReconcileMeta
 } from '../types';
 
 /** Opciones de get(): admin=true añade administradores y cargos (Pro/Business). */
@@ -26,6 +34,25 @@ export interface RadarOptions {
   province?: string;
   priority?: string;
   range?: string;
+  /** Código CNAE (o su prefijo). */
+  cnae?: string;
+  /** Puntuación mínima (0-100). */
+  min_score?: number;
+  /** Tipo de acto principal (constitución, ampliación de capital...). */
+  main_act_type?: string;
+  /** true: solo empresas con teléfono. */
+  has_phone?: boolean;
+}
+
+function filterParams(o: FilterOptions): URLSearchParams {
+  const p = new URLSearchParams();
+  for (const [k, v] of Object.entries(o || {})) {
+    if (v === undefined || v === null || v === '') continue;
+    if (Array.isArray(v)) p.set(k, v.join(','));
+    else if (typeof v === 'boolean') p.set(k, v ? 'true' : 'false');
+    else p.set(k, String(v));
+  }
+  return p;
 }
 
 export class Companies {
@@ -39,6 +66,52 @@ export class Companies {
     if (options.admin) params.set('admin', 'true');
     const response = await this.client.request<BaseResponse<Company>>(`/companies?${params.toString()}`);
     return response.data!;
+  }
+
+  /**
+   * (Pro) Verificación KYB en una llamada: estado, nombre, administrador, VIES y
+   * alertas, con decision_hint pass / review / fail. Coste: 2 consultas.
+   */
+  public async verify(cif: string, options: VerifyOptions = {}): Promise<VerifyResult> {
+    const params = new URLSearchParams({ cif });
+    if (options.name) params.set('name', options.name);
+    if (options.person) params.set('person', options.person);
+    if (options.vat) params.set('vat', 'true');
+    const response = await this.client.request<BaseResponse<VerifyResult>>(`/companies/verify?${params.toString()}`);
+    return response.data!;
+  }
+
+  /**
+   * (Pro) Nombre a CIF, hasta 100 por petición. 1 consulta por cada "match";
+   * ambiguous y no_match no se cobran.
+   */
+  public async reconcile(items: Array<string | ReconcileItem>): Promise<{ data: ReconcileResult[]; meta: ReconcileMeta }> {
+    const body = { items: items.map((i) => (typeof i === 'string' ? { name: i } : i)) };
+    const response = await this.client.request<{ success: boolean; data: ReconcileResult[]; meta: ReconcileMeta }>('/companies/reconcile', {
+      method: 'POST',
+      body: JSON.stringify(body)
+    });
+    return { data: response.data, meta: response.meta };
+  }
+
+  /**
+   * Cuántas empresas encajan con los filtros. Gratis en todos los planes.
+   */
+  public async count(options: FilterOptions): Promise<number> {
+    const params = filterParams(options);
+    params.set('count_only', 'true');
+    const response = await this.client.request<BaseResponse<{ total: number }>>(`/companies/filter?${params.toString()}`);
+    return response.data!.total;
+  }
+
+  /**
+   * (Business) Empresas de un segmento. 5 consultas por fila devuelta; para la página
+   * siguiente, pasa meta.next_cursor como cursor con los mismos filtros.
+   */
+  public async filter(options: FilterOptions): Promise<{ data: SegmentRow[]; meta: SegmentMeta }> {
+    const params = filterParams(options);
+    const response = await this.client.request<{ success: boolean; data: SegmentRow[]; meta: SegmentMeta }>(`/companies/filter?${params.toString()}`);
+    return { data: response.data, meta: response.meta };
   }
 
   /**
@@ -124,7 +197,7 @@ export class Companies {
    */
   public async radar(cifOrOptions: string | RadarOptions = {}): Promise<any> {
     // Compatibilidad: antes se pasaba un CIF, que el Radar no usa. Ahora se pasan
-    // los filtros (province, priority, range).
+    // los filtros (province, priority, range, cnae, min_score, main_act_type, has_phone).
     const params = new URLSearchParams();
     if (typeof cifOrOptions === 'string') {
       params.set('cif', cifOrOptions);

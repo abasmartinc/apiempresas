@@ -71,9 +71,77 @@ const match = await api.companies.match('A15075062', 'software');
 
 // Radar de empresas nuevas (Business)
 const nuevas = await api.companies.radar({ province: 'Madrid', range: 'semana' });
+// Filtros añadidos en 1.2.0: cnae, min_score, main_act_type, has_phone
+const software = await api.companies.radar({ cnae: '62', min_score: 70, has_phone: true });
 ```
 
 Requiere Node.js 18 o superior (usa `fetch` nativo).
+
+### 5. Verificación KYB (Pro) — 2 consultas
+
+```typescript
+const v = await api.companies.verify('A46103834', {
+  name: 'Mercadona SA',        // se compara con la razón social
+  person: 'Juan Roig Alfonso', // ¿es administrador vigente?
+  vat: true                    // NIF-IVA en VIES
+});
+console.log(v.decision_hint);  // 'pass' | 'review' | 'fail'
+console.log(v.flags);          // alertas con code, severity y message
+```
+
+Cada empresa trae además `status_code` (ACTIVE, INSOLVENCY, EXTINCT...), `status_source`, `status_date` y, en Pro/Business, `financials` (tramo de tamaño y último año de cuentas). Los administradores traen `since`.
+
+### Nombre a CIF (Pro)
+
+```typescript
+const { data, meta } = await api.companies.reconcile(['Mercadona', { name: 'Talleres Pérez', province: 'Madrid' }]);
+// data[i].status: match (con company.cif) | ambiguous (candidates) | no_match. Solo se cobran los match.
+```
+
+### Segmentos de empresas
+
+```typescript
+const total = await api.companies.count({ cnae: ['62'], province: 'MADRID', has_phone: true }); // gratis
+const { data, meta } = await api.companies.filter({ cnae: ['62'], province: 'MADRID', limit: 100 }); // Business: 5 consultas por fila
+// Siguiente página: api.companies.filter({ ...mismosFiltros, cursor: meta.next_cursor })
+```
+
+### 6. Vigilancia de empresas (Pro: 100, Business: 1.000) — sin coste
+
+```typescript
+await api.watchlist.add(['A46103834', 'A28015865']);
+const { data: vigiladas, meta } = await api.watchlist.list();   // meta.watch_limit
+const { data: cambios } = await api.watchlist.events({ since: '2026-09-01', types: ['borme_act', 'status_change'] });
+await api.watchlist.remove('A28015865');
+```
+
+### 7. Webhooks (Business)
+
+```typescript
+const hook = await api.webhooks.create({ url: 'https://tu-servidor.com/apiempresas', event: 'watchlist.*' });
+// Guarda hook.secret: con él se comprueba la firma.
+await api.webhooks.test(hook.id); // envía un test.ping y devuelve lo que respondió tu servidor
+```
+
+En tu servidor, comprueba la firma con el cuerpo **en bruto** (no el JSON ya parseado):
+
+```typescript
+import express from 'express';
+import { constructWebhookEvent } from 'apiempresas';
+
+app.post('/apiempresas', express.raw({ type: 'application/json' }), (req, res) => {
+  try {
+    const evento = constructWebhookEvent(req.body, req.header('X-ApiEmpresas-Signature'), process.env.APIEMPRESAS_WEBHOOK_SECRET!);
+    // evento.event: company.borme_act | company.status_changed | company.risk_level_changed | test.ping
+    // Usa evento.id (o la cabecera X-ApiEmpresas-Delivery) para no procesar dos veces el mismo envío.
+    res.sendStatus(200);
+  } catch {
+    res.sendStatus(400);
+  }
+});
+```
+
+Si tu servidor no responde 2xx, se reintenta a los 1 min, 5 min, 30 min, 2 h y 6 h.
 
 ## Entorno de Pruebas (Sandbox)
 

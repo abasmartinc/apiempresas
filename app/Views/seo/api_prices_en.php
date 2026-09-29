@@ -834,6 +834,30 @@
                             </tr>
                             <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
                                 <td style="padding: 18px 20px;">
+                                    <div style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">GET /companies/verify</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Parameters: ?cif=...&amp;name=...&amp;person=...&amp;vat=true</div>
+                                </td>
+                                <td style="padding: 18px 20px;">
+                                    <strong style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">One-call KYB Verification</strong>
+                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">Whether the company exists and operates (<code style="color: #2563eb;">status_code</code>), whether the name matches, whether the signer is a current director and whether the VAT number is in VIES. Returns <code style="color: #2563eb;">decision_hint</code>: pass, review or fail. Costs 2 queries.</p>
+                                </td>
+                                <td style="padding: 18px 20px; text-align: center;"><span style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO / BUS</span></td>
+                                <td style="padding: 18px 20px; text-align: center;"><button type="button" onclick="event.preventDefault(); showJsonPreview('get_verify')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VIEW JSON</button></td>
+                            </tr>
+                            <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 18px 20px;">
+                                    <div style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">POST /companies/reconcile</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">JSON: items[{name, province}]</div>
+                                </td>
+                                <td style="padding: 18px 20px;">
+                                    <strong style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Name to CIF (Reconciliation)</strong>
+                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">Send up to 100 company names and get each CIF with a confidence score (match, ambiguous or no_match). 1 query per match; the rest are free.</p>
+                                </td>
+                                <td style="padding: 18px 20px; text-align: center;"><span style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO / BUS</span></td>
+                                <td style="padding: 18px 20px; text-align: center; color: #94a3b8;">—</td>
+                            </tr>
+                            <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 18px 20px;">
                                     <div style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">GET /companies/search</div>
                                     <div style="font-size: 0.75rem; color: #94a3b8;">Parameter: ?q=...</div>
                                 </td>
@@ -964,14 +988,38 @@
                                 <td style="padding: 18px 20px; text-align: center;"><span style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span></td>
                                 <td style="padding: 18px 20px; text-align: center;"><button type="button" onclick="event.preventDefault(); showJsonPreview('get_risk_profile')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VIEW JSON</button></td>
                             </tr>
+                            <tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 18px 20px;">
+                                    <div style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">GET /watchlist/events</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Parameter: ?since=YYYY-MM-DD</div>
+                                </td>
+                                <td style="padding: 18px 20px;">
+                                    <strong style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Company Watchlist</strong>
+                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">Add companies with <code style="color: #2563eb;">POST /watchlist</code> and get their new BORME acts, status changes and risk level changes. 100 companies on Pro, 1,000 on Business. Does not consume queries.</p>
+                                </td>
+                                <td style="padding: 18px 20px; text-align: center;"><span style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO / BUS</span></td>
+                                <td style="padding: 18px 20px; text-align: center;"><button type="button" onclick="event.preventDefault(); showJsonPreview('get_watchlist_events')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VIEW JSON</button></td>
+                            </tr>
+<tr class="api-endpoint-row" style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 18px 20px;">
+                                    <div style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">GET /companies/filter</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Parameters: ?cnae=...&amp;province=...&amp;count_only=true</div>
+                                </td>
+                                <td style="padding: 18px 20px;">
+                                    <strong style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Company Segments</strong>
+                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">Filter by CNAE, province, municipality, incorporation date, phone, revenue band and accounts year. Counting is free on every plan; downloading rows (Business) costs 5 queries per company.</p>
+                                </td>
+                                <td style="padding: 18px 20px; text-align: center;"><span style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span></td>
+                                <td style="padding: 18px 20px; text-align: center;"><button type="button" onclick="event.preventDefault(); showJsonPreview('get_filter')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VIEW JSON</button></td>
+                            </tr>
                             <tr class="api-endpoint-row">
                                 <td style="padding: 18px 20px;">
                                     <div style="font-family: monospace; font-weight: 700; color: #1e40af; margin-bottom: 4px;">POST /webhooks</div>
                                     <div style="font-size: 0.75rem; color: #94a3b8;">Body: {url, event}</div>
                                 </td>
                                 <td style="padding: 18px 20px;">
-                                    <strong style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">PUSH Sync (BORME)</strong>
-                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">Register your callback URL to receive real-time HTTP notifications when an event of interest occurs (e.g. new company in your area).</p>
+                                    <strong style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Webhooks (Watchlist)</strong>
+                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">Register your HTTPS URL and receive signed notifications when a watched company has a new BORME act, a status change or a risk level change.</p>
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;"><span style="background: #fdf2f8; color: #db2777; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">BUSINESS</span></td>
                                 <td style="padding: 18px 20px; text-align: center;"><button type="button" onclick="event.preventDefault(); showJsonPreview('post_webhook')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VIEW JSON</button></td>
@@ -1009,9 +1057,9 @@
                         <div class="api-price-value">€0<span>/ one-time</span></div>
                         <p class="api-pricing-card__desc">For development environments, technical sandboxing and JSON schema validation.</p>
                         <ul class="api-price-list">
-                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> <?= $freeLimit ?> guaranteed queries</li>
-                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> Official basic data</li>
-                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> Access to /companies</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> <?= $freeLimit ?> free queries (one-time, not renewed)</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> Company name, status, CNAE and province</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> Lookup by CIF and search by name</li>
                         </ul>
                         <div class="api-price-cta" style="margin-top: 32px;">
                             <form id="api_quick_unlock_form" style="display: flex; flex-direction: column; gap: 12px;">
@@ -1031,14 +1079,17 @@
                     <!-- PRO -->
                     <div class="api-pricing-card featured">
                         <div class="api-pricing-card__header"><h3>Pro</h3></div>
-                        <div class="api-price-value"><b id="pricePro" data-monthly="19" data-annual="15" style="font-weight: inherit;">15</b>€<span>/ month</span></div>
-                        <p class="api-pricing-card__desc">Full integration for B2B onboarding, lead enrichment and scoring workflows.</p>
+                        <div class="api-price-value"><b id="pricePro" data-monthly="19" data-annual="15.17" style="font-weight: inherit;">15.17</b>€<span>/ month</span></div>
+                        <p class="api-pricing-card__desc">For full KYB: current directors, address, BORME history and portfolio monitoring.</p>
                         <ul class="api-price-list">
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> 3,000 queries / month</li>
-                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> Full BORME Act History</li>
-                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> AI Scoring Included</li>
-                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> New Incorporations Feed</li>
-                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> Corporate Network Graphs</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> Current directors, with appointment date</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> One-call KYB verification (/verify)</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> Name to CIF in batch (/reconcile)</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> Revenue band and latest accounts year</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> Watchlist of 100 companies (BORME, status and risk)</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> BORME history and signals</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> Batch lookups: 100 CIFs per request</li>
                         </ul>
                         <a href="<?= site_url('register') ?>" class="api-pricing-btn primary">Activate Pro Plan</a>
                     </div>
@@ -1046,14 +1097,15 @@
                     <!-- BUSINESS -->
                     <div class="api-pricing-card business-plan">
                         <div class="api-pricing-card__header"><h3>Business</h3></div>
-                        <div class="api-price-value"><b id="priceBusiness" data-monthly="49" data-annual="39" style="font-weight: inherit;">39</b>€<span>/ month</span></div>
-                        <p class="api-pricing-card__desc">Real-time synchronisation via Webhooks and bulk volume for mission-critical platforms.</p>
+                        <div class="api-price-value"><b id="priceBusiness" data-monthly="49" data-annual="39.17" style="font-weight: inherit;">39.17</b>€<span>/ month</span></div>
+                        <p class="api-pricing-card__desc">For more volume and risk analysis: solvency profile, public contracts and webhooks.</p>
                         <ul class="api-price-list">
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> 10,000 queries / month</li>
-                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> PUSH Webhooks</li>
-                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> AI Insights &amp; Predictive Business</li>
-                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> B2B Match Calculator</li>
-                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> Priority Slack Support</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> Risk and solvency profile</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> Public contracts and awards</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> Watchlist of 1,000 companies with webhooks</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> Segments: download companies by CNAE, area and size</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg> Email support: reply in under 2 h</li>
                         </ul>
                         <a href="<?= site_url('register') ?>" class="api-pricing-btn">Activate Business</a>
                     </div>
@@ -1367,7 +1419,7 @@ getCompany(<span style="color:#98c379;">'B12345678'</span>);</code></pre>
 
         // JSON preview modal
         const jsonExamples = {
-            get_companies: { success: true, data: { id: 12345, name: "TECH FLOW SOLUTIONS SL", cif: "B12345678", cnae: "6201", cnae_label: "Programación informática", founded: "2024-03-12", province: "MADRID", municipality: "MADRID", address: "CALLE DE LA TECNOLOGIA 42", status: "ACTIVA", score: 94 } },
+            get_companies: { success: true, data: { id: 12345, name: "TECH FLOW SOLUTIONS SL", cif: "B12345678", cnae: "6201", cnae_label: "Programación informática", founded: "2024-03-12", province: "MADRID", municipality: "MADRID", address: "CALLE DE LA TECNOLOGIA 42", status: "ACTIVA", status_code: "ACTIVE", status_source: "registry", status_date: "2024-03-12", financials: { size_band: "LT_500K", size_band_label: "Menos de 0,5 M€", last_accounts_year: 2024 }, score: 94 } },
             get_search: { success: true, data: { name: "TECH FLOW SOLUTIONS SL", cif: "B12345678", score: 94, province: "MADRID", status: "ACTIVA" } },
             post_batch: { success: true, data: [{ name: "INDUSTRIA DE DISENO TEXTIL SA", cif: "A15075062" }, { name: "INDITEX LOGISTICA SA", cif: "B00000001" }], meta: { requested: 2, found: 2, cost: 2, truncated: false } },
             get_score: { success: true, data: { cif: "B12345678", score: 94, priority: "VERY_HIGH", reasons: ["Recent capital increase", "High BORME activity"], last_signal: { type: "CAPITAL_INCREASE", date: "2024-05-01" } } },
@@ -1379,8 +1431,11 @@ getCompany(<span style="color:#98c379;">'B12345678'</span>);</code></pre>
             get_match: { success: true, data: { cif: "B12345678", seller_sector: "software", match_score: 85, analysis: { match_level: "High", synergy: "High synergy", buyer_needs: ["Digitalisation", "CRM"] }, sales_pitch: "I noticed you're growing fast. Our software can help you..." } },
             get_contracts: { success: true, data: { cif: "A01001411", company_name: "RHEINMETALL EXPAL MUNITIONS SA", summary: { total_contracts: 32, total_amount: "617746086.47", currency: "EUR" }, contracts: [{ tender_id: "https://contrataciondelestado.es/...", title: "Suministro de 27.000 granadas...", contracting_authority: "Mando de Apoyo Logístico", award_date: "2026-08-25", amount: "4395320.00", currency: "EUR" }], pagination: { total: 32, page: 1, limit: 20, total_pages: 2, has_more: true } } },
             get_risk_profile: { success: true, data: { cif: "A01001411", company_name: "RHEINMETALL EXPAL MUNITIONS SA", risk_score: 62, risk_level: "ALTO", confidence_score: 49, data_quality_score: 70, summary_message: "Atención: Constan indicadores de elevado riesgo financiero o corporativo.", legal_state: "REGISTRY_CLOSURE_GENERICO", data_sources: { borme_status: "CHECKED_WITH_RECORDS", accounts_status: "KNOWN_DELAYED", official_status: "KNOWN" }, dimensions: { legal_distress: 60, filing_compliance: 0, governance_volatility: 30, capital_instability: 0, structural_volatility: 0, stabilizing_credit: 0 }, canonical_events: [{ code: "LEGAL_STATE_REGISTRY_CLOSURE_GENERICO", dimension: "legal_distress", severity: "high", description: "Consta publicación registral de cierre sin especificación de causa.", event_date: "2026-08-24", classification_confidence: "LOW" }], model_version: "2.0.0", calculated_at: "2026-08-24T00:00:00Z" } },
-            post_webhook: { success: true, message: "Webhook created successfully", id: 789 },
-            get_webhooks: { success: true, data: [{ id: "789", url: "https://yourcrm.com/api/callback", event: "company.created" }] },
+            get_filter: { success: true, data: [{ cif: "B12345678", name: "EMPRESA DE EJEMPLO SL", cnae: "6201", cnae_label: "Actividades de programación informática", province: "MADRID", municipality: "MADRID", founded: "2019-03-01", status: "ACTIVA", status_code: "ACTIVE", status_source: "registry", financials: { size_band: "GT_1M", size_band_label: "Más de 1 M€", last_accounts_year: 2023 }, has_phone: true }], meta: { total: 3412, returned: 100, limit: 100, has_more: true, next_cursor: "eyJpZCI6ODgxMjM0NX0", cost: 500, cost_per_row: 5, truncated: false } },
+            get_verify: { success: true, data: { cif: "B12345678", exists: true, name: "EMPRESA DE EJEMPLO SL", status: "ACTIVA", status_code: "ACTIVE", status_source: "registry", status_date: null, checks: { name: { provided: "Empresa de Ejemplo, S.L.", score: 100, match: true }, person: { provided: "Juan Pérez García", is_current_admin: true, matched_name: "PEREZ GARCIA JUAN", position: "Adm. Unico", since: "2019-03-01" }, vat: { vat_number: "ESB12345678", checked: true, valid: true, source: "VIES", error: null }, accounts: { last_accounts_year: 2023 } }, flags: [], decision_hint: "pass", checked_at: "2026-09-28T10:30:00+02:00" } },
+            get_watchlist_events: { success: true, data: [{ id: "borme_act:8812345", type: "borme_act", date: "2026-09-22", cif: "B12345678", company_name: "EMPRESA DE EJEMPLO SL", data: { act_types: "Nombramientos, Ceses/Dimisiones", description: "Ceses/Dimisiones. Adm. Unico: ...", url_pdf: "https://www.boe.es/borme/dias/2026/09/22/pdfs/BORME-A-2026-181-28.pdf" } }, { id: "risk_level_change:B12345678:2026-09-25", type: "risk_level_change", date: "2026-09-25", cif: "B12345678", company_name: "EMPRESA DE EJEMPLO SL", data: { from: "BAJO", to: "MEDIO", model_change: false } }], meta: { since: "2026-09-20", total: 2, page: 1, limit: 100, has_more: false } },
+            post_webhook: { success: true, message: "Webhook creado correctamente", id: 789, event: "watchlist.*", secret: "3f9c1b2a7d..." },
+            get_webhooks: { success: true, data: [{ id: "789", url: "https://yourcrm.com/api/callback", event: "watchlist.*" }] },
             delete_webhook: { success: true, message: "Webhook deleted" }
         };
 
@@ -1388,7 +1443,7 @@ getCompany(<span style="color:#98c379;">'B12345678'</span>);</code></pre>
             const modal    = document.getElementById('json-modal');
             const content  = document.getElementById('modal-json-content');
             const endpoint = document.getElementById('modal-endpoint-name');
-            const names = { get_companies: 'GET /companies', get_search: 'GET /companies/search', post_batch: 'POST /companies/batch', get_score: 'GET /companies/score', get_signals: 'GET /companies/signals', get_borme: 'GET /companies/borme', get_insights: 'GET /companies/insights', get_radar: 'GET /companies/radar', get_network: 'GET /companies/network', get_match: 'GET /companies/match', get_contracts: 'GET /companies/contracts', get_risk_profile: 'GET /companies/risk-profile', post_webhook: 'POST /webhooks', get_webhooks: 'GET /webhooks', delete_webhook: 'DELETE /webhooks/{id}' };
+            const names = { get_verify: 'GET /companies/verify', get_filter: 'GET /companies/filter', get_watchlist_events: 'GET /watchlist/events', get_companies: 'GET /companies', get_search: 'GET /companies/search', post_batch: 'POST /companies/batch', get_score: 'GET /companies/score', get_signals: 'GET /companies/signals', get_borme: 'GET /companies/borme', get_insights: 'GET /companies/insights', get_radar: 'GET /companies/radar', get_network: 'GET /companies/network', get_match: 'GET /companies/match', get_contracts: 'GET /companies/contracts', get_risk_profile: 'GET /companies/risk-profile', post_webhook: 'POST /webhooks', get_webhooks: 'GET /webhooks', delete_webhook: 'DELETE /webhooks/{id}' };
             endpoint.textContent = names[key];
             content.innerHTML = syntaxHighlight(jsonExamples[key]);
             modal.style.display = 'flex';

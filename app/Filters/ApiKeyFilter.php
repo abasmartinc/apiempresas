@@ -33,6 +33,8 @@ class ApiKeyFilter implements FilterInterface
         if (strpos($path, 'api/v1/watchlist') !== false) return 0; // Vigilancia: no gasta cupo (27-09-2026)
         if (strpos($path, 'api/v1/usage') !== false) return 0;
         if (strpos($path, 'api/v1/companies/batch') !== false) return 0;
+        if (strpos($path, 'api/v1/companies/reconcile') !== false) return 0; // Nombre → CIF: cobra el controlador, 1 por match (29-09-2026)
+        if (strpos($path, 'api/v1/companies/filter') !== false) return 0; // Segmentos: el recuento es gratis y las filas las cobra el controlador (29-09-2026)
         if (strpos($path, 'api/v1/professional/search') !== false) return 0; // Autocompletado gratuito (mínimo 3 chars), el cobro real es en /professional/details
 
         // "vamos a dejar los dos primeros a 1 credito y los otros a 3"
@@ -45,6 +47,9 @@ class ApiKeyFilter implements FilterInterface
 
         // Professional Details: 1 crédito (el /search es gratuito, el /details es el que cuenta)
         if (strpos($path, 'api/v1/professional/details') !== false) return 1;
+
+        // Verificación KYB: 2 créditos del monedero y 2 consultas del plan (28-09-2026)
+        if (strpos($path, 'api/v1/companies/verify') !== false) return 2;
 
         // Los demás (api/v1/*) a 3 créditos
         if (strpos($path, 'api/v1/') !== false) return 3;
@@ -360,6 +365,9 @@ class ApiKeyFilter implements FilterInterface
                 }
                 
                 $requestCost = 1; // Para la suscripción, 1 llamada = 1 petición
+                if (strpos($endpointPath, 'api/v1/companies/verify') !== false) {
+                    $requestCost = 2; // /verify sustituye a 2-3 llamadas: gasta 2 del plan (28-09-2026)
+                }
                 
                 if ($monthlyRemaining >= $requestCost) {
                     // Queda cuota mensual, se cobra 1 petición de la suscripción

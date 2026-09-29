@@ -55,6 +55,18 @@
                             </a>
                         </li>
                         <li>
+                            <a href="#endpoint-verify">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+                                <span class="nav-num">3.1</span> Verificación KYB <span class="sidebar-badge pro">Pro</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#endpoint-reconcile">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+                                <span class="nav-num">3.2</span> Nombre a CIF <span class="sidebar-badge pro">Pro</span>
+                            </a>
+                        </li>
+                        <li>
                             <a href="#endpoint-search">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                                 <span class="nav-num">4.</span> Búsqueda
@@ -82,6 +94,12 @@
                             <a href="#endpoint-watchlist">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                 <span class="nav-num">7.1</span> Vigilancia <span class="sidebar-badge pro">Pro</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#endpoint-filter">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                                <span class="nav-num">7.2</span> Segmentos <span class="sidebar-badge biz">Biz</span>
                             </a>
                         </li>
                         <li>
@@ -553,6 +571,111 @@ Accept: application/json</code></pre>
                         <li><code>status_code</code>, <code>status_source</code> y <code>status_date</code> llegan igual que en los planes de pago.</li>
                     </ul>
                     <p>Con un plan Pro o Business, o con saldo de bono, recibes los datos completos sin cambiar nada en tu código.</p>
+                </section>
+
+                <section class="docs-section" id="endpoint-verify">
+                    <h2>3.1 Verificación KYB</h2>
+                    <p>En una sola llamada: si la empresa existe y está operativa, si el nombre que te han dado coincide con la razón social, si quien firma es administrador vigente y si el NIF-IVA está en VIES. Devuelve las alertas y una recomendación (<code>decision_hint</code>) que puedes usar tal cual o ignorar y decidir con los datos. <strong>Coste: 2 consultas.</strong></p>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/companies/verify</code>
+                        <span class="plan-badge pro">Pro</span>
+                    </div>
+                    <table class="docs-table">
+                        <thead><tr><th>Parámetro</th><th>Descripción</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>cif</code></td><td><strong>Requerido.</strong> CIF de la empresa.</td></tr>
+                            <tr><td><code>name</code></td><td>Opcional. Razón social que te han dado. Se compara sin tildes, signos ni forma jurídica (0-100; coincide desde 80).</td></tr>
+                            <tr><td><code>person</code></td><td>Opcional. Nombre y apellidos de quien firma. Se busca entre los administradores vigentes, en cualquier orden.</td></tr>
+                            <tr><td><code>vat</code></td><td>Opcional. Con <code>true</code>, comprueba el NIF-IVA intracomunitario en VIES (Comisión Europea).</td></tr>
+                        </tbody>
+                    </table>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "cif": "B12345678",
+    "exists": true,
+    "name": "EMPRESA DE EJEMPLO SL",
+    "status": "ACTIVA",
+    "status_code": "ACTIVE",
+    "status_source": "registry",
+    "status_date": null,
+    "checks": {
+      "name": { "provided": "Empresa de Ejemplo, S.L.", "score": 100, "match": true },
+      "person": { "provided": "Juan Pérez García", "is_current_admin": true, "matched_name": "PEREZ GARCIA JUAN", "position": "Adm. Unico", "since": "2019-03-01" },
+      "vat": { "vat_number": "ESB12345678", "checked": true, "valid": true, "source": "VIES", "error": null },
+      "accounts": { "last_accounts_year": 2023 }
+    },
+    "flags": [],
+    "decision_hint": "pass",
+    "checked_at": "2026-09-28T10:30:00+02:00"
+  }
+}</code></pre>
+                    <table class="docs-table" style="margin-top: 16px;">
+                        <thead><tr><th style="width: 18%;">decision_hint</th><th>Cuándo</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>fail</code></td><td>La sociedad no opera: extinguida, disuelta, en liquidación, hoja registral cerrada, absorbida o inactiva.</td></tr>
+                            <tr><td><code>review</code></td><td>Concurso en curso, estado desconocido, el nombre no coincide, quien firma no es administrador vigente, el NIF no está en VIES (si lo pides) o, en Business, riesgo alto.</td></tr>
+                            <tr><td><code>pass</code></td><td>Ninguna de las anteriores.</td></tr>
+                        </tbody>
+                    </table>
+                    <ul>
+                        <li>Cada alerta de <code>flags</code> lleva <code>code</code>, <code>severity</code> (critical, high, medium, low) y <code>message</code>.</li>
+                        <li>Si VIES no responde, <code>checks.vat.checked</code> es <code>false</code> y no afecta a la decisión.</li>
+                        <li>El año de últimas cuentas es informativo: puede haber depósitos posteriores que aún no constan.</li>
+                        <li><strong>Business:</strong> la respuesta añade <code>risk</code> (<code>risk_level</code>, <code>risk_score</code>).</li>
+                        <li>Empresa no encontrada: 404 <code>COMPANY_NOT_FOUND</code> con <code>decision_hint: "fail"</code> (no se cobra). Plan Free sin saldo: 403 <code>PLAN_RESTRICTION</code>.</li>
+                    </ul>
+                </section>
+
+                <section class="docs-section" id="endpoint-reconcile">
+                    <h2>3.2 Nombre a CIF (reconciliación)</h2>
+                    <p>Envía una lista de nombres de empresa y recibe el CIF de cada una con una puntuación de confianza. Sirve para completar o limpiar bases de clientes y proveedores que tienen el nombre pero no el CIF. <strong>Coste: 1 consulta por cada nombre con coincidencia (<code>match</code>)</strong>; los ambiguos y los que no se encuentran no se cobran.</p>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge post">POST</span>
+                        <code>/companies/reconcile</code>
+                        <span class="plan-badge pro">Pro</span>
+                    </div>
+                    <pre><code class="language-json">// Petición
+{
+  "items": [
+    { "name": "Mercadona, S.A.", "province": "Valencia" },
+    { "name": "Talleres Pérez" },
+    { "name": "Panadería Inventada del Norte" }
+  ]
+}
+
+// Respuesta
+{
+  "success": true,
+  "data": [
+    {
+      "input": { "name": "Mercadona, S.A.", "province": "Valencia" },
+      "status": "match",
+      "score": 100,
+      "company": { "cif": "A46103834", "name": "MERCADONA SA", "province": "VALENCIA", "status": "ACTIVA", "status_code": "ACTIVE", "score": 100 }
+    },
+    {
+      "input": { "name": "Talleres Pérez", "province": null },
+      "status": "ambiguous",
+      "candidates": [
+        { "cif": "B12345678", "name": "TALLERES PEREZ SL", "province": "MADRID", "status": "ACTIVA", "status_code": "ACTIVE", "score": 100 },
+        { "cif": "A12345674", "name": "TALLERES PEREZ SA", "province": "SEVILLA", "status": "ACTIVA", "status_code": "ACTIVE", "score": 100 }
+      ]
+    },
+    { "input": { "name": "Panadería Inventada del Norte", "province": null }, "status": "no_match" }
+  ],
+  "meta": { "requested": 3, "matched": 1, "ambiguous": 1, "no_match": 1, "invalid": 0, "skipped_quota": 0, "cost": 1, "thresholds": { "match": 85, "ambiguous": 70 } }
+}</code></pre>
+                    <ul>
+                        <li>Hasta 100 nombres por petición. También vale <code>{"names": ["...", "..."]}</code>.</li>
+                        <li>El nombre se compara sin tildes, signos ni forma jurídica. <code>match</code>: puntuación de 85 o más y claramente por delante del siguiente candidato. <code>ambiguous</code>: hay candidatos plausibles (70 o más), se devuelven hasta 3. <code>no_match</code>: ninguno llega a 70.</li>
+                        <li>La provincia (<code>province</code>) es opcional y sirve para desempatar entre empresas con el mismo nombre.</li>
+                        <li>Si no te llega el cupo, los nombres que quedan salen como <code>skipped_quota</code> y no se cobran.</li>
+                        <li>Pro y Business (y Free con saldo). Plan Free sin saldo: 403 <code>PLAN_RESTRICTION</code>.</li>
+                    </ul>
                 </section>
 
                 <!-- SEARCH -->
@@ -1093,6 +1216,85 @@ Accept: application/json</code></pre>
                     </ul>
                 </section>
 
+                <section class="docs-section" id="endpoint-filter">
+                    <h2>7.2 Segmentos de Empresas</h2>
+                    <p>Filtra empresas por actividad, zona, tamaño y otros criterios. <strong>Contar es gratis en todos los planes</strong> (<code>count_only=true</code>): sabrás cuántas empresas encajan antes de pagar nada. Descargar las filas es del plan Business y cuesta <strong>5 consultas por fila devuelta</strong>.</p>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/companies/filter</code>
+                        <span class="plan-badge business">Business</span>
+                    </div>
+                    <table class="docs-table">
+                        <thead><tr><th>Parámetro</th><th>Descripción</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>cnae</code></td><td>Prefijos CNAE separados por comas (ej: <code>62</code> o <code>4711,4719</code>).</td></tr>
+                            <tr><td><code>province</code></td><td>Provincia del Registro Mercantil (ej: <code>MADRID</code>).</td></tr>
+                            <tr><td><code>municipality</code></td><td>Municipio (ej: <code>GETAFE</code>).</td></tr>
+                            <tr><td><code>status</code></td><td><code>active</code> (por defecto: activas en el Registro), <code>active_or_unknown</code> (también las que no tienen estado registrado) o <code>any</code>.</td></tr>
+                            <tr><td><code>founded_from / founded_to</code></td><td>Fecha de constitución, <code>YYYY-MM-DD</code>.</td></tr>
+                            <tr><td><code>has_phone</code></td><td>Con <code>true</code>, solo empresas con teléfono. El número no se devuelve.</td></tr>
+                            <tr><td><code>size_band</code></td><td>Tramos de facturación separados por comas: <code>NO_REVENUE</code>, <code>LT_500K</code>, <code>500K_1M</code>, <code>GT_1M</code>.</td></tr>
+                            <tr><td><code>min_accounts_year</code></td><td>Último año de cuentas depositadas igual o posterior (ej: <code>2023</code>).</td></tr>
+                            <tr><td><code>count_only</code></td><td>Con <code>true</code>, solo el recuento. Gratis.</td></tr>
+                            <tr><td><code>limit / cursor</code></td><td>Filas por página (1-1000, por defecto 100) y <code>meta.next_cursor</code> de la página anterior.</td></tr>
+                        </tbody>
+                    </table>
+                    <p>Hace falta al menos uno de <code>cnae</code>, <code>province</code> o <code>municipality</code>.</p>
+
+                    <h4>Solo el recuento (todos los planes, gratis)</h4>
+                    <pre><code class="language-json">// GET /companies/filter?cnae=62&province=MADRID&has_phone=true&count_only=true
+{
+  "success": true,
+  "data": { "total": 3412 },
+  "meta": {
+    "filters": { "cnae": ["62"], "province": "MADRID", "status": "active", "has_phone": true },
+    "cost": 0,
+    "counted_at": "2026-09-29T09:30:00+02:00"
+  }
+}</code></pre>
+
+                    <h4>Filas (Business)</h4>
+                    <pre><code class="language-json">// GET /companies/filter?cnae=62&province=MADRID&has_phone=true&limit=100
+{
+  "success": true,
+  "data": [
+    {
+      "cif": "B12345678",
+      "name": "EMPRESA DE EJEMPLO SL",
+      "cnae": "6201",
+      "cnae_label": "Actividades de programación informática",
+      "province": "MADRID",
+      "municipality": "MADRID",
+      "founded": "2019-03-01",
+      "status": "ACTIVA",
+      "status_code": "ACTIVE",
+      "status_source": "registry",
+      "financials": { "size_band": "GT_1M", "size_band_label": "Más de 1 M€", "last_accounts_year": 2023 },
+      "has_phone": true
+    }
+  ],
+  "meta": {
+    "total": 3412,
+    "returned": 100,
+    "limit": 100,
+    "has_more": true,
+    "next_cursor": "eyJpZCI6ODgxMjM0NX0",
+    "cost": 500,
+    "cost_per_row": 5,
+    "truncated": false,
+    "filters": { "cnae": ["62"], "province": "MADRID", "status": "active", "has_phone": true }
+  }
+}</code></pre>
+                    <ul>
+                        <li>Se cobran solo las filas devueltas: <code>meta.cost</code> = filas × 5. Si no te llega el cupo, la página se recorta (<code>truncated: true</code>) a las filas que puedes pagar.</li>
+                        <li>Para la página siguiente, pasa <code>meta.next_cursor</code> en <code>cursor</code> con los mismos filtros.</li>
+                        <li>Los recuentos se guardan 6 horas: repetir la misma búsqueda no vuelve a calcularse.</li>
+                        <li>Sin plan Business, pedir filas responde 403 <code>PLAN_RESTRICTION</code> con el recuento en <code>upsell_opportunities.total</code>.</li>
+                        <li>No se devuelven teléfonos ni emails: solo <code>has_phone</code>.</li>
+                    </ul>
+                </section>
+
                 <section class="docs-section" id="endpoint-webhooks">
                     <h2>8. Webhooks (Solo Business)</h2>
                     <p>Recibe en tu servidor, sin tener que consultar la API, los cambios de las empresas de tu <a href="#endpoint-watchlist">vigilancia</a>: actos nuevos en el BORME, cambios de estado y cambios de nivel de riesgo. Los eventos se generan cada 15 minutos.</p>
@@ -1547,6 +1749,22 @@ empresa = api.companies.get('A15075062')
 print(empresa['name'])</code></pre>
                         </div>
                     </div>
+
+                    <h3 style="margin-top: 28px;">Novedades de la versión 1.2.0</h3>
+                    <p>Los tres SDK incluyen la <a href="#endpoint-verify">verificación KYB</a> (<code>companies.verify</code>), la <a href="#endpoint-watchlist">vigilancia</a> (<code>watchlist.add / list / remove / events</code>), los <a href="#endpoint-webhooks">webhooks</a> (<code>webhooks.create / list / remove / test</code>), los filtros nuevos del Radar y una función para comprobar la firma de los webhooks. Actualiza con <code>npm install apiempresas@latest</code>, <code>pip install -U apiempresas</code> o <code>composer update apiempresas/apiempresas-php</code>.</p>
+                    <pre><code class="language-typescript">import { ApiEmpresas, constructWebhookEvent } from 'apiempresas';
+
+const api = new ApiEmpresas({ apiKey: 'tu_api_key' });
+
+const v = await api.companies.verify('A46103834', { name: 'Mercadona SA', vat: true });
+console.log(v.decision_hint); // pass | review | fail
+
+await api.watchlist.add(['A46103834']);
+const { data: cambios } = await api.watchlist.events({ since: '2026-09-01' });
+
+// En tu servidor (cuerpo en bruto):
+const evento = constructWebhookEvent(rawBody, req.headers['x-apiempresas-signature'], secret);</code></pre>
+                    <p>En PHP: <code>ApiEmpresas\Resources\Webhooks::constructEvent($raw, $firma, $secret)</code>. En Python: <code>from apiempresas import construct_webhook_event</code>.</p>
                 </section>
 
                 <!-- EXAMPLES -->

@@ -1,16 +1,15 @@
-
 <script>
-<?php if (!empty($force_public_header)): ?>
-    // En páginas con cache pública, no sobreescribir localStorage hasta que responda el AJAX
-<?php elseif (!session('logged_in')): ?>
-    if (typeof localStorage !== 'undefined') localStorage.removeItem('is_logged_in');
-<?php else: ?>
-    if (typeof localStorage !== 'undefined') localStorage.setItem('is_logged_in', '1');
-<?php endif; ?>
+    <?php if (!empty($force_public_header)): ?>
+        // En páginas con cache pública, no sobreescribir localStorage hasta que responda el AJAX
+    <?php elseif (!session('logged_in')): ?>
+        if (typeof localStorage !== 'undefined') localStorage.removeItem('is_logged_in');
+    <?php else: ?>
+        if (typeof localStorage !== 'undefined') localStorage.setItem('is_logged_in', '1');
+    <?php endif; ?>
 
-if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') === '1') {
-    document.write('<style>.header-public-item { display: none !important; } .header-private-item { display: inline-flex !important; }</style>');
-}
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') === '1') {
+        document.write('<style>.header-public-item { display: none !important; } .header-private-item { display: inline-flex !important; }</style>');
+    }
 </script>
 <header class="main-site-header">
     <?php if (session('impersonator_id')): ?>
@@ -66,33 +65,53 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
         </div>
 
         <style>
-            .nav-dropdown-mega .nav-mega-col { display: flex; flex-direction: column; gap: 4px; }
-            .nav-dropdown-mega .nav-mega-sub { margin: 10px 0 2px 10px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; }
-            .nav-dropdown-mega a.nav-compact { padding: 5px 10px; }
-            .nav-dropdown-mega a.nav-compact strong { font-size: 13px; font-weight: 600; color: #475569; }
-            .nav-dropdown-mega a.nav-compact:hover strong { color: #0f172a; }
+            .nav-dropdown-mega .nav-mega-col {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .nav-dropdown-mega .nav-mega-sub {
+                margin: 10px 0 2px 10px;
+                font-size: 0.7rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: #94a3b8;
+            }
+
+            .nav-dropdown-mega a.nav-compact {
+                padding: 5px 10px;
+            }
+
+            .nav-dropdown-mega a.nav-compact strong {
+                font-size: 13px;
+                font-weight: 600;
+                color: #475569;
+            }
+
+            .nav-dropdown-mega a.nav-compact:hover strong {
+                color: #0f172a;
+            }
         </style>
 
         <!-- Programmatic Navigation (Desktop) -->
         <nav class="desktop-only" aria-label="Principal" style="display:flex; align-items:center; gap: 20px;">
-            
+
             <div class="nav-dropdown">
                 <button class="nav-dropdown-trigger">
                     Soluciones
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <path d="m6 9 6 6 6-6" />
                     </svg>
                 </button>
                 <div class="nav-dropdown-menu nav-dropdown-mega">
                     <div class="nav-mega-col">
-                        <h4 style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin: 0 0 6px 10px;">Productos</h4>
-                        <a href="<?= site_url() ?>">
-                            <div class="nav-item-icon">🔌</div>
-                            <div>
-                                <strong>API de empresas</strong>
-                                <span>Valida CIF y consulta datos del Registro Mercantil y el BORME.</span>
-                            </div>
-                        </a>
+                        <h4
+                            style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin: 0 0 6px 10px;">
+                            Productos</h4>
+
                         <a href="<?= site_url('api-empresas') ?>">
                             <div class="nav-item-icon">✅</div>
                             <div>
@@ -103,50 +122,64 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                         <a href="<?= site_url('perfil-de-riesgo') ?>">
                             <div class="nav-item-icon">🛡️</div>
                             <div>
-                                <strong style="display: flex; align-items: center; gap: 6px;">Perfil de Riesgo <b style="background: #2563eb; color: white; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">NUEVO</b></strong>
+                                <strong style="display: flex; align-items: center; gap: 6px;">Perfil de Riesgo <b
+                                        style="background: #2563eb; color: white; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">NUEVO</b></strong>
                                 <span>Consulta scoring de solvencia, alertas BORME y riesgo comercial.</span>
                             </div>
                         </a>
                         <div class="nav-mega-sub">Otras herramientas</div>
-                        <a class="nav-compact" href="<?= site_url('encontrar-empresas-similares') ?>"><strong>Empresas Gemelas</strong></a>
-                        <a class="nav-compact" href="<?= getRadarRedirect('header') ?>"><strong>Radar Inteligente</strong></a>
-                        <a class="nav-compact" href="https://vertice.apiempresas.es" target="_blank" rel="noopener"><strong>Vértice</strong></a>
+                        <a class="nav-compact" href="<?= site_url('encontrar-empresas-similares') ?>"><strong>Empresas
+                                Gemelas</strong></a>
+                        <a class="nav-compact" href="<?= getRadarRedirect('header') ?>"><strong>Radar
+                                Inteligente</strong></a>
+                        <a class="nav-compact" href="https://vertice.apiempresas.es" target="_blank"
+                            rel="noopener"><strong>Vértice</strong></a>
                     </div>
                     <div class="nav-mega-col">
-                        <h4 style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin: 0 0 6px 10px;">Integraciones</h4>
+                        <h4
+                            style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin: 0 0 6px 10px;">
+                            Integraciones</h4>
                         <a href="<?= site_url('plugin-wordpress-buscador-empresas') ?>">
                             <div class="nav-item-icon">
-                                <img src="<?= base_url('public/img/logos/wordpress.svg') ?>" width="18" height="18" alt="WordPress" style="display: block;">
+                                <img src="<?= base_url('public/img/logos/wordpress.svg') ?>" width="18" height="18"
+                                    alt="WordPress" style="display: block;">
                             </div>
                             <div>
-                                <strong style="display: flex; align-items: center; gap: 6px;">Plugin WordPress <b style="background: #10b981; color: white; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">DISPONIBLE</b></strong>
+                                <strong style="display: flex; align-items: center; gap: 6px;">Plugin WordPress <b
+                                        style="background: #10b981; color: white; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">DISPONIBLE</b></strong>
                                 <span>Buscador B2B para convertir tu web en imán de leads corporativos.</span>
                             </div>
                         </a>
                         <a href="<?= site_url('integraciones/google-sheets') ?>">
                             <div class="nav-item-icon">
-                                <img src="<?= base_url('public/img/logos/googlesheets.svg') ?>" width="18" height="18" alt="Google Sheets" style="display: block;">
+                                <img src="<?= base_url('public/img/logos/googlesheets.svg') ?>" width="18" height="18"
+                                    alt="Google Sheets" style="display: block;">
                             </div>
                             <div>
-                                <strong style="display: flex; align-items: center; gap: 6px;">Extensión Google Sheets <b style="background: #10b981; color: white; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">DISPONIBLE</b></strong>
+                                <strong style="display: flex; align-items: center; gap: 6px;">Extensión Google Sheets <b
+                                        style="background: #10b981; color: white; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">DISPONIBLE</b></strong>
                                 <span>Sincroniza y enriquece BBDD masivamente desde tus hojas de cálculo.</span>
                             </div>
                         </a>
                         <a href="#" class="js-track-wp-cta">
                             <div class="nav-item-icon">
-                                <img src="<?= base_url('public/img/logos/zapier.svg') ?>" width="18" height="18" alt="Zapier" style="display: block;">
+                                <img src="<?= base_url('public/img/logos/zapier.svg') ?>" width="18" height="18"
+                                    alt="Zapier" style="display: block;">
                             </div>
                             <div>
-                                <strong style="display: flex; align-items: center; gap: 6px;">App Zapier / Make <b style="background: #f1f5f9; color: #64748b; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">PRÓXIMAMENTE</b></strong>
+                                <strong style="display: flex; align-items: center; gap: 6px;">App Zapier / Make <b
+                                        style="background: #f1f5f9; color: #64748b; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">PRÓXIMAMENTE</b></strong>
                                 <span>Automatiza conectando nuestra API con miles de herramientas.</span>
                             </div>
                         </a>
                         <a href="#" class="js-track-wp-cta">
                             <div class="nav-item-icon">
-                                <img src="<?= base_url('public/img/logos/shopify.svg') ?>" width="18" height="18" alt="Shopify" style="display: block;">
+                                <img src="<?= base_url('public/img/logos/shopify.svg') ?>" width="18" height="18"
+                                    alt="Shopify" style="display: block;">
                             </div>
                             <div>
-                                <strong style="display: flex; align-items: center; gap: 6px;">Plugin Shopify B2B <b style="background: #f1f5f9; color: #64748b; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">PRÓXIMAMENTE</b></strong>
+                                <strong style="display: flex; align-items: center; gap: 6px;">Plugin Shopify B2B <b
+                                        style="background: #f1f5f9; color: #64748b; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">PRÓXIMAMENTE</b></strong>
                                 <span>Valida CIF y solvencia financiera en el checkout B2B.</span>
                             </div>
                         </a>
@@ -157,7 +190,8 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
             <div class="nav-dropdown">
                 <button class="nav-dropdown-trigger">
                     Listados
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <path d="m6 9 6 6 6-6" />
                     </svg>
                 </button>
@@ -200,17 +234,28 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                 </div>
             </div>
 
-            <a class="minor-nav-link" href="<?= site_url() ?>#precios" data-track-event="nav_pricing_click" data-track-metadata='{"source_block": "header"}'>Precios</a>
+            <a class="minor-nav-link" href="<?= site_url() ?>#precios" data-track-event="nav_pricing_click"
+                data-track-metadata='{"source_block": "header"}'>Precios</a>
             <a class="minor-nav-link" href="<?= site_url('documentation') ?>">Docs</a>
         </nav>
 
         <div class="desktop-only auth-buttons" style="position: relative;">
             <?php if (!session('logged_in') || !empty($force_public_header)): ?>
-                <a class="btn btn_header btn_header--ghost header-public-item" href="<?= site_url() ?>enter">Iniciar sesión</a>
-                <a class="btn btn_header btn_header--primary header-public-item" href="<?= site_url('register') . (uri_string() === '' ? '?intent=api&source=home_header' : '') ?>">Crear cuenta gratis</a>
-                <a class="btn btn_header btn_header--primary header-private-item" style="display: none;" href="<?= site_url('dashboard') ?>">Dashboard</a>
-                <a class="btn btn_header btn_header--ghost header-private-item" style="display: none; padding: 8px 12px;" href="<?= site_url('logout') ?>" title="Cerrar sesión">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                <a class="btn btn_header btn_header--ghost header-public-item" href="<?= site_url() ?>enter">Iniciar
+                    sesión</a>
+                <a class="btn btn_header btn_header--primary header-public-item"
+                    href="<?= site_url('register') . (uri_string() === '' ? '?intent=api&source=home_header' : '') ?>">Crear
+                    cuenta gratis</a>
+                <a class="btn btn_header btn_header--primary header-private-item" style="display: none;"
+                    href="<?= site_url('dashboard') ?>">Dashboard</a>
+                <a class="btn btn_header btn_header--ghost header-private-item" style="display: none; padding: 8px 12px;"
+                    href="<?= site_url('logout') ?>" title="Cerrar sesión">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
                 </a>
             <?php else: ?>
                 <a class="btn btn_header btn_header--primary" href="<?= site_url('dashboard') ?>">Dashboard</a>
@@ -253,7 +298,7 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                                 ->where('user_id', session('user_id'))
                                 ->where('status', 'active')
                                 ->get()->getResultArray();
-                                
+
                             if (!empty($activePlans)) {
                                 $hasOnlyCopilot = true;
                                 foreach ($activePlans as $plan) {
@@ -268,26 +313,26 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                             }
                         }
                         if ($showFullMenu):
-                        ?>
-                        <a href="<?= site_url('dashboard') ?>" class="dropdown-item">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect width="7" height="9" x="3" y="3" rx="1" />
-                                <rect width="7" height="5" x="14" y="3" rx="1" />
-                                <rect width="7" height="9" x="14" y="12" rx="1" />
-                                <rect width="7" height="5" x="3" y="16" rx="1" />
-                            </svg>
-                            Mi Dashboard
-                        </a>
-                        <a href="<?= site_url('tickets') ?>" class="dropdown-item">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path
-                                    d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
-                            </svg>
-                            Mis tickets
-                        </a>
-                        <div class="dropdown-divider"></div>
+                            ?>
+                            <a href="<?= site_url('dashboard') ?>" class="dropdown-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect width="7" height="9" x="3" y="3" rx="1" />
+                                    <rect width="7" height="5" x="14" y="3" rx="1" />
+                                    <rect width="7" height="9" x="14" y="12" rx="1" />
+                                    <rect width="7" height="5" x="3" y="16" rx="1" />
+                                </svg>
+                                Mi Dashboard
+                            </a>
+                            <a href="<?= site_url('tickets') ?>" class="dropdown-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
+                                </svg>
+                                Mis tickets
+                            </a>
+                            <div class="dropdown-divider"></div>
                         <?php endif; ?>
                         <a href="<?= site_url('logout') ?>" class="dropdown-item logout logout-item">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -320,13 +365,16 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
             </div>
             <nav class="mobile-nav">
                 <div class="mobile-nav-group" style="margin-bottom: 16px;">
-                    <a href="<?= site_url() ?>#precios" class="mobile-nav-link" data-track-event="nav_pricing_click" data-track-metadata='{"source_block": "mobile_header"}'>Precios</a>
+                    <a href="<?= site_url() ?>#precios" class="mobile-nav-link" data-track-event="nav_pricing_click"
+                        data-track-metadata='{"source_block": "mobile_header"}'>Precios</a>
                     <a href="<?= site_url('documentation') ?>" class="mobile-nav-link">Docs</a>
                 </div>
                 <div class="mobile-nav-group">
                     <div class="mobile-nav-label">Soluciones</div>
-                    
-                    <div style="padding: 12px 18px 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em;">Productos</div>
+
+                    <div
+                        style="padding: 12px 18px 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em;">
+                        Productos</div>
                     <a href="<?= site_url() ?>" class="mobile-nav-link">
                         <span>API de empresas</span>
                     </a>
@@ -337,14 +385,23 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                         <span>Perfil de Riesgo</span>
                     </a>
 
-                    <div style="padding: 16px 18px 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em;">Otras herramientas</div>
-                    <a href="<?= site_url('encontrar-empresas-similares') ?>" class="mobile-nav-link"><span>Empresas Gemelas</span></a>
-                    <a href="<?= getRadarRedirect('mobile_header') ?>" class="mobile-nav-link"><span>Radar Inteligente</span></a>
-                    <a href="https://vertice.apiempresas.es" target="_blank" rel="noopener" class="mobile-nav-link"><span>Vértice</span></a>
+                    <div
+                        style="padding: 16px 18px 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em;">
+                        Otras herramientas</div>
+                    <a href="<?= site_url('encontrar-empresas-similares') ?>" class="mobile-nav-link"><span>Empresas
+                            Gemelas</span></a>
+                    <a href="<?= getRadarRedirect('mobile_header') ?>" class="mobile-nav-link"><span>Radar
+                            Inteligente</span></a>
+                    <a href="https://vertice.apiempresas.es" target="_blank" rel="noopener"
+                        class="mobile-nav-link"><span>Vértice</span></a>
 
-                    <div style="padding: 16px 18px 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em;">Integraciones</div>
-                    <a href="<?= site_url('plugin-wordpress-buscador-empresas') ?>" class="mobile-nav-link"><span>Plugin WordPress</span></a>
-                    <a href="<?= site_url('integraciones/google-sheets') ?>" class="mobile-nav-link"><span>Google Sheets</span></a>
+                    <div
+                        style="padding: 16px 18px 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em;">
+                        Integraciones</div>
+                    <a href="<?= site_url('plugin-wordpress-buscador-empresas') ?>" class="mobile-nav-link"><span>Plugin
+                            WordPress</span></a>
+                    <a href="<?= site_url('integraciones/google-sheets') ?>" class="mobile-nav-link"><span>Google
+                            Sheets</span></a>
                     <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Zapier / Make</span></a>
                     <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Shopify B2B</span></a>
                 </div>
@@ -371,9 +428,12 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                 <div class="mobile-auth">
                     <?php if (!session('logged_in') || !empty($force_public_header)): ?>
                         <a href="<?= site_url() ?>enter" class="btn btn-full ghost header-public-item">Iniciar sesión</a>
-                        <a href="<?= site_url('register') . (uri_string() === '' ? '?intent=api&source=home_header' : '') ?>" class="btn btn-full primary header-public-item">Crear cuenta gratis</a>
-                        <a href="<?= site_url('dashboard') ?>" class="btn btn-full ghost header-private-item" style="display: none;">Dashboard</a>
-                        <a href="<?= site_url('logout') ?>" class="btn btn-full ghost logout header-private-item" style="display: none;">Salir</a>
+                        <a href="<?= site_url('register') . (uri_string() === '' ? '?intent=api&source=home_header' : '') ?>"
+                            class="btn btn-full primary header-public-item">Crear cuenta gratis</a>
+                        <a href="<?= site_url('dashboard') ?>" class="btn btn-full ghost header-private-item"
+                            style="display: none;">Dashboard</a>
+                        <a href="<?= site_url('logout') ?>" class="btn btn-full ghost logout header-private-item"
+                            style="display: none;">Salir</a>
                     <?php else: ?>
                         <a href="<?= site_url('dashboard') ?>" class="btn btn-full ghost">Dashboard</a>
                         <a href="<?= site_url('logout') ?>" class="btn btn-full ghost logout">Salir</a>
@@ -416,7 +476,7 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
                 try {
                     var u = new URL(a.href, location.href);
                     if (u.pathname === location.pathname && u.hash) closeMenu();
-                } catch (e) {}
+                } catch (e) { }
             });
         });
 
@@ -487,4 +547,3 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('is_logged_in') 
 </script>
 
 <?= view('partials/wp_coming_soon_modal') ?>
-

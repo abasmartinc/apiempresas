@@ -1,9 +1,12 @@
 import { ApiEmpresasOptions } from './types';
 import { ApiError } from './errors/ApiError';
 import { Companies } from './resources/Companies';
+import { Watchlist } from './resources/Watchlist';
+import { Webhooks } from './resources/Webhooks';
+import { verifyWebhookSignature, constructWebhookEvent } from './webhooks/signature';
 
 /** Versión del SDK, enviada en el User-Agent. */
-export const SDK_VERSION = '1.1.0';
+export const SDK_VERSION = '1.2.0';
 
 /**
  * Mensaje legible del cuerpo de error. Según el error, la API lo pone en
@@ -28,6 +31,14 @@ export class ApiEmpresas {
   private timeout: number;
 
   public companies: Companies;
+  /** (Pro/Business) Vigilancia de empresas. */
+  public watchlist: Watchlist;
+  /** (Business) Webhooks. */
+  public webhooks: Webhooks;
+
+  /** Atajos: ApiEmpresas.verifyWebhookSignature(...) sin instanciar el cliente. */
+  public static verifyWebhookSignature = verifyWebhookSignature;
+  public static constructWebhookEvent = constructWebhookEvent;
 
   constructor(options: ApiEmpresasOptions) {
     if (!options || !options.apiKey) {
@@ -39,6 +50,8 @@ export class ApiEmpresas {
     this.timeout = options.timeout || 30000;
 
     this.companies = new Companies(this);
+    this.watchlist = new Watchlist(this);
+    this.webhooks = new Webhooks(this);
   }
 
   public async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {

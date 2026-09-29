@@ -232,6 +232,10 @@
                     <p class="endpoint-desc">Vigila hasta 1.000 empresas (100 en Pro) y consulta sus cambios en el BORME, en su estado y en su nivel de riesgo sin gastar consultas.</p>
                 </div>
                 <div class="endpoint-card">
+                    <div class="endpoint-route">GET /companies/filter</div>
+                    <p class="endpoint-desc">Descarga segmentos de empresas por CNAE, provincia, municipio, fecha de constitución, teléfono, tramo de facturación y año de cuentas. El recuento es gratis; cada empresa descargada, 5 consultas.</p>
+                </div>
+                <div class="endpoint-card">
                     <div class="endpoint-route">POST /webhooks</div>
                     <p class="endpoint-desc">Recibe en tu servidor, firmados, los cambios de tus empresas vigiladas: actos del BORME, estado y nivel de riesgo. Con reintentos automáticos.</p>
                 </div>

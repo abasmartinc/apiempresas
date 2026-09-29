@@ -231,6 +231,14 @@
                     <p class="endpoint-desc">Puntuación comercial (0-100) con su prioridad, los motivos y la última señal del BORME. Para riesgo de impago y solvencia, el perfil de riesgo va en Business.</p>
                 </div>
                 <div class="endpoint-card">
+                    <div class="endpoint-route">GET /companies/verify</div>
+                    <p class="endpoint-desc">Verificación KYB en una llamada: estado, coincidencia del nombre, si quien firma es administrador vigente y NIF en VIES, con recomendación pass, review o fail. Gasta 2 consultas.</p>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-route">POST /companies/reconcile</div>
+                    <p class="endpoint-desc">Pasa hasta 100 nombres de empresa y recibe el CIF de cada una con una puntuación de confianza. Solo se cobran las coincidencias: 1 consulta por cada una.</p>
+                </div>
+                <div class="endpoint-card">
                     <div class="endpoint-route">GET /watchlist/events</div>
                     <p class="endpoint-desc">Vigila hasta 100 empresas y consulta sus cambios: actos nuevos en el BORME, cambios de estado y de nivel de riesgo. No gasta consultas.</p>
                 </div>

@@ -208,6 +208,9 @@ $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function
     $routes->get('api/v1/companies/borme', 'Api\V1\CompanyBormeController::index');
     $routes->get('api/v1/companies/contracts', 'Api\V1\CompanyContractsController::index');
     $routes->get('api/v1/companies/risk-profile', 'Api\V1\CompanyRiskProfileController::index');
+    $routes->get('api/v1/companies/verify', 'Api\V1\CompanyVerifyController::index');
+    $routes->get('api/v1/companies/filter', 'Api\V1\CompanyFilterController::index'); // Segmentos (29-09-2026)
+    $routes->post('api/v1/companies/reconcile', 'Api\V1\CompanyReconcileController::index'); // Nombre → CIF (29-09-2026)
 
     // Webhooks CRUD
     $routes->get('api/v1/webhooks', 'Api\V1\WebhookController::index');

@@ -4,17 +4,23 @@ namespace ApiEmpresas;
 
 use ApiEmpresas\Exceptions\ApiException;
 use ApiEmpresas\Resources\Companies;
+use ApiEmpresas\Resources\Watchlist;
+use ApiEmpresas\Resources\Webhooks;
 
 class ApiEmpresas
 {
     /** Versión del SDK, enviada en el User-Agent. */
-    public const VERSION = '1.1.0';
+    public const VERSION = '1.2.0';
 
     private string $apiKey;
     private string $baseUrl;
     private int $timeout;
     
     public Companies $companies;
+    /** (Pro/Business) Vigilancia de empresas. */
+    public Watchlist $watchlist;
+    /** (Business) Webhooks. */
+    public Webhooks $webhooks;
 
     /**
      * ApiEmpresas constructor.
@@ -36,6 +42,8 @@ class ApiEmpresas
 
         // Inicializar recursos
         $this->companies = new Companies($this);
+        $this->watchlist = new Watchlist($this);
+        $this->webhooks = new Webhooks($this);
     }
 
     /**

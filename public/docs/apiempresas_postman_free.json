@@ -165,6 +165,57 @@
                     }
                 },
                 {
+                    "name": "Segmentos: recuento (gratis)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/filter?cnae=62&province=MADRID&has_phone=true&count_only=true",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "filter"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cnae",
+                                    "value": "62"
+                                },
+                                {
+                                    "key": "province",
+                                    "value": "MADRID"
+                                },
+                                {
+                                    "key": "has_phone",
+                                    "value": "true"
+                                },
+                                {
+                                    "key": "count_only",
+                                    "value": "true"
+                                }
+                            ]
+                        },
+                        "description": "Cuántas empresas encajan con los filtros. Gratis en todos los planes. Filtros: cnae, province, municipality, status (active, active_or_unknown, any), founded_from, founded_to, has_phone, size_band (NO_REVENUE, LT_500K, 500K_1M, GT_1M), min_accounts_year. Hace falta cnae, province o municipality."
+                    }
+                },
+                {
                     "name": "Estadísticas de Consumo",
                     "request": {
                         "method": "GET",

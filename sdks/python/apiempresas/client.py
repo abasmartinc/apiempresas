@@ -1,8 +1,10 @@
 import requests
 from .exceptions import ApiError
 from .resources.companies import Companies
+from .resources.watchlist import Watchlist
+from .resources.webhooks import Webhooks
 
-SDK_VERSION = '1.1.0'
+SDK_VERSION = '1.2.0'
 
 
 def _extract_error_message(data):
@@ -42,6 +44,10 @@ class ApiEmpresas:
         
         # Inicializar recursos
         self.companies = Companies(self)
+        # (Pro/Business) Vigilancia de empresas
+        self.watchlist = Watchlist(self)
+        # (Business) Webhooks
+        self.webhooks = Webhooks(self)
 
     def request(self, method: str, endpoint: str, params: dict = None, json_data: dict = None) -> dict:
         """

@@ -165,6 +165,57 @@
                     }
                 },
                 {
+                    "name": "Segmentos: recuento (gratis)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/filter?cnae=62&province=MADRID&has_phone=true&count_only=true",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "filter"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cnae",
+                                    "value": "62"
+                                },
+                                {
+                                    "key": "province",
+                                    "value": "MADRID"
+                                },
+                                {
+                                    "key": "has_phone",
+                                    "value": "true"
+                                },
+                                {
+                                    "key": "count_only",
+                                    "value": "true"
+                                }
+                            ]
+                        },
+                        "description": "Cuántas empresas encajan con los filtros. Gratis en todos los planes. Filtros: cnae, province, municipality, status (active, active_or_unknown, any), founded_from, founded_to, has_phone, size_band (NO_REVENUE, LT_500K, 500K_1M, GT_1M), min_accounts_year. Hace falta cnae, province o municipality."
+                    }
+                },
+                {
                     "name": "Estadísticas de Consumo",
                     "request": {
                         "method": "GET",
@@ -284,6 +335,99 @@
                             ]
                         },
                         "description": "Datos completos, financials (tramo de facturación y último año de cuentas) y administradores vigentes con su fecha de nombramiento."
+                    }
+                },
+                {
+                    "name": "Verificación KYB",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/verify?cif=A46103834&name=Mercadona, S.A.&person=Juan Roig Alfonso&vat=true",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "verify"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cif",
+                                    "value": "A46103834"
+                                },
+                                {
+                                    "key": "name",
+                                    "value": "Mercadona, S.A."
+                                },
+                                {
+                                    "key": "person",
+                                    "value": "Juan Roig Alfonso"
+                                },
+                                {
+                                    "key": "vat",
+                                    "value": "true"
+                                }
+                            ]
+                        },
+                        "description": "Estado, nombre, firmante (administrador vigente) y NIF en VIES, con decision_hint pass/review/fail. En Business añade el nivel de riesgo. Coste: 2 consultas."
+                    }
+                },
+                {
+                    "name": "Nombre a CIF (reconciliación)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-KEY",
+                                "value": "{{API_KEY}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"items\": [\n    {\n      \"name\": \"Mercadona, S.A.\",\n      \"province\": \"Valencia\"\n    },\n    {\n      \"name\": \"Telefónica de España\"\n    },\n    {\n      \"name\": \"Talleres Pérez\"\n    }\n  ]\n}"
+                        },
+                        "url": {
+                            "raw": "https://apiempresas.es/api/v1/companies/reconcile",
+                            "protocol": "https",
+                            "host": [
+                                "apiempresas",
+                                "es"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "reconcile"
+                            ]
+                        },
+                        "description": "Hasta 100 nombres por petición, con provincia opcional. Devuelve match (con CIF), ambiguous (hasta 3 candidatos) o no_match. 1 consulta por cada match; el resto no se cobra."
                     }
                 },
                 {

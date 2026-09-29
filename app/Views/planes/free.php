@@ -234,6 +234,10 @@
                     <p class="endpoint-desc">Empresas recién constituidas (hoy, 7 o 30 días): 10 por consulta, con el nombre y el CIF ocultos.</p>
                 </div>
                 <div class="endpoint-card">
+                    <div class="endpoint-route">GET /companies/filter?count_only=true</div>
+                    <p class="endpoint-desc">Cuenta cuántas empresas hay por sector, provincia, municipio, tamaño o con teléfono. Gratis y sin gastar consultas. Descargar las empresas es del plan Business.</p>
+                </div>
+                <div class="endpoint-card">
                     <div class="endpoint-route">GET /usage</div>
                     <p class="endpoint-desc">Consulta tu consumo y las consultas que te quedan. No gasta consultas. Disponible en todos los planes.</p>
                 </div>

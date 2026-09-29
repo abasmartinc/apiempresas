@@ -55,6 +55,18 @@
                             </a>
                         </li>
                         <li>
+                            <a href="#endpoint-verify">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+                                <span class="nav-num">3.1</span> KYB Verification <span class="sidebar-badge pro">Pro</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#endpoint-reconcile">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+                                <span class="nav-num">3.2</span> Name to CIF <span class="sidebar-badge pro">Pro</span>
+                            </a>
+                        </li>
+                        <li>
                             <a href="#endpoint-search">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                                 <span class="nav-num">4.</span> Search
@@ -76,6 +88,18 @@
                             <a href="#endpoint-radar">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                                 <span class="nav-num">7.</span> Radar <span class="sidebar-badge pro">Pro</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#endpoint-watchlist">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                <span class="nav-num">7.1</span> Watchlist <span class="sidebar-badge pro">Pro</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#endpoint-filter">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                                <span class="nav-num">7.2</span> Segments <span class="sidebar-badge biz">Biz</span>
                             </a>
                         </li>
                         <li>
@@ -423,7 +447,7 @@ Accept: application/json</code></pre>
                             <tr>
                                 <td><code>admin</code></td>
                                 <td>boolean</td>
-                                <td><strong>Optional.</strong> If <code>true</code>, includes current directors and officers. <span class="plan-badge pro" style="margin-left: 5px; display: inline-block;">Pro</span></td>
+                                <td><strong>Optional.</strong> If <code>true</code>, includes current directors and officers (appointments minus the removals, resignations and revocations published in the BORME). <span class="plan-badge pro" style="margin-left: 5px; display: inline-block;">Pro</span></td>
                             </tr>
                         </tbody>
                     </table>
@@ -435,13 +459,22 @@ Accept: application/json</code></pre>
     "cif": "B12345678",
     "name": "EMPRESA DE EJEMPLO SL",
     "status": "ACTIVA",
+    "status_code": "ACTIVE",
+    "status_source": "registry",
+    "status_date": "2011-02-03",
     "province": "MADRID",
     "cnae": "6201",
     "cnae_label": "Actividades de programación informática",
+    "financials": {
+      "size_band": "GT_1M",
+      "size_band_label": "Más de 1 M€",
+      "last_accounts_year": 2023
+    },
     "administrators": [
       {
         "name": "JUAN PÉREZ GARCÍA",
-        "position": "Administrador Único"
+        "position": "Adm. Unico",
+        "since": "2019-03-01"
       }
     ]
   }
@@ -474,7 +507,27 @@ Accept: application/json</code></pre>
                             <tr>
                                 <td><code style="background: transparent; color: #2563eb; font-weight: 600;">status</code></td>
                                 <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">enum</span></td>
-                                <td style="color: #475569;">Current commercial status. Possible values: <code style="font-size: 0.8rem;">ACTIVA</code>, <code style="font-size: 0.8rem;">CESADA</code>, <code style="font-size: 0.8rem;">LIQUIDACION</code>.</td>
+                                <td style="color: #475569;">Status as it appears in the Registry, not normalised (e.g. <code style="font-size: 0.8rem;">ACTIVA</code>, <code style="font-size: 0.8rem;">Activa</code>, <code style="font-size: 0.8rem;">Extinción</code>). May be empty. In your code, use <code style="font-size: 0.8rem;">status_code</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">status_code</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">enum</span></td>
+                                <td style="color: #475569;">Normalised status: <code style="font-size: 0.8rem;">ACTIVE</code> (active in the Registry), <code style="font-size: 0.8rem;">PRESUMED_ACTIVE</code> (no status in the Registry and no BORME event that closes it), <code style="font-size: 0.8rem;">INSOLVENCY</code> (insolvency proceedings in progress), <code style="font-size: 0.8rem;">IN_LIQUIDATION</code>, <code style="font-size: 0.8rem;">DISSOLVED</code>, <code style="font-size: 0.8rem;">REGISTRY_CLOSED</code> (registry sheet closed), <code style="font-size: 0.8rem;">MERGED</code> (absorbed), <code style="font-size: 0.8rem;">INACTIVE</code>, <code style="font-size: 0.8rem;">EXTINCT</code> or <code style="font-size: 0.8rem;">UNKNOWN</code>. All plans.</td>
+                            </tr>
+                            <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">status_source</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string | null</span></td>
+                                <td style="color: #475569;">Where <code style="font-size: 0.8rem;">status_code</code> comes from: <code style="font-size: 0.8rem;">registry</code> (Registry status) or <code style="font-size: 0.8rem;">borme_analysis</code> (reading of the BORME acts, which prevails when there is a more serious event than the registered status).</td>
+                            </tr>
+                            <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">status_date</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">date | null</span></td>
+                                <td style="color: #475569;">Date of the status, when known.</td>
+                            </tr>
+                            <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">financials</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">object</span></td>
+                                <td style="color: #475569;"><span class="plan-badge pro">Pro</span> <code style="font-size: 0.8rem;">size_band</code>: indicative revenue band (<code style="font-size: 0.8rem;">LT_500K</code>, <code style="font-size: 0.8rem;">500K_1M</code>, <code style="font-size: 0.8rem;">GT_1M</code> or <code style="font-size: 0.8rem;">NO_REVENUE</code>; null if unknown), with its label in <code style="font-size: 0.8rem;">size_band_label</code>. <code style="font-size: 0.8rem;">last_accounts_year</code>: latest financial year with filed accounts in our database (a later one may exist that we have not loaded yet).</td>
                             </tr>
                             <tr>
                                 <td><code style="background: transparent; color: #2563eb; font-weight: 600;">province</code></td>
@@ -489,10 +542,127 @@ Accept: application/json</code></pre>
                             <tr>
                                 <td><code style="background: transparent; color: #2563eb; font-weight: 600;">administrators[]</code></td>
                                 <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td>
-                                <td style="color: #475569;">List of current directors. Each object contains <code style="font-size: 0.8rem;">name</code> and their official title (<code style="font-size: 0.8rem;">position</code>).</td>
+                                <td style="color: #475569;">Current directors and officers: BORME appointments minus later removals, resignations and revocations. Each object contains <code style="font-size: 0.8rem;">name</code>, the title (<code style="font-size: 0.8rem;">position</code>; comma-separated if several) and <code style="font-size: 0.8rem;">since</code>, the date of the current appointment (null if it predates our BORME history).</td>
                             </tr>
                         </tbody>
                     </table>
+
+                    <h4>Data on the Free plan</h4>
+                    <p>On the Free plan (without prepaid credit) the response has the same structure, with these cuts:</p>
+                    <ul>
+                        <li><code>address</code> contains the text <code>*** [ACTUALIZA A PRO PARA VER LA DIRECCION ]</code>.</li>
+                        <li><code>corporate_purpose</code> is cut to 100 characters when longer.</li>
+                        <li><code>lat</code> and <code>lng</code> are not included.</li>
+                        <li>An <code>upsell_opportunities</code> object is added. If your code needs to know whether the response is trimmed, check for that field.</li>
+                        <li><code>financials</code> is not included. Inside <code>upsell_opportunities</code>, <code>datos_pro</code> says whether a revenue band and accounts year exist, and how many directors are on record.</li>
+                        <li><code>status_code</code>, <code>status_source</code> and <code>status_date</code> are returned as on paid plans.</li>
+                    </ul>
+                    <p>With a Pro or Business plan, or with prepaid credit, you get the full data without changing your code.</p>
+                </section>
+
+                <section class="docs-section" id="endpoint-verify">
+                    <h2>3.1 KYB Verification</h2>
+                    <p>In a single call: whether the company exists and is operating, whether the name you were given matches the registered name, whether the signer is a current director and whether the VAT number is registered in VIES. Returns alerts and a recommendation (<code>decision_hint</code>) that you can use as is, or ignore and decide from the data. <strong>Cost: 2 requests.</strong></p>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/companies/verify</code>
+                        <span class="plan-badge pro">Pro</span>
+                    </div>
+                    <table class="docs-table">
+                        <thead><tr><th>Parameter</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>cif</code></td><td><strong>Required.</strong> Company CIF.</td></tr>
+                            <tr><td><code>name</code></td><td>Optional. The company name you were given. Compared without accents, punctuation or legal form (0-100; matches from 80).</td></tr>
+                            <tr><td><code>person</code></td><td>Optional. Full name of the signer. Looked up among the current directors, in any word order.</td></tr>
+                            <tr><td><code>vat</code></td><td>Optional. With <code>true</code>, checks the EU VAT number in VIES (European Commission).</td></tr>
+                        </tbody>
+                    </table>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "cif": "B12345678",
+    "exists": true,
+    "name": "EMPRESA DE EJEMPLO SL",
+    "status": "ACTIVA",
+    "status_code": "ACTIVE",
+    "status_source": "registry",
+    "status_date": null,
+    "checks": {
+      "name": { "provided": "Empresa de Ejemplo, S.L.", "score": 100, "match": true },
+      "person": { "provided": "Juan Pérez García", "is_current_admin": true, "matched_name": "PEREZ GARCIA JUAN", "position": "Adm. Unico", "since": "2019-03-01" },
+      "vat": { "vat_number": "ESB12345678", "checked": true, "valid": true, "source": "VIES", "error": null },
+      "accounts": { "last_accounts_year": 2023 }
+    },
+    "flags": [],
+    "decision_hint": "pass",
+    "checked_at": "2026-09-28T10:30:00+02:00"
+  }
+}</code></pre>
+                    <table class="docs-table" style="margin-top: 16px;">
+                        <thead><tr><th style="width: 18%;">decision_hint</th><th>When</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>fail</code></td><td>The company is not operating: extinct, dissolved, in liquidation, registry sheet closed, absorbed or inactive.</td></tr>
+                            <tr><td><code>review</code></td><td>Insolvency proceedings, unknown status, name mismatch, signer is not a current director, VAT number not in VIES (if requested) or, on Business, high risk.</td></tr>
+                            <tr><td><code>pass</code></td><td>None of the above.</td></tr>
+                        </tbody>
+                    </table>
+                    <ul>
+                        <li>Each alert in <code>flags</code> has <code>code</code>, <code>severity</code> (critical, high, medium, low) and <code>message</code>.</li>
+                        <li>If VIES does not respond, <code>checks.vat.checked</code> is <code>false</code> and the decision is not affected.</li>
+                        <li>The latest accounts year is informative: later filings may exist that we have not loaded yet.</li>
+                        <li><strong>Business:</strong> the response adds <code>risk</code> (<code>risk_level</code>, <code>risk_score</code>).</li>
+                        <li>Company not found: 404 <code>COMPANY_NOT_FOUND</code> with <code>decision_hint: "fail"</code> (not charged). Free plan without credit: 403 <code>PLAN_RESTRICTION</code>.</li>
+                    </ul>
+                </section>
+
+                <section class="docs-section" id="endpoint-reconcile">
+                    <h2>3.2 Name to CIF (reconciliation)</h2>
+                    <p>Send a list of company names and get each one's CIF with a confidence score. Useful to complete or clean customer and supplier databases that have the name but not the CIF. <strong>Cost: 1 request per name with a match (<code>match</code>)</strong>; ambiguous and not-found names are free.</p>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge post">POST</span>
+                        <code>/companies/reconcile</code>
+                        <span class="plan-badge pro">Pro</span>
+                    </div>
+                    <pre><code class="language-json">// Request
+{
+  "items": [
+    { "name": "Mercadona, S.A.", "province": "Valencia" },
+    { "name": "Talleres Pérez" },
+    { "name": "Panadería Inventada del Norte" }
+  ]
+}
+
+// Response
+{
+  "success": true,
+  "data": [
+    {
+      "input": { "name": "Mercadona, S.A.", "province": "Valencia" },
+      "status": "match",
+      "score": 100,
+      "company": { "cif": "A46103834", "name": "MERCADONA SA", "province": "VALENCIA", "status": "ACTIVA", "status_code": "ACTIVE", "score": 100 }
+    },
+    {
+      "input": { "name": "Talleres Pérez", "province": null },
+      "status": "ambiguous",
+      "candidates": [
+        { "cif": "B12345678", "name": "TALLERES PEREZ SL", "province": "MADRID", "status": "ACTIVA", "status_code": "ACTIVE", "score": 100 },
+        { "cif": "A12345674", "name": "TALLERES PEREZ SA", "province": "SEVILLA", "status": "ACTIVA", "status_code": "ACTIVE", "score": 100 }
+      ]
+    },
+    { "input": { "name": "Panadería Inventada del Norte", "province": null }, "status": "no_match" }
+  ],
+  "meta": { "requested": 3, "matched": 1, "ambiguous": 1, "no_match": 1, "invalid": 0, "skipped_quota": 0, "cost": 1, "thresholds": { "match": 85, "ambiguous": 70 } }
+}</code></pre>
+                    <ul>
+                        <li>Up to 100 names per request. <code>{"names": ["...", "..."]}</code> also works.</li>
+                        <li>Names are compared without accents, punctuation or legal form. <code>match</code>: score 85 or higher and clearly ahead of the next candidate. <code>ambiguous</code>: plausible candidates (70 or higher), up to 3 returned. <code>no_match</code>: none reaches 70.</li>
+                        <li>The province (<code>province</code>) is optional and breaks ties between companies with the same name.</li>
+                        <li>If your quota runs out, the remaining names come back as <code>skipped_quota</code> and are not charged.</li>
+                        <li>Pro and Business (and Free with credit). Free plan without credit: 403 <code>PLAN_RESTRICTION</code>.</li>
+                    </ul>
                 </section>
 
                 <!-- SEARCH -->
@@ -876,6 +1046,22 @@ Accept: application/json</code></pre>
                                 <td><code>priority</code></td>
                                 <td>Commercial relevance level: <code>alta</code> (high), <code>media</code> (medium), <code>baja</code> (low).</td>
                             </tr>
+                            <tr>
+                                <td><code>cnae</code></td>
+                                <td>One or more comma-separated CNAE prefixes (e.g. <code>62</code> or <code>4711,4719</code>).</td>
+                            </tr>
+                            <tr>
+                                <td><code>min_score</code></td>
+                                <td>Minimum opportunity score, 0 to 100.</td>
+                            </tr>
+                            <tr>
+                                <td><code>main_act_type</code></td>
+                                <td>Type of the latest relevant BORME act (e.g. <code>Constitución</code>, <code>Ampliación de capital</code>).</td>
+                            </tr>
+                            <tr>
+                                <td><code>has_phone</code></td>
+                                <td>With <code>true</code>, only companies with a phone number.</td>
+                            </tr>
                         </tbody>
                     </table>
 
@@ -908,11 +1094,176 @@ Accept: application/json</code></pre>
                     </table>
                 </section>
 
+                <!-- WATCHLIST -->
+                <section class="docs-section" id="endpoint-watchlist">
+                    <h2>7.1 Company Watchlist</h2>
+                    <p>Add the companies you care about and fetch their changes since a date: new BORME acts, Registry status changes and risk level changes. <strong>Does not consume requests.</strong> Pro: up to 100 companies. Business: up to 1,000.</p>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge post">POST</span>
+                        <code>/watchlist</code>
+                        <span class="plan-badge pro">Pro</span>
+                    </div>
+                    <p>Add up to 500 CIFs per request. The response says what happened to each one.</p>
+                    <pre><code class="language-json">// Request
+{ "cifs": ["A46103834", "A15075062"] }
+
+// Response
+{
+  "success": true,
+  "data": {
+    "added": ["A46103834"],
+    "already_watching": ["A15075062"],
+    "not_found": [],
+    "invalid": [],
+    "rejected_over_limit": []
+  },
+  "meta": { "total": 2, "watch_limit": 100 }
+}</code></pre>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/watchlist</code>
+                    </div>
+                    <p>Lists your watched companies (<code>page</code>, <code>limit</code> up to 500).</p>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge delete">DELETE</span>
+                        <code>/watchlist/{cif}</code>
+                    </div>
+                    <p>Removes a company. If it was not on your watchlist, returns 404 <code>NOT_WATCHING</code>.</p>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/watchlist/events</code>
+                    </div>
+                    <table class="docs-table">
+                        <thead><tr><th>Parameter</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>since</code></td><td>Date <code>YYYY-MM-DD</code>, inclusive. Default: 7 days ago; at most 90 days back.</td></tr>
+                            <tr><td><code>types</code></td><td>Optional. <code>borme_act</code>, <code>status_change</code>, <code>risk_level_change</code>, comma-separated.</td></tr>
+                            <tr><td><code>cif</code></td><td>Optional. Only the events of that company.</td></tr>
+                            <tr><td><code>page</code> / <code>limit</code></td><td>Pagination (up to 500 per page).</td></tr>
+                        </tbody>
+                    </table>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": [
+    {
+      "id": "borme_act:8812345",
+      "type": "borme_act",
+      "date": "2026-09-22",
+      "cif": "B12345678",
+      "company_name": "EMPRESA DE EJEMPLO SL",
+      "data": {
+        "act_types": "Nombramientos, Ceses/Dimisiones",
+        "description": "Ceses/Dimisiones. Adm. Unico: ...",
+        "url_pdf": "https://www.boe.es/borme/dias/2026/09/22/pdfs/BORME-A-2026-181-28.pdf"
+      }
+    },
+    {
+      "id": "risk_level_change:B12345678:2026-09-25",
+      "type": "risk_level_change",
+      "date": "2026-09-25",
+      "cif": "B12345678",
+      "company_name": "EMPRESA DE EJEMPLO SL",
+      "data": { "from": "BAJO", "to": "MEDIO", "model_change": false }
+    }
+  ],
+  "meta": { "since": "2026-09-20", "types": ["borme_act", "status_change", "risk_level_change"], "total": 2, "page": 1, "limit": 100, "has_more": false }
+}</code></pre>
+                    <ul>
+                        <li>Events are returned oldest first. The <code>id</code> is stable: use it to avoid processing the same event twice.</li>
+                        <li><code>model_change: true</code> means the level changed because we recalculated our model, not because of anything new at the company; <code>null</code> if it cannot be known.</li>
+                        <li>Recommended use: one call a day with <code>since</code> = the date of your last call.</li>
+                        <li>Free plan: 403 <code>PLAN_RESTRICTION</code>. On Business you can receive these same events on your server with <a href="#endpoint-webhooks">webhooks</a>.</li>
+                    </ul>
+                </section>
+
+                <section class="docs-section" id="endpoint-filter">
+                    <h2>7.2 Company Segments</h2>
+                    <p>Filter companies by activity, area, size and other criteria. <strong>Counting is free on every plan</strong> (<code>count_only=true</code>): you see how many companies match before paying anything. Downloading the rows is a Business feature and costs <strong>5 requests per returned row</strong>.</p>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/companies/filter</code>
+                        <span class="plan-badge business">Business</span>
+                    </div>
+                    <table class="docs-table">
+                        <thead><tr><th>Parameter</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>cnae</code></td><td>Comma-separated CNAE prefixes (e.g. <code>62</code> or <code>4711,4719</code>).</td></tr>
+                            <tr><td><code>province</code></td><td>Mercantile Registry province (e.g. <code>MADRID</code>).</td></tr>
+                            <tr><td><code>municipality</code></td><td>Municipality (e.g. <code>GETAFE</code>).</td></tr>
+                            <tr><td><code>status</code></td><td><code>active</code> (default: active in the Registry), <code>active_or_unknown</code> (also those with no registered status) or <code>any</code>.</td></tr>
+                            <tr><td><code>founded_from / founded_to</code></td><td>Incorporation date, <code>YYYY-MM-DD</code>.</td></tr>
+                            <tr><td><code>has_phone</code></td><td>With <code>true</code>, only companies with a phone number. The number is not returned.</td></tr>
+                            <tr><td><code>size_band</code></td><td>Comma-separated revenue bands: <code>NO_REVENUE</code>, <code>LT_500K</code>, <code>500K_1M</code>, <code>GT_1M</code>.</td></tr>
+                            <tr><td><code>min_accounts_year</code></td><td>Latest filed accounts year equal or later (e.g. <code>2023</code>).</td></tr>
+                            <tr><td><code>count_only</code></td><td>With <code>true</code>, only the count. Free.</td></tr>
+                            <tr><td><code>limit / cursor</code></td><td>Rows per page (1-1000, default 100) and <code>meta.next_cursor</code> from the previous page.</td></tr>
+                        </tbody>
+                    </table>
+                    <p>At least one of <code>cnae</code>, <code>province</code> or <code>municipality</code> is required.</p>
+
+                    <h4>Count only (all plans, free)</h4>
+                    <pre><code class="language-json">// GET /companies/filter?cnae=62&province=MADRID&has_phone=true&count_only=true
+{
+  "success": true,
+  "data": { "total": 3412 },
+  "meta": {
+    "filters": { "cnae": ["62"], "province": "MADRID", "status": "active", "has_phone": true },
+    "cost": 0,
+    "counted_at": "2026-09-29T09:30:00+02:00"
+  }
+}</code></pre>
+
+                    <h4>Rows (Business)</h4>
+                    <pre><code class="language-json">// GET /companies/filter?cnae=62&province=MADRID&has_phone=true&limit=100
+{
+  "success": true,
+  "data": [
+    {
+      "cif": "B12345678",
+      "name": "EMPRESA DE EJEMPLO SL",
+      "cnae": "6201",
+      "cnae_label": "Actividades de programación informática",
+      "province": "MADRID",
+      "municipality": "MADRID",
+      "founded": "2019-03-01",
+      "status": "ACTIVA",
+      "status_code": "ACTIVE",
+      "status_source": "registry",
+      "financials": { "size_band": "GT_1M", "size_band_label": "Más de 1 M€", "last_accounts_year": 2023 },
+      "has_phone": true
+    }
+  ],
+  "meta": {
+    "total": 3412,
+    "returned": 100,
+    "limit": 100,
+    "has_more": true,
+    "next_cursor": "eyJpZCI6ODgxMjM0NX0",
+    "cost": 500,
+    "cost_per_row": 5,
+    "truncated": false,
+    "filters": { "cnae": ["62"], "province": "MADRID", "status": "active", "has_phone": true }
+  }
+}</code></pre>
+                    <ul>
+                        <li>Only returned rows are charged: <code>meta.cost</code> = rows × 5. If your quota is not enough, the page is cut (<code>truncated: true</code>) to the rows you can pay for.</li>
+                        <li>For the next page, pass <code>meta.next_cursor</code> as <code>cursor</code> with the same filters.</li>
+                        <li>Counts are cached for 6 hours: repeating the same search is not recalculated.</li>
+                        <li>Without a Business plan, asking for rows returns 403 <code>PLAN_RESTRICTION</code> with the count in <code>upsell_opportunities.total</code>.</li>
+                        <li>Phone numbers and emails are never returned: only <code>has_phone</code>.</li>
+                    </ul>
+                </section>
+
                 <!-- WEBHOOKS -->
                 <section class="docs-section" id="endpoint-webhooks">
                     <h2>8. Webhooks (Business only)</h2>
-                    <p>Receive automatic real-time notifications in your system when we detect new companies or signals.</p>
-                    
+                    <p>Receive the changes of the companies on your <a href="#endpoint-watchlist">watchlist</a> on your server, without polling the API: new BORME acts, status changes and risk level changes. Events are generated every 15 minutes.</p>
+
                     <div class="endpoint-header" style="margin-bottom: 5px;">
                         <span class="http-badge get">GET</span>
                         <code>/webhooks</code>
@@ -923,40 +1274,73 @@ Accept: application/json</code></pre>
                         <code>/webhooks</code>
                         <span class="plan-badge business">Business</span>
                     </div>
+                    <div class="endpoint-header" style="margin-bottom: 5px;">
+                        <span class="http-badge post">POST</span>
+                        <code>/webhooks/{id}/test</code>
+                        <span class="plan-badge business">Business</span>
+                    </div>
                     <div class="endpoint-header">
-                        <span class="http-badge" style="background: #f93e3e;">DELETE</span>
+                        <span class="http-badge delete">DELETE</span>
                         <code>/webhooks/{id}</code>
                         <span class="plan-badge business">Business</span>
                     </div>
 
-                    <h4>Example response (GET)</h4>
-                    <pre><code class="language-json">{
-  "success": true,
-  "data": [
-    {
-      "id": 1,
-      "url": "https://yourdomain.com/webhook",
-      "event": "company.updated",
-      "created_at": "2023-11-01 10:00:00"
-    }
-  ]
-}</code></pre>
+                    <h4>Create a webhook</h4>
+                    <pre><code class="language-json">// Request
+{ "url": "https://yourdomain.com/webhooks/apiempresas", "event": "watchlist.*" }
 
-                    <h4>Example response (POST / DELETE)</h4>
-                    <pre><code class="language-json">{
+// Response (201)
+{
   "success": true,
-  "message": "Webhook created successfully",
-  "id": 1
+  "message": "Webhook creado correctamente",
+  "id": 12,
+  "event": "watchlist.*",
+  "secret": "3f9c1b2a7d..."
 }</code></pre>
+                    <p>Keep the <code>secret</code>: it lets you check that each delivery comes from us. If you send one in the request, yours is used.</p>
+
                     <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                         <thead style="background: #f8fafc;">
-                            <tr><th style="width: 25%;">Field</th><th style="width: 15%;">Type</th><th>Description</th></tr>
+                            <tr><th style="width: 30%;">Event</th><th>When it arrives</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">event</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Subscribed event type (e.g. <code>company.updated</code>, <code>radar.new</code>).</td></tr>
-                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">url</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Your server URL where we will POST the payload.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">company.borme_act</code></td><td style="color: #475569;">An act is published in the BORME for a watched company.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">company.status_changed</code></td><td style="color: #475569;">The Registry changes the status of a watched company.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">company.risk_level_changed</code></td><td style="color: #475569;">Its risk level changes (<code>model_change: true</code> if caused by a recalculation of our model).</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">watchlist.*</code></td><td style="color: #475569;">All three above.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">test.ping</code></td><td style="color: #475569;">Only when calling <code>/webhooks/{id}/test</code>.</td></tr>
                         </tbody>
                     </table>
+
+                    <h4>What your server receives</h4>
+                    <p>A JSON <code>POST</code> with these headers: <code>X-ApiEmpresas-Event</code>, <code>X-ApiEmpresas-Delivery</code> (unique delivery id) and <code>X-ApiEmpresas-Signature</code>.</p>
+                    <pre><code class="language-json">{
+  "id": "5d41402a-bc4b-2a76-b971-9d911017c592",
+  "event": "company.borme_act",
+  "created_at": "2026-09-28T10:15:00+02:00",
+  "data": {
+    "id": "borme_act:8812345",
+    "type": "borme_act",
+    "date": "2026-09-28",
+    "cif": "B12345678",
+    "company_name": "EMPRESA DE EJEMPLO SL",
+    "data": { "act_types": "Nombramientos", "description": "Nombramientos. Adm. Unico: ...", "url_pdf": "https://www.boe.es/borme/..." }
+  }
+}</code></pre>
+
+                    <h4>Verify the signature</h4>
+                    <p><code>X-ApiEmpresas-Signature</code> looks like <code>t=1790000000,v1=&lt;signature&gt;</code>. The signature is the hex HMAC-SHA256 of <code>t + "." + body</code> with your <code>secret</code>. Reject the delivery if it does not match or if <code>t</code> is more than 5 minutes old. The <a href="#sdks">SDKs</a> include a helper that does this.</p>
+                    <pre><code class="language-php">[$t, $v1] = array_map(fn($p) => explode('=', $p, 2)[1], explode(',', $_SERVER['HTTP_X_APIEMPRESAS_SIGNATURE']));
+$body = file_get_contents('php://input');
+$ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(time() - (int) $t) < 300;</code></pre>
+
+                    <h4>Retries</h4>
+                    <ul>
+                        <li>Reply with a 2xx code within 10 seconds. Otherwise we retry after 1, 5 and 30 minutes, and after 2 and 6 hours; then the delivery is dropped.</li>
+                        <li>Use <code>X-ApiEmpresas-Delivery</code> to avoid processing the same delivery twice.</li>
+                        <li>A webhook with 50 consecutive failures is disabled. Create it again once your server responds.</li>
+                        <li>The URL must be HTTPS (port 443) and public. We do not follow redirects.</li>
+                    </ul>
                 </section>
 
                 <!-- PUBLIC CONTRACTS -->
@@ -1017,8 +1401,17 @@ Accept: application/json</code></pre>
                     <pre><code class="language-json">{
   "success": false,
   "error": "PLAN_RESTRICTION",
-  "message": "El acceso a contratos públicos requiere el plan Business."
+  "message": "El acceso a contratos públicos requiere el plan Business.",
+  "upsell_opportunities": {
+    "mensaje": "Esta empresa tiene 14 contratos públicos adjudicados por 2.318.400 €. Con el plan Business ves cada contrato: órgano, título, fecha, importe y enlace a la licitación.",
+    "upgrade_url": "https://apiempresas.es/billing?plan=business&source=api_403_contracts",
+    "contratos_detectados": 14,
+    "importe_total": 2318400.0,
+    "currency": "EUR",
+    "ultima_adjudicacion": "2026-06-12"
+  }
 }</code></pre>
+                    <p style="font-size: 13px; color: #64748b;">The <code>upsell_opportunities</code> summary is included in up to 25 403 responses per account per day; after that they only carry <code>mensaje</code> and <code>upgrade_url</code>.</p>
                 </section>
 
                 <!-- CORPORATE RISK PROFILE -->
@@ -1085,8 +1478,15 @@ Accept: application/json</code></pre>
                     <pre><code class="language-json">{
   "success": false,
   "error": "PLAN_RESTRICTION",
-  "message": "El acceso al perfil de riesgo corporativo requiere el plan Business."
+  "message": "El acceso al perfil de riesgo corporativo requiere el plan Business.",
+  "upsell_opportunities": {
+    "mensaje": "Nivel de riesgo de esta empresa: MEDIO. Con el plan Business ves la puntuación, las seis dimensiones, el estado legal y cada evento del BORME que lo explica.",
+    "upgrade_url": "https://apiempresas.es/billing?plan=business&source=api_403_risk",
+    "perfil_disponible": true,
+    "nivel_riesgo": "MEDIO"
+  }
 }</code></pre>
+                    <p style="font-size: 13px; color: #64748b;"><code>nivel_riesgo</code> only appears on paid plans; on Free you only get whether a profile exists (<code>perfil_disponible</code>). Up to 25 responses with this summary per account per day.</p>
 
                     <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                         <thead style="background: #f8fafc;">
@@ -1239,8 +1639,8 @@ Accept: application/json</code></pre>
 use ApiEmpresas\ApiEmpresas;
 
 $api = new ApiEmpresas('your_api_key');
-$company = $api->companies()->getByCif('B12345678');
-echo $company->name;</code></pre>
+$company = $api->companies->get('B12345678');
+echo $company['name'];</code></pre>
                         </div>
 
                         <!-- Node.js SDK -->
@@ -1257,8 +1657,8 @@ echo $company->name;</code></pre>
                             <p style="color:#475569; font-size:0.95rem; margin-top:15px; margin-bottom: 10px;">TypeScript usage example:</p>
                             <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0;"><code class="language-typescript" style="color: #e2e8f0;">import { ApiEmpresas } from 'apiempresas';
 
-const api = new ApiEmpresas('your_api_key');
-const company = await api.companies.getByCif('B12345678');
+const api = new ApiEmpresas({ apiKey: 'your_api_key' });
+const company = await api.companies.get('B12345678');
 console.log(company.name);</code></pre>
                         </div>
 
@@ -1277,10 +1677,25 @@ console.log(company.name);</code></pre>
                             <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0;"><code class="language-python" style="color: #e2e8f0;">from apiempresas import ApiEmpresas
 
 api = ApiEmpresas('your_api_key')
-company = api.companies.get_by_cif('B12345678')
-print(company.name)</code></pre>
+company = api.companies.get('B12345678')
+print(company['name'])</code></pre>
                         </div>
                     </div>
+                    <h3 style="margin-top: 28px;">What's new in version 1.2.0</h3>
+                    <p>All three SDKs include <a href="#endpoint-verify">KYB verification</a> (<code>companies.verify</code>), the <a href="#endpoint-watchlist">watchlist</a> (<code>watchlist.add / list / remove / events</code>), <a href="#endpoint-webhooks">webhooks</a> (<code>webhooks.create / list / remove / test</code>), the new Radar filters and a helper to verify webhook signatures. Update with <code>npm install apiempresas@latest</code>, <code>pip install -U apiempresas</code> or <code>composer update apiempresas/apiempresas-php</code>.</p>
+                    <pre><code class="language-typescript">import { ApiEmpresas, constructWebhookEvent } from 'apiempresas';
+
+const api = new ApiEmpresas({ apiKey: 'your_api_key' });
+
+const v = await api.companies.verify('A46103834', { name: 'Mercadona SA', vat: true });
+console.log(v.decision_hint); // pass | review | fail
+
+await api.watchlist.add(['A46103834']);
+const { data: cambios } = await api.watchlist.events({ since: '2026-09-01' });
+
+// On your server (raw body):
+const evento = constructWebhookEvent(rawBody, req.headers['x-apiempresas-signature'], secret);</code></pre>
+                    <p>In PHP: <code>ApiEmpresas\Resources\Webhooks::constructEvent($raw, $firma, $secret)</code>. In Python: <code>from apiempresas import construct_webhook_event</code>.</p>
                 </section>
 
                 <!-- CODE EXAMPLES -->
@@ -1414,6 +1829,7 @@ print(response.json())</code></pre>
     .http-badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; margin-right: 8px; color: white; }
     .http-badge.get { background: #61affe; }
     .http-badge.post { background: #49cc90; }
+    .http-badge.delete { background: #f93e3e; }
     .endpoint-header { display: flex; align-items: center; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px; gap: 10px; }
     .plan-badge { font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 99px; margin-left: auto; }
     .plan-badge.pro { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }

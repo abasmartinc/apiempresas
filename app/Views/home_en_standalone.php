@@ -236,7 +236,7 @@
                 <div class="band-header" style="text-align: left; max-width: 800px;">
                     <h2 class="reveal delay-1">Transparent plans for any volume</h2>
                     <div style="width: 60px; height: 4px; background: linear-gradient(90deg, #4f46e5, #4b9a69); margin-top: 16px; margin-bottom: 24px;"></div>
-                    <p class="reveal delay-2" style="font-size: 1.1rem; color: var(--ae-slate);">Start validating CIFs and company namo in the Sandbox. When moving to production, scale to Pro/Business with usage control and traceability. No commitments, no hidden costs.<br><br></p>
+                    <p class="reveal delay-2" style="font-size: 1.1rem; color: var(--ae-slate);">Start validating CIFs and company names in the Sandbox. When moving to production, scale to Pro/Business with usage control and traceability. No commitments, no hidden costs.<br><br></p>
                 </div>
                 
                 <!-- TOGGLE ANUAL / MENSUAL -->
@@ -257,9 +257,12 @@
                         <div class="tier-desc">Test the API with real data and validate results before moving to production.</div>
                         <div class="price">0€<span>/once</span></div>
                         <ul class="tier-features">
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> <?= $freeLimit ?> guaranteed requests</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Access to /companies endpoint</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Basic official data (CIF, Name, CNAE)</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> <?= $freeLimit ?> free requests (one-time, not renewed)</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Lookup by CIF and search by name</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Basic data: company name, normalised status, CNAE, province and incorporation date</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Basic commercial score (no breakdown)</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Newly incorporated companies (today, 7 or 30 days): 10 per request</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Free segment counts: how many companies by sector, area and size</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> No credit card required</li>
                         </ul>
                         <a href="<?= site_url('register?plan=free') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Start for free", "plan": "free", "source_block": "pricing_cta", "page_type": "home"}'>Start for free</a>
@@ -271,13 +274,19 @@
                         <h3>Pro</h3>
                         <div class="tier-subtitle">To automate validations</div>
                         <div class="tier-desc">The ideal option for SaaS, ERPs and products that require validation in production.</div>
-                        <div class="price"><b id="priceProHome" data-monthly="19" data-annual="15" style="font-weight: inherit;">15</b>€<span>/mo</span></div>
+                        <div class="price"><b id="priceProHome" data-monthly="19" data-annual="15.17" style="font-weight: inherit;">15.17</b>€<span>/mo</span></div>
                         <ul class="tier-features">
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 3.000 consultas al mo</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Full BORME and Activity data</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> AI Commercial Scoring (0-100)</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> List of New Companies</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Corporate Power Graphs</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 3,000 requests per month</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Full data, with address and current directors (with appointment date)</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Revenue band and latest filed accounts year</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> One-call KYB verification: status, name, signer and VAT number in VIES</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Name to CIF in batch: complete your customer database (you only pay for matches)</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Batch lookups: up to 100 CIFs per request</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> BORME history, signals and corporate graphs</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Watchlist of 100 companies: BORME, status and risk changes, without using requests</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Full AI commercial score (0-100)</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Newly incorporated companies (today, 7 or 30 days): up to 100 per request, filterable by CNAE and phone</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Priority email support</li>
                         </ul>
                         <a href="<?= site_url('register?plan=pro') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Start with Pro", "plan": "pro", "source_block": "pricing_cta", "page_type": "home"}'>Start with Pro</a>
                     </div>
@@ -288,13 +297,18 @@
                         <h3>Business</h3>
                         <div class="tier-subtitle">For teams and high volume</div>
                         <div class="tier-desc">Designed for platforms with higher load, critical processes and high availability needs.</div>
-                        <div class="price"><b id="priceBizHome" data-monthly="49" data-annual="39" style="font-weight: inherit;">39</b>€<span>/mo</span></div>
+                        <div class="price"><b id="priceBizHome" data-monthly="49" data-annual="39.17" style="font-weight: inherit;">39.17</b>€<span>/mo</span></div>
                         <ul class="tier-features">
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 10.000 consultas al mo</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Push Webhooks (BORME Notifications)</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Predictive AI Opportunities</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> B2B Match Calculator</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Priority Slack / Email Support</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 10,000 requests per month</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Risk and solvency profile</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Public contracts and awards</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Watchlist of 1,000 companies (BORME, status and risk)</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Push webhooks for watchlist changes</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Segments: download companies by CNAE, area, size and phone</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Full AI Business Insights</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> AI Contact Prep and B2B Match Calculator</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Newly incorporated companies (today, 7 or 30 days): up to 1,000 per request</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Priority email support</li>
                         </ul>
                         <a href="<?= site_url('register?plan=business') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Start with Business", "plan": "business", "source_block": "pricing_cta", "page_type": "home"}'>Start with Business</a>
                     </div>
@@ -370,6 +384,31 @@
                                     </div>
                                 </td>
                                 <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">KYB Verification</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies/verify</div>
+                                        <div class="cap-feature-desc">In one call: whether the company operates, whether the name matches, whether the signer is a current director and whether the VAT number is in VIES. Returns pass, review or fail.</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('get_verify')" class="btn-json-preview">View JSON Response</button>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Name to CIF (batch)</div>
+                                        <div class="cap-feature-endpoint">POST /api/v1/companies/reconcile</div>
+                                        <div class="cap-feature-desc">Send up to 100 company names and get each one's CIF with a confidence score. You only pay for the matches.</div>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
                                 <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
                                 <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
                             </tr>
@@ -507,9 +546,35 @@
                             <tr>
                                 <td>
                                     <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Company Watchlist</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/watchlist/events</div>
+                                        <div class="cap-feature-desc">Watch 100 (Pro) or 1,000 (Business) companies and get their new BORME acts, status changes and risk level changes. Does not use requests.</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('get_watchlist_events')" class="btn-json-preview">View JSON Response</button>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Company Segments</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies/filter</div>
+                                        <div class="cap-feature-desc">Filter by CNAE, province, municipality, incorporation date, phone, revenue band and accounts year. Counting is free; downloading rows costs 5 requests per company.</div>
+                                        <button type="button" onclick="event.preventDefault(); showJsonPreview('get_filter')" class="btn-json-preview">View JSON Response</button>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; font-size: 0.85rem; font-weight: 700;">Count</td>
+                                <td class="cap-featured-col" style="text-align: center; font-size: 0.85rem; font-weight: 700;">Count</td>
+                                <td style="text-align: center; font-size: 0.85rem; font-weight: 700;">Count and rows</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
                                         <div class="cap-feature-name">Webhooks PUSH</div>
                                         <div class="cap-feature-endpoint">POST /api/v1/webhooks</div>
-                                        <div class="cap-feature-desc">Synchronize events in real time with your CRM without having to poll the API.</div>
+                                        <div class="cap-feature-desc">Receive the changes of your watched companies on your server, signed with HMAC, without polling the API.</div>
                                         <button type="button" onclick="event.preventDefault(); showJsonPreview('post_webhook')" class="btn-json-preview">View JSON Response</button>
                                     </div>
                                 </td>
@@ -688,7 +753,7 @@
                     <span style="background:rgba(37,99,235,0.08); color:#2563eb; font-size:10px; font-weight:800; padding:4px 10px; border-radius:6px; letter-spacing:0.05em; text-transform:uppercase;">Response Data</span>
                     <span id="modal-endpoint-name" style="color:#475569; font-family:'Fira Code', monospace; font-size:13px; font-weight:700;">GET /v1/companies</span>
                 </div>
-                <button onclick="closeJsonModal()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:24px; line-height:1; transition:color 0.2s;" onmouseover="this.style.color='#0f172a'" onmouseout="this.style.color='#94a3b8'">&timo;</button>
+                <button onclick="closeJsonModal()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:24px; line-height:1; transition:color 0.2s;" onmouseover="this.style.color='#0f172a'" onmouseout="this.style.color='#94a3b8'">&times;</button>
             </div>
             <div style="padding:32px; max-height:70vh; overflow-y:auto; background:#ffffff;">
                 <pre id="modal-json-content" style="margin:0; font-family:'Fira Code', 'Courier New', monospace; font-size:14px; line-height:1.6; color:#1e293b;"></pre>
@@ -715,8 +780,37 @@
                     municipality: "MADRID",
                     address: "CALLE DE LA TECNOLOGIA 42",
                     status: "ACTIVA",
+                    status_code: "ACTIVE",
+                    status_source: "registry",
+                    status_date: "2024-03-12",
+                    financials: { size_band: "LT_500K", size_band_label: "Menos de 0,5 M€", last_accounts_year: 2024 },
                     score: 94
                 }
+            },
+            get_filter: { success: true, data: [{ cif: "B12345678", name: "EMPRESA DE EJEMPLO SL", cnae: "6201", cnae_label: "Actividades de programación informática", province: "MADRID", municipality: "MADRID", founded: "2019-03-01", status: "ACTIVA", status_code: "ACTIVE", status_source: "registry", financials: { size_band: "GT_1M", size_band_label: "Más de 1 M€", last_accounts_year: 2023 }, has_phone: true }], meta: { total: 3412, returned: 100, limit: 100, has_more: true, next_cursor: "eyJpZCI6ODgxMjM0NX0", cost: 500, cost_per_row: 5, truncated: false } },
+            get_verify: {
+                success: true,
+                data: {
+                    cif: "B12345678", exists: true, name: "EMPRESA DE EJEMPLO SL",
+                    status: "ACTIVA", status_code: "ACTIVE", status_source: "registry", status_date: null,
+                    checks: {
+                        name: { provided: "Empresa de Ejemplo, S.L.", score: 100, match: true },
+                        person: { provided: "Juan Pérez García", is_current_admin: true, matched_name: "PEREZ GARCIA JUAN", position: "Adm. Unico", since: "2019-03-01" },
+                        vat: { vat_number: "ESB12345678", checked: true, valid: true, source: "VIES", error: null },
+                        accounts: { last_accounts_year: 2023 }
+                    },
+                    flags: [],
+                    decision_hint: "pass",
+                    checked_at: "2026-09-28T10:30:00+02:00"
+                }
+            },
+            get_watchlist_events: {
+                success: true,
+                data: [
+                    { id: "borme_act:8812345", type: "borme_act", date: "2026-09-22", cif: "B12345678", company_name: "EMPRESA DE EJEMPLO SL", data: { act_types: "Nombramientos, Ceses/Dimisiones", description: "Ceses/Dimisiones. Adm. Unico: ...", url_pdf: "https://www.boe.es/borme/dias/2026/09/22/pdfs/BORME-A-2026-181-28.pdf" } },
+                    { id: "risk_level_change:B12345678:2026-09-25", type: "risk_level_change", date: "2026-09-25", cif: "B12345678", company_name: "EMPRESA DE EJEMPLO SL", data: { from: "BAJO", to: "MEDIO", model_change: false } }
+                ],
+                meta: { since: "2026-09-20", total: 2, page: 1, limit: 100, has_more: false }
             },
             get_search: {
                 success: true,
@@ -912,8 +1006,10 @@
             },
             post_webhook: {
                 success: true,
-                mosage: "Webhook creado correctamente",
-                id: 789
+                message: "Webhook creado correctamente",
+                id: 789,
+                event: "watchlist.*",
+                secret: "3f9c1b2a7d..."
             }
         };
 
@@ -922,8 +1018,11 @@
             const content = document.getElementById('modal-json-content');
             const endpoint = document.getElementById('modal-endpoint-name');
             
-            const namo = {
+            const names = {
                 get_companies: 'GET /companies',
+                get_verify: 'GET /companies/verify',
+                get_filter: 'GET /companies/filter',
+                get_watchlist_events: 'GET /watchlist/events',
                 get_search: 'GET /companies/search',
                 post_batch: 'POST /companies/batch',
                 get_score: 'GET /companies/score',
@@ -939,7 +1038,7 @@
                 post_webhook: 'POST /webhooks'
             };
 
-            endpoint.textContent = namo[key];
+            endpoint.textContent = names[key];
             content.innerHTML = syntaxHighlight(jsonExamples[key]);
             modal.style.display = 'flex';
 
@@ -947,7 +1046,7 @@
             window.dataLayer = window.dataLayer || [];
             window.dataLayer.push({
                 'event': 'view_json_preview',
-                'api_endpoint': namo[key]
+                'api_endpoint': names[key]
             });
             // Eliminamos overflow hidden para evitar saltos de scroll
             // document.body.style.overflow = 'hidden';
