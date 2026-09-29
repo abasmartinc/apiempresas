@@ -1901,6 +1901,53 @@ class EmailService
     }
 
     /**
+     * Confirmación al comprador de un PDF de Solvencia (Informe 3,90 € / Dossier 5,90 €).
+     *
+     * Antes no existía: el comprador solo veía la página de gracias y, si la cerraba,
+     * perdía el PDF. Transaccional (plantilla risk_servicio): le llega aunque haya
+     * rechazado el marketing y aunque no tenga cuenta. La llama PdfOrderService, una
+     * vez por pedido.
+     *
+     * @param array $d empresa, cif, dossier (bool), url_descarga, url_ajustes, url_ficha, user_id
+     */
+    public function sendPdfPurchaseConfirmation(string $email, array $d): array
+    {
+        $empresa  = esc((string) ($d['empresa'] ?? 'la empresa'));
+        $cif      = esc((string) ($d['cif'] ?? ''));
+        $dossier  = !empty($d['dossier']);
+        $producto = $dossier ? 'Dossier Completo 360º' : 'Informe de riesgo y solvencia';
+        $enlace   = static fn (string $url, string $texto) => '<a href="' . $url . '" style="color:#2563eb;font-weight:700;">' . $texto . '</a>';
+
+        $contenido = $this->p('Gracias por tu compra. Aquí tienes el <strong>' . $producto . '</strong> de <strong>' . $empresa . '</strong>'
+                . ($cif !== '' ? ' (' . $cif . ')' : '') . '.')
+            . $this->p('El botón de abajo lo descarga cuando lo necesites, sin iniciar sesión. <strong>Guarda este correo</strong>: es tu acceso al informe.');
+
+        if ($dossier && !empty($d['url_ajustes'])) {
+            $contenido .= $this->p('¿Quieres cambiar el logo, los colores o el pie de página? ' . $enlace((string) $d['url_ajustes'], 'Ajustar la marca blanca') . '.');
+        }
+
+        $contenido .= $this->p('¿Necesitas factura a nombre de tu empresa? Responde a este correo con tus datos fiscales (razón social, CIF y dirección) y te la enviamos.');
+
+        if (!empty($d['url_ficha'])) {
+            $sep = str_contains((string) $d['url_ficha'], '?') ? '&' : '?';
+            $contenido .= $this->p('<span style="color:#64748b;">P. D.: ¿Quieres saber si cambia algo en ' . $empresa . '? '
+                . $enlace((string) $d['url_ficha'] . $sep . 'vigilar=1&origen=email', 'Vigílala gratis')
+                . ' y te avisamos por correo cuando publique algo en el Registro Mercantil.</span>');
+        }
+
+        return $this->sendRiskGeneric(
+            ['email' => $email, 'user_id' => (int) ($d['user_id'] ?? 0)],
+            'Tu ' . ($dossier ? 'Dossier 360º' : 'informe') . ' de ' . html_entity_decode($empresa, ENT_QUOTES, 'UTF-8') . ' está listo para descargar',
+            $contenido,
+            'Descargar el PDF',
+            (string) ($d['url_descarga'] ?? site_url()),
+            'Guarda este correo: el enlace de descarga es tuyo.',
+            $dossier ? 'pdf_dossier_comprado' : 'pdf_informe_comprado',
+            'risk_servicio'
+        );
+    }
+
+    /**
      * Correo de Solvencia con la plantilla común `risk_generic`.
      *
      * $contenidoHtml es HTML ya construido: quien llama escapa lo que venga de datos

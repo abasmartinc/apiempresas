@@ -1528,10 +1528,27 @@ class Company extends BaseController
                     'quantity' => 1,
                 ]],
                 'mode' => 'payment',
-                'client_reference_id' => $orderId,
+                // Qué se vende y de qué pedido, para que el webhook pueda confirmar el
+                // pago y avisar al comprador aunque no vuelva a la página de gracias.
+                // Antes iba el id del PEDIDO en client_reference_id, que el webhook lee
+                // como id de USUARIO: la venta se apuntaba a otro usuario.
+                'metadata' => [
+                    'plan'         => $reportType === 'risk' ? 'risk_pdf_single' : 'risk_dossier_single',
+                    'pdf_uuid'     => $uuid,
+                    'pdf_order_id' => (string) $orderId,
+                    'user_id'      => (string) (int) session('user_id'),
+                    'cif'          => (string) ($company['cif'] ?? ''),
+                ],
                 'success_url' => site_url('empresa/success-premium-pdf?session_id={CHECKOUT_SESSION_ID}&uuid=' . $uuid),
                 'cancel_url' => site_url('empresa/' . $company['id']),
             ];
+            if ((int) session('user_id') > 0) {
+                $sessionParams['client_reference_id'] = (string) (int) session('user_id');
+            }
+            // El correo que dejó en el formulario, ya escrito en Stripe
+            if ($email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $sessionParams['customer_email'] = $email;
+            }
             
             // Check if we have tax rate
             $taxRate = $stripeService->getTaxRateId();
@@ -1665,7 +1682,12 @@ class Company extends BaseController
 
         // Una recarga de la página de descarga no debe contar otra conversión
         $pdfAttrKey = 'pdf_logged_' . $uuid;
-        if (!session()->get($pdfAttrKey)) {
+        // Tampoco si ya la registró el webhook de Stripe (Webhook::registrarVenta)
+        $yaRegistrada = \Config\Database::connect()->table('tracking_events')
+            ->where('event_name', 'checkout_completed')
+            ->like('metadata', '"stripe_id":"' . $sessionId . '"')
+            ->countAllResults() > 0;
+        if (!session()->get($pdfAttrKey) && !$yaRegistrada) {
             session()->set($pdfAttrKey, true);
 
             $this->logPdfCheckoutEvent('checkout_completed', [
@@ -1686,6 +1708,7 @@ class Company extends BaseController
             try {
                 $stripeService = new \App\Services\StripeService();
                 $stripeSession = \Stripe\Checkout\Session::retrieve($sessionId);
+                $emailStripe   = (string) ($stripeSession->customer_details->email ?? '');
                 
                 if ($stripeSession->payment_status !== 'paid') {
                     return redirect()->to('/')->with('error', 'El pago no ha sido completado.');
@@ -1724,33 +1747,14 @@ class Company extends BaseController
             }
         }
 
-        // Mark as paid if it wasn't
-        if ($order['status'] !== 'paid') {
-            $pdfOrderModel->update($order['id'], ['status' => 'paid']);
-            
-            // Send notification to admin
-            try {
-                $emailService = new \App\Services\EmailService();
-                // El aviso decía 3,90 € y "Marca Blanca" para los dos productos,
-                // así que cada Dossier vendido se notificaba 2 € por debajo y con
-                // el nombre del otro informe. Ahora sale del pedido.
-                $esDossier = $this->esPedidoDossier($order);
-                $centimos  = (int) solvencia($esDossier ? 'centimos.dossier' : 'centimos.pdf', $esDossier ? 590 : 390);
-
-                $emailService->sendPaymentNotification([
-                    'invoice_number' => 'PDF-' . strtoupper(substr($order['uuid'], 0, 8)),
-                    'customer_name'  => !empty($order['agency_name']) ? $order['agency_name'] : 'Cliente',
-                    'customer_email' => !empty($order['email']) ? $order['email'] : 'No especificado',
-                    'plan_name'      => $esDossier
-                        ? 'Dossier Completo 360º (Marca Blanca)'
-                        : 'Informe de Riesgo y Solvencia (PDF)',
-                    'amount'         => number_format($centimos / 100, 2, '.', ''),
-                    'currency'       => 'EUR',
-                    'invoice'        => 'N/A'
-                ]);
-            } catch (\Exception $e) {
-                log_message('error', '[successPremiumPdf] Error sending email: ' . $e->getMessage());
-            }
+        // Pagado, aviso al admin y correo al comprador con el enlace de descarga,
+        // una sola vez aunque el webhook de Stripe llegue antes o después
+        // (App\Services\PdfOrderService). Con el usuario de la sesión, para usar su
+        // correo si no dejó otro (el desbloqueo que repite es idempotente).
+        try {
+            (new \App\Services\PdfOrderService())->confirmarPago((string) $uuid, (string) $sessionId, $emailStripe ?? '', $usuarioActual);
+        } catch (\Throwable $e) {
+            log_message('error', '[successPremiumPdf] confirmarPago: ' . $e->getMessage());
         }
 
         // Mostrar pantalla de éxito

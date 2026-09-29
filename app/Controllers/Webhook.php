@@ -271,6 +271,27 @@ class Webhook extends Controller
 
     private function handleCheckoutSessionCompleted($session)
     {
+        // PDF de Solvencia (Informe / Dossier): confirma el pago y avisa al comprador
+        // aunque no vuelva a la página de gracias. Va antes que todo lo demás a
+        // propósito: la rama de pagos únicos crea una cuenta al comprador invitado,
+        // y quien compra un PDF no ha pedido una cuenta.
+        if (in_array((string) ($session->metadata->plan ?? ''), \App\Services\PdfOrderService::PLANES, true)) {
+            if (in_array((string) ($session->payment_status ?? ''), ['paid', 'no_payment_required'], true)
+                && !empty($session->metadata->pdf_uuid)) {
+                try {
+                    (new \App\Services\PdfOrderService())->confirmarPago(
+                        (string) $session->metadata->pdf_uuid,
+                        (string) ($session->id ?? ''),
+                        (string) ($session->customer_details->email ?? ''),
+                        (int) ($session->metadata->user_id ?? 0)
+                    );
+                } catch (\Throwable $e) {
+                    log_message('error', '[Webhook::pdf] ' . $e->getMessage());
+                }
+            }
+            return;
+        }
+
         $userId = $session->client_reference_id ?? $session->metadata->user_id ?? null;
         $planSlug = $session->metadata->plan ?? null;
         $stripeSubscriptionId = $session->subscription ?? null;
