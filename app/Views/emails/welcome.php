@@ -58,7 +58,7 @@
                                             <tr>
                                                 <td width="24" valign="top" style="color: #2152FF; font-weight: 900; font-size: 16px;">3.</td>
                                                 <td style="padding-left: 10px; color: #334155; font-size: 15px;">
-                                                    <strong>Lee la Doc:</strong> Guía técnica completa con ejemplos en <strong>PHP, JS y Python</strong>.
+                                                    <strong>Lee la guía paso a paso:</strong> te la dejamos aquí abajo en PDF, pensada para empezar desde cero.
                                                 </td>
                                             </tr>
                                         </table>
@@ -66,10 +66,22 @@
                                 </tr>
                             </table>
                             
+                            <!-- Guía en PDF (enlace, no adjunto: llega mejor a la bandeja y el clic se mide) -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 20px 0 5px; background-color: #eef2ff; border-radius: 12px; border: 1px solid #c7d2fe;">
+                                <tr>
+                                    <td style="padding: 22px 24px;">
+                                        <p style="margin: 0 0 6px; color: #2152FF; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em;">Guía gratuita · PDF · 26 páginas</p>
+                                        <p style="margin: 0 0 8px; color: #0f172a; font-weight: 800; font-size: 18px;">La API de empresas explicada paso a paso</p>
+                                        <p style="margin: 0 0 18px; color: #475569; font-size: 14px;">Qué es una API, tu primera consulta en 5 minutos, qué hace cada función, qué hacer cuando algo falla y recetas listas para copiar. Sin jerga innecesaria.</p>
+                                        <a href="<?= site_url('docs/guia-api-apiempresas.pdf') ?>" style="display: inline-block; background-color: #ffffff; color: #2152FF !important; padding: 12px 22px; border-radius: 10px; border: 2px solid #2152FF; text-decoration: none; font-weight: 800; font-size: 15px;">Descargar la guía (PDF)</a>
+                                    </td>
+                                </tr>
+                            </table>
+
                              <p style="margin: 25px 0 10px; color: #0f172a; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em;">Ejemplo de integración rápida:</p>
                              <div style="background: #1e293b; padding: 20px; border-radius: 8px; margin: 0 0 20px;">
                                  <code style="color: #38bdf8; font-family: 'Fira Code', monospace; font-size: 13px; word-break: break-all;">
-                                     curl -X GET "https://apiempresas.es/api/v1/companies?cif=B12345678" \<br>
+                                     curl -X GET "https://apiempresas.es/api/v1/companies?cif=A15075062" \<br>
                                      &nbsp;&nbsp;-H "X-API-KEY: TU_CLAVE_API"
                                  </code>
                              </div>
