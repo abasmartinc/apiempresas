@@ -73,7 +73,7 @@
                                         <p style="margin: 0 0 6px; color: #2152FF; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em;">Guía gratuita · PDF · 26 páginas</p>
                                         <p style="margin: 0 0 8px; color: #0f172a; font-weight: 800; font-size: 18px;">La API de empresas explicada paso a paso</p>
                                         <p style="margin: 0 0 18px; color: #475569; font-size: 14px;">Qué es una API, tu primera consulta en 5 minutos, qué hace cada función, qué hacer cuando algo falla y recetas listas para copiar. Sin jerga innecesaria.</p>
-                                        <a href="<?= site_url('docs/guia-api-apiempresas.pdf') ?>" style="display: inline-block; background-color: #ffffff; color: #2152FF !important; padding: 12px 22px; border-radius: 10px; border: 2px solid #2152FF; text-decoration: none; font-weight: 800; font-size: 15px;">Descargar la guía (PDF)</a>
+                                        <a href="<?= site_url('public/docs/guia-api-apiempresas.pdf') ?>" style="display: inline-block; background-color: #ffffff; color: #2152FF !important; padding: 12px 22px; border-radius: 10px; border: 2px solid #2152FF; text-decoration: none; font-weight: 800; font-size: 15px;">Descargar la guía (PDF)</a>
                                     </td>
                                 </tr>
                             </table>

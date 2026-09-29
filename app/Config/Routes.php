@@ -265,6 +265,8 @@ $routes->get('documentation', 'Documentation::index');
 $routes->get('documentation/en', 'Documentation::english'); // English version
 $routes->get('api-docs', 'Documentation::english');          // SEO alias
 $routes->get('docs/errors/(:any)', 'Documentation::error/$1');
+// Guía en PDF: el correo de bienvenida la enlazó un tiempo sin /public (29-09-2026)
+$routes->addRedirect('docs/guia-api-apiempresas.pdf', 'public/docs/guia-api-apiempresas.pdf', 301);
 
 
 // SEO Map Route
