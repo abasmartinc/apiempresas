@@ -177,6 +177,15 @@ class SeedEmailTemplates extends BaseCommand
                 'trigger' => 'Plantilla base usada para múltiples avisos (Límites de cuota, avisos de 15min, reporte mensual, etc).'
             ],
             [
+                'slug'    => 'api_plain',
+                'name'    => 'API: correo en texto plano',
+                'subject' => '{subject}',
+                'view'    => 'api_plain',
+                'subject_en' => '{subject}',
+                'vars'    => '{subject}, {preheader}, {name}, {content}',
+                'trigger' => 'Correos "de persona a persona" sin diseño: despedida del día 30 a quien no ha usado la API (no_requests_day30).'
+            ],
+            [
                 'slug'    => 'quick_start',
                 'name'    => 'Prompt de Inicio Rápido',
                 'subject' => 'Configura tu integración con APIEmpresas en 1 minuto 🚀',

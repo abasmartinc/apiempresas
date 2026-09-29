@@ -119,7 +119,7 @@ class EmailService
      * Plantillas que solo son un marco (asunto, saludo, botón) para contenido que se
      * escribe en PHP. El idioma lo decide quien escribe el contenido (`_idioma`).
      */
-    private const CONTENIDO_EN_CODIGO = ['automation_generic', 'quota_warning', 'risk_generic', 'risk_servicio', 'subscription_generic'];
+    private const CONTENIDO_EN_CODIGO = ['automation_generic', 'api_plain', 'quota_warning', 'risk_generic', 'risk_servicio', 'subscription_generic'];
 
     /** ¿Tiene el HTML de una plantilla señales de haberse roto al sembrarla? */
     private static function plantillaRota(string $html): bool
@@ -820,6 +820,28 @@ class EmailService
         return $nombre !== '' ? $nombre : (explode('@', (string) ($userData['email'] ?? ''))[0] ?: 'Usuario');
     }
 
+    /**
+     * "pago único desde 49 € por 10.000 consultas, sin caducidad".
+     *
+     * Antes los correos vendían el bono como la opción para "unas pocas consultas", y el
+     * mínimo son 10.000 créditos por 49 € (Billing::createBonusCheckout; precio en
+     * BillingService::calculateBonusPrice): más de entrada que Pro (19 €). Lo cierto es
+     * que no es suscripción, no caduca (user_wallets no tiene fecha) y por consulta sale
+     * más barato. Una consulta básica = 1 crédito (ApiKeyFilter::getEndpointCost).
+     */
+    private function lineaBono(bool $en = false): string
+    {
+        $min = 10000;
+        try {
+            $precio = (new \App\Services\BillingService())->calculateBonusPrice($min);
+        } catch (\Throwable $e) {
+            $precio = 49.0;
+        }
+        return $en
+            ? 'a one-off payment from €' . self::euros($precio, true) . ' for ' . self::num($min, true) . ' lookups, which never expire'
+            : 'pago único desde ' . self::euros($precio) . ' € por ' . self::num($min) . ' consultas, sin caducidad';
+    }
+
     /** Enlace de texto con el estilo de los correos */
     private static function enlace(string $url, string $texto): string
     {
@@ -856,6 +878,97 @@ class EmailService
                 base_url('dashboard?probar=A15075062'),
                 'no_requests_15min'
             );
+    }
+
+    /**
+     * TRIGGER: no_requests_day14
+     *
+     * Día 14 sin ninguna llamada. Los correos anteriores (15 min, día 1, día 3) dicen
+     * "esta es la llamada, pruébala"; quien no conectó con eso necesita otro ángulo: para
+     * qué sirve, con el caso de uso más habitual, contado en pasos.
+     */
+    public function sendNoUsageUseCase(array $userData): array
+    {
+        $en   = $this->idioma($userData) === 'en';
+        $c    = static fn (string $t) => '<code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:13px;">' . $t . '</code>';
+        $li   = static fn (string $h) => '<li style="margin:0 0 8px;">' . $h . '</li>';
+        $url  = base_url('dashboard?probar=A15075062');
+
+        if ($en) {
+            return $this->sendApiAutomation(
+                $userData,
+                'An API use case you can build in an afternoon: validate a customer\'s tax ID',
+                'When someone types their tax ID into your form or ERP, the rest fills itself in.',
+                $this->p('You signed up two weeks ago and haven\'t used your API Key yet. In case it gives you an idea, this is the most common first use: <strong>validating and autocompleting a Spanish customer\'s details from their tax ID (CIF)</strong>.')
+                    . '<ol style="margin:0 0 14px; padding-left:20px;">'
+                    . $li('The customer types their CIF into your form, ERP or CRM.')
+                    . $li('You call ' . $c('GET /api/v1/companies?cif=…') . '.')
+                    . $li('You check that the company exists and is active (' . $c('"status": "ACTIVA"') . ') and fill in the legal name, province and activity code (CNAE) without anyone typing them.')
+                    . '</ol>'
+                    . $this->p('No more sign-ups with mistyped tax IDs or dissolved companies, and invoices with the right details from day one.')
+                    . $this->p('Other common uses: enriching a customer list, checking suppliers before paying them, or segmenting leads by sector (CNAE) and province.')
+                    . $this->p('Building something else? <strong>Reply to this email</strong> and I\'ll tell you whether the API fits.'),
+                'Try it with a real company',
+                $url,
+                'no_requests_day14',
+                'en'
+            );
+        }
+
+        return $this->sendApiAutomation(
+            $userData,
+            'Un uso de la API que se monta en una tarde: validar el CIF al dar de alta un cliente',
+            'Cuando alguien escribe su CIF en tu formulario o tu ERP, el resto se rellena solo.',
+            $this->p('Te registraste hace dos semanas y aún no has usado tu API Key. Por si te da una idea, este es el uso más habitual para empezar: <strong>validar y autocompletar los datos de un cliente a partir de su CIF</strong>.')
+                . '<ol style="margin:0 0 14px; padding-left:20px;">'
+                . $li('El cliente escribe su CIF en tu formulario, tu ERP o tu CRM.')
+                . $li('Llamas a ' . $c('GET /api/v1/companies?cif=…') . '.')
+                . $li('Compruebas que la empresa existe y está activa (' . $c('"status": "ACTIVA"') . ') y rellenas razón social, provincia y CNAE sin que nadie los teclee.')
+                . '</ol>'
+                . $this->p('Se acabaron las altas con el CIF mal escrito o de empresas extinguidas, y facturas con los datos correctos desde el primer día.')
+                . $this->p('Otros usos habituales: enriquecer una lista de clientes, comprobar a un proveedor antes de pagarle o segmentar leads por sector (CNAE) y provincia.')
+                . $this->p('¿Lo tuyo es otra cosa? <strong>Responde a este correo</strong> y te digo si la API te sirve.'),
+            'Probar con un CIF real',
+            $url,
+            'no_requests_day14'
+        );
+    }
+
+    /**
+     * TRIGGER: no_requests_day30
+     *
+     * Último correo a quien no ha hecho ninguna llamada en un mes. En texto plano (plantilla
+     * api_plain), corto y firmado por una persona: es el que más respuestas suele tener.
+     * Promete no volver a escribir sobre esto, y la automatización lo cumple (después
+     * de él no hay más correos de activación). La firma sale de EMAIL_FIRMA en el .env.
+     */
+    public function sendNoUsageGoodbye(array $userData): array
+    {
+        $en     = $this->idioma($userData) === 'en';
+        $panel  = base_url('dashboard');
+        $limite = $this->freeLimit();
+        $firma  = esc((string) env('EMAIL_FIRMA', $en ? 'The APIEmpresas team' : 'El equipo de APIEmpresas'));
+        $a      = '<a href="' . $panel . '" style="color:#2563eb;">' . $panel . '</a>';
+        $p      = static fn (string $h) => '<p style="margin:0 0 14px;">' . $h . '</p>';
+
+        $contenido = $en
+            ? $p('You signed up for APIEmpresas a month ago and never got to use the API. That\'s fine: this is the last email I\'ll send you about it.')
+                . $p('If you ever need Spanish company data, your API Key and your ' . $limite . ' free lookups are still in your dashboard: ' . $a)
+                . $p('And if you reply with one line about what you were looking for, I\'ll tell you honestly whether the API is a fit.')
+                . $p($firma)
+            : $p('Te registraste en APIEmpresas hace un mes y no llegaste a usar la API. No pasa nada: este es el último correo que te mando sobre ello.')
+                . $p('Si algún día necesitas datos de empresas, tu API Key y tus ' . $limite . ' consultas gratuitas siguen en tu panel: ' . $a)
+                . $p('Y si me respondes con una línea contándome qué buscabas, te digo con sinceridad si la API te sirve o no.')
+                . $p($firma);
+
+        return $this->sendTemplateEmail('api_plain', [
+            '_log_slug' => 'no_requests_day30',
+            '_idioma'   => $en ? 'en' : 'es',
+            'subject'   => $en ? 'I won\'t write to you about this again' : 'No te vuelvo a escribir sobre esto',
+            'preheader' => $en ? 'Your API Key is still there if you ever need it.' : 'Tu API Key sigue ahí por si algún día la necesitas.',
+            'name'      => self::saludo($userData),
+            'content'   => $contenido,
+        ], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
     }
 
     /**
@@ -930,7 +1043,7 @@ class EmailService
                 $userData,
                 'You\'ve used 80% of your ' . $limite . ' free lookups',
                 'When you reach ' . $limite . ', the API will stop responding. Here is how to avoid it.',
-                'You\'ve reached 80 of your ' . $limite . ' free lookups. At ' . $limite . ', the API will respond with a 429 error and your integration will stop.<br><br>To avoid that, the <b>Pro plan</b>:' . $this->ventajasPro(true) . $this->precioPro(true) . '<br><br>Only need a few more lookups? A <b>credit pack</b>, no subscription and also with full data: ' . self::enlace($bono, 'create a pack') . '.',
+                'You\'ve reached 80 of your ' . $limite . ' free lookups. At ' . $limite . ', the API will respond with a 429 error and your integration will stop.<br><br>To avoid that, the <b>Pro plan</b>:' . $this->ventajasPro(true) . $this->precioPro(true) . '<br><br>Rather not subscribe? A <b>credit pack</b>: ' . $this->lineaBono(true) . ', also with full data: ' . self::enlace($bono, 'create a pack') . '.',
                 'Avoid the cut-off: see Pro',
                 base_url('billing?plan=pro'),
                 'reached_80_requests',
@@ -940,7 +1053,7 @@ class EmailService
                 $userData,
                 'Has usado el 80 % de tus ' . $limite . ' consultas gratuitas',
                 'Cuando llegues a ' . $limite . ', la API dejará de responder. Así lo evitas.',
-                'Has alcanzado las 80 consultas de tus ' . $limite . ' gratuitas. Cuando llegues a ' . $limite . ', la API responderá con error 429 y tu integración se parará.<br><br>Para que no pase, el <b>Plan Pro</b>:' . $this->ventajasPro() . $this->precioPro() . '<br><br>¿Solo necesitas unas pocas consultas más? Un <b>bono de créditos</b>, sin suscripción y también con los datos completos: ' . self::enlace($bono, 'crear bono') . '.',
+                'Has alcanzado las 80 consultas de tus ' . $limite . ' gratuitas. Cuando llegues a ' . $limite . ', la API responderá con error 429 y tu integración se parará.<br><br>Para que no pase, el <b>Plan Pro</b>:' . $this->ventajasPro() . $this->precioPro() . '<br><br>¿Prefieres no suscribirte? Un <b>bono de créditos</b>: ' . $this->lineaBono() . ', también con los datos completos: ' . self::enlace($bono, 'crear bono') . '.',
                 'Evitar el corte: ver Plan Pro',
                 base_url('billing?plan=pro'),
                 'reached_80_requests'
@@ -1022,7 +1135,7 @@ class EmailService
                 $userData,
                 'You\'ve used up your ' . $limite . ' free lookups: your integration has stopped',
                 'Turn it back on in a minute with the Pro plan, without changing your code.',
-                'You\'ve used all ' . $limite . ' of your free lookups. From now on the API responds with a 429 error and your integration receives no data.<br><br>There are two ways to resume it today, without changing your code:<br><br>• <b>Pro plan</b>: ' . $this->lineaPro(true) . ', with the full response.<br>• <b>Credit pack</b>, if you only need a few more, no subscription: ' . self::enlace($bono, 'create a pack') . '.',
+                'You\'ve used all ' . $limite . ' of your free lookups. From now on the API responds with a 429 error and your integration receives no data.<br><br>There are two ways to resume it today, without changing your code:<br><br>• <b>Pro plan</b>: ' . $this->lineaPro(true) . ', with the full response.<br>• <b>Credit pack</b>, no subscription: ' . $this->lineaBono(true) . '. ' . self::enlace($bono, 'Create a pack') . '.',
                 'Resume with the Pro plan',
                 base_url('billing?plan=pro'),
                 'reached_100_percent_quota',
@@ -1032,7 +1145,7 @@ class EmailService
                 $userData,
                 'Has agotado tus ' . $limite . ' consultas gratuitas: tu integración está parada',
                 'Actívala de nuevo en un minuto con el Plan Pro, sin cambiar tu código.',
-                'Has agotado tus ' . $limite . ' consultas gratuitas. Desde ahora la API responde con error 429 y tu integración no recibe datos.<br><br>Tienes dos formas de reanudarla hoy mismo, sin cambiar tu código:<br><br>• <b>Plan Pro</b>: ' . $this->lineaPro() . ', con la respuesta completa.<br>• <b>Bono de créditos</b>, si solo necesitas unas pocas más, sin suscripción: ' . self::enlace($bono, 'crear bono') . '.',
+                'Has agotado tus ' . $limite . ' consultas gratuitas. Desde ahora la API responde con error 429 y tu integración no recibe datos.<br><br>Tienes dos formas de reanudarla hoy mismo, sin cambiar tu código:<br><br>• <b>Plan Pro</b>: ' . $this->lineaPro() . ', con la respuesta completa.<br>• <b>Bono de créditos</b>, sin suscripción: ' . $this->lineaBono() . '. ' . self::enlace($bono, 'Crear bono') . '.',
                 'Reanudar con el Plan Pro',
                 base_url('billing?plan=pro'),
                 'reached_100_percent_quota'
@@ -1047,7 +1160,8 @@ class EmailService
      * (429 en N días distintos), se lo decimos, y respondemos las dudas de antes de
      * pagar con lo que es cierto en el código: sin permanencia y con acceso hasta fin de
      * periodo (ApiKeyFilter), factura en cada cobro (user_invoice), mismo código y API
-     * Key, y el bono como paso pequeño. A los 10: corto, pregunta qué le frena.
+     * Key, y el bono como alternativa sin suscripción (desde 49 €: no es un paso
+     * más pequeño que Pro, es otra forma de pagar). A los 10: corto, pregunta qué le frena.
      *
      * Nada de garantía de devolución: esa es de Solvencia Pro, no de la API.
      *
@@ -1070,7 +1184,7 @@ class EmailService
                     'What\'s holding you back from continuing with the API?',
                     'One line in reply is enough. It helps me a lot.',
                     $this->p('Your free lookups ran out ten days ago and you haven\'t continued. That\'s fine, but it would help me to know why: <strong>the price, a missing field, or the project didn\'t go ahead?</strong> Just reply to this email with one line.')
-                        . $this->p('If it\'s the price and your volume is small, a credit pack works out cheaper than the subscription: ' . self::enlace($bono, 'create a pack') . '.')
+                        . $this->p('If it\'s the price: Pro has no lock-in, so you can pay only for the months you use it. And if your usage is occasional, a credit pack (' . $this->lineaBono(true) . ') works out cheaper over time than a monthly fee: ' . self::enlace($bono, 'create a pack') . '.')
                         . $this->p('And if you need more volume or something specific (annual billing, a bigger quota), tell me and we\'ll look at it.'),
                     'See plans',
                     base_url('billing?plan=pro'),
@@ -1083,7 +1197,7 @@ class EmailService
                 '¿Qué te frena para seguir con la API?',
                 'Con una línea de respuesta me basta. Me ayuda mucho.',
                 $this->p('Hace diez días que se acabaron tus consultas gratuitas y no has seguido. No pasa nada, pero me ayudaría saber por qué: <strong>¿es el precio, te falta algún dato o el proyecto no siguió adelante?</strong> Responde a este correo con una línea.')
-                    . $this->p('Si es el precio y tu volumen es pequeño, el bono de créditos te sale más a cuenta que la suscripción: ' . self::enlace($bono, 'crear bono') . '.')
+                    . $this->p('Si es el precio: Pro no tiene permanencia, así que puedes pagar solo los meses que lo uses. Y si tu uso es esporádico, el bono de créditos (' . $this->lineaBono() . ') a la larga sale más barato que una cuota mensual: ' . self::enlace($bono, 'crear bono') . '.')
                     . $this->p('Y si necesitas más volumen o algo concreto (pago anual, más cupo), dímelo y lo vemos.'),
                 'Ver planes',
                 base_url('billing?plan=pro'),
@@ -1105,7 +1219,7 @@ class EmailService
                     . $li('<strong>Is there a lock-in?</strong> No. Pro is monthly and you cancel from your dashboard whenever you want; you keep access until the end of the paid period.')
                     . $li('<strong>Do I get an invoice?</strong> Yes, by email with every charge, with your company details if you fill them in under billing details.')
                     . $li('<strong>Do I need to change my code?</strong> No: same API Key, same endpoints. As soon as the plan is active, the API responds again, with the full data.')
-                    . $li('<strong>What if I only need a few?</strong> A credit pack, no subscription: you pay once and look up until it runs out. ' . self::enlace($bono, 'Create a pack') . '.')
+                    . $li('<strong>What if I don\'t want a subscription?</strong> A credit pack: ' . $this->lineaBono(true) . '. You pay once and look up until it runs out. ' . self::enlace($bono, 'Create a pack') . '.')
                     . '</ul>'
                     . $this->p('The <strong>Pro plan</strong> is ' . $this->lineaPro(true) . '.'),
                 'Resume with the Pro plan',
@@ -1129,7 +1243,7 @@ class EmailService
                 . $li('<strong>¿Tiene permanencia?</strong> No. Pro es mensual y lo cancelas desde tu panel cuando quieras; conservas el acceso hasta el final del periodo pagado.')
                 . $li('<strong>¿Me hacéis factura?</strong> Sí, con IVA, por correo en cada cobro y a nombre de tu empresa si rellenas tus datos de facturación.')
                 . $li('<strong>¿Tengo que cambiar mi código?</strong> No: misma API Key y mismos endpoints. En cuanto se activa el plan, la API vuelve a responder, con los datos completos.')
-                . $li('<strong>¿Y si solo necesito unas pocas?</strong> Un bono de créditos, sin suscripción: pagas una vez y consultas hasta gastarlo. ' . self::enlace($bono, 'Crear bono') . '.')
+                . $li('<strong>¿Y si no quiero suscripción?</strong> Un bono de créditos: ' . $this->lineaBono() . '. Pagas una vez y consultas hasta gastarlo. ' . self::enlace($bono, 'Crear bono') . '.')
                 . '</ul>'
                 . $this->p('El <strong>Plan Pro</strong> son ' . $this->lineaPro() . '.'),
             'Reanudar con el Plan Pro',
@@ -1657,7 +1771,7 @@ class EmailService
 
         $extra = '';
         if ($tipo === 'api' && in_array($motivo, ['too_expensive', 'low_usage'], true)) {
-            $extra = 'Si no llegabas a gastar el cupo del mes, un <strong>bono de créditos</strong> te permite pagar solo lo que consultas, sin suscripción: <a href="' . $bono . '" style="color:#2563eb;font-weight:700;">crear bono</a>.';
+            $extra = 'Si no llegabas a gastar el cupo del mes, un <strong>bono de créditos</strong> (' . $this->lineaBono() . ') te dura meses sin pagar cuota: <a href="' . $bono . '" style="color:#2563eb;font-weight:700;">crear bono</a>.';
         } elseif (in_array($motivo, ['technical_issues', 'missing_features'], true)) {
             $extra = 'Nos ayudaría mucho saber qué falló o qué echaste en falta. Responde a este correo: lo lee una persona.';
         } elseif ($motivo === 'temporary_pause') {
@@ -1728,7 +1842,7 @@ class EmailService
 
         $porMotivo = match ($motivo) {
             'too_expensive', 'low_usage'
-                => 'Si lo dejaste por precio o porque no gastabas el cupo del mes, un <strong>bono de créditos</strong> te permite pagar solo lo que consultas, sin suscripción: <a href="' . $bono . '" style="color:#2563eb;font-weight:700;">crear bono</a>.',
+                => 'Si lo dejaste por precio o porque no gastabas el cupo del mes, un <strong>bono de créditos</strong> (' . $this->lineaBono() . ') te dura meses sin pagar cuota: <a href="' . $bono . '" style="color:#2563eb;font-weight:700;">crear bono</a>.',
             'technical_issues', 'missing_features'
                 => 'Si lo dejaste por algo que no funcionaba o que echabas en falta, cuéntanoslo respondiendo a este correo. Si ya está resuelto te lo diremos, y si no, nos ayudas a priorizarlo.',
             'switched_solution'
@@ -1743,7 +1857,7 @@ class EmailService
 
         return $this->sendTemplateEmail('api_winback', [
             'subject'     => 'Tu API Key sigue activa: vuelve al plan ' . $nombre . ' cuando quieras',
-            'preheader'   => 'Mismo código, misma clave. Y si el plan se te quedaba grande, hay bonos sin suscripción.',
+            'preheader'   => 'Mismo código, misma clave. Y si no quieres cuota mensual, hay bonos de pago único.',
             'name'        => esc(trim((string) ($userData['name'] ?? '')) ?: explode('@', (string) $userData['email'])[0]),
             'content'     => $contenido,
             'button_text' => 'Ver planes',
@@ -2604,5 +2718,145 @@ class EmailService
         ];
 
         return $this->sendTemplateEmail('massive_export_ready', $templateData, $userEmail);
+    }
+
+    /**
+     * Aviso al administrador de cada "¿Son correctos estos datos?" → "No, hay un error".
+     * Un correo por envío con todos los datos que ha tocado el usuario. Desde la web no
+     * se aplica nada solo: por cada dato, lo que hay ahora en la ficha, lo que proponen
+     * y dónde se guarda (tabla.columna), para cambiarlo a mano. Los que no pasan la
+     * validación salen aparte con el motivo. Si llega algo ya aplicado (el comando
+     * datos:aplicar-avisos), sale con antes → ahora.
+     *
+     * Va directo, sin plantilla en email_templates, porque es interno.
+     * Destinatario: ADMIN_NOTIFY_EMAIL en .env, o el correo de administración de siempre.
+     *
+     * @param array $aviso ['email' => quien avisa, 'ip' => ...]
+     * @param array $items lista de ['id', 'campo', 'valor', 'original', 'resultado' => DataCorrectionService]
+     */
+    public function sendDataCorrectionNotification(array $company, array $aviso, array $items): bool
+    {
+        helper('company');
+        $to = env('ADMIN_NOTIFY_EMAIL', 'papelo.amh@gmail.com');
+
+        $e      = static fn ($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
+        $nombre = (string) ($company['company_name'] ?? $company['name'] ?? ('#' . ($company['id'] ?? '?')));
+        $ficha  = company_url(['cif' => $company['cif'] ?? '', 'name' => $nombre]);
+
+        $campos = [
+            'direccion' => 'Dirección', 'telefono' => 'Teléfono', 'movil' => 'Móvil', 'actividad' => 'Actividad (CNAE)',
+            'estado' => 'Estado', 'administradores' => 'Administradores', 'web' => 'Página web',
+            'correo' => 'Email de la empresa', 'otro' => 'Otro dato',
+        ];
+
+        $aplicados  = array_values(array_filter($items, static fn ($i) => !empty($i['resultado']['aplicado'])));
+        $propuestos = array_values(array_filter($items, static fn ($i) => empty($i['resultado']['aplicado']) && !empty($i['resultado']['valido'])));
+        $revisar    = array_values(array_filter($items, static fn ($i) => empty($i['resultado']['aplicado']) && empty($i['resultado']['valido'])));
+
+        $asunto = ($aplicados && !$propuestos && !$revisar ? '✅ Ficha corregida: ' : '📝 Corrección de datos propuesta: ') . $nombre
+            . ' (' . implode(', ', array_map(static fn ($i) => $campos[$i['campo']] ?? $i['campo'], $items)) . ')';
+
+        $celda = 'padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top';
+        $th    = 'padding:8px 10px;text-align:left;color:#64748b;font-size:12px;border-bottom:2px solid #e2e8f0';
+        $caja  = static fn (string $fondo, string $borde, string $color, string $texto) =>
+            '<div style="background:' . $fondo . ';border:1px solid ' . $borde . ';color:' . $color
+            . ';padding:10px 14px;border-radius:10px;font-weight:700;margin-top:18px">' . $texto . '</div>';
+        $nombreCampo = static function (array $i) use ($campos): string {
+            $c = $campos[$i['campo']] ?? $i['campo'];
+            $real = $i['resultado']['campo'] ?? $i['campo'];
+            return ($real !== $i['campo'] && isset($campos[$real])) ? $c . ' → ' . $campos[$real] : $c;
+        };
+        $vacio = '<em style="color:#94a3b8">(vacío)</em>';
+
+        $html = '<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:680px;margin:0 auto;color:#334155">'
+            . '<h2 style="color:#0f172a;font-size:18px;margin-bottom:4px">Aviso de datos de la ficha</h2>'
+            . '<p style="margin-top:0"><a href="' . $e($ficha) . '" style="color:#2563eb;font-weight:700">' . $e($nombre) . '</a> · '
+            . $e($company['cif'] ?? '') . ' · id ' . (int) ($company['id'] ?? 0) . '</p>';
+
+        if ($propuestos) {
+            $html .= $caja('#eff6ff', '#bfdbfe', '#1e40af', 'Propuesta para revisar (' . count($propuestos) . '): no se ha cambiado nada')
+                . '<table style="width:100%;border-collapse:collapse;margin:8px 0 4px;font-size:14px">'
+                . '<tr><th style="' . $th . '">Dato</th><th style="' . $th . '">En la ficha ahora</th><th style="' . $th . '">Proponen</th></tr>';
+            foreach ($propuestos as $i) {
+                $r = $i['resultado'];
+                $nuevo = $e($r['nuevo'] ?? '');
+                if (!empty($r['detalle'])) {
+                    $nuevo .= ' <span style="color:#64748b">(' . $e($r['detalle']) . ')</span>';
+                }
+                if (($i['valor'] ?? '') !== '' && $i['valor'] !== ($r['nuevo'] ?? '')) {
+                    $nuevo .= '<br><span style="color:#94a3b8;font-size:12px">escrito: ' . $e($i['valor']) . '</span>';
+                }
+                $html .= '<tr><td style="' . $celda . ';font-weight:600">' . $e($nombreCampo($i))
+                    . '<br><code style="font-size:11px;color:#94a3b8">' . $e($r['tabla'] . '.' . $r['columna']) . '</code></td>'
+                    . '<td style="' . $celda . ';color:#64748b">' . (($r['anterior'] ?? '') !== '' ? $e($r['anterior']) : $vacio) . '</td>'
+                    . '<td style="' . $celda . ';font-weight:700;color:#0f172a">' . $nuevo . '</td></tr>';
+            }
+            $html .= '</table>'
+                . '<p style="color:#64748b;font-size:12px;margin-top:4px">"Proponen" ya va normalizado (teléfonos solo con cifras, web con https://). '
+                . 'Tras cambiarlo, la ficha tarda hasta 24 h en verse por la caché de Cloudflare.</p>';
+        }
+
+        if ($revisar) {
+            $html .= $caja('#fffbeb', '#fde68a', '#92400e', 'Con dudas (' . count($revisar) . '): míralo con calma')
+                . '<table style="width:100%;border-collapse:collapse;margin:8px 0;font-size:14px">'
+                . '<tr><th style="' . $th . '">Dato</th><th style="' . $th . '">Lo que indican</th><th style="' . $th . '">Nota</th></tr>';
+            foreach ($revisar as $i) {
+                $valor = ($i['valor'] ?? '') !== '' ? $e($i['valor']) : '<em>(lo han borrado)</em>';
+                if (!empty($i['original'])) {
+                    $valor .= '<br><span style="color:#94a3b8;font-size:12px">veía en la ficha: ' . $e($i['original']) . '</span>';
+                }
+                $html .= '<tr><td style="' . $celda . ';font-weight:600">' . $e($nombreCampo($i)) . '</td>'
+                    . '<td style="' . $celda . '">' . $valor . '</td>'
+                    . '<td style="' . $celda . ';color:#92400e">' . $e($i['resultado']['motivo'] ?? '') . '</td></tr>';
+            }
+            $html .= '</table>';
+        }
+
+        if ($aplicados) {
+            $cache = $aplicados[0]['resultado']['cache'] ?? null;
+            $html .= $caja('#ecfdf5', '#a7f3d0', '#065f46', 'Aplicado (' . count($aplicados) . ')')
+                . '<table style="width:100%;border-collapse:collapse;margin:8px 0 4px;font-size:14px">'
+                . '<tr><th style="' . $th . '">Dato</th><th style="' . $th . '">Antes</th><th style="' . $th . '">Ahora</th></tr>';
+            foreach ($aplicados as $i) {
+                $r = $i['resultado'];
+                $html .= '<tr><td style="' . $celda . ';font-weight:600">' . $e($nombreCampo($i))
+                    . '<br><code style="font-size:11px;color:#94a3b8">' . $e($r['tabla'] . '.' . $r['columna']) . '</code></td>'
+                    . '<td style="' . $celda . ';color:#64748b">' . (($r['anterior'] ?? '') !== '' ? $e($r['anterior']) : $vacio) . '</td>'
+                    . '<td style="' . $celda . ';font-weight:700;color:#0f172a">' . $e($r['nuevo'] ?? '') . '</td></tr>';
+            }
+            $html .= '</table><p style="font-size:13px;margin:4px 0 0">Caché Cloudflare: '
+                . ($cache === true ? '<span style="color:#15803d;font-weight:700">vaciada</span>'
+                                   : '<span style="color:#b91c1c;font-weight:700">no se ha podido vaciar (mira el log)</span>') . '</p>';
+        }
+
+        $ids = array_filter(array_map(static fn ($i) => (int) ($i['id'] ?? 0), $items));
+        $html .= '<p style="font-size:13px;color:#64748b;margin-top:18px">Quién avisa: '
+            . (($aviso['email'] ?? '') !== ''
+                ? '<a href="mailto:' . $e($aviso['email']) . '">' . $e($aviso['email']) . '</a> (quiere que le avisemos al corregirlo)'
+                : '<em>anónimo</em>')
+            . ' · IP ' . $e($aviso['ip'] ?? '') . ' · Avisos ' . ($ids ? '#' . implode(', #', $ids) : '-') . ' · ' . date('d/m/Y H:i') . '</p>'
+            . '<p><a href="' . $e(site_url('admin/avisos-datos')) . '" style="display:inline-block;background:#0f172a;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:700">Ver todos los avisos</a></p>'
+            . '</div>';
+
+        try {
+            $email = Services::email();
+            $email->clear(true);
+            $email->setFrom(env('email.fromEmail', 'soporte@apiempresas.es'), env('email.fromName', 'APIEmpresas.es'));
+            $email->setTo($to);
+            if (($aviso['email'] ?? '') !== '' && filter_var($aviso['email'], FILTER_VALIDATE_EMAIL)) {
+                $email->setReplyTo($aviso['email']);   // "Responder" le escribe a quien avisó
+            }
+            $email->setSubject($asunto);
+            $email->setMailType('html');
+            $email->setMessage($html);
+            if (!$email->send(false)) {
+                log_message('error', '[DataCorrection] No se pudo enviar el correo: ' . $email->printDebugger(['headers']));
+                return false;
+            }
+            return true;
+        } catch (\Throwable $ex) {
+            log_message('error', '[DataCorrection] Error enviando el correo: ' . $ex->getMessage());
+            return false;
+        }
     }
 }

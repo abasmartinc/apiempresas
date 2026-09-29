@@ -1119,7 +1119,7 @@
                                 </div>
                                 <?php endif; ?>
                             </dl>
-                            <?= view('partials/company_data_check', ['companyId' => (int) ($company['id'] ?? 0), 'lang' => 'es']) ?>
+                            <?= view('partials/company_data_check', ['companyId' => (int) ($company['id'] ?? 0), 'company' => $company, 'lang' => 'es']) ?>
                         </section>
 
                         <?php if ((!empty($company['lat']) && !empty($company['lng'])) || !empty($company['address'])): ?>

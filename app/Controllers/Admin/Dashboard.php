@@ -889,10 +889,20 @@ class Dashboard extends BaseController
         $sentCount = 0;
         $errorCount = 0;
 
+        // Contactos fríos (ver App\Libraries\ContactosFrios): fuera, salvo que se marque
+        $incluirFrios = (int)$this->request->getPost('incluir_frios') === 1;
+        $frios = $incluirFrios ? [] : \App\Libraries\ContactosFrios::de(array_map(static fn ($u) => (int) $u->id, $users));
+        $coldCount = 0;
+
         foreach ($users as $user) {
             // Skip if unsubscribed
             if ((int)($user->unsuscribe ?? 0) === 1) {
                 log_message('info', "[AdminDashboard] Email masivo saltado para {$user->email} por unsuscribe=1");
+                continue;
+            }
+
+            if (isset($frios[(int)$user->id])) {
+                $coldCount++;
                 continue;
             }
 
@@ -944,6 +954,9 @@ class Dashboard extends BaseController
         }
 
         $msg = "Proceso finalizado. Enviados: $sentCount.";
+        if ($coldCount > 0) {
+            $msg .= " Omitidos por ser contactos fríos: $coldCount (5+ correos sin ningún clic, sin uso de la API y sin entrar en 30 días).";
+        }
         if ($errorCount > 0) {
             $msg .= " Errores: $errorCount.";
             session()->setFlashdata('error', "Hubo algunos errores al enviar.");

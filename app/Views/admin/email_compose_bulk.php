@@ -48,6 +48,11 @@
                     <p style="font-size: 0.8rem; color: #64748b; margin-top: 0.5rem;">Se enviará con la plantilla corporativa.</p>
                 </div>
 
+<label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; color: #475569; cursor: pointer;">
+                        <input type="checkbox" name="incluir_frios" value="1" style="margin-top: 2px;">
+                        <span><strong>Incluir contactos fríos.</strong> Por defecto se omite a quien ha recibido 5 correos o más sin hacer ningún clic, no ha usado la API y no entra desde hace 30 días: seguir escribiéndoles hace que Gmail mande a spam también el resto de nuestros correos.</span>
+                    </label>
+
                 <div class="alert alert-warning" style="background: #fffbeb; color: #92400e; padding: 1rem; border: 1px solid #fcd34d; border-radius: 8px;">
                     <strong>Confirmación:</strong> Se enviarán <strong><?= $count ?></strong> correos electrónicos. Esta acción puede tardar unos segundos.
                 </div>

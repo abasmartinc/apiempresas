@@ -1068,13 +1068,22 @@ class Company extends BaseController
      * prefijo fijo para poder filtrarlo:
      *
      *   [DATOS] Correctos
-     *   [DATOS] Campo: actividad | Correcto: Asesoría fiscal | Email: x@y.com
+     *   [DATOS] Campo: telefono | Correcto: 910805444 | Email: x@y.com | Aplicado: companies.phone | Anterior: ...
      *
-     * Una respuesta por IP y empresa: si vuelve a contestar, se actualiza (puede
-     * pasar de Sí a No al fijarse mejor). Tope de 30 avisos por IP y hora contra
-     * el spam, y un campo trampa (`web`) que los bots rellenan y las personas no.
-     * Sin CSRF, igual que company/rate: la ficha va cacheada en Cloudflare y el
-     * token del HTML no sería el de la sesión de quien la mira.
+     * 29-09-2026: el formulario sale relleno con los datos actuales y el usuario cambia
+     * los que quiera. Llegan como cambios[campo] (valor nuevo) y originales[campo] (lo
+     * que veía). Cada campo es una fila propia en company_ratings. NADA se aplica solo
+     * (cualquiera puede rellenarlo, sea o no de la empresa): DataCorrectionService::revisar()
+     * valida cada dato y lo compara con la ficha, y llega UN correo al administrador con
+     * lo que hay ahora y lo que proponen, para cambiarlo a mano. `otro` es texto libre.
+     *
+     * Las páginas cacheadas con el formulario antiguo (un solo campo/valor) siguen
+     * funcionando: se tratan como un único cambio sin original.
+     *
+     * "Sí": una respuesta por IP y empresa. Tope de 30 filas por IP y hora contra el
+     * spam, y un campo trampa (`web`) que los bots rellenan y las personas no. Sin
+     * CSRF, igual que company/rate: la ficha va cacheada en Cloudflare y el token del
+     * HTML no sería el de la sesión de quien la mira.
      */
     public function submitDataFeedback()
     {
@@ -1093,21 +1102,54 @@ class Company extends BaseController
 
         $companyId = (int) $request->getPost('company_id');
         $correcto  = (string) $request->getPost('correcto') === '1';
-        $campo     = (string) $request->getPost('campo');
-        $valor     = trim(strip_tags((string) $request->getPost('valor')));
         $email     = trim((string) $request->getPost('email'));
         $ip        = $request->getIPAddress();
 
-        $campos = ['direccion', 'telefono', 'actividad', 'estado', 'administradores', 'otro'];
+        $etiquetas = [
+            'telefono'  => $t('Teléfono', 'Phone'),
+            'movil'     => $t('Móvil', 'Mobile'),
+            'web'       => $t('Página web', 'Website'),
+            'correo'    => $t('Email de la empresa', 'Company email'),
+            'direccion' => $t('Dirección', 'Address'),
+            'actividad' => $t('Actividad', 'Activity'),
+        ];
+        // Campos que llegan de formularios antiguos (páginas aún en caché).
+        $camposAntiguos = ['direccion', 'telefono', 'actividad', 'estado', 'administradores', 'web', 'correo', 'otro'];
+
+        $cambios = [];
+        $originales = [];
+        $otro = '';
+        if (!$correcto) {
+            $origPost = (array) ($request->getPost('originales') ?? []);
+            foreach ((array) ($request->getPost('cambios') ?? []) as $campo => $valor) {
+                if (isset($etiquetas[$campo]) && is_string($valor)) {
+                    $cambios[$campo] = mb_substr(trim(strip_tags($valor)), 0, 500);
+                    $originales[$campo] = mb_substr(trim(strip_tags(is_string($origPost[$campo] ?? null) ? $origPost[$campo] : '')), 0, 500);
+                }
+            }
+            $otro = mb_substr(trim(strip_tags((string) $request->getPost('otro'))), 0, 500);
+
+            // Formulario antiguo: campo + valor.
+            $campoAnt = (string) $request->getPost('campo');
+            if ($campoAnt !== '' && in_array($campoAnt, $camposAntiguos, true)) {
+                $valorAnt = mb_substr(trim(strip_tags((string) $request->getPost('valor'))), 0, 500);
+                if (isset($etiquetas[$campoAnt])) {
+                    $cambios[$campoAnt] = $valorAnt;   // sin original: aviso de un solo campo
+                } else {
+                    $otro = trim($campoAnt . ': ' . $valorAnt, ': ');
+                    $otroCampo = $campoAnt;
+                }
+            }
+        }
 
         if ($companyId <= 0) {
             return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => $t('Datos inválidos', 'Invalid data')]);
         }
-        if (!$correcto && !in_array($campo, $campos, true)) {
-            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => $t('Indica qué dato no es correcto.', 'Please tell us which item is wrong.')]);
+        if (!$correcto && !$cambios && $otro === '') {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => $t('Cambia algún dato o cuéntanos qué está mal.', 'Change something or tell us what is wrong.')]);
         }
         if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => $t('Ese email no parece válido.', 'That email does not look valid.')]);
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => $t('Tu email no parece válido.', 'Your email does not look valid.')]);
         }
 
         $ratingModel = new CompanyRatingModel();
@@ -1119,36 +1161,104 @@ class Company extends BaseController
             return $this->response->setStatusCode(429)->setJSON(['status' => 'error', 'message' => $t('Demasiados avisos seguidos. Inténtalo más tarde.', 'Too many reports in a row. Please try again later.')]);
         }
 
-        // Sin separadores sueltos dentro de los valores, para que el formato se pueda leer.
-        $limpio = static fn (string $v, int $max) => mb_substr(str_replace(['|', "\r", "\n"], ['/', ' ', ' '], $v), 0, $max);
+        // --- "Sí, son correctos": una fila por IP y empresa ---
+        if ($correcto) {
+            $fila = [
+                'company_id' => $companyId,
+                'rating'     => 5,
+                'feedback'   => '[DATOS] Correctos',
+                'ip_address' => $ip,
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
+            $previa = $ratingModel->where('company_id', $companyId)->where('ip_address', $ip)
+                ->where('feedback', '[DATOS] Correctos')->first();
+            $previa ? $ratingModel->update($previa['id'], $fila) : $ratingModel->insert($fila);
 
-        $feedback = $correcto
-            ? '[DATOS] Correctos'
-            : '[DATOS] Campo: ' . $campo
-                . ($valor !== '' ? ' | Correcto: ' . $limpio($valor, 500) : '')
-                . ($email !== '' ? ' | Email: ' . $limpio($email, 190) : '');
-
-        $fila = [
-            'company_id' => $companyId,
-            'rating'     => $correcto ? 5 : 1,
-            'feedback'   => $feedback,
-            'ip_address' => $ip,
-            'created_at' => date('Y-m-d H:i:s'),
-        ];
-
-        $previa = $ratingModel->where('company_id', $companyId)->where('ip_address', $ip)->first();
-        if ($previa) {
-            $ratingModel->update($previa['id'], $fila);
-        } else {
-            $ratingModel->insert($fila);
+            return $this->response->setJSON(['status' => 'success', 'message' => $t('¡Gracias! Nos ayuda saberlo.', 'Thank you! That helps us.')]);
         }
+
+        // --- "No, hay un error": un "Sí" anterior de esta IP ya no vale ---
+        $ratingModel->where('company_id', $companyId)->where('ip_address', $ip)
+            ->where('feedback', '[DATOS] Correctos')->delete();
+
+        $this->registrarCorreccionesDatos($companyId, $cambios, $originales, $otro, $otroCampo ?? 'otro', $email, $ip);
 
         return $this->response->setJSON([
             'status'  => 'success',
-            'message' => $correcto
-                ? $t('¡Gracias! Nos ayuda saberlo.', 'Thank you! That helps us.')
-                : $t('Gracias por avisar. Lo revisamos y lo corregimos si procede.', 'Thanks for letting us know. We will review it and fix it if needed.'),
+            'message' => $email !== ''
+                ? $t('¡Gracias! Hemos recibido tu corrección. La revisaremos a mano antes de actualizar la ficha y te escribiremos cuando esté hecho.',
+                     'Thank you! We have received your correction. We will review it manually before updating the page and let you know once it is done.')
+                : $t('¡Gracias! Hemos recibido tu corrección. La revisaremos a mano antes de actualizar la ficha.',
+                     'Thank you! We have received your correction. We will review it manually before updating the page.'),
         ]);
+    }
+
+    /**
+     * Guarda una fila por campo en company_ratings, revisa cada dato SIN aplicarlo
+     * (DataCorrectionService::revisar: formato, dónde iría y qué hay ahora), lo deja
+     * anotado en cada fila y manda un solo correo al administrador para que lo cambie
+     * a mano. Nunca lanza: si algo falla, el aviso queda guardado igualmente.
+     */
+    private function registrarCorreccionesDatos(int $companyId, array $cambios, array $originales, string $otro, string $otroCampo, string $email, string $ip): void
+    {
+        $ratingModel = new CompanyRatingModel();
+        $limpio = static fn (string $v, int $max) => mb_substr(str_replace(['|', "\r", "\n"], ['/', ' ', ' '], $v), 0, $max);
+        $sufijoEmail = $email !== '' ? ' | Email: ' . $limpio($email, 190) : '';
+
+        $guardar = static function (string $campo, string $valor) use ($ratingModel, $companyId, $ip, $limpio, $sufijoEmail): array {
+            $feedback = '[DATOS] Campo: ' . $campo . ($valor !== '' ? ' | Correcto: ' . $limpio($valor, 500) : '') . $sufijoEmail;
+            $id = (int) $ratingModel->insert([
+                'company_id' => $companyId,
+                'rating'     => 1,
+                'feedback'   => $feedback,
+                'ip_address' => $ip,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+            return [$id, $feedback];
+        };
+
+        $items = [];
+
+        try {
+            $filas = [];
+            foreach ($cambios as $campo => $valor) {
+                $filas[$campo] = $guardar($campo, $valor);
+            }
+
+            $revision = $cambios
+                ? (new \App\Services\DataCorrectionService())->revisar($companyId, $cambios, $originales)
+                : [];
+
+            foreach ($revision as $campo => $r) {
+                [$id, $feedback] = $filas[$campo];
+                if ($id > 0) {
+                    $ratingModel->update($id, ['feedback' => $feedback . \App\Services\DataCorrectionService::sufijoRevision($r)]);
+                }
+                $items[] = ['id' => $id, 'campo' => $campo, 'valor' => $cambios[$campo], 'original' => $originales[$campo] ?? null, 'resultado' => $r];
+            }
+
+            // Texto libre.
+            if ($otro !== '') {
+                [$id, $feedback] = $guardar($otroCampo, $otro);
+                $r = ['aplicado' => false, 'valido' => false, 'campo' => $otroCampo, 'motivo' => 'Texto libre: léelo y decide.'];
+                if ($id > 0) {
+                    $ratingModel->update($id, ['feedback' => $feedback . \App\Services\DataCorrectionService::sufijoRevision($r)]);
+                }
+                $items[] = ['id' => $id, 'campo' => $otroCampo, 'valor' => $otro, 'original' => null, 'resultado' => $r];
+            }
+        } catch (\Throwable $e) {
+            log_message('error', '[DataCorrection] Empresa ' . $companyId . ': ' . $e->getMessage());
+        }
+
+        if ($items) {
+            try {
+                $company = \Config\Database::connect()->table('companies')
+                    ->select('id, company_name, cif')->where('id', $companyId)->get()->getRowArray() ?? ['id' => $companyId];
+                (new \App\Services\EmailService())->sendDataCorrectionNotification($company, ['email' => $email, 'ip' => $ip], $items);
+            } catch (\Throwable $e) {
+                log_message('error', '[DataCorrection] Correo empresa ' . $companyId . ': ' . $e->getMessage());
+            }
+        }
     }
 
     /**

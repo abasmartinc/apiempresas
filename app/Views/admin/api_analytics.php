@@ -926,6 +926,11 @@ $analyticsUrl = function (array $overrides = []) use ($period, $user_status_filt
                     <!-- Cuántos de los seleccionados ya han recibido algo -->
                     <div id="modalBulkHistory" style="display: none; border-radius: 10px; padding: 12px 14px; font-size: 0.82rem; line-height: 1.5;"></div>
 
+<label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; color: #475569; cursor: pointer;">
+                        <input type="checkbox" name="incluir_frios" value="1" id="modalBulkIncluirFrios" style="margin-top: 2px;">
+                        <span><strong>Incluir contactos fríos.</strong> Por defecto se omite a quien ha recibido 5 correos o más sin hacer ningún clic, no ha usado la API y no entra desde hace 30 días: seguir escribiéndoles hace que Gmail mande a spam también el resto de nuestros correos.</span>
+                    </label>
+
                     <div id="modalBulkDupWarning" style="display: none; background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 12px 14px;">
                         <div style="font-size: 0.82rem; color: #991b1b; font-weight: 700; margin-bottom: 8px;">
                             ⚠️ <span id="modalBulkDupText"></span>

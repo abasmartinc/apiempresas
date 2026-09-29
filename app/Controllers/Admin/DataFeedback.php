@@ -18,9 +18,12 @@ class DataFeedback extends BaseController
     private const CAMPOS = [
         'direccion'       => 'Dirección',
         'telefono'        => 'Teléfono',
+        'movil'           => 'Móvil',
         'actividad'       => 'Actividad (CNAE)',
         'estado'          => 'Estado de la empresa',
         'administradores' => 'Administradores',
+        'web'             => 'Página web',
+        'correo'          => 'Email de la empresa',
         'otro'            => 'Otro dato',
     ];
 
@@ -111,7 +114,9 @@ class DataFeedback extends BaseController
      */
     private function parsear(string $fb): array
     {
-        $out = ['d_campo' => '', 'd_valor' => '', 'd_email' => '', 'd_nuevo' => strpos($fb, '[DATOS]') === 0];
+        $out = ['d_campo' => '', 'd_valor' => '', 'd_email' => '', 'd_aplicado' => '', 'd_anterior' => '', 'd_no_aplicado' => '',
+                'd_pendiente' => '', 'd_actual' => '', 'd_revisar' => '',
+                'd_nuevo' => strpos($fb, '[DATOS]') === 0];
         if (!$out['d_nuevo']) {
             return $out;
         }
@@ -120,6 +125,14 @@ class DataFeedback extends BaseController
             if ($k === 'Campo')    { $out['d_campo'] = $v; }
             if ($k === 'Correcto') { $out['d_valor'] = $v; }
             if ($k === 'Email')    { $out['d_email'] = $v; }
+            // Corrección automática (DataCorrectionService, 29-09-2026)
+            if ($k === 'Aplicado')    { $out['d_aplicado'] = $v; }
+            if ($k === 'Anterior')    { $out['d_anterior'] = $v; }
+            if ($k === 'No aplicado') { $out['d_no_aplicado'] = $v; }
+            // Revisión manual (desde el 29-09-2026 nada se aplica solo)
+            if ($k === 'Pendiente')   { $out['d_pendiente'] = $v; }
+            if ($k === 'Actual')      { $out['d_actual'] = $v; }
+            if ($k === 'Revisar')     { $out['d_revisar'] = $v; }
         }
         return $out;
     }

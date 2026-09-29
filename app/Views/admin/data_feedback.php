@@ -123,11 +123,12 @@
                     <th>Dato</th>
                     <th>Valor correcto que indican</th>
                     <th>Email</th>
+                    <th>Revisión</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($filas)): ?>
-                    <tr><td colspan="6" style="color:#64748b">No hay avisos con estos filtros.</td></tr>
+                    <tr><td colspan="7" style="color:#64748b">No hay avisos con estos filtros.</td></tr>
                 <?php endif; ?>
                 <?php helper('company'); foreach ($filas as $f): ?>
                     <tr>
@@ -150,6 +151,19 @@
                         <td>
                             <?php if ($f['d_email'] !== ''): ?>
                                 <a href="mailto:<?= esc($f['d_email'], 'attr') ?>"><?= esc($f['d_email']) ?></a>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <?php if (($f['d_aplicado'] ?? '') !== ''): ?>
+                                <span class="df-tag df-tag--ok">Aplicado</span>
+                                <br><small style="color:#64748b"><?= esc($f['d_aplicado']) ?> · antes: <?= esc($f['d_anterior']) ?></small>
+                            <?php elseif (($f['d_pendiente'] ?? '') !== ''): ?>
+                                <span class="df-tag df-tag--old">Pendiente</span>
+                                <br><small style="color:#64748b">va en <?= esc($f['d_pendiente']) ?> · ahora: <?= esc($f['d_actual']) ?></small>
+                            <?php elseif (($f['d_revisar'] ?? '') !== ''): ?>
+                                <small style="color:#92400e"><?= esc($f['d_revisar']) ?></small>
+                            <?php elseif (($f['d_no_aplicado'] ?? '') !== ''): ?>
+                                <small style="color:#92400e"><?= esc($f['d_no_aplicado']) ?></small>
                             <?php endif; ?>
                         </td>
                     </tr>

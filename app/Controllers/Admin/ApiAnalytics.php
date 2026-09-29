@@ -824,6 +824,11 @@ class ApiAnalytics extends BaseController
 
         $allowDuplicate = (int)$this->request->getPost('allow_duplicate') === 1;
 
+        // Contactos fríos (ver App\Libraries\ContactosFrios): fuera, salvo que se marque
+        $incluirFrios = (int)$this->request->getPost('incluir_frios') === 1;
+        $frios = $incluirFrios ? [] : \App\Libraries\ContactosFrios::de(array_map(static fn ($u) => (int) $u->id, $users));
+        $coldCount = 0;
+
         $sentCount = 0;
         $errorCount = 0;
         $skippedCount = 0;
@@ -833,6 +838,11 @@ class ApiAnalytics extends BaseController
         foreach ($users as $user) {
             if ((int)($user->unsuscribe ?? 0) === 1) {
                 $skippedCount++;
+                continue;
+            }
+
+            if (isset($frios[(int)$user->id])) {
+                $coldCount++;
                 continue;
             }
 
@@ -892,6 +902,9 @@ class ApiAnalytics extends BaseController
         $msg = "Campaña procesada: {$sentCount} email(s) enviados correctamente.";
         if ($skippedCount > 0) {
             $msg .= " ({$skippedCount} omitido(s) por baja voluntaria).";
+        }
+        if ($coldCount > 0) {
+            $msg .= " {$coldCount} omitido(s) por ser contactos fríos (5+ correos sin ningún clic, sin uso de la API y sin entrar en 30 días).";
         }
         if ($duplicateCount > 0) {
             $msg .= " {$duplicateCount} omitido(s) por haber recibido ya este mismo asunto"

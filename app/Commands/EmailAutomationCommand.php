@@ -210,6 +210,17 @@ class EmailAutomationCommand extends BaseCommand
         if ($totalRequests === 0) {
             $edad = time() - strtotime($createdAt);
 
+            // Día 30: despedida en texto plano. Es el último correo de la secuencia.
+            if ($edad >= 30 * 86400 && $edad < 37 * 86400) {
+                $this->checkAndSend($user, 'no_requests_day30', 'email_sent_no_usage_day30');
+                return;
+            }
+            // Día 14: un caso de uso concreto (antes la secuencia acababa el día 7 y los
+            // tres correos repetían lo mismo: "esta es la llamada, pruébala")
+            if ($edad >= 14 * 86400 && $edad < 21 * 86400) {
+                $this->checkAndSend($user, 'no_requests_day14', 'email_sent_no_usage_day14');
+                return;
+            }
             if ($edad >= 3 * 86400 && $edad < 7 * 86400) {          // día 3 a 7
                 $this->checkAndSend($user, 'no_requests_day3', 'email_sent_no_usage_day3');
                 return;
@@ -218,7 +229,9 @@ class EmailAutomationCommand extends BaseCommand
                 $this->checkAndSend($user, 'no_requests_day1', 'email_sent_no_usage_day1');
                 return;
             }
-            if ($edad >= 900) {                                     // 15 minutos
+            // 15 minutos (hasta el día 1: sin tope, al desplegar le llegaba a cualquier
+            // cuenta antigua sin llamadas que no lo hubiera recibido)
+            if ($edad >= 900 && $edad < 86400) {
                 $this->checkAndSend($user, 'no_requests_15min', 'email_sent_no_usage');
                 return;
             }
@@ -249,7 +262,7 @@ class EmailAutomationCommand extends BaseCommand
      *   - el aviso al agotarlas (reached_100_percent_quota), como siempre;
      *   - a los 3 días (api_exhausted_3d): cuántos días ha seguido llamando su
      *     integración (los 429 quedan en api_requests), las dudas de siempre antes de
-     *     pagar y el bono como paso pequeño;
+     *     pagar y el bono como alternativa sin suscripción;
      *   - a los 10 días (api_exhausted_10d): corto, pregunta qué le frena;
      *   - el recordatorio de cada 30 días, como mucho 3 veces en total.
      * Quien tiene saldo en el monedero no está parado (consulta con saldo): nada.
@@ -347,6 +360,7 @@ class EmailAutomationCommand extends BaseCommand
             ->where('user_id', $userId)
             ->whereIn('email_type', [
                 'first_request', 'no_requests_15min', 'no_requests_day1', 'no_requests_day3',
+                'no_requests_day14', 'no_requests_day30',
                 'one_request_inactive_1h', 'reached_5_requests', 'reached_80_requests',
                 'reached_100_percent_quota', 'monthly_report', 'bad_request_help',
                 'api_stalled_7d', 'api_stalled_30d', 'api_checkout_abandoned',
@@ -721,6 +735,12 @@ class EmailAutomationCommand extends BaseCommand
                 break;
             case 'no_requests_day3':
                 $result = $this->emailService->sendInactivityReminder($user);
+                break;
+            case 'no_requests_day14':
+                $result = $this->emailService->sendNoUsageUseCase($user);
+                break;
+            case 'no_requests_day30':
+                $result = $this->emailService->sendNoUsageGoodbye($user);
                 break;
             case 'one_request_inactive_1h':
                 $result = $this->emailService->sendOneUsageInactive1H($user);
