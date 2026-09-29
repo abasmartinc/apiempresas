@@ -195,11 +195,17 @@
 
                 <div class="grid-3">
                     <div class="feature-card use-case card-blue reveal delay-1">
-                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 16px;">
-                            <div class="icon-box" style="margin-bottom: 0;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
+                        <div class="use-case-header">
+                            <div class="use-case-header-top">
+                                <div class="use-case-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
+                                </div>
+                                <span class="use-case-badge">
+                                    <span class="use-case-badge-dot"></span>
+                                    Onboarding B2B
+                                </span>
                             </div>
-                            <h3 style="margin-bottom: 0; font-size: 1.2rem; font-weight: 850;">Alta de clientes y KYB</h3>
+                            <h3 class="use-case-title">Alta de clientes y KYB</h3>
                         </div>
                         <p>Cuando un cliente B2B se registra, valida con su CIF que la empresa existe y está activa antes de darle de alta.</p>
                         <ul class="use-case-list">
@@ -213,11 +219,17 @@
                         </div>
                     </div>
                     <div class="feature-card use-case card-teal reveal delay-2">
-                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 16px;">
-                            <div class="icon-box" style="margin-bottom: 0;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="13" y2="17"></line></svg>
+                        <div class="use-case-header">
+                            <div class="use-case-header-top">
+                                <div class="use-case-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="13" y2="17"></line></svg>
+                                </div>
+                                <span class="use-case-badge">
+                                    <span class="use-case-badge-dot"></span>
+                                    Automatización ERP
+                                </span>
                             </div>
-                            <h3 style="margin-bottom: 0; font-size: 1.2rem; font-weight: 850;">Facturación y ERP</h3>
+                            <h3 class="use-case-title">Facturación y ERP</h3>
                         </div>
                         <p>Evita facturas con datos fiscales erróneos: autocompleta la razón social y el domicilio desde el CIF o el nombre.</p>
                         <ul class="use-case-list">
@@ -231,11 +243,17 @@
                         </div>
                     </div>
                     <div class="feature-card use-case card-indigo reveal delay-3">
-                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 16px;">
-                            <div class="icon-box" style="margin-bottom: 0;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        <div class="use-case-header">
+                            <div class="use-case-header-top">
+                                <div class="use-case-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                </div>
+                                <span class="use-case-badge">
+                                    <span class="use-case-badge-dot"></span>
+                                    Due Diligence
+                                </span>
                             </div>
-                            <h3 style="margin-bottom: 0; font-size: 1.2rem; font-weight: 850;">Riesgo de clientes</h3>
+                            <h3 class="use-case-title">Riesgo de clientes</h3>
                         </div>
                         <p>Antes de dar crédito o firmar con un proveedor, comprueba su situación legal y su historial en el BORME.</p>
                         <ul class="use-case-list">
@@ -250,15 +268,212 @@
                     </div>
                 </div>
                 <style>
-                    .use-case { display: flex; flex-direction: column; }
-                    .use-case > p { margin-bottom: 14px; }
-                    .use-case-list { list-style: none; padding: 0; margin: 4px 0 20px; display: grid; gap: 8px; }
-                    .use-case-list li { position: relative; padding-left: 22px; font-size: 0.95rem; color: var(--ae-slate); line-height: 1.45; }
-                    .use-case-list li::before { content: ""; position: absolute; left: 4px; top: 0.55em; width: 8px; height: 8px; border-radius: 50%; background: var(--ae-blue); opacity: .7; }
-                    .use-case-foot { margin-top: auto; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 16px; border-top: 1px solid rgba(15,23,42,0.08); }
-                    .use-case-plan { font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: #64748B; }
-                    .use-case-foot a { font-weight: 800; font-size: 0.92rem; color: var(--ae-blue); text-decoration: none; }
-                    .use-case-foot a:hover { text-decoration: underline; }
+                    .use-case {
+                        display: flex;
+                        flex-direction: column;
+                        position: relative;
+                        overflow: hidden;
+                    }
+                    .use-case.card-blue {
+                        background: radial-gradient(circle at 18% 12%, rgba(37, 99, 235, 0.05) 0%, transparent 60%), #ffffff;
+                    }
+                    .use-case.card-teal {
+                        background: radial-gradient(circle at 18% 12%, rgba(16, 185, 129, 0.05) 0%, transparent 60%), #ffffff;
+                    }
+                    .use-case.card-indigo {
+                        background: radial-gradient(circle at 18% 12%, rgba(99, 102, 241, 0.05) 0%, transparent 60%), #ffffff;
+                    }
+                    .use-case::after {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 28px;
+                        right: 28px;
+                        height: 3px;
+                        border-radius: 0 0 3px 3px;
+                        opacity: 0;
+                        transform: scaleX(0.6);
+                        transition: opacity 0.35s ease, transform 0.35s ease;
+                        pointer-events: none;
+                    }
+                    .use-case.card-blue::after { background: linear-gradient(90deg, #2563EB, #60A5FA); }
+                    .use-case.card-teal::after { background: linear-gradient(90deg, #059669, #34D399); }
+                    .use-case.card-indigo::after { background: linear-gradient(90deg, #4F46E5, #818CF8); }
+                    .use-case:hover::after {
+                        opacity: 1;
+                        transform: scaleX(1);
+                    }
+
+                    /* Cabecera de la card */
+                    .use-case-header {
+                        margin-bottom: 16px;
+                    }
+                    .use-case-header-top {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 12px;
+                    }
+                    .use-case-icon {
+                        width: 52px;
+                        height: 52px;
+                        border-radius: 14px;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+                        flex-shrink: 0;
+                    }
+                    .card-blue .use-case-icon {
+                        background: linear-gradient(135deg, rgba(37, 99, 235, 0.12) 0%, rgba(59, 130, 246, 0.05) 100%);
+                        border: 1px solid rgba(37, 99, 235, 0.2);
+                        box-shadow: 0 6px 14px -3px rgba(37, 99, 235, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+                        color: #2563EB;
+                    }
+                    .card-teal .use-case-icon {
+                        background: linear-gradient(135deg, rgba(5, 150, 105, 0.12) 0%, rgba(16, 185, 129, 0.05) 100%);
+                        border: 1px solid rgba(5, 150, 105, 0.2);
+                        box-shadow: 0 6px 14px -3px rgba(5, 150, 105, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+                        color: #059669;
+                    }
+                    .card-indigo .use-case-icon {
+                        background: linear-gradient(135deg, rgba(79, 70, 229, 0.12) 0%, rgba(99, 102, 241, 0.05) 100%);
+                        border: 1px solid rgba(79, 70, 229, 0.2);
+                        box-shadow: 0 6px 14px -3px rgba(79, 70, 229, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+                        color: #4F46E5;
+                    }
+
+                    .use-case.card-blue:hover .use-case-icon {
+                        background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+                        color: #ffffff;
+                        border-color: #2563EB;
+                        transform: translateY(-2px) scale(1.04);
+                        box-shadow: 0 10px 22px -3px rgba(37, 99, 235, 0.38);
+                    }
+                    .use-case.card-teal:hover .use-case-icon {
+                        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+                        color: #ffffff;
+                        border-color: #059669;
+                        transform: translateY(-2px) scale(1.04);
+                        box-shadow: 0 10px 22px -3px rgba(5, 150, 105, 0.38);
+                    }
+                    .use-case.card-indigo:hover .use-case-icon {
+                        background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+                        color: #ffffff;
+                        border-color: #4F46E5;
+                        transform: translateY(-2px) scale(1.04);
+                        box-shadow: 0 10px 22px -3px rgba(79, 70, 229, 0.38);
+                    }
+
+                    /* Badge píldora superior */
+                    .use-case-badge {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        font-size: 0.72rem;
+                        font-weight: 750;
+                        text-transform: uppercase;
+                        letter-spacing: 0.05em;
+                        padding: 5px 11px;
+                        border-radius: 9999px;
+                        white-space: nowrap;
+                    }
+                    .card-blue .use-case-badge {
+                        background: rgba(37, 99, 235, 0.08);
+                        color: #1D4ED8;
+                        border: 1px solid rgba(37, 99, 235, 0.16);
+                    }
+                    .card-teal .use-case-badge {
+                        background: rgba(5, 150, 105, 0.08);
+                        color: #047857;
+                        border: 1px solid rgba(5, 150, 105, 0.16);
+                    }
+                    .card-indigo .use-case-badge {
+                        background: rgba(79, 70, 229, 0.08);
+                        color: #4338CA;
+                        border: 1px solid rgba(79, 70, 229, 0.16);
+                    }
+                    .use-case-badge-dot {
+                        width: 6px;
+                        height: 6px;
+                        border-radius: 50%;
+                        background: currentColor;
+                    }
+
+                    /* Título de la card */
+                    .use-case-title {
+                        font-size: 1.28rem;
+                        font-weight: 850;
+                        color: var(--ae-dark, #0F172A);
+                        letter-spacing: -0.02em;
+                        line-height: 1.3;
+                        margin: 18px 0 0 0;
+                    }
+
+                    .use-case > p {
+                        margin: 0 0 14px 0;
+                        color: var(--ae-slate, #64748B);
+                        font-size: 0.98rem;
+                        line-height: 1.6;
+                    }
+                    .use-case-list {
+                        list-style: none;
+                        padding: 0;
+                        margin: 4px 0 20px;
+                        display: grid;
+                        gap: 8px;
+                    }
+                    .use-case-list li {
+                        position: relative;
+                        padding-left: 22px;
+                        font-size: 0.95rem;
+                        color: var(--ae-slate, #64748B);
+                        line-height: 1.45;
+                    }
+                    .use-case-list li::before {
+                        content: "";
+                        position: absolute;
+                        left: 4px;
+                        top: 0.55em;
+                        width: 8px;
+                        height: 8px;
+                        border-radius: 50%;
+                        opacity: .8;
+                    }
+                    .card-blue .use-case-list li::before { background: #2563EB; }
+                    .card-teal .use-case-list li::before { background: #059669; }
+                    .card-indigo .use-case-list li::before { background: #4F46E5; }
+
+                    .use-case-foot {
+                        margin-top: auto;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        gap: 12px;
+                        flex-wrap: wrap;
+                        padding-top: 16px;
+                        border-top: 1px solid rgba(15,23,42,0.08);
+                    }
+                    .use-case-plan {
+                        font-size: 0.78rem;
+                        font-weight: 800;
+                        text-transform: uppercase;
+                        letter-spacing: .04em;
+                        color: #64748B;
+                    }
+                    .use-case-foot a {
+                        font-weight: 800;
+                        font-size: 0.92rem;
+                        text-decoration: none;
+                        transition: opacity 0.2s ease;
+                    }
+                    .card-blue .use-case-foot a { color: #2563EB; }
+                    .card-teal .use-case-foot a { color: #059669; }
+                    .card-indigo .use-case-foot a { color: #4F46E5; }
+                    .use-case-foot a:hover {
+                        text-decoration: underline;
+                        opacity: 0.85;
+                    }
                 </style>
             </div>
         </section>
