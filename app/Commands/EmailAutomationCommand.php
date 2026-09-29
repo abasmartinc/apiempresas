@@ -77,6 +77,8 @@ class EmailAutomationCommand extends BaseCommand
         // =========================================================================
         CLI::write('💳 [4/6] Revisando el cupo mensual de los clientes de pago de la API...', 'cyan');
         $this->bloque('4', fn () => $this->processPaidApiQuota());
+        // Resumen del mes (días 1-3) y aviso a quien paga y no usa la API
+        $this->bloque('4b', fn () => $this->processPaidApiLifecycle());
 
         // =========================================================================
         // BLOQUE 5: RECUPERACIÓN DE QUIEN DEJÓ PRO O BUSINESS HACE UN MES
@@ -118,13 +120,26 @@ class EmailAutomationCommand extends BaseCommand
     protected function processApiTriggersForUser(array $user)
     {
         $userId = (int)$user['id'];
+
+        // El usuario del monitor de estado no es un cliente
+        if ($userId === \App\Filters\ApiKeyFilter::MONITOR_USER_ID) {
+            return;
+        }
+
+        // Tope global: como mucho UN correo de la API Free al día por usuario. Antes
+        // podían caer dos en la misma hora (first_request y one_request_inactive_1h,
+        // que dicen casi lo mismo). El que no sale hoy sale en otra pasada.
+        if ($this->recibioHoyApi($userId)) {
+            return;
+        }
+
         $totalRequests = $this->getTotalRequests($userId);
         $lastRequestTime = $this->getLastRequestTime($userId);
         $createdAt = $user['created_at'];
 
-        // 0. TRIGGER: reached_100_percent_quota (Bono de 100)
+        // 0. AGOTÓ EL FREE: aviso, seguimiento a los 3 y 10 días, y recordatorio espaciado
         if ($totalRequests >= 100) {
-            $this->checkAndSend($user, 'reached_100_percent_quota', 'email_sent_quota_max', [], true);
+            $this->procesarFreeAgotado($user);
             return;
         }
 
@@ -145,17 +160,44 @@ class EmailAutomationCommand extends BaseCommand
             return;
         }
 
-        // 2. TRIGGER: reached_5_requests
-        if ($totalRequests >= 5) {
-            $this->checkAndSend($user, 'reached_5_requests', 'email_sent_engaged');
+        // 2. TRIGGER: reached_5_requests (una vez). Antes hacía `return` aunque ya se
+        //    hubiera enviado, y por eso nadie con 5 o más llegaba nunca al resumen
+        //    mensual ni a nada posterior. Ahora solo corta si de verdad envía.
+        if ($totalRequests >= 5 && $this->checkAndSend($user, 'reached_5_requests', 'email_sent_engaged')) {
             return;
         }
 
-        // 3. TRIGGER: one_request_inactive_1h
+        // 3. TRIGGER: one_request_inactive_1h (una vez)
         if ($totalRequests === 1 && $lastRequestTime) {
             $diffSeconds = time() - strtotime($lastRequestTime);
-            if ($diffSeconds >= 3600) { // 1 hora
-                $this->checkAndSend($user, 'one_request_inactive_1h', 'email_sent_first_usage');
+            if ($diffSeconds >= 3600 && $this->checkAndSend($user, 'one_request_inactive_1h', 'email_sent_first_usage')) {
+                return;
+            }
+        }
+
+        // 3b. USÓ LA API Y SE PARÓ: 7 y 30 días desde la última llamada.
+        //
+        // Era el hueco más grande: quien hacía unas cuantas consultas y dejaba de llamar
+        // no volvía a saber de nosotros (solo existía el aviso de 1 h para quien hizo
+        // exactamente una). Ventanas cerradas (7-14 y 30-37 días) para no escribir de
+        // golpe a toda la base antigua al desplegar, y un envío por parón: se cuenta
+        // desde la última llamada, y como mucho uno de cada tipo cada 60 días.
+        if ($totalRequests >= 1 && $lastRequestTime && !$this->tuvoPlanDePago($userId)) {
+            $diasParado = (time() - strtotime($lastRequestTime)) / 86400;
+
+            foreach ([['api_stalled_30d', 30, 37], ['api_stalled_7d', 7, 14]] as [$tipo, $desde, $hasta]) {
+                if ($diasParado < $desde || $diasParado >= $hasta) {
+                    continue;
+                }
+                if ($this->enviadoDesde($userId, $tipo, $lastRequestTime)
+                    || $this->automationModel->wasSentRecently($userId, $tipo, 60)) {
+                    return;
+                }
+                $this->checkAndSend($user, $tipo, 'email_sent_' . $tipo, [
+                    'dias'      => (int) floor($diasParado),
+                    'total'     => $totalRequests,
+                    'empresas'  => $this->empresasConsultadas($userId),
+                ], true);
                 return;
             }
         }
@@ -182,13 +224,224 @@ class EmailAutomationCommand extends BaseCommand
             }
         }
 
-        // 5. TRIGGER: monthly_report (Recurrente cada 30 días)
-        if (!$this->automationModel->wasSentRecently($userId, 'monthly_report', 30)) {
+        // 5. TRIGGER: monthly_report (cada 30 días, a quien ha usado la API en ese tiempo).
+        //    Solo a cuentas de 4 semanas o más: antes, el primer mes ya lo cubren los
+        //    correos de alta y de hitos.
+        $edadCuenta = time() - strtotime((string) $createdAt);
+        if ($totalRequests >= 1 && $edadCuenta >= 28 * 86400
+            && !$this->automationModel->wasSentRecently($userId, 'monthly_report', 30)) {
             $usage30Days = $this->getUsageLast30Days($userId);
             if ($usage30Days > 0) {
-                $this->checkAndSend($user, 'monthly_report', 'email_sent_monthly_report', ['usage' => $usage30Days], true);
+                $this->checkAndSend($user, 'monthly_report', 'email_sent_monthly_report', [
+                    'usage'    => $usage30Days,
+                    'total'    => $totalRequests,
+                    'empresas' => $this->empresasConsultadas($userId, 30),
+                ], true);
             }
         }
+    }
+
+    /**
+     * Free con las 100 consultas gastadas.
+     *
+     * Antes: el mismo "has agotado tus consultas" cada 30 días, para siempre, y nada en
+     * medio. Ahora:
+     *   - el aviso al agotarlas (reached_100_percent_quota), como siempre;
+     *   - a los 3 días (api_exhausted_3d): cuántos días ha seguido llamando su
+     *     integración (los 429 quedan en api_requests), las dudas de siempre antes de
+     *     pagar y el bono como paso pequeño;
+     *   - a los 10 días (api_exhausted_10d): corto, pregunta qué le frena;
+     *   - el recordatorio de cada 30 días, como mucho 3 veces en total.
+     * Quien tiene saldo en el monedero no está parado (consulta con saldo): nada.
+     */
+    protected function procesarFreeAgotado(array $user): void
+    {
+        $userId = (int) $user['id'];
+
+        if ($this->saldoMonedero($userId) > 0 || $this->tuvoPlanDePago($userId)) {
+            return;
+        }
+
+        [$desde, $veces] = $this->avisosAgotado($userId);
+
+        if ($desde === null) {
+            $this->checkAndSend($user, 'reached_100_percent_quota', 'email_sent_quota_max', [], true);
+            return;
+        }
+
+        $dias  = (time() - strtotime($desde)) / 86400;
+
+        foreach ([['api_exhausted_10d', 10, 17], ['api_exhausted_3d', 3, 7]] as [$tipo, $min, $max]) {
+            if ($dias < $min || $dias >= $max) {
+                continue;
+            }
+            // Uno por agotamiento y, como mucho, uno de cada tipo cada 180 días
+            if ($this->enviadoDesde($userId, $tipo, $desde) || $this->automationModel->wasSentRecently($userId, $tipo, 180)) {
+                return;
+            }
+            $this->checkAndSend($user, $tipo, 'email_sent_' . $tipo, [
+                'dias_429' => $this->diasConRechazos($userId, $desde),
+                'empresas' => $this->empresasConsultadas($userId),
+            ], true);
+            return;
+        }
+
+        if ($veces < 3) {
+            $this->checkAndSend($user, 'reached_100_percent_quota', 'email_sent_quota_max', [], true);
+        }
+    }
+
+    /**
+     * Último aviso de "has agotado" y cuántos se han enviado en total.
+     *
+     * @return array{0: ?string, 1: int} [fecha del último o null, total]
+     */
+    protected function avisosAgotado(int $userId): array
+    {
+        $fila = \Config\Database::connect()->query(
+            "SELECT MAX(sent_at) AS ultimo, COUNT(*) AS n FROM user_email_automation
+             WHERE user_id = ? AND email_type = 'reached_100_percent_quota'",
+            [$userId]
+        )->getRowArray();
+        return [$fila['ultimo'] ?? null, (int) ($fila['n'] ?? 0)];
+    }
+
+    /** Créditos en el monedero (bono) del usuario. */
+    protected function saldoMonedero(int $userId): int
+    {
+        try {
+            $fila = \Config\Database::connect()->table('user_wallets')
+                ->select('balance')->where('user_id', $userId)->get()->getRowArray();
+            return (int) ($fila['balance'] ?? 0);
+        } catch (\Throwable $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Días distintos, desde una fecha, en que la API le devolvió 429 (cupo agotado).
+     * ApiKeyFilter::registrarRechazo guarda como mucho un rechazo por minuto, así que se
+     * cuentan días y no peticiones.
+     */
+    protected function diasConRechazos(int $userId, string $desde): int
+    {
+        try {
+            $fila = \Config\Database::connect()->query(
+                'SELECT COUNT(DISTINCT DATE(created_at)) AS n FROM api_requests
+                 WHERE user_id = ? AND status_code = 429 AND created_at >= ?',
+                [$userId, $desde]
+            )->getRowArray();
+            return (int) ($fila['n'] ?? 0);
+        } catch (\Throwable $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * ¿Ha recibido ya en las últimas 20 h algún correo automático de la API Free?
+     * (los de servicio de clientes de pago, como paid_quota_*, no cuentan)
+     */
+    protected function recibioHoyApi(int $userId): bool
+    {
+        return \Config\Database::connect()->table('user_email_automation')
+            ->where('user_id', $userId)
+            ->whereIn('email_type', [
+                'first_request', 'no_requests_15min', 'no_requests_day1', 'no_requests_day3',
+                'one_request_inactive_1h', 'reached_5_requests', 'reached_80_requests',
+                'reached_100_percent_quota', 'monthly_report', 'bad_request_help',
+                'api_stalled_7d', 'api_stalled_30d', 'api_checkout_abandoned',
+                'api_exhausted_3d', 'api_exhausted_10d',
+            ])
+            ->where('sent_at >=', date('Y-m-d H:i:s', strtotime('-20 hours')))
+            ->countAllResults() > 0;
+    }
+
+    /** ¿Se envió ese correo después de una fecha? (p. ej. después de la última llamada) */
+    protected function enviadoDesde(int $userId, string $tipo, string $desde): bool
+    {
+        return \Config\Database::connect()->table('user_email_automation')
+            ->where('user_id', $userId)
+            ->where('email_type', $tipo)
+            ->where('sent_at >=', $desde)
+            ->countAllResults() > 0;
+    }
+
+    /** @var array<int, true>|null usuarios que han tenido Pro o Business alguna vez */
+    protected ?array $exPago = null;
+
+    /**
+     * Quien ha pagado Pro o Business ya tiene su propio correo de recuperación
+     * (api_winback): el de "te has parado" con el cupo gratuito no le corresponde.
+     */
+    protected function tuvoPlanDePago(int $userId): bool
+    {
+        if ($this->exPago === null) {
+            $this->exPago = array_flip(array_map('intval', array_column(
+                \Config\Database::connect()->table('user_subscriptions')
+                    ->select('user_id')->distinct()
+                    ->whereIn('plan_id', [2, 3])
+                    ->get()->getResultArray(),
+                'user_id'
+            )));
+        }
+        return isset($this->exPago[$userId]);
+    }
+
+    /**
+     * Las últimas empresas (distintas) que el usuario consultó con éxito, para que el
+     * correo hable de SU uso: [['cif' => ..., 'nombre' => ...], ...]
+     */
+    protected function empresasConsultadas(int $userId, ?int $dias = null, int $max = 3): array
+    {
+        $db = \Config\Database::connect();
+        try {
+            $q = $db->table('api_requests')
+                ->select('search_term, MAX(created_at) AS ultima', false)
+                ->where('user_id', $userId)
+                ->where('status_code', 200)
+                ->where('search_term IS NOT NULL', null, false)
+                ->where('search_term <>', '')
+                ->where('created_at >=', \App\Filters\ApiKeyFilter::FREE_DESDE . ' 00:00:00');
+            if ($dias !== null) {
+                $q->where('created_at >=', date('Y-m-d H:i:s', strtotime("-{$dias} days")));
+            }
+            $filas = $q->groupBy('search_term')->orderBy('ultima', 'DESC')->limit($max)
+                ->get()->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', '[EmailAutomation::empresasConsultadas] ' . $e->getMessage());
+            return [];
+        }
+
+        $terminos = array_values(array_filter(array_map(
+            static fn ($f) => strtoupper(trim((string) $f['search_term'])),
+            $filas
+        )));
+        if (empty($terminos)) {
+            return [];
+        }
+
+        $nombres = [];
+        try {
+            $nombres = array_column($db->table('companies')->select('cif, company_name')
+                ->whereIn('cif', $terminos)->get()->getResultArray(), 'company_name', 'cif');
+        } catch (\Throwable $e) {
+            // Sin nombre, se muestra el CIF
+        }
+
+        helper('company');
+        $salida = [];
+        foreach ($terminos as $t) {
+            // Solo identificadores con forma de CIF/NIF: el search_term también puede
+            // ser una búsqueda por nombre (q, name), que no sirve para ?probar=
+            if (!preg_match('/^[A-Z0-9]{9}$/', $t)) {
+                continue;
+            }
+            $nombre = isset($nombres[$t]) && $nombres[$t] !== ''
+                ? (function_exists('company_display_name') ? company_display_name((string) $nombres[$t], $t) : (string) $nombres[$t])
+                : '';
+            $salida[] = ['cif' => $t, 'nombre' => $nombre];
+        }
+        return $salida;
     }
 
     /**
@@ -438,16 +691,19 @@ class EmailAutomationCommand extends BaseCommand
         }
     }
 
-    protected function checkAndSend(array $user, string $triggerType, string $trackingEvent, array $extraParams = [], bool $isRecurring = false)
+    /**
+     * @return bool true si el correo se ha enviado en esta llamada
+     */
+    protected function checkAndSend(array $user, string $triggerType, string $trackingEvent, array $extraParams = [], bool $isRecurring = false): bool
     {
         $userId = (int)$user['id'];
 
-        $alreadySent = $isRecurring 
+        $alreadySent = $isRecurring
             ? $this->automationModel->wasSentRecently($userId, $triggerType, 30)
             : $this->automationModel->wasSent($userId, $triggerType);
 
         if ($alreadySent) {
-            return;
+            return false;
         }
 
         CLI::write("  -> Intentando enviar '{$triggerType}' a {$user['email']}...");
@@ -480,15 +736,42 @@ class EmailAutomationCommand extends BaseCommand
                 break;
             case 'monthly_report':
                 $usage = $extraParams['usage'] ?? 0;
-                $result = $this->emailService->sendMonthlyUsageReport($user, $usage);
+                $result = $this->emailService->sendMonthlyUsageReport(
+                    $user,
+                    (int) $usage,
+                    (int) ($extraParams['total'] ?? 0),
+                    $extraParams['empresas'] ?? []
+                );
+                break;
+            case 'api_exhausted_3d':
+            case 'api_exhausted_10d':
+                $result = $this->emailService->sendFreeExhaustedFollowUp(
+                    $user,
+                    (int) ($extraParams['dias_429'] ?? 0),
+                    $extraParams['empresas'] ?? [],
+                    $triggerType === 'api_exhausted_10d'
+                );
+                break;
+            case 'api_stalled_7d':
+            case 'api_stalled_30d':
+                $result = $this->emailService->sendApiStalled(
+                    $user,
+                    (int) ($extraParams['dias'] ?? 0),
+                    (int) ($extraParams['total'] ?? 0),
+                    $extraParams['empresas'] ?? [],
+                    $triggerType === 'api_stalled_30d'
+                );
                 break;
         }
 
-        if ($result['success']) {
-            $this->automationModel->markAsSent($userId, $triggerType, $result['body']);
+        // Como antes: un envío saltado (baja) también se marca, para no reintentarlo
+        if (!empty($result['success'])) {
+            $this->automationModel->markAsSent($userId, $triggerType, $result['body'] ?? '');
             $this->recordTracking($userId, $trackingEvent);
             CLI::write("     [SENT] {$triggerType} OK", 'yellow');
+            return true;
         }
+        return false;
     }
 
     /**
@@ -1253,6 +1536,151 @@ class EmailAutomationCommand extends BaseCommand
     }
 
     /**
+     * Clientes de pago de la API (Pro y Business):
+     *
+     *  - paid_monthly_summary (días 1-3): el resumen del mes anterior. Hasta ahora el
+     *    cliente de pago solo recibía la factura; el resumen es la prueba de que la
+     *    suscripción se usa y el sitio natural para enseñarle errores que no ha visto.
+     *  - paid_low_usage: lleva 14 días pagando sin hacer ni una consulta. Es la baja que
+     *    viene, y la forma de evitarla es ayudarle a ponerlo en marcha. Una vez cada 60 días.
+     *
+     * Como mucho uno de los dos por usuario y pasada.
+     */
+    protected function processPaidApiLifecycle(): void
+    {
+        $db = \Config\Database::connect();
+
+        $filas = $db->query("
+            SELECT u.id, u.email, u.name, us.plan_id, us.created_at AS sub_desde,
+                   ap.name AS plan_name, ap.monthly_quota
+            FROM user_subscriptions us
+            JOIN users u      ON u.id = us.user_id
+            JOIN api_plans ap ON ap.id = us.plan_id
+            WHERE us.plan_id IN (2, 3)
+              AND us.status = 'active'
+              AND (us.current_period_end IS NULL OR us.current_period_end > NOW())
+              AND u.is_admin = 0
+              AND u.id <> ?
+            ORDER BY us.id DESC
+        ", [\App\Filters\ApiKeyFilter::MONITOR_USER_ID])->getResultArray();
+
+        $clientes = [];
+        foreach ($filas as $f) {
+            $clientes[(int) $f['id']] ??= $f;
+        }
+        if (empty($clientes)) {
+            CLI::write('  - Sin clientes de pago activos de la API.', 'dark_gray');
+            return;
+        }
+
+        $inicioMes   = date('Y-m-01 00:00:00');
+        $mesPasado   = date('Y-m', strtotime('first day of last month'));
+        $desdePasado = $mesPasado . '-01 00:00:00';
+        $esPrincipio = (int) date('j') <= 3;
+        $enviados    = 0;
+
+        foreach ($clientes as $uid => $c) {
+            $usuario = ['id' => $uid, 'user_id' => $uid, 'email' => $c['email'], 'name' => $c['name']];
+
+            // 1. Resumen del mes anterior
+            if ($esPrincipio
+                && strtotime((string) $c['sub_desde']) < strtotime($inicioMes)
+                && !$this->enviadoDesde($uid, 'paid_monthly_summary', $inicioMes)) {
+
+                $usadas = (int) ($db->table('api_usage_daily')->selectSum('requests_count')
+                    ->where('user_id', $uid)->like('date', $mesPasado, 'after')
+                    ->get()->getRowArray()['requests_count'] ?? 0);
+
+                if ($usadas > 0) {
+                    $stats = $this->estadisticasMes($uid, $desdePasado, $inicioMes, $mesPasado);
+                    CLI::write("  -> Enviando 'paid_monthly_summary' a {$c['email']} ({$usadas} consultas)...");
+                    $res = $this->emailService->sendPaidMonthlySummary(
+                        $usuario,
+                        ['name' => $c['plan_name'], 'monthly_quota' => (int) $c['monthly_quota'], 'id' => (int) $c['plan_id']],
+                        $mesPasado,
+                        $usadas,
+                        $stats
+                    );
+                    $this->registrarEnvio($uid, 'paid_monthly_summary', $res);
+                    if (!empty($res['success'])) {
+                        $enviados++;
+                        continue;
+                    }
+                }
+            }
+
+            // 2. Paga y no usa: 14 días con el plan y ninguna consulta en esos 14 días
+            if (time() - strtotime((string) $c['sub_desde']) < 14 * 86400
+                || $this->automationModel->wasSentRecently($uid, 'paid_low_usage', 60)) {
+                continue;
+            }
+            $recientes = (int) ($db->table('api_usage_daily')->selectSum('requests_count')
+                ->where('user_id', $uid)->where('date >=', date('Y-m-d', strtotime('-14 days')))
+                ->get()->getRowArray()['requests_count'] ?? 0);
+            if ($recientes > 0) {
+                continue;
+            }
+
+            $ultima = $this->getLastRequestTime($uid);
+            CLI::write("  -> Enviando 'paid_low_usage' a {$c['email']}...");
+            $res = $this->emailService->sendPaidLowUsage(
+                $usuario,
+                ['name' => $c['plan_name'], 'monthly_quota' => (int) $c['monthly_quota']],
+                $ultima ? (int) floor((time() - strtotime($ultima)) / 86400) : null
+            );
+            $this->registrarEnvio($uid, 'paid_low_usage', $res);
+            if (!empty($res['success'])) {
+                $enviados++;
+            }
+        }
+
+        CLI::write('  - Resúmenes y avisos de poco uso enviados: ' . $enviados);
+    }
+
+    /**
+     * Cifras de un mes para el resumen del cliente de pago: día de más uso, errores 400,
+     * días con rechazos 429 y endpoints más usados.
+     */
+    protected function estadisticasMes(int $userId, string $desde, string $hasta, string $mes): array
+    {
+        $db    = \Config\Database::connect();
+        $stats = ['pico_dia' => null, 'pico_n' => 0, 'errores_400' => 0, 'dias_429' => 0, 'endpoints' => []];
+
+        try {
+            $pico = $db->table('api_usage_daily')
+                ->select('date, SUM(requests_count) AS n')
+                ->where('user_id', $userId)->like('date', $mes, 'after')
+                ->groupBy('date')->orderBy('n', 'DESC')->limit(1)
+                ->get()->getRowArray();
+            if ($pico) {
+                $stats['pico_dia'] = (string) $pico['date'];
+                $stats['pico_n']   = (int) $pico['n'];
+            }
+
+            $fila = $db->query(
+                'SELECT SUM(status_code = 400) AS e400,
+                        COUNT(DISTINCT CASE WHEN status_code = 429 THEN DATE(created_at) END) AS d429
+                 FROM api_requests
+                 WHERE user_id = ? AND created_at >= ? AND created_at < ?',
+                [$userId, $desde, $hasta]
+            )->getRowArray();
+            $stats['errores_400'] = (int) ($fila['e400'] ?? 0);
+            $stats['dias_429']    = (int) ($fila['d429'] ?? 0);
+
+            $stats['endpoints'] = $db->query(
+                'SELECT endpoint, COUNT(*) AS n FROM api_requests
+                 WHERE user_id = ? AND status_code = 200 AND created_at >= ? AND created_at < ?
+                 GROUP BY endpoint ORDER BY n DESC LIMIT 3',
+                [$userId, $desde, $hasta]
+            )->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', '[EmailAutomation::estadisticasMes] ' . $e->getMessage());
+        }
+
+        return $stats;
+    }
+
+    /**
      * 30-37 días después de que TERMINE un Pro/Business cancelado, si no ha vuelto.
      * Una vez al año como mucho. Es comercial: usuariosElegibles() descarta las bajas.
      */
@@ -1427,20 +1855,26 @@ class EmailAutomationCommand extends BaseCommand
                 SUM(CASE WHEN r.status_code = 400 THEN 1 ELSE 0 END) as bad_count,
                 COUNT(r.id) as total_count
             FROM users u
-            JOIN user_subscriptions us ON us.user_id = u.id AND us.status = 'active' AND us.plan_id = 1
-            JOIN api_requests r ON r.user_id = u.id AND DATE(r.created_at) = CURDATE()
+            JOIN api_requests r ON r.user_id = u.id AND r.created_at >= CURDATE()
             WHERE u.is_admin = 0
               AND u.unsuscribe = 0
-              AND u.signup_intent = 'api'
-              AND u.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+              AND u.id <> ?
+              -- Free, Pro y Business. Antes solo Free con intent 'api' y alta de menos de
+              -- 7 días: quien fallaba después (o ya pagaba) no recibía ayuda.
+              AND EXISTS (
+                  SELECT 1 FROM user_subscriptions us
+                  WHERE us.user_id = u.id AND us.status = 'active' AND us.plan_id IN (1, 2, 3)
+              )
+              -- Como mucho una vez cada 30 días (antes, una vez en la vida)
               AND u.id NOT IN (
                   SELECT user_id FROM user_email_automation
                   WHERE email_type = 'bad_request_help'
+                    AND sent_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
               )
             GROUP BY u.id, u.email, u.name, u.created_at
             HAVING bad_count >= 20
               AND (bad_count / total_count) >= 0.30
-        ")->getResultArray();
+        ", [\App\Filters\ApiKeyFilter::MONITOR_USER_ID])->getResultArray();
 
         if (empty($results)) {
             CLI::write('  - Sin usuarios con alta tasa de errores 400 hoy.', 'dark_gray');
@@ -1457,7 +1891,7 @@ class EmailAutomationCommand extends BaseCommand
             $ejemplos = array_column($db->query("
                 SELECT DISTINCT search_term
                 FROM api_requests
-                WHERE user_id = ? AND status_code = 400 AND DATE(created_at) = CURDATE()
+                WHERE user_id = ? AND status_code = 400 AND created_at >= CURDATE()
                   AND search_term IS NOT NULL AND search_term <> ''
                 LIMIT 3
             ", [$userId])->getResultArray(), 'search_term');

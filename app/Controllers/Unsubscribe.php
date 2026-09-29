@@ -72,6 +72,36 @@ class Unsubscribe extends Controller
     }
 
     /**
+     * Baja de UN CLIC desde la cabecera List-Unsubscribe (RFC 8058).
+     *
+     * Gmail, Yahoo y Apple Mail muestran un botón "Cancelar suscripción" junto al
+     * remitente y, al pulsarlo, hacen un POST a esta URL con el cuerpo
+     * "List-Unsubscribe=One-Click". No hay pantalla intermedia: la baja es inmediata.
+     * Está fuera del CSRF (Config\Filters) porque el POST no viene de nuestra web; lo
+     * protege el hash HMAC del correo, igual que el enlace del pie.
+     */
+    public function oneClick($hash)
+    {
+        $email = (string) $this->request->getGet('email');
+        $expectedHash = hash_hmac('sha256', $email, env('encryption.key', 'apiempresas-secret-key'));
+
+        if ($email === '' || !$hash || !hash_equals($expectedHash, (string) $hash)) {
+            log_message('warning', "[Unsubscribe] Baja de un clic con hash inválido para: {$email}");
+            return $this->response->setStatusCode(400)->setBody('Invalid unsubscribe link');
+        }
+
+        $userModel = new UserModel();
+        $user = $userModel->where('email', $email)->first();
+        if ($user && (int) ($user->unsuscribe ?? 0) !== 1) {
+            $userModel->update($user->id, ['unsuscribe' => 1]);
+            log_message('info', "[Unsubscribe] {$email} se ha dado de baja con un clic (List-Unsubscribe).");
+        }
+
+        // El cliente de correo no enseña esta respuesta: basta con un 200
+        return $this->response->setStatusCode(200)->setBody('OK');
+    }
+
+    /**
      * Process the unsubscribe confirmation.
      */
     public function confirm()

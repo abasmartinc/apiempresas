@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= esc($subject) ?></title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333;">
+    <!-- Preheader: la línea que el cliente de correo enseña junto al asunto -->
+    <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all; font-size: 1px; line-height: 1px; color: #f4f7f6;"><?= esc($preheader) ?></div>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f7f6; padding: 20px;">
+        <tr>
+            <td align="center">
+                <table width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #2152FF 0%, #10B981 100%); padding: 30px; text-align: center; color: #ffffff;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 800; letter-spacing: -1px;">APIEmpresas.es</h1>
+                            <p style="margin: 5px 0 0; color: rgba(255,255,255,0.9); font-size: 14px; font-weight: 500;">Official Spanish company data for developers</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px; line-height: 1.6;">
+                            <h2 style="margin-top: 0; color: #1a1a1a; font-size: 22px;">Hello <?= esc($name) ?>,</h2>
+                            <div style="font-size: 16px; color: #4b5563;">
+                                <?= $content ?>
+                            </div>
+                            
+                            <!-- CTA Button -->
+                            <table border="0" cellspacing="0" cellpadding="0" style="margin: 35px 0;">
+                                <tr>
+                                    <td align="center" bgcolor="#2563eb" style="border-radius: 8px;">
+                                        <a href="<?= $button_url ?>" target="_blank" style="display: inline-block; padding: 14px 28px; font-size: 16px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 8px;">
+                                            <?= esc($button_text) ?>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+                            
+                            <p style="font-size: 14px; color: #9ca3af; margin-bottom: 0;">
+                                Kind regards,<br>
+                                <strong>The APIEmpresas.es team</strong>
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #9ca3af;">
+                            &copy; <?= date('Y') ?> APIEmpresas.es. All rights reserved.<br>
+                            You are receiving this email because you signed up on our platform.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

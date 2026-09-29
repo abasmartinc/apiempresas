@@ -239,6 +239,22 @@ class ApiAnalytics extends BaseController
             }
         }
 
+        // Cupo Free gastado, contado IGUAL que ApiKeyFilter y el comando de correos: de
+        // por vida desde FREE_DESDE. Antes el panel miraba el uso del MES y sus
+        // segmentos no coincidían con los correos automáticos ("límite agotado" aquí y
+        // sin correo de agotado, o al revés).
+        $freeUsageByUser = [];
+        if (!empty($cohortUserIds)) {
+            foreach ($db->table('api_usage_daily')
+                        ->select('user_id, SUM(requests_count) as total_free')
+                        ->whereIn('user_id', $cohortUserIds)
+                        ->where('date >=', \App\Filters\ApiKeyFilter::FREE_DESDE)
+                        ->groupBy('user_id')
+                        ->get()->getResultArray() as $row) {
+                $freeUsageByUser[(int)$row['user_id']] = (int)$row['total_free'];
+            }
+        }
+
         // Estado de API Keys por usuario
         $apiKeysByUser = [];
         if (!empty($cohortUserIds)) {
@@ -340,7 +356,10 @@ class ApiAnalytics extends BaseController
 
             // Cuota del plan: si es de pago usa la del plan, si es free = 100
             $quota = $isPaid ? (int)($subData['monthly_quota'] ?? 3000) : 100;
-            $usagePct = $quota > 0 ? min(100, round(($monthReqs / $quota) * 100)) : 0;
+            // Consumo que cuenta para el cupo: el del mes en los de pago; en Free, el
+            // acumulado desde FREE_DESDE (el Free no se renueva cada mes)
+            $cupoReqs = $isPaid ? $monthReqs : ($freeUsageByUser[$uId] ?? 0);
+            $usagePct = $quota > 0 ? min(100, round(($cupoReqs / $quota) * 100)) : 0;
 
             // Embudo: activación real se mide por hacer al menos 1 petición a la API
             if ($historyReqs >= 1) {
@@ -365,12 +384,12 @@ class ApiAnalytics extends BaseController
                 $status = 'paid';
                 $statusLabel = 'Cliente ' . ($subData['plan_name'] ?? 'Pro');
                 $statusBadge = 'success';
-            } elseif ($monthReqs >= $quota) {
+            } elseif ($cupoReqs >= $quota) {
                 $countLimitReached++;
                 $status = 'limit_reached';
                 $statusLabel = 'Límite 100% Agotado';
                 $statusBadge = 'danger';
-            } elseif ($monthReqs >= 80) {
+            } elseif ($cupoReqs >= 80) {
                 $countNearLimit++;
                 $status = 'near_limit';
                 $statusLabel = 'Cerca del Límite (80%+)';
@@ -383,7 +402,7 @@ class ApiAnalytics extends BaseController
             } elseif ($monthReqs > 0) {
                 $countActiveFree++;
                 $status = 'active_free';
-                $statusLabel = 'Activo Free (' . $monthReqs . '/100)';
+                $statusLabel = 'Activo Free (' . $cupoReqs . '/100)';
                 $statusBadge = 'info';
             } elseif ($historyReqs > 0) {
                 $countInactive++;
@@ -740,6 +759,8 @@ class ApiAnalytics extends BaseController
         $emailService->clear();
         $emailService->setTo($user->email);
         $emailService->setSubject($subject);
+        // Cabecera de baja de un clic (Gmail y Yahoo la exigen al correo comercial)
+        $emailHelper->cabecerasBaja($emailService, $user->email);
         $emailService->setMessage($body);
 
         $logData = [
@@ -828,6 +849,7 @@ class ApiAnalytics extends BaseController
             $emailService->clear();
             $emailService->setTo($user->email);
             $emailService->setSubject($subject);
+            $emailHelper->cabecerasBaja($emailService, $user->email);
 
             $trackingCode = bin2hex(random_bytes(16));
 

@@ -726,6 +726,8 @@ class Dashboard extends BaseController
 
         $email->setTo($user->email);
         $email->setSubject($subject);
+        // Cabecera de baja de un clic (Gmail y Yahoo la exigen al correo comercial)
+        (new \App\Services\EmailService())->cabecerasBaja($email, $user->email);
 
         $trackingCode = bin2hex(random_bytes(16));
 
@@ -899,6 +901,7 @@ class Dashboard extends BaseController
 
             $emailService->setTo($user->email);
             $emailService->setSubject($subject);
+            (new \App\Services\EmailService())->cabecerasBaja($emailService, $user->email);
 
             $trackingCode = bin2hex(random_bytes(16));
 

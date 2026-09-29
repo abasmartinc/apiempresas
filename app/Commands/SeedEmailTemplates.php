@@ -47,6 +47,7 @@ class SeedEmailTemplates extends BaseCommand
                 'name'    => 'Bienvenida (Registro)',
                 'subject' => '🚀 [Configuración] Tu acceso a la API de Empresas España',
                 'view'    => 'welcome',
+                'subject_en' => '🚀 [Setup] Your access to the Spanish Company API',
                 'vars'    => '{name}',
                 'trigger' => 'Se envía inmediatamente después de que un usuario completa su registro.'
             ],
@@ -135,6 +136,7 @@ class SeedEmailTemplates extends BaseCommand
                 'name'    => 'Establecer Contraseña',
                 'subject' => 'Establece tu contraseña - APIEmpresas.es',
                 'view'    => 'set_password_email',
+                'subject_en' => 'Set your password - APIEmpresas.es',
                 'vars'    => '{token}',
                 'trigger' => 'Se envía en registros rápidos para que el usuario configure su contraseña por primera vez.'
             ],
@@ -170,6 +172,7 @@ class SeedEmailTemplates extends BaseCommand
                 // APIEmpresas.es") y todos los avisos de la API llegaban iguales.
                 'subject' => '{subject}',
                 'view'    => 'automation_generic',
+                'subject_en' => '{subject}',
                 'vars'    => '{subject}, {preheader}, {name}, {content}, {button_text}, {button_url}',
                 'trigger' => 'Plantilla base usada para múltiples avisos (Límites de cuota, avisos de 15min, reporte mensual, etc).'
             ],
@@ -178,6 +181,7 @@ class SeedEmailTemplates extends BaseCommand
                 'name'    => 'Prompt de Inicio Rápido',
                 'subject' => 'Configura tu integración con APIEmpresas en 1 minuto 🚀',
                 'view'    => 'quick_start',
+                'subject_en' => 'Your first API call in 1 minute 🚀',
                 'vars'    => '{name}',
                 'trigger' => 'Día 1 sin ninguna llamada a la API (entre 1 y 3 días después del alta). Lo envía email:automation (no_requests_day1).'
             ],
@@ -188,6 +192,7 @@ class SeedEmailTemplates extends BaseCommand
                 // de constituciones de hoy que casi siempre era 0.
                 'subject' => '¿Algo te ha frenado con la API?',
                 'view'    => 'inactivity_reminder',
+                'subject_en' => 'Did something get in the way with the API?',
                 'vars'    => '{name}',
                 'trigger' => 'Día 3 sin ninguna llamada a la API (entre 3 y 7 días después del alta): ofrece ayuda con la integración. Lo envía email:automation (no_requests_day3).'
             ],
@@ -196,6 +201,7 @@ class SeedEmailTemplates extends BaseCommand
                 'name'    => 'Hito: Primera Petición',
                 'subject' => 'Ya estás usando la API ⚡',
                 'view'    => 'first_request_success',
+                'subject_en' => 'You are now using the API ⚡',
                 'vars'    => '{name}',
                 'trigger' => 'Se envía en el momento exacto en que el usuario realiza su primera llamada con éxito.'
             ],
@@ -282,7 +288,60 @@ class SeedEmailTemplates extends BaseCommand
 
             $viewPath = APPPATH . 'Views/emails/' . $t['view'] . '.php';
             if (file_exists($viewPath)) {
-                $content = file_get_contents($viewPath);
+                $content = $this->transformarVista(file_get_contents($viewPath), $t['slug'], 'es');
+                if ($content === null) {
+                    continue;
+                }
+
+                // Versión en inglés (altas desde spaincompanyapi.com, users.lang = 'en'):
+                // Views/emails/en/<vista>.php. Si no existe, body_en queda vacío y el
+                // envío usa la española, que funciona. Antes nadie escribía body_en y
+                // quedaron en producción versiones EN rotas (enlaces vacíos, "????").
+                $contentEn = null;
+                $viewPathEn = APPPATH . 'Views/emails/en/' . $t['view'] . '.php';
+                if (file_exists($viewPathEn)) {
+                    $contentEn = $this->transformarVista(file_get_contents($viewPathEn), $t['slug'], 'en');
+                    if ($contentEn === null) {
+                        continue;
+                    }
+                }
+
+                $data = [
+                    'slug'        => $t['slug'],
+                    'name'        => $t['name'],
+                    'subject'     => $t['subject'],
+                    'body'        => $content,
+                    'description' => $t['trigger'] . ' | Variables: ' . $t['vars'],
+                ];
+                // La versión EN solo se toca si hay vista EN. Sin ella se deja la que
+                // hubiera: si está rota, EmailService lo detecta y envía la española.
+                if ($contentEn !== null) {
+                    $data['subject_en'] = $t['subject_en'] ?? $t['subject'];
+                    $data['body_en']    = $contentEn;
+                }
+
+                if ($model->where('slug', $t['slug'])->first()) {
+                    $model->where('slug', $t['slug'])->set($data)->update();
+                    CLI::write("Actualizada: " . $t['slug'], 'yellow');
+                } else {
+                    $model->insert($data);
+                    CLI::write("Insertada: " . $t['slug'], 'green');
+                }
+            } else {
+                CLI::error("Vista no encontrada: " . $viewPath);
+            }
+        }
+
+        CLI::write("Proceso de semilla completado.", 'cyan');
+    }
+
+    /**
+     * Convierte una vista PHP en el HTML con marcadores ({name}, {reset_url}...) que se
+     * guarda en email_templates. Devuelve null si queda PHP sin traducir: borrarlo en
+     * silencio es lo que dejaba botones con href="" en producción.
+     */
+    private function transformarVista(string $content, string $slug, string $version): ?string
+    {
                 
                 // --- REEMPLAZOS DINÁMICOS PARA NORMALIZAR CABECERAS ---
                 
@@ -377,38 +436,18 @@ class SeedEmailTemplates extends BaseCommand
                 // 4. Si queda PHP sin traducir, NO se escribe: borrarlo en silencio es
                 //    lo que dejaba enlaces vacíos. Hay que añadir la traducción arriba.
                 if (preg_match_all('/<\?.*?\?>/s', $content, $restos)) {
-                    CLI::error("NO se actualiza '{$t['slug']}': quedan expresiones PHP sin traducir:");
+                    CLI::error("NO se actualiza '{$slug}' ({$version}): quedan expresiones PHP sin traducir:");
                     foreach (array_unique($restos[0]) as $resto) {
                         CLI::write('   ' . $resto, 'red');
                     }
-                    continue;
+                    return null;
                 }
 
                 // Aviso (no bloquea) si algún enlace ha quedado vacío
                 if (preg_match('/href=["\']\s*["\']/', $content)) {
-                    CLI::write("AVISO: '{$t['slug']}' tiene algún href vacío. Revísalo.", 'yellow');
+                    CLI::write("AVISO: '{$slug}' ({$version}) tiene algún href vacío. Revísalo.", 'yellow');
                 }
 
-                $data = [
-                    'slug'        => $t['slug'],
-                    'name'        => $t['name'],
-                    'subject'     => $t['subject'],
-                    'body'        => $content,
-                    'description' => $t['trigger'] . ' | Variables: ' . $t['vars']
-                ];
-
-                if ($model->where('slug', $t['slug'])->first()) {
-                    $model->where('slug', $t['slug'])->set($data)->update();
-                    CLI::write("Actualizada: " . $t['slug'], 'yellow');
-                } else {
-                    $model->insert($data);
-                    CLI::write("Insertada: " . $t['slug'], 'green');
-                }
-            } else {
-                CLI::error("Vista no encontrada: " . $viewPath);
-            }
-        }
-
-        CLI::write("Proceso de semilla completado.", 'cyan');
+        return $content;
     }
 }

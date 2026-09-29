@@ -659,6 +659,17 @@ class Register extends BaseController
                         'email'         => $email,
                         'signup_intent' => $data['signup_intent'],
                     ], (string)$redirect, (string)(session()->get('signup_cif') ?? $this->request->getPost('cif') ?? ''));
+                } elseif (($data['signup_intent'] ?? '') === 'api' && !$intentPorDefecto) {
+                    // Igual que el registro normal: quien viene expresamente por la API
+                    // recibe su bienvenida (API Key, primera llamada). Antes solo le
+                    // llegaba "pon tu contraseña". Si el 'api' es por defecto (sin
+                    // intención ni pista), no: puede venir de una ficha y no quiere curls.
+                    $this->emailService->sendWelcomeEmail([
+                        'user_id'       => $user_id,
+                        'name'          => $data['name'],
+                        'email'         => $email,
+                        'signup_intent' => 'api',
+                    ]);
                 }
             } catch (\Throwable $e) {
                 log_message('error', 'Quick Register: fallo enviando correos al usuario ' . $user_id . ': ' . $e->getMessage());

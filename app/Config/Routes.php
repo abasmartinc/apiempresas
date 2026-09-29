@@ -613,6 +613,11 @@ $routes->post('garantia/solicitar', 'Garantia::solicitar');
 // Unsubscribe
 // Baja de un clic solo de las alertas del BORME (antes de la ruta genérica, que es (:any))
 $routes->get('unsubscribe/alertas/(:any)', 'Unsubscribe::alerts/$1');
+// Baja de un clic de la cabecera List-Unsubscribe: el cliente de correo hace POST (baja
+// inmediata). Abierta en el navegador (GET), la confirmación de siempre.
+$routes->post('unsubscribe/alertas/(:any)', 'Unsubscribe::alerts/$1');
+$routes->get('unsubscribe/one-click/(:any)', 'Unsubscribe::index/$1');
+$routes->post('unsubscribe/one-click/(:any)', 'Unsubscribe::oneClick/$1');
 $routes->get('unsubscribe/(:any)', 'Unsubscribe::index/$1');
 $routes->post('unsubscribe/confirm', 'Unsubscribe::confirm');
 

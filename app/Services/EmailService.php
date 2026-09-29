@@ -115,6 +115,34 @@ class EmailService
      * Plantillas cuyos enlaces NO se envuelven para medir clics: avisos internos y
      * enlaces con token de un solo uso (entrar, poner contraseña).
      */
+    /**
+     * Plantillas que solo son un marco (asunto, saludo, botón) para contenido que se
+     * escribe en PHP. El idioma lo decide quien escribe el contenido (`_idioma`).
+     */
+    private const CONTENIDO_EN_CODIGO = ['automation_generic', 'quota_warning', 'risk_generic', 'risk_servicio', 'subscription_generic'];
+
+    /** ¿Tiene el HTML de una plantilla señales de haberse roto al sembrarla? */
+    private static function plantillaRota(string $html): bool
+    {
+        return (bool) preg_match('/href=["\']\s*["\']/', $html)   // botón sin destino
+            || str_contains($html, '????')                         // emojis perdidos
+            || (bool) preg_match('/<\?(=|php)/', $html);           // PHP sin traducir
+    }
+
+    /**
+     * Añade List-Unsubscribe y List-Unsubscribe-Post (baja de un clic) a un envío.
+     * Público para los envíos manuales del admin, que montan el correo a mano.
+     *
+     * @param bool $alertas baja solo de las alertas del BORME, no del marketing
+     */
+    public function cabecerasBaja(\CodeIgniter\Email\Email $email, string $to, bool $alertas = false): void
+    {
+        $url = $alertas ? $this->generateAlertsOptOutLink($to) : $this->generateOneClickUnsubscribeLink($to);
+        $buzon = env('email.fromEmail', 'soporte@apiempresas.es');
+        $email->setHeader('List-Unsubscribe', '<' . $url . '>, <mailto:' . $buzon . '?subject=' . rawurlencode($alertas ? 'Baja alertas' : 'Baja') . '>');
+        $email->setHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
+    }
+
     private const SIN_SEGUIMIENTO = [
         'payment_notification', 'admin_registration', 'login_link', 'set_password', 'reset_password',
     ];
@@ -565,7 +593,7 @@ class EmailService
      */
     public function sendQuickStartPrompt(array $userData)
     {
-        return $this->sendTemplateEmail('quick_start', ['name' => $userData['name'] ?? 'Usuario'], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
+        return $this->sendTemplateEmail('quick_start', ['name' => self::saludo($userData)], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
     }
 
     /**
@@ -576,7 +604,7 @@ class EmailService
      */
     public function sendInactivityReminder(array $userData)
     {
-        return $this->sendTemplateEmail('inactivity_reminder', ['name' => $userData['name'] ?? 'Usuario'], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
+        return $this->sendTemplateEmail('inactivity_reminder', ['name' => self::saludo($userData)], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
     }
 
     /**
@@ -584,7 +612,7 @@ class EmailService
      */
     public function sendFirstRequestMilestone(array $userData)
     {
-        return $this->sendTemplateEmail('first_request_success', ['name' => $userData['name'] ?? 'Usuario'], $userData['email'], ['papelo.amh@gmail.com']);
+        return $this->sendTemplateEmail('first_request_success', ['name' => self::saludo($userData)], $userData['email'], ['papelo.amh@gmail.com']);
     }
 
     /**
@@ -617,20 +645,53 @@ class EmailService
      * Cada aviso trae su asunto y su preheader: antes la plantilla tenía el asunto
      * fijo "Notificación APIEmpresas.es" y los siete avisos llegaban iguales. Pasa
      * además el user_id, para que el envío quede en email_logs (antes no quedaba).
+     *
+     * El contenido se escribe aquí, en PHP, así que es quien llama el que sabe en qué
+     * idioma está: lo indica con $idioma. Sin él, español (ver sendTemplateEmail).
      */
-    private function sendApiAutomation(array $userData, string $asunto, string $preheader, string $contenidoHtml, string $botonTexto, string $botonUrl, string $tipo = ''): array
+    private function sendApiAutomation(array $userData, string $asunto, string $preheader, string $contenidoHtml, string $botonTexto, string $botonUrl, string $tipo = '', string $idioma = 'es'): array
     {
         return $this->sendTemplateEmail('automation_generic', [
-            // Los siete avisos comparten plantilla: el tipo distingue cada uno en
+            // Los avisos comparten plantilla: el tipo distingue cada uno en
             // email_logs, en el source del enlace y en el informe.
             '_log_slug'   => $tipo,
+            '_idioma'     => $idioma,
             'subject'     => $asunto,
             'preheader'   => $preheader,
-            'name'        => $userData['name'] ?? 'Usuario',
+            'name'        => self::saludo($userData),
             'content'     => $contenidoHtml,
             'button_text' => $botonTexto,
             'button_url'  => $botonUrl,
         ], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
+    }
+
+    /**
+     * Idioma del usuario ('es' o 'en'), de users.lang. Las altas desde
+     * spaincompanyapi.com tienen 'en'.
+     */
+    private function idioma(array $userData): string
+    {
+        static $cache = [];
+
+        if (isset($userData['lang']) && $userData['lang'] !== '') {
+            return $userData['lang'] === 'en' ? 'en' : 'es';
+        }
+        $id    = (int) ($userData['user_id'] ?? $userData['id'] ?? 0);
+        $clave = $id > 0 ? 'id:' . $id : 'mail:' . strtolower((string) ($userData['email'] ?? ''));
+        if (!isset($cache[$clave])) {
+            $cache[$clave] = 'es';
+            try {
+                $q = \Config\Database::connect()->table('users')->select('lang');
+                $fila = ($id > 0 ? $q->where('id', $id) : $q->where('email', (string) ($userData['email'] ?? '')))
+                    ->get()->getRowArray();
+                if (($fila['lang'] ?? '') === 'en') {
+                    $cache[$clave] = 'en';
+                }
+            } catch (\Throwable $e) {
+                // Sin BD, español
+            }
+        }
+        return $cache[$clave];
     }
 
     /** Cupo del plan Free, para no escribir "100" a mano en los asuntos. */
@@ -663,26 +724,39 @@ class EmailService
         return $pro;
     }
 
+    /** Número con el separador de miles de cada idioma: 3.000 / 3,000 */
+    private static function num(int $x, bool $en = false): string
+    {
+        return number_format($x, 0, $en ? '.' : ',', $en ? ',' : '.');
+    }
+
     /** "3.000 consultas cada mes por 19 €/mes + IVA", o sin precio si no se conoce. */
-    private function lineaPro(): string
+    private function lineaPro(bool $en = false): string
     {
         $pro    = $this->planPro();
         $precio = (float) ($pro['price_monthly'] ?? 0);
-        return number_format((int) $pro['monthly_quota'], 0, ',', '.') . ' consultas cada mes'
+        $cupo   = self::num((int) $pro['monthly_quota'], $en);
+
+        if ($en) {
+            return $cupo . ' lookups every month'
+                . ($precio > 0 ? ' for <strong>€' . self::euros($precio, true) . '/month + VAT</strong>, cancel anytime' . $this->anualPro(true) : ', cancel anytime');
+        }
+        return $cupo . ' consultas cada mes'
             . ($precio > 0 ? ' por <strong>' . self::euros($precio) . ' €/mes + IVA</strong>, sin permanencia' . $this->anualPro() : ', sin permanencia');
     }
 
     /** Importe en euros sin decimales sobrantes: 19 → "19", 182,5 → "182,50" */
-    private static function euros(float $x): string
+    private static function euros(float $x, bool $en = false): string
     {
-        return rtrim(rtrim(number_format($x, 2, ',', '.'), '0'), ',');
+        $dec = $en ? '.' : ',';
+        return rtrim(rtrim(number_format($x, 2, $dec, $en ? ',' : '.'), '0'), $dec);
     }
 
     /**
      * " o 182 €/año si pagas el año entero (te ahorras un 20 %)", con enlace a la página
      * de precios con el anual ya marcado. Vacío si no hay precio anual en api_plans.
      */
-    private function anualPro(): string
+    private function anualPro(bool $en = false): string
     {
         $pro     = $this->planPro();
         $mensual = (float) ($pro['price_monthly'] ?? 0);
@@ -691,27 +765,45 @@ class EmailService
             return '';
         }
         $ahorro = (int) round((1 - $anual / ($mensual * 12)) * 100);
-        return ', o <a href="' . site_url('billing?plan=pro&period=annual') . '" style="color:#2563eb;font-weight:700;">'
-            . self::euros($anual) . ' €/año</a> si pagas el año entero (te ahorras un ' . $ahorro . ' %)';
+        $enlace = '<a href="' . site_url('billing?plan=pro&period=annual') . '" style="color:#2563eb;font-weight:700;">';
+
+        return $en
+            ? ', or ' . $enlace . '€' . self::euros($anual, true) . '/year</a> if you pay annually (save ' . $ahorro . '%)'
+            : ', o ' . $enlace . self::euros($anual) . ' €/año</a> si pagas el año entero (te ahorras un ' . $ahorro . ' %)';
     }
 
     /** "Cuesta 19 €/mes + IVA, sin permanencia, o 182 €/año…" (sin precio si no se conoce) */
-    private function precioPro(): string
+    private function precioPro(bool $en = false): string
     {
         $precio = (float) ($this->planPro()['price_monthly'] ?? 0);
+        if ($en) {
+            return $precio > 0
+                ? 'It costs <strong>€' . self::euros($precio, true) . '/month + VAT</strong>, cancel anytime' . $this->anualPro(true) . '.'
+                : 'Cancel anytime.';
+        }
         return $precio > 0
             ? 'Cuesta <strong>' . self::euros($precio) . ' €/mes + IVA</strong>, sin permanencia' . $this->anualPro() . '.'
             : 'Sin permanencia.';
     }
 
     /** Lo que desbloquea Pro, comprobado en el código (CompaniesByCif, PlanAccessService). */
-    private function ventajasPro(): string
+    private function ventajasPro(bool $en = false): string
     {
-        $li = static fn (string $h) => '<li style="margin:0 0 6px;">' . $h . '</li>';
-        $c  = static fn (string $t) => '<code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:13px;">' . $t . '</code>';
-        $cupo = number_format((int) $this->planPro()['monthly_quota'], 0, ',', '.');
+        $li   = static fn (string $h) => '<li style="margin:0 0 6px;">' . $h . '</li>';
+        $c    = static fn (string $t) => '<code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:13px;">' . $t . '</code>';
+        $cupo = self::num((int) $this->planPro()['monthly_quota'], $en);
+        $free = self::num($this->freeLimit(), $en);
+
+        if ($en) {
+            return '<ul style="margin:0 0 14px; padding-left:20px;">'
+                . $li('<strong>' . $cupo . ' lookups every month</strong>, renewed on the 1st. Free is ' . $free . ' in total and does not renew.')
+                . $li('<strong>The full address</strong> of each company, which is masked on Free: it is what you need to invoice or onboard a customer. Coordinates too.')
+                . $li('<strong>Directors and officers</strong> of each company, by adding ' . $c('&amp;admin=true') . '.')
+                . $li('<strong>Scoring and activity signals</strong>: ' . $c('/api/v1/companies/score') . ' and ' . $c('/api/v1/companies/signals') . '.')
+                . '</ul>';
+        }
         return '<ul style="margin:0 0 14px; padding-left:20px;">'
-            . $li('<strong>' . $cupo . ' consultas cada mes</strong>, que se renuevan el día 1. El Free son ' . $this->freeLimit() . ' en total y no se renuevan.')
+            . $li('<strong>' . $cupo . ' consultas cada mes</strong>, que se renuevan el día 1. El Free son ' . $free . ' en total y no se renuevan.')
             . $li('<strong>La dirección completa</strong> de cada empresa, que en Free llega enmascarada: es lo que necesitas para facturar o dar de alta un cliente. También las coordenadas.')
             . $li('<strong>Administradores y cargos</strong> de cada empresa, añadiendo ' . $c('&amp;admin=true') . '.')
             . $li('<strong>Scoring y señales de actividad</strong>: ' . $c('/api/v1/companies/score') . ' y ' . $c('/api/v1/companies/signals') . '.')
@@ -719,21 +811,51 @@ class EmailService
     }
 
     /**
+     * Nombre para el saludo: el del usuario o, si no hay, la parte local del correo.
+     * "Hola Usuario" (o "Hi Usuario" a quien lee en inglés) queda descuidado.
+     */
+    private static function saludo(array $userData): string
+    {
+        $nombre = trim((string) ($userData['name'] ?? ''));
+        return $nombre !== '' ? $nombre : (explode('@', (string) ($userData['email'] ?? ''))[0] ?: 'Usuario');
+    }
+
+    /** Enlace de texto con el estilo de los correos */
+    private static function enlace(string $url, string $texto): string
+    {
+        return '<a href="' . $url . '" style="color:#2563eb;font-weight:700;">' . $texto . '</a>';
+    }
+
+    /**
      * TRIGGER: no_requests_15min
      */
     public function sendNoUsage15Min(array $userData)
     {
+        $en   = $this->idioma($userData) === 'en';
+        $code = '<code style="background:#f1f5f9; padding:10px; display:block; border-radius:5px;">GET /api/v1/companies?cif=A15075062</code>';
+
         // CIF de una empresa real: con el ficticio B12345678 la primera prueba
         // gastaba una consulta y devolvía un error.
-        return $this->sendApiAutomation(
-            $userData,
-            'Tu primera llamada a la API, lista para copiar',
-            'Pega tu API Key en este curl y tendrás los datos de una empresa real en segundos.',
-            'He visto que todavía no has lanzado tu primera validación técnica.<br><br>Para que no pierdas tiempo con la documentación, aquí tienes tu endpoint listo:<br><br><code style="background:#f1f5f9; padding:10px; display:block; border-radius:5px;">GET /api/v1/companies?cif=A15075062</code><br><br>No olvides incluir tu <b>X-API-KEY</b> en los headers. Si prefieres verlo antes de escribir código, el botón de abajo hace esa misma consulta desde tu panel. Y si necesitas un ejemplo en un lenguaje concreto, responde a este correo.',
-            '▶ Probarla ahora con un clic',
-            base_url('dashboard?probar=A15075062'),
-            'no_requests_15min'
-        );
+        return $en
+            ? $this->sendApiAutomation(
+                $userData,
+                'Your first API call, ready to copy',
+                'Paste your API Key into this request and get a real company\'s data in seconds.',
+                'You haven\'t made your first API call yet.<br><br>To save you time with the docs, here is your endpoint, ready to go:<br><br>' . $code . '<br>Remember to send your <b>X-API-KEY</b> header. If you\'d rather see it before writing any code, the button below runs that same lookup from your dashboard. And if you need an example in a specific language, just reply to this email.',
+                '▶ Try it now in one click',
+                base_url('dashboard?probar=A15075062'),
+                'no_requests_15min',
+                'en'
+            )
+            : $this->sendApiAutomation(
+                $userData,
+                'Tu primera llamada a la API, lista para copiar',
+                'Pega tu API Key en este curl y tendrás los datos de una empresa real en segundos.',
+                'He visto que todavía no has lanzado tu primera validación técnica.<br><br>Para que no pierdas tiempo con la documentación, aquí tienes tu endpoint listo:<br><br>' . $code . '<br><br>No olvides incluir tu <b>X-API-KEY</b> en los headers. Si prefieres verlo antes de escribir código, el botón de abajo hace esa misma consulta desde tu panel. Y si necesitas un ejemplo en un lenguaje concreto, responde a este correo.',
+                '▶ Probarla ahora con un clic',
+                base_url('dashboard?probar=A15075062'),
+                'no_requests_15min'
+            );
     }
 
     /**
@@ -741,15 +863,28 @@ class EmailService
      */
     public function sendOneUsageInactive1H(array $userData)
     {
-        return $this->sendApiAutomation(
-            $userData,
-            'Tu primera consulta ha funcionado. Esto es lo siguiente',
-            'Lo que añade el Plan Pro a la respuesta que acabas de recibir.',
-            'Tu primera consulta a la API ha funcionado. Lo que has recibido son datos reales, con una limitación importante del plan Free: la dirección llega enmascarada, y sin ella no puedes rellenar facturas ni fichas de cliente.<br><br>Cuando tu integración vaya a producción, el <b>Plan Pro</b> te da:' . $this->ventajasPro() . $this->precioPro() . ' No cambias ni tu API Key ni tu código.',
-            'Ver el Plan Pro',
-            base_url('billing?plan=pro'),
-            'one_request_inactive_1h'
-        );
+        $en = $this->idioma($userData) === 'en';
+
+        return $en
+            ? $this->sendApiAutomation(
+                $userData,
+                'Your first lookup worked. Here is what comes next',
+                'What the Pro plan adds to the response you just got.',
+                'Your first API lookup worked. What you received is real data, with one important Free plan limitation: the address comes masked, and without it you can\'t fill in invoices or customer records.<br><br>When your integration goes to production, the <b>Pro plan</b> gives you:' . $this->ventajasPro(true) . $this->precioPro(true) . ' You keep the same API Key and the same code.',
+                'See the Pro plan',
+                base_url('billing?plan=pro'),
+                'one_request_inactive_1h',
+                'en'
+            )
+            : $this->sendApiAutomation(
+                $userData,
+                'Tu primera consulta ha funcionado. Esto es lo siguiente',
+                'Lo que añade el Plan Pro a la respuesta que acabas de recibir.',
+                'Tu primera consulta a la API ha funcionado. Lo que has recibido son datos reales, con una limitación importante del plan Free: la dirección llega enmascarada, y sin ella no puedes rellenar facturas ni fichas de cliente.<br><br>Cuando tu integración vaya a producción, el <b>Plan Pro</b> te da:' . $this->ventajasPro() . $this->precioPro() . ' No cambias ni tu API Key ni tu código.',
+                'Ver el Plan Pro',
+                base_url('billing?plan=pro'),
+                'one_request_inactive_1h'
+            );
     }
 
     /**
@@ -757,15 +892,28 @@ class EmailService
      */
     public function sendReached5Requests(array $userData)
     {
-        return $this->sendApiAutomation(
-            $userData,
-            'Ya has consultado 5 empresas: esto es lo que no estás viendo',
-            'La dirección completa de cada empresa, sin asteriscos.',
-            'Ya llevas 5 empresas consultadas. En tus respuestas habrás visto la dirección como <code>*** [ACTUALIZA A PRO PARA VER LA DIRECCION ]</code>: justo el dato que necesitas para facturar o dar de alta un cliente.<br><br>Con el <b>Plan Pro</b> recibes el dato completo en la misma llamada, sin cambiar tu código, y además puedes pedir los administradores y cargos de cada empresa con <code>&amp;admin=true</code>.<br><br>Son ' . $this->lineaPro() . '.',
-            'Desbloquear datos Pro',
-            base_url('billing?plan=pro'),
-            'reached_5_requests'
-        );
+        $en = $this->idioma($userData) === 'en';
+
+        return $en
+            ? $this->sendApiAutomation(
+                $userData,
+                'You\'ve looked up 5 companies: here is what you\'re not seeing',
+                'The full address of each company, without asterisks.',
+                'You\'ve already looked up 5 companies. In your responses you\'ll have seen the address as <code>*** [ACTUALIZA A PRO PARA VER LA DIRECCION ]</code> ("upgrade to Pro to see the address"): exactly the field you need to invoice or onboard a customer.<br><br>With the <b>Pro plan</b> you get the full value in the same call, without changing your code, and you can also request each company\'s directors and officers with <code>&amp;admin=true</code>.<br><br>That\'s ' . $this->lineaPro(true) . '.',
+                'Unlock Pro data',
+                base_url('billing?plan=pro'),
+                'reached_5_requests',
+                'en'
+            )
+            : $this->sendApiAutomation(
+                $userData,
+                'Ya has consultado 5 empresas: esto es lo que no estás viendo',
+                'La dirección completa de cada empresa, sin asteriscos.',
+                'Ya llevas 5 empresas consultadas. En tus respuestas habrás visto la dirección como <code>*** [ACTUALIZA A PRO PARA VER LA DIRECCION ]</code>: justo el dato que necesitas para facturar o dar de alta un cliente.<br><br>Con el <b>Plan Pro</b> recibes el dato completo en la misma llamada, sin cambiar tu código, y además puedes pedir los administradores y cargos de cada empresa con <code>&amp;admin=true</code>.<br><br>Son ' . $this->lineaPro() . '.',
+                'Desbloquear datos Pro',
+                base_url('billing?plan=pro'),
+                'reached_5_requests'
+            );
     }
 
     /**
@@ -773,17 +921,30 @@ class EmailService
      */
     public function sendReached80Requests(array $userData)
     {
+        $en     = $this->idioma($userData) === 'en';
         $limite = $this->freeLimit();
+        $bono   = site_url('crear-bono-api');
 
-        return $this->sendApiAutomation(
-            $userData,
-            'Has usado el 80 % de tus ' . $limite . ' consultas gratuitas',
-            'Cuando llegues a ' . $limite . ', la API dejará de responder. Así lo evitas.',
-            'Has alcanzado las 80 consultas de tus ' . $limite . ' gratuitas. Cuando llegues a ' . $limite . ', la API responderá con error 429 y tu integración se parará.<br><br>Para que no pase, el <b>Plan Pro</b>:' . $this->ventajasPro() . $this->precioPro() . '<br><br>¿Solo necesitas unas pocas consultas más? Un <b>bono de créditos</b>, sin suscripción y también con los datos completos: <a href="' . site_url('crear-bono-api') . '" style="color:#2563eb;font-weight:700;">crear bono</a>.',
-            'Evitar el corte: ver Plan Pro',
-            base_url('billing?plan=pro'),
-            'reached_80_requests'
-        );
+        return $en
+            ? $this->sendApiAutomation(
+                $userData,
+                'You\'ve used 80% of your ' . $limite . ' free lookups',
+                'When you reach ' . $limite . ', the API will stop responding. Here is how to avoid it.',
+                'You\'ve reached 80 of your ' . $limite . ' free lookups. At ' . $limite . ', the API will respond with a 429 error and your integration will stop.<br><br>To avoid that, the <b>Pro plan</b>:' . $this->ventajasPro(true) . $this->precioPro(true) . '<br><br>Only need a few more lookups? A <b>credit pack</b>, no subscription and also with full data: ' . self::enlace($bono, 'create a pack') . '.',
+                'Avoid the cut-off: see Pro',
+                base_url('billing?plan=pro'),
+                'reached_80_requests',
+                'en'
+            )
+            : $this->sendApiAutomation(
+                $userData,
+                'Has usado el 80 % de tus ' . $limite . ' consultas gratuitas',
+                'Cuando llegues a ' . $limite . ', la API dejará de responder. Así lo evitas.',
+                'Has alcanzado las 80 consultas de tus ' . $limite . ' gratuitas. Cuando llegues a ' . $limite . ', la API responderá con error 429 y tu integración se parará.<br><br>Para que no pase, el <b>Plan Pro</b>:' . $this->ventajasPro() . $this->precioPro() . '<br><br>¿Solo necesitas unas pocas consultas más? Un <b>bono de créditos</b>, sin suscripción y también con los datos completos: ' . self::enlace($bono, 'crear bono') . '.',
+                'Evitar el corte: ver Plan Pro',
+                base_url('billing?plan=pro'),
+                'reached_80_requests'
+            );
     }
 
     /**
@@ -799,6 +960,7 @@ class EmailService
      */
     public function sendBadRequestHelp(array $userData, int $errorCount, array $ejemplos = []): array
     {
+        $en   = $this->idioma($userData) === 'en';
         $code = static fn (string $t, string $fondo) => '<code style="background:' . $fondo . '; padding:6px 10px; display:inline-block; border-radius:4px; margin:4px 0;">' . $t . '</code>';
 
         $lista = '';
@@ -806,8 +968,28 @@ class EmailService
             $lista .= $code('❌ /api/v1/companies?cif=' . esc(mb_substr((string) $cif, 0, 60)), '#f1f5f9') . '<br>';
         }
         $bloqueEjemplos = $lista !== ''
-            ? '<b>Algunas de las que has enviado hoy:</b><br>' . $lista
-            : '<b>Por ejemplo:</b><br>' . $code('❌ /api/v1/companies?cif=A08649477ELADJUDICATARIO', '#f1f5f9') . '<br>';
+            ? '<b>' . ($en ? 'Some of the ones you sent today:' : 'Algunas de las que has enviado hoy:') . '</b><br>' . $lista
+            : '<b>' . ($en ? 'For example:' : 'Por ejemplo:') . '</b><br>' . $code('❌ /api/v1/companies?cif=A08649477ELADJUDICATARIO', '#f1f5f9') . '<br>';
+        $bien = $code('✅ /api/v1/companies?cif=A08649477', '#dcfce7');
+
+        if ($en) {
+            return $this->sendApiAutomation(
+                $userData,
+                $errorCount . ' of your requests failed today because of the tax ID format',
+                'We didn\'t charge you for them. Here is how to fix the 400 error.',
+                "Today <b>{$errorCount} of your requests</b> returned a 400 error (Bad Request). Don't worry about your quota: <b>requests that fail are not charged</b>.<br><br>"
+                    . 'A 400 appears when the <code>cif</code> parameter is not a valid Spanish tax ID. The most common cause is extra text stuck to the ID when extracting it from a document or spreadsheet.<br><br>'
+                    . $bloqueEjemplos . '<br>'
+                    . '<b>The correct format is just the ID</b>, with no spaces or extra text:<br>'
+                    . $bien . '<br><br>'
+                    . 'A tip: before calling, keep only letters and digits and check that 9 characters remain.<br><br>'
+                    . 'If you can\'t see where the extra text comes from, reply to this email with an example and we\'ll help.',
+                'Open my dashboard',
+                base_url('dashboard'),
+                'bad_request_help',
+                'en'
+            );
+        }
 
         return $this->sendApiAutomation(
             $userData,
@@ -817,7 +999,7 @@ class EmailService
                 . 'El 400 aparece cuando el parámetro <code>cif</code> no es un identificador fiscal español válido. Lo más habitual es enviar texto pegado al CIF al extraerlo de un documento o de una hoja de cálculo.<br><br>'
                 . $bloqueEjemplos . '<br>'
                 . '<b>El formato correcto es solo el identificador</b>, sin espacios ni texto añadido:<br>'
-                . $code('✅ /api/v1/companies?cif=A08649477', '#dcfce7') . '<br><br>'
+                . $bien . '<br><br>'
                 . 'Un truco: antes de llamar, quédate solo con letras y números y comprueba que quedan 9 caracteres.<br><br>'
                 . 'Si no ves de dónde sale el texto de más, responde a este correo con un ejemplo y te echamos un cable.',
             'Ver mi dashboard',
@@ -831,32 +1013,432 @@ class EmailService
      */
     public function sendQuotaExceeded(array $userData)
     {
+        $en     = $this->idioma($userData) === 'en';
         $limite = $this->freeLimit();
+        $bono   = site_url('crear-bono-api');
+
+        return $en
+            ? $this->sendApiAutomation(
+                $userData,
+                'You\'ve used up your ' . $limite . ' free lookups: your integration has stopped',
+                'Turn it back on in a minute with the Pro plan, without changing your code.',
+                'You\'ve used all ' . $limite . ' of your free lookups. From now on the API responds with a 429 error and your integration receives no data.<br><br>There are two ways to resume it today, without changing your code:<br><br>• <b>Pro plan</b>: ' . $this->lineaPro(true) . ', with the full response.<br>• <b>Credit pack</b>, if you only need a few more, no subscription: ' . self::enlace($bono, 'create a pack') . '.',
+                'Resume with the Pro plan',
+                base_url('billing?plan=pro'),
+                'reached_100_percent_quota',
+                'en'
+            )
+            : $this->sendApiAutomation(
+                $userData,
+                'Has agotado tus ' . $limite . ' consultas gratuitas: tu integración está parada',
+                'Actívala de nuevo en un minuto con el Plan Pro, sin cambiar tu código.',
+                'Has agotado tus ' . $limite . ' consultas gratuitas. Desde ahora la API responde con error 429 y tu integración no recibe datos.<br><br>Tienes dos formas de reanudarla hoy mismo, sin cambiar tu código:<br><br>• <b>Plan Pro</b>: ' . $this->lineaPro() . ', con la respuesta completa.<br>• <b>Bono de créditos</b>, si solo necesitas unas pocas más, sin suscripción: ' . self::enlace($bono, 'crear bono') . '.',
+                'Reanudar con el Plan Pro',
+                base_url('billing?plan=pro'),
+                'reached_100_percent_quota'
+            );
+    }
+
+    /**
+     * TRIGGER: api_exhausted_3d / api_exhausted_10d
+     *
+     * Seguimiento a quien agotó el Free y no ha comprado. Antes solo se repetía el aviso
+     * de "has agotado" cada 30 días. A los 3 días: si su integración ha seguido llamando
+     * (429 en N días distintos), se lo decimos, y respondemos las dudas de antes de
+     * pagar con lo que es cierto en el código: sin permanencia y con acceso hasta fin de
+     * periodo (ApiKeyFilter), factura en cada cobro (user_invoice), mismo código y API
+     * Key, y el bono como paso pequeño. A los 10: corto, pregunta qué le frena.
+     *
+     * Nada de garantía de devolución: esa es de Solvencia Pro, no de la API.
+     *
+     * @param int   $dias429  días distintos con 429 desde que agotó
+     * @param array $empresas últimas empresas consultadas [['cif','nombre'], ...]
+     */
+    public function sendFreeExhaustedFollowUp(array $userData, int $dias429, array $empresas = [], bool $diezDias = false): array
+    {
+        $en     = $this->idioma($userData) === 'en';
+        $limite = $this->freeLimit();
+        $bono   = site_url('crear-bono-api');
+        $lista  = $this->listaEmpresas($empresas, $en);
+        $li     = static fn (string $h) => '<li style="margin:0 0 8px;">' . $h . '</li>';
+        $tipo   = $diezDias ? 'api_exhausted_10d' : 'api_exhausted_3d';
+
+        if ($diezDias) {
+            if ($en) {
+                return $this->sendApiAutomation(
+                    $userData,
+                    'What\'s holding you back from continuing with the API?',
+                    'One line in reply is enough. It helps me a lot.',
+                    $this->p('Your free lookups ran out ten days ago and you haven\'t continued. That\'s fine, but it would help me to know why: <strong>the price, a missing field, or the project didn\'t go ahead?</strong> Just reply to this email with one line.')
+                        . $this->p('If it\'s the price and your volume is small, a credit pack works out cheaper than the subscription: ' . self::enlace($bono, 'create a pack') . '.')
+                        . $this->p('And if you need more volume or something specific (annual billing, a bigger quota), tell me and we\'ll look at it.'),
+                    'See plans',
+                    base_url('billing?plan=pro'),
+                    $tipo,
+                    'en'
+                );
+            }
+            return $this->sendApiAutomation(
+                $userData,
+                '¿Qué te frena para seguir con la API?',
+                'Con una línea de respuesta me basta. Me ayuda mucho.',
+                $this->p('Hace diez días que se acabaron tus consultas gratuitas y no has seguido. No pasa nada, pero me ayudaría saber por qué: <strong>¿es el precio, te falta algún dato o el proyecto no siguió adelante?</strong> Responde a este correo con una línea.')
+                    . $this->p('Si es el precio y tu volumen es pequeño, el bono de créditos te sale más a cuenta que la suscripción: ' . self::enlace($bono, 'crear bono') . '.')
+                    . $this->p('Y si necesitas más volumen o algo concreto (pago anual, más cupo), dímelo y lo vemos.'),
+                'Ver planes',
+                base_url('billing?plan=pro'),
+                $tipo
+            );
+        }
+
+        if ($en) {
+            $inicio = $dias429 > 0
+                ? 'Since you used up your ' . $limite . ' free lookups, your integration has kept calling the API on <strong>' . $dias429 . ' different ' . ($dias429 === 1 ? 'day' : 'days') . '</strong>, and got a 429 error every time. In other words: you still need it.'
+                : 'A few days ago you used up your ' . $limite . ' free lookups' . ($lista !== '' ? ', including ' . $lista : '') . '.';
+            return $this->sendApiAutomation(
+                $userData,
+                $dias429 > 0 ? 'Your integration has been without data for ' . $dias429 . ' ' . ($dias429 === 1 ? 'day' : 'days') : 'Before you continue: the usual questions',
+                'No lock-in, an invoice with every charge and the same code. And a smaller option if you need few lookups.',
+                $this->p($inicio)
+                    . $this->p('Before paying, these are the questions people usually ask:')
+                    . '<ul style="margin:0 0 14px; padding-left:20px;">'
+                    . $li('<strong>Is there a lock-in?</strong> No. Pro is monthly and you cancel from your dashboard whenever you want; you keep access until the end of the paid period.')
+                    . $li('<strong>Do I get an invoice?</strong> Yes, by email with every charge, with your company details if you fill them in under billing details.')
+                    . $li('<strong>Do I need to change my code?</strong> No: same API Key, same endpoints. As soon as the plan is active, the API responds again, with the full data.')
+                    . $li('<strong>What if I only need a few?</strong> A credit pack, no subscription: you pay once and look up until it runs out. ' . self::enlace($bono, 'Create a pack') . '.')
+                    . '</ul>'
+                    . $this->p('The <strong>Pro plan</strong> is ' . $this->lineaPro(true) . '.'),
+                'Resume with the Pro plan',
+                base_url('billing?plan=pro'),
+                $tipo,
+                'en'
+            );
+        }
+
+        $inicio = $dias429 > 0
+            ? 'Desde que agotaste tus ' . $limite . ' consultas gratuitas, tu integración ha seguido llamando a la API en <strong>' . $dias429 . ' ' . ($dias429 === 1 ? 'día distinto' : 'días distintos') . '</strong> y ha recibido error 429 todas las veces. Es decir: la sigues necesitando.'
+            : 'Hace unos días agotaste tus ' . $limite . ' consultas gratuitas' . ($lista !== '' ? ', entre ellas ' . $lista : '') . '.';
 
         return $this->sendApiAutomation(
             $userData,
-            'Has agotado tus ' . $limite . ' consultas gratuitas: tu integración está parada',
-            'Actívala de nuevo en un minuto con el Plan Pro, sin cambiar tu código.',
-            'Has agotado tus ' . $limite . ' consultas gratuitas. Desde ahora la API responde con error 429 y tu integración no recibe datos.<br><br>Tienes dos formas de reanudarla hoy mismo, sin cambiar tu código:<br><br>• <b>Plan Pro</b>: ' . $this->lineaPro() . ', con la respuesta completa.<br>• <b>Bono de créditos</b>, si solo necesitas unas pocas más, sin suscripción: <a href="' . site_url('crear-bono-api') . '" style="color:#2563eb;font-weight:700;">crear bono</a>.',
+            $dias429 > 0 ? 'Tu integración lleva ' . $dias429 . ' ' . ($dias429 === 1 ? 'día' : 'días') . ' sin datos' : 'Antes de seguir: las dudas de siempre',
+            'Sin permanencia, con factura en cada cobro y sin tocar tu código. Y una opción más pequeña si necesitas pocas.',
+            $this->p($inicio)
+                . $this->p('Antes de pagar, esto es lo que se suele preguntar:')
+                . '<ul style="margin:0 0 14px; padding-left:20px;">'
+                . $li('<strong>¿Tiene permanencia?</strong> No. Pro es mensual y lo cancelas desde tu panel cuando quieras; conservas el acceso hasta el final del periodo pagado.')
+                . $li('<strong>¿Me hacéis factura?</strong> Sí, con IVA, por correo en cada cobro y a nombre de tu empresa si rellenas tus datos de facturación.')
+                . $li('<strong>¿Tengo que cambiar mi código?</strong> No: misma API Key y mismos endpoints. En cuanto se activa el plan, la API vuelve a responder, con los datos completos.')
+                . $li('<strong>¿Y si solo necesito unas pocas?</strong> Un bono de créditos, sin suscripción: pagas una vez y consultas hasta gastarlo. ' . self::enlace($bono, 'Crear bono') . '.')
+                . '</ul>'
+                . $this->p('El <strong>Plan Pro</strong> son ' . $this->lineaPro() . '.'),
             'Reanudar con el Plan Pro',
             base_url('billing?plan=pro'),
-            'reached_100_percent_quota'
+            $tipo
         );
     }
 
     /**
-     * TRIGGER: monthly_report
+     * "<b>Nombre</b> (CIF), <b>Otra</b> (CIF) y …" para citar en el correo las empresas
+     * que el usuario consultó. Vacío si no hay ninguna.
+     *
+     * @param list<array{cif:string, nombre:string}> $empresas
      */
-    public function sendMonthlyUsageReport(array $userData, int $usage): array
+    private function listaEmpresas(array $empresas, bool $en = false): string
     {
+        $partes = [];
+        foreach (array_slice($empresas, 0, 3) as $e) {
+            $cif = esc((string) ($e['cif'] ?? ''));
+            $nom = trim((string) ($e['nombre'] ?? ''));
+            $partes[] = $nom !== '' ? '<strong>' . esc($nom) . '</strong> (' . $cif . ')' : '<strong>' . $cif . '</strong>';
+        }
+        if (count($partes) <= 1) {
+            return $partes[0] ?? '';
+        }
+        $ultima = array_pop($partes);
+        return implode(', ', $partes) . ($en ? ' and ' : ' y ') . $ultima;
+    }
+
+    /**
+     * TRIGGER: monthly_report
+     *
+     * Antes casi nunca salía (el comando cortaba antes) y, cuando salía, solo decía un
+     * número. Ahora cuenta lo que le queda del cupo gratuito, cuánto le dura a su ritmo
+     * y qué empresas ha consultado.
+     *
+     * @param int   $total    consultas del cupo Free gastadas (de por vida, como el filtro)
+     * @param array $empresas últimas empresas consultadas en el periodo
+     */
+    public function sendMonthlyUsageReport(array $userData, int $usage, int $total = 0, array $empresas = []): array
+    {
+        $en     = $this->idioma($userData) === 'en';
+        $n      = static fn (int $x) => self::num($x, $en);
+        $limite = $this->freeLimit();
+        $quedan = max(0, $limite - $total);
+        $lista  = $this->listaEmpresas($empresas, $en);
+        $ritmo  = $usage / 30;                                   // consultas al día
+        $duran  = $ritmo > 0 ? (int) floor($quedan / $ritmo) : 0;
+
+        if ($en) {
+            $contenido = $this->p('In the last 30 days you made <strong>' . $n($usage) . ' ' . ($usage === 1 ? 'lookup' : 'lookups') . '</strong>'
+                    . ($lista !== '' ? ', including ' . $lista : '') . '.');
+            if ($total > 0) {
+                $contenido .= $this->p('Of your ' . $n($limite) . ' free lookups you have <strong>' . $n($quedan) . '</strong> left.'
+                    . ($duran > 0 && $duran < 365 ? ' At your current pace they will last about <strong>' . $n($duran) . ' days</strong>.' : '')
+                    . ' The free quota does not renew: when it runs out, the API will respond with a 429 error.');
+            }
+            $contenido .= $this->p('When your integration goes to production, the <strong>Pro plan</strong> gives you:')
+                . $this->ventajasPro(true)
+                . $this->p($this->precioPro(true) . ' Same API Key, same code.');
+
+            return $this->sendApiAutomation(
+                $userData,
+                'Your month with the API: ' . $n($usage) . ' ' . ($usage === 1 ? 'lookup' : 'lookups') . ($total > 0 ? ' and ' . $n($quedan) . ' free left' : ''),
+                'What you looked up, what you have left and how long it lasts at your pace.',
+                $contenido,
+                'See the Pro plan',
+                base_url('billing?plan=pro'),
+                'monthly_report',
+                'en'
+            );
+        }
+
+        $contenido = $this->p('En los últimos 30 días has hecho <strong>' . $n($usage) . ' '
+                . ($usage === 1 ? 'consulta' : 'consultas') . '</strong> a la API'
+                . ($lista !== '' ? ', entre ellas ' . $lista : '') . '.');
+
+        if ($total > 0) {
+            $contenido .= $this->p('De tus ' . $n($limite) . ' consultas gratuitas te quedan <strong>' . $n($quedan) . '</strong>.'
+                . ($duran > 0 && $duran < 365 ? ' A tu ritmo actual te durarán unos <strong>' . $n($duran) . ' días</strong>.' : '')
+                . ' El cupo gratuito no se renueva: cuando se acabe, la API responderá con error 429.');
+        }
+
+        $contenido .= $this->p('Cuando tu integración vaya a producción, el <strong>Plan Pro</strong> te da:')
+            . $this->ventajasPro()
+            . $this->p($this->precioPro() . ' No cambias ni tu API Key ni tu código.');
+
         return $this->sendApiAutomation(
             $userData,
-            'Tu uso de la API en los últimos 30 días: ' . number_format($usage, 0, ',', '.') . ' consultas',
-            'Resumen de actividad de tu cuenta de APIEmpresas.',
-            "Aquí tienes el resumen de actividad de tu cuenta en los últimos 30 días:<br><br>• <b>Consultas a la API realizadas:</b> {$usage}<br><br>Si tu consumo sigue aumentando y necesitas asegurar disponibilidad, mayor tasa de peticiones y datos mercantiles completos sin restricciones, te recomendamos revisar nuestros planes:",
-            'Ver Planes y Facturación',
-            site_url('billing'),
+            'Tu mes con la API: ' . $n($usage) . ' ' . ($usage === 1 ? 'consulta' : 'consultas')
+                . ($total > 0 ? ' y te quedan ' . $n($quedan) . ' gratis' : ''),
+            'Lo que has consultado, lo que te queda y cuánto te dura a tu ritmo.',
+            $contenido,
+            'Ver el Plan Pro',
+            base_url('billing?plan=pro'),
             'monthly_report'
+        );
+    }
+
+    /**
+     * TRIGGER: api_stalled_7d / api_stalled_30d
+     *
+     * Usó la API y dejó de llamar. Era el hueco más grande de la automatización y lo que
+     * se cubría a mano desde /admin/api-analytics. Habla de SU uso (las empresas que
+     * consultó) y pide respuesta: a los 7 días, ayuda para terminar la integración; a
+     * los 30, una pregunta corta sobre qué pasó.
+     *
+     * @param int   $dias     días desde la última llamada
+     * @param int   $total    consultas del cupo Free gastadas
+     * @param array $empresas últimas empresas consultadas [['cif','nombre'], ...]
+     */
+    public function sendApiStalled(array $userData, int $dias, int $total, array $empresas = [], bool $treintaDias = false): array
+    {
+        $en     = $this->idioma($userData) === 'en';
+        $n      = static fn (int $x) => self::num($x, $en);
+        $limite = $this->freeLimit();
+        $quedan = max(0, $limite - $total);
+        $lista  = $this->listaEmpresas($empresas, $en);
+        $tipo   = $treintaDias ? 'api_stalled_30d' : 'api_stalled_7d';
+        $li     = static fn (string $h) => '<li style="margin:0 0 6px;">' . $h . '</li>';
+
+        // El botón repite la última consulta en su panel (?probar=), que ya muestra el
+        // resultado sin escribir código. Sin empresas, al panel sin más.
+        $ultima = $empresas[0] ?? null;
+        $nombreUltima = $ultima
+            ? (trim((string) ($ultima['nombre'] ?? '')) !== '' ? mb_strimwidth((string) $ultima['nombre'], 0, 40, '…') : (string) $ultima['cif'])
+            : '';
+        $url = $ultima ? base_url('dashboard?probar=' . rawurlencode((string) $ultima['cif'])) : base_url('dashboard');
+
+        if ($en) {
+            $boton = $ultima ? 'Look up ' . $nombreUltima . ' again' : 'Open my dashboard';
+            $hecho = 'You made ' . $n($total) . ' ' . ($total === 1 ? 'lookup' : 'lookups') . ($lista !== '' ? ', including ' . $lista . ',' : '');
+
+            if (!$treintaDias) {
+                return $this->sendApiAutomation(
+                    $userData,
+                    'Did your API integration get stuck halfway?',
+                    'You have ' . $n($quedan) . ' free lookups left. If something stopped you, just reply to this email.',
+                    $this->p($hecho . ' and your API Key hasn\'t called again for ' . $n($dias) . ' days.')
+                        . $this->p('If the integration got stuck halfway, tell me where it is and I\'ll help: <strong>reply to this email</strong> with the language or tool you use (PHP, Python, JavaScript, Excel, n8n, your ERP…) and I\'ll send you the exact example for your case.')
+                        . $this->p('Your <strong>' . $n($quedan) . ' free lookups</strong> are still there: they don\'t expire.'),
+                    $boton, $url, $tipo, 'en'
+                );
+            }
+            return $this->sendApiAutomation(
+                $userData,
+                'Are you still working on the API project?',
+                'A quick question: one line in reply is enough.',
+                $this->p($hecho . ' and you haven\'t used the API for over a month. A quick question: what happened?')
+                    . '<ul style="margin:0 0 14px; padding-left:20px;">'
+                    . $li('You solved it another way.')
+                    . $li('The project is on hold, for now.')
+                    . $li('Some data was missing or something didn\'t work as you expected.')
+                    . '</ul>'
+                    . $this->p('<strong>Reply to this email</strong>, even with a single letter: it helps me improve the API. If it was the third one, tell me which field it was and I\'ll tell you if we have it.')
+                    . $this->p('If what you were missing was the full address or the directors, that\'s in the Pro plan. ' . $this->precioPro(true))
+                    . $this->p('And if you come back, you have <strong>' . $n($quedan) . ' free lookups</strong> left.'),
+                $boton, $url, $tipo, 'en'
+            );
+        }
+
+        $boton = $ultima ? 'Ver de nuevo ' . $nombreUltima : 'Ir a mi panel';
+        $hecho = 'Hiciste ' . $n($total) . ' ' . ($total === 1 ? 'consulta' : 'consultas') . ($lista !== '' ? ', entre ellas ' . $lista . ',' : '');
+
+        if (!$treintaDias) {
+            return $this->sendApiAutomation(
+                $userData,
+                '¿Se quedó a medias tu integración con la API?',
+                'Te quedan ' . $n($quedan) . ' consultas gratuitas. Si algo te ha frenado, responde a este correo.',
+                $this->p($hecho . ' y desde hace ' . $n($dias) . ' días tu API Key no ha vuelto a llamar.')
+                    . $this->p('Si la integración se quedó a medias, dime en qué punto está y te ayudo: <strong>responde a este correo</strong> con el lenguaje o la herramienta que usas (PHP, Python, JavaScript, Excel, n8n, tu ERP…) y te mando el ejemplo exacto para tu caso.')
+                    . $this->p('Tus <strong>' . $n($quedan) . ' consultas gratuitas</strong> siguen ahí: no caducan.'),
+                $boton, $url, $tipo
+            );
+        }
+
+        return $this->sendApiAutomation(
+            $userData,
+            '¿Sigues con el proyecto de la API?',
+            'Una pregunta rápida: con una línea de respuesta me basta.',
+            $this->p($hecho . ' y hace más de un mes que no usas la API. Una pregunta rápida: ¿qué pasó?')
+                . '<ul style="margin:0 0 14px; padding-left:20px;">'
+                . $li('Lo resolviste de otra forma.')
+                . $li('El proyecto está parado, de momento.')
+                . $li('Te faltaba algún dato o algo no funcionaba como esperabas.')
+                . '</ul>'
+                . $this->p('<strong>Responde a este correo</strong>, aunque sea con una letra: me ayuda a mejorar la API. Si fue lo tercero, dime qué dato era y te digo si lo tenemos.')
+                . $this->p('Si lo que te faltaba era la dirección completa o los administradores, eso está en el Plan Pro. ' . $this->precioPro())
+                . $this->p('Y si vuelves, te quedan <strong>' . $n($quedan) . ' consultas gratuitas</strong>.'),
+            $boton, $url, $tipo
+        );
+    }
+
+    /**
+     * TRIGGER: paid_monthly_summary (días 1-3 del mes)
+     *
+     * Resumen del mes anterior para un cliente de pago de la API. Hasta ahora solo
+     * recibía la factura. Es aviso de servicio (plantilla quota_warning, transaccional):
+     * cuenta lo que ha usado, el día de más uso, sus endpoints, los 400 (no cobrados) y
+     * los días que se quedó sin cupo, con la salida que corresponde a su plan.
+     *
+     * @param array  $plan  name, monthly_quota, id (2 Pro, 3 Business)
+     * @param string $mes   'Y-m' del mes resumido
+     * @param array  $stats de EmailAutomationCommand::estadisticasMes
+     */
+    public function sendPaidMonthlySummary(array $userData, array $plan, string $mes, int $usadas, array $stats): array
+    {
+        $n       = static fn (int $x) => self::num($x);
+        $meses   = [1 => 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
+                    'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        $nombreMes = $meses[(int) substr($mes, 5, 2)] ?? $mes;
+        $mesActual = $meses[(int) date('n')];
+        $cupo    = (int) ($plan['monthly_quota'] ?? 0);
+        $nombre  = trim((string) ($plan['name'] ?? 'Pro'));
+        $pct     = $cupo > 0 ? (int) round($usadas / $cupo * 100) : 0;
+        $li      = static fn (string $h) => '<li style="margin:0 0 6px;">' . $h . '</li>';
+        $c       = static fn (string $t) => '<code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:13px;">' . esc($t) . '</code>';
+        $esPro   = (int) ($plan['id'] ?? 0) === 2;
+
+        $filas = $li('<strong>Consultas:</strong> ' . $n($usadas) . ($cupo > 0 ? ' de ' . $n($cupo) . ' (' . $pct . ' %)' : ''));
+        if (!empty($stats['pico_dia']) && (int) ($stats['pico_n'] ?? 0) > 0) {
+            $filas .= $li('<strong>Día de más uso:</strong> ' . (int) date('j', strtotime((string) $stats['pico_dia'])) . ' de ' . $nombreMes
+                . ' (' . $n((int) $stats['pico_n']) . ' consultas)');
+        }
+        if (!empty($stats['endpoints'])) {
+            $partes = [];
+            foreach ($stats['endpoints'] as $e) {
+                $partes[] = $c((string) $e['endpoint']) . ' (' . $n((int) $e['n']) . ')';
+            }
+            $filas .= $li('<strong>Lo que más usas:</strong> ' . implode(', ', $partes));
+        }
+
+        $contenido = $this->p('Así ha ido tu plan ' . esc($nombre) . ' en ' . $nombreMes . ':')
+            . '<ul style="margin:0 0 14px; padding-left:20px;">' . $filas . '</ul>';
+
+        $errores = (int) ($stats['errores_400'] ?? 0);
+        if ($errores > 0) {
+            $contenido .= $this->p('<strong>' . $n($errores) . ' ' . ($errores === 1 ? 'petición devolvió' : 'peticiones devolvieron') . ' error 400</strong> (no se cobran). Casi siempre es texto pegado al CIF: envía solo el identificador, 9 letras y números. Si no ves de dónde sale, responde con un ejemplo.');
+        }
+
+        $dias429 = (int) ($stats['dias_429'] ?? 0);
+        $boton   = 'Ver mi consumo';
+        $url     = site_url('consumption');
+        if ($dias429 > 0) {
+            $contenido .= $this->p('<strong>Tu integración se quedó sin cupo ' . $dias429 . ' ' . ($dias429 === 1 ? 'día' : 'días') . '</strong> y recibió error 429. Para que no vuelva a pasar:')
+                . '<ul style="margin:0 0 14px; padding-left:20px;">'
+                . ($esPro ? $li('<strong>Pasar a Business</strong>: más consultas al mes, cambio inmediato y sin tocar tu código.') : '')
+                . $li('<strong>Un bono de créditos</strong>: cuando se acaba el cupo, las consultas se cobran del monedero en vez de fallar. ' . self::enlace(site_url('crear-bono-api'), 'Crear bono') . '.')
+                . (!$esPro ? $li('<strong>Un plan a medida</strong> si tu volumen es estable por encima de ' . $n($cupo) . ': responde a este correo con tu volumen.') : '')
+                . '</ul>';
+            if ($esPro) {
+                $boton = 'Pasar a Business';
+                $url   = site_url('billing?plan=business');
+            }
+        } elseif ($pct >= 80) {
+            $contenido .= $this->p('Estás cerca del límite de tu plan. Si este mes esperas más volumen, te avisaremos al 80 % y al 100 %, y un bono de créditos evita que la API se pare al llegar al tope.');
+        }
+
+        $contenido .= $this->p('Tu cupo se renovó el día 1: tienes ' . $n($cupo) . ' consultas para ' . $mesActual . '.');
+
+        return $this->sendTemplateEmail('quota_warning', [
+            '_log_slug'   => 'paid_monthly_summary',
+            'subject'     => 'Tu ' . $nombreMes . ' en la API: ' . $n($usadas) . ' consultas' . ($cupo > 0 ? ' (' . $pct . ' % de tu plan)' : ''),
+            'preheader'   => $dias429 > 0
+                ? 'Te quedaste sin cupo ' . $dias429 . ' ' . ($dias429 === 1 ? 'día' : 'días') . '. Así evitas que se repita.'
+                : 'Tu uso del mes pasado, en un vistazo.',
+            'name'        => esc(trim((string) ($userData['name'] ?? '')) ?: explode('@', (string) $userData['email'])[0]),
+            'content'     => $contenido,
+            'button_text' => esc($boton),
+            'button_url'  => $url,
+        ], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
+    }
+
+    /**
+     * TRIGGER: paid_low_usage
+     *
+     * Lleva 14 días con Pro o Business y ninguna consulta en esos 14 días. Es la baja
+     * que viene: le ofrecemos ayuda para ponerlo en marcha y le recordamos lo que tiene.
+     *
+     * @param int|null $diasDesdeUltima días desde su última llamada (null si nunca llamó)
+     */
+    public function sendPaidLowUsage(array $userData, array $plan, ?int $diasDesdeUltima): array
+    {
+        $nombre = trim((string) ($plan['name'] ?? 'Pro'));
+        $cupo   = self::num((int) ($plan['monthly_quota'] ?? 0));
+        $c      = static fn (string $t) => '<code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:13px;">' . $t . '</code>';
+        $li     = static fn (string $h) => '<li style="margin:0 0 6px;">' . $h . '</li>';
+
+        $cuando = $diasDesdeUltima === null
+            ? 'todavía no ha hecho ninguna consulta'
+            : 'no ha hecho ninguna consulta en las últimas dos semanas (la última fue hace ' . $diasDesdeUltima . ' días)';
+
+        return $this->sendApiAutomation(
+            $userData,
+            'Tu plan ' . $nombre . ' lleva dos semanas sin consultas: ¿te ayudo a ponerlo en marcha?',
+            'Dime qué usas y te mando el ejemplo exacto para tu caso.',
+            $this->p('Tu plan <strong>' . esc($nombre) . '</strong> está activo, pero tu API Key ' . $cuando . '.')
+                . $this->p('Si la integración está a medias o algo no funciona como esperabas, <strong>responde a este correo</strong> con lo que usas (PHP, Python, JavaScript, Excel, n8n, tu ERP…) y te ayudo a dejarlo funcionando.')
+                . $this->p('Lo que ya tienes incluido:')
+                . '<ul style="margin:0 0 14px; padding-left:20px;">'
+                . $li('<strong>' . $cupo . ' consultas cada mes</strong>, que se renuevan el día 1.')
+                . $li('<strong>La dirección completa</strong> de cada empresa y sus coordenadas.')
+                . $li('<strong>Administradores y cargos</strong>, añadiendo ' . $c('&amp;admin=true') . '.')
+                . $li('<strong>Scoring y señales de actividad</strong>: ' . $c('/api/v1/companies/score') . ' y ' . $c('/api/v1/companies/signals') . '.')
+                . '</ul>'
+                . $this->p('El botón hace una consulta de ejemplo desde tu panel, para que veas la respuesta completa sin escribir código.'),
+            'Ver una consulta completa',
+            base_url('dashboard?probar=A15075062'),
+            'paid_low_usage'
         );
     }
 
@@ -1742,6 +2324,16 @@ class EmailService
         $logSlug = !empty($data['_log_slug']) ? (string) $data['_log_slug'] : $slug;
         unset($data['_log_slug']);
 
+        // Idioma elegido por quien llama. Las plantillas que solo son un marco para
+        // contenido escrito en PHP (CONTENIDO_EN_CODIGO) van en español salvo que quien
+        // llama diga otra cosa: antes un usuario 'en' recibía el marco en inglés con el
+        // texto en español dentro.
+        $idiomaForzado = isset($data['_idioma']) ? (string) $data['_idioma'] : null;
+        unset($data['_idioma']);
+        if ($idiomaForzado === null && in_array($slug, self::CONTENIDO_EN_CODIGO, true)) {
+            $idiomaForzado = 'es';
+        }
+
         // Define which templates are purely transactional (must send even if unsubscribed)
         $transactionalSlugs = [
             'payment_notification',
@@ -1807,9 +2399,24 @@ class EmailService
             }
         }
 
+        if ($idiomaForzado !== null) {
+            $userLang = $idiomaForzado;
+        }
+
+        // Versión en inglés solo si existe y no está rota. El seed antiguo dejó en
+        // body_en botones con href="" (entre ellos el de "Set my password"), emojis
+        // convertidos en "????" y restos de PHP: mejor el correo en español que
+        // funciona que uno en inglés que no lleva a ningún sitio.
+        $usarEn = $userLang === 'en' && !empty($template->body_en);
+        if ($usarEn && self::plantillaRota((string) $template->body_en)) {
+            log_message('warning', "[EmailService] body_en de '{$slug}' está roto: se envía en español a {$to}");
+            $usarEn = false;
+        }
+        $userLang = $usarEn ? 'en' : 'es';
+
         // Determine correct subject and body based on language
-        $subjectTemplate = ($userLang === 'en' && !empty($template->subject_en)) ? $template->subject_en : $template->subject;
-        $bodyTemplate = ($userLang === 'en' && !empty($template->body_en)) ? $template->body_en : $template->body;
+        $subjectTemplate = ($usarEn && !empty($template->subject_en)) ? $template->subject_en : $template->subject;
+        $bodyTemplate = $usarEn ? $template->body_en : $template->body;
 
         // Valores comunes que el seed deja como marcadores ({year}, {date}...). Lo que
         // mande quien llama tiene prioridad.
@@ -1846,7 +2453,18 @@ class EmailService
             $body .= "\n\n<p style='font-size:12px; color:#94a3b8; text-align:center; margin-top:30px;'>Recibes este aviso porque tienes esta empresa en vigilancia. <a href='{$optOutUrl}' style='color:#94a3b8; text-decoration:underline;'>Dejar de recibir alertas del Registro Mercantil</a>.</p>";
         } elseif (!in_array($slug, $transactionalSlugs) && strpos($body, 'unsubscribe') === false) {
             $unsubUrl = $this->generateUnsubscribeLink($to);
-            $body .= "\n\n<p style='font-size:12px; color:#94a3b8; text-align:center; margin-top:30px;'>¿No quieres recibir correos con consejos u ofertas? <a href='{$unsubUrl}' style='color:#94a3b8; text-decoration:underline;'>Date de baja de la lista aquí</a>.</p>";
+            $body .= $userLang === 'en'
+                ? "\n\n<p style='font-size:12px; color:#94a3b8; text-align:center; margin-top:30px;'>Don't want tips or offers by email? <a href='{$unsubUrl}' style='color:#94a3b8; text-decoration:underline;'>Unsubscribe here</a>.</p>"
+                : "\n\n<p style='font-size:12px; color:#94a3b8; text-align:center; margin-top:30px;'>¿No quieres recibir correos con consejos u ofertas? <a href='{$unsubUrl}' style='color:#94a3b8; text-decoration:underline;'>Date de baja de la lista aquí</a>.</p>";
+        }
+
+        // Cabeceras de baja (RFC 2369 y 8058). Gmail y Yahoo las exigen a quien envía
+        // correo comercial en volumen; sin ellas, más correos acaban en spam. Solo en
+        // los que admiten baja: un transaccional no la tiene.
+        if ($slug === 'borme_alert') {
+            $this->cabecerasBaja($email, $to, true);
+        } elseif (!in_array($slug, $transactionalSlugs)) {
+            $this->cabecerasBaja($email, $to);
         }
 
         $email->setTo($to);
@@ -1944,6 +2562,17 @@ class EmailService
     {
         $hash = hash_hmac('sha256', 'alerts:' . $email, env('encryption.key', 'apiempresas-secret-key'));
         return site_url("unsubscribe/alertas/{$hash}?email=" . urlencode($email));
+    }
+
+    /**
+     * Enlace de baja de un clic para la cabecera List-Unsubscribe: el cliente de correo
+     * hace un POST y la baja es inmediata (Unsubscribe::oneClick). Abierto con GET
+     * enseña la misma confirmación que el enlace del pie.
+     */
+    public function generateOneClickUnsubscribeLink(string $email): string
+    {
+        $hash = hash_hmac('sha256', $email, env('encryption.key', 'apiempresas-secret-key'));
+        return site_url("unsubscribe/one-click/{$hash}?email=" . urlencode($email));
     }
 
     public function generateUnsubscribeLink(string $email): string
