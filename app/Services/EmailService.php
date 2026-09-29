@@ -68,7 +68,9 @@ class EmailService
             'user_id' => $userData['user_id'] ?? '?'
         ];
 
-        return $this->sendTemplateEmail('admin_registration', $templateData, $adminEmail, [], [], $userData['user_id'] ?? 0);
+        // Sin el id del cliente: el correo va al admin. Con él, email_logs lo apuntaba
+        // como enviado AL CLIENTE e inflaba sus correos (y el criterio de contacto frío).
+        return $this->sendTemplateEmail('admin_registration', $templateData, $adminEmail);
     }
 
     /**

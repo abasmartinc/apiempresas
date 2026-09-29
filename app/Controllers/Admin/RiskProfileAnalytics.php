@@ -629,6 +629,8 @@ class RiskProfileAnalytics extends BaseController
         $emailService->clear();
         $emailService->setTo($user->email);
         $emailService->setSubject($subject);
+        // Cabecera de baja de un clic (Gmail y Yahoo la exigen al correo comercial)
+        (new \App\Services\EmailService())->cabecerasBaja($emailService, $user->email);
 
         $trackingCode = bin2hex(random_bytes(16));
 
@@ -709,15 +711,26 @@ class RiskProfileAnalytics extends BaseController
         $errorCount = 0;
         $skippedCount = 0;
 
+        // Contactos fríos (ver App\Libraries\ContactosFrios): fuera, salvo que se marque
+        $incluirFrios = (int)$this->request->getPost('incluir_frios') === 1;
+        $frios = $incluirFrios ? [] : \App\Libraries\ContactosFrios::de(array_map(static fn ($u) => (int) $u->id, $users));
+        $coldCount = 0;
+
         foreach ($users as $user) {
             if ((int)($user->unsuscribe ?? 0) === 1) {
                 $skippedCount++;
                 continue;
             }
 
+            if (isset($frios[(int)$user->id])) {
+                $coldCount++;
+                continue;
+            }
+
             $emailService->clear();
             $emailService->setTo($user->email);
             $emailService->setSubject($subject);
+            $emailHelper->cabecerasBaja($emailService, $user->email);
 
             $trackingCode = bin2hex(random_bytes(16));
 
@@ -760,6 +773,9 @@ class RiskProfileAnalytics extends BaseController
         $msg = "Campaña procesada: {$sentCount} email(s) enviados correctamente.";
         if ($skippedCount > 0) {
             $msg .= " ({$skippedCount} omitido(s) por baja voluntaria).";
+        }
+        if ($coldCount > 0) {
+            $msg .= " {$coldCount} omitido(s) por ser contactos fríos (5+ correos sin ningún clic, sin uso de la API y sin entrar en 30 días).";
         }
         if ($errorCount > 0) {
             $msg .= " {$errorCount} fallaron.";

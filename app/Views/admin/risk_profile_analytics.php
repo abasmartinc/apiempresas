@@ -1046,6 +1046,11 @@
                 <?= csrf_field() ?>
                 <input type="hidden" name="user_ids" id="bulkUserIdsInput" value="">
 
+                <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; color: #475569; cursor: pointer; margin-bottom: 14px;">
+                    <input type="checkbox" name="incluir_frios" value="1" style="margin-top: 2px;">
+                    <span><strong>Incluir contactos fríos.</strong> Por defecto se omite a quien ha recibido 5 correos o más sin hacer ningún clic, no ha usado la API y no entra desde hace 30 días: seguir escribiéndoles hace que Gmail mande a spam también el resto de nuestros correos.</span>
+                </label>
+
                 <!-- Selector de Plantilla -->
                 <div style="margin-bottom: 14px;">
                     <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">

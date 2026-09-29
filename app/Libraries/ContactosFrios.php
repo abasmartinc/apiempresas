@@ -52,6 +52,10 @@ class ContactosFrios
                                SUM(clicked_at IS NOT NULL) AS clics
                         FROM email_logs
                         WHERE user_id IN ({$marcadores})
+                          -- Avisos al admin que se apuntaban con el id del cliente
+                          AND COALESCE(template_slug, '') NOT IN ('admin_registration', 'payment_notification')
+                          AND subject NOT LIKE '%Nuevo registro de usuario%'
+                          AND subject NOT LIKE '%Nuevo Pago Recibido%'
                         GROUP BY user_id
                     ) e ON e.user_id = u.id
                     WHERE u.id IN ({$marcadores})
