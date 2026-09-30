@@ -100,6 +100,7 @@
             </div>
             <h1 class="plan-title">Precio API Enriquecimiento<br><span>B2B y KYB</span></h1>
             <p class="plan-subtitle">Tarifas diseñadas para escalar SaaS y automatizar onboarding B2B. Extrae datos del Registro Mercantil y haz scoring comercial sin costes ocultos.</p>
+            <?= view('planes/_precio', ['plan' => 'pro', 'source' => 'planes_pro']) ?>
         </div>
 
         <div class="plan-demo-wrapper">
@@ -287,7 +288,7 @@
             <div class="plan-card-bg"></div>
             <h2>Pásate al nivel profesional</h2>
             <p>Obtén tu API Key Pro al instante y empieza a automatizar.</p>
-            <a href="<?= site_url('register?intent=api&plan=pro&period=monthly') ?>" class="btn-primary-cta">Empezar con Pro (19€/mes + IVA)</a>
+            <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=planes_pro') ?>" class="btn-primary-cta js-precio-cta">Empezar con Pro</a>
         </div>
         
         <div class="alternative-plans">

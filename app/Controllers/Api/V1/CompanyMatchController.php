@@ -87,6 +87,7 @@ class CompanyMatchController extends BaseApiController
             
             return $this->respond([
                 'success' => false,
+                'error'   => 'PLAN_RESTRICTION',
                 'message' => $validation['message'],
                 'data' => [
                     'match_score' => '🔒 Business Plan',
@@ -100,7 +101,8 @@ class CompanyMatchController extends BaseApiController
                     'fit_level_detectado' => ($company) 
                         ? "Hemos detectado un nivel de encaje ({$previewLevel}) para el sector '{$sellerSector}'. ¡Pásate a Business para ver el informe completo!"
                         : "Evalúa el encaje comercial entre cualquier prospecto y tu sector de ventas.",
-                    'upgrade_url' => site_url('billing')
+                    'upgrade_url' => site_url('billing'),
+                    'checkout_url' => self::checkoutUrl('business', 'api_403_match'),
                 ]
             ], 403);
         }

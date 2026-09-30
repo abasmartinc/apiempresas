@@ -68,7 +68,25 @@ class CompaniesBatch extends BaseApiController
         $walletBalance = (int)(\App\Filters\ApiKeyFilter::$apiMeta['wallet_balance'] ?? 0);
 
         if (!in_array($planSlug, ['pro', 'business', 'enterprise'])) {
-            return $this->failForbidden('El endpoint de batch requiere un plan Pro o Business.');
+            // Mismos campos que daba failForbidden() (status, error: 403, messages) y se
+            // añaden los que faltaban: sin ellos salía como UNKNOWN_ERROR, sin mensaje
+            // legible y sin enlace. Quien prueba /batch trae una lista de CIF: es el
+            // perfil de compra más claro.
+            $msgBatch = 'El endpoint de batch requiere un plan Pro o Business.';
+            return $this->respond([
+                'status'   => 403,
+                'error'    => 403,
+                'messages' => ['error' => $msgBatch],
+                'success'  => false,
+                'code'     => 'PLAN_RESTRICTION',
+                'title'    => 'PLAN_RESTRICTION',
+                'type'     => 'https://apiempresas.es/docs/errors/plan_restriction',
+                'message'  => $msgBatch,
+                'upsell_opportunities' => [
+                    'mensaje'      => 'Con Pro consultas hasta 100 CIF en una sola petición, con los datos completos.',
+                    'checkout_url' => self::checkoutUrl('pro', 'api_403_batch'),
+                ],
+            ], ResponseInterface::HTTP_FORBIDDEN);
         }
 
         // 2. Parse JSON
@@ -228,7 +246,8 @@ class CompaniesBatch extends BaseApiController
                 'found' => $foundCount,
                 'cost' => $allowedCount,
                 'truncated' => $truncated
-            ]
+            // Recortado por falta de cupo: cómo seguir (campos nuevos, solo en ese caso)
+            ] + ($truncated ? \App\Filters\ApiKeyFilter::enlacesCompra((int) $planId, 'api_batch_truncated') : []),
         ]);
     }
 }

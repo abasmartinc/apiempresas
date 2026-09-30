@@ -34,7 +34,10 @@ class Billing extends BaseController
     public function index()
     {
         if (!session('logged_in')) {
-            return redirect()->to(site_url('dashboard'));
+            // A iniciar sesión y de vuelta aquí con plan, periodo y origen. Antes iba
+            // al panel (y de ahí al login sin destino): los enlaces de los correos
+            // abiertos sin sesión perdían el plan elegido y la venta quedaba sin origen.
+            return $this->loginYVolver('billing');
         }
 
         $userId = (int) session('user_id');
@@ -460,6 +463,13 @@ class Billing extends BaseController
             }
             
             $cancelUrl = site_url('billing/cancel');
+            if (in_array($plan, ['pro', 'business'], true)) {
+                $cancelUrl .= '?' . http_build_query(array_filter([
+                    'plan'   => $plan,
+                    'period' => $period,
+                    'source' => (string) ($postData['source'] ?? ''),
+                ]));
+            }
 
             // Si es una compra de radar/excel, enviamos a Stripe una URL de cancelación dinámica
             // para que el usuario vuelva a su resumen de compra en vez de a /billing/cancel (que requiere login)
@@ -1303,6 +1313,35 @@ class Billing extends BaseController
             return $this->renderView('billing/success_bonus', $data);
         }
 
+        // 1.6 Plan de la API (Pro/Business) según Stripe.
+        //
+        // Plan, periodo e importe salen de ESTA sesión de pago, no de la BD: si el
+        // usuario vuelve antes que el webhook, la suscripción aún no está guardada y
+        // antes se le mandaba al panel sin confirmación (seguía viendo "Activar Pro").
+        // Y la BD daba siempre "Mensual" y el precio mensual, también al que pagó anual.
+        $apiEnStripe = isset($packStripe) && $packStripe
+            && in_array((string) ($packStripe->metadata->plan ?? ''), ['pro', 'business'], true)
+            && ($packStripe->status ?? '') === 'complete'
+            // La vista dice "Hemos confirmado tu pago": no a un SEPA aún sin cobrar
+            && in_array((string) ($packStripe->payment_status ?? ''), ['paid', 'no_payment_required'], true);
+        if ($apiEnStripe) {
+            $planSlug = (string) $packStripe->metadata->plan;
+            $isAnnual = ($packStripe->metadata->period ?? '') === 'annual';
+            $planRow  = (new \App\Models\ApiPlanModel())->where('slug', $planSlug)->first();
+            $precioBd = $isAnnual ? ($planRow->price_annual ?? null) : ($planRow->price_monthly ?? null);
+            $data = [
+                'plan_name'      => (string) ($planRow->name ?? ucfirst($planSlug)),
+                // Base imponible cobrada (la vista suma el IVA encima)
+                'base_price'     => isset($packStripe->amount_subtotal)
+                    ? ((int) $packStripe->amount_subtotal) / 100
+                    : (float) ($precioBd ?? ($planSlug === 'business' ? 49 : 19)),
+                'period_name'    => $isAnnual ? 'Anual' : 'Mensual',
+                'payment_method' => 'Tarjeta (Stripe)',
+                'order_ref'      => 'SUB-' . strtoupper(substr((string) $packStripe->id, -8)),
+            ];
+            return $this->renderView('purchase_success', $data);
+        }
+
         // 1. Excel Single Purchase Flow (Check context or last info)
         $validExcelTypes = ['excel', 'directory_excel', 'subsidies_excel', 'contracts_excel', 'lookalike_excel'];
         if (in_array($checkoutData['type'] ?? '', $validExcelTypes) || (!empty($lastInfo) && empty($subscription))) {
@@ -1456,10 +1495,21 @@ class Billing extends BaseController
 
         // 4. API Subscription Success (Pro/Business)
         if ($subscription && strtolower($subscription->plan_slug ?? '') !== 'free' && (float) ($subscription->price_monthly ?? 0) > 0) {
+            // Sin sesión de Stripe: el periodo se deduce de la duración del ciclo
+            $isAnnual     = false;
+            $precioAnual  = null;
+            if (!empty($subscription->current_period_start) && !empty($subscription->current_period_end)) {
+                $days = (strtotime((string) $subscription->current_period_end) - strtotime((string) $subscription->current_period_start)) / 86400;
+                if ($days > 40) {
+                    // getActivePlanByUserId no trae price_annual
+                    $precioAnual = (new \App\Models\ApiPlanModel())->find((int) $subscription->plan_id)->price_annual ?? null;
+                    $isAnnual    = !empty($precioAnual);
+                }
+            }
             $data = [
                 'plan_name' => $subscription->plan_name ?? 'Pro',
-                'base_price' => $subscription->price_monthly ?? '19',
-                'period_name' => 'Mensual',
+                'base_price' => $isAnnual ? $precioAnual : ($subscription->price_monthly ?? '19'),
+                'period_name' => $isAnnual ? 'Anual' : 'Mensual',
                 'payment_method' => 'Tarjeta (Stripe)',
                 'order_ref' => 'SUB-' . str_pad($subscription->id ?? '0', 6, '0', STR_PAD_LEFT),
             ];
@@ -1476,11 +1526,31 @@ class Billing extends BaseController
 
     public function cancel()
     {
+        // Vuelve al pago con el plan, periodo y origen que había elegido (la URL de
+        // cancelación de Stripe los lleva). Antes aparecía Pro mensual por defecto.
+        $vuelta = array_filter([
+            'plan'   => in_array($this->request->getGet('plan'), ['pro', 'business'], true) ? $this->request->getGet('plan') : null,
+            'period' => in_array($this->request->getGet('period'), ['monthly', 'annual'], true) ? $this->request->getGet('period') : null,
+            'source' => substr(preg_replace('/[^a-z0-9_\-]/i', '', (string) $this->request->getGet('source')), 0, 64) ?: null,
+        ]);
+        $destino = 'billing' . ($vuelta ? '?' . http_build_query($vuelta) : '');
+
         if (!session('logged_in')) {
-            return redirect()->to(site_url('dashboard'));
+            return redirect()->to(site_url('enter') . '?redirect=' . urlencode($destino));
         }
         // puedes crear una vista billing_cancel si quieres
-        return redirect()->to(site_url('billing'))->with('info', lang('Messages.flash_14'));
+        return redirect()->to(site_url($destino))->with('info', lang('Messages.flash_14'));
+    }
+
+    /**
+     * Al login y, tras entrar, de vuelta a esta misma página con su query string
+     * (plan, periodo, source...). Login::index y los botones sociales lo respetan.
+     */
+    private function loginYVolver(string $ruta)
+    {
+        $query   = (string) $this->request->getUri()->getQuery();
+        $destino = $ruta . ($query !== '' ? '?' . $query : '');
+        return redirect()->to(site_url('enter') . '?redirect=' . urlencode($destino));
     }
 
 

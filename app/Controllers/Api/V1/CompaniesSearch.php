@@ -145,10 +145,10 @@ class CompaniesSearch extends BaseApiController
             if ((int)$planId === 1 && !$conSaldo) {
                 if ($multiple) {
                     foreach ($items as &$item) {
-                        $item = mask_company_data($item);
+                        $item = mask_company_data($item, 'api_free_search');
                     }
                 } else {
-                    $items = mask_company_data($items);
+                    $items = mask_company_data($items, 'api_free_search');
                 }
             }
 
@@ -245,10 +245,10 @@ class CompaniesSearch extends BaseApiController
             if ((int)$planId === 1 && !$conSaldo) {
                 if ($multiple) {
                     foreach ($data as &$item) {
-                        $item = mask_company_data($item);
+                        $item = mask_company_data($item, 'api_free_search');
                     }
                 } else {
-                    $data = mask_company_data($data);
+                    $data = mask_company_data($data, 'api_free_search');
                 }
             }
 

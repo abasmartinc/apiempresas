@@ -26,7 +26,7 @@ class Usage extends BaseController
     public function index()
     {
         if (!session('logged_in')) {
-            return redirect()->to(site_url('dashboard'));
+            return redirect()->to(site_url('enter') . '?redirect=consumption');
         }
 
         $userId = (int) session('user_id');

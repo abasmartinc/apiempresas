@@ -41,11 +41,18 @@ class Register extends BaseController
         $planPedido  = strtolower(trim((string) $this->request->getGet('plan')));
         if (in_array($planPedido, ['pro', 'business'], true)) {
             $periodo     = $this->request->getGet('period') === 'monthly' ? 'monthly' : 'annual';
-            $destinoPago = 'billing?plan=' . $planPedido . '&period=' . $periodo;
+            $destinoPago = 'billing?plan=' . $planPedido . '&period=' . $periodo . '&from=signup';
+            // El origen del botón (home_pricing_pro, planes_pro...) llega hasta el
+            // pago: antes se perdía aquí y las ventas quedaban sin atribuir.
+            $origen = substr(preg_replace('/[^a-z0-9_\-]/i', '', (string) $this->request->getGet('source')), 0, 64);
+            if ($origen !== '') {
+                $destinoPago .= '&source=' . $origen;
+            }
         }
 
         if (session('logged_in')) {
-            $redirectUrl = $destinoPago ?? ($this->request->getGet('redirect') ?? 'dashboard');
+            // Ya tiene cuenta: al pago sin el aviso de "cuenta creada"
+            $redirectUrl = $destinoPago !== null ? str_replace('&from=signup', '', $destinoPago) : ($this->request->getGet('redirect') ?? 'dashboard');
             return redirect()->to(site_url(ltrim($redirectUrl, '/')));
         }
         $validation = session('validation') ?? \Config\Services::validation();

@@ -19,8 +19,29 @@
                 <div class="auth-form-icon-badge" style="margin-bottom: 8px; width: 40px; height: 40px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
                 </div>
-                <h1 style="font-size: 1.5rem; margin-bottom: 4px;">Crea tu cuenta gratis</h1>
-                <p style="font-size: 0.85rem;">Sin tarjeta, sin permanencias. Solo necesitas un correo profesional.</p>
+                <?php
+                    // Quien viene de "Activar Pro/Business" no viene a por la cuenta gratis:
+                    // se le dice que es el paso 1 de 2 y lo que pagará después.
+                    $vienePagar = null;
+                    if (!empty($redirectUrl) && preg_match('#^billing\?plan=(pro|business)&period=(monthly|annual)#', (string) $redirectUrl, $mPago)) {
+                        $filaPlan = (new \App\Models\ApiPlanModel())->where('slug', $mPago[1])->first();
+                        if ($filaPlan) {
+                            $vienePagar = [
+                                'nombre' => (string) $filaPlan->name,
+                                'precio' => $mPago[2] === 'annual'
+                                    ? number_format((float) $filaPlan->price_annual, 0, ',', '.') . ' €/año'
+                                    : number_format((float) $filaPlan->price_monthly, 0, ',', '.') . ' €/mes',
+                            ];
+                        }
+                    }
+                ?>
+                <?php if ($vienePagar): ?>
+                    <h1 style="font-size: 1.5rem; margin-bottom: 4px;">Paso 1 de 2: crea tu cuenta para activar <?= esc($vienePagar['nombre']) ?></h1>
+                    <p style="font-size: 0.85rem;">Después confirmas el pago (<?= esc($vienePagar['precio']) ?> + IVA). Sin permanencia: cancelas cuando quieras.</p>
+                <?php else: ?>
+                    <h1 style="font-size: 1.5rem; margin-bottom: 4px;">Crea tu cuenta gratis</h1>
+                    <p style="font-size: 0.85rem;">Sin tarjeta, sin permanencias. Solo necesitas un correo profesional.</p>
+                <?php endif; ?>
             </div>
 
             <!-- ALERTS / ERRORS -->

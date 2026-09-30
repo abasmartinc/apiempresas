@@ -460,4 +460,392 @@ class SandboxController extends \App\Controllers\Api\V1\BaseApiController
             ]
         ]);
     }
+
+    // =========================================================================
+    // Bloque "sandbox" en las respuestas correctas (campo nuevo, 30-09-2026)
+    // =========================================================================
+
+    /**
+     * Plan mínimo de cada endpoint y, en /companies, qué campos son de pago. El sandbox
+     * responde siempre con los datos completos; sin esto, quien integra aquí no sabía
+     * qué iba a ver con su plan, ni cómo pasar a producción.
+     */
+    private const PLAN_POR_ENDPOINT = [
+        'companies'        => 'free',
+        'search'           => 'free',
+        'score'            => 'pro',
+        'signals'          => 'pro',
+        'insights'         => 'business',
+        'contact-prep'     => 'business',
+        'radar'            => 'free',
+        'match'            => 'business',
+        'network'          => 'pro',
+        'borme'            => 'pro',
+        'risk-profile'     => 'business',
+        'batch'            => 'pro',
+        'contracts'        => 'business',
+        'verify'           => 'pro',
+        'filter'           => 'business',
+        'reconcile'        => 'pro',
+        'watchlist'        => 'pro',
+        'events'           => 'pro',
+    ];
+
+    private function infoSandbox(): array
+    {
+        $path = (string) $this->request->getUri()->getPath();
+        $seg  = basename(rtrim($path, '/'));
+        if (preg_match('#watchlist/[^/]+$#', $path) && $seg !== 'events') {
+            $seg = 'watchlist';
+        }
+        $info = [
+            'mode'           => 'sandbox',
+            'cost'           => 0,
+            'plan_required'  => self::PLAN_POR_ENDPOINT[$seg] ?? null,
+            'production_url' => $this->urlProduccion(),
+        ];
+        if (in_array($seg, ['companies', 'search', 'batch'], true)) {
+            $info['fields_by_plan'] = [
+                'address'           => 'pro',
+                'corporate_purpose' => 'pro (en Free, 100 caracteres)',
+                'lat'               => 'pro',
+                'lng'               => 'pro',
+                'financials'        => 'pro',
+                'administrators'    => 'pro',
+            ];
+        }
+        $notas = [
+            'radar'  => 'Free: 10 resultados con datos ocultos. Pro: 100. Business: 1.000.',
+            'filter' => 'El recuento (count_only=true) es gratis en todos los planes; las filas son de Business (5 consultas por fila).',
+            'score'  => 'Free: solo la cifra, sin desglose.',
+            'insights' => 'Pro: vista previa (perfil y probabilidad). Business: completo.',
+            'verify' => 'Cuesta 2 consultas. El bloque risk es de Business.',
+        ];
+        if (isset($notas[$seg])) {
+            $info['plan_notes'] = $notas[$seg];
+        }
+
+        return $info;
+    }
+
+    public function respond($data = null, ?int $statusCode = null, string $message = '')
+    {
+        if (is_array($data) && ($data['success'] ?? null) === true && !isset($data['sandbox'])) {
+            $data['sandbox'] = $this->infoSandbox();
+        }
+
+        return parent::respond($data, $statusCode, $message);
+    }
+
+    /** CIF de la query, limpio, o respuesta de error (400 / 403 / 404) si no sirve. */
+    private function cifOError(bool $permitirNoEncontrado = false)
+    {
+        $cifRaw = $this->request->getGet('cif');
+        if (!$cifRaw) {
+            return $this->respond(['success' => false, 'error' => 'VALIDATION_ERROR', 'message' => 'El parámetro "cif" es obligatorio.'], 400);
+        }
+        $cif = $this->validateMagicCif($cifRaw);
+        if (!$cif) {
+            return $this->getForbiddenResponse();
+        }
+        if ($cif !== 'A15075062' && !$permitirNoEncontrado) {
+            return $this->respond(['success' => false, 'error' => 'COMPANY_NOT_FOUND', 'message' => 'Empresa no encontrada.'], 404);
+        }
+
+        return $cif;
+    }
+
+    /** Sin tildes, mayúsculas, solo letras y números. */
+    private static function normalizar(string $s): string
+    {
+        $s = strtoupper(strtr($s, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n',
+                                   'Á' => 'A', 'É' => 'E', 'Í' => 'I', 'Ó' => 'O', 'Ú' => 'U', 'Ü' => 'U', 'Ñ' => 'N']));
+        return trim(preg_replace('/[^A-Z0-9 ]+/', ' ', $s));
+    }
+
+    // =========================================================================
+    // ENDPOINT: /api/sandbox/v1/companies/contracts
+    // =========================================================================
+    public function contracts()
+    {
+        $cif = $this->cifOError();
+        if (!is_string($cif)) return $cif;
+
+        $contratos = [
+            ['tender_id' => 'SBX-2026-001', 'title' => 'Suministro de uniformes para el personal de atención al público', 'contracting_authority' => 'Ayuntamiento de Ejemplo', 'award_date' => '2026-06-15', 'amount' => '184500.00', 'currency' => 'EUR', 'tender_url' => 'https://contrataciondelestado.es/'],
+            ['tender_id' => 'SBX-2025-114', 'title' => 'Vestuario laboral para servicios municipales (lote 2)', 'contracting_authority' => 'Diputación Provincial de Ejemplo', 'award_date' => '2025-11-03', 'amount' => '62300.00', 'currency' => 'EUR', 'tender_url' => 'https://contrataciondelestado.es/'],
+        ];
+
+        return $this->respond([
+            'success' => true,
+            'data'    => [
+                'cif'          => $cif,
+                'company_name' => 'INDUSTRIA DE DISENO TEXTIL SA',
+                'summary'      => ['total_contracts' => 2, 'total_amount' => '246800.00', 'currency' => 'EUR'],
+                'contracts'    => $contratos,
+                'pagination'   => ['total' => 2, 'page' => 1, 'limit' => 20, 'total_pages' => 1, 'has_more' => false],
+            ],
+        ]);
+    }
+
+    // =========================================================================
+    // ENDPOINT: /api/sandbox/v1/companies/verify
+    // =========================================================================
+    public function verify()
+    {
+        $cif = $this->cifOError(true);
+        if (!is_string($cif)) return $cif;
+
+        if ($cif !== 'A15075062') {
+            return $this->respond(['success' => false, 'error' => 'COMPANY_NOT_FOUND', 'message' => 'Empresa no encontrada.', 'decision_hint' => 'fail'], 404);
+        }
+
+        $checks = [];
+        $flags  = [];
+        $hint   = 'pass';
+
+        $name = trim((string) $this->request->getGet('name'));
+        if ($name !== '') {
+            $n = self::normalizar($name);
+            $score = (str_contains($n, 'INDUSTRIA DE DISENO TEXTIL') || str_contains($n, 'INDITEX')) ? 100 : 40;
+            $checks['name'] = ['provided' => $name, 'score' => $score, 'match' => $score >= 80];
+            if ($score < 80) {
+                $flags[] = ['code' => 'NAME_MISMATCH', 'severity' => 'medium', 'message' => 'El nombre no coincide con la razón social.'];
+                $hint = 'review';
+            }
+        }
+
+        $person = trim((string) $this->request->getGet('person'));
+        if ($person !== '') {
+            $palabras = array_filter(explode(' ', self::normalizar($person)));
+            $admins = [
+                ['name' => 'ORTEGA PEREZ MARTA', 'position' => 'Presidente', 'since' => '2022-04-01'],
+                ['name' => 'GARCIA MACEIRAS OSCAR', 'position' => 'Consejero Delegado', 'since' => '2021-12-01'],
+            ];
+            $encontrado = null;
+            foreach ($admins as $a) {
+                $suyas = explode(' ', $a['name']);
+                if (count($palabras) >= 2 && !array_diff($palabras, $suyas)) {
+                    $encontrado = $a;
+                    break;
+                }
+            }
+            $checks['person'] = [
+                'provided'         => $person,
+                'is_current_admin' => $encontrado !== null,
+                'matched_name'     => $encontrado['name'] ?? null,
+                'position'         => $encontrado['position'] ?? null,
+                'since'            => $encontrado['since'] ?? null,
+            ];
+            if ($encontrado === null) {
+                $flags[] = ['code' => 'SIGNER_NOT_ADMIN', 'severity' => 'medium', 'message' => 'Quien firma no consta como administrador vigente.'];
+                $hint = 'review';
+            }
+        }
+
+        if (filter_var($this->request->getGet('vat'), FILTER_VALIDATE_BOOLEAN)) {
+            $checks['vat'] = ['vat_number' => 'ES' . $cif, 'checked' => true, 'valid' => true, 'source' => 'VIES', 'error' => null];
+        }
+        $checks['accounts'] = ['last_accounts_year' => 2024];
+
+        return $this->respond([
+            'success' => true,
+            'data'    => [
+                'cif'           => $cif,
+                'exists'        => true,
+                'name'          => 'INDUSTRIA DE DISENO TEXTIL SA',
+                'status'        => 'ACTIVA',
+                'status_code'   => 'ACTIVE',
+                'status_source' => 'registry',
+                'status_date'   => null,
+                'checks'        => $checks,
+                'flags'         => $flags,
+                'decision_hint' => $hint,
+                'checked_at'    => date('c'),
+            ],
+        ]);
+    }
+
+    // =========================================================================
+    // ENDPOINT: /api/sandbox/v1/companies/filter
+    // =========================================================================
+    public function filter()
+    {
+        $f = array_filter([
+            'cnae'         => $this->request->getGet('cnae'),
+            'province'     => $this->request->getGet('province'),
+            'municipality' => $this->request->getGet('municipality'),
+        ], static fn ($v) => is_string($v) && trim($v) !== '');
+        if (!$f) {
+            return $this->respond(['success' => false, 'error' => 'VALIDATION_ERROR', 'message' => 'Indica al menos uno de estos filtros: cnae, province o municipality.'], 400);
+        }
+
+        if (filter_var($this->request->getGet('count_only'), FILTER_VALIDATE_BOOLEAN)) {
+            return $this->respond([
+                'success' => true,
+                'data'    => ['total' => 1234],
+                'meta'    => ['filters' => $f, 'cost' => 0, 'counted_at' => date('c')],
+            ]);
+        }
+
+        $fila = static fn (string $cif, string $name, string $municipio, string $fundada) => [
+            'cif' => $cif, 'name' => $name, 'cnae' => '4642', 'cnae_label' => 'Comercio al por mayor de prendas de vestir y calzado',
+            'province' => 'A CORUÑA', 'municipality' => $municipio, 'founded' => $fundada,
+            'status' => 'ACTIVA', 'status_code' => 'ACTIVE', 'status_source' => 'registry',
+            'financials' => ['size_band' => 'GT_1M', 'size_band_label' => 'Más de 1 M€', 'last_accounts_year' => 2024],
+            'has_phone' => true,
+        ];
+
+        return $this->respond([
+            'success' => true,
+            'data'    => [
+                $fila('A15075062', 'INDUSTRIA DE DISENO TEXTIL SA', 'ARTEIXO', '1985-06-12'),
+                $fila('B00000001', 'EMPRESA DE EJEMPLO SANDBOX SL', 'A CORUÑA', '2019-03-04'),
+            ],
+            'meta'    => [
+                'total' => 1234, 'returned' => 2, 'limit' => 100, 'has_more' => true,
+                'next_cursor' => 'c2FuZGJveA', 'cost' => 10, 'cost_per_row' => 5, 'truncated' => false, 'filters' => $f,
+            ],
+        ]);
+    }
+
+    // =========================================================================
+    // ENDPOINT: POST /api/sandbox/v1/companies/reconcile
+    // =========================================================================
+    public function reconcile()
+    {
+        $json  = $this->request->getJSON(true) ?? [];
+        $items = [];
+        foreach ((array) ($json['items'] ?? []) as $it) {
+            if (is_array($it) && isset($it['name'])) {
+                $items[] = ['name' => trim((string) $it['name']), 'province' => isset($it['province']) ? (string) $it['province'] : null];
+            }
+        }
+        foreach ((array) ($json['names'] ?? []) as $n) {
+            if (is_string($n)) {
+                $items[] = ['name' => trim($n), 'province' => null];
+            }
+        }
+        if (!$items) {
+            return $this->respond(['success' => false, 'error' => 'VALIDATION_ERROR', 'message' => 'Envía un JSON con "names" (lista de nombres) o "items" ([{"name", "province"}]).'], 400);
+        }
+        if (count($items) > 100) {
+            return $this->respond(['success' => false, 'error' => 'VALIDATION_ERROR', 'message' => 'Máximo 100 nombres por petición.'], 400);
+        }
+
+        $out = [];
+        $c = ['match' => 0, 'ambiguous' => 0, 'no_match' => 0, 'invalid' => 0];
+        foreach ($items as $it) {
+            $row = ['input' => $it];
+            $n = self::normalizar($it['name']);
+            if (mb_strlen($it['name']) < 3) {
+                $row['status'] = 'invalid';
+                $row['message'] = 'El nombre debe tener al menos 3 caracteres.';
+            } elseif (str_contains($n, 'INDUSTRIA DE DISENO TEXTIL') || $n === 'INDITEX' || $n === 'INDITEX SA') {
+                $row['status'] = 'match';
+                $row['score'] = 100;
+                $row['company'] = ['cif' => 'A15075062', 'name' => 'INDUSTRIA DE DISENO TEXTIL SA', 'province' => 'A CORUÑA', 'status' => 'ACTIVA', 'status_code' => 'ACTIVE', 'score' => 100];
+            } elseif (str_contains($n, 'EJEMPLO')) {
+                $row['status'] = 'ambiguous';
+                $row['candidates'] = [
+                    ['cif' => 'B00000001', 'name' => 'EMPRESA DE EJEMPLO SANDBOX SL', 'province' => 'A CORUÑA', 'status' => 'ACTIVA', 'status_code' => 'ACTIVE', 'score' => 78],
+                    ['cif' => 'B00000002', 'name' => 'EJEMPLO SANDBOX SERVICIOS SA', 'province' => 'MADRID', 'status' => 'ACTIVA', 'status_code' => 'ACTIVE', 'score' => 74],
+                ];
+            } else {
+                $row['status'] = 'no_match';
+            }
+            $c[$row['status']]++;
+            $out[] = $row;
+        }
+
+        return $this->respond([
+            'success' => true,
+            'data'    => $out,
+            'meta'    => [
+                'requested' => count($items), 'matched' => $c['match'], 'ambiguous' => $c['ambiguous'],
+                'no_match' => $c['no_match'], 'invalid' => $c['invalid'], 'skipped_quota' => 0,
+                'cost' => $c['match'], 'thresholds' => ['match' => 85, 'ambiguous' => 70],
+                'test_names' => '"Inditex" da match, cualquier nombre con "Ejemplo" da ambiguous y el resto no_match.',
+            ],
+        ]);
+    }
+
+    // =========================================================================
+    // ENDPOINTS: /api/sandbox/v1/watchlist (GET, POST, DELETE /{cif}, GET /events)
+    // Sin estado: responde como si ya vigilaras A15075062.
+    // =========================================================================
+    public function watchlistList()
+    {
+        return $this->respond([
+            'success' => true,
+            'data'    => [['cif' => 'A15075062', 'name' => 'INDUSTRIA DE DISENO TEXTIL SA', 'added_at' => date('Y-m-d H:i:s', strtotime('-10 days'))]],
+            'meta'    => ['total' => 1, 'watch_limit' => 100, 'page' => 1, 'limit' => 100, 'has_more' => false],
+        ]);
+    }
+
+    public function watchlistAdd()
+    {
+        $json = $this->request->getJSON(true) ?? [];
+        $cifs = $json['cifs'] ?? null;
+        if (!is_array($cifs) || !$cifs) {
+            return $this->respond(['success' => false, 'error' => 'VALIDATION_ERROR', 'message' => 'Envía un JSON con el array "cifs", por ejemplo {"cifs": ["A15075062"]}.'], 400);
+        }
+        $res = ['added' => [], 'already_watching' => [], 'not_found' => [], 'invalid' => [], 'rejected_over_limit' => []];
+        foreach ($cifs as $raw) {
+            $cif = strtoupper(preg_replace('/[^A-Z0-9]/i', '', (string) $raw));
+            if ($cif === 'A15075062') {
+                $res['already_watching'][] = $cif;
+            } elseif ($cif === 'B00000000') {
+                $res['not_found'][] = $cif;
+            } elseif (preg_match('/^[A-Z][0-9]{7}[A-Z0-9]$/', $cif)) {
+                $res['added'][] = $cif;
+            } else {
+                $res['invalid'][] = (string) $raw;
+            }
+        }
+
+        return $this->respond([
+            'success' => true,
+            'data'    => $res,
+            'meta'    => ['total' => 1 + count($res['added']), 'watch_limit' => 100],
+        ]);
+    }
+
+    public function watchlistRemove($cif = null)
+    {
+        $cif = strtoupper(preg_replace('/[^A-Z0-9]/i', '', (string) $cif));
+        if ($cif !== 'A15075062') {
+            return $this->respond(['success' => false, 'error' => 'NOT_WATCHING', 'message' => 'Esa empresa no está en tu vigilancia.'], 404);
+        }
+
+        return $this->respond([
+            'success' => true,
+            'data'    => ['cif' => $cif, 'removed' => true],
+            'meta'    => ['total' => 0, 'watch_limit' => 100],
+        ]);
+    }
+
+    public function watchlistEvents()
+    {
+        $since = (string) ($this->request->getGet('since') ?: date('Y-m-d', strtotime('-7 days')));
+        $d1 = date('Y-m-d', strtotime('-5 days'));
+        $d2 = date('Y-m-d', strtotime('-2 days'));
+
+        return $this->respond([
+            'success' => true,
+            'data'    => [
+                [
+                    'id' => 'borme_act:sandbox1', 'type' => 'borme_act', 'date' => $d1, 'cif' => 'A15075062',
+                    'company_name' => 'INDUSTRIA DE DISENO TEXTIL SA',
+                    'data' => ['act_types' => 'Nombramientos', 'description' => 'Nombramientos. Consejero: EJEMPLO SANDBOX PERSONA.', 'url_pdf' => 'https://www.boe.es/borme/'],
+                ],
+                [
+                    'id' => 'risk_level_change:A15075062:' . $d2, 'type' => 'risk_level_change', 'date' => $d2, 'cif' => 'A15075062',
+                    'company_name' => 'INDUSTRIA DE DISENO TEXTIL SA',
+                    'data' => ['from' => 'BAJO', 'to' => 'MEDIO', 'model_change' => false],
+                ],
+            ],
+            'meta'    => ['since' => $since, 'types' => ['borme_act', 'status_change', 'risk_level_change'], 'total' => 2, 'page' => 1, 'limit' => 100, 'has_more' => false],
+        ]);
+    }
 }

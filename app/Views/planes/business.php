@@ -101,6 +101,7 @@
             </div>
             <h1 class="plan-title">Infraestructura API <span>Enterprise</span></h1>
             <p class="plan-subtitle">Tarifas y planes para alto volumen. Conecta tu ERP al Registro Mercantil, evalúa el riesgo de tus clientes y recibe por webhook los cambios de hasta 1.000 empresas vigiladas.</p>
+            <?= view('planes/_precio', ['plan' => 'business', 'source' => 'planes_business']) ?>
         </div>
 
         <div class="plan-demo-wrapper" style="background: #f8fafc;">
@@ -280,7 +281,7 @@
             <div class="plan-card-bg"></div>
             <h2>Escala tus operaciones hoy</h2>
             <p>Únete a los clientes que ya están revolucionando su inteligencia comercial.</p>
-            <a href="<?= site_url('register?intent=api&plan=business&period=monthly') ?>" class="btn-primary-cta">Empezar con Business (49€/mes + IVA)</a>
+            <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=planes_business') ?>" class="btn-primary-cta js-precio-cta">Empezar con Business</a>
         </div>
         
         <div class="alternative-plans">

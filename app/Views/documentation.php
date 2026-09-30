@@ -430,6 +430,8 @@ Accept: application/json</code></pre>
                         <li><code>B00000000</code>: empresa no encontrada (404).</li>
                     </ul>
                     <p>Cualquier otro CIF devuelve un error. El Sandbox responde siempre con los datos completos, sin los recortes del plan Free ni los límites de cupo: sirve para comprobar el formato de las respuestas, no lo que verás con tu plan.</p>
+                    <p>Cada respuesta correcta del Sandbox añade un bloque <code>sandbox</code>: <code>plan_required</code> (plan mínimo del endpoint), <code>production_url</code> (la misma petición en producción, lista para copiar), <code>cost</code> (siempre 0) y, en <code>/companies</code>, <code>/companies/search</code> y <code>/companies/batch</code>, <code>fields_by_plan</code> con los campos que solo llegan completos con Pro.</p>
+                    <p>También están en el Sandbox <code>/companies/verify</code>, <code>/companies/contracts</code>, <code>/companies/filter</code>, <code>POST /companies/reconcile</code> (<code>"Inditex"</code> da <code>match</code>, un nombre con <code>"Ejemplo"</code> da <code>ambiguous</code> y el resto <code>no_match</code>) y la vigilancia (<code>/watchlist</code> y <code>/watchlist/events</code>, sin guardar nada: responde como si ya vigilaras A15075062).</p>
                 </section>
 
                 <!-- BY CIF -->
@@ -460,7 +462,7 @@ Accept: application/json</code></pre>
                             <tr>
                                 <td><code>admin</code></td>
                                 <td>boolean</td>
-                                <td><strong>Opcional.</strong> Si es <code>true</code>, incluye los administradores y cargos vigentes (se descuentan los ceses, dimisiones y revocaciones publicados en el BORME). <span class="plan-badge pro" style="margin-left: 5px; display: inline-block;">Pro</span></td>
+                                <td><strong>Opcional.</strong> Si es <code>true</code>, incluye los administradores y cargos vigentes (se descuentan los ceses, dimisiones y revocaciones publicados en el BORME). <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=docs_by_cif') ?>" class="plan-badge pro" style="margin-left: 5px; display: inline-block;; text-decoration: none;" title="Ver el plan Pro">Pro</a></td>
                             </tr>
                         </tbody>
                     </table>
@@ -540,7 +542,7 @@ Accept: application/json</code></pre>
                             <tr>
                                 <td><code style="background: transparent; color: #2563eb; font-weight: 600;">financials</code></td>
                                 <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">object</span></td>
-                                <td style="color: #475569;"><span class="plan-badge pro">Pro</span> <code style="font-size: 0.8rem;">size_band</code>: tramo orientativo de facturación (<code style="font-size: 0.8rem;">LT_500K</code>, <code style="font-size: 0.8rem;">500K_1M</code>, <code style="font-size: 0.8rem;">GT_1M</code> o <code style="font-size: 0.8rem;">NO_REVENUE</code>; null si no consta) y su texto en <code style="font-size: 0.8rem;">size_band_label</code>. <code style="font-size: 0.8rem;">last_accounts_year</code>: último ejercicio con cuentas depositadas que consta en nuestra base (puede existir uno posterior aún no incorporado).</td>
+                                <td style="color: #475569;"><a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=docs_by_cif') ?>" class="plan-badge pro" style="text-decoration: none;" title="Ver el plan Pro">Pro</a> <code style="font-size: 0.8rem;">size_band</code>: tramo orientativo de facturación (<code style="font-size: 0.8rem;">LT_500K</code>, <code style="font-size: 0.8rem;">500K_1M</code>, <code style="font-size: 0.8rem;">GT_1M</code> o <code style="font-size: 0.8rem;">NO_REVENUE</code>; null si no consta) y su texto en <code style="font-size: 0.8rem;">size_band_label</code>. <code style="font-size: 0.8rem;">last_accounts_year</code>: último ejercicio con cuentas depositadas que consta en nuestra base (puede existir uno posterior aún no incorporado).</td>
                             </tr>
                             <tr>
                                 <td><code style="background: transparent; color: #2563eb; font-weight: 600;">province</code></td>
@@ -568,9 +570,11 @@ Accept: application/json</code></pre>
                         <li><code>lat</code> y <code>lng</code> no se incluyen.</li>
                         <li>Se añade el objeto <code>upsell_opportunities</code>. Si tu código necesita saber si la respuesta está recortada, comprueba si existe ese campo.</li>
                         <li><code>financials</code> no se incluye. Dentro de <code>upsell_opportunities</code>, <code>datos_pro</code> indica si hay tramo de facturación y año de cuentas, y cuántos administradores constan.</li>
+                        <li>También dentro de <code>upsell_opportunities</code>: <code>consultas_restantes</code> (ya descontada esta petición), <code>consultas_totales</code> y <code>se_renuevan</code> (<code>false</code>: las del Free no se renuevan).</li>
                         <li><code>status_code</code>, <code>status_source</code> y <code>status_date</code> llegan igual que en los planes de pago.</li>
                     </ul>
                     <p>Con un plan Pro o Business, o con saldo de bono, recibes los datos completos sin cambiar nada en tu código.</p>
+                    <p>En el plan Pro, cuando la empresa tiene contratos públicos o perfil de riesgo (datos de Business), la respuesta puede añadir <code>business_preview</code>: <code>contratos_publicos</code>, <code>importe_contratos</code>, <code>perfil_riesgo_disponible</code>, <code>mensaje</code> y <code>checkout_url</code>. Solo son recuentos, y aparece como mucho en 25 respuestas al día. También en <code>/companies/verify</code>.</p>
                 </section>
 
                 <section class="docs-section" id="endpoint-verify">
@@ -580,7 +584,7 @@ Accept: application/json</code></pre>
                     <div class="endpoint-header">
                         <span class="http-badge get">GET</span>
                         <code>/companies/verify</code>
-                        <span class="plan-badge pro">Pro</span>
+                        <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=docs_verify') ?>" class="plan-badge pro" style="text-decoration: none;" title="Ver el plan Pro">Pro</a>
                     </div>
                     <table class="docs-table">
                         <thead><tr><th>Parámetro</th><th>Descripción</th></tr></thead>
@@ -636,7 +640,7 @@ Accept: application/json</code></pre>
                     <div class="endpoint-header">
                         <span class="http-badge post">POST</span>
                         <code>/companies/reconcile</code>
-                        <span class="plan-badge pro">Pro</span>
+                        <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=docs_reconcile') ?>" class="plan-badge pro" style="text-decoration: none;" title="Ver el plan Pro">Pro</a>
                     </div>
                     <pre><code class="language-json">// Petición
 {
@@ -765,7 +769,7 @@ Accept: application/json</code></pre>
                         <div class="endpoint-header">
                             <span class="http-badge get">GET</span>
                             <code>/companies/score</code>
-                            <span class="plan-badge pro">Pro</span>
+                            <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=docs_expanded') ?>" class="plan-badge pro" style="text-decoration: none;" title="Ver el plan Pro">Pro</a>
                         </div>
                         <p>Obtén el score de interés comercial y el nivel de prioridad de una empresa.</p>
                         <pre><code class="language-json">{
@@ -794,7 +798,7 @@ Accept: application/json</code></pre>
                         <div class="endpoint-header">
                             <span class="http-badge get">GET</span>
                             <code>/companies/signals</code>
-                            <span class="plan-badge pro">Pro</span>
+                            <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=docs_expanded') ?>" class="plan-badge pro" style="text-decoration: none;" title="Ver el plan Pro">Pro</a>
                         </div>
                         <p>Eventos y actos societarios detectados recientemente.</p>
                         <pre><code class="language-json">{
@@ -827,7 +831,7 @@ Accept: application/json</code></pre>
                         <div class="endpoint-header">
                             <span class="http-badge get">GET</span>
                             <code>/companies/insights</code>
-                            <span class="plan-badge business">Business</span>
+                            <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_expanded') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
                         </div>
                         <p>Análisis IA del perfil comercial y necesidades probables de la empresa.</p>
                         <pre><code class="language-json">{
@@ -856,7 +860,7 @@ Accept: application/json</code></pre>
                         <div class="endpoint-header">
                             <span class="http-badge get">GET</span>
                             <code>/companies/contact-prep</code>
-                            <span class="plan-badge business">Business</span>
+                            <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_expanded') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
                         </div>
                         <p>Pitch de venta sugerido y manejo de objeciones generado por IA.</p>
                         <pre><code class="language-json">{
@@ -884,7 +888,7 @@ Accept: application/json</code></pre>
                         <div class="endpoint-header">
                             <span class="http-badge get">GET</span>
                             <code>/companies/network</code>
-                            <span class="plan-badge pro">Pro</span>
+                            <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=docs_expanded') ?>" class="plan-badge pro" style="text-decoration: none;" title="Ver el plan Pro">Pro</a>
                         </div>
                         <p>Obtiene la red de vinculación entre empresas a través de sus administradores. Requiere el parámetro <code>cif</code>.</p>
                         <pre><code class="language-json">{
@@ -919,7 +923,7 @@ Accept: application/json</code></pre>
                         <div class="endpoint-header">
                             <span class="http-badge get">GET</span>
                             <code>/companies/match</code>
-                            <span class="plan-badge business">Business</span>
+                            <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_expanded') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
                         </div>
                         <p>Calculadora de Match B2B. Requiere los parámetros <code>cif</code> y <code>seller_sector</code>. Devuelve el nivel de encaje comercial y un argumentario personalizado.</p>
                         <pre><code class="language-json">{
@@ -948,8 +952,8 @@ Accept: application/json</code></pre>
                         <div class="endpoint-header">
                             <span class="http-badge post">POST</span>
                             <code>/companies/batch</code>
-                            <span class="plan-badge pro">Pro</span>
-                            <span class="plan-badge business">Business</span>
+                            <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=docs_expanded') ?>" class="plan-badge pro" style="text-decoration: none;" title="Ver el plan Pro">Pro</a>
+                            <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_expanded') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
                         </div>
                         <p>Consulta hasta 100 empresas de una sola vez enviando un array de CIFs. El coste es variable: 1 consulta de tu cuota mensual o monedero por cada empresa <strong>encontrada</strong> (código 200). Si no tienes suficientes créditos para cubrir el lote entero, la respuesta se recortará automáticamente hasta el número de empresas que puedas pagar.</p>
                         
@@ -1001,7 +1005,7 @@ Accept: application/json</code></pre>
                     <div class="endpoint-header">
                         <span class="http-badge get">GET</span>
                         <code>/companies/borme</code>
-                        <span class="plan-badge pro">Pro</span>
+                        <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=docs_borme') ?>" class="plan-badge pro" style="text-decoration: none;" title="Ver el plan Pro">Pro</a>
                     </div>
 
                     <h4>Parámetros</h4>
@@ -1058,7 +1062,7 @@ Accept: application/json</code></pre>
                     <div class="endpoint-header">
                         <span class="http-badge get">GET</span>
                         <code>/companies/radar</code>
-                        <span class="plan-badge pro">Pro</span>
+                        <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=docs_radar') ?>" class="plan-badge pro" style="text-decoration: none;" title="Ver el plan Pro">Pro</a>
                     </div>
 
                     <h4>Parámetros opcionales</h4>
@@ -1138,7 +1142,7 @@ Accept: application/json</code></pre>
                     <div class="endpoint-header">
                         <span class="http-badge post">POST</span>
                         <code>/watchlist</code>
-                        <span class="plan-badge pro">Pro</span>
+                        <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=docs_watchlist') ?>" class="plan-badge pro" style="text-decoration: none;" title="Ver el plan Pro">Pro</a>
                     </div>
                     <p>Añade hasta 500 CIF por petición. La respuesta dice qué pasó con cada uno.</p>
                     <pre><code class="language-json">// Petición
@@ -1223,7 +1227,7 @@ Accept: application/json</code></pre>
                     <div class="endpoint-header">
                         <span class="http-badge get">GET</span>
                         <code>/companies/filter</code>
-                        <span class="plan-badge business">Business</span>
+                        <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_filter') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
                     </div>
                     <table class="docs-table">
                         <thead><tr><th>Parámetro</th><th>Descripción</th></tr></thead>
@@ -1302,22 +1306,22 @@ Accept: application/json</code></pre>
                     <div class="endpoint-header" style="margin-bottom: 5px;">
                         <span class="http-badge get">GET</span>
                         <code>/webhooks</code>
-                        <span class="plan-badge business">Business</span>
+                        <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_webhooks') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
                     </div>
                     <div class="endpoint-header" style="margin-bottom: 5px;">
                         <span class="http-badge post">POST</span>
                         <code>/webhooks</code>
-                        <span class="plan-badge business">Business</span>
+                        <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_webhooks') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
                     </div>
                     <div class="endpoint-header" style="margin-bottom: 5px;">
                         <span class="http-badge post">POST</span>
                         <code>/webhooks/{id}/test</code>
-                        <span class="plan-badge business">Business</span>
+                        <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_webhooks') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
                     </div>
                     <div class="endpoint-header">
                         <span class="http-badge delete">DELETE</span>
                         <code>/webhooks/{id}</code>
-                        <span class="plan-badge business">Business</span>
+                        <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_webhooks') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
                     </div>
 
                     <h4>Crear un webhook</h4>
@@ -1386,7 +1390,7 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
                     <div class="endpoint-header">
                         <span class="http-badge get">GET</span>
                         <code>/companies/contracts</code>
-                        <span class="plan-badge business">Business</span>
+                        <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_contracts') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
                     </div>
 
                     <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
@@ -1457,7 +1461,7 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
                     <div class="endpoint-header">
                         <span class="http-badge get">GET</span>
                         <code>/companies/risk-profile</code>
-                        <span class="plan-badge business">Business</span>
+                        <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_risk_profile') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
                     </div>
 
                     <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
@@ -1577,6 +1581,8 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.monthly_quota</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Consultas incluidas en tu plan (al mes, o 100 en total en Free).</td></tr>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.remaining_calls</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Consultas del plan que te quedan antes de usar saldo del monedero.</td></tr>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.quota_period</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;"><code>monthly</code> (se renueva cada mes) o <code>lifetime</code> (Free: no se renueva).</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.quota_resets_at</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string|null</span></td><td style="color: #475569;">Cuándo se renueva el cupo (ISO 8601). <code>null</code> en Free.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.checkout_url</code> / <code style="background: transparent; color: #2563eb; font-weight: 600;">stats.recharge_url</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string|null</span></td><td style="color: #475569;">Enlace para pasar al plan siguiente (<code>null</code> si no hay) y para comprar un bono.</td></tr>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">history[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">Histórico de consultas individuales con su fecha y CIF.</td></tr>
                         </tbody>
                     </table>
@@ -1590,7 +1596,7 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
   "success": false,
   "error": "COMPANY_NOT_FOUND",
   "message": "Empresa no encontrada.",
-  "type": "https://apiempresas.com/docs/errors/company_not_found",
+  "type": "https://apiempresas.es/docs/errors/company_not_found",
   "title": "COMPANY_NOT_FOUND",
   "status": 404,
   "detail": "Empresa no encontrada.",
@@ -1666,7 +1672,8 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
                         </tbody>
                     </table>
 
-                    <p>La disponibilidad de cada endpoint, medida cada 5 minutos, está publicada en <a href="https://status.apiempresas.es" target="_blank" rel="noopener">status.apiempresas.es</a>.</p>
+                    <p><strong>Aviso de cupo en la respuesta.</strong> En <code>/api/v1/companies</code>, cuando te queda el 20 % del cupo o menos, la respuesta añade un objeto <code>notice</code> junto a <code>data</code>: <code>type</code> (<code>quota_warning</code>), <code>message</code>, <code>quota_remaining</code>, <code>quota_limit</code>, <code>quota_resets_at</code> (null en Free), <code>checkout_url</code> y <code>recharge_url</code>. Por debajo de ese umbral no aparece.</p>
+
                     <p>Si superas el límite por segundo, recibirás un error <code>429 Too Many Requests</code> junto con la cabecera <code>Retry-After: 1</code> indicando que esperes 1 segundo (<code>code</code>: <code>TOO_MANY_REQUESTS</code>). El cupo agotado también responde 429, pero con <code>code</code> <code>QUOTA_EXCEEDED</code> y sin <code>Retry-After</code>: no reintentes en ese caso. Si necesitas procesar muchas empresas de golpe, te recomendamos utilizar el endpoint <a href="#batch">Batch</a>.</p>
                 </section>
 

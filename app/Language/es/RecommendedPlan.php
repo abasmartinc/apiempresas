@@ -9,19 +9,19 @@ return [
     
     // Pro Plan
     'pro_queries' => '3.000 consultas / mes',
-    'pro_feat_1' => 'Scoring Comercial IA',
-    'pro_feat_2' => 'Radar Inteligente B2B',
-    'pro_feat_3' => '10 Webhooks Activos',
+    'pro_feat_1' => 'Dirección completa y administradores vigentes',
+    'pro_feat_2' => 'Tramo de facturación y año de cuentas',
+    'pro_feat_3' => 'Verificación KYB y vigilancia de 100 empresas',
     'pro_desc' => 'Ideal para automatizar validaciones en tu CRM o sistema.',
     'pro_cta' => 'Activar Pro ahora',
-    'pro_value' => 'Ahorra +10h de validación manual',
+    'pro_value' => 'Desde 15,17 €/mes pagando anual',
     
     // Business Plan
-    'biz_queries' => '10.000+ consultas / mes',
-    'biz_feat_1' => 'SLA Avanzado (99.9%)',
-    'biz_feat_2' => 'Gestor de cuenta personal',
-    'biz_feat_3' => 'Webhooks Ilimitados',
-    'biz_desc' => 'Para volumen alto, roles avanzados y soporte dedicado.',
+    'biz_queries' => '10.000 consultas / mes',
+    'biz_feat_1' => 'Perfil de riesgo y contratos públicos',
+    'biz_feat_2' => 'Vigilancia de 1.000 empresas con webhooks',
+    'biz_feat_3' => 'Segmentos: descarga por sector, zona y tamaño',
+    'biz_desc' => 'Para volumen alto, análisis de riesgo y prospección.',
     'biz_cta' => 'Mejorar a Business',
-    'biz_value' => 'Escalabilidad sin límites',
+    'biz_value' => 'Desde 39,17 €/mes pagando anual',
 ];

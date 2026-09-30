@@ -664,7 +664,6 @@
                     <div><strong><?= esc($fmtCorto((int) $ps['acts'])) ?></strong><span>Actos del BORME</span></div>
                     <?php endif; ?>
                     <div><strong>Diario</strong><span>Actualización del BORME</span></div>
-                    <div><a href="https://status.apiempresas.es" target="_blank" rel="noopener"><strong>En vivo</strong><span>Estado del servicio</span></a></div>
                 </div>
 
             </div>
@@ -1209,9 +1208,13 @@
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
                                 </svg> Consultas por lotes: 100 NIF por petición</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                                </svg> Soporte prioritario por email: respuesta en menos de 2 h</li>
                         </ul>
 
-                        <a href="<?= site_url('register?intent=api&plan=pro&period=annual') ?>" class="api-pricing-btn primary">Activar Plan Pro</a>
+                        <a href="<?= site_url('register?intent=api&plan=pro&period=annual&source=api_kyb_pricing_pro') ?>" class="api-pricing-btn primary">Activar Plan Pro</a>
                     </div>
 
                     <!-- BUSINESS -->
@@ -1251,10 +1254,10 @@
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                                </svg> Soporte por email: respuesta en menos de 2 h</li>
+                                </svg> Soporte prioritario por email: respuesta en menos de 2 h</li>
                         </ul>
 
-                        <a href="<?= site_url('register?intent=api&plan=business&period=annual') ?>" class="api-pricing-btn">Activar Business</a>
+                        <a href="<?= site_url('register?intent=api&plan=business&period=annual&source=api_kyb_pricing_business') ?>" class="api-pricing-btn">Activar Business</a>
                     </div>
                 </div>
                 <p style="text-align:center; margin-top:28px; font-weight:800;"><a href="<?= site_url() ?>#precios" style="color:#2563eb; text-decoration:none;">Ver la comparativa completa de planes y funciones →</a></p>
@@ -1549,15 +1552,6 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                                 <div
                                     style="color: rgba(255,255,255,0.5); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; margin-top: 4px;">
                                     CONSULTAS GRATIS</div>
-                            </div>
-                            <div style="width: 1px; background: rgba(255,255,255,0.1);"></div>
-                            <div>
-                                <div
-                                    style="color: #fff; font-size: 1.75rem; font-weight: 950; letter-spacing: -0.04em;">
-                                    <a href="https://status.apiempresas.es" target="_blank" rel="noopener" style="color:#fff; text-decoration:none;">En vivo</a></div>
-                                <div
-                                    style="color: rgba(255,255,255,0.5); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; margin-top: 4px;">
-                                    ESTADO DEL SERVICIO</div>
                             </div>
                         </div>
 

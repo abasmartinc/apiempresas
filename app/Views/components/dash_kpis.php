@@ -44,7 +44,10 @@
     ]) ?>
 
     <?= view('components/ui/kpi', [
-        'theme' => 'error',
+        // Neutro, no rojo: son las peticiones del propio usuario que no dieron 200 (CIF
+        // mal escrito, empresa no encontrada, sin cupo...), no fallos del servicio, y no
+        // se cobran. En rojo y como "Ratio error" parecía que la API fallaba.
+        'theme' => 'default',
         'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
         'label' => lang('Dashboard.error_rate'),
         'value' => '<div id="kpi-error">'.($requestsUsed > 0 ? '...' : '--').'</div>',
@@ -64,42 +67,16 @@
             'theme' => 'success',
             'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
             'label' => lang('Dashboard.status'),
-            'value' => '<span id="kpi-status" style="color: #10b981;">' . lang('Dashboard.operational') . '</span>',
-            'meta' => '<a id="kpi-uptime" href="https://status.apiempresas.es" target="_blank" rel="noopener" style="color: inherit;">' . lang('Dashboard.uptime') . '</a>'
+            // Fijo de momento (30-09-2026, decisión de Adrián): la página de estado aún no
+            // mide bien y enseñaba "Degradado" a quien entraba al panel. Volver a leerla
+            // de status.apiempresas.es cuando esté arreglada.
+            'value' => '<span id="kpi-status" style="color: #10b981;">Activa</span>',
+            'meta' => 'Tu API Key está lista'
         ]) ?>
     <?php endif; ?>
 </div>
 
 <script>
-    // Estado y disponibilidad reales, de la página de estado pública (antes el texto
-    // decía siempre "Disponibilidad 99.9%"). Si no responde, se queda el enlace.
-    document.addEventListener('DOMContentLoaded', function() {
-        const statusEl = document.getElementById('kpi-status');
-        const uptimeEl = document.getElementById('kpi-uptime');
-        if (!statusEl || !uptimeEl) return;
-        fetch('https://status.apiempresas.es/api.php')
-        .then(res => res.json())
-        .then(data => {
-            const eps = (data.endpoints || []).filter(e => e.uptime_30d !== null && e.uptime_30d !== undefined);
-            if (eps.length) {
-                const media = eps.reduce((a, e) => a + Number(e.uptime_30d), 0) / eps.length;
-                uptimeEl.textContent = 'Disponibilidad 30 días: ' + media.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' %';
-            }
-            const estados = {
-                operational: ['Operativo', '#10b981'],
-                degraded: ['Degradado', '#d97706'],
-                partial: ['Incidencia', '#dc2626'],
-                down: ['Caído', '#dc2626']
-            };
-            const e = estados[data.overall_status];
-            if (e) {
-                statusEl.textContent = e[0];
-                statusEl.style.color = e[1];
-            }
-        })
-        .catch(() => {});
-    });
-
     document.addEventListener('DOMContentLoaded', function() {
         fetch('<?= site_url('dashboard/kpis') ?>', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(res => res.json())

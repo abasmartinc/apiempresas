@@ -46,7 +46,7 @@ class CompanyVerifyController extends BaseApiController
                 'message' => 'La verificación KYB requiere un plan Pro o Business.',
                 'upsell_opportunities' => [
                     'mensaje'     => 'Comprueba en una llamada que la empresa existe y opera, que el nombre coincide, que quien firma es administrador y que el NIF está en VIES.',
-                    'upgrade_url' => site_url('billing?plan=pro&source=api_403_verify'),
+                    'upgrade_url' => \App\Filters\ApiKeyFilter::urlGancho('pro', 'api_403_verify'),
                 ],
             ], ResponseInterface::HTTP_FORBIDDEN);
         }
@@ -157,6 +157,12 @@ class CompanyVerifyController extends BaseApiController
         ];
         if ($esBusiness) {
             $data['risk'] = $risk;
+        } else {
+            // Pro: el riesgo y los contratos están en Business (campo nuevo)
+            $preview = self::businessPreview($cif, 'api_pro_verify');
+            if ($preview !== null) {
+                $data['business_preview'] = $preview;
+            }
         }
         $data['flags'] = $d['flags'];
         $data['decision_hint'] = $d['decision_hint'];

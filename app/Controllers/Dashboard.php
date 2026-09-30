@@ -25,7 +25,11 @@ class Dashboard extends BaseController
     public function index()
     {
         if (! session('logged_in')) {
-            return redirect()->to(site_url('enter'))
+            // Con destino de vuelta: los correos enlazan a dashboard?probar=... y
+            // sin esto, tras entrar, se perdía la consulta de prueba.
+            $query = (string) $this->request->getUri()->getQuery();
+            $vuelta = $query !== '' ? '?redirect=' . urlencode('dashboard?' . $query) : '';
+            return redirect()->to(site_url('enter') . $vuelta)
                 ->with('error', lang('Messages.flash_24'));
         }
 
@@ -151,6 +155,18 @@ class Dashboard extends BaseController
         $data['plan'] = $plan;
         $data['isPaid'] = $isPaid;
         $data['maxLimit'] = $maxLimit;
+
+        // Lo que incluye su plan de la API y qué ha probado ya (tarjeta del panel).
+        // Solo Pro y Business: los que pagan y no descubren lo que compraron se van.
+        $data['planIncluye'] = null;
+        if ($isPaid && $plan && in_array((int) ($plan->plan_id ?? 0), [2, 3], true)) {
+            $planIdIncluye = (int) $plan->plan_id;
+            $data['planIncluye'] = [
+                'plan_id' => $planIdIncluye,
+                'items'   => \App\Libraries\PlanIncluye::items($planIdIncluye, \App\Libraries\PlanIncluye::ultimoCif((int) $userId)),
+                'usadas'  => \App\Libraries\PlanIncluye::usadas((int) $userId, $planIdIncluye, (string) ($plan->created_at ?? date('Y-m-d', strtotime('-90 days')))),
+            ];
+        }
 
         // Recuperar saldo del monedero y estadísticas
         $walletBalance = 0;

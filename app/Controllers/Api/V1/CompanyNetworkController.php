@@ -82,6 +82,7 @@ class CompanyNetworkController extends BaseApiController
 
             return $this->respond([
                 'success' => false,
+                'error'   => 'PLAN_RESTRICTION',
                 'message' => $validation['message'],
                 'data' => [
                     'nodes' => [],
@@ -93,7 +94,8 @@ class CompanyNetworkController extends BaseApiController
                     'nodos_detectados' => ($company && isset($stats['total_administrators']) && is_numeric($stats['total_administrators'])) 
                         ? "Hemos detectado {$stats['total_administrators']} administradores y {$stats['total_linked_companies']} empresas vinculadas. ¡Pásate a Pro para mapear su red!"
                         : 'Mapea la red de vinculación entre empresas a través de sus administradores.',
-                    'upgrade_url' => site_url('billing')
+                    'upgrade_url' => site_url('billing'),
+                    'checkout_url' => self::checkoutUrl('pro', 'api_403_network'),
                 ]
             ], 403);
         }

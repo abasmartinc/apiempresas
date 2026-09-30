@@ -81,7 +81,7 @@ $fmt = function ($n) {
                             
                             <ul class="plan-features">
                                 <li style="color: #64748b;"><div class="feature-icon" style="background: #f1f5f9; color: #64748b;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> 100 consultas en total (no se renuevan)</li>
-                                <li style="color: #64748b;"><div class="feature-icon" style="background: #f1f5f9; color: #64748b;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> Datos limitados</li>
+                                <li style="color: #64748b;"><div class="feature-icon" style="background: #f1f5f9; color: #64748b;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> <?= lang('Billing.free_limited') ?></li>
                             </ul>
                         </label>
                         
@@ -115,6 +115,7 @@ $fmt = function ($n) {
                                 <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> <?= lang('Billing.pro_f3') ?></li>
                                 <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> <?= lang('Billing.pro_f4') ?></li>
                                 <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> <?= lang('Billing.pro_f5') ?></li>
+                                <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div> <?= lang('Billing.pro_f6') ?></li>
                             </ul>
                         </label>
 
@@ -174,7 +175,7 @@ $fmt = function ($n) {
                                 </p>
                                 <div style="display: flex; gap: 12px; justify-content: center;">
                                     <button type="button" onclick="document.getElementById('error-modal').remove()" style="padding: 12px 20px; background: #ffffff; border: 1px solid #cbd5e1; color: #475569; font-weight: 800; border-radius: 12px; cursor: pointer; transition: all 0.2s;"><?= lang('Billing.close') ?></button>
-                                    <a href="<?= site_url('contacto') ?>" style="padding: 12px 20px; background: #2152ff; border: 1px solid #2152ff; color: #ffffff; font-weight: 800; border-radius: 12px; text-decoration: none; display: inline-block; transition: background 0.2s; box-shadow: 0 4px 6px -1px rgba(33, 82, 255, 0.2);"><?= lang('Billing.contact_support') ?></a>
+                                    <a href="<?= site_url('contact') ?>" style="padding: 12px 20px; background: #2152ff; border: 1px solid #2152ff; color: #ffffff; font-weight: 800; border-radius: 12px; text-decoration: none; display: inline-block; transition: background 0.2s; box-shadow: 0 4px 6px -1px rgba(33, 82, 255, 0.2);"><?= lang('Billing.contact_support') ?></a>
                                 </div>
                             </div>
                         </div>
@@ -192,6 +193,12 @@ $fmt = function ($n) {
                         </div>
                     <?php endif; ?>
 
+                    <?php if (service('request')->getGet('from') === 'signup'): ?>
+                        <?php // Llega del registro de "Activar Pro/Business": segundo y último paso ?>
+                        <div style="margin-top: 24px; padding: 14px 18px; background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; border-radius: 12px; font-weight: 700;">
+                            Ya estás dentro. Paso 2 de 2: confirma el pago y tu plan se activa al momento.
+                        </div>
+                    <?php endif; ?>
                     <!-- BLOQUE DE PAGO (Stepped Layout) -->
                     <div id="checkout-section" style="margin-top: 40px; display: none;">
                         <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 40px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.02), 0 4px 6px -4px rgba(0,0,0,0.02);">
@@ -212,7 +219,9 @@ $fmt = function ($n) {
 
                                     <!-- BOTON Y CONFIRMACION -->
                                     <div style="position: relative; z-index: 1;">
-                                        <h3 style="margin: 0 0 16px; font-size: 1.25rem; font-weight: 900; color: #0f172a;"><?= lang('Billing.step2_title') ?></h3>
+                                        <?php // El JS pone aquí "Completa la activación" o, si ya tiene plan de pago, el aviso de cambio/bajada (no se reembolsa) ?>
+                                        <h3 id="checkout-title" style="margin: 0 0 8px; font-size: 1.25rem; font-weight: 900; color: #0f172a;"><?= lang('Billing.step2_title') ?></h3>
+                                        <p id="checkout-sub" style="margin: 0 0 16px; font-size: 0.95rem; color: #64748b; line-height: 1.5;"></p>
                                         
                                         <div style="border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; display: flex; gap: 32px; align-items: center; background: #ffffff; margin-bottom: 24px;">
                                             <div style="width: 140px; height: 140px; border-radius: 16px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: inset 0 2px 4px rgba(255,255,255,0.8), 0 4px 6px -1px rgba(37, 99, 235, 0.1); border: 1px solid #bfdbfe;">
@@ -363,7 +372,7 @@ $fmt = function ($n) {
 
                         <!-- Datos comprobables en lugar de testimonio -->
                         <div style="background: #edf4ff; border-radius: 16px; padding: 20px 24px; text-align: center; font-size: 0.9rem; color: #0f172a; line-height: 1.6;">
-                            ¿Quieres comprobarlo antes de pagar? Mira la <a href="https://status.apiempresas.es" target="_blank" rel="noopener" style="font-weight: 800; color: #1d4ed8;">disponibilidad en tiempo real</a> de cada endpoint o prueba la API con las <strong>100 consultas gratis</strong> del plan Free.
+                            ¿Quieres comprobarlo antes de pagar? Prueba la API con las <strong>100 consultas gratis</strong> del plan Free o, sin gastar ninguna, con el <a href="<?= site_url('documentation#auth') ?>" style="font-weight: 800; color: #1d4ed8;">sandbox</a>.
                         </div>
                     </div>
 
@@ -526,10 +535,17 @@ $fmt = function ($n) {
                         // que quede de Business y de la alternativa (cancelar a fin de periodo).
                         const esBajada = (currentPlan === 'business' && plan === 'pro');
                         if (checkoutTitle) checkoutTitle.textContent = esBajada ? <?= json_encode(lang('Billing.confirm_downgrade')) ?> : <?= json_encode(lang('Billing.confirm_change')) ?>;
-                        if (checkoutSub) checkoutSub.textContent = esBajada ? <?= json_encode(lang('Billing.confirm_downgrade_desc')) ?> : <?= json_encode(lang('Billing.confirm_change_desc')) ?>;
+                        if (checkoutSub) {
+                            checkoutSub.textContent = esBajada ? <?= json_encode(lang('Billing.confirm_downgrade_desc')) ?> : <?= json_encode(lang('Billing.confirm_change_desc')) ?>;
+                            // Es un aviso de dinero: que se vea
+                            checkoutSub.style.cssText = 'margin: 0 0 16px; padding: 12px 16px; font-size: 0.95rem; line-height: 1.5; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; font-weight: 600;';
+                        }
                     } else {
                         if (checkoutTitle) checkoutTitle.textContent = '<?= lang('Billing.complete_activation') ?>';
-                        if (checkoutSub) checkoutSub.textContent = '<?= lang('Billing.complete_activation_desc') ?>';
+                        if (checkoutSub) {
+                            checkoutSub.textContent = '<?= lang('Billing.complete_activation_desc') ?>';
+                            checkoutSub.style.cssText = 'margin: 0 0 16px; font-size: 0.95rem; color: #64748b; line-height: 1.5;';
+                        }
                     }
                 }
             }
@@ -569,6 +585,11 @@ $fmt = function ($n) {
         }
         if (qs.get('period') === 'annual') {
             setPeriod('annual');
+        }
+        // Si viene a por un plan concreto (botones de precios, correos, registro), se le
+        // lleva directo al botón de pago en vez de dejarle debajo de las tres tarjetas.
+        if ((planUrl === 'pro' || planUrl === 'business') && planUrl !== currentPlan && checkoutSection) {
+            setTimeout(function () { checkoutSection.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300);
         }
     })();
 </script>

@@ -67,6 +67,9 @@ class CompanyEnrichmentController extends BaseApiController
 
         // Si es Free, devolvemos un score "base" o enmascaramos detalles
         if ($this->planAccess->getAccessLevel($planSlug, 'company_score') === 'basic') {
+            // La vista recortada del Free ya no gasta una de sus 100 consultas: solo trae
+            // la cifra, y cobrarla restaba cupo sin dar motivo para comprar.
+            \App\Filters\ApiKeyFilter::$apiSkipBilling = true;
             return $this->respond([
                 'success' => true,
                 'data' => [
@@ -75,7 +78,9 @@ class CompanyEnrichmentController extends BaseApiController
                     'fuerza_financiera' => '🔒 Actualiza a Pro',
                     'riesgo_impago' => '🔒 Actualiza a Pro',
                     'trayectoria' => '🔒 Actualiza a Pro',
-                    'mensaje' => 'Actualiza a Pro para ver el desglose detallado y señales del BORME'
+                    'mensaje' => 'Actualiza a Pro para ver el desglose detallado y señales del BORME',
+                    // Campo nuevo: enlace de compra con origen
+                    'checkout_url' => self::checkoutUrl('pro', 'api_free_score'),
                 ]
             ]);
         }
@@ -123,9 +128,12 @@ class CompanyEnrichmentController extends BaseApiController
             $count = is_array($signals) ? count($signals) : 0;
             return $this->respond([
                 'success' => false,
+                // Campo nuevo: sin él el error salía como UNKNOWN_ERROR
+                'error'   => 'PLAN_RESTRICTION',
                 'message' => "Te estás perdiendo {$count} eventos societarios recientes (nombramientos, ampliaciones, etc.). Actualiza al plan Pro para acceder al historial completo y tomar mejores decisiones.",
                 'upsell_opportunities' => [
-                    'eventos_ocultos' => $count
+                    'eventos_ocultos' => $count,
+                    'checkout_url'    => self::checkoutUrl('pro', 'api_403_signals'),
                 ]
             ], 403);
         }
@@ -178,11 +186,15 @@ class CompanyEnrichmentController extends BaseApiController
         if ($accessLevel === 'none') {
             return $this->respond([
                 'success' => false,
+                'error'   => 'PLAN_RESTRICTION',
                 'message' => 'El análisis IA requiere un plan Business.',
                 'upsell_opportunities' => [
                     'pain_points' => '🔒 Desbloquea Business para ver los puntos de dolor',
                     'buyer_persona' => '🔒 Desbloquea Business para ver quién toma las decisiones',
-                    'sales_arguments' => '🔒 Desbloquea Business para obtener argumentos de venta'
+                    'sales_arguments' => '🔒 Desbloquea Business para obtener argumentos de venta',
+                    // Con Pro ya hay una vista previa (perfil y probabilidad)
+                    'vista_previa_en_pro' => true,
+                    'checkout_url'        => self::checkoutUrl('pro', 'api_403_insights'),
                 ]
             ], 403);
         }
@@ -191,7 +203,8 @@ class CompanyEnrichmentController extends BaseApiController
         if (!$insights) return $this->failNotFound('Sin análisis disponible para esta empresa.');
 
         if ($accessLevel === 'preview') {
-            // Solo mostramos el perfil básico y probabilidad
+            // Solo mostramos el perfil básico y probabilidad. La vista previa no se cobra.
+            \App\Filters\ApiKeyFilter::$apiSkipBilling = true;
             return $this->respond([
                 'success' => true,
                 'data' => [
@@ -200,7 +213,8 @@ class CompanyEnrichmentController extends BaseApiController
                     'pain_points' => '🔒 Desbloquea Business para ver los puntos de dolor',
                     'buyer_persona' => '🔒 Desbloquea Business para ver quién toma las decisiones',
                     'sales_arguments' => '🔒 Desbloquea Business para obtener argumentos de venta',
-                    'message' => 'Actualiza a Business para ver el análisis comercial completo y necesidades detectadas.'
+                    'message' => 'Actualiza a Business para ver el análisis comercial completo y necesidades detectadas.',
+                    'checkout_url' => self::checkoutUrl('business', 'api_pro_insights'),
                 ]
             ]);
         }
@@ -246,11 +260,15 @@ class CompanyEnrichmentController extends BaseApiController
         if (!$this->planAccess->canAccess($planSlug, 'contact_prep')) {
             return $this->respond([
                 'success' => false,
-                'message' => 'La IA ha detectado que esta empresa es altamente receptiva. Pásate a Business para obtener los guiones de venta y preparación de contacto generados por IA.',
+                'error'   => 'PLAN_RESTRICTION',
+                // Antes decía "La IA ha detectado que esta empresa es altamente
+                // receptiva" de cualquier empresa, sin haber analizado nada.
+                'message' => 'La preparación de contacto con IA (tácticas y guiones de email y LinkedIn) es exclusiva del plan Business.',
                 'upsell_opportunities' => [
                     'tacticas' => '🔒 Exclusivo Business',
                     'guiones_email' => '🔒 Exclusivo Business',
-                    'guiones_linkedin' => '🔒 Exclusivo Business'
+                    'guiones_linkedin' => '🔒 Exclusivo Business',
+                    'checkout_url' => self::checkoutUrl('business', 'api_403_contact_prep'),
                 ]
             ], 403);
         }

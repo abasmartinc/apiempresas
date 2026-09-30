@@ -1559,6 +1559,55 @@ class EmailService
     }
 
     /**
+     * TRIGGER: paid_mid_cycle
+     *
+     * Hacia la mitad del ciclo mensual (días 10-15) de Pro/Business, a quien lo usa poco
+     * (menos de 100 consultas en el periodo). Pagan y no lo usan: son los que se van al
+     * mes. No menciona la renovación ni el precio a propósito (recordar el cobro empuja
+     * a cancelar a quien duda): lo que ha hecho, lo que tiene sin probar y una pregunta
+     * que se contesta en una línea. Texto plano y de persona, sin descuentos.
+     *
+     * @param array  $plan         name
+     * @param array  $noUsadas     funciones del plan sin probar (PlanIncluye::items)
+     * @param bool   $primerCiclo  true si es su primer mes con el plan
+     * @param string $soloEndpoint endpoint si casi todo el uso es uno solo ('' si no)
+     */
+    public function sendPaidMidCycle(array $userData, array $plan, bool $primerCiclo, int $usadas, array $noUsadas, string $soloEndpoint = ''): array
+    {
+        $nombre = trim((string) ($plan['name'] ?? 'Pro')) ?: 'Pro';
+        $firma  = esc((string) env('EMAIL_FIRMA', 'El equipo de APIEmpresas'));
+        $p      = static fn (string $h) => '<p style="margin:0 0 14px;">' . $h . '</p>';
+
+        $cuando = $primerCiclo ? 'Llevas dos semanas con tu plan ' . esc($nombre) . '.' : 'Un repaso rápido de tu plan ' . esc($nombre) . '.';
+        $uso = $usadas === 0
+            ? 'En este periodo tu API Key aún no ha hecho ninguna consulta.'
+            : 'En este periodo llevas ' . self::num($usadas) . ' ' . ($usadas === 1 ? 'consulta' : 'consultas')
+                . ($soloEndpoint !== '' ? ', casi todas a ' . esc($soloEndpoint) : '') . '.';
+
+        $lista = '';
+        foreach (array_slice($noUsadas, 0, 4) as $it) {
+            $lista .= '- ' . esc($it['titulo']) . ': ' . esc($it['detalle']) . '<br>';
+        }
+
+        $contenido = $p($cuando . ' ' . $uso)
+            . ($lista !== ''
+                ? $p('Por si no lo has visto, además de la ficha de cada empresa el plan incluye:<br>' . $lista
+                    . 'Tienes un ejemplo de cada una, listo para copiar, en tu panel: <a href="' . site_url('dashboard#paid-plan-includes') . '" style="color:#2563eb;">' . site_url('dashboard') . '</a>')
+                : '')
+            . $p('Si me cuentas en una línea para qué usas la API, te digo cuál de estas te ahorra trabajo. Y si algo no funciona como esperabas, dímelo y lo miramos.')
+            . $p($firma);
+
+        return $this->sendTemplateEmail('api_plain', [
+            '_log_slug' => 'paid_mid_cycle',
+            '_idioma'   => 'es',
+            'subject'   => $lista !== '' ? 'Lo que tienes en tu plan ' . $nombre . ' y aún no has probado' : '¿Le estás sacando partido a tu plan ' . $nombre . '?',
+            'preheader' => 'Una pregunta rápida para ayudarte a sacarle partido.',
+            'name'      => self::saludo($userData),
+            'content'   => $contenido,
+        ], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
+    }
+
+    /**
      * Aviso de cupo a un cliente de PAGO de la API (80 % o 100 % del mes).
      *
      * Antes no existía: al agotar sus consultas recibía un 429 sin aviso previo. Es
@@ -1713,13 +1762,18 @@ class EmailService
         $li = static fn (string $h) => '<li style="margin:0 0 8px;">' . $h . '</li>';
         $c  = static fn (string $t) => '<code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:13px;">' . $t . '</code>';
 
-        $cambios = $li('<strong>Datos sin enmascarar</strong>: dirección completa, objeto social íntegro y coordenadas (lat/lng).')
-            . $li('<strong>Administradores y cargos</strong>: añade ' . $c('&amp;admin=true') . ' a ' . $c('/api/v1/companies') . '.')
-            . $li('<strong>Scoring y señales</strong>: ' . $c('/api/v1/companies/score') . ' y ' . $c('/api/v1/companies/signals') . '.');
-        if ($business) {
-            $cambios .= $li('<strong>Webhooks</strong> (' . $c('/api/v1/webhooks') . '), <strong>contratos públicos</strong> (' . $c('/api/v1/companies/contracts') . ') y <strong>perfil de riesgo</strong> (' . $c('/api/v1/companies/risk-profile') . ').')
-                . $li('<strong>Insights y mensajes con IA</strong> completos: ' . $c('/api/v1/companies/insights') . ' y ' . $c('/api/v1/companies/contact-prep') . '.');
+        // Lo que ha comprado, con un ejemplo copiable de cada cosa (y su último CIF
+        // consultado). Antes solo se citaban datos sin enmascarar, score y signals: las
+        // funciones por las que se paga Pro (administradores, verify, vigilancia,
+        // reconcile) no aparecían, y casi nadie las usa.
+        $uid   = (int) ($userData['user_id'] ?? $userData['id'] ?? 0);
+        $cifEj = $uid > 0 ? \App\Libraries\PlanIncluye::ultimoCif($uid) : \App\Libraries\PlanIncluye::CIF_EJEMPLO;
+        $cambios = $li('<strong>Datos sin enmascarar</strong>: dirección completa, objeto social íntegro, coordenadas y tramo de facturación con el último año de cuentas.');
+        foreach (\App\Libraries\PlanIncluye::items($business ? 3 : 2, $cifEj) as $it) {
+            $cambios .= $li('<strong>' . esc($it['titulo']) . '</strong>: ' . esc($it['detalle'])
+                . '<br>' . $c(esc($it['ejemplo'])));
         }
+        $cambios .= $li('<strong>SDK</strong> para PHP, Node y Python, y todos los ejemplos en la <a href="' . site_url('documentation#sdks') . '" style="color:#2563eb;">documentación</a>.');
 
         $contenido = $this->p('Ya tienes activo el plan <strong>' . esc($nombre) . '</strong>. No tienes que cambiar nada: tu API Key y tu código siguen igual, y desde la próxima llamada las respuestas llegan completas.')
             . $this->p('<strong>Lo que cambia:</strong>')
@@ -1732,8 +1786,8 @@ class EmailService
             'preheader'   => 'No tienes que cambiar tu API Key ni tu código. Esto es lo que cambia en tus respuestas.',
             'name'        => esc(trim((string) ($userData['name'] ?? '')) ?: explode('@', (string) $userData['email'])[0]),
             'content'     => $contenido,
-            'button_text' => 'Ir a mi panel',
-            'button_url'  => site_url('dashboard'),
+            'button_text' => 'Ver lo que incluye mi plan',
+            'button_url'  => site_url('dashboard#paid-plan-includes'),
         ], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
     }
 

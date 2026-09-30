@@ -145,7 +145,7 @@ class UsageController extends BaseApiController
                 $details = $this->companyModel->getByCif($cif);
                 if ($details) {
                     if ((int)$planId === 1) {
-                        $details = mask_company_data($details);
+                        $details = mask_company_data($details, 'api_free_usage');
                     }
                     $details = filter_company_data($details);
                     $details['query_count'] = $queryCount;
@@ -179,7 +179,9 @@ class UsageController extends BaseApiController
                         // En Free, monthly_queries y monthly_quota son de por vida (100 en
                         // total, no se renuevan). Campo nuevo para no cambiar los de siempre.
                         'quota_period'    => ((int) $planId === 1) ? 'lifetime' : 'monthly',
-                    ],
+                        // Campos nuevos: cuándo se renueva (null en Free) y cómo ampliar
+                        'quota_resets_at' => ((int) $planId === 1) ? null : date('c', strtotime('first day of next month 00:00:00')),
+                    ] + \App\Filters\ApiKeyFilter::enlacesCompra((int) $planId, 'api_usage'),
                     'history' => $history
                 ]
             ], ResponseInterface::HTTP_OK);

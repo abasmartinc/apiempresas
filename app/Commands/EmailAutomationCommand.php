@@ -1563,6 +1563,10 @@ class EmailAutomationCommand extends BaseCommand
      *    suscripción se usa y el sitio natural para enseñarle errores que no ha visto.
      *  - paid_low_usage: lleva 14 días pagando sin hacer ni una consulta. Es la baja que
      *    viene, y la forma de evitarla es ayudarle a ponerlo en marcha. Una vez cada 60 días.
+     *  - paid_mid_cycle: entre los días 10 y 15 de una mensualidad, si en el periodo
+     *    lleva menos de 100 consultas. Lo que ha usado y lo que tiene sin probar, sin
+     *    mencionar la renovación. Como mucho una vez cada 60 días, y no si le llegó
+     *    paid_low_usage en la última semana.
      *
      * Como mucho uno de los dos por usuario y pasada.
      */
@@ -1572,6 +1576,7 @@ class EmailAutomationCommand extends BaseCommand
 
         $filas = $db->query("
             SELECT u.id, u.email, u.name, us.plan_id, us.created_at AS sub_desde,
+                   us.current_period_start, us.current_period_end,
                    ap.name AS plan_name, ap.monthly_quota
             FROM user_subscriptions us
             JOIN users u      ON u.id = us.user_id
@@ -1629,7 +1634,13 @@ class EmailAutomationCommand extends BaseCommand
                 }
             }
 
-            // 2. Paga y no usa: 14 días con el plan y ninguna consulta en esos 14 días
+            // 2. A mitad de la mensualidad, a quien usa poco
+            if ($this->avisoMitadDeCiclo($uid, $c, $usuario)) {
+                $enviados++;
+                continue;
+            }
+
+            // 3. Paga y no usa: 14 días con el plan y ninguna consulta en esos 14 días
             if (time() - strtotime((string) $c['sub_desde']) < 14 * 86400
                 || $this->automationModel->wasSentRecently($uid, 'paid_low_usage', 60)) {
                 continue;
@@ -1655,6 +1666,73 @@ class EmailAutomationCommand extends BaseCommand
         }
 
         CLI::write('  - Resúmenes y avisos de poco uso enviados: ' . $enviados);
+    }
+
+    /**
+     * paid_mid_cycle (ver processPaidApiLifecycle). Devuelve true si se ha enviado.
+     *
+     * Antes era paid_pre_renewal (2-5 días antes de renovar); se cambió antes de
+     * enviarse ninguno (30-09-2026, decisión de Adrián): recordar la renovación a quien
+     * duda empuja a cancelar, y a mitad de ciclo aún tiene tiempo de encontrarle uso.
+     */
+    protected function avisoMitadDeCiclo(int $uid, array $c, array $usuario): bool
+    {
+        $ini = strtotime((string) ($c['current_period_start'] ?? ''));
+        $fin = strtotime((string) ($c['current_period_end'] ?? ''));
+        if (!$ini || !$fin) {
+            return false;
+        }
+        $diasCiclo = ($fin - $ini) / 86400;
+        $dia       = (time() - $ini) / 86400;
+        // Solo mensualidades, entre los días 10 y 15 del periodo
+        if ($diasCiclo < 25 || $diasCiclo > 35 || $dia < 10 || $dia > 15) {
+            return false;
+        }
+        if ($this->automationModel->wasSentRecently($uid, 'paid_mid_cycle', 60)
+            || $this->automationModel->wasSentRecently($uid, 'paid_low_usage', 7)) {
+            return false;
+        }
+
+        $db     = \Config\Database::connect();
+        $desde  = date('Y-m-d H:i:s', $ini);
+        $usadas = (int) ($db->table('api_usage_daily')->selectSum('requests_count')
+            ->where('user_id', $uid)->where('date >=', date('Y-m-d', $ini))
+            ->get()->getRowArray()['requests_count'] ?? 0);
+        if ($usadas >= 100) {
+            return false;
+        }
+
+        // ¿Casi todo a un solo endpoint? (el 94 % del uso es /companies)
+        $solo = '';
+        $top  = $db->table('api_requests')
+            ->select('endpoint, COUNT(*) AS n')
+            ->where('user_id', $uid)->where('created_at >=', $desde)->where('status_code', 200)
+            ->groupBy('endpoint')->orderBy('n', 'DESC')
+            ->get()->getResultArray();
+        $total = array_sum(array_map(static fn ($f) => (int) $f['n'], $top));
+        if ($total >= 5 && (int) $top[0]['n'] >= 0.9 * $total) {
+            $solo = preg_replace('#^.*?(/api/v1/)#', '$1', (string) $top[0]['endpoint']);
+        }
+
+        $planId   = (int) $c['plan_id'];
+        $items    = \App\Libraries\PlanIncluye::items($planId, \App\Libraries\PlanIncluye::ultimoCif($uid));
+        $probadas = \App\Libraries\PlanIncluye::usadas($uid, $planId, (string) $c['sub_desde']);
+        $noUsadas = array_values(array_filter($items, static fn ($it) => !isset($probadas[$it['clave']])));
+        // Primer mes: el periodo actual empieza cuando se dio de alta la suscripción
+        $primerCiclo = abs($ini - strtotime((string) $c['sub_desde'])) < 3 * 86400;
+
+        CLI::write("  -> Enviando 'paid_mid_cycle' a {$c['email']} ({$usadas} consultas en el periodo)...");
+        $res = $this->emailService->sendPaidMidCycle(
+            $usuario,
+            ['name' => $c['plan_name']],
+            $primerCiclo,
+            $usadas,
+            $noUsadas,
+            $solo
+        );
+        $this->registrarEnvio($uid, 'paid_mid_cycle', $res);
+
+        return !empty($res['success']);
     }
 
     /**

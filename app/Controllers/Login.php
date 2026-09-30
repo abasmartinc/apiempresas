@@ -23,7 +23,7 @@ class Login extends BaseController
         @file_put_contents(WRITEPATH . 'debug_redirect.txt', date('Y-m-d H:i:s') . " | LOGIN_INDEX | URI: {$currentUri} | Referer: " . ($this->request->getServer('HTTP_REFERER') ?? 'N/A') . "\n", FILE_APPEND);
 
         if (session('logged_in')) {
-            $redirectUrl = $this->request->getGet('redirect') ?: 'dashboard';
+            $redirectUrl = \App\Services\LoginLinkService::limpiarDestino((string) $this->request->getGet('redirect')) ?: 'dashboard';
             return redirect()->to(site_url(ltrim($redirectUrl, '/')));
         }
         $data = [
@@ -42,7 +42,7 @@ class Login extends BaseController
     public function english()
     {
         if (session('logged_in')) {
-            $redirectUrl = $this->request->getGet('redirect') ?: 'dashboard';
+            $redirectUrl = \App\Services\LoginLinkService::limpiarDestino((string) $this->request->getGet('redirect')) ?: 'dashboard';
             return redirect()->to(site_url(ltrim($redirectUrl, '/')));
         }
         $data = [
@@ -155,7 +155,8 @@ class Login extends BaseController
         log_activity('login');
 
         // Redirección contextual o por defecto
-        $redirectUrl = $this->request->getPost('redirect');
+        // Solo destinos internos (sin esquema ni //): el redirect llega por la URL
+        $redirectUrl = \App\Services\LoginLinkService::limpiarDestino((string) $this->request->getPost('redirect'));
         
         if (empty($redirectUrl)) {
             // Si no hay redirección específica, comprobamos el plan del usuario

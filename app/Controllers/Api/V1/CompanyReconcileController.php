@@ -41,7 +41,7 @@ class CompanyReconcileController extends BaseApiController
                 'message' => 'La reconciliación de nombres requiere un plan Pro o Business.',
                 'upsell_opportunities' => [
                     'mensaje'     => 'Pasa una lista de nombres y recibe el CIF de cada empresa, con una puntuación de confianza. Solo pagas los que encuentran coincidencia.',
-                    'upgrade_url' => site_url('billing?plan=pro&source=api_403_reconcile'),
+                    'upgrade_url' => \App\Filters\ApiKeyFilter::urlGancho('pro', 'api_403_reconcile'),
                 ],
             ], ResponseInterface::HTTP_FORBIDDEN);
         }

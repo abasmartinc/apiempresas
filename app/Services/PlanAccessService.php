@@ -105,7 +105,10 @@ class PlanAccessService
         
         if (!empty($meta) && isset($meta['plan_slug']) && isset($meta['user_id'])) {
             $userId = (int)$meta['user_id'];
-            $planSlug = $meta['plan_slug'];
+            // Nivel de acceso, no plan contratado: un Free con saldo en el monedero
+            // accede como Pro (lo que vende la página del bono). Antes /network le daba
+            // 403 aunque la documentación lo marca como Pro. /batch no usa este método.
+            $planSlug = $meta['access_slug'] ?? $meta['plan_slug'];
         } else {
             // Fallback: buscar directamente en BD si el filtro no se ha ejecutado
             try {

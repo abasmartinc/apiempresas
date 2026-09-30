@@ -7,7 +7,7 @@ if (!function_exists('mask_company_data')) {
      * @param array $data The original company data
      * @return array The masked company data
      */
-    function mask_company_data(array $data): array
+    function mask_company_data(array $data, string $source = 'api_free_mask'): array
     {
         // 2. Mask Address detail
         if (!empty($data['address'])) {
@@ -33,7 +33,10 @@ if (!function_exists('mask_company_data')) {
             'campos_ocultos' => ['direccion_completa', 'objeto_social_completo', 'geolocalizacion_lat_lng'],
             'mensaje' => '🔒 Pásate al plan Pro para desbloquear la ubicación y los datos societarios completos de esta empresa.',
             // Campo añadido: enlace directo a la compra (los campos anteriores no cambian)
-            'upgrade_url' => site_url('billing?plan=pro&source=api_free_mask'),
+            // El origen distingue /companies de /search (antes los dos, api_free_mask)
+            'upgrade_url' => class_exists(\App\Filters\ApiKeyFilter::class)
+                ? \App\Filters\ApiKeyFilter::urlGancho('pro', $source)
+                : site_url('billing?plan=pro&source=' . $source),
         ];
 
         return $data;

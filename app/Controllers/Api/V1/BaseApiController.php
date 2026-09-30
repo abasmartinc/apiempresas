@@ -34,7 +34,7 @@ class BaseApiController extends ResourceController
 
                 // Inyectar campos RFC 7807 solo si no existen previamente para evitar sobrescrituras accidentales
                 if (!isset($data['type'])) {
-                    $data['type'] = 'https://apiempresas.com/docs/errors/' . strtolower($errorCodeStr);
+                    $data['type'] = 'https://apiempresas.es/docs/errors/' . strtolower($errorCodeStr);
                 }
                 if (!isset($data['title'])) {
                     $data['title'] = $errorCodeStr;
@@ -59,6 +59,126 @@ class BaseApiController extends ResourceController
         }
 
         return parent::respond($data, $statusCode, $message);
+    }
+
+    /**
+     * Enlace de compra con plan y origen (campo nuevo `checkout_url` de los ganchos).
+     * El origen llega al checkout y a checkout_completed: así se sabe qué gancho vende.
+     */
+    protected static function checkoutUrl(string $plan, string $source): string
+    {
+        return \App\Filters\ApiKeyFilter::urlGancho($plan, $source);
+    }
+
+    /** Plan al que subir desde el actual: Free → pro, Pro → business, resto → null. */
+    protected static function planSiguiente(): ?string
+    {
+        $planId = (int) (\App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1);
+        return $planId === 1 ? 'pro' : ($planId === 2 ? 'business' : null);
+    }
+
+    /**
+     * Cupo que queda DESPUÉS de esta petición (si se cobra del plan) y el total.
+     * null si la petición no cuenta para el cupo (sandbox, monitor, endpoints gratis)
+     * o si paga el monedero.
+     *
+     * @return array{restantes:int, total:int}|null
+     */
+    protected static function cupoTrasPeticion(): ?array
+    {
+        $meta = \App\Filters\ApiKeyFilter::$apiMeta;
+        if (empty($meta) || \App\Filters\ApiKeyFilter::$apiSkipBilling || (int) ($meta['sub_cost'] ?? 0) <= 0) {
+            return null;
+        }
+        $total = (int) ($meta['quota_limit'] ?? 0);
+        if ($total <= 0) {
+            return null;
+        }
+        $restantes = max(0, (int) ($meta['quota_remaining'] ?? 0) - (int) $meta['sub_cost']);
+
+        return ['restantes' => $restantes, 'total' => $total];
+    }
+
+    /**
+     * Aviso de cupo dentro de la respuesta (campo nuevo `notice`, de primer nivel),
+     * desde el 80 % gastado. Antes solo iba en cabeceras: quien integra por código se
+     * enteraba con el 429, con su integración ya parada. null por debajo del 80 %.
+     */
+    protected static function avisoCupo(): ?array
+    {
+        $cupo = self::cupoTrasPeticion();
+        if ($cupo === null || $cupo['restantes'] > 0.2 * $cupo['total']) {
+            return null;
+        }
+        $planId = (int) (\App\Filters\ApiKeyFilter::$apiMeta['plan_id'] ?? 1);
+        $n      = static fn (int $x) => number_format($x, 0, ',', '.');
+        $free   = $planId === 1;
+        $reset  = $free ? null : strtotime('first day of next month 00:00:00');
+        $source = $free ? 'api_notice_free_80' : 'api_notice_paid_80';
+
+        $mensaje = $free
+            ? 'Te quedan ' . $n($cupo['restantes']) . ' de tus ' . $n($cupo['total']) . ' consultas gratuitas, y no se renuevan. Con Pro tienes 3.000 al mes y los datos completos.'
+            : 'Te quedan ' . $n($cupo['restantes']) . ' de las ' . $n($cupo['total']) . ' consultas de este mes. Se renuevan el ' . date('d/m/Y', $reset) . '.';
+
+        return [
+            'type'            => 'quota_warning',
+            'message'         => $mensaje,
+            'quota_remaining' => $cupo['restantes'],
+            'quota_limit'     => $cupo['total'],
+            'quota_resets_at' => $reset !== null ? date('c', $reset) : null,
+        ] + \App\Filters\ApiKeyFilter::enlacesCompra($planId, $source);
+    }
+
+    /**
+     * Lo que Business añadiría sobre ESTA empresa, para un cliente Pro (campo nuevo
+     * `business_preview`). Un Pro no veía en ninguna respuesta que Business existe, y
+     * los endpoints de Business casi no se usan. Solo recuentos (nada del contenido de
+     * pago), con el mismo tope diario que los ganchos de los 403 porque no se cobran
+     * aparte. null si no es Pro, si se ha llegado al tope o si no hay nada que enseñar.
+     */
+    protected static function businessPreview(string $cif, string $source): ?array
+    {
+        $meta = \App\Filters\ApiKeyFilter::$apiMeta;
+        if ((int) ($meta['plan_id'] ?? 0) !== 2 || $cif === '') {
+            return null;
+        }
+        $uid = (int) ($meta['user_id'] ?? 0);
+        if ($uid === \App\Filters\ApiKeyFilter::MONITOR_USER_ID
+            || !\App\Services\ApiCompanyEnricher::teaserAllowed($uid)) {
+            return null;
+        }
+
+        $clave = 'api_bizprev_' . md5(strtoupper($cif));
+        $datos = cache()->get($clave);
+        if (!is_array($datos)) {
+            $contratos = \App\Services\ApiCompanyEnricher::contractsSummary($cif);
+            $datos = [
+                'contratos'   => (int) ($contratos['total_contracts'] ?? 0),
+                'importe'     => (float) ($contratos['total_amount'] ?? 0),
+                'con_riesgo'  => \App\Services\ApiCompanyEnricher::riskLevel($cif) !== null,
+            ];
+            cache()->save($clave, $datos, 43200);
+        }
+        if ($datos['contratos'] === 0 && !$datos['con_riesgo']) {
+            return null;
+        }
+
+        $partes = [];
+        if ($datos['contratos'] > 0) {
+            $partes[] = $datos['contratos'] . ' ' . ($datos['contratos'] === 1 ? 'contrato público' : 'contratos públicos')
+                . ' por ' . number_format($datos['importe'], 0, ',', '.') . ' €';
+        }
+        if ($datos['con_riesgo']) {
+            $partes[] = 'su perfil de riesgo';
+        }
+
+        return [
+            'contratos_publicos'       => $datos['contratos'],
+            'importe_contratos'        => round($datos['importe'], 2),
+            'perfil_riesgo_disponible' => $datos['con_riesgo'],
+            'mensaje'                  => 'Con Business verías ' . implode(' y ', $partes) . ' de esta empresa.',
+            'checkout_url'             => self::checkoutUrl('business', $source),
+        ];
     }
 
     /**

@@ -390,7 +390,7 @@ class CompanyRiskProfileController extends BaseApiController
         $gancho = [
             'upsell_opportunities' => [
                 'mensaje'     => 'Con el plan Business ves la puntuación, las seis dimensiones de riesgo, el estado legal y cada evento del BORME que la explica.',
-                'upgrade_url' => site_url('billing?plan=business&source=api_403_risk'),
+                'upgrade_url' => \App\Filters\ApiKeyFilter::urlGancho('business', 'api_403_risk'),
             ],
         ];
         $cif = \App\Services\ApiCompanyEnricher::normalizeCif((string) $this->request->getGet('cif'));

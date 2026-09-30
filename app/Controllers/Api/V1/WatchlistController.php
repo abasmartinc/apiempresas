@@ -33,7 +33,7 @@ class WatchlistController extends BaseApiController
                 'message' => 'La vigilancia de empresas requiere un plan Pro (100 empresas) o Business (1.000 empresas).',
                 'upsell_opportunities' => [
                     'mensaje'     => 'Vigila empresas y consulta sus cambios en el BORME, en su estado y en su nivel de riesgo sin gastar consultas.',
-                    'upgrade_url' => site_url('billing?plan=pro&source=api_403_watchlist'),
+                    'upgrade_url' => \App\Filters\ApiKeyFilter::urlGancho('pro', 'api_403_watchlist'),
                 ],
             ], ResponseInterface::HTTP_FORBIDDEN)];
         }
@@ -131,7 +131,7 @@ class WatchlistController extends BaseApiController
             $siguiente = strtolower($ctx['plan']) === 'pro';
             $body['message'] = 'Has llegado al límite de ' . $ctx['limit'] . ' empresas vigiladas de tu plan.';
             if ($siguiente) {
-                $body['upgrade_url'] = site_url('billing?plan=business&source=api_watchlist_limit');
+                $body['upgrade_url'] = \App\Filters\ApiKeyFilter::urlGancho('business', 'api_watchlist_limit');
             }
         }
         return $this->respond($body);

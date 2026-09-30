@@ -379,7 +379,7 @@ class CompanyContractsController extends BaseApiController
         $gancho = [
             'upsell_opportunities' => [
                 'mensaje'     => 'Con el plan Business ves cada contrato: órgano, título, fecha, importe y enlace a la licitación.',
-                'upgrade_url' => site_url('billing?plan=business&source=api_403_contracts'),
+                'upgrade_url' => \App\Filters\ApiKeyFilter::urlGancho('business', 'api_403_contracts'),
             ],
         ];
         $cif = \App\Services\ApiCompanyEnricher::normalizeCif((string) $this->request->getGet('cif'));

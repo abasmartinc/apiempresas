@@ -112,7 +112,12 @@ class CompanyBormeController extends BaseApiController
                 [
                     'success' => false,
                     'error'   => 'UPGRADE_REQUIRED',
-                    'message' => 'Este endpoint requiere un plan Pro o Business.'
+                    'message' => 'Este endpoint requiere un plan Pro o Business.',
+                    // Campos nuevos: mismo gancho que el resto de 403
+                    'upsell_opportunities' => [
+                        'mensaje'      => 'Con Pro tienes el historial de actos del BORME de cada empresa.',
+                        'checkout_url' => self::checkoutUrl('pro', 'api_403_borme'),
+                    ],
                 ],
                 ResponseInterface::HTTP_FORBIDDEN
             );

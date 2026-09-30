@@ -651,7 +651,7 @@
                         'Vigilancia de 100 empresas: cambios en el BORME, el estado y el riesgo, sin gastar consultas',
                         'Scoring comercial IA completo (0-100)',
                         'Empresas recién constituidas (hoy, 7 o 30 días): hasta 100 por consulta, filtrables por CNAE y teléfono',
-                        'Soporte prioritario por email',
+                        'Soporte prioritario por email: respuesta en menos de 2 h',
                     ],
                     'business' => [
                         '10.000 consultas al mes',
@@ -663,7 +663,7 @@
                         'IA Business Insights completo',
                         'IA Contact Prep y Calculadora Match B2B',
                         'Empresas recién constituidas (hoy, 7 o 30 días): hasta 1.000 por consulta',
-                        'Soporte prioritario por email',
+                        'Soporte prioritario por email: respuesta en menos de 2 h',
                     ],
                 ];
                 $tierTick = '<svg style="flex-shrink: 0;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>';
@@ -704,7 +704,7 @@
                             <li><?= $tierTick ?> <?= esc($f) ?></li>
                             <?php endforeach; ?>
                         </ul>
-                        <a href="<?= site_url('register?intent=api&plan=pro&period=annual') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Pro", "plan": "pro", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Pro</a>
+                        <a href="<?= site_url('register?intent=api&plan=pro&period=annual&source=home_pricing_pro') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Pro", "plan": "pro", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Pro</a>
                         <div style="text-align: center; margin-top: 16px;">
                             <a href="<?= site_url('planes/pro') ?>" style="color: #c7d2fe; font-size: 0.9rem; text-decoration: none; font-weight: 500; border-bottom: 1px dashed #818cf8; padding-bottom: 2px; transition: color 0.2s;">Ver casos de uso y ejemplos &rarr;</a>
                         </div>
@@ -724,7 +724,7 @@
                             <li><?= $tierTick ?> <?= esc($f) ?></li>
                             <?php endforeach; ?>
                         </ul>
-                        <a href="<?= site_url('register?intent=api&plan=business&period=annual') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Business", "plan": "business", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Business</a>
+                        <a href="<?= site_url('register?intent=api&plan=business&period=annual&source=home_pricing_business') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Business", "plan": "business", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Business</a>
                         <div style="text-align: center; margin-top: 16px;">
                             <a href="<?= site_url('planes/business') ?>" style="color: #a7f3d0; font-size: 0.9rem; text-decoration: none; font-weight: 500; border-bottom: 1px dashed #34d399; padding-bottom: 2px; transition: color 0.2s;">Ver casos de uso y ejemplos &rarr;</a>
                         </div>
@@ -1102,15 +1102,6 @@
                                     <div style="color: var(--ae-slate); font-size: 0.8rem; font-weight: 500;">Desde España · Tiempo de respuesta &lt; 2h</div>
                                 </div>
                             </div>
-                            <a href="https://status.apiempresas.es" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 14px; padding: 12px 18px; background: #ffffff; border-radius: 16px; border: 1px solid var(--ae-border); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); text-decoration: none;">
-                                <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(16,185,129,0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                    <span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 4px rgba(16,185,129,0.2);"></span>
-                                </div>
-                                <div>
-                                    <div style="font-weight: 800; color: var(--ae-dark); font-size: 0.95rem;">Estado del servicio en tiempo real</div>
-                                    <div style="color: var(--ae-slate); font-size: 0.8rem; font-weight: 500;">Disponibilidad pública de la API &rarr;</div>
-                                </div>
-                            </a>
                         </div>
 
                         <a href="mailto:soporte@apiempresas.es" class="btn-ae reveal delay-3" style="background: linear-gradient(135deg, var(--ae-blue), var(--ae-teal)); color: #ffffff; border-radius: 14px; box-shadow: 0 10px 20px -5px rgba(37,99,235,0.4); padding: 16px 32px; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 12px; transition: all 0.4s ease; border: none; font-weight: 700;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 30px -5px rgba(37, 99, 235, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 20px -5px rgba(37,99,235,0.4)';">

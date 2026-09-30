@@ -77,12 +77,79 @@ class ApiKeyFilter implements FilterInterface
      */
     public static function enlacesCompra(int $planId, string $source): array
     {
+        self::marcarGancho($source);
         $siguiente = $planId === 1 ? 'pro' : ($planId === 2 ? 'business' : null);
+        // Free → Pro abre en mensual (casi nadie compra anual de primeras: el primer
+        // pago es 19 € y no 182 €). Pro → Business sigue en anual.
+        $periodo = $planId === 1 ? 'monthly' : 'annual';
         return [
             'checkout_url' => $siguiente !== null
-                ? site_url('billing?plan=' . $siguiente . '&period=annual&source=' . $source)
+                ? site_url('billing?plan=' . $siguiente . '&period=' . $periodo . '&source=' . $source)
                 : null,
             'recharge_url' => site_url('crear-bono-api?source=' . $source),
+        ];
+    }
+
+    /** Usuario de la petición en curso, para registrar ganchos antes de apiMeta. */
+    private static int $ganchoUserId = 0;
+
+    /** @var array<string, true> ganchos ya registrados en esta petición */
+    private static array $ganchosPeticion = [];
+
+    /**
+     * Enlace de compra de un gancho (mismo valor que site_url('billing?plan=...&source=...'))
+     * y registro de que se ha enseñado. Así se puede cruzar "vio el gancho X" con
+     * checkout_completed.element (el mismo source).
+     */
+    public static function urlGancho(string $plan, string $source): string
+    {
+        self::marcarGancho($source);
+        return site_url('billing?plan=' . $plan . '&source=' . $source);
+    }
+
+    /**
+     * Registra en tracking_events (event_name api_upsell_shown, page api, element =
+     * source) que a este usuario se le ha enseñado un gancho de venta. Como mucho una
+     * fila por usuario, gancho y día: sirve para contar personas, no respuestas. Nunca
+     * rompe la petición ni cuenta al monitor.
+     */
+    public static function marcarGancho(string $source, ?string $cif = null): void
+    {
+        $uid = (int) (self::$apiMeta['user_id'] ?? self::$ganchoUserId);
+        if ($uid <= 0 || $uid === self::MONITOR_USER_ID || $source === '' || isset(self::$ganchosPeticion[$source])) {
+            return;
+        }
+        self::$ganchosPeticion[$source] = true;
+        try {
+            $clave = 'api_gancho_' . $uid . '_' . md5($source) . '_' . date('Ymd');
+            if (cache()->get($clave)) {
+                return;
+            }
+            cache()->save($clave, 1, 90000);
+            \Config\Database::connect()->table('tracking_events')->insert([
+                'event_name'   => 'api_upsell_shown',
+                'page'         => 'api',
+                'user_id'      => $uid,
+                'session_id'   => '',
+                'anonymous_id' => '',
+                'element'      => substr($source, 0, 255),
+                'metadata'     => json_encode([
+                    'endpoint' => (string) service('request')->getUri()->getPath(),
+                    'cif'      => $cif ?? (self::$apiMeta['search_term'] ?? null),
+                ]),
+                'created_at'   => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', '[ApiKeyFilter::marcarGancho] ' . $e->getMessage());
+        }
+    }
+
+    /** Enlaces de los 401: alta gratis (con origen) y cómo autenticarse. */
+    private static function salidas401(): array
+    {
+        return [
+            'signup_url' => site_url('register?intent=api&source=api_401'),
+            'docs_url'   => site_url('documentation#auth'),
         ];
     }
 
@@ -124,7 +191,7 @@ class ApiKeyFilter implements FilterInterface
         $extra = [
             'success'  => false,
             'code'     => $code,
-            'type'     => 'https://apiempresas.com/docs/errors/' . strtolower($code),
+            'type'     => 'https://apiempresas.es/docs/errors/' . strtolower($code),
             'title'    => $code,
             'status'   => $status,
             'detail'   => $detail,
@@ -182,7 +249,9 @@ class ApiKeyFilter implements FilterInterface
         }
 
         if ($apiKey === '') {
-            return $this->errorResponse(401, ['error' => 'Falta la API key (X-API-KEY).'], 'API_KEY_MISSING', 'Falta la API key (X-API-KEY).');
+            // signup_url y docs_url (campos nuevos): quien hace su primera llamada sin
+            // clave necesita saber dónde conseguirla, no solo que falta.
+            return $this->errorResponse(401, ['error' => 'Falta la API key (X-API-KEY).'] + self::salidas401(), 'API_KEY_MISSING', 'Falta la API key (X-API-KEY).');
         }
 
         // 3) Validar contra DB
@@ -225,8 +294,9 @@ class ApiKeyFilter implements FilterInterface
         $row = $builder->get()->getRow();
 
         if (!$row) {
-            return $this->errorResponse(401, ['error' => 'API key inválida'], 'API_KEY_INVALID', 'API key inválida');
+            return $this->errorResponse(401, ['error' => 'API key inválida'] + self::salidas401(), 'API_KEY_INVALID', 'API key inválida');
         }
+        self::$ganchoUserId = (int) $row->user_id;
 
         if ((int)$row->is_active !== 1 || (int)$row->user_active !== 1) {
             $this->registrarRechazo($request, $row, 403, 'inactive');
@@ -302,7 +372,7 @@ class ApiKeyFilter implements FilterInterface
                     'success' => false,
                     'error'   => 'TOO_MANY_REQUESTS',
                     'message' => 'Has superado el límite de ' . $maxRequestsPerSecond . ' peticiones por segundo. Por favor, reduce la velocidad de tus peticiones o utiliza el endpoint /batch.',
-                    'type'    => 'https://apiempresas.com/docs/errors/too_many_requests',
+                    'type'    => 'https://apiempresas.es/docs/errors/too_many_requests',
                     'title'   => 'TOO_MANY_REQUESTS',
                     'status'  => 429,
                     'detail'  => 'Has superado el límite de ' . $maxRequestsPerSecond . ' peticiones por segundo. Por favor, reduce la velocidad de tus peticiones o utiliza el endpoint /batch.',

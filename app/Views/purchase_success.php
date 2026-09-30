@@ -21,7 +21,7 @@
 
                     <p class="sub">
                         Hemos confirmado tu pago y tu plan <strong><?= htmlspecialchars($plan_name ?? 'Pro') ?></strong> ya está activo. En 2 minutos puedes dejar tu integración lista.
-                        El IVA se calcula según tu país y aparece desglosado en el comprobante.
+                        El IVA aparece desglosado en la factura.
                     </p>
 
                     <div class="hero-actions">
@@ -97,7 +97,7 @@
                             </p>
                         </div>
                         <div class="step-actions">
-                            <a class="btn btn_light btn_full" href="<?=site_url()?>documentation"><?= lang('Billing.success_sub_step2_btn') ?></a>
+                            <a class="btn btn_light btn_full" href="<?=site_url('dashboard?probar=A15075062')?>"><?= lang('Billing.success_sub_step2_btn') ?></a>
                         </div>
                     </article>
 
@@ -113,7 +113,7 @@
                             </p>
                         </div>
                         <div class="step-actions">
-                            <a class="btn btn_light btn_full" href="<?=site_url()?>consumption"><?= lang('Billing.success_sub_step3_btn') ?></a>
+                            <a class="btn btn_light btn_full" href="<?=site_url('dashboard#paid-plan-includes')?>"><?= lang('Billing.success_sub_step3_btn') ?></a>
                         </div>
                     </article>
                 </div>

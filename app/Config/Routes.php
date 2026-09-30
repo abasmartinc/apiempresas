@@ -245,6 +245,15 @@ $routes->group('api/sandbox/v1', ['filter' => ['apikey']], static function ($rou
     $routes->get('companies/borme', 'Api\V1\Sandbox\SandboxController::borme');
     $routes->get('companies/risk-profile', 'Api\V1\Sandbox\SandboxController::riskProfile');
     $routes->post('companies/batch', 'Api\V1\Sandbox\SandboxController::batch');
+    // Endpoints nuevos también en el sandbox (30-09-2026)
+    $routes->get('companies/contracts', 'Api\V1\Sandbox\SandboxController::contracts');
+    $routes->get('companies/verify', 'Api\V1\Sandbox\SandboxController::verify');
+    $routes->get('companies/filter', 'Api\V1\Sandbox\SandboxController::filter');
+    $routes->post('companies/reconcile', 'Api\V1\Sandbox\SandboxController::reconcile');
+    $routes->get('watchlist', 'Api\V1\Sandbox\SandboxController::watchlistList');
+    $routes->post('watchlist', 'Api\V1\Sandbox\SandboxController::watchlistAdd');
+    $routes->get('watchlist/events', 'Api\V1\Sandbox\SandboxController::watchlistEvents');
+    $routes->delete('watchlist/(:segment)', 'Api\V1\Sandbox\SandboxController::watchlistRemove/$1');
 });
 // ----------- API SANDBOX ----------- //
 

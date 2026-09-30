@@ -1546,7 +1546,7 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
   "success": false,
   "error": "COMPANY_NOT_FOUND",
   "message": "Empresa no encontrada.",
-  "type": "https://apiempresas.com/docs/errors/company_not_found",
+  "type": "https://apiempresas.es/docs/errors/company_not_found",
   "title": "COMPANY_NOT_FOUND",
   "status": 404,
   "detail": "Empresa no encontrada.",

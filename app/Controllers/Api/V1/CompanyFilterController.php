@@ -76,7 +76,7 @@ class CompanyFilterController extends BaseApiController
                     'mensaje'      => $n . ' empresas encajan con tu búsqueda. Con el plan Business puedes descargarlas por API.',
                     'total'        => $count['total'],
                     'cost_per_row' => S::ROW_COST,
-                    'upgrade_url'  => site_url('billing?plan=business&source=api_403_filter'),
+                    'upgrade_url'  => \App\Filters\ApiKeyFilter::urlGancho('business', 'api_403_filter'),
                 ],
             ], ResponseInterface::HTTP_FORBIDDEN);
         }

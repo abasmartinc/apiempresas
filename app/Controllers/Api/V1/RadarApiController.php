@@ -121,7 +121,20 @@ class RadarApiController extends BaseApiController
         $ocultos = $totalCount - count($results);
         if ($ocultos > 0) {
             $meta['oportunidades_ocultas'] = $ocultos;
-            $meta['upsell'] = "🔒 Tienes {$ocultos} empresas nuevas esperándote hoy. Sube a Business para verlas todas y descargar listados completos.";
+            // Al plan que toca: a un Free se le decía "Sube a Business" cuando con Pro
+            // ya ve hasta 100. Y "hoy" solo si ha pedido las de hoy.
+            // (Free con saldo accede como Pro: cuenta el nivel de acceso, no el plan)
+            $acceso = strtolower((string) $planSlug);
+            $cuando = ($filters['range'] ?? 'hoy') === 'hoy' ? ' hoy' : '';
+            if ($acceso === 'free') {
+                $meta['upsell'] = "🔒 Hay {$ocultos} empresas nuevas más{$cuando}. Con Pro ves hasta 100 por consulta, sin datos ocultos y con filtros por CNAE y teléfono.";
+                $meta['checkout_url'] = self::checkoutUrl('pro', 'api_radar_limit');
+            } elseif ($acceso === 'pro') {
+                $meta['upsell'] = "🔒 Hay {$ocultos} empresas nuevas más{$cuando}. Con Business ves hasta 1.000 por consulta.";
+                $meta['checkout_url'] = self::checkoutUrl('business', 'api_radar_limit');
+            } else {
+                $meta['upsell'] = "Hay {$ocultos} empresas nuevas más{$cuando} de las que caben en una consulta: acota con province, cnae o priority.";
+            }
         }
 
         return $this->respond([

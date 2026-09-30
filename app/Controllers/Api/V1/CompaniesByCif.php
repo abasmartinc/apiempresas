@@ -148,7 +148,7 @@ class CompaniesByCif extends BaseApiController
                 [
                     'success' => true,
                     'data'    => $this->completar($cached),
-                ],
+                ] + array_filter(['notice' => self::avisoCupo()]),
                 ResponseInterface::HTTP_OK
             );
         }
@@ -173,7 +173,8 @@ class CompaniesByCif extends BaseApiController
                 [
                     'success' => true,
                     'data'    => $this->completar($company),
-                ],
+                    // Campo nuevo desde el 80 % del cupo (ver BaseApiController::avisoCupo)
+                ] + array_filter(['notice' => self::avisoCupo()]),
                 ResponseInterface::HTTP_OK
             );
         } catch (\Throwable $e) {
@@ -207,6 +208,13 @@ class CompaniesByCif extends BaseApiController
 
         if (!$fullAccess) {
             $company = mask_company_data($company);
+            // Cuánto le queda, legible por código (campos nuevos; antes solo en cabeceras)
+            $cupo = self::cupoTrasPeticion();
+            if ($cupo !== null && isset($company['upsell_opportunities']) && is_array($company['upsell_opportunities'])) {
+                $company['upsell_opportunities']['consultas_restantes'] = $cupo['restantes'];
+                $company['upsell_opportunities']['consultas_totales']   = $cupo['total'];
+                $company['upsell_opportunities']['se_renuevan']         = false;
+            }
         }
 
         $company = \App\Services\ApiCompanyEnricher::enrich([$company], $fullAccess)[0];
@@ -217,6 +225,12 @@ class CompaniesByCif extends BaseApiController
         if ($includeAdmins && $fullAccess && $companyId) {
             $vigentes = \App\Services\ApiCompanyEnricher::currentAdministrators([(int) $companyId]);
             $company['administrators'] = $vigentes[(int) $companyId] ?? [];
+        }
+
+        // Pro: qué añadiría Business sobre esta empresa (campo nuevo, con tope diario)
+        $preview = self::businessPreview((string) ($company['cif'] ?? ''), 'api_pro_companies');
+        if ($preview !== null) {
+            $company['business_preview'] = $preview;
         }
 
         return $company;
