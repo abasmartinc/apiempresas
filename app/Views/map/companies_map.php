@@ -59,28 +59,19 @@
         </h1>
         
         <p style="font-size: 1.2rem; color: #cbd5e1; max-width: 750px; margin: 0 auto 1.5rem auto; line-height: 1.6;">
-            Filtra por provincia, municipio y sector. Configura y descarga tu <strong>base de datos a medida</strong> al instante. Pago único. Sin suscripciones. Extraído del BORME y listo para tu CRM.
+            Filtra por provincia, municipio y sector. Configura tu <strong>base de datos a medida</strong> y descárgala en CSV nada más pagar. Pago único, sin suscripciones. Con las sociedades publicadas en el BORME, lista para tu CRM.
         </p>
 
-        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 2rem;">
-            <div style="display: flex; color: #fbbf24;">
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            </div>
-            <span style="color: #94a3b8; font-size: 0.95rem;">Usado por <strong>+2.500</strong> equipos de ventas en España</span>
-        </div>
+        <?php /* Fuera las 5 estrellas y "Usado por +2.500 equipos de ventas": no se pueden demostrar (01-10-2026). */ ?>
 
-        <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;">
+        <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-top: 1.5rem;">
             <span style="display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.15); color: #34D399; padding: 6px 14px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.25);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                Datos Oficiales BORME
+                Fuente: BORME
             </span>
             <span style="display: inline-flex; align-items: center; gap: 6px; background: rgba(96, 165, 250, 0.15); color: #60A5FA; padding: 6px 14px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; border: 1px solid rgba(96, 165, 250, 0.25);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.92-10.44l5.36-1.36"></path></svg>
-                Actualización Diaria
+                Nuevas sociedades cada día laborable
             </span>
             <span style="display: inline-flex; align-items: center; gap: 6px; background: rgba(192, 132, 252, 0.15); color: #c084fc; padding: 6px 14px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; border: 1px solid rgba(192, 132, 252, 0.25);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
@@ -296,7 +287,7 @@
             <!-- SEO & FAQ Section Moved Here -->
                     <div class="b2b-card" style="padding: 40px 32px; background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; margin-top: 32px; margin-bottom: 24px;">
                         <!-- Benefits -->
-                        <h2 style="font-size: 1.8rem; font-weight: 900; color: #0f172a; text-align: center; margin-bottom: 40px; letter-spacing: -0.03em; line-height: 1.2;">Exporta al instante tu base de datos B2B de empresas españolas</h2>
+                        <h2 style="font-size: 1.8rem; font-weight: 900; color: #0f172a; text-align: center; margin-bottom: 40px; letter-spacing: -0.03em; line-height: 1.2;">Descarga tu base de datos B2B de empresas españolas</h2>
                         
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; margin-bottom: 48px;">
                             <div>
@@ -304,21 +295,21 @@
                                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                                 </div>
                                 <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 6px;">Listos para Telemarketing</h3>
-                                <p style="color: #475569; font-size: 0.9rem; line-height: 1.6; margin: 0;">Los registros incluyen teléfono, dirección postal, estado de actividad y sector CNAE preciso. Formato perfecto para importar a tu CRM.</p>
+                                <p style="color: #475569; font-size: 0.9rem; line-height: 1.6; margin: 0;">Cada registro trae dirección, estado registral y sector CNAE, y el teléfono cuando lo tenemos (marca «con teléfono» para quedarte solo con esas). Listo para importar en tu CRM.</p>
                             </div>
                             <div>
                                 <div style="background: #f0fdf4; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
                                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                                 </div>
-                                <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 6px;">Datos Oficiales (BORME)</h3>
-                                <p style="color: #475569; font-size: 0.9rem; line-height: 1.6; margin: 0;">Toda la información es pública, extraída y consolidada del Registro Mercantil. Asegura que tus campañas B2B cumplan con la normativa.</p>
+                                <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 6px;">Datos públicos (BORME)</h3>
+                                <p style="color: #475569; font-size: 0.9rem; line-height: 1.6; margin: 0;">Los datos societarios salen de lo publicado en el BORME, y los de contacto, de fuentes públicas (directorios de empresas y la web de la propia empresa). Recuerda que cada campaña tiene que cumplir la normativa de protección de datos y de comunicaciones comerciales.</p>
                             </div>
                             <div>
                                 <div style="background: #fdf4ff; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
                                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d946ef" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                                 </div>
                                 <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 6px;">Pago justo por volumen</h3>
-                                <p style="color: #475569; font-size: 0.9rem; line-height: 1.6; margin: 0;">A diferencia de otros directorios, aquí solo pagas por la provincia y sector exactos que necesitas. Desde muy pocos euros.</p>
+                                <p style="color: #475569; font-size: 0.9rem; line-height: 1.6; margin: 0;">Solo pagas por la provincia, el municipio o el sector que necesitas, desde 9 € + IVA, y con un precio máximo de 149 € + IVA.</p>
                             </div>
                         </div>
 
@@ -333,12 +324,12 @@
                             
                             <div style="margin-bottom: 16px;">
                                 <h4 style="font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 6px;">¿Incluye emails de las empresas?</h4>
-                                <p style="color: #475569; font-size: 0.9rem; line-height: 1.6; margin: 0;">Para cumplir rigurosamente con la Ley Orgánica de Protección de Datos (RGPD) en España, nuestra base de datos prioriza los datos registrales públicos: teléfonos fijos/móviles corporativos, dirección física y datos de constitución (CNAE).</p>
+                                <p style="color: #475569; font-size: 0.9rem; line-height: 1.6; margin: 0;">No. El listado incluye los datos de la sociedad: razón social, CIF, dirección, sector CNAE, fecha de constitución, cargos publicados en el BORME y, cuando lo tenemos, el teléfono de la empresa.</p>
                             </div>
 
                             <div>
                                 <h4 style="font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 6px;">¿Cada cuánto se actualizan los datos?</h4>
-                                <p style="color: #475569; font-size: 0.9rem; line-height: 1.6; margin: 0;">Procesamos de forma ininterrumpida las actas del BORME. Si una empresa se disuelve o cambia de actividad, lo verás reflejado. Por eso nuestro mapa te permite filtrar exclusivamente por empresas con Estado "ACTIVA".</p>
+                                <p style="color: #475569; font-size: 0.9rem; line-height: 1.6; margin: 0;">Cada día laborable incorporamos lo que publica el BORME: nuevas sociedades, disoluciones, extinciones y otros actos. Si el BORME publica que una empresa se disuelve o se extingue, su estado cambia, y en el mapa puedes filtrar solo las que están activas.</p>
                             </div>
                         </div>
 
@@ -365,7 +356,7 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
             </div>
             <h3 style="font-size: 1.4rem; font-weight: 800; color: #0f172a; margin: 0 0 12px 0;">Consigue una muestra gratis</h3>
-            <p style="color: #475569; font-size: 0.95rem; line-height: 1.5; margin: 0 0 24px 0;">Te enviamos ahora mismo un archivo CSV con 20 empresas reales de esta búsqueda para que compruebes la calidad de los datos.</p>
+            <p style="color: #475569; font-size: 0.95rem; line-height: 1.5; margin: 0 0 24px 0;">Te enviamos por correo un archivo de Excel con 20 empresas reales de esta búsqueda para que compruebes los datos.</p>
             <form id="leadForm" onsubmit="submitLeadForm(event)">
                 <div style="margin-bottom: 16px;">
                     <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 6px;">Tu correo electrónico</label>
@@ -401,7 +392,7 @@
           "name": "¿Incluye emails de las empresas?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Para cumplir rigurosamente con la Ley Orgánica de Protección de Datos (RGPD) en España, nuestra base de datos prioriza los datos registrales públicos: teléfonos fijos/móviles corporativos, dirección física y datos de constitución (CNAE)."
+            "text": "No. El listado incluye los datos de la sociedad: razón social, CIF, dirección, sector CNAE, fecha de constitución, cargos publicados en el BORME y, cuando lo tenemos, el teléfono de la empresa."
           }
         },
         {
@@ -409,7 +400,7 @@
           "name": "¿Cada cuánto se actualizan los datos?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Procesamos de forma ininterrumpida las actas del BORME. Si una empresa se disuelve o cambia de actividad, lo verás reflejado. Por eso nuestro mapa te permite filtrar exclusivamente por empresas con Estado ACTIVA."
+            "text": "Cada día laborable incorporamos lo que publica el BORME: nuevas sociedades, disoluciones, extinciones y otros actos. Si el BORME publica que una empresa se disuelve o se extingue, su estado cambia, y en el mapa puedes filtrar solo las que están activas."
           }
         }
       ]
@@ -420,7 +411,7 @@
       "@context": "https://schema.org",
       "@type": "Dataset",
       "name": "Base de Datos de Empresas Españolas",
-      "description": "Listado oficial y actualizado de empresas de España, procesado desde el BORME. Incluye razón social, CIF, CNAE, cargos directivos, teléfonos y estado actual para campañas B2B.",
+      "description": "Listado de empresas de España a partir de lo publicado en el BORME. Incluye razón social, CIF, CNAE, cargos publicados, estado registral y, cuando lo hay, teléfono.",
       "keywords": [
         "empresas españolas",
         "base de datos B2B",
@@ -434,7 +425,6 @@
         "name": "APIEmpresas"
       },
       "inLanguage": "es-ES",
-      "license": "https://creativecommons.org/licenses/by/4.0/",
       "distribution": [
         {
           "@type": "DataDownload",

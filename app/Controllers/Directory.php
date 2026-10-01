@@ -16,7 +16,9 @@ class Directory extends BaseController
     public function index()
     {
         $cache = \Config\Services::cache();
-        $cacheKey = 'directory_index_data_v5';
+        // v6 (01-10-2026): nombres de la CNAE-2025 y sin códigos que no existen. Tras pasar
+        // calidad_datos/normalizar_datos.py, las provincias ya son las 52 canónicas.
+        $cacheKey = 'directory_index_data_v6';
         
         $data = $cache->get($cacheKey);
         
@@ -53,23 +55,44 @@ class Directory extends BaseController
                 ->get()
                 ->getResultArray();
 
+            // Nombres de sector: CNAE-2009 y, si el código es de la CNAE-2025 (las altas
+            // nuevas), su nombre de 2025. Antes solo se miraba 2009 y salían "CNAE 6812"
+            // (164.219 empresas, el tercer sector) y otros 2025 sin nombre.
             $db = \Config\Database::connect();
-            $cnaeLabels = $db->table('cnae_2009_2025')
-                ->select('cnae_2009 as cnae, label_2009 as label')
-                ->get()
-                ->getResultArray();
-                
             $cnaeMap = [];
-            foreach ($cnaeLabels as $row) {
-                $cnaeMap[$row['cnae']] = $row['label'];
+            foreach ($db->table('cnae_2009_2025')->select('cnae_2009 as cnae, label_2009 as label')->get()->getResultArray() as $row) {
+                if ($row['cnae'] !== null && $row['cnae'] !== '' && !empty($row['label'])) {
+                    $cnaeMap[(string) $row['cnae']] = $row['label'];
+                }
+            }
+            foreach ($db->table('cnae_2009_2025')->select('cnae_2025 as cnae, label_2025 as label')->get()->getResultArray() as $row) {
+                $code = (string) ($row['cnae'] ?? '');
+                if ($code !== '' && !empty($row['label']) && !isset($cnaeMap[$code])) {
+                    $cnaeMap[$code] = $row['label'];
+                }
             }
 
+            // Solo se listan (y se cuentan en "Sectores CNAE") los códigos que existen en
+            // alguna de las dos clasificaciones. Los demás eran códigos sueltos y erróneos
+            // (6046, 9848…, casi todos con 1 empresa) que inflaban el KPI hasta 1.222.
+            $cnaes = array_values(array_filter($cnaes, static fn ($c) => isset($cnaeMap[(string) $c['cnae']])));
             foreach ($cnaes as &$cnae) {
-                $cnae['name'] = $cnaeMap[$cnae['cnae']] ?? "CNAE {$cnae['cnae']}";
+                $cnae['name'] = $cnaeMap[(string) $cnae['cnae']];
             }
             unset($cnae);
 
-            // Últimas 10 empresas para la home del directorio (excluyendo fechas futuras erróneas)
+            $data = [
+                'provinces' => $provinces,
+                'cnaes'     => $cnaes,
+            ];
+
+            $cache->save($cacheKey, $data, 1296000); // 15 días (recuentos pesados, cambian poco)
+        }
+
+        // "Últimas empresas registradas" va aparte con caché de 1 hora. Antes iba en la de
+        // 15 días de arriba (el comentario decía 24 h) y la lista se quedaba congelada.
+        $latest = $cache->get('directory_latest_v1');
+        if (!is_array($latest)) {
             $latest = $this->companyModel->builder()
                 ->select('id, cif, company_name as name, fecha_constitucion as founded, cnae_label, registro_mercantil as province')
                 ->where('fecha_constitucion IS NOT NULL')
@@ -78,16 +101,9 @@ class Directory extends BaseController
                 ->limit(10)
                 ->get()
                 ->getResultArray();
-            
-            $data = [
-                'provinces' => $provinces,
-                'cnaes'     => $cnaes,
-                'latest'    => $latest
-            ];
-            
-            // Cache por 24 horas
-            $cache->save($cacheKey, $data, 1296000); // 15 días
+            $cache->save('directory_latest_v1', $latest, 3600);
         }
+        $data['latest'] = $latest;
 
         // Calcular máximos dinámicos para barras de densidad
         $maxProvince = !empty($data['provinces']) ? max(array_column($data['provinces'], 'total')) : 1;
@@ -113,8 +129,8 @@ class Directory extends BaseController
             'dynamic_price'    => $dynamicPrice,
             'pricing'          => $priceData,
             'title'            => "Listado de Empresas en España | {$totalFormatted} Sociedades Registradas",
-            'meta_description' => "Listado completo de {$totalFormatted} empresas españolas organizadas por {$numProvinces} provincias y sectores CNAE. Datos oficiales actualizados del Registro Mercantil.",
-            'excerptText'      => "Listado completo de {$totalFormatted} empresas españolas organizadas por {$numProvinces} provincias y sectores CNAE. Datos oficiales actualizados del Registro Mercantil.",
+            'meta_description' => "Listado de {$totalFormatted} empresas españolas organizadas por las 52 provincias y por sector CNAE, con los datos publicados en el BORME.",
+            'excerptText'      => "Listado de {$totalFormatted} empresas españolas organizadas por las 52 provincias y por sector CNAE, con los datos publicados en el BORME.",
             'canonical'        => site_url('listado-de-empresas'),
         ]);
     }
@@ -133,9 +149,9 @@ class Directory extends BaseController
         }
 
         $cache = \Config\Services::cache();
-        $nombres = $cache->get('dir_provincias_nombres_v1');
+        $nombres = $cache->get('dir_provincias_nombres_v2');
         if (!is_array($nombres)) {
-            $indice = $cache->get('directory_index_data_v5');
+            $indice = $cache->get('directory_index_data_v6');
             if (is_array($indice) && !empty($indice['provinces'])) {
                 $nombres = array_column($indice['provinces'], 'name');
             } else {
@@ -145,7 +161,7 @@ class Directory extends BaseController
                     ->groupBy('registro_mercantil')
                     ->get()->getResultArray(), 'name');
             }
-            $cache->save('dir_provincias_nombres_v1', $nombres, 1296000); // 15 días
+            $cache->save('dir_provincias_nombres_v2', $nombres, 1296000); // 15 días
         }
 
         $sinOrden = self::claveProvincia($texto, true);
@@ -298,10 +314,10 @@ class Directory extends BaseController
             'province_name'   => $provinceName,
             'robots'          => ($page > 1) ? 'noindex, follow' : 'index, follow',
             'canonical'       => site_url("listado-de-empresas/" . urlencode($provinceName)), // siempre pág 1
-            'title'           => "{$totalFormatted} Empresas en {$provinceName} | Listado Oficial",
-            'excerptText'     => "Consulta el listado completo de {$totalFormatted} empresas registradas en {$provinceName}. Datos oficiales actualizados.",
+            'title'           => "{$totalFormatted} Empresas en {$provinceName} | Listado",
+            'excerptText'     => "Consulta el listado de {$totalFormatted} empresas registradas en {$provinceName}, con los datos publicados en el BORME.",
             'header'          => "Listado de empresas en {$provinceName}",
-            'meta_description'=> "Listado de {$totalFormatted} empresas en {$provinceName}. Busca por nombre, consulta CIF y accede a la ficha oficial de cada sociedad.",
+            'meta_description'=> "Listado de {$totalFormatted} empresas en {$provinceName}. Busca por nombre, consulta CIF y accede a la ficha de cada sociedad.",
             'cross_links' => [
                 'type'     => 'cnae',
                 'title'    => "Principales sectores en {$provinceName}",
@@ -459,10 +475,10 @@ class Directory extends BaseController
             'province_name'   => $cnaeLabel, // reusing this variable for the excel download label
             'cnae_code'       => $cnaeCode,
             'robots'    => ($page > 1) ? 'noindex, follow' : 'index, follow',
-            'title'     => "{$totalFormatted} Empresas de {$cnaeLabel} hoy | Leads listos para contactar",
-            'excerptText' => "Accede al listado completo de {$totalFormatted} empresas del sector {$cnaeLabel} hoy. Detectadas en tiempo real y listas para contactar antes que otros proveedores.",
+            'title'     => "{$totalFormatted} Empresas de {$cnaeLabel} | Listado por sector",
+            'excerptText' => "Listado de {$totalFormatted} empresas del sector {$cnaeLabel} en España, con CIF, provincia y fecha de constitución.",
             'header'    => "Empresas en el sector: {$cnaeLabel}",
-            'meta_description' => "Accede al listado de {$totalFormatted} empresas del sector {$cnaeLabel} hoy. Detectadas en tiempo real y listas para contactar antes que otros proveedores.",
+            'meta_description' => "Listado de {$totalFormatted} empresas del sector {$cnaeLabel} en España. Consulta el CIF, la provincia y la ficha de cada sociedad.",
             'cross_links' => [
                 'type' => 'province',
                 'title' => "Ver {$cnaeLabel} por provincias",
@@ -625,7 +641,7 @@ class Directory extends BaseController
             'robots'    => ($page > 1) ? 'noindex, follow' : 'index, follow',
             'canonical' => $baseUrl,
             'title'     => "{$totalFormatted} empresas de {$cnaeLabel} en {$provinceName} | Listado",
-            'excerptText' => "Listado de {$totalFormatted} empresas de {$cnaeLabel} en {$provinceName}, con datos oficiales del Registro Mercantil.",
+            'excerptText' => "Listado de {$totalFormatted} empresas de {$cnaeLabel} en {$provinceName}, con los datos publicados en el BORME.",
             'header'    => "{$cnaeLabel} en {$provinceName}",
             'meta_description' => "Listado de {$totalFormatted} empresas de {$cnaeLabel} en {$provinceName}. Consulta CIF, fecha de constitución y ficha de cada sociedad.",
             'pagination' => [
@@ -700,7 +716,7 @@ class Directory extends BaseController
             'title'     => "{$totalFormatted} Empresas etiquetadas como {$titleTag} | Listado",
             'excerptText' => "Descubre nuestro listado de {$totalFormatted} empresas relacionadas con {$titleTag}.",
             'header'    => "Empresas de " . $titleTag,
-            'meta_description' => "Accede al listado de {$totalFormatted} empresas con la etiqueta {$titleTag}. Listado de sociedades oficiales B2B.",
+            'meta_description' => "Accede al listado de {$totalFormatted} empresas con la etiqueta {$titleTag}. Consulta la ficha de cada sociedad.",
             'pagination' => [
                 'current' => $page,
                 'total'   => $totalPages,

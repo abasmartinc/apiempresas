@@ -459,32 +459,20 @@
             Directorio y Buscador Gratuito
         </div>
         <h1>Listado de <span class="grad">Empresas Españolas</span></h1>
-        <p>Buscador mercantil SEO gratuito con información de sociedades, licitaciones y subvenciones obtenida directamente de fuentes oficiales.</p>
+        <p>Buscador gratuito de sociedades españolas, con los actos publicados en el BORME y datos de licitaciones y subvenciones públicas.</p>
 
-        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 1.5rem; margin-bottom: 1.25rem;">
-            <div style="display: flex; color: #fbbf24;">
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            </div>
-            <span style="color: #94a3b8; font-size: 0.95rem;">Usado por <strong>+2.500</strong> equipos de ventas en España</span>
-        </div>
+        <?php /* Fuera las 5 estrellas y "Usado por +2.500 equipos de ventas": no se pueden demostrar (01-10-2026). */ ?>
 
-        <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-bottom: 2rem;">
+        <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-top: 1.5rem; margin-bottom: 2rem;">
             <span style="display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.15); color: #34D399; padding: 6px 14px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.25);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                Datos Oficiales BORME
+                Fuente: BORME
             </span>
             <span style="display: inline-flex; align-items: center; gap: 6px; background: rgba(96, 165, 250, 0.15); color: #60A5FA; padding: 6px 14px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; border: 1px solid rgba(96, 165, 250, 0.25);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.92-10.44l5.36-1.36"></path></svg>
-                Actualización Diaria
+                Nuevas sociedades cada día laborable
             </span>
-            <span style="display: inline-flex; align-items: center; gap: 6px; background: rgba(192, 132, 252, 0.15); color: #c084fc; padding: 6px 14px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; border: 1px solid rgba(192, 132, 252, 0.25);">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                Fuente Oficial Registro Mercantil
-            </span>
+            <?php /* Fuera "Fuente Oficial Registro Mercantil": los datos no vienen del Registro Mercantil, sino del BORME y otras fuentes. */ ?>
         </div>
         
         <form class="dir-search-form" method="GET" action="<?= site_url('search_company') ?>" style="max-width: 600px; margin-left: auto; margin-right: auto; position: relative;">
@@ -520,7 +508,7 @@
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 </div>
                 <div>
-                    <div class="dir-stat__num"><?= count($provinces) ?></div>
+                    <div class="dir-stat__num">52</div><?php /* Las 52 provincias de España (50 + Ceuta y Melilla) */ ?>
                     <div class="dir-stat__label">Provincias Cubiertas</div>
                 </div>
             </div>
@@ -543,7 +531,7 @@
                 </div>
                 <h2>Empresas por Provincia</h2>
                 <div class="line"></div>
-                <span class="section-header__count"><?= count($provinces) ?> provincias</span>
+                <span class="section-header__count">52 provincias</span>
             </div>
 
             <div class="dir-search-wrap">
@@ -617,8 +605,8 @@
         <!-- ── CROSS SELL BANNER 1 (CSV) ── -->
         <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #a7f3d0; border-radius: 20px; padding: 24px 32px; margin-bottom: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;">
             <div>
-                <h3 style="font-size: 1.25rem; font-weight: 800; color: #065f46; margin: 0 0 8px 0;">¿Necesitas el listado completo en Excel?</h3>
-                <p style="margin: 0; color: #047857; font-size: 0.95rem;">Descarga nuestra base de datos completa filtrada a medida para tu CRM. Pago único.</p>
+                <h3 style="font-size: 1.25rem; font-weight: 800; color: #065f46; margin: 0 0 8px 0;">¿Necesitas el listado completo?</h3>
+                <p style="margin: 0; color: #047857; font-size: 0.95rem;">Elige provincia, municipio o sector y descarga las empresas en CSV (se abre en Excel y se importa en tu CRM). Pago único.</p>
             </div>
             <a href="<?= site_url('base-de-datos-de-empresas') ?>" style="display: inline-flex; align-items: center; gap: 8px; background: #10b981; color: white; font-weight: 800; padding: 12px 24px; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 14px rgba(16,185,129,0.3); flex-shrink: 0;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -777,15 +765,15 @@
             <div style="color: #475569; font-size: 0.95rem; line-height: 1.7;">
                 <h2 style="font-size: 1.4rem; color: #0f172a; margin-bottom: 1rem; font-weight: 800;">Acerca de este Listado de Empresas Españolas</h2>
                 <p style="margin-bottom: 1.25rem;">
-                    Nuestro <strong>listado de empresas españolas</strong> proporciona acceso estructurado y oficial a la base de datos B2B más completa del país. Diariamente sincronizamos millones de registros procedentes de fuentes públicas como el BORME (Boletín Oficial del Registro Mercantil) y el Registro Mercantil Central para asegurar la máxima calidad y frescura de los datos societarios.
+                    Este <strong>listado de empresas españolas</strong> reúne las sociedades publicadas en el BORME (Boletín Oficial del Registro Mercantil), organizadas por provincia y por sector de actividad (CNAE). Cada día que se publica el BORME incorporamos las nuevas constituciones y los actos de las sociedades, y completamos las fichas con datos de otras fuentes públicas.
                 </p>
                 <h3 style="font-size: 1.15rem; color: #0f172a; margin-top: 1.5rem; margin-bottom: 0.75rem; font-weight: 700;">¿Cómo descargar la base de datos de empresas?</h3>
                 <p style="margin-bottom: 1.25rem;">
-                    Si eres un equipo de ventas, marketing o análisis, puedes utilizar nuestro buscador avanzado o navegar por las provincias y sectores CNAE (Clasificación Nacional de Actividades Económicas) para localizar nichos específicos. En cada sección provincial y sectorial de este listado, así como en nuestra <a href="<?= site_url('base-de-datos-de-empresas') ?>" style="color: #2152FF; text-decoration: underline; font-weight: 600;">base de datos general</a>, ofrecemos la opción de descargar los registros en formatos estructurados como Excel, perfectos para integrarse en tu CRM y listos para trabajar.
+                    Si eres un equipo de ventas, marketing o análisis, puedes utilizar nuestro buscador avanzado o navegar por las provincias y sectores CNAE (Clasificación Nacional de Actividades Económicas) para localizar nichos específicos. En cada sección provincial y sectorial de este listado, así como en nuestra <a href="<?= site_url('base-de-datos-de-empresas') ?>" style="color: #2152FF; text-decoration: underline; font-weight: 600;">base de datos general</a>, puedes descargar las empresas en un fichero CSV, que se abre directamente en Excel o Google Sheets y se importa en cualquier CRM.
                 </p>
                 <h3 style="font-size: 1.15rem; color: #0f172a; margin-top: 1.5rem; margin-bottom: 0.75rem; font-weight: 700;">¿Qué incluye la ficha de cada sociedad?</h3>
                 <p style="margin-bottom: 0;">
-                    Al consultar cualquier mercantil dentro de este listado, accederás a un resumen oficial que incluye su NIF/CIF, domicilio social actual, provincia de registro, actividad principal (CNAE), fecha de constitución y eventos recientes publicados. Esta transparencia es clave para procesos de validación mercantil, prospección comercial (Sales Intelligence) y estudios de mercado sectoriales.
+                    Al consultar cualquier mercantil dentro de este listado, verás un resumen con su NIF/CIF, domicilio social, provincia de registro, actividad principal (CNAE), fecha de constitución y los últimos actos publicados en el BORME. Esta transparencia es clave para procesos de validación mercantil, prospección comercial (Sales Intelligence) y estudios de mercado sectoriales.
                 </p>
             </div>
         </section>
