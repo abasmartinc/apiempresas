@@ -28,7 +28,10 @@ class InvoiceService
         $planModel = new ApiPlanModel();
         $plan = $planModel->find($planId);
 
-        if (!$user || !$plan) {
+        // Invitado (userId 0): sin cuenta, pero con los datos de facturación de Stripe
+        $esInvitado = $userId === 0 && !empty($billingData['email']);
+
+        if ((!$user && !$esInvitado) || !$plan) {
             log_message('error', "[InvoiceService] User or Plan not found. UserID: $userId, PlanID: $planId");
             return null;
         }
@@ -60,13 +63,32 @@ class InvoiceService
             'currency'          => 'EUR',
             'status'            => 'paid',
             'stripe_invoice_id' => $stripeInvoiceId,
-            'billing_name'      => $billingData['name'] ?? $user->name,
-            'billing_email'     => $billingData['email'] ?? $user->email,
+            'billing_name'      => $billingData['name'] ?? ($user->name ?? 'Cliente'),
+            'billing_email'     => $billingData['email'] ?? ($user->email ?? ''),
             'billing_address'   => $billingData['address'] ?? '',
             'billing_vat'       => $billingData['vat'] ?? '',
         ];
 
-        $invoiceId = $this->invoiceModel->insert($invoiceData);
+        try {
+            $invoiceId = $this->invoiceModel->insert($invoiceData);
+        } catch (\Throwable $e) {
+            $invoiceId = false;
+            log_message('error', '[InvoiceService] Insert factura: ' . $e->getMessage());
+        }
+        // Si la columna user_id no admite 0 (clave foránea), el invitado va con NULL
+        if (!$invoiceId && $esInvitado) {
+            $invoiceData['user_id'] = null;
+            try {
+                $invoiceId = $this->invoiceModel->insert($invoiceData);
+            } catch (\Throwable $e) {
+                $invoiceId = false;
+                log_message('error', '[InvoiceService] Insert factura invitado (NULL): ' . $e->getMessage());
+            }
+        }
+        if (!$invoiceId) {
+            log_message('critical', '[InvoiceService] No se pudo guardar la factura de ' . ($invoiceData['billing_email'] ?: '?') . ' (' . ($stripeInvoiceId ?? '-') . ')');
+            return null;
+        }
         $invoice = $this->invoiceModel->find($invoiceId);
 
         // Generar PDF

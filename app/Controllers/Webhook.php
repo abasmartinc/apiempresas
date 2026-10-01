@@ -652,7 +652,9 @@ class Webhook extends Controller
         if (!$stripeSubscriptionId) {
             // Pago único (ej. descarga de Excel)
             $userId = $invoice->metadata->user_id ?? $invoice->lines->data[0]->metadata->user_id ?? null;
-            if ($userId) {
+            // "0" es una compra como invitado, no "sin usuario": en PHP "0" es falso y
+            // aquí se descartaba la factura de todos los invitados.
+            if ($userId !== null && $userId !== '') {
                 // Fetch the inner invoice if invoice isn't passed fully with metadata, although invoice_data should map it
                 $this->processSinglePaymentInvoice($invoice);
             } else {
@@ -852,8 +854,13 @@ class Webhook extends Controller
         }
 
         if (!$dbUser) {
-            log_message('error', "[Webhook::processSinglePaymentInvoice] Could not find user for invoice: " . $invoice->id);
-            return;
+            // Invitado sin cuenta: la factura se emite igual, a los datos que dio en
+            // Stripe (user_id 0). Antes se cortaba aquí y el invitado no recibía factura.
+            if (empty($invoice->customer_email)) {
+                log_message('error', "[Webhook::processSinglePaymentInvoice] Factura {$invoice->id} sin usuario ni email: no se puede emitir.");
+                return;
+            }
+            $userId = 0;
         }
 
         $planModel = new \App\Models\ApiPlanModel();
@@ -877,6 +884,17 @@ class Webhook extends Controller
                 $plan = $freePlan;
             }
             $customPlanName = (string) ($metadata->product_name ?? 'Listado de empresas a medida');
+        }
+
+        // Listados: no tienen fila en api_plans y la factura caía al plan 'radar'
+        // ("Radar B2B" en el concepto). El concepto es el producto que se cobró en
+        // Stripe, p. ej. "BBDD Histórica Madrid (12.345 empresas)".
+        if (in_array($planSlug, array_merge(\App\Libraries\PaidExports::PLANES, ['lookalike_single']), true)) {
+            $freePlan = $planModel->find(1);
+            if ($freePlan) {
+                $plan = $freePlan;
+            }
+            $customPlanName = trim((string) ($invoice->lines->data[0]->description ?? '')) ?: 'Listado de empresas';
         }
 
         if (!$plan && isset($invoice->subtotal)) {
